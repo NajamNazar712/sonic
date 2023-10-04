@@ -12183,18 +12183,36 @@ class AdminReportsController extends Controller
 
     public function rv_call_history(Request $request)
     {
-        $mergedArray = [];
-        $data = RvAgentCallHistory::with(['rv_call_finding', 'user'])->where('shipment_id', $request->id)->get();
+        // dd($request->all());
+        // $mergedArray = [];
+        // $data = RvAgentCallHistory::with(['rv_call_finding', 'user'])->where('shipment_id', $request->id)->get();
     
-        foreach ($data as $item) {
-            $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
-            $mergedArray[] = [
-                'data' => $item,
-                'user_name' => $userData,
-            ];
-        }
+        // foreach ($data as $item) {
+        //     $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
+        //     $mergedArray[] = [
+        //         'data' => $item,
+        //         'user_name' => $userData,
+        //     ];
+        // }
         
-        return response()->json(['data' => $mergedArray]);
+        // return response()->json(['data' => $mergedArray]);
+        $shipment = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
+        ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rv_shipment_assign_agents.rv_assign_agent_sub_status_id')
+        ->leftJoin('admins','admins.id','rv_shipment_assign_agents.agent_id')
+        ->leftJoin('shipments','shipments.id','rv_shipment_assign_agents.shipment_id')
+        ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
+        ->where('rv_shipment_assign_agents.shipment_id',$request->shipment_id)
+
+        ->select('rv_shipment_assign_agents.updated_at as updated_at','admins.name as updated_by',
+        'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
+        'rvass.name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
+        'shipment_status.name as current_shipment_status')
+
+        ->orderBy('rv_shipment_assign_agents.updated_at','desc')
+        ->where('call_to_id',1) // 1 is for consignee and 0 is for shipper
+        ->limit(10)->get();
+        
+        return $shipment;
     }
 
     public function operations_performance_index()
