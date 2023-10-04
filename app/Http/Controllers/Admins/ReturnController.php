@@ -5026,18 +5026,21 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
-        $agent_id = $request->admin_id;
-        $admin = Admin::where('employee_id', $agent_id)->first();
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
-        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
         $assigned_shipment = [];
         $flag = null;
         $all_shippers = [];
+        $included_shippers = [];
+        $only_shippers = [];
+        $assigned_to_new_user = [];
+
+        $agent_id = $request->admin_id;
+        $admin = Admin::where('employee_id', $agent_id)->first();
+        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
+        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
 
         $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
-        $included_shippers = [];
         if ($included_shipper->exists()) {
             $flag = true;
             $included_shipper = $included_shipper->first();
@@ -5048,7 +5051,6 @@ class ReturnController extends Controller
         }
 
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
-        $only_shippers = [];
         if ($only_shipper->exists()) {
             $flag = false;
             $only_shipper = $only_shipper->first();
@@ -5068,6 +5070,12 @@ class ReturnController extends Controller
         if(!empty($sorted_agents_zones)){
            foreach($shipment_ids as $shipment_id){
             $shipment = Shipment::where('id', $shipment_id)->first();
+            $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
+            if($already_assigned_state->exists()){
+                $already_assigned_state =  $already_assigned_state->first();
+            }else{
+                $already_assigned_state = null;
+            }
             $currentDateTime = Carbon::now();
             $shipment_journey = $shipment->shipment_journey;
             
@@ -5076,10 +5084,12 @@ class ReturnController extends Controller
             })->first();
 
             if($shipment->exists()){
-                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                     $assigned_shipment[] = $shipment->tracking_number;
-
+                    if($already_assigned_state->rv_state_id === 3){
+                        $assigned_to_new_user[] = $shipment->tracking_number;
+                    }
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
                 }
@@ -5090,13 +5100,19 @@ class ReturnController extends Controller
             $no_zone_shipment = implode(',', $no_zone_shipment);
             $already_assigned = implode(',', $already_assigned);
             $assigned_shipment = implode(',', $assigned_shipment);
+            $assigned_to_new_user = implode(',', $assigned_to_new_user);
 
             if ($already_assigned == ''){
                 return response()->json(['status' => 1, 'error' => 'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' '.($assigned_shipment != null ? 'And Rest Has Been Assigned' : '')]);
             }
             else{
-                return response()->json(['status'=> 1, 'error'=>'These Shipment Are Already Assigned '.$already_assigned.'.X No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
-            }
+                return response()->json([
+                    'status' => 1,
+                    'error' => ($assigned_to_new_user != null)
+                        ? 'These Shipment Assign to this agent successfully: ' . $already_assigned . '. X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment . ' And Rest Has Been Assigned.'
+                        : 'These Shipment Are Already Assigned'
+                ]);
+                            }
         }else{
             return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
 
