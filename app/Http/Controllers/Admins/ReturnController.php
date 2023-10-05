@@ -126,48 +126,49 @@ class ReturnController extends Controller
         ->leftjoin('city_areas as ca','ca.id','=','cas.city_area_id')
         ->leftJoin('shipments_journey', function ($join) {
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id','=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            ->where('shipments_journey.id','=',
+            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
         ->leftJoin('shipments_journey as admin_journey', function ($join) {
             $join->on('admin_journey.shipment_id', '=', 'shipments.id')
-                ->where('admin_journey.id','=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
+            ->where('admin_journey.id','=',
+            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
         })
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',
+            ->where('sj.id','=',
                     DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-        })
-        ->leftJoin('shipments_journey as sret', function ($join) {
+                })
+                ->leftJoin('shipments_journey as sret', function ($join) {
             $join->on('sret.shipment_id', '=', 'shipments.id')
                 ->where('sret.shipper_status_id','=',13)
                 ->where('sret.verification','=',1);
 //                    ->where('sret.id','=',
 //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
-        })
+})
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
         ->leftjoin('crm_requests as crm', function ($join) {
             $join->on('crm.shipment_id', '=', 'shipments.id')
-                ->where('crm.id','=',
-                    DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
+            ->where('crm.id','=',
+            DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
-
+        
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
-                ->where('new_ras.id','=',
-                    DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
-                    and rv_shipment_assign_agents.rv_state_id = 1)'));
-                    
+            ->where('new_ras.id','=',
+            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+            and rv_shipment_assign_agents.rv_state_id = 1)'));
+            
         })
         ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
             $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
-                ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
+            ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
         })
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
-
+        ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
+        
         ->leftjoin('consolidation_shipments as consolidations', function ($join){
             $join->on('consolidations.shipment_id', '=', 'shipments.id')
                 ->where('consolidations.consolidation_id','=',
@@ -197,7 +198,7 @@ class ReturnController extends Controller
          'tat_options.value as tat_value',
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
+         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time')
         ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
