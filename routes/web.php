@@ -2929,7 +2929,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('rv_report')->name('rv_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
             Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
 
         });
