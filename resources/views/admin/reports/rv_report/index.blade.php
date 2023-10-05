@@ -395,14 +395,110 @@
                 }
             });
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    if(params !== undefined){
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
+                    }
+                    else{
+                        params = {
+                            'excel':true,
+                        }
+                    }
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.rv_report.list') }}',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: params,
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');  
+                            head.push('Tracking No.');
+                            head.push('Shipper');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Area');
+                            head.push('Consignee');
+                            head.push('Number');
+                            head.push('Address');
+                            head.push('COD Amount');
+                            head.push('Weight');
+                            head.push('Shipping Mode');
+                            head.push('Service Type');
+                            head.push('Arrival Date');
+                            head.push('RV Status');
+                            head.push('Reason');
+                            head.push('Remarks');
+                            head.push('Action Date');
+                            head.push('Action Updated By');
+                            head.push('RCP Agent Updated By');
+                            head.push('Current Status');
+                            head.push('Current Status Date');
+                            head.push('Fake Status');
+                            head.push('Request Status');
+                            head.push('Delivery Attempt Count');
+                            head.push('Re Attempt Count');
+                            head.push('Unresponsive Count');
+                            
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper_name);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.area);
+                                row.push(values.consignee_name);
+                                row.push(values.number);
+                                row.push(values.address);
+                                row.push(values.cod_amount);
+                                row.push(values.weight);
+                                row.push(values.shipping_mode);
+                                row.push(values.service_type);
+                                row.push(values.arrival_date);
+                                row.push(values.rv_status);
+                                row.push(values.reason);
+                                row.push(values.remarks);
+                                row.push(values.action_date);
+                                row.push(values.action_updated_by);
+                                row.push(values.rcp_agent_updated_by);
+                                row.push(values.current_status);
+                                row.push(values.current_status_date);
+                                row.push(values.fake_status);
+                                row.push(values.delivery_attempt_count);
+                                row.push(values.re_attempt_count);
+                                row.push(values.unresponsive_count);
+                                row.push(values.unresponsive_count);
+                                row.push(values.call_count);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                    
+                }
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    extend: 'excel',
-                    title: 'Trax Directory',
+                    extend: 'excelHtml5',
+                    title: 'RV Report',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                    className: 'btn btn-primary datatable_excel_btn d-none',
+                    className: 'btn btn-primary datatable_excel_btn',
                     
                 },'reset'],
                 scrollX: true, scrollY: '500px',
@@ -418,6 +514,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.rv_report.list')}}',
+                    method: 'POST',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_shipper_name = $('#search_shipper_name').val();
