@@ -400,15 +400,15 @@
                     body = [];
                     var params = table.ajax.params();
                     if(params !== undefined){
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                }
-                else{
-                    params = {
-                        'excel':true,
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
                     }
-                }
+                    else{
+                        params = {
+                            'excel':true,
+                        }
+                    }
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.rv_report.list') }}',
                         method: 'POST',
@@ -488,6 +488,7 @@
                     });
 
                     return {body: body, header: head};
+                    
                 }
             });
 
@@ -513,6 +514,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.rv_report.list')}}',
+                    method: 'POST',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_shipper_name = $('#search_shipper_name').val();
