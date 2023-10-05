@@ -1972,7 +1972,7 @@
                         {data: 'consolidation',name: 'consolidation',class: 'align-middle consolidation', orderable: false,searchable: false},
                         {data: 'consolidated_id',name: 'consolidations.consolidation_id',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'rvsaa_unresponsive_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'unresponsive_attempt_time',name: 'rvsaa.unresponsive_attempt_time',class: 'align-middle consolidated_id', orderable: false,searchable: false},
+                        {data: 'call_time',name: 'rach.created_at',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent', orderable: false,searchable: false},
                         {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
 
