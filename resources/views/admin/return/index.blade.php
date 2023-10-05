@@ -1345,9 +1345,6 @@
                                 head.push('Assigned By');
                                 head.push('Consolidation');
                                 head.push('Consolidation IDs');
-                                head.push('Unresponsive Count');
-                                head.push('Unresponsive Call Time');
-                                head.push('Last Agent Name');
 
                                     $.each(result.data, function(index, values) {
                                     row = [];
@@ -1385,9 +1382,6 @@
                                     row.push(values.assigned_by);
                                     row.push(values.consolidation);
                                     row.push(values.consolidated_id);
-                                    row.push(values.rvsaa_unresponsive_count);
-                                    row.push(values.call_time);
-                                    row.push(values.assigned_agent);
                                     body.push(row);
                                     }
                                 );
@@ -1972,14 +1966,14 @@
                         {data: 'confirmation_on',name: '',class: 'align-middle confirmation_on', orderable: false,searchable: false},
                         {data: 'delivery_attempt',name: '',class: 'align-middle reattempts', orderable: false,searchable: false},
                         {data: 'reattempts',name: 'sret.created_at',class: 'align-middle reattempts', orderable: false,searchable: false},
-                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent' },
+                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent', orderable: false,searchable: false},
                         {data: 'assigned_at',name: 'ras.created_at',class: 'align-middle assigned_at'},
                         {data: 'assigned_by',name: 'asadby.name',class: 'align-middle assigned_by'},
                         {data: 'consolidation',name: 'consolidation',class: 'align-middle consolidation', orderable: false,searchable: false},
                         {data: 'consolidated_id',name: 'consolidations.consolidation_id',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'rvsaa_unresponsive_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'call_time',name: 'rach.created_at',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent', orderable: false,searchable: false},
+                        {data: 'unresponsive_attempt_time',name: 'rvsaa.unresponsive_attempt_time',class: 'align-middle consolidated_id', orderable: false,searchable: false},
+                        {data: 'last_agent_name',name: 'rvsaad.agent_id',class: 'align-middle assigned_agent' },
                         {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
 
                     ],
@@ -1989,6 +1983,14 @@
 
                         if (data.OsaStatus == 0) {
                             $('td:eq(0)', row).addClass('select-checkbox');
+
+                            if ($.inArray(data.shId, selected_rows) !== -1) {
+                                table.row(row).select();
+                            }
+                        }
+
+                        if (data.RvShipmentAssignedAgent == 1) {
+                            $('td:eq(0)', row).removeClass('select-checkbox');
 
                             if ($.inArray(data.shId, selected_rows) !== -1) {
                                 table.row(row).select();
