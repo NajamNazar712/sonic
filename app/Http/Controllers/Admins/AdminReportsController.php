@@ -12183,19 +12183,6 @@ class AdminReportsController extends Controller
 
     public function rv_call_history(Request $request)
     {
-        // dd($request->all());
-        // $mergedArray = [];
-        // $data = RvAgentCallHistory::with(['rv_call_finding', 'user'])->where('shipment_id', $request->id)->get();
-    
-        // foreach ($data as $item) {
-        //     $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
-        //     $mergedArray[] = [
-        //         'data' => $item,
-        //         'user_name' => $userData,
-        //     ];
-        // }
-        
-        // return response()->json(['data' => $mergedArray]);
         $shipment = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
         ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rv_shipment_assign_agents.rv_assign_agent_sub_status_id')
         ->leftJoin('admins','admins.id','rv_shipment_assign_agents.agent_id')

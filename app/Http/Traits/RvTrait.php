@@ -656,7 +656,7 @@ trait RvTrait
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
             //updating the shipment status to unresponsive(65) in shipments journey table
-            ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
+            ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
             return response()->json(['status' => 1]); 
 
         }
