@@ -1431,7 +1431,18 @@ trait RvTrait
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                ->where('consignee_city_id', $agent['city_id']);
+                ->where('consignee_city_id', $agent['city_id'])  
+                ->whereRaw('NOT EXISTS (
+                    SELECT 1
+                    FROM shipments_journey AS sj
+                    WHERE sj.status_reason_id = 12
+                    AND sj.shipment_id = shipments.id
+                    AND sj.id = (
+                        SELECT MAX(id)
+                        FROM shipments_journey
+                        WHERE shipment_id = shipments.id
+                    )
+                )');
 
                 if ($flag == true){
                     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
@@ -1467,8 +1478,18 @@ trait RvTrait
                     $exploded_result = implode(',', $result);
                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                    ->whereIn('user_id', $result);
-
+                    ->whereIn('user_id', $result)
+                    ->whereRaw('NOT EXISTS (
+                            SELECT 1
+                            FROM shipments_journey AS sj
+                            WHERE sj.status_reason_id = 12
+                            AND sj.shipment_id = shipments.id
+                            AND sj.id = (
+                                SELECT MAX(id)
+                                FROM shipments_journey
+                                WHERE shipment_id = shipments.id
+                            )
+                    )');
                     if(!empty($rv_priority_shippers)){
                         $flag = true;
                     }else{
@@ -1480,9 +1501,9 @@ trait RvTrait
                     } else {
                         $shipments->orderBy('id', 'ASC');
                     } 
-
+                    
                     $shipments = $shipments->get();
-
+                    
                     if($shipments->isEmpty()){
                         continue;
                     }  
@@ -1533,8 +1554,7 @@ trait RvTrait
                     foreach ($shipments as $key => $shipment) {
                         
                         // if agent shipment is open - assigned to any user who comes first
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-
+                        
                         $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                         if ($shipment_assigned_unassigned_agent->exists()) {
                             $shipment_assigned_unassigned_agent->first();
@@ -1551,11 +1571,12 @@ trait RvTrait
 
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                        if ($find_shipment_assigned_agent && $shipments_journey->status_reason_id != 12) {
+                        if ($find_shipment_assigned_agent ) {
                             $shipment = null;
                             continue;
                         }
-
+                        
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                         
                         $data = [
                             'agent_id' => $agent_id,

@@ -121,7 +121,7 @@
                                 <th>Calling Date</th>
                                 <th>Calling Time</th>
                                 <th>Call Findings</th>
-                                <th>Unresponsive Finding</th>
+                                <th>Call Finding Reasons</th>
                                 <th>Other Remarks</th>
                                 <th>User</th>
                             </tr>
@@ -444,7 +444,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'rv_status', name: 'rv_status', class: 'align-middle designation',searchable: false,orderable:false},
-                    {data: 'reason', name: 'reason', class: 'align-middle designation',searchable: false,orderable:false},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false,orderable:false},
                     {data: 'remarks', name: 'remarks', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle designation',searchable: false,orderable:false},
@@ -480,22 +480,21 @@
                 $.ajax({
                     url: '{!! route('admin.reports.rv_report.rv_call_history') !!}',
                     method: 'GET',
-                    data: { id: dataId },
+                    data: { shipment_id: dataId },
                     dataType: 'json',
                     success: function(response) {
                         var tableBody = $('#unresponsive_count').find('tbody');
                         tableBody.empty();
-                        console.log(response.data);
-                        $.each(response.data, function(index, rowData) {
-                            var dateTimeParts = rowData.data.created_at.split(' ');
+                        $.each(response, function(index, rowData) {
+                            var dateTimeParts = rowData.updated_at.split(' ');
                             var row = $('<tr>');
                             row.append($('<td>').text(index + 1)); 
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text('Unresponsive'));
-                            row.append($('<td>').text(rowData.data.rv_call_finding.remark));
-                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-'));
-                            row.append($('<td>').text(rowData.user_name));
+                            row.append($('<td>').text(rowData.call_finding_id));
+                            row.append($('<td>').text(rowData.call_finding_reason_id));
+                            row.append($('<td>').text(rowData.remarks != null ? rowData.remarks : '-'));
+                            row.append($('<td>').text(rowData.updated_by));
                             tableBody.append(row);
                         });
 
