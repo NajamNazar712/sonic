@@ -1966,7 +1966,7 @@
                         {data: 'confirmation_on',name: '',class: 'align-middle confirmation_on', orderable: false,searchable: false},
                         {data: 'delivery_attempt',name: '',class: 'align-middle reattempts', orderable: false,searchable: false},
                         {data: 'reattempts',name: 'sret.created_at',class: 'align-middle reattempts', orderable: false,searchable: false},
-                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent' },
+                        {data: 'assigned_agent_1',name: 'assigned_agent_1.name',class: 'align-middle assigned_agent' },
                         {data: 'assigned_at',name: 'ras.created_at',class: 'align-middle assigned_at'},
                         {data: 'assigned_by',name: 'asadby.name',class: 'align-middle assigned_by'},
                         {data: 'consolidation',name: 'consolidation',class: 'align-middle consolidation', orderable: false,searchable: false},

@@ -167,6 +167,8 @@ class ReturnController extends Controller
         })
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
+        ->leftjoin('admins as assigned_agent_1', 'assigned_agent_1.id', '=', 'rvsaa.agent_id')
+
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
         
@@ -192,14 +194,14 @@ class ReturnController extends Controller
          'shipments_journey.remarks as shipper_remarks',
          'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
          'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
-         'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
+         'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent_1.name as assigned_agent_1','assigned_agent.name as assigned_agent', 
          'new_ras.created_at as assigned_at',
          'asadby.name as assigned_by','consolidations.consolidation_id',
          'assigned_agent.id as assigned_agent_id',
          'tat_options.value as tat_value',
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time')
+         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id')
         ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
@@ -316,6 +318,7 @@ class ReturnController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
+
             ->editColumn('shipper_phone',function ($shipment){
                 return "$shipment->shipper_phone1 | $shipment->shipper_phone2";
             })
@@ -350,6 +353,15 @@ class ReturnController extends Controller
                 }
                 else {
                     return '';
+                }
+            })
+
+            ->editColumn('assigned_agent_1', function ($shipment) {
+                if ($shipment->rv_state_id != 3) {
+                    return $shipment->assigned_agent_1;
+                }
+                else {
+                    return '-';
                 }
             })
             ->filterColumn('u.name', function ($query, $keyword) {
