@@ -160,13 +160,14 @@ class ReturnController extends Controller
             and rv_shipment_assign_agents.rv_state_id = 1)'));
             
         })
+        
         ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
             $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
             ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
         })
-        ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
-        ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
+        ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
+        ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
         
         ->leftjoin('consolidation_shipments as consolidations', function ($join){
