@@ -542,6 +542,14 @@ class ReturnController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('RvShipmentAssignedAgent', function ($shipments){//using for checking the rv-assign-shipment-agent to not add checkbox in the datatable
+                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $shipments->shId)->where('rv_state_id', 1)->first();
+                if($rv_shipment_assign_agents)
+                    return 1;
+                else
+                    return 0;
+                
+            })
             ->addColumn('sub_station', function ($shipments) {
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
@@ -586,7 +594,8 @@ class ReturnController extends Controller
                 $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
-                if(session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions')))) {
+                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->first();
+                if( !$rv_shipment_assign_agents && (session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions'))))) {
                     if (session('role_id') == 1 || count(array_intersect([45, 46, 211, 212, 245], session('permissions'))) !== 0) {
                         $dropdown = "
                         <div class='btn-group'>
@@ -5237,7 +5246,7 @@ class ReturnController extends Controller
                 foreach ($spreadsheet_row as $key => $value) {
                     $row[$fields[$key]] = $value;
                 }
-
+                
                 $rows[] = $row;
             }
 
@@ -5252,7 +5261,7 @@ class ReturnController extends Controller
                 } else {
                     $validate = Validator::make($row, $rules_without_agent, $messages);
                 }
-
+                
                 $validate->setAttributeNames($names);
 
                 if ($validate->fails()) {
@@ -5272,7 +5281,7 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
                     if (!empty($row['agent_id'])) {
@@ -5292,10 +5301,10 @@ class ReturnController extends Controller
                     $tracking_number = trim($row['tracking_number']);
                     $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                     $shipment_id = $shipment->id;
-
+                    
                     //if agent row is empty unassign the shipment id 
-                    if($row['agent_id'] = null){
-                        $this->rv_unassign_agents(null, $shipment_id);
+                    if($row['agent_id'] == null){
+                        $this->rv_unassign_agents($request, $shipment_id);
                     }
                     else{
                         $agent_id = Employee::where('trax_id',$row['agent_id'])->first();

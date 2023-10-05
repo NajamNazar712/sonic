@@ -1988,6 +1988,14 @@
                                 table.row(row).select();
                             }
                         }
+
+                        if (data.RvShipmentAssignedAgent == 1) {
+                            $('td:eq(0)', row).removeClass('select-checkbox');
+
+                            if ($.inArray(data.shId, selected_rows) !== -1) {
+                                table.row(row).select();
+                            }
+                        }
                     },
 
                     initComplete: function() {
