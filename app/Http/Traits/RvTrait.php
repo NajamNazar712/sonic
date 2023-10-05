@@ -1482,6 +1482,7 @@ trait RvTrait
                     } 
 
                     $shipments = $shipments->get();
+
                     if($shipments->isEmpty()){
                         continue;
                     }  
@@ -1532,6 +1533,8 @@ trait RvTrait
                     foreach ($shipments as $key => $shipment) {
                         
                         // if agent shipment is open - assigned to any user who comes first
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+
                         $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                         if ($shipment_assigned_unassigned_agent->exists()) {
                             $shipment_assigned_unassigned_agent->first();
@@ -1548,12 +1551,11 @@ trait RvTrait
 
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                        if ($find_shipment_assigned_agent) {
+                        if ($find_shipment_assigned_agent && $shipments_journey->status_reason_id != 12) {
                             $shipment = null;
                             continue;
                         }
 
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                         
                         $data = [
                             'agent_id' => $agent_id,
