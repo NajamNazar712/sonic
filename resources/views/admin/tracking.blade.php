@@ -653,12 +653,9 @@
                                 row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
                                 row.append($('<td>').text(dateTimeParts[1])); // Display time
-                                // row.append($('<td>').text('Unresponsive'));
                                 row.append($('<td>').text(rowData.call_finding_id));
                                 row.append($('<td>').text(rowData.call_finding_reason_id));
                                 row.append($('<td>').text(rowData.remarks != null ? rowData.remarks : '-'));
-                                // row.append($('<td>').text(rowData.call_to_id != null ? rowData.call_to_id : '-'));
-                                // row.append($('<td>').text(rowData.current_shipment_status != null ? rowData.current_shipment_status : '-'));
                                 row.append($('<td>').text(rowData.updated_by));
                                 tableBody.append(row);
                         });
