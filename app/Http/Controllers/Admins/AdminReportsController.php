@@ -12196,7 +12196,7 @@ class AdminReportsController extends Controller
             DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
             and rv_shipment_assign_agents.rv_state_id IN (2,4))'));
         })
-        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.agent_id')
+        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.updated_by_id')
 
         ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
 

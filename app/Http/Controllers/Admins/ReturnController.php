@@ -233,11 +233,23 @@ class ReturnController extends Controller
         $sub_status_call_finding = SubStatusCallFinding::all();
         $unresponsive_sub_status_call_finding = RvAssignAgentSubStatus::where('rv_assign_agent_status_id',6)->get();
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
-        $percentage_reason_validation_required = (count($reason_validation_required)/($total_of_shipments) * 100);
+        if ($total_of_shipments === 0) {
+            $percentage_reason_validation_required = 0; // or any default value you prefer
+        } else {
+            $percentage_reason_validation_required = (count($reason_validation_required) / $total_of_shipments) * 100;
+        }
         $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->get();
-        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/($total_of_shipments) * 100);
+        if ($total_of_shipments === 0) {
+            $percentage_shipper_advised_requested = 0; // or any default value you prefer
+        } else {
+            $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
+        }
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
-        $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
+        if ($rv_tickets === 0) {
+            $percentage_unresponsive_count = 0; // or any default value you prefer
+        } else {
+            $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
+        }
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
 
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
@@ -7021,29 +7033,22 @@ class ReturnController extends Controller
     //returning call remarks in Remarks Log Modal on admin/return screen  
     public function call_status_history(Request $request)
     {
-        // $shipment = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
-        // ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rv_shipment_assign_agents.rv_assign_agent_sub_status_id')
-        // ->leftJoin('admins','admins.id','rv_shipment_assign_agents.agent_id')
-        // ->leftJoin('shipments','shipments.id','rv_shipment_assign_agents.shipment_id')
-        // ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
-        // ->where('rv_shipment_assign_agents.shipment_id',$request->shipment_id)
-
-        // ->select('rv_shipment_assign_agents.updated_at as updated_at','admins.name as updated_by',
-        // 'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
-        // 'rvass.name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
-        // 'shipment_status.name as current_shipment_status')
-
-        // ->orderBy('rv_shipment_assign_agents.updated_at','desc')
-        // ->where('call_to_id',1) // 1 is for consignee and 0 is for shipper
-        // ->limit(10)->get();
-        
-        // return $shipment;
         $shipment = RvAgentCallHistory::leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.id','rv_agent_call_histories.rv_shipment_assign_agent_id')
         ->leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rsaa.rv_assign_agent_status_id')
         ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rsaa.rv_assign_agent_sub_status_id')
         ->leftJoin('admins','admins.id','rsaa.agent_id')
         ->leftJoin('shipments','shipments.id','rsaa.shipment_id')
         ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
+
+        //used for status updated_by 
+        ->leftjoin('rv_shipment_assign_agents', function ($join) {
+            $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+            ->where('rv_shipment_assign_agents.id','=',
+            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+            and rv_shipment_assign_agents.rv_state_id IN (2,4))'));
+        })
+        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.updated_by_id')
+
         ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
 
         ->select('rsaa.updated_at as updated_at','admins.name as updated_by',
