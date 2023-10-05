@@ -153,6 +153,7 @@ class ReturnController extends Controller
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
         
+        //used for assigned_at
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
@@ -7022,12 +7023,21 @@ class ReturnController extends Controller
         $shipment = RvAgentCallHistory::leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.id','rv_agent_call_histories.rv_shipment_assign_agent_id')
         ->leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rsaa.rv_assign_agent_status_id')
         ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rsaa.rv_assign_agent_sub_status_id')
-        ->leftJoin('admins','admins.id','rsaa.agent_id')
         ->leftJoin('shipments','shipments.id','rsaa.shipment_id')
         ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
+
+        //used for status updated_by 
+        ->leftjoin('rv_shipment_assign_agents', function ($join) {
+            $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+            ->where('rv_shipment_assign_agents.id','=',
+            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+            and rv_shipment_assign_agents.rv_state_id IN (2,4))'));
+        })
+        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.agent_id')
+
         ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
 
-        ->select('rsaa.updated_at as updated_at','admins.name as updated_by',
+        ->select('rsaa.updated_at as updated_at','a.name as updated_by',
         'rsaa.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
         'rvass.name as call_finding_reason_id', 'rsaa.remarks as remarks',
         'shipment_status.name as current_shipment_status')

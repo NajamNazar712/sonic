@@ -1345,6 +1345,9 @@
                                 head.push('Assigned By');
                                 head.push('Consolidation');
                                 head.push('Consolidation IDs');
+                                head.push('Unresponsive Count');
+                                head.push('Unresponsive Call Time');
+                                head.push('Last Agent Name');
 
                                     $.each(result.data, function(index, values) {
                                     row = [];
@@ -1382,6 +1385,9 @@
                                     row.push(values.assigned_by);
                                     row.push(values.consolidation);
                                     row.push(values.consolidated_id);
+                                    row.push(values.rvsaa_unresponsive_count);
+                                    row.push(values.call_time);
+                                    row.push(values.assigned_agent);
                                     body.push(row);
                                     }
                                 );
