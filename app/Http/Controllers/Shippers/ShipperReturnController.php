@@ -191,7 +191,7 @@ class ShipperReturnController extends Controller
                     $dropdown .= $confirm_button;
                     $dropdown .= $reattempt_button;
                 }
-				if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
+				if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52 || $result->shipper_status_id == 65) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
                     $dropdown .= $intercept;
                 }
 			}
