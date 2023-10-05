@@ -72,7 +72,8 @@ class ReturnV2Controller extends Controller
     public function get_shipment_reason(Request $request)
     {
         $reasons = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', $request->id)->where('is_active', 1)->get();
-        $unresponsive_reasons = SubStatusCallFinding::get();
+        // $unresponsive_reasons = SubStatusCallFinding::get();
+        $unresponsive_reasons = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 6)->where('is_active', 1)->get();
         return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'status' => 1]);
     }
 
