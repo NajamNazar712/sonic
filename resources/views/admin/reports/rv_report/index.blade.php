@@ -488,6 +488,7 @@
                     });
 
                     return {body: body, header: head};
+                    
                 }
             });
 
@@ -513,6 +514,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.rv_report.list')}}',
+                    method: 'POST',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_shipper_name = $('#search_shipper_name').val();
