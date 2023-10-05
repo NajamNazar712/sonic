@@ -418,45 +418,62 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Responsible Hub</th>
-                                    <th class="border-primary border-darken-1">Responsible Zone</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Last Status Date</th>
+                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last status by</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
-                                    <th class="border-primary border-darken-1">COD Value</th>
                                     <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
-                                    <th class="border-primary border-darken-1">Sales Person</th>
-                                    <th class="border-primary border-darken-1">KAE</th>
-                                    <th class="border-primary border-darken-1">Segment</th>
-                                    <th class="border-primary border-darken-1">Key account category</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Launched By</th>
-                                    <th class="border-primary border-darken-1">Launched By Type</th>
-                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    {{-- <th class="border-primary border-darken-1">Manual Tagged To</th>
-                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
-                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
-                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
-                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Sub Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
+                                    <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    {{-- <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
                                     <th class="border-primary border-darken-1">Valid Date</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
-                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
-                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">COD Value</th>
+                                    <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    <th class="border-primary border-darken-1">Segment</th>
+                                    <th class="border-primary border-darken-1">Weight</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Sales Person</th>
+                                    <th class="border-primary border-darken-1">Key account category</th>
+                                    <th class="border-primary border-darken-1">KAE</th>
+                                    <th class="border-primary border-darken-1">Launched By</th>
+                                    <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Channel</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
+                                    <th class="border-primary border-darken-1">Last Reason</th>
+
+                                    
+                                    
+                                    {{-- <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
+                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
+                                    
+                                   
+                                    
+                                    
+                                    {{-- <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
+                                    
+                                    
+                                    
+                                    
+                                    
                                     {{-- <th class="border-primary border-darken-1"></th> --}}
                                 </tr>
                                 </thead>
@@ -1041,7 +1058,7 @@
                         success: function (result) {
                             head = [];
 
-                            head.push('S No.');
+                            head.push('S. No.');
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Shipper Name');
@@ -1049,45 +1066,45 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Zone');
-                            head.push('Responsible Hub');
-                            head.push('Responsible Zone');
+                            head.push('Arrival Date');
+                            head.push('Arrival to Today (TAT)');
                             head.push('Shipment Status');
                             head.push('Status');
-                            head.push('Arrival Date');
                             head.push('Last Status Date');
+                            head.push('Last status to Today (TAT)');
+                            head.push('Last status by');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
-                            head.push('COD Value');
                             head.push('Description');
-                            head.push('Channel');
-                            head.push('Shipping Mode');
-                            head.push('Sales Person');
-                            head.push('KAE');
-                            head.push('Segment');
-                            head.push('Key account category');
-                            head.push('Agent');
-                            head.push('Launched By');
-                            head.push('Launched By Type');
-                            head.push('Tagged (Admin/Department)');
-                            // head.push('Manual Tagged To');
-                            // head.push('Tagged At');
-                            head.push('Auto Tagged To KAE');
-                            head.push('Auto Tagged To Operation');
-                            
                             head.push('Launched Date');
+                            head.push('Launched To Today (TAT)');
                             head.push('Complaint Re-Open Date');
+                            head.push('Responsible Hub');
+                            head.push('Sub Hub');
+                            head.push('Responsible Zone');
+                            head.push('Agent');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
-                            head.push('Address');
-                            // head.push('Address Latitude');
-                            // head.push('Address Longitude');
                             head.push('Valid Date');
-                            head.push('Launched To Today (TAT)');
-                            head.push('Arrival to Today (TAT)');
-                            head.push('Last status to Today (TAT)');
+                            head.push('COD Value');
+                            head.push('Shipping Mode');
+                            head.push('Segment');
+                            head.push('Weight');
+                            head.push('Address');
+                            head.push('Sales Person');
+                            head.push('Key account category');
+                            head.push('KAE');
+                            head.push('Launched By');
+                            head.push('Launched By Type');
+                            head.push('Channel');
+                            head.push('Auto Tagged To KAE');
+                            head.push('Auto Tagged To Operation');
+                            head.push('Tagged (Admin/Department)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
                             head.push('Last Comment Date');
+                            head.push('Last Rider');
+                            head.push('Last Reason');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -1100,46 +1117,45 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.zone);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
+                                row.push(values.arrival);
+                                row.push(values.arrival_today);
                                 row.push(values.status);
                                 row.push(values.crm_request_status);
-                                row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.last_status_today);
+                                row.push(values.last_status_updated_by);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
-                                row.push(values.cod_value);
                                 row.push(values.description);
-                                row.push(values.channel);
-                                row.push(values.shipping_mode);
-                                row.push(values.sale_person);
-                                row.push(values.kae);
-                                row.push(values.segment);
-                                row.push(values.shipper_category);
-                                row.push(values.agent);
-                                row.push(values.launched_by_name);
-                                row.push(values.added_by);
-                                row.push(values.tagged);
-                                // row.push(values.tagged_to_manual);
-                                // row.push(values.tagged_date);
-                                row.push(values.tagged_to_kae);
-                                row.push(values.tagged_to_operation);
-                                
                                 row.push(values.created_at);
+                                row.push(values.current_tat); 
                                 row.push(values.reopen_date);
+                                row.push(values.responsible_hub);
+                                row.push(values.sub_hub);
+                                row.push(values.responsible_zone);
+                                row.push(values.agent);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
-                                row.push(values.address);
-                                // row.push(values.address_latitude);
-                                // row.push(values.address_longitude);
                                 row.push(values.valid_date);
-                                row.push(values.current_tat);
-                                row.push(values.arrival_today);
-                                row.push(values.last_status_today);
+                                row.push(values.cod_value);
+                                row.push(values.shipping_mode);
+                                row.push(values.segment);
+                                row.push(values.actual_weight);
+                                row.push(values.address); 
+                                row.push(values.sale_person);
+                                row.push(values.shipper_category);
+                                row.push(values.kae);
+                                row.push(values.launched_by_name);
+                                row.push(values.tagged);
+                                row.push(values.channel);
+                                row.push(values.tagged_to_kae);
+                                row.push(values.tagged_to_operation);
+                                row.push(values.added_by);
                                 row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment);
                                 row.push(values.last_comment_date);
-
+                                row.push(values.last_updated_rider);
+                                row.push(values.last_rider_reason);
                                 body.push(row);
                             });
                         },
@@ -1422,42 +1438,45 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'crm_request_status', name: 'crs.id', class: 'align-middle crm_request_status'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false},
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by', orderable: false, searchable: false}, // last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'crcnt.id', class: 'align-middle case_nature_type'},
-                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
-                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
-                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
-                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
-                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false},
+                    {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub',orderable: false}, //sub hub
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false},
+                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
-                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
-                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
-                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false},
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'},
+                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
+                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
-                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
+                    {data: 'last_updated_rider', name: 'last_rider_status_upd_by.name', class: 'align-middle last_updated_rider'}, 
+                    {data: 'last_rider_reason', name: 'ssr.name', class: 'align-middle last_rider_reason'},
                 ],
                 rowCallback: function(row, data, index) {
                     if (data.crm_request_status_id != 4) 
