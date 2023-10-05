@@ -41,7 +41,7 @@
                                             </span>
                                         </div>
                                         
-                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ \Carbon\Carbon::today()->startOfDay() }}">
                                     </div>
                                 </div>
                                 {{-- Search date to filter --}}
@@ -53,7 +53,7 @@
                                     </span>
                                         </div>
         
-                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
                                     </div>
         
                                 </div>
@@ -357,7 +357,7 @@
             });
 
             var currDate='{{ Carbon\Carbon::now() }}';
-            $('#search_form #search_date_from').pickadate({
+            var search_date_from = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 max: currDate,
@@ -367,20 +367,19 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        var fromDate = $('#search_form #search_date_from').pickadate('picker').get('select');
-                        $('#search_form #search_date_to').pickadate('picker').set('min', fromDate);
+                        var fromDate = $('input[name="search_date_from_formatted"]').val();
+                        addOneMonth = moment(fromDate).add(31,'days');
 
-                        // toDate returns 'invalid date', logic is to be corrected
-                        var toDate = new Date();
-                        console.log("new date", toDate);
-                        toDate.setDate(new Date(fromDate.year, fromDate.month, fromDate.date + 30));
+                        $('#search_form #search_date_to').pickadate('picker').set('min', new Date(fromDate));
+                        $('#search_form #search_date_to').pickadate('picker').set('max',  new Date(addOneMonth.toDate()));
+                        $('#search_form #search_date_to').pickadate('picker').set('select', new Date(addOneMonth.toDate()));
 
-                        $('#search_form #search_date_to').pickadate('picker').set('max', toDate);
+
                     }
                 }
             });
 
-            $('#search_form #search_date_to').pickadate({
+            var search_date_to = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 max: currDate,
@@ -390,8 +389,8 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {    
-                        var toDate = $('#search_form #search_date_to').pickadate('picker').get('select');
-                        $('#search_form #search_date_from').pickadate('picker').set('max', toDate);
+                        var toDate = $('input[name="search_date_from_formatted"]').val();
+                        $('#search_form #search_date_from').pickadate('picker').set('max', new Date(toDate));
                     }
                 }
             });
