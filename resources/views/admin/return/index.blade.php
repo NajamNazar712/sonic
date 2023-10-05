@@ -1335,6 +1335,7 @@
                                 head.push('Arrival Date');
                                 head.push('Status Date');
                                 head.push('Status Updated');
+
                                 head.push('Confirmation Required');
                                 head.push('Confirmation On');
                                 head.push('Delivery Attempt Count');
@@ -1386,7 +1387,7 @@
                                     row.push(values.consolidated_id);
                                     row.push(values.rvsaa_unresponsive_count);
                                     row.push(values.call_time);
-                                    row.push(values.updated_by);
+                                    row.push(values.assigned_agent);
                                     body.push(row);
                                     }
                                 );
@@ -1978,7 +1979,7 @@
                         {data: 'consolidated_id',name: 'consolidations.consolidation_id',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'rvsaa_unresponsive_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'call_time',name: 'rach.created_at',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'updated_by',name: 'admin.name',class: 'align-middle updated_by', orderable: false,searchable: false},
+                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent', orderable: false,searchable: false},
                         {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
 
                     ],
