@@ -41,7 +41,7 @@
                                             </span>
                                         </div>
                                         
-                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ \Carbon\Carbon::today()->startOfDay() }}">
                                     </div>
                                 </div>
                                 {{-- Search date to filter --}}
@@ -53,7 +53,7 @@
                                     </span>
                                         </div>
         
-                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
                                     </div>
         
                                 </div>
@@ -121,7 +121,7 @@
                                 <th>Calling Date</th>
                                 <th>Calling Time</th>
                                 <th>Call Findings</th>
-                                <th>Unresponsive Finding</th>
+                                <th>Call Finding Reasons</th>
                                 <th>Other Remarks</th>
                                 <th>User</th>
                             </tr>
@@ -357,7 +357,7 @@
             });
 
             var currDate='{{ Carbon\Carbon::now() }}';
-            $('#search_form #search_date_from').pickadate({
+            var search_date_from = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 max: currDate,
@@ -367,20 +367,19 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        var fromDate = $('#search_form #search_date_from').pickadate('picker').get('select');
-                        $('#search_form #search_date_to').pickadate('picker').set('min', fromDate);
+                        var fromDate = $('input[name="search_date_from_formatted"]').val();
+                        addOneMonth = moment(fromDate).add(31,'days');
 
-                        // toDate returns 'invalid date', logic is to be corrected
-                        var toDate = new Date();
-                        console.log("new date", toDate);
-                        toDate.setDate(new Date(fromDate.year, fromDate.month, fromDate.date + 30));
+                        $('#search_form #search_date_to').pickadate('picker').set('min', new Date(fromDate));
+                        $('#search_form #search_date_to').pickadate('picker').set('max',  new Date(addOneMonth.toDate()));
+                        $('#search_form #search_date_to').pickadate('picker').set('select', new Date(addOneMonth.toDate()));
 
-                        $('#search_form #search_date_to').pickadate('picker').set('max', toDate);
+
                     }
                 }
             });
 
-            $('#search_form #search_date_to').pickadate({
+            var search_date_to = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 max: currDate,
@@ -390,8 +389,8 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {    
-                        var toDate = $('#search_form #search_date_to').pickadate('picker').get('select');
-                        $('#search_form #search_date_from').pickadate('picker').set('max', toDate);
+                        var toDate = $('input[name="search_date_from_formatted"]').val();
+                        $('#search_form #search_date_from').pickadate('picker').set('max', new Date(toDate));
                     }
                 }
             });
@@ -445,7 +444,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'rv_status', name: 'rv_status', class: 'align-middle designation',searchable: false,orderable:false},
-                    {data: 'reason', name: 'reason', class: 'align-middle designation',searchable: false,orderable:false},
+                    {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false,orderable:false},
                     {data: 'remarks', name: 'remarks', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle designation',searchable: false,orderable:false},
@@ -481,22 +480,21 @@
                 $.ajax({
                     url: '{!! route('admin.reports.rv_report.rv_call_history') !!}',
                     method: 'GET',
-                    data: { id: dataId },
+                    data: { shipment_id: dataId },
                     dataType: 'json',
                     success: function(response) {
                         var tableBody = $('#unresponsive_count').find('tbody');
                         tableBody.empty();
-                        console.log(response.data);
-                        $.each(response.data, function(index, rowData) {
-                            var dateTimeParts = rowData.data.created_at.split(' ');
+                        $.each(response, function(index, rowData) {
+                            var dateTimeParts = rowData.updated_at.split(' ');
                             var row = $('<tr>');
                             row.append($('<td>').text(index + 1)); 
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text('Unresponsive'));
-                            row.append($('<td>').text(rowData.data.rv_call_finding.remark));
-                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-'));
-                            row.append($('<td>').text(rowData.user_name));
+                            row.append($('<td>').text(rowData.call_finding_id));
+                            row.append($('<td>').text(rowData.call_finding_reason_id));
+                            row.append($('<td>').text(rowData.remarks != null ? rowData.remarks : '-'));
+                            row.append($('<td>').text(rowData.updated_by));
                             tableBody.append(row);
                         });
 

@@ -19,7 +19,7 @@ class ActivityTrailForRvReport extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Rv Report', 'url'=>'admin.reports.rv_report.index', 'permission_id' => 905),           
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Overall Action Rv Report', 'url'=>'admin.reports.rv_report.index', 'permission_id' => 905),           
         ));
     }
 }
