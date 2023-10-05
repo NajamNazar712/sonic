@@ -1433,7 +1433,7 @@ trait RvTrait
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->whereRaw('NOT EXISTS (
-                    SELECT 1
+                    SELECT sj.id
                     FROM shipments_journey AS sj
                     WHERE sj.status_reason_id = 12
                     AND sj.shipment_id = shipments.id
@@ -1480,15 +1480,15 @@ trait RvTrait
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
-                            SELECT 1
-                            FROM shipments_journey AS sj
-                            WHERE sj.status_reason_id = 12
-                            AND sj.shipment_id = shipments.id
-                            AND sj.id = (
-                                SELECT MAX(id)
-                                FROM shipments_journey
-                                WHERE shipment_id = shipments.id
-                            )
+                        SELECT sj.id
+                        FROM shipments_journey AS sj
+                        WHERE sj.status_reason_id = 12
+                        AND sj.shipment_id = shipments.id
+                        AND sj.id = (
+                            SELECT MAX(id)
+                            FROM shipments_journey
+                            WHERE shipment_id = shipments.id
+                        )
                     )');
                     if(!empty($rv_priority_shippers)){
                         $flag = true;
