@@ -35,6 +35,8 @@ use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\ShipmentStatusReason;
 use App\RvAssignAgentSubStatus;
 
@@ -118,6 +120,8 @@ trait RvTrait
             'shipment_id' => $data['shipment_id'],
             'shipments_journey_id' => $data['shipments_journey_id'],
             'agent_id' => $data['agent_id'],
+            'updated_by_id' => Auth::id(),
+            'updated_type_id' => 1,
             'rv_state_id' => $data['rv_state_id'] ?? 1,
             'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
             'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
@@ -147,7 +151,7 @@ trait RvTrait
                         $rv_unassign_agent->save();
 
                         //new row in RvShipmentAssignAgentDetails table
-                        $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
+                        // $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
                         
                         $request->request->add(['shipment_id' => $shipment, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks, 'call_to_id' => $rv_unassign_agent->call_to_id]);
@@ -167,7 +171,7 @@ trait RvTrait
             if ($rv_unassign_agent->exists()) 
             {
                 $rv_unassign_agent = $rv_unassign_agent->latest()->first();
-                $rv_unassign_agent->rv_state_id = 2;
+                $rv_unassign_agent->rv_state_id = 3;
                 $rv_unassign_agent->updated_by_id = Auth::id();
                 $rv_unassign_agent->save();
                 
@@ -193,17 +197,28 @@ trait RvTrait
     // Description:
     protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey)
     {
+        // dd($shipment_assign_agent);
+        
+        $admin = Admin::find(Auth::id());
+        $updated_type_id = 1;
+        if($admin){
+            $employee = Employee::find($admin->employee_id);
+            if($employee){
+                if($employee->staff_category_id == 3)
+                    $updated_type_id = 2;
+            }
+        }
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
-        $rv_shipment_assign_agent_details->agent_id = Auth::id();
+        $rv_shipment_assign_agent_details->agent_id = $shipment_assign_agent->agent_id;
         $rv_shipment_assign_agent_details->shipments_journey_id = $shipments_journey->id;
         $rv_shipment_assign_agent_details->last_shipments_journey_id = $shipments_journey->id;
         $rv_shipment_assign_agent_details->shipment_id = $request->shipment_id;
         $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $shipment_assign_agent->rv_assign_agent_status_id;
         $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $shipment_assign_agent->rv_assign_agent_sub_status_id;
         $rv_shipment_assign_agent_details->rv_state_id = $shipment_assign_agent->rv_state_id;
-        $rv_shipment_assign_agent_details->updated_type_id = $shipment_assign_agent->updated_type_id;
-        $rv_shipment_assign_agent_details->updated_by_id = $shipment_assign_agent->updated_by_id;
+        $rv_shipment_assign_agent_details->updated_type_id = $updated_type_id;
+        $rv_shipment_assign_agent_details->updated_by_id = Auth::id();
         $rv_shipment_assign_agent_details->is_fake_status = $request->is_fake_status;
         $rv_shipment_assign_agent_details->rv_fake_status_id = $request->rv_fake_status_id;
         $rv_shipment_assign_agent_details->remarks = $request->remarks;
