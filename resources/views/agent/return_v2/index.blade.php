@@ -1087,7 +1087,7 @@
 
                                 $.each(data.unresponsive_reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
-                                        .remark + '</option>';
+                                        .name + '</option>';
                                 });
                                 $('#shipment_reason').html(options);
                                 $('#shipment_reason').show().click();
