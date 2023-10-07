@@ -3,65 +3,70 @@
 @section('title', 'Overall RV Action Report')
 
 @section('content')
-    <div class="app-content content">
-        <div class="content-wrapper">
-            <div class="content-header row">
-            </div>
-            <div class="content-body">
-                <h1 class="mb-1">
-                   Overall RV Action Report
-                </h1>
+<div class="app-content content">
+    <div class="content-wrapper">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">
+            <div class="row">
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
+                            <h1>Overall RV Action Report</h1>
                             @include('admin.inc.messages')
-                            <div id="search_form" class="row mb-2 justify-content-center">
-                                {{-- Search by tracking number --}}
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                                    </fieldset>
-                                </div>
+                            <div class="col mt-2">
+                                <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
+                                    {{-- Search by tracking number --}}
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number" style="text-align: right;" fdprocessedid="l9xr5h">
+                                        </fieldset>
+                                    </div>
                                 {{-- Search by shipper name --}}
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_shipper_name" id="search_shipper_name" class="form-control select2">
-                                            @foreach($shippers as $shipper)
-                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                                {{-- Search date from filter --}}
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <select name="search_shipper_name" id="search_shipper_name" class="form-control select2">
+                                                @foreach($shippers as $shipper)
+                                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
+                                    </div>
+
+                                    {{-- Search date from filter --}}
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                            </div>
+                                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Search date to filter --}}
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                </span>
+                                            </div>
+                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Search btn --}}
+                                    <div class="col-2">
+                                       
+                                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                         
-                                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ \Carbon\Carbon::today()->startOfDay() }}">
                                     </div>
-                                </div>
-                                {{-- Search date to filter --}}
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                                        </div>
-        
-                                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}">
-                                    </div>
-        
-                                </div>
-                                {{-- Search btn --}}
-                                <div class="col-2">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                                </div>
+                                </form>
                             </div>
+
+
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -554,13 +559,26 @@
                 },
             });
 
-            $('#search_filter_btn').on('click',function () {
-                var trackingNo = $('#search_tracking_no').val();
-                var shipperName = $('#search_shipper_name').val();
-                var dateFrom = $('input[name="search_date_from_formatted"]').val();
-                var dateTo = $('input[name="search_date_to_formatted"]').val();
+            // $('#search_filter_btn').on('click',function () {
+            //     var trackingNo = $('#search_tracking_no').val();
+            //     var shipperName = $('#search_shipper_name').val();
+            //     var dateFrom = $('input[name="search_date_from_formatted"]').val();
+            //     var dateTo = $('input[name="search_date_to_formatted"]').val();
 
-                if (shipperName !== '' || trackingNo !== '' || (dateFrom !== '' && dateTo !== '')) {
+            //     if (shipperName !== '' || trackingNo !== '' || (dateFrom !== '' && dateTo !== '')) {
+            //         table.draw();
+            //     }
+
+            // });
+
+            $('#search_form').bind('submit', function (e) {
+                e.preventDefault();
+                var tracking_number = $('#search_form #search_tracking_no').val();
+                var shipper_name = $('#search_form #search_shipper_name').val();
+                var search_date_from = $('#search_form #search_date_from').val();
+                var search_date_to = $('#search_form #search_date_to').val();
+
+                if (shipper_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
                     table.draw();
                 }
 
