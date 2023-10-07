@@ -12082,16 +12082,25 @@ class AdminReportsController extends Controller
         ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
         ->leftjoin('shipping_modes', 'shipments.shipping_mode_id', 'shipping_modes.id')
         ->leftjoin('booking_types', 'shipments.booking_type_id', 'booking_types.id')
-        ->leftjoin('employees', 'rv_shipment_assign_agents.agent_id', 'employees.id')
+        ->leftjoin('admins as ad', 'rv_shipment_assign_agents.agent_id', 'ad.id')
         ->leftjoin('shipments_journey', 'rv_shipment_assign_agents.shipments_journey_id', 'shipments_journey.id')
         ->leftjoin('admins', 'shipments_journey.admin_id', 'admins.id')
         ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aas.id')
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
-        ->select('shipments.id as shipment_id','shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub','shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks', 'rv_shipment_assign_agents.updated_at as action_date', 'admins.name as action_updated_by','employees.name as rcp_agent_updated_by', 'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 'rv_shipment_assign_agents.unresponsive_count as call_count')->groupBy('shipments.id');
 
-        // dd($rv_report->pluck('shipper_name'));
+        ->select('shipments.id as shipment_id','shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 
+        'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
+        'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 
+        'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 
+        'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks',
+        'rv_shipment_assign_agents.updated_at as action_date', 'admins.name as action_updated_by','ad.name as rcp_agent_updated_by', 
+        'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
+        'rv_shipment_assign_agents.unresponsive_count as call_count')
+
+        ->groupBy('shipments.id');
+
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
                         $route = route('admin.tracking.index');
@@ -12113,6 +12122,16 @@ class AdminReportsController extends Controller
                             return $rv_report['remarks'];
                         }
                     })
+
+                    ->editColumn('reason', function($rv_report) {
+                        if ($rv_report['reason']=="") {
+                            return '-';
+                        }
+                        else {
+                            return $rv_report['reason'];
+                        }
+                    })
+
                     ->editColumn('fake_status', function($rv_report) {
                         if ($rv_report['fake_status']) {
                             return $rv_report['fake_status'];
