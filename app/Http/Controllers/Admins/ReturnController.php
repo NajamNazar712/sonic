@@ -153,7 +153,6 @@ class ReturnController extends Controller
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
         
-        //used for assigned_at
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
@@ -167,7 +166,16 @@ class ReturnController extends Controller
             ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
         })
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
+
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
+        ->leftjoin('rv_shipment_assign_agent_details as rvsaad', function($join){
+            $join->on('rvsaad.shipment_id', '=', 'shipments.id')
+            ->where('rvsaad.id','=',
+            DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id 
+            and rv_shipment_assign_agent_details.rv_state_id = 3)'));
+
+        })
+
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
         
@@ -200,10 +208,11 @@ class ReturnController extends Controller
          'tat_options.value as tat_value',
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time')
+         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name')
         ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
+        
 
         return $shipments;
     }
@@ -329,6 +338,8 @@ class ReturnController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
+
+       
             ->editColumn('shipper_phone',function ($shipment){
                 return "$shipment->shipper_phone1 | $shipment->shipper_phone2";
             })
@@ -363,6 +374,25 @@ class ReturnController extends Controller
                 }
                 else {
                     return '';
+                }
+            })
+
+            ->editColumn('assigned_agent', function ($shipment) {
+                if ($shipment->rv_state_id != 3) {
+                    return $shipment->assigned_agent;
+                }
+                else {
+                    return '-';
+                }
+            }) 
+
+            ->editColumn('last_agent_name', function ($shipment) {
+
+                if(isset($shipment->last_agent_name)){
+                    $agent_name = Admin::where('id', $shipment->last_agent_name)->first()->name;
+                    return $agent_name;
+                }else{
+                    return '-';
                 }
             })
             ->filterColumn('u.name', function ($query, $keyword) {
@@ -512,6 +542,14 @@ class ReturnController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('RvShipmentAssignedAgent', function ($shipments){//using for checking the rv-assign-shipment-agent to not add checkbox in the datatable
+                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $shipments->shId)->where('rv_state_id', 1)->first();
+                if($rv_shipment_assign_agents)
+                    return 1;
+                else
+                    return 0;
+                
+            })
             ->addColumn('sub_station', function ($shipments) {
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
@@ -556,7 +594,8 @@ class ReturnController extends Controller
                 $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
-                if(session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions')))) {
+                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->first();
+                if( !$rv_shipment_assign_agents && (session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions'))))) {
                     if (session('role_id') == 1 || count(array_intersect([45, 46, 211, 212, 245], session('permissions'))) !== 0) {
                         $dropdown = "
                         <div class='btn-group'>
@@ -5207,7 +5246,7 @@ class ReturnController extends Controller
                 foreach ($spreadsheet_row as $key => $value) {
                     $row[$fields[$key]] = $value;
                 }
-
+                
                 $rows[] = $row;
             }
 
@@ -5222,7 +5261,7 @@ class ReturnController extends Controller
                 } else {
                     $validate = Validator::make($row, $rules_without_agent, $messages);
                 }
-
+                
                 $validate->setAttributeNames($names);
 
                 if ($validate->fails()) {
@@ -5242,7 +5281,7 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
                     if (!empty($row['agent_id'])) {
@@ -5262,10 +5301,10 @@ class ReturnController extends Controller
                     $tracking_number = trim($row['tracking_number']);
                     $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                     $shipment_id = $shipment->id;
-
+                    
                     //if agent row is empty unassign the shipment id 
-                    if($row['agent_id'] = null){
-                        $this->rv_unassign_agents(null, $shipment_id);
+                    if($row['agent_id'] == null){
+                        $this->rv_unassign_agents($request, $shipment_id);
                     }
                     else{
                         $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
@@ -7006,6 +7045,7 @@ class ReturnController extends Controller
         $shipment = RvAgentCallHistory::leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.id','rv_agent_call_histories.rv_shipment_assign_agent_id')
         ->leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rsaa.rv_assign_agent_status_id')
         ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rsaa.rv_assign_agent_sub_status_id')
+        ->leftJoin('admins','admins.id','rsaa.agent_id')
         ->leftJoin('shipments','shipments.id','rsaa.shipment_id')
         ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
 
@@ -7020,7 +7060,7 @@ class ReturnController extends Controller
 
         ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
 
-        ->select('rsaa.updated_at as updated_at','a.name as updated_by',
+        ->select('rsaa.updated_at as updated_at','admins.name as updated_by',
         'rsaa.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
         'rvass.name as call_finding_reason_id', 'rsaa.remarks as remarks',
         'shipment_status.name as current_shipment_status')
