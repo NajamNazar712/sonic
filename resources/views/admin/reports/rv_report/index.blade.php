@@ -356,42 +356,36 @@
                 'allowPlus': false
             });
 
-            var currDate='{{ Carbon\Carbon::now() }}';
-            var search_date_from = $('#search_form #search_date_from').pickadate({
+            var search_date_from = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: currDate,
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        var fromDate = $('input[name="search_date_from_formatted"]').val();
-                        addOneMonth = moment(fromDate).add(31,'days');
 
-                        $('#search_form #search_date_to').pickadate('picker').set('min', new Date(fromDate));
-                        $('#search_form #search_date_to').pickadate('picker').set('max',  new Date(addOneMonth.toDate()));
-                        $('#search_form #search_date_to').pickadate('picker').set('select', new Date(addOneMonth.toDate()));
-
-
-                    }
+                    var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    search_date_to.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    search_date_to.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    search_date_to.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
 
-            var search_date_to = $('#search_form #search_date_to').pickadate({
+            var search_date_to = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: currDate,
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {    
-                        var toDate = $('input[name="search_date_from_formatted"]').val();
-                        $('#search_form #search_date_from').pickadate('picker').set('max', new Date(toDate));
-                    }
                 }
             });
 
@@ -443,10 +437,9 @@
                             head.push('Current Status');
                             head.push('Current Status Date');
                             head.push('Fake Status');
-                            head.push('Request Status');
                             head.push('Delivery Attempt Count');
                             head.push('Re Attempt Count');
-                            head.push('Unresponsive Count');
+                            head.push('Call Count');
                             
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -477,8 +470,6 @@
                                 row.push(values.fake_status);
                                 row.push(values.delivery_attempt_count);
                                 row.push(values.re_attempt_count);
-                                row.push(values.unresponsive_count);
-                                row.push(values.unresponsive_count);
                                 row.push(values.call_count);
 
                                 body.push(row);
@@ -548,7 +539,7 @@
                     {data: 'remarks', name: 'remarks', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle designation',searchable: false,orderable:false},
-                    {data: 'rcp_agent_updated_by', name: 'rcp_agent_updated_by', class: 'align-middle designation',searchable: false,orderable:false},
+                    {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'current_status', name: 'current_status', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'current_status_date', name: 'current_status_date', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'fake_status', name: 'fake_status', class: 'align-middle designation',searchable: false,orderable:false},
