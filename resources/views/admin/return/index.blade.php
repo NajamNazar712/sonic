@@ -1536,7 +1536,8 @@
                                     className: 'btn btn-primary un-assign',
                                     enabled: false,
                                     action: function(e, dt, node, config) {
-                                        if (selected_rows != '' && restricted_rows.length == 0) {
+                                        // if (selected_rows != '' && restricted_rows.length == 0) {
+                                        if (selected_rows != '') {
                                             swal({
                                                 title: 'Are You Sure?',
                                                 text: 'Select Yes to Un Assign Agent!',
@@ -2190,7 +2191,7 @@
                             } else {
                                 selected_rows.splice(index, 1);
                             }
-                            
+
                             var restricted_index = $.inArray(id, restricted_rows);
                             if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
                                 assigned_agent_id != {{ auth()->id() }} && tat > 0) {
@@ -2203,7 +2204,11 @@
                             }
 
                             if(agent_assigned){
-                                restricted_rows.push(id);
+                                if (restricted_index === -1) {
+                                    restricted_rows.push(id);
+                                } else {
+                                    restricted_rows.splice(restricted_index, 1);
+                                }
                             }
 
                             if (selected_rows.length > 0) {
@@ -2232,10 +2237,18 @@
                                     selected_rows.splice(index, 1);
                                 }
 
+                                var restricted_index = $.inArray(id, restricted_rows);
                                 if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
                                     assigned_agent_id != {{ auth()->id() }} && tat > 0) {
-                                    var restricted_index = $.inArray(id, restricted_rows);
 
+                                    if (restricted_index === -1) {
+                                        restricted_rows.push(id);
+                                    } else {
+                                        restricted_rows.splice(restricted_index, 1);
+                                    }
+                                }
+
+                                if(agent_assigned){
                                     if (restricted_index === -1) {
                                         restricted_rows.push(id);
                                     } else {
