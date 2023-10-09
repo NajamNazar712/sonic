@@ -1579,6 +1579,7 @@ trait RvTrait
                         $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                         if ($shipment_assigned_unassigned_agent->exists()) {
                             $shipment_assigned_unassigned_agent->first();
+                            RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3)->update(['rv_state_id'=> 1]);
                             break 2;
                         }
                         
