@@ -818,10 +818,10 @@
 
 
                                 shipment +=
-                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea></strong></th>';
-
+                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></strong></th>';
+                                    
                                 shipment +=
-                                    '</select></strong><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></th>';
+                                    '</select></strong></th>';
 
 
 
