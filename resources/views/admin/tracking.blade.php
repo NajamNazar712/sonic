@@ -644,19 +644,20 @@
                         success: function(response) {
                             var tableBody = $('#update_call_status_modal').find('tbody');
                             tableBody.empty();
-                            if(response.length > 0){
+                            if(response.data.length > 0){
                                 $('#call_history').removeClass('d-none');
                             }
-                            $.each(response, function(index, rowData) {
-                                var dateTimeParts = rowData.updated_at.split(' ');
+                            $.each(response.data, function(index, value) {
+                                var dateTimeParts = value.data.updated_at.split(' ');
                                 var row = $('<tr>');
                                 row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
                                 row.append($('<td>').text(dateTimeParts[1])); // Display time
-                                row.append($('<td>').text(rowData.call_finding_id));
-                                row.append($('<td>').text(rowData.call_finding_reason_id));
-                                row.append($('<td>').text(rowData.remarks != null ? rowData.remarks : '-'));
-                                row.append($('<td>').text(rowData.updated_by));
+                                // row.append($('<td>').text(value.data.call_finding_id));
+                                row.append($('<td>').text('Unresponsive'));
+                                row.append($('<td>').text(value.data.rv_call_finding.name));
+                                row.append($('<td>').text(value.data.remarks != null ? value.data.remarks : '-'));
+                                row.append($('<td>').text(value.user_name));
                                 tableBody.append(row);
                         });
 

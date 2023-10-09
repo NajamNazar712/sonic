@@ -972,31 +972,31 @@
                                 'shipment_id': shipment_id
                             }
                         })
-                        .done(function(data) {
-                            if (data) {
+                        .done(function(response) {
+                            if (response) {
                                 var modalBody = $('#call_history_modal .modal-body');
                                 modalBody.html('');
-
+                                
                                 var tableHtml =
                                     '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
                                 tableHtml +=
                                     '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Finding</th><th>Call Finding Reason</th><th>Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
-                                tableHtml += '<tbody class="text-center">';
-                                $.each(data, function(index, value) {
-                                    var updated_at = value.updated_at;
+                                    tableHtml += '<tbody class="text-center">';
+                                $.each(response.data, function(index, value) {
+                                    var updated_at = value.data.updated_at;
                                     var trimmedDateTime = updated_at.substring(0, 10);
                                     var trimmedTime = updated_at.substring(11, 16);
-                                    var call_finding_id = value.call_finding_id;
-                                    var call_finding_reason_id = value.call_finding_reason_id;
+                                    var call_finding_id = 'Unresponsive';
+                                    var call_finding_reason_id = value.data.rv_call_finding.name;
                                     
-                                    var remarks = value.remarks;
+                                    var remarks = value.data.remarks;
                                     if (remarks == null) {
                                         remarks = '-';
                                     }
-                                    var current_shipment_status = value.current_shipment_status;
-                                    var updated_by = value.updated_by;
+                                    var current_shipment_status = value.data.shipment.status_shipper.name;
+                                    var updated_by = value.user_name;
 
-                                    var call_to_id = value.call_to_id;
+                                    var call_to_id = value.data.call_to_id;
                                     if (call_to_id == 1) {
                                         call_to_id = 'Consignee'
                                     } else {

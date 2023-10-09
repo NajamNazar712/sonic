@@ -251,7 +251,7 @@ trait RvTrait
         if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count < 2) {
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
-
+            
         } 
         else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 2) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
@@ -274,19 +274,23 @@ trait RvTrait
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
+        if($admin_agent->employee){
 
-        if ($admin_agent->employee->staff_category_id == 3) {
-            $assigned_agent->increment('total_shipments');
-            $assigned_agent->increment('actual_productivity');
-            $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
+            if ($admin_agent->employee->staff_category_id == 3) {
+                $assigned_agent->increment('total_shipments');
+                $assigned_agent->increment('actual_productivity');
+                $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
+            } else {
+                $assigned_agent->increment('already_updated');
+                $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
+            }
+
+            $shipment_assign_agent->update($shipment_assign_agent_table_columns);
+            // dd(1);
+            return true;
         } else {
-            $assigned_agent->increment('already_updated');
-            $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
+            return false;
         }
-
-        $shipment_assign_agent->update($shipment_assign_agent_table_columns);
-
-        return true;
     }
 
     // Heading: N/A
@@ -650,32 +654,38 @@ trait RvTrait
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
-        $status = new RvAgentCallHistory();
-        $status->shipment_id= $request->shipment_id;
-        $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
-        $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
-        $status->call_to_id = $request->call_to_id; //Shipper or Consignee
-        $status->remarks = $rv_shipment_assign_agent->remarks;
-        $status->save();
+        if($rv_shipment_assign_agent){
+            $status = new RvAgentCallHistory();
+            $status->shipment_id= $request->shipment_id;
+            $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
+            $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
+            $status->call_to_id = $request->call_to_id; //Shipper or Consignee
+            $status->remarks = $request->remarks;
+            $status->save();
 
-        $rv_shipment_assign_agent->increment('unresponsive_count');
-        $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+            $rv_shipment_assign_agent->increment('unresponsive_count');
+            $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+            $rv_shipment_assign_agent->save();
 
-        //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
-        if ($rv_shipment_assign_agent->unresponsive_count == 2) {
-            //updating the shipment status to unresponsive(65) in shipments table
-            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+            //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
+            if ($rv_shipment_assign_agent->unresponsive_count == 2) {
+                //updating the shipment status to Shipper Advise Requested(65) in shipments table
+                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
-            //updating the shipment status to unresponsive(65) in shipments journey table
-            ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
-            return response()->json(['status' => 1]); 
+                //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
+                ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
+                return response()->json(['status' => 1]); 
 
+            }
+
+            //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
+            else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
+                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
+            }
         }
-
-        //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
-        else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
+        else{
+            return redirect()->back()->with('error', 'Shipment not found');
         }
     }
 
@@ -1611,5 +1621,29 @@ trait RvTrait
             }
         }
         return $shipment;
+    }
+
+    public function get_call_status_history(Request $request)
+    {
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
+            $query->select('id', 'name');
+        }, 'shipment.status_shipper' => function ($query) {
+            $query->select('id', 'name');
+        },  'user'])->where('shipment_id', $request->shipment_id)->get();
+        if($data){
+
+            foreach ($data as $item) {
+                $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
+                $mergedArray[] = [
+                    'data' => $item,
+                    'user_name' => $userData,
+                ];
+            }
+            return  $mergedArray;
+        }
+        else{
+            return false;
+        }
     }
 }
