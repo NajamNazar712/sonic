@@ -16,6 +16,11 @@ class RvShipmentAssignAgent extends Model
    {
       return $this->belongsTo('App\RvAssignAgentSubStatus', 'rv_assign_agent_sub_status_id', 'id');
    }
+   
+   public function max_rv_shipment_assign_agent_detail()
+   {
+      return $this->hasOne('App\Http\Models\RvShipmentAssignAgentDetails', 'rv_shipment_assign_agent_id')->orderBy('id', 'desc');
+   }
 
    public function shipment()
    {
