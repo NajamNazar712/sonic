@@ -650,6 +650,14 @@ trait RvTrait
     // Description: 
     protected function unresponsive(Request $request)
     {
+        $updated_type = null;
+        $get_updated_type = Admin::find(Auth::id());
+        if(strpos($get_updated_type->trax_id, 'C') !== false){
+            $updated_type = 2;
+        }
+        else{
+            $updated_type = 1;
+        }
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
@@ -661,6 +669,8 @@ trait RvTrait
             $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
             $status->call_to_id = $request->call_to_id; //Shipper or Consignee
             $status->remarks = $request->remarks;
+            $status->updated_type_id = $updated_type;
+            $status->updated_by_id = Auth::id();
             $status->save();
 
             $rv_shipment_assign_agent->increment('unresponsive_count');
@@ -1631,14 +1641,15 @@ trait RvTrait
             $query->select('id', 'name');
         }, 'shipment.status_shipper' => function ($query) {
             $query->select('id', 'name');
-        },  'user'])->where('shipment_id', $request->shipment_id)->get();
+        },  'updated_by'])->where('shipment_id', $request->shipment_id)->get();
+        
         if($data){
-
+            // dd($data);
             foreach ($data as $item) {
-                $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
+                // $userData = Admin::where('id', $item['user']['max_rv_shipment_assign_agent_detail']['updated_by_id'])->value('name');
                 $mergedArray[] = [
                     'data' => $item,
-                    'user_name' => $userData,
+                    'user_name' => $item->updated_by->name ?? '-',
                 ];
             }
             return  $mergedArray;
