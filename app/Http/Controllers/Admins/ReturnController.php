@@ -5162,22 +5162,29 @@ class ReturnController extends Controller
             $already_assigned = implode(',', $already_assigned);
             $assigned_shipment = implode(',', $assigned_shipment);
             $assigned_to_new_user = implode(',', $assigned_to_new_user);
+            // $assigned_shipment_count = explode(',', $assigned_shipment);
+            // $assigned_shipment_count = array_filter($assigned_shipment_count, function($value) {
+            //     return $value !== "";
+            // });
+
+            // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));
 
             if ($already_assigned == '') {
                 return response()->json([
                     'status' => 1,
                     'error' => 'No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment . 
-                               ($assigned_shipment != null ? ' And Rest Has Been Assigned' : '')
+                               (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                 ]);
             } else {
                 return response()->json([
                     'status' => 1,
                     'error' => ($assigned_to_new_user != null)
                         ? 'These Shipments are assigned to this agent successfully: ' . $already_assigned . 
-                          (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '') . 
-                          ' And Rest Has Been Assigned'
-                        : null 
+                          (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                        : 'Already Assigned' 
                 ]);
+                
+                
             } 
             
         }else{
