@@ -261,9 +261,8 @@ class ReturnV2Controller extends Controller
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5',
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
-            'remarks' => Rule::requiredIf(function () use ($request) {
-                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 7;
-            }), //if unresponsive and other is selected remark is required
+            'remarks' => 'required',
+             //if unresponsive and other is selected remark is required
         ];
 
         $data = [
