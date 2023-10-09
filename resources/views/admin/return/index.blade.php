@@ -1536,7 +1536,8 @@
                                     className: 'btn btn-primary un-assign',
                                     enabled: false,
                                     action: function(e, dt, node, config) {
-                                        if (selected_rows != '' && restricted_rows.length == 0) {
+                                        // if (selected_rows != '' && restricted_rows.length == 0) {
+                                        if (selected_rows != '') {
                                             swal({
                                                 title: 'Are You Sure?',
                                                 text: 'Select Yes to Un Assign Agent!',
@@ -1989,13 +1990,13 @@
                             }
                         }
 
-                        if (data.RvShipmentAssignedAgent == 1) {
-                            $('td:eq(0)', row).removeClass('select-checkbox');
+                        // if (data.RvShipmentAssignedAgent == 1) {
+                        //     $('td:eq(0)', row).removeClass('select-checkbox');
 
-                            if ($.inArray(data.shId, selected_rows) !== -1) {
-                                table.row(row).select();
-                            }
-                        }
+                        //     if ($.inArray(data.shId, selected_rows) !== -1) {
+                        //         table.row(row).select();
+                        //     }
+                        // }
                     },
 
                     initComplete: function() {
@@ -2115,6 +2116,7 @@
                     var id = parseInt($(this).parent('tr').attr('id'));
                     var hub_id = $(this).parents('tr').data('hub');
                     var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+                    var agent_assigned = table.row($(this).parents('tr')).data().RvShipmentAssignedAgent
                     var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
                     var tat = table.row($(this).parents('tr')).data().confirmation_on;
                     var id = parseInt($(this).parent('tr').attr('id'));
@@ -2190,10 +2192,18 @@
                                 selected_rows.splice(index, 1);
                             }
 
+                            var restricted_index = $.inArray(id, restricted_rows);
                             if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
                                 assigned_agent_id != {{ auth()->id() }} && tat > 0) {
-                                var restricted_index = $.inArray(id, restricted_rows);
 
+                                if (restricted_index === -1) {
+                                    restricted_rows.push(id);
+                                } else {
+                                    restricted_rows.splice(restricted_index, 1);
+                                }
+                            }
+
+                            if(agent_assigned){
                                 if (restricted_index === -1) {
                                     restricted_rows.push(id);
                                 } else {
@@ -2227,10 +2237,18 @@
                                     selected_rows.splice(index, 1);
                                 }
 
+                                var restricted_index = $.inArray(id, restricted_rows);
                                 if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
                                     assigned_agent_id != {{ auth()->id() }} && tat > 0) {
-                                    var restricted_index = $.inArray(id, restricted_rows);
 
+                                    if (restricted_index === -1) {
+                                        restricted_rows.push(id);
+                                    } else {
+                                        restricted_rows.splice(restricted_index, 1);
+                                    }
+                                }
+
+                                if(agent_assigned){
                                     if (restricted_index === -1) {
                                         restricted_rows.push(id);
                                     } else {
