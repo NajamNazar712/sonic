@@ -594,16 +594,17 @@
                     success: function(response) {
                         var tableBody = $('#unresponsive_count').find('tbody');
                         tableBody.empty();
-                        $.each(response, function(index, rowData) {
-                            var dateTimeParts = rowData.updated_at.split(' ');
+                        $.each(response.data, function(index, rowData) {
+
+                            var dateTimeParts = rowData.data.updated_at.split(' ');
                             var row = $('<tr>');
                             row.append($('<td>').text(index + 1)); 
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text(rowData.call_finding_id));
-                            row.append($('<td>').text(rowData.call_finding_reason_id));
-                            row.append($('<td>').text(rowData.remarks != null ? rowData.remarks : '-'));
-                            row.append($('<td>').text(rowData.updated_by));
+                            row.append($('<td>').text('Unresponsive'));
+                            row.append($('<td>').text(rowData.data.rv_call_finding.name));
+                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-'));
+                            row.append($('<td>').text(rowData.user_name));
                             tableBody.append(row);
                         });
 

@@ -225,7 +225,6 @@ class ReturnController extends Controller
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
-        // $total_of_shipments = Shipment::whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->count();
         $total_of_shipments = $this->shipments()->get()->count();
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
@@ -355,10 +354,25 @@ class ReturnController extends Controller
             //Remarks Count Button in table column
             ->addColumn('remarks',function ($shipment){
                 $request = new Request(['shipment_id' => $shipment->shId]);
-                $status_count = $this->call_status_history($request)->count();
+                $status_count = $this->call_status_history($request);
+                $statusData = $status_count->getData(); // Access the 'data' property
+            if (isset($statusData) && count($statusData->data) > 0) {
+                $dataCount = count($statusData->data);
+                if ($dataCount > 0) {
+                    $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count">
+                        <span class="align-middle">' . $dataCount . '</span>
+                    </button>';
+                } 
+            } 
+            else {
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count">
+                    <span class="align-middle">-</span>
+                </button>';
+            }
 
-                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
-                return $btn;
+            return $btn;
+
+
             })
 
             //for shipment counts in excel
@@ -7049,34 +7063,8 @@ class ReturnController extends Controller
     //returning call remarks in Remarks Log Modal on admin/return screen  
     public function call_status_history(Request $request)
     {
-        $shipment = RvAgentCallHistory::leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.id','rv_agent_call_histories.rv_shipment_assign_agent_id')
-        ->leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rsaa.rv_assign_agent_status_id')
-        ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rsaa.rv_assign_agent_sub_status_id')
-        ->leftJoin('admins','admins.id','rsaa.agent_id')
-        ->leftJoin('shipments','shipments.id','rsaa.shipment_id')
-        ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
-
-        //used for status updated_by 
-        ->leftjoin('rv_shipment_assign_agents', function ($join) {
-            $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-            ->where('rv_shipment_assign_agents.id','=',
-            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
-            and rv_shipment_assign_agents.rv_state_id IN (2,4))'));
-        })
-        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.updated_by_id')
-
-        ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
-
-        ->select('rsaa.updated_at as updated_at','admins.name as updated_by',
-        'rsaa.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
-        'rvass.name as call_finding_reason_id', 'rsaa.remarks as remarks',
-        'shipment_status.name as current_shipment_status')
-
-        ->orderBy('rv_agent_call_histories.updated_at','desc')
-        ->where('rsaa.call_to_id',1) // 1 is for consignee and 0 is for shipper
-        ->limit(10)->get();
-        
-        return $shipment;
+        $mergedArray = $this->get_call_status_history($request);        
+        return response()->json(['data' => $mergedArray]);
     }
 
     public function rcp_agent_cn_index(){

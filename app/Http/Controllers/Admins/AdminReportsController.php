@@ -83,10 +83,13 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Traits\RvTrait;
+
 use function GuzzleHttp\Promise\all;
 
 class AdminReportsController extends Controller
 {
+    use RvTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -12194,7 +12197,8 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->whereBetween('shipments.created_at', [$from, $to]);
+            // dd($from, $to);
+            $rv_report->whereBetween('rv_shipment_assign_agents.created_at', [$from, $to]);
         }   
 
         return $datatable->make(true);
@@ -12202,33 +12206,8 @@ class AdminReportsController extends Controller
 
     public function rv_call_history(Request $request)
     {
-        $shipment = RvAgentCallHistory::leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.id','rv_agent_call_histories.rv_shipment_assign_agent_id')
-        ->leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rsaa.rv_assign_agent_status_id')
-        ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rsaa.rv_assign_agent_sub_status_id')
-        ->leftJoin('shipments','shipments.id','rsaa.shipment_id')
-        ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
-
-        //used for status updated_by 
-        ->leftjoin('rv_shipment_assign_agents', function ($join) {
-            $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-            ->where('rv_shipment_assign_agents.id','=',
-            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
-            and rv_shipment_assign_agents.rv_state_id IN (2,4))'));
-        })
-        ->leftJoin('admins as a','a.id','rv_shipment_assign_agents.updated_by_id')
-
-        ->where('rv_agent_call_histories.shipment_id',$request->shipment_id)
-
-        ->select('rsaa.updated_at as updated_at','a.name as updated_by',
-        'rsaa.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
-        'rvass.name as call_finding_reason_id', 'rsaa.remarks as remarks',
-        'shipment_status.name as current_shipment_status')
-
-        ->orderBy('rv_agent_call_histories.updated_at','desc')
-        ->where('rsaa.call_to_id',1) // 1 is for consignee and 0 is for shipper
-        ->limit(10)->get();
-        
-        return $shipment;
+        $mergedArray = $this->get_call_status_history($request);
+        return response()->json(['data' => $mergedArray]);
     }
 
     public function operations_performance_index()
