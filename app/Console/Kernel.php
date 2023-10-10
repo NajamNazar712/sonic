@@ -193,7 +193,7 @@ class Kernel extends ConsoleKernel
             }
         }
 
-        $employee_shifts = EmployeeShift::where('id', 2)->get();
+        $employee_shifts = EmployeeShift::where('shift_type_id', 2)->get();
         if(count($employee_shifts)){
             foreach($employee_shifts as $employee_shift)
             {
