@@ -2206,8 +2206,13 @@
                             if(agent_assigned){
                                 if (restricted_index === -1) {
                                     restricted_rows.push(id);
+                                    table.button('.call_history').disable();
+                                    table.button('.excel-upload').disable();
                                 } else {
                                     restricted_rows.splice(restricted_index, 1);
+                                    table.button('.call_history').enable();
+                    
+                                    table.button('.excel-upload').enable();
                                 }
                             }
 
@@ -2251,8 +2256,14 @@
                                 if(agent_assigned){
                                     if (restricted_index === -1) {
                                         restricted_rows.push(id);
+                                        table.button('.call_history').disable();
+                                        table.button('.excel-upload').disable();
+
                                     } else {
                                         restricted_rows.splice(restricted_index, 1);
+                                        table.button('.call_history').enable();
+                                        table.button('.excel-upload').enable();
+
                                     }
                                 }
 
