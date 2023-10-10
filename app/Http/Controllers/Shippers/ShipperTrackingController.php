@@ -2,35 +2,36 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\Rider;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\SubstituteUserShipment;
-use App\Http\Models\Shipper\ReturnSheetShipments;
-use Cassandra\Session;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\DeliveryLocationMapping;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Shipment;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\RiderDelivery;
-use App\Http\Models\ShipmentReplacementParcelImage;
 use Auth;
-
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Cassandra\Session;
+use App\Http\Models\Rider;
+use App\RvAgentCallHistory;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\Admin\StatusRemark;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\ReturnSheetShipments;
+
+use App\Http\Models\Admin\DeliveryLocationMapping;
 use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 
 class ShipperTrackingController extends Controller
 {
@@ -749,18 +750,27 @@ class ShipperTrackingController extends Controller
 
     public function call_status_history(Request $request)
     {
-        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
-        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
-        ->leftJoin('admins','admins.id','status_remarks.updated_by')
-        ->where('status_remarks.shipment_id',$request->shipment_id)
-
-        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
-        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
-        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
-        'shipment_status.name as status', 'admins.name as updated_by')
-        ->orderBy('status_remarks.updated_at','desc')->limit(10)->get();
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
+            $query->select('id', 'name');
+        }, 'shipment.status_shipper' => function ($query) {
+            $query->select('id', 'name');
+        },  'updated_by'])->where('shipment_id', $request->shipment_id)->get();
         
-        return $shipment;
+        if($data){
+            // dd($data);
+            foreach ($data as $item) {
+                // $userData = Admin::where('id', $item['user']['max_rv_shipment_assign_agent_detail']['updated_by_id'])->value('name');
+                $mergedArray[] = [
+                    'data' => $item,
+                    'user_name' => $item->updated_by->name ?? '-',
+                ];
+            }
+            return  $mergedArray;
+        }
+        else{
+            return false;
+        }
     }
 
 

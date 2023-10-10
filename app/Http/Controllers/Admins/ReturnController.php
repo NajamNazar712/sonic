@@ -153,12 +153,12 @@ class ReturnController extends Controller
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
         
+        //for assigned_by
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
             DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
-            and rv_shipment_assign_agents.rv_state_id = 1)'));
-            
+            and rv_shipment_assign_agents.rv_state_id = 1)'));  
         })
         
         ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
@@ -169,6 +169,7 @@ class ReturnController extends Controller
 
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
 
+        //for assigned_agent
         ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) {
             $join->on('rvsaad.shipment_id', '=', 'shipments.id')
                  ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
@@ -210,7 +211,7 @@ class ReturnController extends Controller
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
          'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name')
-        ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
+        ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65,66])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
         

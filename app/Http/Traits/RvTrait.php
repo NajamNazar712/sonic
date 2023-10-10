@@ -126,6 +126,7 @@ trait RvTrait
             'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
             'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
             'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
+            'call_to_id' => $data['call_to_id'] ?? 0,
         ]);
         
 
@@ -1462,7 +1463,7 @@ trait RvTrait
                 }   
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
+                ->whereIn('shipper_status_id', [7,8,9,15,12,65,66])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
@@ -1509,7 +1510,7 @@ trait RvTrait
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
+                    ->whereIn('shipper_status_id', [7,8,9,15,12,65,66])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
                         SELECT sj.id
@@ -1609,7 +1610,7 @@ trait RvTrait
                             $rv_shipment_assign_agent_details->is_fake_status = 0;
                             $rv_shipment_assign_agent_details->rv_fake_status_id = Null;
                             $rv_shipment_assign_agent_details->remarks = Null;
-                            $rv_shipment_assign_agent_details->call_to_id  = Null;
+                            $rv_shipment_assign_agent_details->call_to_id  = 0;
                             $rv_shipment_assign_agent_details->save();
                             break 2;
                         }

@@ -939,6 +939,8 @@
                                 var call_history = data.call_history;
                                 call_history.forEach(function(item, index) {
                                 date = item.data.created_at.split(' ')
+
+                                console.log(call_history);
                                 shipment += '<tr>';
                                 shipment += '<td>' + (index + 1) + '</td>'; // S.no
                                 shipment += '<td>' + date[0] + '</td>';
@@ -946,7 +948,7 @@
                                 shipment += '<td>' + 'Unresponsive' + '</td>';
                                 shipment += '<td>' + item.data.rv_call_finding.name + '</td>';
                                 shipment += '<td>' + item.data.shipment.status_shipper.name + '</td>';
-                                shipment += '<td>' + item.data.remarks + '</td>';
+                                shipment += '<td>' + ((item.data.remarks != null) ? item.data.remarks : '-') + '</td>';
                                 shipment += '<td>' + 'Consigneee' + '</td>';
                                 shipment += '<td>' + item.user_name + '</td>';
                                 shipment += '</tr>';
