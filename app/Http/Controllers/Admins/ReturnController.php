@@ -168,10 +168,13 @@ class ReturnController extends Controller
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
 
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
+
         ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) {
             $join->on('rvsaad.shipment_id', '=', 'shipments.id')
-                 ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3))'));
+                 ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
         })
+        
+        
         
 
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
@@ -390,10 +393,10 @@ class ReturnController extends Controller
             })
 
             ->editColumn('assigned_agent', function ($shipment) {
-                if(isset($shipment->shId)){
+                if(isset($shipment->shId) && $shipment->rv_state_id != 3){
                     $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
                     if(isset($latest_shipment)){
-                        $agent_name = Admin::where('id', $latest_shipment->updated_by_id)->first()->name;
+                        $agent_name = Admin::where('id', $latest_shipment->agent_id)->first()->name;
                         return $agent_name;
                     }else{
                         return '-';
@@ -402,7 +405,6 @@ class ReturnController extends Controller
             }) 
 
             ->editColumn('last_agent_name', function ($shipment) {
-
                 if(isset($shipment->last_agent_name)){
                     $agent_name = Admin::where('id', $shipment->last_agent_name)->first()->name;
                     return $agent_name;

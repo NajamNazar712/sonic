@@ -450,7 +450,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_number.split(">")[2].slice(0,-3));
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -482,7 +482,7 @@
                         },
                         async: false
                     });
-
+                    
                     return {body: body, header: head};
                     
                 }

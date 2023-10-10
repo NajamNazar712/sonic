@@ -1655,14 +1655,14 @@ trait RvTrait
         return $shipment;
     }
 
-    public function get_call_status_history(Request $request)
+    public function get_call_status_history(Request $request, $shipment = null)
     {
         $mergedArray = [];
         $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
             $query->select('id', 'name');
         }, 'shipment.status_shipper' => function ($query) {
             $query->select('id', 'name');
-        },  'updated_by'])->where('shipment_id', $request->shipment_id)->get();
+        },  'updated_by'])->where('shipment_id', (isset($request->shipment_id) ? $request->shipment_id : $shipment))->get();
         
         if($data){
             // dd($data);
