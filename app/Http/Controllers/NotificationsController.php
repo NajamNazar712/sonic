@@ -10342,8 +10342,9 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 220) {
-
+                    $from = 'noreply@trax.pk';
                     $emailShipments = [];
+                    $subject = str_replace('[date]', date('Y-m-d'), $subject);
 
                     foreach ($reference_1_id as $user) {
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
@@ -10380,35 +10381,39 @@ class NotificationsController extends Controller
                             $shipment = Shipment::find($rv_shipment);
                             $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
                             $shipment_journey = ShipmentsJourney::whereIn('id', $shipment_journey)->latest()->first();
-                            $rv_shipment = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->first();
+                            $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 6)->where('unresponsive_count', 2)->first();
 
                             $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->order_id) ? $shipment->order_id : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_name) ? $shipment->consignee_name : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_address) ? $shipment->consignee_address : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->phone_number_1) ? $shipment->phone_number_1 : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_phone_number_1) ? $shipment->consignee_phone_number_1 : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->destination_city->name) ? $shipment->destination_city->name : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->amount) ? $shipment->amount : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment_journey->shipment_status_reason->name) ? $shipment_journey->shipment_status_reason->name : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
 
-                            if ($rv_shipment->rv_assign_agent_status_id == 6) {
+                            // if ($rv_shipment->rv_assign_agent_status_id == 6) {
 
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
-                            } else {
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . '-----' . '</td>';
+                            //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
+                            // } else {
+                            //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . '-----' . '</td>';
 
-                            }
+                            // }
                             $html .= '</tr>';
                         }
 
                         $html .= '</tbody></table>';
 
+                        $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
+
                         // Use $html to replace [preview] in the email body
-                        $body = str_replace('[preview]', $html, $notification->body);
+                        $body = str_replace(['[preview]', '[link]'], [$html, $link], $notification->body);
+
 
                         // Send the email to the user with all their shipments
-                        self::email($subject, $body, $email);
+                        self::email($subject, $body, $email, $from);
                     }
 
 
