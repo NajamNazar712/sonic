@@ -930,11 +930,27 @@
                                 shipment += '<th>Un-responsive Findings</th>';
                                 shipment += '<th>Shipment Status</th>';
                                 shipment += '<th>Remarks</th>';
-                                shipment += '<th>Status</th>';
+                                shipment += '<th>Call To</th>';
                                 shipment += '<th>User</th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
+
+                                var call_history = data.call_history;
+                                call_history.forEach(function(item, index) {
+                                date = item.data.created_at.split(' ')
+                                shipment += '<tr>';
+                                shipment += '<td>' + (index + 1) + '</td>'; // S.no
+                                shipment += '<td>' + date[0] + '</td>';
+                                shipment += '<td>' + date[1] + '</td>';
+                                shipment += '<td>' + 'Unresponsive' + '</td>';
+                                shipment += '<td>' + item.data.rv_call_finding.name + '</td>';
+                                shipment += '<td>' + item.data.shipment.status_shipper.name + '</td>';
+                                shipment += '<td>' + item.data.remarks + '</td>';
+                                shipment += '<td>' + 'Consigneee' + '</td>';
+                                shipment += '<td>' + item.user_name + '</td>';
+                                shipment += '</tr>';
+                                });
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';

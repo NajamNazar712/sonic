@@ -178,6 +178,7 @@ class ReturnV2Controller extends Controller
                                     $rider_details['remarks'] = '-';
                                 }
 
+                                $call_history = $this->get_call_status_history($request , $shipment->id);
 
                                 $image_location = [];
 
@@ -209,10 +210,10 @@ class ReturnV2Controller extends Controller
 
 
                                 if (isset($shipment_assigned_agents)) {
-                                    return response()->json(['status' => 1, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
+                                    return response()->json(['status' => 1, 'call_history' => $call_history ,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
                                 } 
                                 else {
-                                    return response()->json(['status' => 0, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
+                                    return response()->json(['status' => 0, 'call_history' => $call_history ,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                                 }
                             } catch (Exception $ex) {
                                 return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
