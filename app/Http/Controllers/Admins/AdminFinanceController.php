@@ -101,8 +101,7 @@ use App\Http\Models\InvoiceForReimbursement;
 use SnappyImage;
 use SnappyPDF;
 use Auth;
-use DB;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -4550,7 +4549,9 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 89);
         }
 
-        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
+//        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
+        $pending_payments = DB::connection('reports_2')->table('pending_payments')
+            ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
