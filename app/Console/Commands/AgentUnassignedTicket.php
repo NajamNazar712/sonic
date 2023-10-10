@@ -55,7 +55,7 @@ class AgentUnassignedTicket extends Command
             //Check If 30 Minutes Had Passed
             ->where('created_at','>', Carbon::now()->subMinutes(30)->toDateTimeString())
             //If All Condition Are Being Met Then Update Rv State To 3 (Open), Any Agent Can Now Get This Ticket
-            ->update(['rv_state_id', 3]);
+            ->update(['rv_state_id' => 3]);
    
         } catch (\Throwable $th) {
             $this->createRvCronLog($th->getMessage());
