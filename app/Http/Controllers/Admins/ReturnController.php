@@ -168,13 +168,11 @@ class ReturnController extends Controller
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
 
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
-        ->leftjoin('rv_shipment_assign_agent_details as rvsaad', function($join){
+        ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) {
             $join->on('rvsaad.shipment_id', '=', 'shipments.id')
-            ->where('rvsaad.id','=',
-            DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id 
-            and rv_shipment_assign_agent_details.rv_state_id = 3)'));
-
+                 ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3))'));
         })
+        
 
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
@@ -392,11 +390,14 @@ class ReturnController extends Controller
             })
 
             ->editColumn('assigned_agent', function ($shipment) {
-                if ($shipment->rv_state_id != 3) {
-                    return $shipment->assigned_agent;
-                }
-                else {
-                    return '-';
+                if(isset($shipment->shId)){
+                    $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
+                    if(isset($latest_shipment)){
+                        $agent_name = Admin::where('id', $latest_shipment->updated_by_id)->first()->name;
+                        return $agent_name;
+                    }else{
+                        return '-';
+                    }
                 }
             }) 
 
