@@ -77,12 +77,12 @@ class AgentSarNotification extends Command
                 $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                     ->where('rv_state_id', 2)
                     ->where('unresponsive_count', 2)
-                    ->where('unresponsive_email_count', 6)
+                    ->where('unresponsive_email_count', '>', 0)
                     ->get(); // Check if unresponsive_email_count 6 which means that 24 hours have passed
         
                 if ($shipmentsToUpdate->isNotEmpty()) {
                     foreach ($shipmentsToUpdate as $shipment) {
-                        $shipment->update(['rv_assign_agent_status_id' => 3]);
+                        $shipment->update(['rv_assign_agent_status_id' => 1]);
                     }
                 }
             }
