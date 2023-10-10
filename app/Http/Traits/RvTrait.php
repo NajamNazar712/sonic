@@ -262,7 +262,7 @@ trait RvTrait
 
         } 
         else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
-            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 3; //set status to return confirm
+            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = 4; //set status as shipment completed
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
         }
