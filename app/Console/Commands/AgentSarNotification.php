@@ -82,7 +82,10 @@ class AgentSarNotification extends Command
         
                 if ($shipmentsToUpdate->isNotEmpty()) {
                     foreach ($shipmentsToUpdate as $shipment) {
-                        $shipment->update(['rv_assign_agent_status_id' => 1]);
+                        $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+
+                        // call function for return-confirm from trait to update shipment, journey and finance tables
+                        
                     }
                 }
             }
