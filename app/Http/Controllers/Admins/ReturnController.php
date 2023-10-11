@@ -686,7 +686,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
-            $datatable->where('rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
+            $datatable->where('rvsaa.rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
