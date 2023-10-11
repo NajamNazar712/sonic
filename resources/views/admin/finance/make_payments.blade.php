@@ -286,6 +286,7 @@
 														<th class="border-primary border-darken-1">GST</th>
 														<th class="border-primary border-darken-1">WHT</th>
 														<th class="border-primary border-darken-1">Fintech Charges</th>
+														<th class="border-primary border-darken-1">Packging Charges</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 														<th class="border-primary border-darken-1">Arrival Date</th>
@@ -954,6 +955,7 @@
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
 					{data:'wht', name: 'pending_payment_shipments.wht', class: 'align-middle wht'},
 					{data:'fintech_charges', name: 'fintech_charges', class: 'align-middle fintech_charges'},
+					{data:'packaging_charges', name: 'packaging_charges', class: 'align-middle packaging_charges'},
 					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
 					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
 					{data:'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
@@ -1224,7 +1226,7 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packging Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
@@ -1234,6 +1236,7 @@
 							details += '<td class="align-middle text-center">' + detail.charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.gst + '</td>';
 							details += '<td class="align-middle text-center">' + detail.fintech_charges + '</td>';
+							details += '<td class="align-middle text-center">' + detail.packaging_charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.deductable + '</td>';
 							details += '<td class="align-middle text-center">' + detail.payable + '</td>';
 							details += '</tr>';
