@@ -56,8 +56,8 @@ class AgentSarNotification extends Command
             $sendEmail = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
             ->where('rv_state_id', 2)
             ->where('unresponsive_count', 2)
-            ->where('updated_at', '<', $currentDateTime->subHours(4))
-            ->where('unresponsive_email_count', '<', 6)
+            ->where('updated_at', '<', $currentDateTime->subHours(12))
+            ->where('unresponsive_email_count', '<', 1)
             ->get(); // Check if 4 hours have passed
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
@@ -77,12 +77,15 @@ class AgentSarNotification extends Command
                 $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                     ->where('rv_state_id', 2)
                     ->where('unresponsive_count', 2)
-                    ->where('unresponsive_email_count', 6)
+                    ->where('unresponsive_email_count', '>', 0)
                     ->get(); // Check if unresponsive_email_count 6 which means that 24 hours have passed
         
                 if ($shipmentsToUpdate->isNotEmpty()) {
                     foreach ($shipmentsToUpdate as $shipment) {
-                        $shipment->update(['rv_assign_agent_status_id' => 3]);
+                        $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+
+                        // call function for return-confirm from trait to update shipment, journey and finance tables
+                        
                     }
                 }
             }
