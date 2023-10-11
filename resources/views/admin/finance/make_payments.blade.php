@@ -286,7 +286,7 @@
 														<th class="border-primary border-darken-1">GST</th>
 														<th class="border-primary border-darken-1">WHT</th>
 														<th class="border-primary border-darken-1">Fintech Charges</th>
-														<th class="border-primary border-darken-1">Packing Charges</th>
+														<th class="border-primary border-darken-1">Packaging Charges</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 														<th class="border-primary border-darken-1">Arrival Date</th>
@@ -1226,7 +1226,7 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packing Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Packaging Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
