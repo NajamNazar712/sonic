@@ -126,7 +126,7 @@
                                             <h3 class="text-white">
                                                 <p id="total_sar" class="d-inline">
                                                     {{ count($unresponsive_count) }}</p>
-                                                ({{ round($percentage_unresponsive_count) }}%)
+                                               
                                             </h3>
                                             <span>Unresponsive Count</span>
                                         </div>
