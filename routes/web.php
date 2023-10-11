@@ -95,6 +95,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit', 'Shippers\ShipperConsolidatedController@consolidate_shipment_submit')->name('submit');
         });
     });
+    Route::prefix('mentor_health')->name('mentor_health.')->group(function () {
+        Route::get('', 'Shippers\ShipperDashboardController@mentor_health_index')->name('index');
+        Route::post('add_request', 'Shippers\ShipperDashboardController@mentor_health_add_request')->name('add_request');
+    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
