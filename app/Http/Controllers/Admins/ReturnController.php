@@ -682,7 +682,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_total_value_div') === "3") {
-            $datatable->whereIn('shipments.shipper_status_id',[12,65]);
+            $datatable->whereIn('shipments.shipper_status_id',[7,8,9,15,12,65,66]);
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
