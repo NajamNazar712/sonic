@@ -5114,7 +5114,7 @@ class ReturnController extends Controller
             $only_shippers = [];
             $assigned_to_new_user = [];
             $assigned_to_now_new_user = [];
-            
+
             $agent_id = $request->admin_id;
             $admin = Admin::where('employee_id', $agent_id)->first();
             $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
@@ -5198,7 +5198,7 @@ class ReturnController extends Controller
                 } else {
                     return response()->json([
                         'status' => 1,
-                        'error' => ($assigned_to_new_user != null)
+                        'error' => ($assigned_to_new_user != null && count($assigned_to_now_new_user) <= 0)
                             ? 'These Shipments are assigned to this agent successfully: ' . $already_assigned . 
                             (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
                             : ((count($assigned_to_now_new_user) > 0) ? 'Rest Are Already Assigned Except These: ' . implode(', ', $assigned_to_now_new_user) : 'Already Assigned'),
