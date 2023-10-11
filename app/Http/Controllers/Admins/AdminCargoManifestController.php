@@ -2776,8 +2776,10 @@ class AdminCargoManifestController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
         }
-        $receive_cargo = DB::connection('reports_2')->table('cargo_manifests')
-            ->join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
+
+        $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
+//        $receive_cargo = DB::connection('reports_2')->table('cargo_manifests')
+//            ->join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->leftJoin('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
