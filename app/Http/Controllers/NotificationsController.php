@@ -10485,6 +10485,14 @@ class NotificationsController extends Controller
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);    
                  }
+                else if($id == 219){
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    $to = array('noumanarshad.83@gmail.com', 'muhammad.waqas@trax.pk');
+
+                    self::email($subject, $body, $to);
+                }
 
             }
         }

@@ -1402,11 +1402,9 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 134);
         }
-        if (Auth::id() == 3) {
-            $connection = 'mysql';
-        } else {
-            $connection = 'reports';
-        }
+
+        $connection = 'reports';
+
 
         $count = DB::connection($connection)->table('delivery_note_shipments');
 
