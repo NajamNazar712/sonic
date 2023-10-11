@@ -5102,7 +5102,7 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->charges;
             $row[] = $pending_payment_shipment->gst;
             $row[] = $pending_payment_shipment->wht;
-            $row[] = $shipment->packaging_material_charges;
+            $row[] = $shipment->packaging_charges;
             $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
             $row[] = $pending_payment_shipment->payable;
             $row[] = ($arrival_date) ? $arrival_date->created_at : '';
