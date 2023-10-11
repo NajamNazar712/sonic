@@ -245,12 +245,12 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
-        if ($rv_tickets === 0) {
-            $percentage_unresponsive_count = 0; // or any default value you prefer
-        } else {
-            $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
-        }
+        $unresponsive_count = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
+        // if ($rv_tickets === 0) {
+        //     $percentage_unresponsive_count = 0; // or any default value you prefer
+        // } else {
+        //     $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
+        // }
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
 
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
@@ -258,7 +258,7 @@ class ReturnController extends Controller
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
-        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count,'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
+        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
