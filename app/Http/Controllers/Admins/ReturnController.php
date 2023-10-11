@@ -245,7 +245,7 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
+        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->get();
         // if ($rv_tickets === 0) {
         //     $percentage_unresponsive_count = 0; // or any default value you prefer
         // } else {
