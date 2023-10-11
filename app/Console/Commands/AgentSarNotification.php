@@ -58,6 +58,7 @@ class AgentSarNotification extends Command
             $sendEmail = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
             ->where('rv_state_id', 2)
             ->where('unresponsive_count', 2)
+            //selects older records, i.e., records that were updated more than 12 hours ago.            
             ->where('updated_at', '<', $currentDateTime->subHours(12))
             ->where('unresponsive_email_count', '<', 1)
             ->get();

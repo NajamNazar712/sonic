@@ -126,7 +126,7 @@
                                             <h3 class="text-white">
                                                 <p id="total_sar" class="d-inline">
                                                     {{ count($unresponsive_count) }}</p>
-                                                ({{ round($percentage_unresponsive_count) }}%)
+                                               
                                             </h3>
                                             <span>Unresponsive Count</span>
                                         </div>
@@ -1335,7 +1335,6 @@
                                 head.push('Arrival Date');
                                 head.push('Status Date');
                                 head.push('Status Updated');
-
                                 head.push('Confirmation Required');
                                 head.push('Confirmation On');
                                 head.push('Delivery Attempt Count');
@@ -1345,6 +1344,9 @@
                                 head.push('Assigned By');
                                 head.push('Consolidation');
                                 head.push('Consolidation IDs');
+                                head.push('Unresponsive Count');
+                                head.push('Unresponsive Call Time');
+                                head.push('Last Agent Name');
 
                                     $.each(result.data, function(index, values) {
                                     row = [];
@@ -1382,6 +1384,9 @@
                                     row.push(values.assigned_by);
                                     row.push(values.consolidation);
                                     row.push(values.consolidated_id);
+                                    row.push(values.rvsaa_unresponsive_count);
+                                    row.push(values.unresponsive_attempt_time);
+                                    row.push(values.last_agent_name);
                                     body.push(row);
                                     }
                                 );

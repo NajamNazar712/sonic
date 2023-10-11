@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Admins;
 
 use DB;
+use Exception;
 use Carbon\Carbon;
 use function foo\func;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
+use App\RvAgentCallHistory;
 use Illuminate\Support\Str;
 use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use App\Jobs\RCPSmsToConsignee;
+use App\RvAssignAgentSubStatus;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BookingType;
 use App\Http\Models\HR\Employee;
@@ -78,6 +81,7 @@ use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
+use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -97,9 +101,6 @@ use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Models\RvShipmentAssignAgentDetails;
-use App\RvAgentCallHistory;
-use App\RvAssignAgentSubStatus;
 
 class ReturnController extends Controller
 {
@@ -245,12 +246,12 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
-        if ($rv_tickets === 0) {
-            $percentage_unresponsive_count = 0; // or any default value you prefer
-        } else {
-            $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
-        }
+        $unresponsive_count = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
+        // if ($rv_tickets === 0) {
+        //     $percentage_unresponsive_count = 0; // or any default value you prefer
+        // } else {
+        //     $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
+        // }
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
 
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
@@ -258,7 +259,7 @@ class ReturnController extends Controller
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
-        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count,'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
+        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -682,11 +683,11 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_total_value_div') === "3") {
-            $datatable->whereIn('shipments.shipper_status_id',[12,65]);
+            $datatable->whereIn('shipments.shipper_status_id',[7,8,9,15,12,65,66]);
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
-            $datatable->where('rvsaa.unresponsive_count', '>', 0);
+            $datatable->where('rvsaa.rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
@@ -5102,118 +5103,117 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
-        $shipment_ids =  $request->shipment_ids;
-        $no_zone_shipment = [];
-        $assigned_shipment = [];
-        $flag = null;
-        $all_shippers = [];
-        $included_shippers = [];
-        $only_shippers = [];
-        $assigned_to_new_user = [];
-        $assigned_to_now_new_user = [];
+        try{
+            DB::beginTransaction();
+            $shipment_ids =  $request->shipment_ids;
+            $no_zone_shipment = [];
+            $assigned_shipment = [];
+            $flag = null;
+            $all_shippers = [];
+            $included_shippers = [];
+            $only_shippers = [];
+            $assigned_to_new_user = [];
+            $assigned_to_now_new_user = [];
 
-        $agent_id = $request->admin_id;
-        $admin = Admin::where('employee_id', $agent_id)->first();
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
-        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
+            $agent_id = $request->admin_id;
+            $admin = Admin::where('employee_id', $agent_id)->first();
+            $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
+            $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
 
-        $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
-        if ($included_shipper->exists()) {
-            $flag = true;
-            $included_shipper = $included_shipper->first();
-            $included_shippers = explode(',', $included_shipper['text']);
-            $included_shippers = array_filter($included_shippers, function($value){
-                return $value != "";
-            });
-        }
-
-        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
-        if ($only_shipper->exists()) {
-            $flag = false;
-            $only_shipper = $only_shipper->first();
-            $only_shippers = explode(',', $only_shipper['text']);
-            $only_shippers = array_filter($only_shippers, function($value){
-                return $value != "";
-            });
-            $all_shippers = User::where('status', 3)->pluck('id')->toArray();
-            $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
-                return !in_array($value, $only_shippers);
-            });
-        }
-
-        $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
-        $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
-
-        if(!empty($sorted_agents_zones)){
-           foreach($shipment_ids as $shipment_id){
-            $shipment = Shipment::where('id', $shipment_id)->first();
-            $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
-            if($already_assigned_state->exists()){
-                $already_assigned_state =  $already_assigned_state->first();
-            }else{
-                $already_assigned_state = null;
+            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+            if ($included_shipper->exists()) {
+                $flag = true;
+                $included_shipper = $included_shipper->first();
+                $included_shippers = explode(',', $included_shipper['text']);
+                $included_shippers = array_filter($included_shippers, function($value){
+                    return $value != "";
+                });
             }
-            $currentDateTime = Carbon::now();
-            $shipment_journey = $shipment->shipment_journey;
-            
-            $shipment_journey = $shipment_journey->sortBy(function ($item) use ($currentDateTime) {
-                return abs($item->created_at->diffInSeconds($currentDateTime));
-            })->first();
 
-            if($shipment->exists()){
-                if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
-                    $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
-                    $assigned_shipment[] = $shipment->tracking_number;
-                    if($already_assigned_state != null){
-                        $assigned_to_new_user[] = $shipment->tracking_number;
-                    }else{
-                        $assigned_to_now_new_user[] = 1;
-                    }
+            $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+            if ($only_shipper->exists()) {
+                $flag = false;
+                $only_shipper = $only_shipper->first();
+                $only_shippers = explode(',', $only_shipper['text']);
+                $only_shippers = array_filter($only_shippers, function($value){
+                    return $value != "";
+                });
+                $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+                $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+                    return !in_array($value, $only_shippers);
+                });
+            }
+
+            $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
+            $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
+
+            if(!empty($sorted_agents_zones)){
+            foreach($shipment_ids as $shipment_id){
+                $shipment = Shipment::where('id', $shipment_id)->first();
+                $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
+                if($already_assigned_state->exists()){
+                    $already_assigned_state =  $already_assigned_state->first();
                 }else{
-                    $no_zone_shipment[] = $shipment->tracking_number;
+                    $already_assigned_state = null;
                 }
-            }
-        } 
-
-        if(!empty($no_zone_shipment) || !empty($already_assigned)){
-            $no_zone_shipment = implode(',', $no_zone_shipment);
-            $already_assigned = implode(',', $already_assigned);
-            $assigned_shipment = implode(',', $assigned_shipment);
-            $assigned_to_new_user = implode(',', $assigned_to_new_user);
-            // $assigned_shipment_count = explode(',', $assigned_shipment);
-            // $assigned_shipment_count = array_filter($assigned_shipment_count, function($value) {
-            //     return $value !== "";
-            // });
-
-            // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));
-
-            if ($already_assigned == '') {
-                return response()->json([
-                    'status' => 1,
-                    'error' => 'No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment . 
-                               (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 1,
-                    'error' => ($assigned_to_new_user != null)
-                        ? 'These Shipments are assigned to this agent successfully: ' . $already_assigned . 
-                          (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
-                        : 'Already Assigned' 
-                ]);
+                $currentDateTime = Carbon::now();
+                $shipment_journey = $shipment->shipment_journey;
                 
-                
+                $shipment_journey = $shipment_journey->sortBy(function ($item) use ($currentDateTime) {
+                    return abs($item->created_at->diffInSeconds($currentDateTime));
+                })->first();
+                if($shipment->exists()){
+                    if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                        DB::commit();
+                        $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
+                        $assigned_shipment[] = $shipment->tracking_number;
+                        if($already_assigned_state != null){
+                            $assigned_to_new_user[] = $shipment->tracking_number;
+                        }else{
+                            $assigned_to_now_new_user[] = $shipment->tracking_number;
+                        }
+                    }else{
+                        $no_zone_shipment[] = $shipment->tracking_number;
+                    }
+                }
             } 
-            
-        }else{
-            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
+            if(!empty($no_zone_shipment) || !empty($already_assigned)){
+                $no_zone_shipment = implode(',', $no_zone_shipment);
+                $already_assigned = implode(',', $already_assigned);
+                $assigned_shipment = implode(',', $assigned_shipment);
+                $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                // $assigned_shipment_count = explode(',', $assigned_shipment);
+                // $assigned_shipment_count = array_filter($assigned_shipment_count, function($value) {
+                //     return $value !== "";
+                // });
 
-        }
+                // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));\
 
-        }else{
-            return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
-        }
-           
+                if ($already_assigned == '') {
+                    return response()->json([
+                        'status' => 1,
+                        'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . 
+                                (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 1,
+                        'error' => ($assigned_to_new_user != null && count($assigned_to_now_new_user) <= 0)
+                            ? 'These Shipments are assigned to this agent successfully: ' . $already_assigned . 
+                            (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                            : ((count($assigned_to_now_new_user) > 0) ? 'Rest Are Already Assigned Except These: ' . implode(', ', $assigned_to_now_new_user) : 'Already Assigned'),
+                    ]);
+                } 
+            }else{
+                return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
+            }
+            }else{
+                return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+            }
+        }catch(Exception $th){
+            DB::rollBack();
+            return response()->json(['error'=> $th->getMessage()]);
+        } 
     }
 
     //Assigning and Unassigning Shipments to agents by uploading excel sheet (Upload Agent Modal in Rcp Screen)
