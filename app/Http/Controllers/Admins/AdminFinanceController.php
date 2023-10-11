@@ -5065,7 +5065,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'Packging Charges', 'Deductable', 'Payable', 'Arrival Date' ];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'Packing Charges', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
