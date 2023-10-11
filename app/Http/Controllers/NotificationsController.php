@@ -10380,8 +10380,8 @@ class NotificationsController extends Controller
                         foreach ($shipments as $rv_shipment) {
                             $shipment = Shipment::find($rv_shipment);
                             $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
-                            $shipment_journey = ShipmentsJourney::whereIn('id', $shipment_journey)->latest()->first();
-                            $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 6)->where('unresponsive_count', 2)->first();
+                            $shipment_journey = ShipmentsJourney::where('id', $shipment_journey)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
+                            $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 6)->where('unresponsive_count', 2)->latest()->first();
 
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';

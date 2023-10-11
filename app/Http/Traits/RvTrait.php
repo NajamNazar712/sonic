@@ -101,11 +101,13 @@ trait RvTrait
                 ['shipment_id' => $data['shipment_id']],
                 [ 
                     'agent_id' => $data['agent_id'],
-                    'rv_state_id' => $data['rv_state_id'],
-                    'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'],
-                    'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'],
                     'shipments_journey_id' => $data['shipments_journey_id'],
                     'last_shipments_journey_id' => $data['shipments_journey_id'],
+                    'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'],
+                    'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'],
+                    'rv_state_id' => $data['rv_state_id'],
+                    'updated_type_id' => Auth::guard('agent')->check() ? 2 : 1,
+                    'updated_by_id' => Auth::id(),
                     'created_at' => Carbon::now(),
                 ]
             );
@@ -120,8 +122,8 @@ trait RvTrait
             'shipment_id' => $data['shipment_id'],
             'shipments_journey_id' => $data['shipments_journey_id'],
             'agent_id' => $data['agent_id'],
+            'updated_type_id' => Auth::guard('agent')->check() ? 2 : 1,
             'updated_by_id' => Auth::id(),
-            'updated_type_id' => 1,
             'rv_state_id' => $data['rv_state_id'] ?? 1,
             'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
             'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
@@ -194,18 +196,7 @@ trait RvTrait
     // URL: 
     // Description:
     protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey)
-    {
-        // dd($shipment_assign_agent);
-        
-        $admin = Admin::find(Auth::id());
-        $updated_type_id = 1;
-        if($admin){
-            $employee = Employee::find($admin->employee_id);
-            if($employee){
-                if($employee->staff_category_id == 3)
-                    $updated_type_id = 2;
-            }
-        }
+    {   
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
         $rv_shipment_assign_agent_details->agent_id = $shipment_assign_agent->agent_id;
@@ -215,7 +206,7 @@ trait RvTrait
         $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $shipment_assign_agent->rv_assign_agent_status_id;
         $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $shipment_assign_agent->rv_assign_agent_sub_status_id;
         $rv_shipment_assign_agent_details->rv_state_id = $shipment_assign_agent->rv_state_id;
-        $rv_shipment_assign_agent_details->updated_type_id = $updated_type_id;
+        $rv_shipment_assign_agent_details->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
         $rv_shipment_assign_agent_details->updated_by_id = Auth::id();
         $rv_shipment_assign_agent_details->is_fake_status = $request->is_fake_status;
         $rv_shipment_assign_agent_details->rv_fake_status_id = $request->rv_fake_status_id;
@@ -235,11 +226,12 @@ trait RvTrait
         return [
             'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
-            'rv_state_id' => 4,
+            'rv_state_id' => 2, //unassign
             'rv_fake_status_id' => $request->rv_fake_status_id,
             'remarks' => $request->remarks,
             'is_fake_status' => $request->is_fake_status,
             'call_to_id' => $request->call_to_id,
+            'updated_type_id' => 2, //Agent
             'updated_by_id' => Auth::id(),
             'rv_shipment_agent_id' => $agent->id,
         ];
@@ -652,14 +644,6 @@ trait RvTrait
     // Description: 
     protected function unresponsive(Request $request)
     {
-        $updated_type = null;
-        $get_updated_type = Admin::find(Auth::id());
-        if(strpos($get_updated_type->trax_id, 'C') !== false){
-            $updated_type = 2;
-        }
-        else{
-            $updated_type = 1;
-        }
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
@@ -671,7 +655,7 @@ trait RvTrait
             $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
             $status->call_to_id = $request->call_to_id; //Shipper or Consignee
             $status->remarks = $request->remarks;
-            $status->updated_type_id = $updated_type;
+            $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
             $status->updated_by_id = Auth::id();
             $status->save();
 
@@ -1370,22 +1354,23 @@ trait RvTrait
                 $rv_shipment_assign_agents->updated_by_id = Auth::id();
                 $rv_shipment_assign_agents->update();
 
-                $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
-                $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $rv_shipment_assign_agents->id;
-                $rv_shipment_assign_agent_details->agent_id = $rv_shipment_assign_agents->agent_id;
-                $rv_shipment_assign_agent_details->shipments_journey_id = $rv_shipment_assign_agents->shipments_journey_id;
-                $rv_shipment_assign_agent_details->last_shipments_journey_id = $rv_shipment_assign_agents->last_shipments_journey_id;
-                $rv_shipment_assign_agent_details->shipment_id = $rv_shipment_assign_agents->shipment_id;
-                $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $rv_shipment_assign_agents->rv_assign_agent_status_id;
-                $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $rv_shipment_assign_agents->rv_assign_agent_sub_status_id;
-                $rv_shipment_assign_agent_details->rv_state_id = $rv_shipment_assign_agents->rv_state_id;
-                $rv_shipment_assign_agent_details->updated_type_id = 3; //Shipper
-                $rv_shipment_assign_agent_details->updated_by_id = Auth::id();
-                $rv_shipment_assign_agent_details->is_fake_status = $rv_shipment_assign_agents->is_fake_status;
-                $rv_shipment_assign_agent_details->rv_fake_status_id = $rv_shipment_assign_agents->rv_fake_status_id;
-                $rv_shipment_assign_agent_details->remarks = $rv_shipment_assign_agents->remarks;
-                $rv_shipment_assign_agent_details->call_to_id  = $rv_shipment_assign_agents->call_to_id;
-                $rv_shipment_assign_agent_details->save();
+                $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
+                        'agent_id' => $rv_shipment_assign_agents->agent_id,
+                        'shipments_journey_id' => $rv_shipment_assign_agents->shipments_journey_id,
+                        'last_shipments_journey_id' => $rv_shipment_assign_agents->last_shipments_journey_id,
+                        'shipment_id' => $rv_shipment_assign_agents->shipment_id,
+                        'rv_assign_agent_status_id' => $rv_shipment_assign_agents->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agents->rv_assign_agent_sub_status_id,
+                        'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
+                        'updated_type_id' => 3,
+                        'updated_by_id' =>  Auth::id(),
+                        'is_fake_status' => $rv_shipment_assign_agents->is_fake_status,
+                        'rv_fake_status_id' => $rv_shipment_assign_agents->rv_fake_status_id,
+                        'remarks' => $rv_shipment_assign_agents->remarks,
+                        'call_to_id' => $rv_shipment_assign_agents->call_to_id,
+                    ];
+                $this->data_rv_shipment_assign_agent_details($data);
+
                 return true;
             } else {
                 return ['status' => 1, 'error' => 'No Shipment ID Found'];
@@ -1596,22 +1581,21 @@ trait RvTrait
 
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
-                            $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
-                            $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
-                            $rv_shipment_assign_agent_details->agent_id = $agent_id;
-                            $rv_shipment_assign_agent_details->shipments_journey_id = $shipments_journey->id;
-                            $rv_shipment_assign_agent_details->last_shipments_journey_id = $shipments_journey->id;
-                            $rv_shipment_assign_agent_details->shipment_id = $shipment->id;
-                            $rv_shipment_assign_agent_details->rv_assign_agent_status_id = Null;
-                            $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = Null;
-                            $rv_shipment_assign_agent_details->rv_state_id = 1;
-                            $rv_shipment_assign_agent_details->updated_type_id = Null; 
-                            $rv_shipment_assign_agent_details->updated_by_id = Null;
-                            $rv_shipment_assign_agent_details->is_fake_status = 0;
-                            $rv_shipment_assign_agent_details->rv_fake_status_id = Null;
-                            $rv_shipment_assign_agent_details->remarks = Null;
-                            $rv_shipment_assign_agent_details->call_to_id  = 0;
-                            $rv_shipment_assign_agent_details->save();
+                            $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
+                                    'shipments_journey_id' => $shipments_journey->id,
+                                    'last_shipments_journey_id' => $shipments_journey->id,
+                                    'shipment_id' => $shipment->id,
+                                    'rv_assign_agent_status_id' => Null,
+                                    'rv_assign_agent_sub_status_id' => Null,
+                                    'rv_state_id' => 1,
+                                    'updated_type_id' => Null,
+                                    'updated_by_id' =>  Null,
+                                    'is_fake_status' => 0,
+                                    'rv_fake_status_id' => Null,
+                                    'remarks' => Null,
+                                    'call_to_id' => 0,
+                                ];
+                            $this->data_rv_shipment_assign_agent_details($data);
                             break 2;
                         }
                         
@@ -1656,6 +1640,8 @@ trait RvTrait
         return $shipment;
     }
 
+
+
     public function get_call_status_history(Request $request, $shipment = null)
     {
         $mergedArray = [];
@@ -1679,5 +1665,24 @@ trait RvTrait
         else{
             return false;
         }
+    }
+
+    protected function data_rv_shipment_assign_agent_details($data){
+        $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
+        $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
+        $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
+        $rv_shipment_assign_agent_details->shipments_journey_id = $data['shipments_journey_id'];
+        $rv_shipment_assign_agent_details->last_shipments_journey_id = $data['last_shipments_journey_id'];
+        $rv_shipment_assign_agent_details->shipment_id = $data['shipment_id'];
+        $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
+        $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'];
+        $rv_shipment_assign_agent_details->rv_state_id = $data['rv_state_id'];
+        $rv_shipment_assign_agent_details->updated_type_id = $data['updated_type_id']; 
+        $rv_shipment_assign_agent_details->updated_by_id = $data['updated_by_id'];
+        $rv_shipment_assign_agent_details->is_fake_status = $data['is_fake_status'];
+        $rv_shipment_assign_agent_details->rv_fake_status_id = $data['rv_fake_status_id'];
+        $rv_shipment_assign_agent_details->remarks = $data['remarks'];
+        $rv_shipment_assign_agent_details->call_to_id  = $data['call_to_id'];
+        $rv_shipment_assign_agent_details->save();
     }
 }
