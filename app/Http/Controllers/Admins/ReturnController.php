@@ -245,7 +245,7 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->get();
+        $unresponsive_count = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
         // if ($rv_tickets === 0) {
         //     $percentage_unresponsive_count = 0; // or any default value you prefer
         // } else {
@@ -686,7 +686,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
-            $datatable->where('rvsaa.unresponsive_count', '>', 0);
+            $datatable->where('rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
