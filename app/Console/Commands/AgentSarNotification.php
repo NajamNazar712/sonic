@@ -4,12 +4,14 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Traits\RvTrait;
 use App\RvCronLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class AgentSarNotification extends Command
 {
+    use RvTrait;
     /**
      * The name and signature of the console command.
      *
@@ -58,7 +60,7 @@ class AgentSarNotification extends Command
             ->where('unresponsive_count', 2)
             ->where('updated_at', '<', $currentDateTime->subHours(12))
             ->where('unresponsive_email_count', '<', 1)
-            ->get(); // Check if 4 hours have passed
+            ->get();
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
             if ($sendEmail->isNotEmpty()) {
@@ -78,14 +80,33 @@ class AgentSarNotification extends Command
                     ->where('rv_state_id', 2)
                     ->where('unresponsive_count', 2)
                     ->where('unresponsive_email_count', '>', 0)
-                    ->get(); // Check if unresponsive_email_count 6 which means that 24 hours have passed
+                    ->get();
         
                 if ($shipmentsToUpdate->isNotEmpty()) {
                     foreach ($shipmentsToUpdate as $shipment) {
                         $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
 
-                        // call function for return-confirm from trait to update shipment, journey and finance tables
-                        
+                        $request = $shipment->request->add(['shipment_id' => $shipment->shipment_id, 'is_fake_status' => $shipment->is_fake_status, 'remarks' => $shipment->remarks, 
+                        'call_to_id' => $shipment->call_to_id, 'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id]);
+                        $this->return_confirm($request);
+
+
+                        $data = ['rv_shipment_assign_agent_id' => $shipment->id,
+                        'agent_id' => $shipment->agent_id,
+                        'shipments_journey_id' => $shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
+                        'shipment_id' => $shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id,
+                        'rv_state_id' => $shipment->rv_state_id,
+                        'updated_type_id' => 1,
+                        'updated_by_id' =>  Null,
+                        'is_fake_status' => $shipment->is_fake_status,
+                        'rv_fake_status_id' => $shipment->rv_fake_status_id,
+                        'remarks' => $shipment->remarks,
+                        'call_to_id' => $shipment->call_to_id,
+                    ];
+                        $this->data_rv_shipment_assign_agent_details($data);
                     }
                 }
             }
