@@ -10342,7 +10342,7 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 220) {
-                    $from = 'noreply@trax.pk';
+                    $from = ['noreply@trax.pk'];
                     $emailShipments = [];
                     $subject = str_replace('[date]', date('Y-m-d'), $subject);
 
@@ -10378,10 +10378,10 @@ class NotificationsController extends Controller
                         $html = $htmlHeader;
 
                         foreach ($shipments as $rv_shipment) {
-                            $shipment = Shipment::find($rv_shipment);
-                            $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
-                            $shipment_journey = ShipmentsJourney::where('id', $shipment_journey)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
-                            $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 6)->where('unresponsive_count', 2)->latest()->first();
+                            // $shipment = Shipment::find($rv_shipment);
+                            // $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
+                            $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 7)->where('unresponsive_count', 2)->latest()->first();
 
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
@@ -10393,14 +10393,6 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->amount) ? $shipment->amount : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment_journey->shipment_status_reason->name) ? $shipment_journey->shipment_status_reason->name : '---') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
-
-                            // if ($rv_shipment->rv_assign_agent_status_id == 6) {
-
-                            //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
-                            // } else {
-                            //     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . '-----' . '</td>';
-
-                            // }
                             $html .= '</tr>';
                         }
 
@@ -10409,7 +10401,7 @@ class NotificationsController extends Controller
                         $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
 
                         // Use $html to replace [preview] in the email body
-                        $body = str_replace(['[preview]', '[link]'], [$html, $link], $notification->body);
+                        $body = str_replace(['[preview]', '[Link]'], [$html, $link], $notification->body);
 
 
                         // Send the email to the user with all their shipments

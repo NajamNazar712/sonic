@@ -353,7 +353,7 @@ class ReturnV2Controller extends Controller
                     catch(\Throwable $th)
                     {
                         DB::rollBack();
-                        return response()->json(['status' => 3, 'errors' => 'Something Went Wrong']);
+                        return response()->json(['status' => 3, 'errors' => 'Something Went Wrong', 'info'=> $th->getMessage()]);
                     }
                 }
                 else 

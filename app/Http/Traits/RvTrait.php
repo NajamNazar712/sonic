@@ -643,8 +643,8 @@ trait RvTrait
                                 $shipment_parcel_image->save();
                             }
                         }
-
-                        return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
+                        return ['status' => 1, 'success' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']];
+                        // return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                     }
                 } else {
                     $request->request->set('rv_assign_agent_status_id', null); //passing rv_assign_agent_status_id as 'null' instead of '3' when error occurs in intercept 
