@@ -558,7 +558,7 @@ class ShipperReturnController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = s.id)'));
             })
             ->select('s.tracking_number as tracking_number','s.tracking_number as tracking','u.name as shipper','oc.name as origin','dc.name as destination','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as current_status','sj.created_at as current_status_date','shipments_journey.created_at as reattempt_status_date','sj.remarks as current_remarks')
-            ->where('shipments_journey.shipper_status_id', 52)
+            ->whereIn('shipments_journey.shipper_status_id', [66, 52])
             ->where('s.user_id', session('user_id'));
 
             if(session('user_type') == 2){
