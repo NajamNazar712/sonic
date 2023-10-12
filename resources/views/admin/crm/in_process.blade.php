@@ -695,7 +695,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
-                    {data: 'zone', name: 'z.id', class: 'align-middle zone'},
+                    {data: 'zone', name: 'zones', class: 'align-middle zone'},
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},

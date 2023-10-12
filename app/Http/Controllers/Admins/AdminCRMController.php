@@ -897,7 +897,7 @@ class AdminCRMController extends Controller
             $sms = 0;
         }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email, $sms);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email, $sms, 1);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }
@@ -1075,6 +1075,14 @@ class AdminCRMController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -1775,6 +1783,14 @@ class AdminCRMController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -2527,7 +2543,11 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
-                    return $admin->name;
+                    if($admin){
+                        return $admin->name;
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }

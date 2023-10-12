@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
 use App\Jobs\RCPSmsToConsignee;
-use App\ReturnConfirmationPendingSmsAttempt;
 use Illuminate\Console\Command;
 
 class RCPSMSToConsigneeReattempt extends Command

@@ -119,7 +119,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
 use App\Jobs\SwichPaymentGatewayApi;
 use App\Helpers\PayfastApiCall;
-
+use Illuminate\Support\Facades\Log;
 class DeliveryController extends Controller
 {
 
@@ -153,7 +153,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->leftJoin('zones as z', 'z.id', '=', 'oc.zone_id')
+            ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
@@ -755,6 +755,10 @@ class DeliveryController extends Controller
                                     } elseif ($request->hub_id == $hub_id) {
                                         $flag = true;
                                     }
+                                    else
+                                    {
+                                        $flag = false;
+                                    }
                                     // rider assigned hub setting end
 
                                     if ($flag) {
@@ -1100,7 +1104,7 @@ class DeliveryController extends Controller
                             }
                         }
                     }
-
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
                     $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                     if ($handover_shipments->exists()) {
                         $handover_shipments = $handover_shipments->first();
@@ -1119,52 +1123,53 @@ class DeliveryController extends Controller
                     }
                 }
 
-                foreach ($valid_shipments as $index => $shipment) {
+                foreach ($valid_shipments as $index => $shipment_id) {
 
-                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
                     $dbf_otp = mt_rand(100000, 999999);
                     if ($shipment_otp->exists()) {
                         $shipment_otp = $shipment_otp->first();
                     } else {
                         $shipment_otp = new ShipmentOtp();
-                        $shipment_otp->shipment_id = $shipment;
+                        $shipment_otp->shipment_id = $shipment_id;
                     }
                     $shipment_otp->dbf_otp = $dbf_otp;
                     $shipment_otp->rider_id = null;
                     $shipment_otp->latitude = null;
                     $shipment_otp->longitude = null;
 
-                    $pos = array_keys($shipments, $shipment);
+                    $pos = array_keys($shipments, $shipment_id);
                     if ($notifications[$pos[0]]) {
-                        $shipment_obj = Shipment::find($shipment);
+                        $shipment_obj = Shipment::find($shipment_id);
                         $otp = mt_rand(100000, 999999);
                         $shipment_otp->otp = $otp;
                         $shipment_otp->save();
                         if ($shipment_obj->amount == 0) {
                             //English
-                            NotificationsController::send(132, $note->id, $shipment);
+                            NotificationsController::send(132, $note->id, $shipment_id);
                             //Urdu
-                            NotificationsController::send(135, $note->id, $shipment);
+                            NotificationsController::send(135, $note->id, $shipment_id);
                         } else {
                             $environment = config('app.env');
                             if ($environment == 'production' || $environment == 'staging') {
                                 //When Admin Create Delivery Note
-                                $payment_detials = PayfastApiCall::ApiCall($note->id, $shipment);
-                                $rand = $payment_detials['unique_key'];
-                                $payment_link = $payment_detials['payment_link'];
-                                $url = $payment_detials['url'];
-                                $shipments_id = array_wrap($shipment);
-                                CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
-                                NotificationsController::send(12, $note->id, $shipment, $payment_link);
+                                $payment_details = PayfastApiCall::ApiCall($note->id, $shipment_id);
+                                $rand = $payment_details['unique_key'];
+                                $payment_link = $payment_details['payment_link'];
+                                $url = $payment_details['url'];
+                                Log::channel('trax_pay_test')->info('sh '. json_encode($shipment_id, true));
+                                
+                                CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url);
+                                NotificationsController::send(12, $note->id, $shipment_id, $payment_link);
                             }
                         }
                     } else {
                         $shipment_otp->otp = null;
                         $shipment_otp->save();
                     }
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-                    NotificationsController::send(10, $note->id, $shipment);
-                    NotificationsController::send(11, $note->id, $shipment);
+                    
+                    NotificationsController::send(10, $note->id, $shipment_id);
+                    NotificationsController::send(11, $note->id, $shipment_id);
 
                 }
                 $process_one_link['shipment_ids'] = $valid_shipments;
@@ -7328,6 +7333,20 @@ class DeliveryController extends Controller
                     return '-';
                 }     
             })
+            ->editColumn('hbl_konnect_amount_percent', function ($deliveries) {
+                $dncc_amount = $deliveries->amount;
+                $hbl_konnect_amount = $deliveries->transactions_amount;
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    $hbl_konnect_amount_percent = $hbl_konnect_amount / $dncc_amount *100;
+                    return $hbl_konnect_amount_percent;
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
             
             ->editColumn('delivery_note', function ($deliveries) {
                 $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
@@ -9798,10 +9817,10 @@ class DeliveryController extends Controller
                     }
 
                     foreach ($valid_shipments as $shipment) {
-                        $payment_detials = PayfastApiCall::ApiCall($note->id, $shipment);
-                        $rand = $payment_detials['unique_key'];
-                        $payment_link = $payment_detials['payment_link'];
-                        $url = $payment_detials['url'];
+                        $payment_details = PayfastApiCall::ApiCall($note->id, $shipment);
+                        $rand = $payment_details['unique_key'];
+                        $payment_link = $payment_details['payment_link'];
+                        $url = $payment_details['url'];
                         $shipments_id = array_wrap($shipment);
                         CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
                         NotificationsController::send(10, $note->id, $shipment);
