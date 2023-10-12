@@ -21,7 +21,7 @@ class UpdateModuleForReturnedDeliveredToShipper extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > SMS Notification Return Delivered to shipper', 'url'=>'admin.settings.sms_notification_return_delivered_to_shipper.index', 'permission_id' => 861),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > SMS Notifications Limit', 'url'=>'admin.settings.sms_notifications_limit.index', 'permission_id' => 861),
         ));
     }
 }

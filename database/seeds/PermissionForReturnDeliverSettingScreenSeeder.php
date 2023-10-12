@@ -25,7 +25,7 @@ class PermissionForReturnDeliverSettingScreenSeeder extends Seeder
 
 // if new screen
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting > Shipper > SMS Notification Return Deliver To Shipper', 'url'=>'admin.settings.sms_notification_return_delivered_to_shipper.index', 'permission_id' => 861),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting > Shipper > SMS Notifications Limit', 'url'=>'admin.settings.sms_notifications_limit.index', 'permission_id' => 861),
         ));
     }
 }
