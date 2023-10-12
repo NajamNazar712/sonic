@@ -18,20 +18,20 @@
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
-                                <tr class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S No.</th>
-                                    <th class="border-primary border-darken-1">City Name</th>
-                                    <th class="border-primary border-darken-1">Route Code</th>
-                                    <th class="border-primary border-darken-1">Rider Trax ID</th>
-                                    <th class="border-primary border-darken-1">Rider Name</th>
-                                    <th class="border-primary border-darken-1">Start Point</th>
-                                    <th class="border-primary border-darken-1">End Point</th>
-                                    <th class="border-primary border-darken-1">Junction</th>
-                                    <th class="border-primary border-darken-1">Added Date/Time</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    {{--   <th class="border-primary border-darken-1">Route Types</th>--}}
-                                    <th class="border-primary border-darken-1"></th>
-                                </tr>
+                                    <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S No.</th>
+                                        <th class="border-primary border-darken-1">City Name</th>
+                                        <th class="border-primary border-darken-1">Route Code</th>
+                                        <th class="border-primary border-darken-1">Rider Trax ID</th>
+                                        <th class="border-primary border-darken-1">Rider Name</th>
+                                        <th class="border-primary border-darken-1">Start Point</th>
+                                        <th class="border-primary border-darken-1">End Point</th>
+                                        <th class="border-primary border-darken-1">Junction</th>
+                                        <th class="border-primary border-darken-1">Added Date/Time</th>
+                                        <th class="border-primary border-darken-1">Status</th>
+                                        {{--   <th class="border-primary border-darken-1">Route Types</th>--}}
+                                        <th class="border-primary border-darken-1"></th>
+                                    </tr>
                                 </thead>
                             </table>
                         </div>

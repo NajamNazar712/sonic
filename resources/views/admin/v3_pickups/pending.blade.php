@@ -102,6 +102,7 @@
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Product</th>
+                                    <th class="border-primary border-darken-1">Service</th>
                                     <th class="border-primary border-darken-1">Shippment Type</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Station</th>
@@ -112,6 +113,8 @@
                                     <th class="border-primary border-darken-1">Assigned Courier Phone</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
+                                    <th class="border-primary border-darken-1">Admin Generated</th>
+                                    <th class="border-primary border-darken-1">Client Generated</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -1690,6 +1693,7 @@
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
                     {data: 'product', name: 'product', class: 'align-middle product'},
+                    {data: 'service', name: 'service', class: 'align-middle service'},
                     {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
@@ -1725,12 +1729,26 @@
                   
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
                     {
+                        data:'adminname',name:'adminname',class:'align-middle adminname',orderable: false,
+                        render:function(data,type,row){
+                            return row.adminname != null ?  row.adminname : '';
+                        }
+                    },
+                    {
+                        data:'username',name:'username',class:'align-middle username',orderable: false,
+                        render:function(data,type,row){
+                            return row.username != null ?  row.username : '';
+                        }
+                    },
+                 
+                    {
                         data: 'action',
                         name: 'action',
                         class: 'align-middle text-center action',
                         orderable: false,
                         searchable: false
-                    }
+                    },
+                   
 
                 ],
                 rowCallback: function (row, data, index) {

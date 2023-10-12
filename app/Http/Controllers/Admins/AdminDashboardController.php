@@ -10795,6 +10795,7 @@ public function payfast_payment(Request $request){
     public function addRouteDetails(Request $request)
     {
       
+       
         
         $validations = [
             'city_id' => 'required|numeric',
