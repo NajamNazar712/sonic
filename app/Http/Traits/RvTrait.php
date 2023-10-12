@@ -692,7 +692,7 @@ trait RvTrait
                     
                     //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
                     ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
-                    return response()->json(['status' => 1]); 
+                    return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
 
                 }
 
