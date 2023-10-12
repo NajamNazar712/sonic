@@ -744,7 +744,6 @@ class ReturnController extends Controller
     //THIS FUNCTION IS CALLING ON CONFIRM BUTTON (Header) ON Shipment - Reason Validation Required Screen
     public function return_confirm_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
-        dd($request->all());
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
         $consignee_refused_reasons = $request->consignee_refused_reasons;
