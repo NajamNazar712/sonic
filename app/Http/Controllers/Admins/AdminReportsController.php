@@ -1479,6 +1479,14 @@ class AdminReportsController extends Controller
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 8, 11])
             ->where('s.booking_type_id', '!=', 4)
             ->whereIn('sj.shipper_status_id', [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46]);
+        
+        if ($request->get('delivery_date_from')) {
+            $shipments->where('delivery_note_shipments.created_at', '>=', $delivery_date_from);
+        }
+        if ($request->get('delivery_date_to')) {
+            $shipments->where('delivery_note_shipments.created_at', '>=', $delivery_date_to);
+        }
+        
         if (session('role_id') != 1 || in_array(session('id'), session('sale_users_bypass'))) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
