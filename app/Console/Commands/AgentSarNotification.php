@@ -64,6 +64,7 @@ class AgentSarNotification extends Command
             ->get();
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
+            dd($sendEmail);
             if ($sendEmail->isNotEmpty()) {
                 NotificationsController::send(220, $sendEmail);
 
