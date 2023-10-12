@@ -26,4 +26,9 @@ class RvShipmentAssignAgent extends Model
    {
       return $this->belongsTo('App\Http\Models\Shipment', 'shipment_id', 'id');
    }
+
+   public function admin()
+   {
+      return $this->belongsTo('App\Http\Models\Admin', 'updated_by_id', 'id');
+   }
 }

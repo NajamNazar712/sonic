@@ -155,7 +155,7 @@ class ReturnController extends Controller
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
         
-        
+
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
@@ -255,7 +255,7 @@ class ReturnController extends Controller
         // }
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
 
-        return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
+    return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
         'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
@@ -741,8 +741,11 @@ class ReturnController extends Controller
         return $diff_days;
     }
 
+
+    //THIS FUNCTION IS CALLING ON CONFIRM BUTTON (Header) ON Shipment - Reason Validation Required Screen
     public function return_confirm_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
+        dd($request->all());
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
         $consignee_refused_reasons = $request->consignee_refused_reasons;
@@ -965,6 +968,7 @@ class ReturnController extends Controller
         }
     }
 
+    //THIS FUNCTION IS CALLING ON CONFIRM BUTTON in Row ON Shipment - Reason Validation Required Screen
     public function return_marked_single_status(Request $request)
     {
         $remark = $request->remark;
@@ -7051,7 +7055,7 @@ class ReturnController extends Controller
                 $add_call_status->updated_by_id = Auth::id();
                 $add_call_status->remarks = $request->remarks;
                 $add_call_status->call_to_id = $request->call_to_id;
-                $add_call_status->state_date = Carbon::now();
+                $add_call_status->assigned_by = Auth::id();
                 $add_call_status->save();
 
                 $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
