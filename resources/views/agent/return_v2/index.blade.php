@@ -1288,7 +1288,21 @@
                             
                             //if shipment is unassigned to the agent
                             else if (data.status == 3) {
-                                    var error = "This Shipment has been Unassigned!";
+                                    // var error = "This Shipment has been Unassigned!";
+                                    toastr.error(data.errors, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+
+                                    //Wait 3 seconds and reload the page if shipment is unassigned to the agent 
+                                    setTimeout(function() {
+                                    window.location.reload();
+                                     }, 3000); // 3000 milliseconds = 3 seconds
+                                } 
+                                
+                                
+                            else if (data.status == 4) {
+                                    var error = data.error;
                                     toastr.error(error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'

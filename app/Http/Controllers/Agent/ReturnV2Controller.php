@@ -31,6 +31,7 @@ use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use Illuminate\Support\Facades\DB;
 
 class ReturnV2Controller extends Controller
 {
@@ -294,27 +295,67 @@ class ReturnV2Controller extends Controller
     
                 // Check Employee Shift Time
                 if ($current_time->between(Carbon::parse($employee_shift['start_time']), Carbon::parse($employee_shift['end_time']))) {
-                        //if agent already exists on same date update row
+                    try{
+                        DB::beginTransaction();
+                            //if agent already exists on same date update row
                         if ($assign_agent) 
                         {
                             //if shipment already exists update row
                             if ($shipment_assign_agent) {
-                                $this->update_shipment_status($request); //updating status of shipment
-                                $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
-                                $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-    
-                                return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                                $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
+                                if ($update_shipment_status['status'] == 0) {
+                                    DB::rollBack();
+                                    return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
+                                } else{
+                                    $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                                    if($rv_shipment_assign_agent_details != true){
+                                        DB::rollBack();
+                                        return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
+                                    } else{
+                                        $add_shipment_agent = $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
+                                        if($add_shipment_agent != true){
+                                            DB::rollBack();
+                                            return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
+                                        } else {
+                                            DB::commit();
+                                            return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                                        }
+                                    }
+                                }
                             } else {
+                                DB::rollBack();
                                 return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                             }
                         } 
                         else {
-                            $this->update_shipment_status($request); //updating status of shipment
-                            $this->add_shipment_agent($request, $shipment_assign_agent);
-                            $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-                            return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                            $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
+                            if ($update_shipment_status['status'] == 0) {
+                                DB::rollBack();
+                                return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
+                            } else {
+                                $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                                if($rv_shipment_assign_agent_details != true){
+                                    DB::rollBack();
+                                    return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
+                                } else {
+                                    $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
+                                    if($add_shipment_agent != true){
+                                        DB::rollBack();
+                                        return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
+                                    } else {
+                                        DB::commit();
+                                        return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                                    }
+                                }
+                            }
                         }
                     }
+                    catch(\Throwable $th)
+                    {
+                        DB::rollBack();
+                        return response()->json(['status' => 3, 'errors' => 'Something Went Wrong']);
+                    }
+                }
                 else 
                 {
                     Auth::logout();
