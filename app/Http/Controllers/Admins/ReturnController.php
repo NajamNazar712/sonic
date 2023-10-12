@@ -155,7 +155,7 @@ class ReturnController extends Controller
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
         
-        //for assigned_by
+        
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
@@ -180,7 +180,7 @@ class ReturnController extends Controller
         
         
 
-        ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
+        ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
         
         ->leftjoin('consolidation_shipments as consolidations', function ($join){
@@ -396,7 +396,7 @@ class ReturnController extends Controller
             })
 
             ->editColumn('assigned_agent', function ($shipment) {
-                if(isset($shipment->shId) && $shipment->rv_state_id != 3){
+                if(isset($shipment->shId) && $shipment->rv_state_id == 1){
                     $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
                     if(isset($latest_shipment)){
                         $agent_name = Admin::where('id', $latest_shipment->agent_id)->first()->name;
