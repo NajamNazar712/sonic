@@ -1040,6 +1040,8 @@
                 $(document).on('change', '#shipment_reason', function() {
                     if ($("#shipment_reason").is(':empty') === false) {
                         $('.error_message_rv_assign_agent_sub_status').text('')
+                        $('#shipment_remarks_error').text('');
+
                     }
                 })
 
@@ -1066,6 +1068,9 @@
 
                 })
 
+                $(document).on('keypress', '#shipment_remarks', function() {
+                    $('#shipment_remarks_error').text('');
+                });
 
                 $(document).on('change', '#shipment_status', function() {
                     var id = $(this).val();
@@ -1095,8 +1100,6 @@
                                 }
 
                                 $('#call_to_id').addClass('d-none');
-
-
 
 
                             } else if (data.status == 1 && (id == 6)) { //unresponsive
@@ -1231,6 +1234,9 @@
                     $('#shipment_status').prop('disabled', true);
                 });
 
+                
+
+        
 
                 var checkbox = null;
 
