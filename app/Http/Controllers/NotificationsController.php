@@ -63,7 +63,7 @@ use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DeliveryNoteOtpSms;
 use App\Http\Models\NotificationSetting;
 use App\Http\Models\NotificationSettingShipper;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+// use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\FnfSectionEmployee;
 use App\Jobs\ProcessDeliveryNoteOtpSms;
 use Illuminate\Support\Facades\Storage;
@@ -218,7 +218,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $attachmentPath = null, $attachmentName = null)
     {
         if ($to) {
 
@@ -246,7 +246,7 @@ class NotificationsController extends Controller
                 }
             }
 
-
+        
             $mail = Mail::to($to);
 
             if ($cc) {
@@ -256,8 +256,9 @@ class NotificationsController extends Controller
             if ($bcc) {
                 $mail->bcc($bcc);
             }
+            
 
-            $mail->send(new Notifications($subject, $body, $from));
+            $mail->send(new Notifications($subject, $body, $from, $attachmentPath, $attachmentName));
         }
     }
 
@@ -10425,7 +10426,6 @@ class NotificationsController extends Controller
                         $array[$shipperId][] = $item;
                     }
 
-
                     foreach ($array as $shipperId => $items) {
                         $ids = array();
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
@@ -10472,11 +10472,11 @@ class NotificationsController extends Controller
                         $html .= '</tbody>';
                         $html .= '</table>';
 
-
-
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
+
                         self::email($subject, $body, $email);
+                        
                     }
 
                 } 
