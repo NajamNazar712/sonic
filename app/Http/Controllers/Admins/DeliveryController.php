@@ -2012,16 +2012,16 @@ class DeliveryController extends Controller
         $note_data = DeliveryNote::where('id', $id)->first();
 
         $rider = $note_data->rider;
-        if (session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)) {
-            return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
-        }
+//        if (session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)) {
+//            return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
+//        }
         $require_password = false;
         if ($note_data) {
 
             $rider = $note_data->rider;
-            if (session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)) {
-                return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
-            }
+//            if (session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)) {
+//                return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
+//            }
 
             if ($note_data->password != null) {
                 $require_password = true;
