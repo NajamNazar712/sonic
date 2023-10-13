@@ -1720,4 +1720,27 @@ trait RvTrait
         $rv_shipment_assign_agent_details->call_to_id  = $data['call_to_id'];
         $rv_shipment_assign_agent_details->save();
     }
+
+    protected function data_rv_shipment_assign_agent($data){
+        $rv_shipment_assign_agent = new RvShipmentAssignAgent();
+        $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+        $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
+        $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
+        $rv_shipment_assign_agent->last_shipments_journey_id = $data['last_shipments_journey_id'];
+        $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
+        $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'];
+        $rv_shipment_assign_agent->rv_state_id = $data['rv_state_id'];
+        $rv_shipment_assign_agent->is_fake_status = $data['is_fake_status'];
+        $rv_shipment_assign_agent->rv_fake_status_id = $data['rv_fake_status_id'];
+        $rv_shipment_assign_agent->rv_shipment_agent_id = $data['rv_shipment_agent_id']; 
+        $rv_shipment_assign_agent->updated_type_id = $data['updated_type_id']; 
+        $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
+        $rv_shipment_assign_agent->remarks = $data['remarks'];
+        $rv_shipment_assign_agent->call_to_id  = $data['call_to_id'];
+        $rv_shipment_assign_agent->assigned_by  = $data['assigned_by'];
+        $rv_shipment_assign_agent->unresponsive_count  = $data['unresponsive_count'];
+        $rv_shipment_assign_agent->unresponsive_email_count  = $data['unresponsive_email_count'];
+        $rv_shipment_assign_agent->unresponsive_attempt_time  = $data['unresponsive_attempt_time'];
+        $rv_shipment_assign_agent->save();
+    }
 }
