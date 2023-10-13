@@ -700,7 +700,7 @@ class ReturnController extends Controller
             return $query->where('ssr.id',12);
         })
         ->when($request->get('shipment_re_attempt_request_filter') == 1, function ($query) {
-            return $query->where('shipments.shipper_status_id',52);
+            return $query->whereIn('shipments.shipper_status_id',[52, 66]);
         })
         ->when($request->get('try_buy_filter') == 1, function ($query) {
             return $query->where('shipments.booking_type_id',3);
