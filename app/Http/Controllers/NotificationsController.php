@@ -10479,6 +10479,22 @@ class NotificationsController extends Controller
                         
                     }
 
+                } else if($id == 224){
+                    $attachmentName = $reference_1_id;
+                    $attachmentPath = $reference_2_id;                    
+
+                    $email = ['ahmed@trax.pk'];
+
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
+                } 
+
+                else if($id == 225){
+                    $attachmentName = $reference_1_id;
+                    $attachmentPath = $reference_2_id;                    
+
+                    $email = ['ahmed@trax.pk'];
+
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
             }
         }
