@@ -174,7 +174,7 @@
                                                     <tr value="0" id="shipment_re_attempt_request_filter"
                                                         class="goldClass">
                                                         <td class="align-middle cursor_color">Shipment - Re-Attempt
-                                                            Requested
+                                                            Requested / Re - Attempt Call Requested
                                                         </td>
                                                     </tr>
                                                     <tr value="0" id="try_buy_filter" class="tnb_row">
