@@ -15,6 +15,7 @@ use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Traits\RvTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ShipperInterceptReBookController extends Controller
 {
+    use RvTrait;
     public function __construct() {
         $this->middleware('auth:web,substitute_users');
 
@@ -243,7 +245,7 @@ class ShipperInterceptReBookController extends Controller
 
                         $data = [
                                 'shipment_id' => $request->shipment_id,
-                                'rv_assign_agent_status_id' => 3, //Intercept Requested
+                                'rv_assign_agent_status_id' => 4, //Intercept Requested
                                 'rv_assign_agent_sub_status_id' => Null,
                                 'updated_type_id' => 3, //Shipper
                                 'updated_by_id' =>  $user_id,
@@ -259,7 +261,7 @@ class ShipperInterceptReBookController extends Controller
                                     'shipments_journey_id' => $shipments_journey->id,
                                     'last_shipments_journey_id' => $shipments_journey->id,
                                     'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 3, //Intercept Requested
+                                    'rv_assign_agent_status_id' => 4, //Intercept Requested
                                     'rv_assign_agent_sub_status_id' => Null,
                                     'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
                                     'updated_type_id' => 3, //Shipper

@@ -1746,7 +1746,7 @@ trait RvTrait
 
     protected function update_by_shipper_rv_shipment_assign_agent($data){
 
-        $shipments_journey = ShipmentsJourney::where('shipment_id', $data->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $data->shipment_id)->where('rv_assign_agent_status_id', 65)->latest()->first();
 
         $state_id = Null;
         if($data->rv_assign_agent_status_id == 2) //reattempt 
@@ -1756,9 +1756,9 @@ trait RvTrait
         else{
             $state_id = 4; //Completed
         }
-        $update_from_shipper = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7, 'shipment_id', $data->shipment_id,'rv_state_id', 2,'unresponsive_count', 2)->latest()->first();
-        $update_from_shipper->shipments_journey_id = $shipments_journey;
-        $update_from_shipper->last_shipments_journey_id = $shipments_journey;
+        $update_from_shipper = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)->where('shipment_id', $data->shipment_id)->where('rv_state_id', 2)->where('unresponsive_count', 2)->latest()->first();
+        $update_from_shipper->shipments_journey_id = $shipments_journey->id;
+        $update_from_shipper->last_shipments_journey_id = $shipments_journey->id;
         $update_from_shipper->rv_assign_agent_status_id = $data->rv_assign_agent_status_id;
         $update_from_shipper->rv_assign_agent_sub_status_id = $data->rv_assign_agent_sub_status_id;
         $update_from_shipper->updated_type_id = $data->updated_type_id;
