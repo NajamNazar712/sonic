@@ -53,7 +53,8 @@ class ShipperFinanceController extends Controller
 
     public function payments_list(Request $request)
     {
-        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        // $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DB::connection('reports_2')->table('done_payments')->join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {

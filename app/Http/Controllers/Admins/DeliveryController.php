@@ -149,6 +149,8 @@ class DeliveryController extends Controller
         }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+//        $shipments = DB::connection('reports_2')->table('shipments')
+//            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -1407,9 +1409,9 @@ class DeliveryController extends Controller
 
 
                     if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
+//                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
                             $dropdown .= $receive_button;
-                        }
+//                        }
                     }
                     $rider_check = true;
                     if ($result->operation_rider_id == 1) {
