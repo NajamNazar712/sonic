@@ -18,8 +18,10 @@ use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -141,7 +143,37 @@ class ShipperInterceptReBookController extends Controller
                             $return_assign_log->user_id = Auth::id();
                             $return_assign_log->save();
                                 
-                        }  
+                        }
+
+                            $data = [
+                                        'shipment_id' => $request->shipment_id,
+                                        'rv_assign_agent_status_id' => 1, //ReturnConfirm
+                                        'rv_assign_agent_sub_status_id' => Null,
+                                        'updated_by_id' =>  Auth::id(),
+                                        'updated_type_id' => 3, //shipper
+                                        'remarks' => Null,
+                                    ];
+
+                            $this->update_by_shipper_rv_shipment_assign_agent($data);
+    
+                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
+                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',Auth::id())->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
+                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
+                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
+                                    'shipments_journey_id' => $shipments_journey->id,
+                                    'last_shipments_journey_id' => $shipments_journey->id,
+                                    'shipment_id' => $request->shipment_id,
+                                    'rv_assign_agent_status_id' => 1, //ReturnConfirm
+                                    'rv_assign_agent_sub_status_id' => Null,
+                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
+                                    'updated_type_id' => 3,
+                                    'updated_by_id' =>  Auth::id(),
+                                    'is_fake_status' => 0,
+                                    'rv_fake_status_id' => 0,
+                                    'remarks' => Null,
+                                    'call_to_id' => 0,
+                                ];
+                            $this->data_rv_shipment_assign_agent_details($data);  
                     }
 
                     // Same Consignee
@@ -176,28 +208,6 @@ class ShipperInterceptReBookController extends Controller
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
-                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                        // if($return_assign_shipment->exists()){
-
-                        //     $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                        //     $return_assign_shipment->status = 0;
-                        //     $return_assign_shipment->save();
-
-                        //     // Adding row as request intercept with status = 9
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 9;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-
-                        //     // Adding another row as approved intercept with status = 10
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 10;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-                        // }
-
                         //Updating New RcpAssigned Tables 
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if ($rcp_assigned_shipment->exists()) {
@@ -229,7 +239,37 @@ class ShipperInterceptReBookController extends Controller
                             $return_assign_log->user_id = Auth::id();
                             $return_assign_log->save();
                                 
-                        }  
+                        }
+
+                        $data = [
+                                'shipment_id' => $request->shipment_id,
+                                'rv_assign_agent_status_id' => 3, //Intercept Requested
+                                'rv_assign_agent_sub_status_id' => Null,
+                                'updated_type_id' => 3, //Shipper
+                                'updated_by_id' =>  $user_id,
+                                'remarks' => Null,
+                            ];
+    
+                            $this->update_by_shipper_rv_shipment_assign_agent($data);
+    
+                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
+                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$user_id)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
+                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
+                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
+                                    'shipments_journey_id' => $shipments_journey->id,
+                                    'last_shipments_journey_id' => $shipments_journey->id,
+                                    'shipment_id' => $request->shipment_id,
+                                    'rv_assign_agent_status_id' => 3, //Intercept Requested
+                                    'rv_assign_agent_sub_status_id' => Null,
+                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
+                                    'updated_type_id' => 3, //Shipper
+                                    'updated_by_id' =>  $user_id,
+                                    'is_fake_status' => 0,
+                                    'rv_fake_status_id' => 0,
+                                    'remarks' => Null,
+                                    'call_to_id' => 0,
+                                ];
+                            $this->data_rv_shipment_assign_agent_details($data);  
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);

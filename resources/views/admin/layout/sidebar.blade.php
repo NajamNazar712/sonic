@@ -688,8 +688,6 @@
 
                                     @if (session('role_id') == 1 || in_array(849, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.return.return_confirm_otp.index') }}">Return
-                                                Confirm OTP</a></li>
                                                 href="{{ route('admin.return.return_confirm_otp.index') }}">Return OTP History</a></li>
                                     @endif
 

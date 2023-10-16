@@ -148,6 +148,7 @@ use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
+use App\Http\Traits\RvTrait;
 use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -165,7 +166,7 @@ use Password;
 
 class AdminAPIController extends Controller
 {
-    use SendsPasswordResetEmails, CommonTrait;
+    use SendsPasswordResetEmails, CommonTrait, RvTrait;
 
     public function broker()
     {
