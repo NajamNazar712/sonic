@@ -12283,8 +12283,6 @@ class AdminReportsController extends Controller
     
                     $journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->latest()->first();
     
-                   
-    
                     $first_status_journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where(
                         'id', '>',
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipment_id = $shipment->shipment_id and shipments_journey.shipper_status_id = 5)")
@@ -12292,8 +12290,6 @@ class AdminReportsController extends Controller
     
                     if($first_status_journey){
     
-                        
-                   
                         if($first_status_journey->admin_id != null)
                         {
                             $admin = Admin::find($first_status_journey->admin_id);
@@ -12302,8 +12298,8 @@ class AdminReportsController extends Controller
                                 $data[$key]['first_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
-                            $data[$key]['first_admin_name'] = $admin->name;
-                            $data[$key]['first_admin_trax_id'] = $admin->trax_id;
+                            $data[$key]['first_admin_name'] = $admin->name ?? '-';
+                            $data[$key]['first_admin_trax_id'] = $admin->trax_id ?? '-';
     
                         }
                         else if($first_status_journey->rider_id != null){
@@ -12314,13 +12310,16 @@ class AdminReportsController extends Controller
                                 $data[$key]['first_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
-                            $data[$key]['first_rider_name'] = $rider->name;
-                            $data[$key]['first_rider_trax_id'] = $rider->trax_id;
+                            $data[$key]['first_rider_name'] = $rider->name ?? '-';
+                            $data[$key]['first_rider_trax_id'] = $rider->trax_id ?? '-';
                         }
                        
     
-                        $data[$key]['first_status'] =  $shipment_statuses[$first_status_journey->shipper_status_id];
-                        $data[$key]['first_reason'] = $first_status_journey->status_reason_id ? (ShipmentStatusReason::find($first_status_journey->status_reason_id)->name) : '-';
+                        $data[$key]['first_status'] =  $shipment_statuses[$first_status_journey->shipper_status_id] ?? '-';
+                        $firstReasonId = $first_status_journey->status_reason_id;
+                        $shipmentStatusReason = ShipmentStatusReason::find($firstReasonId);
+                        $firstReason = $shipmentStatusReason ? $shipmentStatusReason->name : '-';
+                        $data[$key]['first_reason'] = $firstReason;
                         $data[$key]['first_status_date'] = $first_status_journey->created_at;
                         
                     }
@@ -12340,8 +12339,8 @@ class AdminReportsController extends Controller
                                 $data[$key]['current_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
-                            $data[$key]['current_admin_name'] = $admin->name;
-                            $data[$key]['current_admin_trax_id'] = $admin->trax_id;
+                            $data[$key]['first_admin_name'] = $admin->name ?? '-';
+                            $data[$key]['first_admin_trax_id'] = $admin->trax_id ?? '-';
     
                         }
                         else if($current_status_journey->rider_id != null){
@@ -12352,12 +12351,22 @@ class AdminReportsController extends Controller
                                 $data[$key]['current_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
-                            $data[$key]['current_rider_name'] = $rider->name;
-                            $data[$key]['current_rider_trax_id'] = $rider->trax_id;
+                            $data[$key]['current_rider_name'] = $rider->name ?? '-';
+                            $data[$key]['current_rider_trax_id'] = $rider->trax_id ?? '-';
                         }
     
-                        $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id];
-                        $data[$key]['current_reason'] = $current_status_journey->status_reason_id ? (ShipmentStatusReason::find($current_status_journey->status_reason_id)->name) : '-';
+                        $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id] ?? '-';
+                        $currentReasonId = $current_status_journey->status_reason_id;
+                        $shipmentStatusReason = ShipmentStatusReason::find($currentReasonId);
+                        
+                        if ($shipmentStatusReason) {
+                            $currentReason = $shipmentStatusReason->name;
+                        } else {
+                            $currentReason = '-';
+                        }
+                        
+                        $data[$key]['current_reason'] = $currentReason;
+                        
                         $data[$key]['current_remarks'] = $current_status_journey->remarks;
                         $data[$key]['current_status_date'] = $current_status_journey->created_at;
                     }
@@ -12453,7 +12462,16 @@ class AdminReportsController extends Controller
                     
                     if($return_reason)
                     {
-                        $data[$key]['return_reason'] = $return_reason->status_reason_id ? (ShipmentStatusReason::find($return_reason->status_reason_id)->name) : '-';
+                        $returnReasonId = $return_reason->status_reason_id;
+
+                        if ($returnReasonId) {
+                            $shipmentStatusReason = ShipmentStatusReason::find($returnReasonId);
+                            $returnReason = $shipmentStatusReason ? $shipmentStatusReason->name : '-';
+                        } else {
+                            $returnReason = '-';
+                        }
+                        
+                        $data[$key]['return_reason'] = $returnReason;
                     }
     
                     $transit_journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where(
