@@ -203,7 +203,13 @@ class Kernel extends ConsoleKernel
             }
         }
         $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
-        $schedule->command('agent:SarNotification')->dailyAt('06:00')->runInBackground();
+        $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
+        $agent_sar_notify_time = '11:00';
+        if ($agent_sar_settings->exists()) {
+            $sar_setting = $agent_sar_settings->first();
+            $agent_sar_notify_time = $sar_setting->setting_value . ':00';
+        }
+        $schedule->command('agent:SarNotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
         //rv agent cron jobs end
 

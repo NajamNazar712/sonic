@@ -72,6 +72,8 @@ class AgentSarNotification extends Command
 
                     // Increment the unresponsive_email_count for each shipment after sending the email
                     $shipment->increment('unresponsive_email_count');
+                    $shipment->unresponsive_email_time = $currentDateTime;
+                    $shipment->save();
                 }
 
             }
@@ -82,6 +84,7 @@ class AgentSarNotification extends Command
                     ->where('rv_state_id', 2)
                     ->where('unresponsive_count', 2)
                     ->where('unresponsive_email_count', '>', 0)
+                    ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48))
                     ->get();
         
                 if ($shipmentsToUpdate->isNotEmpty()) {
