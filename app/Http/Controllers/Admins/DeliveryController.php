@@ -148,8 +148,9 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
-        $shipments = DB::connection('reports_2')->table('shipments')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+//        $shipments = DB::connection('reports_2')->table('shipments')
+//            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')

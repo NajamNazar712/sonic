@@ -8,6 +8,7 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\RiderWiseDeliveryNoteSummary;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use phpDocumentor\Reflection\Types\Null_;
 
 trait LastMileAppReportTrait
@@ -52,9 +53,13 @@ trait LastMileAppReportTrait
              $added_at_from = $added_at_from->toDateTimeString();
              $added_at_to = $added_at_to->toDateTimeString();
 
-             $datetime = Carbon::parse($rider_delivery_date);
-             $time = $datetime->format('H:i:s');
+             $rider_request_datetime = Carbon::parse($rider_delivery_date);
+             $time = $rider_request_datetime->format('H:i:s');
              $flag = false;
+
+             $current_date = Carbon::now();
+             $current_date = Carbon::parse($current_date);
+             $current_date = $current_date->toDateString();
 
              $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
                  ->join('zones as z', 'c.zone_id', 'z.id')
@@ -67,12 +72,12 @@ trait LastMileAppReportTrait
              $delivery_note_creation_date = Carbon::parse($delivery_note_data->delivery_note_creation_date);
 
              $delivery_note_creation_date = $delivery_note_creation_date->toDateString();
-             $datetime = $datetime->toDateString(); // date at which rider mark status
+             $rider_request_datetime = $rider_request_datetime->toDateString(); // date at which rider mark status
 
              $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)
                  ->whereBetween('delivery_date',[$added_at_from,$added_at_to]);
 
-             if ($datetime == $delivery_note_creation_date)
+             if (($rider_request_datetime == $delivery_note_creation_date) && ($delivery_note_creation_date == $current_date))
              {
                  if($check_summary->exists())
                  {
@@ -85,33 +90,35 @@ trait LastMileAppReportTrait
                          $existing_shipment = $existing_shipment->orderBy('id','desc')->first();
                          $existing_time = $existing_shipment->updated_time;
 
-                         if ($existing_time < '10:59:59') {
-                             $check_summary->before_11_count = $check_summary->before_11_count + 1;
-                         } elseif ($existing_time > '10:59:59' && $existing_time < '11:59:59') {
+                         Log::channel('last_mile_app_report_log')->info('Last Mile App Report, Shipment ID : '.$shipment_id.' Delivery Note ID : '.$delivery_note_id.' with DN Creation Date : '.$delivery_note_creation_date.', Rider Requested Date : '.$rider_request_datetime.' and Rider Requested time : '.$time.' with status id : '.$shipper_status_id.' Existing Time : '.$existing_time);
+
+                         if ($existing_time <= '10:59:59') {
+                             $check_summary->before_11_count = $check_summary->before_11_count - 1;
+                         } elseif ($existing_time > '10:59:59' && $existing_time <= '11:59:59') {
                              $check_summary->at_11_count = $check_summary->at_11_count - 1;
-                         } elseif ($existing_time > '11:59:59' && $existing_time < '12:59:59') {
+                         } elseif ($existing_time > '11:59:59' && $existing_time <= '12:59:59') {
                              $check_summary->at_12_count = $check_summary->at_12_count - 1;
-                         } elseif ($existing_time > '12:59:59' && $existing_time < '13:59:59') {
+                         } elseif ($existing_time > '12:59:59' && $existing_time <= '13:59:59') {
                              $check_summary->at_13_count = $check_summary->at_13_count - 1;
-                         } elseif ($existing_time > '13:59:59' && $existing_time < '14:59:59') {
+                         } elseif ($existing_time > '13:59:59' && $existing_time <= '14:59:59') {
                              $check_summary->at_14_count = $check_summary->at_14_count - 1;
-                         } elseif ($existing_time > '14:59:59' && $existing_time < '15:59:59') {
+                         } elseif ($existing_time > '14:59:59' && $existing_time <= '15:59:59') {
                              $check_summary->at_15_count = $check_summary->at_15_count - 1;
-                         } elseif ($existing_time > '15:59:59' && $existing_time < '16:59:59') {
+                         } elseif ($existing_time > '15:59:59' && $existing_time <= '16:59:59') {
                              $check_summary->at_16_count = $check_summary->at_16_count - 1;
-                         } elseif ($existing_time > '16:59:59' && $existing_time < '17:59:59') {
+                         } elseif ($existing_time > '16:59:59' && $existing_time <= '17:59:59') {
                              $check_summary->at_17_count = $check_summary->at_17_count - 1;
-                         } elseif ($existing_time > '17:59:59' && $existing_time < '18:59:59') {
+                         } elseif ($existing_time > '17:59:59' && $existing_time <= '18:59:59') {
                              $check_summary->at_18_count = $check_summary->at_18_count - 1;
-                         } elseif ($existing_time > '18:59:59' && $existing_time < '19:59:59') {
+                         } elseif ($existing_time > '18:59:59' && $existing_time <= '19:59:59') {
                              $check_summary->at_19_count = $check_summary->at_19_count - 1;
-                         } elseif ($existing_time > '19:59:59' && $existing_time < '20:59:59') {
+                         } elseif ($existing_time > '19:59:59' && $existing_time <= '20:59:59') {
                              $check_summary->at_20_count = $check_summary->at_20_count - 1;
-                         } elseif ($existing_time > '20:59:59' && $existing_time < '21:59:59') {
+                         } elseif ($existing_time > '20:59:59' && $existing_time <= '21:59:59') {
                              $check_summary->at_21_count = $check_summary->at_21_count - 1;
-                         } elseif ($existing_time > '21:59:59' && $time < '22:59:59') {
+                         } elseif ($existing_time > '21:59:59' && $existing_time <= '22:59:59') {
                              $check_summary->at_22_count = $check_summary->at_22_count - 1;
-                         } elseif ($existing_time > '22:59:59' && $existing_time < '23:59:59') {
+                         } elseif ($existing_time > '22:59:59' && $existing_time <= '23:59:59') {
                              $check_summary->after_23_count = $check_summary->after_23_count - 1;
                          }
 
@@ -124,33 +131,33 @@ trait LastMileAppReportTrait
                          $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                      }
 
-                     if ($time < '10:59:59') {
+                     if ($time <= '10:59:59') {
                          $check_summary->before_11_count = $check_summary->before_11_count + 1;
-                     } elseif ($time > '10:59:59' && $time < '11:59:59') {
+                     } elseif ($time > '10:59:59' && $time <= '11:59:59') {
                          $check_summary->at_11_count = $check_summary->at_11_count + 1;
-                     } elseif ($time > '11:59:59' && $time < '12:59:59') {
+                     } elseif ($time > '11:59:59' && $time <= '12:59:59') {
                          $check_summary->at_12_count = $check_summary->at_12_count + 1;
-                     } elseif ($time > '12:59:59' && $time < '13:59:59') {
+                     } elseif ($time > '12:59:59' && $time <= '13:59:59') {
                          $check_summary->at_13_count = $check_summary->at_13_count + 1;
-                     } elseif ($time > '13:59:59' && $time < '14:59:59') {
+                     } elseif ($time > '13:59:59' && $time <= '14:59:59') {
                          $check_summary->at_14_count = $check_summary->at_14_count + 1;
-                     } elseif ($time > '14:59:59' && $time < '15:59:59') {
+                     } elseif ($time > '14:59:59' && $time <= '15:59:59') {
                          $check_summary->at_15_count = $check_summary->at_15_count + 1;
-                     } elseif ($time > '15:59:59' && $time < '16:59:59') {
+                     } elseif ($time > '15:59:59' && $time <= '16:59:59') {
                          $check_summary->at_16_count = $check_summary->at_16_count + 1;
-                     } elseif ($time > '16:59:59' && $time < '17:59:59') {
+                     } elseif ($time > '16:59:59' && $time <= '17:59:59') {
                          $check_summary->at_17_count = $check_summary->at_17_count + 1;
-                     } elseif ($time > '17:59:59' && $time < '18:59:59') {
+                     } elseif ($time > '17:59:59' && $time <= '18:59:59') {
                          $check_summary->at_18_count = $check_summary->at_18_count + 1;
-                     } elseif ($time > '18:59:59' && $time < '19:59:59') {
+                     } elseif ($time > '18:59:59' && $time <= '19:59:59') {
                          $check_summary->at_19_count = $check_summary->at_19_count + 1;
-                     } elseif ($time > '19:59:59' && $time < '20:59:59') {
+                     } elseif ($time > '19:59:59' && $time <= '20:59:59') {
                          $check_summary->at_20_count = $check_summary->at_20_count + 1;
-                     } elseif ($time > '20:59:59' && $time < '21:59:59') {
+                     } elseif ($time > '20:59:59' && $time <= '21:59:59') {
                          $check_summary->at_21_count = $check_summary->at_21_count + 1;
-                     } elseif ($time > '21:59:59' && $time < '22:59:59') {
+                     } elseif ($time > '21:59:59' && $time <= '22:59:59') {
                          $check_summary->at_22_count = $check_summary->at_22_count + 1;
-                     } elseif ($time > '22:59:59' && $time < '23:59:59') {
+                     } elseif ($time > '22:59:59' && $time <= '23:59:59') {
                          $check_summary->after_23_count = $check_summary->after_23_count + 1;
                      }
 
@@ -215,33 +222,33 @@ trait LastMileAppReportTrait
                      $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments ?? 0;
                      $new_summary->via_rider_count = 1;
 
-                     if ($time < '10:59:59') {
+                     if ($time <= '10:59:59') {
                          $new_summary->before_11_count = 1;
-                     } elseif ($time > '10:59:59' && $time < '11:59:59') {
+                     } elseif ($time > '10:59:59' && $time <= '11:59:59') {
                          $new_summary->at_11_count = 1;
-                     } elseif ($time > '11:59:59' && $time < '12:59:59') {
+                     } elseif ($time > '11:59:59' && $time <= '12:59:59') {
                          $new_summary->at_12_count = 1;
-                     } elseif ($time > '12:59:59' && $time < '13:59:59') {
+                     } elseif ($time > '12:59:59' && $time <= '13:59:59') {
                          $new_summary->at_13_count = 1;
-                     } elseif ($time > '13:59:59' && $time < '14:59:59') {
+                     } elseif ($time > '13:59:59' && $time <= '14:59:59') {
                          $new_summary->at_14_count = 1;
-                     } elseif ($time > '14:59:59' && $time < '15:59:59') {
+                     } elseif ($time > '14:59:59' && $time <= '15:59:59') {
                          $new_summary->at_15_count = 1;
-                     } elseif ($time > '15:59:59' && $time < '16:59:59') {
+                     } elseif ($time > '15:59:59' && $time <= '16:59:59') {
                          $new_summary->at_16_count = 1;
-                     } elseif ($time > '16:59:59' && $time < '17:59:59') {
+                     } elseif ($time > '16:59:59' && $time <= '17:59:59') {
                          $new_summary->at_17_count = 1;
-                     } elseif ($time > '17:59:59' && $time < '18:59:59') {
+                     } elseif ($time > '17:59:59' && $time <= '18:59:59') {
                          $new_summary->at_18_count = 1;
-                     } elseif ($time > '18:59:59' && $time < '19:59:59') {
+                     } elseif ($time > '18:59:59' && $time <= '19:59:59') {
                          $new_summary->at_19_count = 1;
-                     } elseif ($time > '19:59:59' && $time < '20:59:59') {
+                     } elseif ($time > '19:59:59' && $time <= '20:59:59') {
                          $new_summary->at_20_count = 1;
-                     } elseif ($time > '20:59:59' && $time < '21:59:59') {
+                     } elseif ($time > '20:59:59' && $time <= '21:59:59') {
                          $new_summary->at_21_count = 1;
-                     } elseif ($time > '21:59:59' && $time < '22:59:59') {
+                     } elseif ($time > '21:59:59' && $time <= '22:59:59') {
                          $new_summary->at_22_count = 1;
-                     } elseif ($time > '22:59:59' && $time < '23:59:59') {
+                     } elseif ($time > '22:59:59' && $time <= '23:59:59') {
                          $new_summary->after_23_count = 1;
                      }
                      $new_summary->save();
@@ -265,7 +272,6 @@ trait LastMileAppReportTrait
                      $new_delivery_note_shipment->updated_time = $time;
                      $new_delivery_note_shipment->updated_via = $via;
                      $new_delivery_note_shipment->save();
-
                  }
              }
          }
