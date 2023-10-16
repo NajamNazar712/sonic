@@ -145,9 +145,8 @@ trait CommonTrait
                 'shipments.actual_weight as weight',
                 'si.quantity as quantity'
             )
-            ->whereBetween('shipments.created_at', [$from, $to]);
-            
-            
+            ->whereBetween('sja.created_at', [$from, $to]);
+        
             $shipments = $shipments->get();
 
             $data = [];

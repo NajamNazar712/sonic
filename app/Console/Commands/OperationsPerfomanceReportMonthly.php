@@ -42,13 +42,14 @@ class OperationsPerfomanceReportMonthly extends Command
     {
         $id = 225;
         $currentDate = Carbon::now();
-        $eleventhOfCurrentMonth = $currentDate->day(11);
-        $to = $eleventhOfCurrentMonth->toDateString();
+        $previousMonth = $currentDate->subMonth();
+        $startOfCurrentMonth = $previousMonth->startOfMonth();
+        $from = $startOfCurrentMonth->toDateString();
 
         $currentDate = Carbon::now();
         $previousMonth = $currentDate->subMonth();
-        $eleventhOfPreviousMonth = $previousMonth->day(11);
-        $from = $eleventhOfPreviousMonth->toDateString();
+        $lastDayOfPreviousMonth = $previousMonth->endOfMonth();
+        $to = $lastDayOfPreviousMonth->toDateString();
 
         $this->operations_performance_export_to_excel($from, $to, $id);
     }
