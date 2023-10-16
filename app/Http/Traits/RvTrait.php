@@ -1743,4 +1743,30 @@ trait RvTrait
         $rv_shipment_assign_agent->unresponsive_attempt_time  = $data['unresponsive_attempt_time'];
         $rv_shipment_assign_agent->save();
     }
+
+    protected function update_by_shipper_rv_shipment_assign_agent($data){
+
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $data->shipment_id)->where('rv_assign_agent_status_id', 65)->latest()->first();
+
+        $state_id = Null;
+        if($data->rv_assign_agent_status_id == 2) //reattempt 
+        {
+            $state_id = 3; //state should be open so that agent can get the shipment again for further process
+        }
+        else{
+            $state_id = 4; //Completed
+        }
+        $update_from_shipper = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)->where('shipment_id', $data->shipment_id)->where('rv_state_id', 2)->where('unresponsive_count', 2)->latest()->first();
+        $update_from_shipper->shipments_journey_id = $shipments_journey->id;
+        $update_from_shipper->last_shipments_journey_id = $shipments_journey->id;
+        $update_from_shipper->rv_assign_agent_status_id = $data->rv_assign_agent_status_id;
+        $update_from_shipper->rv_assign_agent_sub_status_id = $data->rv_assign_agent_sub_status_id;
+        $update_from_shipper->updated_type_id = $data->updated_type_id;
+        $update_from_shipper->updated_by_id = $data->updated_by_id;
+        $update_from_shipper->remarks = $data->remarks;
+        $update_from_shipper->state_id = $state_id;
+        $update_from_shipper->save();
+
+
+    }
 }
