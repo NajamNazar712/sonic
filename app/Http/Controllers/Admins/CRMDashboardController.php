@@ -874,9 +874,9 @@ class CRMDashboardController extends Controller
                     return 'Non-Key Account';
                 }
             });
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
-        }
+        // if ($tracking_numbers = $request->get('tracking_numbers')) {
+        //     $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        // }
         if ($origin = $request->get('search_origin')) {
             $datatables->where('oc.id', '=', $origin);
         }
@@ -887,10 +887,10 @@ class CRMDashboardController extends Controller
             $datatables->where('dc.id', '=', $destination);
         }
         if ($case_nature = $request->get('search_case_nature')) {
-            $datatables->where('crcn.id', '=', $case_nature);
+            $datatables->whereIn('crcn.id', $case_nature);
         }
         if ($case_nature_type = $request->get('search_case_nature_type')) {
-            $datatables->where('crcnt.id', '=', $case_nature_type);
+            $datatables->whereIn('crcnt.id', $case_nature_type);
         }
         if ($agent = $request->get('search_agent')) {
             $datatables->where('a1.id', '=', $agent);
@@ -901,6 +901,11 @@ class CRMDashboardController extends Controller
         if ($avg_tat = $request->get('avg_tat')) {
             $datatables->where('crm_requests.status_id', '=', $avg_tat);
         }
+
+        if ($search_tracking = $request->get('search_tracking')) {
+            $datatables->where('s.tracking_number', '=', $search_tracking);
+        }
+        
         if ($request->get('from_date') && $request->get('to_date')) {
             $from = $request->get('from_date');
             $to = $request->get('to_date');

@@ -112,7 +112,7 @@
                 
                                     <div class="col-4">
                                         <fieldset class="form-group">
-                                            <select name="search_case_nature" id="search_case_nature" class="form-control select2">
+                                            <select name="search_case_nature"  multiple="multiple" id="search_case_nature" class="form-control select2">
                                                 @foreach($case_natures as $case_nature)
                                                     <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
                                                 @endforeach
@@ -122,7 +122,7 @@
                 
                                     <div class="col-4">
                                         <fieldset class="form-group">
-                                            <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                            <select name="search_case_nature_type"  multiple="multiple" id="search_case_nature_type" class="form-control select2">
                                                 @foreach($case_nature_types as $case_nature_type)
                                                     <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
                                                 @endforeach
@@ -156,6 +156,15 @@
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                                 @endforeach
                                             </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-4">
+                                        <fieldset class="position-relative has-icon-left">
+                                            <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                                                   name="search_tracking" id="search_tracking">
+                                            <div class="form-control-position">
+                                                <i class="ft-search"></i>
+                                            </div>
                                         </fieldset>
                                     </div>
     {{--             
@@ -429,7 +438,7 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
+                                    <th class="border-primary border-darken-1"><!-- Launched To Today (TAT) --> Aging</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Responsible Hub</th>
                                     <th class="border-primary border-darken-1">Sub Hub</th>
@@ -900,9 +909,21 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#search_tracking').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function () {
+                if (this.value.length == 0 || this.value.length >= 6) {
+                    table.draw();
+                }
+            });
             //Dropdown
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Destination',
@@ -923,12 +944,12 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_case_nature').select2({
                 placeholder:'Search Case Nature',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_case_nature_type').select2({
                 placeholder:'Search Case Nature Type',
                 width:'100%',
                 allowClear:true
@@ -1411,7 +1432,7 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        // d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
@@ -1421,6 +1442,7 @@
                         d.search_agent = $('#search_agent').val();
                         d.search_shipment_status = $('#search_shipment_status').val();
                         d.avg_tat = $('#avg_tat').val();
+                        d.search_tracking = $('#search_tracking').val();
                         d.from_date = $('input[name="from_date_formatted"]').val();
                         d.to_date = $('input[name="to_date_formatted"]').val();
                         d.search_request = $('#search_request_div').val();
@@ -1975,34 +1997,34 @@
             });
 
             //Selectize
-            var select = $('#track_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
+            // var select = $('#track_form .tracking_numbers').selectize({
+            //     placeholder: 'Tracking Number(s)',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
 
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                },
-            });
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     },
+            // });
 
 
             $('#track_form').bind('submit',function (e) {
