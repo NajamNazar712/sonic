@@ -1452,10 +1452,6 @@
             transition: 0.3s;
         }
 
-        .feedback .radio:checked ~ span {
-            filter: grayscale(0);
-            font-size: 4rem;
-        }
         .feedback .radio:hover ~ span {
             filter: grayscale(0);
             font-size: 4rem;
@@ -1487,6 +1483,24 @@
                     ['para', ['ul', 'ol', 'paragraph']],
                 ],
 
+            });
+
+
+            var selectedValue = parseInt($('input[type="radio"]:checked').val());
+
+            $('input[type="radio"]').each(function() {
+                var radioValue = parseInt($(this).val());
+
+                if (radioValue <= selectedValue) {
+                    $(this).prop('disabled', true);
+                        $(this).next('span').css({
+                            filter: 'grayscale(0)',
+                            fontSize: '4rem'
+                        });
+                    
+                } else {
+                    $(this).prop('disabled', false);
+                }
             });
 
             $('#claim_product_cost').inputmask({
