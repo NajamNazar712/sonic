@@ -20,7 +20,7 @@ class RvUpdatedTypeSeeder extends Seeder
             array('name' => 'Agent','created_at' => $timestamp, 'updated_at'=>$timestamp ),
             array('name' => 'User','created_at' => $timestamp, 'updated_at'=>$timestamp),
             array('name' => 'Substitute User','created_at' => $timestamp, 'updated_at'=>$timestamp),
-
+            array('name' => 'Retail','created_at' => $timestamp, 'updated_at'=>$timestamp),
         ));
     }
 }

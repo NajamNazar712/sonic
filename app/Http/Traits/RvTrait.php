@@ -1364,46 +1364,51 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: this function is updating table rows of rv_shipment_assign_agents from shipper side
-    protected function shipment_status_update_shipper($request, $rv_assign_agent_status_id, $get_rv_state_id, $updated_rv_state_id)
+    protected function shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id)
     {
-        $shipper = User::where('id', Auth::id())->first();
+        $shipper = User::where('id', $updated_by_id)->first();
         if ($shipper) {
 
             $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)
-                ->where('rv_assign_agent_status_id', $rv_assign_agent_status_id)
-                ->where('rv_state_id', $get_rv_state_id)
-                ->latest()->first();
+            ->where('rv_assign_agent_status_id',7)
+            ->where('rv_state_id', 2)
+            ->latest()->first();
 
-            if ($rv_shipment_assign_agents) {
-                $rv_shipment_agent = RvShipmentAgent::find($rv_shipment_assign_agents->rv_shipment_agent_id);
-                // increment $rv_shipment_agent already updated
-                $rv_shipment_agent->increment('already_updated');
-
-                $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
-                $rv_shipment_assign_agents->updated_type_id = 3; //Shipper
-                $rv_shipment_assign_agents->updated_by_id = Auth::id();
-                $rv_shipment_assign_agents->update();
-
-                $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                        'agent_id' => $rv_shipment_assign_agents->agent_id,
-                        'shipments_journey_id' => $rv_shipment_assign_agents->shipments_journey_id,
-                        'last_shipments_journey_id' => $rv_shipment_assign_agents->last_shipments_journey_id,
-                        'shipment_id' => $rv_shipment_assign_agents->shipment_id,
-                        'rv_assign_agent_status_id' => $rv_shipment_assign_agents->rv_assign_agent_status_id,
-                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agents->rv_assign_agent_sub_status_id,
-                        'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                        'updated_type_id' => 3,
-                        'updated_by_id' =>  Auth::id(),
-                        'is_fake_status' => $rv_shipment_assign_agents->is_fake_status,
-                        'rv_fake_status_id' => $rv_shipment_assign_agents->rv_fake_status_id,
-                        'remarks' => $rv_shipment_assign_agents->remarks,
-                        'call_to_id' => $rv_shipment_assign_agents->call_to_id,
-                    ];
-                $this->data_rv_shipment_assign_agent_details($data);
-
-                return true;
-            } else {
-                return ['status' => 1, 'error' => 'No Shipment ID Found'];
+            DB::beginTransaction();
+            try {
+                if ($rv_shipment_assign_agents) {
+                    $rv_shipment_assign_agents->rv_assign_agent_status_id = $update_rv_assign_agent_status_id;
+                    $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
+                    $rv_shipment_assign_agents->updated_type_id = $updated_type_id; //Shipper or retail
+                    $rv_shipment_assign_agents->updated_by_id = $updated_by_id;
+                    $rv_shipment_assign_agents->update();
+    
+                    $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
+                            'agent_id' => $rv_shipment_assign_agents->agent_id,
+                            'shipments_journey_id' => $rv_shipment_assign_agents->shipments_journey_id,
+                            'last_shipments_journey_id' => $rv_shipment_assign_agents->last_shipments_journey_id,
+                            'shipment_id' => $rv_shipment_assign_agents->shipment_id,
+                            'rv_assign_agent_status_id' => $rv_shipment_assign_agents->rv_assign_agent_status_id,
+                            'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agents->rv_assign_agent_sub_status_id,
+                            'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
+                            'updated_type_id' => $rv_shipment_assign_agents->updated_type_id,
+                            'updated_by_id' =>  $rv_shipment_assign_agents->updated_by_id,
+                            'is_fake_status' => $rv_shipment_assign_agents->is_fake_status,
+                            'rv_fake_status_id' => $rv_shipment_assign_agents->rv_fake_status_id,
+                            'remarks' => $rv_shipment_assign_agents->remarks,
+                            'call_to_id' => $rv_shipment_assign_agents->call_to_id,
+                        ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                    DB::commit();
+                    return true;
+                } 
+                else {
+                    DB::rollback();
+                    return ['status' => 1, 'error' => 'No Shipment ID Found'];
+                    } 
+                }
+            catch (\Throwable $th) {
+                return ['status' => 1, 'error' => $th->getMessage()];
             }
         }
     }
@@ -1744,29 +1749,25 @@ trait RvTrait
         $rv_shipment_assign_agent->save();
     }
 
-    protected function update_by_shipper_rv_shipment_assign_agent($data){
+    // protected function update_by_shipper_rv_shipment_assign_agent($data){
 
-        $shipments_journey = ShipmentsJourney::where('shipment_id', $data->shipment_id)->where('rv_assign_agent_status_id', 65)->latest()->first();
+    //     $shipments_journey = ShipmentsJourney::where('shipment_id', $data->shipment_id)->where('rv_assign_agent_status_id', 65)->latest()->first();
 
-        $state_id = Null;
-        if($data->rv_assign_agent_status_id == 2) //reattempt 
-        {
-            $state_id = 3; //state should be open so that agent can get the shipment again for further process
-        }
-        else{
-            $state_id = 4; //Completed
-        }
-        $update_from_shipper = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)->where('shipment_id', $data->shipment_id)->where('rv_state_id', 2)->where('unresponsive_count', 2)->latest()->first();
-        $update_from_shipper->shipments_journey_id = $shipments_journey->id;
-        $update_from_shipper->last_shipments_journey_id = $shipments_journey->id;
-        $update_from_shipper->rv_assign_agent_status_id = $data->rv_assign_agent_status_id;
-        $update_from_shipper->rv_assign_agent_sub_status_id = $data->rv_assign_agent_sub_status_id;
-        $update_from_shipper->updated_type_id = $data->updated_type_id;
-        $update_from_shipper->updated_by_id = $data->updated_by_id;
-        $update_from_shipper->remarks = $data->remarks;
-        $update_from_shipper->state_id = $state_id;
-        $update_from_shipper->save();
+    //     $state_id = Null;
 
+    //     //3 - state should be open so that agent can get the shipment again for further process
+    //     //4 - Completed
+    //     $state_id = ($data->rv_assign_agent_status_id == 2) ? 3 : 4;
 
-    }
+    //     $update_from_shipper = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)->where('shipment_id', $data->shipment_id)->where('rv_state_id', 2)->where('unresponsive_count', 2)->latest()->first();
+    //     $update_from_shipper->shipments_journey_id = $shipments_journey->id;
+    //     $update_from_shipper->last_shipments_journey_id = $shipments_journey->id;
+    //     $update_from_shipper->rv_assign_agent_status_id = $data->rv_assign_agent_status_id;
+    //     $update_from_shipper->rv_assign_agent_sub_status_id = $data->rv_assign_agent_sub_status_id;
+    //     $update_from_shipper->updated_type_id = $data->updated_type_id;
+    //     $update_from_shipper->updated_by_id = $data->updated_by_id;
+    //     $update_from_shipper->remarks = $data->remarks;
+    //     $update_from_shipper->state_id = $state_id;
+    //     $update_from_shipper->save();
+    // }
 }

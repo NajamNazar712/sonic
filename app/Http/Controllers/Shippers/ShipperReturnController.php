@@ -88,8 +88,8 @@ class ShipperReturnController extends Controller
             })
             ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.id as reason_id','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
             // ->where('shipments.shipper_status_id', DB::raw(12))
-            ->where('shipments.shipper_status_id', 65) //shipper advise request
-            ->where('rsaa.unresponsive_count','>=', 2) //Unresponsive Count
+            // ->where('shipments.shipper_status_id', 65) //shipper advise request
+            // ->where('rsaa.unresponsive_count', 1) //Unresponsive Count
             ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
 
@@ -303,7 +303,13 @@ class ShipperReturnController extends Controller
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, $user_id, NULL);
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
-                    $this->shipment_status_update_shipper($request, 7, 2, 4);
+                    // $this->shipment_status_update_shipper($request, 7, 2, 4);
+
+                            request()->request->add(['shipment_id' => $shipmentId]);
+                            //$updated_type_id updated by shipper = 3
+                            //$updated_rv_assign_agent_status_id, on hold i.e is 5
+                            //$updated_rv_state_id updating rv status to 4 i.e completed 
+                            $this->shipment_status_update_shipper($request, $user_id, 3, 5, 4);
                 }
 
                 return ['status' => 0, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
@@ -315,78 +321,42 @@ class ShipperReturnController extends Controller
         }
     }
 
-    // public function return_marked_single_status(Request $request){
-    //     $parcel = Shipment::find($request->shipment_id);
-    //     if($parcel){
-    //         if($parcel->shipper_status_id == 12){
+    public function return_marked_single_status(Request $request){
 
-    //                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-    //                 $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+        $this->return_marked_status($request);
+        // $parcel = Shipment::find($request->shipment_id);
+        // if($parcel){
+        //     if($parcel->shipper_status_id == 12){
 
-    //                 ShipmentChargesController::return($request->shipment_id);
+        //             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+        //             $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
 
-    //                 AdminFinanceController::add_payment($request->shipment_id, 1);
-    //                 ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
+        //             ShipmentChargesController::return($request->shipment_id);
+
+        //             AdminFinanceController::add_payment($request->shipment_id, 1);
+        //             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
                 
-    //             $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-    //             if($return_assign_shipment->exists()){
-    //                 $return_assign_shipment = $return_assign_shipment->latest()->first();
-    //                 $return_assign_shipment->status = 0;
-    //                 $return_assign_shipment->save();
+        //         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+        //         if($return_assign_shipment->exists()){
+        //             $return_assign_shipment = $return_assign_shipment->latest()->first();
+        //             $return_assign_shipment->status = 0;
+        //             $return_assign_shipment->save();
 
-    //                 $return_assign_log = new ReturnAssignedShipmentLogs();
-    //                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-    //                         $return_assign_log->status = 2;
-    //                         $return_assign_log->assigned_by = Auth::id();
-    //                         $return_assign_log->save();
-    //             }
+        //             $return_assign_log = new ReturnAssignedShipmentLogs();
+        //                     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //                     $return_assign_log->status = 2;
+        //                     $return_assign_log->assigned_by = Auth::id();
+        //                     $return_assign_log->save();
+        //         }
 
-    //             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+        //         return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
 
-    //         }
+        //     }
 
-    //         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
-    //     }
-    //     return ['status'=>0,'error'=>"Something went wrong, try again later!"];
-
-    // }
-
-    // public function return_marked_status(Request $request){ 
-    //     $shipment_ids = $request->shipment_ids;
-    //     if($shipment_ids){
-    //         foreach ($shipment_ids as $shipment){
-    //             $parcel = Shipment::find($shipment);
-    //             if(!in_array($parcel->shipper_status_id, [20, 52])){
-    //                 $remark_inp = "remark.$shipment";
-
-    //                 $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
-
-    //                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-    //                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-
-    //                     ShipmentChargesController::return($shipment);
-
-    //                     AdminFinanceController::add_payment($shipment, 1);
-    //                     ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
- 
-    //                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-    //                if($return_assign_shipment){
-    //                    $return_assign_shipment->status = 0;
-    //                    $return_assign_shipment->save();
-                       
-    //                     $return_assign_log = new ReturnAssignedShipmentLogs();
-    //                     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-    //                     $return_assign_log->status = 2;
-    //                     $return_assign_log->assigned_by = Auth::id();
-    //                     $return_assign_log->save();
-    //                }
-
-    //             }
-
-    //         }
-    //         return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"]);
-    //     }
-    // }
+        //     return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+        // }
+        // return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+    }
 
     public function return_marked_status(Request $request)
     {
@@ -412,13 +382,20 @@ class ShipperReturnController extends Controller
 
                     // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
                     request()->request->add(['shipment_id' => $shipment]);
-                    $this->shipment_status_update_shipper($request, 7, 2, 4);
+                    // $this->shipment_status_update_shipper($request, 7, 2, 4);
+
+                    //$updated_type_id updated by shipper = 3;
+                    //$updated_rv_assign_agent_status_id, return confirm i.e is 1 
+                    //$updated_rv_state_id updating rv status to 4 i.e completed 
+                    $this->shipment_status_update_shipper($request, Auth::id(), 3, 1, 4);
                 }
             }
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
 
-        } else {
+        } 
+        
+        else {
             // If 'shipment_ids' is not present, process a single shipment
             $parcel = Shipment::find($request->shipment_id);
 
@@ -430,7 +407,13 @@ class ShipperReturnController extends Controller
                 ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
                 
                 // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
-                $this->shipment_status_update_shipper($request, 7, 2, 4);
+                // $this->shipment_status_update_shipper($request, 7, 2, 4);
+
+                request()->request->add(['shipment_id' => $parcel]);
+                //$updated_type_id updated by shipper = 3
+                //$updated_rv_assign_agent_status_id, return confirm i.e is 1 
+                //$updated_rv_state_id updating rv status to 4 i.e completed 
+                $this->shipment_status_update_shipper($request, Auth::id(), 3, 1, 4);
 
                 return response()->json(['status' => 1, 'success' => "Shipment successfully updated as ( Return Confirm )"]);
             }
@@ -438,7 +421,6 @@ class ShipperReturnController extends Controller
         }
     }
 
-    //this function is now used as shipper request for reattempt call 
     public function return_reattempt_status(Request $request)
     {
         $shipment_ids = $request->shipment_ids;
@@ -472,8 +454,14 @@ class ShipperReturnController extends Controller
                     ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
-                    request()->request->add(['shipment_id' => $shipment]);
-                    $this->shipment_status_update_shipper($request, 7, 2, 3);
+                    // request()->request->add(['shipment_id' => $shipment]);
+                    // $this->shipment_status_update_shipper($request, 7, 2, 3);
+
+                    request()->request->add(['shipment_id' => $parcel]);
+                    //$updated_type_id updated by shipper = 3
+                    //$updated_rv_assign_agent_status_id, reattempt i.e is 2 
+                    //$updated_rv_state_id updating rv status to 4 i.e completed 
+                    $this->shipment_status_update_shipper($request, Auth::id(), 3, 2, 4);
 
 
                     if ($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)) {
@@ -489,7 +477,7 @@ class ShipperReturnController extends Controller
     }
 
 
-    //this function is now used as shipper request for reattempt call 
+    //This function is now used as shipper request for Reattempt Request Button  
     public function return_reattempt_single_status(Request $request)
     {
         $parcel = Shipment::find($request->shipment_id);
@@ -520,7 +508,15 @@ class ShipperReturnController extends Controller
                     ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
-                    $this->shipment_status_update_shipper($request, 7, 2, 3);
+                    // $this->shipment_status_update_shipper($request, 7, 2, 3);
+
+
+
+                    request()->request->add(['shipment_id' => $parcel]);
+                    //$updated_type_id updated by shipper = 3
+                    //$updated_rv_assign_agent_status_id, reattempt requested i.e is 2
+                    //$updated_rv_state_id updating rv status to 3 i.e open 
+                    $this->shipment_status_update_shipper($request, Auth::id(), 3, 2, 3);
 
                     if ($journey) {
                         NotificationsController::send(33, $request->shipment_id);
