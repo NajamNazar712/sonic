@@ -27,28 +27,28 @@
                         <div class="col-4">
                             <fieldset class="form-group">
                                 <select name="search_origin" id="search_origin" class="form-control select2">
-                                   
+
                                 </select>
                             </fieldset>
                         </div>
                         <div class="col-4">
                             <fieldset class="form-group">
                                 <select name="search_destination" id="search_destination" class="form-control select2">
-                               
+
                                 </select>
                             </fieldset>
                         </div>
                         <div class="col-4 mt-2">
                             <fieldset class="form-group">
                                 <select name="search_hub" id="search_hub" class="form-control select2">
-                                 
+
                                 </select>
                             </fieldset>
                         </div>
                         <div class="col-4 mt-2">
                             <fieldset class="form-group">
                                 <select name="search_status" id="search_status" class="form-control select2">
-                                    
+
                                 </select>
                             </fieldset>
                         </div>
@@ -71,7 +71,7 @@
 
                                 <input type="text" name="search_date_from"
                                     class="form-control pickadate bg-primary border-primary white rounded-right"
-                                    id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::now() }}"
+                                    id="search_date_from" placeholder="Date (From)" 
                                     data-rule-required="true" data-msg-required="This field is required">
                             </div>
                         </div>
@@ -85,7 +85,7 @@
 
                                 <input type="text" name="search_date_to"
                                     class="form-control pickadate bg-primary border-primary white rounded-right"
-                                    id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::now() }}"
+                                    id="search_date_to" placeholder="Date (To)" 
                                     data-rule-required="true" data-msg-required="This field is required">
                             </div>
                         </div>
@@ -108,8 +108,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
     <link rel="stylesheet" type="text/css"
         href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
 
@@ -173,8 +172,8 @@
                     }
                 }
             });
-       
-        
+
+
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -184,8 +183,9 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from')
-                            .pickadate('picker').get('select'));
+                        var maxDate = new Date(context.select);
+                        maxDate.setMonth(maxDate.getMonth() + 2);
+                        $('#search_date_to').pickadate('picker').set('max', maxDate);
                     }
                 }
             });
@@ -197,21 +197,20 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to')
-                            .pickadate('picker').get('select'));
-                    }
-                }
             });
+
+            
             $.ajax({
                 url: '{!! route('admin.reports.operations_performance.data') !!}',
                 method: 'GET',
                 success: function(data) {
                     // Reinitialize and set placeholders for the select2 elements
-                    initializeSelect2WithPlaceholder('#search_shippers', data.shippers, 'Select Shippers');
-                    initializeSelect2WithPlaceholder('#search_origin', data.cities, 'Select Origin City');
-                    initializeSelect2WithPlaceholder('#search_destination', data.cities, 'Select Destination City');
+                    initializeSelect2WithPlaceholder('#search_shippers', data.shippers,
+                        'Select Shippers');
+                    initializeSelect2WithPlaceholder('#search_origin', data.cities,
+                        'Select Origin City');
+                    initializeSelect2WithPlaceholder('#search_destination', data.cities,
+                        'Select Destination City');
                     initializeSelect2WithPlaceholder('#search_hub', data.hubs, 'Select Hub');
                     initializeSelect2WithPlaceholder('#search_status', data.statuses, 'Select Status');
                 },
