@@ -20,7 +20,7 @@ class DailyAutoCommentForCRMClaims extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Auto Comment For Claim';
 
     /**
      * Create a new command instance.
@@ -39,8 +39,9 @@ class DailyAutoCommentForCRMClaims extends Command
      */
     public function handle()
     {
+        //Claim
         $crm_requests = CrmRequest::where('status_id', 2)->where('case_nature_id', 4);
-        if($crm_requests->exists()){
+        if ($crm_requests->exists()) {
             $crm_requests = $crm_requests->get();
 
             $comment = 'Dear Customer,
@@ -55,10 +56,12 @@ Regards,
 TRAX-Customer Experience';
             $internal_comment = 'Dear Team,
                                  Please conclude this case on priority.';
-            foreach ($crm_requests as $crm_request){
+            foreach ($crm_requests as $crm_request) {
                 CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                 CRMCommentController::add($crm_request->id, 306, 0, 1, $internal_comment, 0, 0);
             }
         }
+
+
     }
 }

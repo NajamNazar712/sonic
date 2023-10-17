@@ -344,10 +344,10 @@
             transition: 0.3s;
         }
 
-        .feedback .radio:checked~span {
+        /* .feedback .radio:checked~span {
             filter: grayscale(0);
             font-size: 4rem;
-        }
+        } */
 
         .feedback .radio:hover~span {
             filter: grayscale(0);
@@ -392,11 +392,22 @@
                 ]
             });
 
+            var selectedValue = parseInt($('input[type="radio"]:checked').val());
 
+            $('input[type="radio"]').each(function() {
+                var radioValue = parseInt($(this).val());
 
-
-
-
+                if (radioValue <= selectedValue) {
+                    $(this).prop('disabled', true);
+                        $(this).next('span').css({
+                            filter: 'grayscale(0)',
+                            fontSize: '4rem'
+                        });
+                    
+                } else {
+                    $(this).prop('disabled', false);
+                }
+            });
             $('#chat_form').on('submit', function(e) {
                 e.preventDefault();
             });

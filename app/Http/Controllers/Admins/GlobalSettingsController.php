@@ -103,6 +103,9 @@ use App\Http\Models\Holiday;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\Notification;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
@@ -8552,7 +8555,7 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function sms_notification_return_delivered_to_shipper_index()
+    public function sms_notifications_limit_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 655);
 
@@ -8580,12 +8583,45 @@ class GlobalSettingsController extends Controller
             $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
         }
 
+        $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
+            ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+            ->whereIn('notification_id', [11, 12]);
+        $notification_details = array();
+        $details = array();
+        if($notification_settings->exists()){
+            $notification_settings = $notification_settings->get();
+            foreach ($notification_settings as $notification_setting){
+                $details['id'] = $notification_setting->notification_id;
+                $details['name'] = $notification_setting->notification_name;
+                $details['shipper_toggle'] = $notification_setting->shipper_toggle;
+                $notification_setting_shippers = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id);
+                if($notification_setting_shippers->exists()){
+                    $notification_setting_shippers = $notification_setting_shippers->pluck('shipper_id')->toArray();
+                    $details['shippers'] = $notification_setting_shippers;
+                }
+                else{
+                    $details['shippers'] = null;
+                }
+                $notification_details[] = $details;
+            }
+        }
+        else{
+            $notification_settings = Notification::whereIn('id', [11, 12])->get();
+            foreach ($notification_settings as $notification_setting){
+                $details['id'] = $notification_setting->id;
+                $details['name'] = $notification_setting->name;
+                $details['shipper_toggle'] = 1;
+                $details['shippers'] = null;
+                $notification_details[] = $details;
+            }
+        }
+
         $shippers = User::select('id', 'name')->where('status', 3)->get();
 
-        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers]);
+        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'notification_details' => $notification_details]);
     }
 
-    public function sms_notification_return_delivered_to_shipper_update(Request $request)
+    public function sms_notifications_limit_update(Request $request)
     {
         if ($request->has('all_shipper_toggle'))
         {
@@ -8634,6 +8670,55 @@ class GlobalSettingsController extends Controller
                 $settings->text = $users;
                 $settings->setting_value = 0;
                 $settings->save();
+            }
+        }
+
+        if(count($request->notifications) > 0){
+            NotificationSetting::truncate();
+            NotificationSettingShipper::truncate();
+            foreach ($request->notifications as $notification){
+                $notification_setting = new NotificationSetting();
+                $notification_setting->notification_id = $notification['id'];
+                $shippers = null;
+                $toggle = 0;
+
+                if(array_key_exists('all_shipper_toggle', $notification)) {
+                    if ($notification['all_shipper_toggle'] == 'on'){
+                        $toggle = 1;
+                    }
+                }
+
+                if($toggle == 1){
+                    $notification_setting->shipper_toggle = 1;
+
+                    if (array_key_exists('excluded_users', $notification)) {
+                        if (count($notification['excluded_users']) > 0) {
+                            $shippers = $notification['excluded_users'];
+                        }
+                    }
+                }
+                else{
+                    $notification_setting->shipper_toggle = 0;
+
+                    if(array_key_exists('only_users', $notification)){
+                        if(count($notification['only_users']) > 0){
+                            $shippers = $notification['only_users'];
+                        }
+                    }
+                }
+                $notification_setting->updated_by = Auth::id();
+                $notification_setting->save();
+
+                if($shippers != null){
+                    if(count($shippers) > 0){
+                        foreach ($shippers as $shipper_id){
+                            $notification_setting_shipper = new NotificationSettingShipper();
+                            $notification_setting_shipper->notification_setting_id = $notification_setting->id;
+                            $notification_setting_shipper->shipper_id = $shipper_id;
+                            $notification_setting_shipper->save();
+                        }
+                    }
+                }
             }
         }
 

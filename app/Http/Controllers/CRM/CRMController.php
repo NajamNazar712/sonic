@@ -356,6 +356,9 @@ class CRMController extends Controller
 
         if($case_nature_id == 2){
             $shipment = Shipment::find($shipment_id);
+
+      
+
             if($shipment){
                 if($case_nature_type_id == 13){
                     $crm_request->status_id = 4;
@@ -365,6 +368,15 @@ class CRMController extends Controller
                     $crm_request_status_history->status_id = 4;
                     $crm_request_status_history->save();
                     
+                }
+                else if($case_nature_type_id == 12)
+                {
+                    $crm_request->status_id = 4;
+                    $crm_request->save();
+                    $crm_request_status_history = new CrmRequestStatusHistory();
+                    $crm_request_status_history->crm_request_id = $id;
+                    $crm_request_status_history->status_id = 4;
+                    $crm_request_status_history->save();
                 }
                 // else if($case_nature_type_id == 12){
                 //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 ){
@@ -427,6 +439,24 @@ class CRMController extends Controller
                     
                 }
             }
+
+            $comment = "Dear Customer,
+            Thank you for reaching out to us!
+            We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
+            UAN # 021-111-11-8729 
+            Email:Info@trax.pk";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment,1);
         }
         return $crm_request->id;
     }

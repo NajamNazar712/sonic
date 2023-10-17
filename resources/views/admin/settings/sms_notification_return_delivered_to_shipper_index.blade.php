@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'SMS notification status delivered to shipper')
+@section('title', 'SMS Notifications Limit')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                   SMS Notification Status Delivered To Shipper
+                   SMS Notifications Limit
                 </h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
@@ -19,10 +19,13 @@
                             {{--todo--}}
                             <div class="row justify-content-center">
                                 <div class="col-md-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.update') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sms_notifications_limit.update') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
-                                        <div class="col-12" id="shippers_wrapper">
+                                        <div class="bg-blue">
+                                            <h3 class="form-section white"><b>ID:</b> 216 | <b>Name:</b> Return Delivered To Shipper</h3>
+                                        </div>
+                                        <div class="col-12 mb-5" id="shippers_wrapper">
                                             <div class="col-12 form-group">
                                                 <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
                                                 <input type="checkbox" name="all_shipper_toggle" id="all_shipper_toggle" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true" @if(isset($all_shippers) && $all_shippers == 1) checked @endif>
@@ -47,6 +50,36 @@
                                             </div>
                                         </div>
 
+                                        @foreach($notification_details as $notification_detail)
+                                            <div class="bg-blue">
+                                                <h3 class="form-section white"><b>ID:</b> {{$notification_detail['id']}} | <b>Name:</b> {{$notification_detail['name']}}</h3>
+                                            </div>
+                                            <div class="col-12 mb-5">
+                                                <div class="col-12 form-group">
+                                                    <input type="hidden" name="notifications[{{$notification_detail['id']}}][id]" value="{{$notification_detail['id']}}">
+                                                    <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
+                                                    <input type="checkbox" name="notifications[{{$notification_detail['id']}}][all_shipper_toggle]" id="all_shipper_toggle_{{$notification_detail['id']}}" class="switchery all_shipper_toggle_{{$notification_detail['id']}}" data-size="sm" data-switchery="true" @if($notification_detail['shipper_toggle'] == 1) checked @endif>
+                                                </div>
+
+                                                <div class="col-12 form-group d-none" id="excluded_users_container_{{$notification_detail['id']}}">
+                                                    <label class="mr-2 font-small-3"><b>Exclude Shipper(s) </b></label>
+                                                    <select name="notifications[{{$notification_detail['id']}}][excluded_users][]" id="excluded_users_{{$notification_detail['id']}}" class="form-control select2" multiple="multiple">
+                                                        @foreach($shippers as $shipper)
+                                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-12 form-group d-none" id="only_users_container_{{$notification_detail['id']}}">
+                                                    <label class="mr-2 font-small-3"><b>Only Shipper(s) </b></label>
+                                                    <select name="notifications[{{$notification_detail['id']}}][only_users][]" id="only_users_{{$notification_detail['id']}}" class="form-control select2" data-rule-required="true"  data-msg-required="This Field is required" multiple="multiple">
+                                                        @foreach($shippers as $shipper)
+                                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                         <div class="col-md-12 form-group">
                                             <button type="submit" class="col-md-4 btn btn-primary">Update</button>
                                         </div>
@@ -109,6 +142,45 @@
             var ids = @json($only_shippers);
             $('#only_users').val(ids).trigger('change');
             @endif
+
+
+            @foreach($notification_details as $notification_detail)
+                @if($notification_detail['shipper_toggle'] == 1)
+                    $("#excluded_users_container_{{$notification_detail['id']}}").removeClass('d-none');
+                    @if($notification_detail['shippers'] != null)
+                        var ids = @json($notification_detail['shippers']);
+                        $("#excluded_users_{{$notification_detail['id']}}").val(ids).trigger('change');
+                    @endif
+                @else
+                    $("#only_users_container_{{$notification_detail['id']}}").removeClass('d-none');
+                    @if($notification_detail['shippers'] != null)
+                        var ids = @json($notification_detail['shippers']);
+                        $("#only_users_{{$notification_detail['id']}}").val(ids).trigger('change');
+                    @endif
+                @endif
+
+                $("#excluded_users_{{$notification_detail['id']}}").select2({
+                    placeholder: 'Select Excluded Shippers',
+                    width: '100%',
+                    allowClear: true
+                });
+
+                $("#only_users_{{$notification_detail['id']}}").select2({
+                    placeholder: 'Select Only Shippers',
+                    width: '100%',
+                    allowClear: true
+                });
+
+                $("#all_shipper_toggle_{{$notification_detail['id']}}").change(function () {
+                    if ($("#all_shipper_toggle_{{$notification_detail['id']}}").is(':checked')) {
+                        $("#excluded_users_container_{{$notification_detail['id']}}").removeClass('d-none');
+                        $("#only_users_container_{{$notification_detail['id']}}").addClass('d-none');
+                    } else {
+                        $("#excluded_users_container_{{$notification_detail['id']}}").addClass('d-none');
+                        $("#only_users_container_{{$notification_detail['id']}}").removeClass('d-none');
+                    }
+                });
+            @endforeach
 
             $('#settings_form').validate({
                 errorClass: 'danger',

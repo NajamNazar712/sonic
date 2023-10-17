@@ -897,7 +897,7 @@ class AdminCRMController extends Controller
             $sms = 0;
         }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email, $sms);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email, $sms, 1);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }
@@ -3503,6 +3503,7 @@ TRAX-Customer Experience';
                         $check_exists->save();
                     }
                 }
+
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
                 ]);
