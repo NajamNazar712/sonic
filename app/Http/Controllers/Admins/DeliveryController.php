@@ -7459,7 +7459,13 @@ class DeliveryController extends Controller
             })
             ->addColumn('transactions_amount_link', function ($shipment) {
                 if ($shipment->transactions_amount != null) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                    $dncc_amount = $shipment->amount ?? 0;
+                    $hbl_connect_amount = $shipment->transactions_amount ?? 0;
+                    $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $shipment->delivery_note)->pluck('shipment_id')->toArray();
+                    $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount') ?? 0;
+                    $one_link_amount = $shipment->one_link_amount ?? 0;
+                    $total_amount = $dncc_amount - ($hbl_connect_amount + $amount + $one_link_amount);
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $total_amount . '</button>';
                 } else {
                     return '-';
                 }

@@ -485,23 +485,23 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     
-                    var fintech_sum = $(row).find('#myButton');
-                    var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
-                    fintech_sum = fintech_sum[0].innerText
-                    fintech_sum = parseFloat(fintech_sum)
+                    // var fintech_sum = $(row).find('#myButton');
+                    // var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
+                    // fintech_sum = fintech_sum[0].innerText
+                    // fintech_sum = parseFloat(fintech_sum)
 
-                    if(data.transactions_amount == null){
+                    // if(data.transactions_amount == null){
                         
-                        data.transactions_amount = 0
-                    }
-                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+                    //     data.transactions_amount = 0
+                    // }
+                    // value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
                     
-                    if (value < 0) {
-                        value = 0;
-                    }  
+                    // if (value < 0) {
+                    //     value = 0;
+                    // }  
 
-                    console.log(data.transactions_amount)
-                    $('td:eq(22)', row).html(value);
+                    // console.log(data.transactions_amount)
+                    // $('td:eq(22)', row).html(value);
 
 
                 },
