@@ -10519,37 +10519,39 @@ class NotificationsController extends Controller
                     ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
 
-                    $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date);
+                    $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
 
 
                     foreach($crm_complaints as $crm_complaint){
-                        if($crm_complaint['created_at'] == Carbon::Today() && $crm_complaint['status_id'] == 1){
+
+                        if($crm_complaint['created_at']->isToday() && $crm_complaint['status_id'] == 1){
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
-                        if($crm_complaint['updated_at'] == Carbon::Today() && $crm_complaint['status_id'] == 4){
+                        if($crm_complaint['updated_at']->isToday() && $crm_complaint['status_id'] == 4){
                             $crm_complaints_launched_each_day_closed[] = 1;
                         }
 
                     }
 
-                    
+
+
                     foreach($crm_service_requests as $crm_service_request){
-                        if($crm_service_request['created_at'] == Carbon::Today() &&  $crm_service_request['status_id'] == 1){
+                        if($crm_service_request['created_at']->isToday() &&  $crm_service_request['status_id'] == 1){
                             $crm_serviced_launched_each_day[] = 1;
                         }
 
-                        if($crm_service_request['updated_at'] == Carbon::Today() && $crm_service_request['status_id'] == 4){
+                        if($crm_service_request['updated_at']->isToday() && $crm_service_request['status_id'] == 4){
                             $crm_serviced_launched_each_day_closed[] = 1;
                         }
                     }
 
                     foreach($crm_claims as $crm_claim){
-                        if($crm_claim['created_at'] == Carbon::Today() && $crm_claim['status_id'] == 1 ){
+                        if($crm_claim['created_at']->isToday() && $crm_claim['status_id'] == 1 ){
                             $crm_claims_launched_each_day[] = 1;
                         }
 
-                        if($crm_claim['updated_at'] == Carbon::Today() && $crm_claim['status_id'] == 4){
+                        if($crm_claim['updated_at']->isToday() && $crm_claim['status_id'] == 4){
                             $crm_claims_launched_each_day_closed[] = 1;
                         }
                     }
@@ -10777,13 +10779,13 @@ class NotificationsController extends Controller
                                     if ($diffInDays == 2  && $statuses[$i] === 4) {
                                         $closure_2_days[] = 1;
                                     }
-                                    if ($created_at[$i] == Carbon::Today()) {
+                                    if ($created_at[$i]->isToday()) {
                                         $today_tickets[] = 1;
                                     }
-                                    if ($created_at[$i] == Carbon::Today() && $statuses[$i] === 4) {
+                                    if ($created_at[$i]->isToday() && $statuses[$i] === 4) {
                                         $today_closed[] = 1;
                                     }
-                                    if ($created_at[$i] == Carbon::Today() && $statuses[$i] === 2) {
+                                    if ($created_at[$i]->isToday() && $statuses[$i] === 2) {
                                         $today_inprocess[] = 1;
                                     }
                                 }
