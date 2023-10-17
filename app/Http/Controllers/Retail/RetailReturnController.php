@@ -233,17 +233,6 @@ class RetailReturnController extends Controller
                     }
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
                     
-                //     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-                //    if($return_assign_shipment){
-                //        $return_assign_shipment->status = 0;
-                //        $return_assign_shipment->save();
-
-                //        $return_assign_log = new ReturnAssignedShipmentLogs();
-                //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                //         $return_assign_log->status = 5;
-                //         $return_assign_log->assigned_by = Auth::id();
-                //         $return_assign_log->save();
-                //    }
                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -265,6 +254,12 @@ class RetailReturnController extends Controller
                        $return_assign_log->admin_id = Auth::id();
                        $return_assign_log->save();
                    }
+
+                   request()->request->add(['shipment_id' => $request->shipment_id]);
+                    //$updated_type_id updated by retail = 5
+                    //$updated_rv_assign_agent_status_id, reattempt requested i.e is 2
+                    //$updated_rv_state_id updating rv status to 3 i.e open 
+                    $this->shipment_status_update_shipper($request, Auth::id(), 5, 2, 3);
                    
                     if($journey){
                         NotificationsController::send(33, $request->shipment_id);

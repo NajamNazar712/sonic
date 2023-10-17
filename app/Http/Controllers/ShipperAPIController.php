@@ -597,35 +597,12 @@ class ShipperAPIController extends Controller
                         }
                     }
 
-                            $data = [
-                                    'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 1, //ReturnConfirm
-                                    'rv_assign_agent_sub_status_id' => Null,
-                                    'updated_by_id' =>  $shipper_id,
-                                    'updated_type_id' => 3, //shipper
-                                    'remarks' => Null,
-                                ];
-
-                            $this->update_by_shipper_rv_shipment_assign_agent($data);
-    
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
-                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$shipper_id)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
-                                    'shipments_journey_id' => $shipments_journey->id,
-                                    'last_shipments_journey_id' => $shipments_journey->id,
-                                    'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 1, //ReturnConfirm
-                                    'rv_assign_agent_sub_status_id' => Null,
-                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                                    'updated_type_id' => 3,
-                                    'updated_by_id' =>  $shipper_id,
-                                    'is_fake_status' => 0,
-                                    'rv_fake_status_id' => 0,
-                                    'remarks' => Null,
-                                    'call_to_id' => 0,
-                                ];
-                            $this->data_rv_shipment_assign_agent_details($data);
+                           
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            //$updated_type_id updated by shipper = 3
+                            //$updated_rv_assign_agent_status_id to return confirm i.e is 1
+                            //$updated_rv_state_id updating rv status to 4 i.e completed 
+                            $this->shipment_status_update_shipper($request, $shipper_id, 3, 1, 4);
 
                     return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
 
@@ -692,35 +669,12 @@ class ShipperAPIController extends Controller
                                 $return_assign_log->save();
                             }
 
-                            $data = [
-                                'shipment_id' => $request->shipment_id,
-                                'rv_assign_agent_status_id' => 2, //Reattempt
-                                'rv_assign_agent_sub_status_id' => Null,
-                                'updated_type_id' => 3, //shipper
-                                'updated_by_id' =>  $shipper_id,
-                                'remarks' => Null,
-                            ];
-
-                            $this->update_by_shipper_rv_shipment_assign_agent($data);
-
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
-                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$shipper_id)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
-                                    'shipments_journey_id' => $shipments_journey->id,
-                                    'last_shipments_journey_id' => $shipments_journey->id,
-                                    'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 2, //Reattempt
-                                    'rv_assign_agent_sub_status_id' => Null,
-                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                                    'updated_type_id' => 3, //shipper
-                                    'updated_by_id' =>  $shipper_id,
-                                    'is_fake_status' => 0,
-                                    'rv_fake_status_id' => 0,
-                                    'remarks' => Null,
-                                    'call_to_id' => 0,
-                                ];
-                            $this->data_rv_shipment_assign_agent_details($data);
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            //$updated_by_id updated by shipper = $shipper_id
+                            //$updated_type_id updated by shipper = 3
+                            //$updated_rv_assign_agent_status_id to reattempt i.e is 2
+                            //$updated_rv_state_id updating rv status to 3 i.e open 
+                            $this->shipment_status_update_shipper($request, $shipper_id, 3, 2, 3);
                         }
                         else{
                             // Reattempt Request is from substitute user
@@ -747,35 +701,13 @@ class ShipperAPIController extends Controller
                                 }
                             }
 
-                            $data = [
-                                'shipment_id' => $request->shipment_id,
-                                'rv_assign_agent_status_id' => 2, //Reattempt
-                                'rv_assign_agent_sub_status_id' => Null,
-                                'updated_type_id' => 4, //substitute
-                                'updated_by_id' =>  $shipper_id,
-                                'remarks' => Null,
-                            ];
-
-                            $this->update_by_shipper_rv_shipment_assign_agent($data);
-
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
-                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$shipper_id)->where('updated_type_id', 4)->where('unresponsive_count', 2)->latest()->first();
-                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
-                                    'shipments_journey_id' => $shipments_journey->id,
-                                    'last_shipments_journey_id' => $shipments_journey->id,
-                                    'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 2, //Reattempt
-                                    'rv_assign_agent_sub_status_id' => Null,
-                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                                    'updated_type_id' => 4, //substitute
-                                    'updated_by_id' =>  $shipper_id,
-                                    'is_fake_status' => 0,
-                                    'rv_fake_status_id' => 0,
-                                    'remarks' => Null,
-                                    'call_to_id' => 0,
-                                ];
-                            $this->data_rv_shipment_assign_agent_details($data);
+                          
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            //$updated_by_id updated by shipper = $shipper_id
+                            //$updated_type_id updated by substitute_user = 4
+                            //$updated_rv_assign_agent_status_id, reattempt i.e is 2
+                            //$updated_rv_state_id updating rv status to 3 i.e open 
+                            $this->shipment_status_update_shipper($request, $shipper_id, 4, 2, 3);
 
 
                         if ($journey) {
@@ -930,35 +862,13 @@ class ShipperAPIController extends Controller
                             $return_assign_log->save(); 
                         }
                             
-                        $data = [
-                            'shipment_id' => $request->shipment_id,
-                            'rv_assign_agent_status_id' => 4, //Intercept approved
-                            'rv_assign_agent_sub_status_id' => Null,
-                            'updated_type_id' => 3, //Shipper
-                            'updated_by_id' =>  $user_id,
-                            'remarks' => Null,
-                        ];
-
-                        $this->update_by_shipper_rv_shipment_assign_agent($data);
-
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
-                        $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$user_id)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-                        $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                                'agent_id' => $rv_shipment_assign_agents->agent_id,
-                                'shipments_journey_id' => $shipments_journey->id,
-                                'last_shipments_journey_id' => $shipments_journey->id,
-                                'shipment_id' => $request->shipment_id,
-                                'rv_assign_agent_status_id' => 4, //Intercept approved
-                                'rv_assign_agent_sub_status_id' => Null,
-                                'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                                'updated_type_id' => 3, //Shipper
-                                'updated_by_id' =>  $user_id,
-                                'is_fake_status' => 0,
-                                'rv_fake_status_id' => 0,
-                                'remarks' => Null,
-                                'call_to_id' => 0,
-                            ];
-                        $this->data_rv_shipment_assign_agent_details($data);
+                        
+                        request()->request->add(['shipment_id' => $request->shipment_id]);
+                            //$updated_by_id updated by shipper = $user_id
+                            //$updated_type_id updated by Shipper = 3
+                            //$updated_rv_assign_agent_status_id to Intercept approved i.e is 4
+                            //$updated_rv_state_id updating rv status to 4 i.e completed 
+                            $this->shipment_status_update_shipper($request, $user_id, 3, 4, 4);
 
                         
                         } 
@@ -1021,35 +931,13 @@ class ShipperAPIController extends Controller
                                     
                             }
 
-                            $data = [
-                                'shipment_id' => $request->shipment_id,
-                                'rv_assign_agent_status_id' => 3, //Intercept Requested
-                                'rv_assign_agent_sub_status_id' => Null,
-                                'updated_type_id' => 3, //Shipper
-                                'updated_by_id' =>  $user_id,
-                                'remarks' => Null,
-                            ];
-    
-                            $this->update_by_shipper_rv_shipment_assign_agent($data);
-    
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id, 'rv_assign_agent_status_id', 65)->latest()->first();
-                            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->where('updated_by_id',$user_id)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-                            $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                                    'agent_id' => $rv_shipment_assign_agents->agent_id,
-                                    'shipments_journey_id' => $shipments_journey->id,
-                                    'last_shipments_journey_id' => $shipments_journey->id,
-                                    'shipment_id' => $request->shipment_id,
-                                    'rv_assign_agent_status_id' => 3, //Intercept Requested
-                                    'rv_assign_agent_sub_status_id' => Null,
-                                    'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
-                                    'updated_type_id' => 3, //Shipper
-                                    'updated_by_id' =>  $user_id,
-                                    'is_fake_status' => 0,
-                                    'rv_fake_status_id' => 0,
-                                    'remarks' => Null,
-                                    'call_to_id' => 0,
-                                ];
-                            $this->data_rv_shipment_assign_agent_details($data);  
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            //$updated_by_id updated by shipper = $user_id
+                            //$updated_type_id updated by Shipper = 3
+                            //$updated_rv_assign_agent_status_id, intercept requested i.e is 3
+                            //$updated_rv_state_id updating rv status to 3 i.e open 
+                            $this->shipment_status_update_shipper($request, $user_id, 3, 3, 3);
+
 
                             if ($request->hasFile('replacement_parcel_image')) {
                                 $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
