@@ -10501,28 +10501,29 @@ class NotificationsController extends Controller
                                                   
                     $closed_complaint_till_date = CrmRequest::where('case_nature_id', 1)
                     ->where('status_id', 4)
-                    ->whereDate('created_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
 
                     $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
                     ->where('status_id', 4)
-                    ->whereDate('created_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
 
                     $closed_feedback_till_date = CrmRequest::where('case_nature_id', 3)
                     ->where('status_id', 4)
-                    ->whereDate('created_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
 
                     $closed_claim_till_date = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 4)
-                    ->whereDate('created_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
 
-                    $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_feedback_till_date) + count($closed_claim_till_date);
+                    $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date);
+
 
                     foreach($crm_complaints as $crm_complaint){
-                        if($crm_complaint['created_at'] == Carbon::Today() || $crm_complaint['updated_at'] == Carbon::Today()){
+                        if($crm_complaint['created_at'] == Carbon::Today() && $crm_complaint['status_id'] == 1){
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
@@ -10533,7 +10534,7 @@ class NotificationsController extends Controller
                     }
 
                     foreach($crm_service_requests as $crm_service_request){
-                        if($crm_service_request['created_at'] == Carbon::Today() || $crm_service_request['updated_at'] == Carbon::Today()){
+                        if($crm_service_request['created_at'] == Carbon::Today() &&  $crm_service_request['status_id'] == 1){
                             $crm_serviced_launched_each_day[] = 1;
                         }
 
@@ -10543,7 +10544,7 @@ class NotificationsController extends Controller
                     }
 
                     foreach($crm_claims as $crm_claim){
-                        if($crm_claim['created_at'] == Carbon::Today() || $crm_claim['updated_at'] == Carbon::Today()){
+                        if($crm_claim['created_at'] == Carbon::Today() && $crm_claim['status_id'] == 1 ){
                             $crm_claims_launched_each_day[] = 1;
                         }
 
@@ -10797,8 +10798,8 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
-                        if(count($total_count_closed) > 0){
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($closure_2_days) / count($total_count_closed), 2) . '</td>';
+                        if(($total_count_closed) > 0){
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($closure_2_days) / ($total_count_closed), 2) . '</td>';
                         }else{
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                         }
