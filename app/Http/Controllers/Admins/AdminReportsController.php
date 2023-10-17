@@ -12116,9 +12116,14 @@ class AdminReportsController extends Controller
 
     }
 
-    public function operations_performance_index()
+     public function operations_performance_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 684);
+        return view('admin.reports.operations_performance_report');
+    }
+
+    public function ajax_load_operation_data()
+    {
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
         } else {
@@ -12133,11 +12138,10 @@ class AdminReportsController extends Controller
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
 
-        return view('admin.reports.operations_performance_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
+        return response()->json(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
     }
 
-        public function operations_performance_export_to_excel(Request $request)
-    {
+        public function operations_performance_export_to_excel(Request $request){
         $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
