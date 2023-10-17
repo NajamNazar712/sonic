@@ -10533,6 +10533,7 @@ class NotificationsController extends Controller
 
                     }
 
+                    
                     foreach($crm_service_requests as $crm_service_request){
                         if($crm_service_request['created_at'] == Carbon::Today() &&  $crm_service_request['status_id'] == 1){
                             $crm_serviced_launched_each_day[] = 1;
