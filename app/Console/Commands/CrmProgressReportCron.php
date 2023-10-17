@@ -47,7 +47,6 @@ class CrmProgressReportCron extends Command
         })
         ->get();
 
-
         $crm_service_requests = CrmRequest::where('case_nature_id', 2)
           ->where(function($query) {
             $query->whereDate('created_at', '>=', Carbon::today()->subDays(2))
@@ -61,7 +60,6 @@ class CrmProgressReportCron extends Command
                   ->orWhereDate('updated_at', '>=', Carbon::today()->subDays(2));
         })
         ->get();
-
 
         NotificationsController::send(223, $crm_complaints, $crm_service_requests, $crm_claims);
     }

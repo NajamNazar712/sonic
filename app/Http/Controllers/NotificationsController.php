@@ -10522,7 +10522,7 @@ class NotificationsController extends Controller
                     $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_feedback_till_date) + count($closed_claim_till_date);
 
                     foreach($crm_complaints as $crm_complaint){
-                        if($crm_complaint['created_at'] == Carbon::Today() || $crm_complaint['updated'] == Carbon::Today()){
+                        if($crm_complaint['created_at'] == Carbon::Today() || $crm_complaint['updated_at'] == Carbon::Today()){
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
