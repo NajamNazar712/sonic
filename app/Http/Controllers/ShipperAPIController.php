@@ -630,10 +630,13 @@ class ShipperAPIController extends Controller
             $parcel = Shipment::find($request->shipment_id);
             $shipper_id = $request->shipper_id;
             if ($parcel) {
-                if ($parcel->shipper_status_id != 52) {
+                // if ($parcel->shipper_status_id != 52) {
+                if ($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66) {
                     if ($parcel->shipper_status_id == 12) {
+                        // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                        // Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
                         $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+                        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]);
 
                         $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
                         if ($last_reason->exists()) {
@@ -642,7 +645,10 @@ class ShipperAPIController extends Controller
                         } else {
                             $last_reason_id = NULL;
                         }
-                        ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, $shipper_id, NULL, NULL);
+                        // ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, $shipper_id, NULL, NULL);
+
+                        //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
+                        ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, $shipper_id, NULL, NULL);
 
                         //When Shipment is requested for Re-Attempt
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
