@@ -10486,7 +10486,6 @@ class NotificationsController extends Controller
 
                     $crm_complaints_2_days_closure = [];
                     $crm_services_2_days_closure = [];
-                    $crm_services_1_day_closure = [];
                     $crm_claims_10_days_closure = [];
                     $crm_complaints_launched_each_day = [];
                     $crm_complaints_launched_each_day_closed = [];
@@ -10503,6 +10502,7 @@ class NotificationsController extends Controller
                     ->where('status_id', 4)
                     ->whereDate('updated_at', '<=', Carbon::today())
                     ->get();
+
 
                     $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
                     ->where('status_id', 4)
@@ -10521,37 +10521,33 @@ class NotificationsController extends Controller
 
                     $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
 
-
                     foreach($crm_complaints as $crm_complaint){
-
-                        if($crm_complaint['created_at']->isToday() && $crm_complaint['status_id'] == 1){
+                        if($crm_complaint['created_at']->isToday()){
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
-                        if($crm_complaint['updated_at']->isToday() && $crm_complaint['status_id'] == 4){
+                        if(($crm_complaint['updated_at']->isToday() && $crm_complaint['created_at']->isToday()) && $crm_complaint['status_id'] == 4){
                             $crm_complaints_launched_each_day_closed[] = 1;
                         }
 
                     }
 
-
-
                     foreach($crm_service_requests as $crm_service_request){
-                        if($crm_service_request['created_at']->isToday() &&  $crm_service_request['status_id'] == 1){
+                        if($crm_service_request['created_at']->isToday()){
                             $crm_serviced_launched_each_day[] = 1;
                         }
 
-                        if($crm_service_request['updated_at']->isToday() && $crm_service_request['status_id'] == 4){
+                        if(($crm_service_request['updated_at']->isToday() && $crm_service_request['created_at']->isToday()) && $crm_service_request['status_id'] == 4){
                             $crm_serviced_launched_each_day_closed[] = 1;
                         }
                     }
 
                     foreach($crm_claims as $crm_claim){
-                        if($crm_claim['created_at']->isToday() && $crm_claim['status_id'] == 1 ){
+                        if($crm_claim['created_at']->isToday()){
                             $crm_claims_launched_each_day[] = 1;
                         }
 
-                        if($crm_claim['updated_at']->isToday() && $crm_claim['status_id'] == 4){
+                        if(($crm_claim['updated_at']->isToday()  && $crm_claim['created_at']->isToday()) && $crm_claim['status_id'] == 4){
                             $crm_claims_launched_each_day_closed[] = 1;
                         }
                     }
@@ -10572,17 +10568,13 @@ class NotificationsController extends Controller
                             }
                         }
                     }
-
-                                    
+                    
                     foreach($crm_service_requests as $key => $value)
                     {
                         if(isset($value['created_at'], $value['updated_at'])){
                             $daysDifference = $value['created_at']->diffInDays($value['updated_at']);
                             if ($value['status_id'] == 4 && $daysDifference == 2){
                                 $crm_services_2_days_closure[] = $daysDifference;
-                            }
-                            if ($value['status_id'] == 4 && $daysDifference == 1){
-                                $crm_services_1_day_closure[] = $daysDifference;
                             }
                         }
                     }
@@ -10636,7 +10628,6 @@ class NotificationsController extends Controller
                     }
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
                     if(count($closed_complaint_till_date) > 0){
-
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure) / count($closed_complaint_till_date), 2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
@@ -10676,7 +10667,7 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
                     if(count($closed_service_till_date) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_1_day_closure) / count($closed_service_till_date,2)).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure) / count($closed_service_till_date,2)).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
