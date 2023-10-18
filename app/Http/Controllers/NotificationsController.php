@@ -10500,22 +10500,22 @@ class NotificationsController extends Controller
                                                   
                     $closed_complaint_till_date = CrmRequest::where('case_nature_id', 1)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $closed_feedback_till_date = CrmRequest::where('case_nature_id', 3)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $closed_claim_till_date = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
@@ -10577,7 +10577,7 @@ class NotificationsController extends Controller
                     
                     $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 3)
-                    ->whereDate('created_at', '>=', Carbon::today()->subDays(10))
+                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
                     ->get();
 
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
