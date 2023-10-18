@@ -7475,7 +7475,11 @@ class DeliveryController extends Controller
                     ->selectRaw('SUM(amount) as total_amount')
                     ->groupBy('delivery_note_id')
                     ->first();
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $hbl_konnect_transactions->total_amount . '</button>';
+                    if($hbl_konnect_transactions){
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $hbl_konnect_transactions->total_amount . '</button>';
+                    } else{
+                        return '-';
+                    }
                 } else {
                     return '-';
                 }
