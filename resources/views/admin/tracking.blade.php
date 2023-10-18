@@ -2593,6 +2593,7 @@
                                             'description': service_description,
                                             'alternate_phone': alternate_phone,
                                             'cod_new_amount': $('#new_amount').val(),
+                                            'cod_remarks': $('#cod_remarks').val(),
                                             'is_automated_cod_change': 1,
                                         }
                                     })
@@ -3057,7 +3058,9 @@
             },
         });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
+            var old_amount = $('#old_amount').val();
             $('#add_request_form')[0].reset();
+            $('#old_amount').val(old_amount);
             $('#case_nature_complaints').val('').trigger('change');
             $('#case_nature_select').val('').trigger('change');
             $('#case_nature_requests').val('').trigger('change');
