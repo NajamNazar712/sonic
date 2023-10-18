@@ -10500,24 +10500,24 @@ class NotificationsController extends Controller
                                                   
                     $closed_complaint_till_date = CrmRequest::where('case_nature_id', 1)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
 
                     $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
 
                     $closed_feedback_till_date = CrmRequest::where('case_nature_id', 3)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $closed_claim_till_date = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '<=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today())
                     ->get();
 
                     $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
