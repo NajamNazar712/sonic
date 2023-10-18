@@ -235,13 +235,20 @@ class ShipperDashboardController extends Controller
                         $kam[] = $detail;
                     }
                 }
+                $route_ids = array();
+                $routes = array();
+                $riders = array();
                 $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-                $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
-                $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                if(count($pickup_address_ids) > 0){
+                    $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
+                    $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                    $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
+                        ->wherein('riders.route_id',$routes)
+                        ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+                }
 
-                $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
-                ->wherein('riders.route_id',$routes)
-                ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+
+
 
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
