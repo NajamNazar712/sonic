@@ -2968,6 +2968,42 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function scan_shipment_detail_v3(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        return $rider_id;
+        $tracking_no = $request->tracking_no;
+        $pickup_requests = V3PickupRequest::join('v3_pickup_request_shipments as prs', 'v3_pickup_requests.id', '=', 'prs.pickup_request_id')
+            ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
+            ->where('s.tracking_number', $tracking_no)
+            ->where('v3_pickup_requests.status_id', 1)
+            ->where('prs.status', 0);
+            
+        if ($pickup_requests->exists()) {
+            $pickup_requests = $pickup_requests->first(); 
+            $shipment_status = $pickup_requests->shipper_status_id;
+            if ($pickup_requests->current_rider_id == $rider_id) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
+            } elseif ($shipment_status != 1 && $shipment_status != 17) {
+                return response()->json(['status' => 1, 'message' => 'Pickup Already Modified']);
+            } else {
+                $pickup = array();
+                $pickup_address = $pickup_requests->pickup_address;
+                $pickup['pickup_request_id'] = $pickup_requests->pickup_request_id;
+                $pickup['shipments'] = $pickup_requests->booked;
+                $pickup['shipper_name'] = $pickup_address->user->name;
+                $pickup['person_of_contact'] = $pickup_address->poc;
+                $pickup['phone_number'] = $pickup_address->phone;
+                $pickup['address'] = $pickup_address->pickup_address;
+                $pickup['location_latitude'] = $pickup_address->location_latitude;
+                $pickup['location_longitude'] = $pickup_address->location_longitude;
+                return response()->json(['status' => 0, 'shipment_detail' => $pickup]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => 'Pickup Request Not Found']);
+        }
+    }
+
     public function scan_shipment_assign(Request $request)
     {
 
@@ -11654,8 +11690,12 @@ class RiderAPIController extends Controller
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
                 //$added_at = $request->added_at;
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
+                
                 if ($shipment_journey->exists()) {
+                    
                     $shipment_journey = $shipment_journey->first();
+                    // return response()->json(['status' => 1, 'message' => 'Shipment Id ', $shipment_journey->shipper_status_id => $validate->errors()]);
+                    
                     if ($shipment_journey->shipper_status_id == 5) {
                         if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                             if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
@@ -11847,6 +11887,8 @@ class RiderAPIController extends Controller
                 DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
+                return response()->json(['status' => 1, 'message' => 'Shipment Id ', $th->getMessage() => $validate->errors()]);
+                  
                 return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
 
                 //throw $th;
@@ -14808,11 +14850,73 @@ class RiderAPIController extends Controller
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
             ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('riders.id', $rider_id);
-        if ($rider_profile->exists()) {
-            $rider_profile = $rider_profile->get();
             $data = array();
+            if ($rider_profile->exists()) {
+            $rider_profile = $rider_profile->get();
             $data['profile'] = $rider_profile;
-            $data['reasons'] = V3PickupRequestReason::all()->where('active', 't');
+            $reasons = array();
+            $reasonsRecord = V3PickupRequestReason::all()->where('active', 't');
+            try{
+
+            if(count($reasonsRecord)>0){
+                $reasons['status'] = 0;
+                $reasons['reasons'] = $reasonsRecord;
+            }else {
+                $reasons['status'] = 1;
+                $reasons['reasons'] = 'Reason not found';
+            }
+        }catch(Exception $ex){
+            return $ex;
+        }
+            $data['reasons'] = $reasons;
+            $shipment_setting = array();
+            $settings = GlobalSettings::whereIn('type', ['rider_shipment_attempt_count', 'rider_shipment_attempt_waiting_duration'])
+            ->select('type as key', 'setting_value as value');
+            if ($settings->exists()) {
+                $settings = $settings->get();
+                $shipment_setting['status'] =  0;
+                $shipment_setting['data'] = $settings;
+            
+            }else {
+                $shipment_setting['status'] =  1;
+                $shipment_setting['message'] = 'Settings not found';
+            }
+                $data['shipment_attempt_settings'] = $shipment_setting;
+            
+            $dnccRecord = array();    
+
+            $delivery_notes = DeliveryNote::join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->select(['delivery_notes.id as delivery_note_id', 'delivery_notes.received_cod_amount as amount'])
+            ->where('delivery_notes.cash_collection_status', 0)
+            ->where('delivery_notes.status', '!=', 4)
+            ->where('delivery_notes.rider_id', $rider_id);
+
+            if ($delivery_notes->exists()) {
+                $delivery_notes = $delivery_notes->get();
+                $dnccRecord['status'] =  0;
+                $dnccRecord['data'] = $delivery_notes;
+            }else {
+                $dnccRecord['status'] =  1;
+                $dnccRecord['message'] = 'DNCC Record not found';
+                
+            }
+            $data['dncc'] = $dnccRecord;
+
+            $slider = array();
+
+            $rider_ticker_images = RiderTickerImage::orderBy('id', 'ASC');
+            if ($rider_ticker_images->exists()) {
+                $rider_ticker_images = $rider_ticker_images->get();
+                $slider['status'] =  0;
+                $slider['data'] = $rider_ticker_images;
+           
+            }else {
+                $slider['status'] =  1;
+                $slider['message'] = 'Slider Not founds';
+           
+            }
+            $data['slider'] = $slider;
+
             return response()->json(['status' => 0, 'rider' => $data]);
         } else {
             return response()->json(['status' => 1, 'message' => "Rider Profile Not Found"]);
