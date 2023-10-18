@@ -332,11 +332,10 @@ class ShipperCRMController extends Controller
         $shipment_ids = $request->shipment_ids;
         $shipment_id = $request->shipment_id;
         $receiving_sheet_id = $request->receiving_sheet_id;
+        $alternate_phone = null; // default
         if($request->has('alternate_phone')){
             if($request->alternate_phone){
                 $alternate_phone = $request->alternate_phone;
-            }else{
-                $alternate_phone = null;
             }
         }
 
