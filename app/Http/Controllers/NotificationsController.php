@@ -10733,6 +10733,8 @@ class NotificationsController extends Controller
                             $today_tickets = []; 
                             $today_closed = [];
                             $today_inprocess = [];
+                            $closure_within_2_days = []; 
+
                             for ($i = 0; $i < count($created_at); $i++) {
                                 if(isset($created_at[$i], $updated_at[$i])){
                                     $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
@@ -10762,7 +10764,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
                         if(count($total_count_closed) > 0){
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($total_count_closed) * 100  . '%'.'</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
                         }else{
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                         }
