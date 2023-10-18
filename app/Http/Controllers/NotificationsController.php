@@ -10483,7 +10483,8 @@ class NotificationsController extends Controller
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
-                    $email = ['ahmed@trax.pk'];
+                    $role_ids = [19,15,106,91,3,9,123,128,95];
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email');
 
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
@@ -10492,7 +10493,8 @@ class NotificationsController extends Controller
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
-                    $email = ['ahmed@trax.pk'];
+                    $role_ids = [19,15,106,91,3,9,123,128,95];
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email');
 
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
@@ -10734,7 +10736,7 @@ class NotificationsController extends Controller
                             if (strpos($body, '[to]') !== FALSE) {
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
-                        }
+                        }f
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 } else if ($id == 14) {
