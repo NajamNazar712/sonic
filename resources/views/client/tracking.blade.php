@@ -1258,6 +1258,7 @@
                                                 'complaint_id': complaint_id,
                                                 'description': description,
                                                 'cod_new_amount': $('#new_amount').val(),
+                                                'cod_remarks': $('#cod_remarks').val(),
                                                 'is_automated_cod_change': 1,
                                             }
                                         })

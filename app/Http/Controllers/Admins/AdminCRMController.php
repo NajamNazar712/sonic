@@ -193,7 +193,7 @@ class AdminCRMController extends Controller
                         if($shipment){
 
                             
-                            if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
+                            if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 5, 14, 18, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                             {
                                 return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                             }
@@ -324,8 +324,16 @@ class AdminCRMController extends Controller
                                             
                                             CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                             
+                                            $old_amount = $shipment->amount;
                                             $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                             $shipment->amount = $request->cod_new_amount;
+                                            ChangeShipmentAmountLog::create([
+                                                'shipment_id' => $shipment->id,
+                                                'old_amount' => $old_amount,
+                                                'new_amount' => $request->cod_new_amount,
+                                                'remarks' => $request->cod_remarks,
+                                                'admin_id' => 346 // for global admin
+                                            ]);
                                             $shipment->save();
                                         }
                                     }
@@ -361,7 +369,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+                    return ['status' => 1, 'success' => $message ?? '', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => 'No shipments selected!'];
                 }
@@ -371,10 +379,10 @@ class AdminCRMController extends Controller
                 if(!empty($shipment_id)){
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
-                        $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+                        // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
+                        // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
-                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
+                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 5, 14, 18, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                         }
@@ -423,8 +431,16 @@ class AdminCRMController extends Controller
                                                         
                                                         CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
 
+                                                        $old_amount = $shipment->amount;
                                                         $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                         $shipment->amount = $request->cod_new_amount;
+                                                        ChangeShipmentAmountLog::create([
+                                                            'shipment_id' => $shipment->id,
+                                                            'old_amount' => $old_amount,
+                                                            'new_amount' => $request->cod_new_amount,
+                                                            'remarks' => $request->cod_remarks,
+                                                            'admin_id' => 346 // for global admin
+                                                        ]);
                                                         $shipment->save();
                                                     }
                                                 }
@@ -492,8 +508,16 @@ class AdminCRMController extends Controller
                                                     
                                                     CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
 
+                                                    $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
+                                                    ChangeShipmentAmountLog::create([
+                                                        'shipment_id' => $shipment->id,
+                                                        'old_amount' => $old_amount,
+                                                        'new_amount' => $request->cod_new_amount,
+                                                        'remarks' => $request->cod_remarks,
+                                                        'admin_id' => 346 // for global admin
+                                                    ]);
                                                     $shipment->save();
                                                 }
                                             }
@@ -571,8 +595,16 @@ class AdminCRMController extends Controller
                                                     
                                                     CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
 
+                                                    $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
+                                                    ChangeShipmentAmountLog::create([
+                                                        'shipment_id' => $shipment->id,
+                                                        'old_amount' => $old_amount,
+                                                        'new_amount' => $request->cod_new_amount,
+                                                        'remarks' => $request->cod_remarks,
+                                                        'admin_id' => 346 // for global admin
+                                                    ]);
                                                     $shipment->save();
                                                 }
                                             }
@@ -641,8 +673,16 @@ class AdminCRMController extends Controller
                                                 
                                                 CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
 
+                                                $old_amount = $shipment->amount;
                                                 $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                 $shipment->amount = $request->cod_new_amount;
+                                                ChangeShipmentAmountLog::create([
+                                                    'shipment_id' => $shipment->id,
+                                                    'old_amount' => $old_amount,
+                                                    'new_amount' => $request->cod_new_amount,
+                                                    'remarks' => $request->cod_remarks,
+                                                    'admin_id' => 346 // for global admin
+                                                ]);
                                                 $shipment->save();
                                             }
                                         }
@@ -681,7 +721,7 @@ class AdminCRMController extends Controller
                             }
                         }
                     }
-                    return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+                    return ['status' => 1, 'success' => $message ?? '' , 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
                 }else{
                     return ['status' => 0, 'error' => $request->shipment_id];
                 }
