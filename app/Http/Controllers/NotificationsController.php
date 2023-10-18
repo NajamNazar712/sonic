@@ -10652,7 +10652,7 @@ class NotificationsController extends Controller
                     $html .= '<br>'; 
 
                     // Table for CRM Claims
-                    $html .= '<table style="display: none; width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
                     $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="9"><strong>Claims</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
@@ -10697,7 +10697,7 @@ class NotificationsController extends Controller
                     $html .= '<br>'; 
 
                     //Agent Summary Report
-                    $html .= '<table style="display: none; width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
                     $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Agents Summary Report</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
