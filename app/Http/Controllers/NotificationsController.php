@@ -10500,22 +10500,22 @@ class NotificationsController extends Controller
                                                   
                     $closed_complaint_till_date = CrmRequest::where('case_nature_id', 1)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
                     ->get();
 
                     $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
                     ->get();
 
                     $closed_feedback_till_date = CrmRequest::where('case_nature_id', 3)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
                     ->get();
 
                     $closed_claim_till_date = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
+                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
                     ->get();
 
                     $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
@@ -10592,6 +10592,7 @@ class NotificationsController extends Controller
                     $resolved_claimed = $resolved_claimed->filter(function ($item) {
                         return $item['status_id'] == 3 && $item['created_at']->isToday();
                     });
+
 
                     // Table for CRM Complaints
                     $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
