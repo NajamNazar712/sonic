@@ -4007,7 +4007,7 @@ TRAX-Customer Experience';
             if ($crm_request->agent_id != null) {
                 if (session('role_id') == 1 || session('role_id') == 6 || $crm_request->agent_id == Auth::id() || in_array(184, session('permissions')))
                     {
-                    if ($crm_request->status_id == 1 || $crm_request->status_id == 5) {
+                    if ($crm_request->status_id == 1 || $crm_request->status_id == 2 || $crm_request->status_id == 5) {
                         if($request->valid == 1){
                             CrmRequest::where('id', $crm_request->id)->update([
                                 'status_id' => 2,
