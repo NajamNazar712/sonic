@@ -10511,7 +10511,7 @@ class NotificationsController extends Controller
                         }
 
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_complaint['status_id'] == 4 && ($daysDifference > 0 && ($daysDifference < 2 || $daysDifference == 2))){
+                        if ($updated_at->isToday() && $crm_complaint['status_id'] == 4 && ($daysDifference > 0 && ($daysDifference < 2 || $daysDifference == 2))){
                             $crm_complaints_2_days_closure[] = 1;
                         }
 
