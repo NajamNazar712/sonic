@@ -10527,7 +10527,7 @@ class NotificationsController extends Controller
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
-                        if(($crm_complaint['updated_at']->isToday() && $crm_complaint['created_at']->isToday()) && $crm_complaint['status_id'] == 4){
+                        if($crm_complaint['created_at']->isToday() && $crm_complaint['status_id'] == 4){
                             $crm_complaints_launched_each_day_closed[] = 1;
                         }
 
@@ -10538,7 +10538,7 @@ class NotificationsController extends Controller
                             $crm_serviced_launched_each_day[] = 1;
                         }
 
-                        if(($crm_service_request['updated_at']->isToday() && $crm_service_request['created_at']->isToday()) && $crm_service_request['status_id'] == 4){
+                        if($crm_service_request['created_at']->isToday() && $crm_service_request['status_id'] == 4){
                             $crm_serviced_launched_each_day_closed[] = 1;
                         }
                     }
@@ -10548,7 +10548,7 @@ class NotificationsController extends Controller
                             $crm_claims_launched_each_day[] = 1;
                         }
 
-                        if(($crm_claim['updated_at']->isToday()  && $crm_claim['created_at']->isToday()) && $crm_claim['status_id'] == 4){
+                        if($crm_claim['created_at']->isToday() && $crm_claim['status_id'] == 4){
                             $crm_claims_launched_each_day_closed[] = 1;
                         }
                     }
