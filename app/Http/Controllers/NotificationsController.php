@@ -10497,48 +10497,26 @@ class NotificationsController extends Controller
                     $crm_complaints = $reference_1_id;
                     $crm_service_requests = $reference_2_id;
                     $crm_claims = $reference_3_id;
-                                                  
-                    $closed_complaint_till_date = CrmRequest::where('case_nature_id', 1)
-                    ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
-                    ->get();
-
-                    $closed_service_till_date = CrmRequest::where('case_nature_id', 2)
-                    ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
-                    ->get();
-
-                    $closed_feedback_till_date = CrmRequest::where('case_nature_id', 3)
-                    ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
-                    ->get();
-
-                    $closed_claim_till_date = CrmRequest::where('case_nature_id', 4)
-                    ->where('status_id', 4)
-                    ->whereDate('updated_at', '>=', Carbon::today())
-                    ->get();
-
-                    $total_count_closed = count($closed_complaint_till_date) + count($closed_service_till_date) + count($closed_claim_till_date) + count($closed_feedback_till_date);
 
                     foreach($crm_complaints as $crm_complaint){
                         $created_at = $crm_complaint['created_at'];
                         $updated_at = $crm_complaint['updated_at'];
-
+                        
                         if($created_at->isToday()){
                             $crm_complaints_launched_each_day[] = 1;
                         }
 
-                        if($created_at->isToday() && $crm_complaint['status_id'] == 4){
+                        if($updated_at->isToday() && $crm_complaint['status_id'] == 4){
                             $crm_complaints_launched_each_day_closed[] = 1;
                         }
 
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_complaint['status_id'] == 4 && $daysDifference == 2){
+                        if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2){
                             $crm_complaints_2_days_closure[] = $daysDifference;
                         }
 
                     }
-
+                    
                     foreach($crm_service_requests as $crm_service_request){
                         $created_at = $crm_service_request['created_at'];
                         $updated_at = $crm_service_request['updated_at'];
@@ -10547,12 +10525,12 @@ class NotificationsController extends Controller
                             $crm_serviced_launched_each_day[] = 1;
                         }
 
-                        if($created_at->isToday() && $crm_service_request['status_id'] == 4){
+                        if($updated_at->isToday() && $crm_service_request['status_id'] == 4){
                             $crm_serviced_launched_each_day_closed[] = 1;
                         }
 
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_service_request['status_id'] == 4 && $daysDifference == 2){
+                        if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2){
                             $crm_services_2_days_closure[] = $daysDifference;
                         }
                     }
@@ -10565,19 +10543,21 @@ class NotificationsController extends Controller
                             $crm_claims_launched_each_day[] = 1;
                         }
 
-                        if($created_at->isToday() && $crm_claim['status_id'] == 4){
+                        if($updated_at->isToday() && $crm_claim['status_id'] == 4){
                             $crm_claims_launched_each_day_closed[] = 1;
                         }
-
+                        
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_claim['status_id'] == 4 && $daysDifference == 10){
+                        if ($crm_claim['status_id'] == 4 && $daysDifference <= 10){
                             $crm_claims_10_days_closure[] = $daysDifference;
                         }
                     }
-                    
+
+                    $total_count_closed = $crm_complaints_launched_each_day_closed + $crm_serviced_launched_each_day_closed + $crm_claims_launched_each_day_closed;
+
                     $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 3)
-                    ->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
+                    ->whereDate('updated_at', '<=', Carbon::today()->subDays(10))
                     ->get();
 
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
@@ -10603,7 +10583,7 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
-                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure In 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
@@ -10621,8 +10601,8 @@ class NotificationsController extends Controller
 
                     }
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
-                    if(count($closed_complaint_till_date) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure) / count($closed_complaint_till_date).'</td>';
+                    if(count($crm_complaints_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure) / count($crm_complaints_launched_each_day_closed).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
@@ -10641,7 +10621,7 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
-                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure In 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
@@ -10659,9 +10639,9 @@ class NotificationsController extends Controller
                     }
 
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
-                    if(count($closed_service_till_date) > 0){
+                    if(count($crm_complaints_launched_each_day_closed) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($closed_service_till_date).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_complaints_launched_each_day_closed).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
@@ -10700,14 +10680,14 @@ class NotificationsController extends Controller
                     }
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_10_days_closure),2).'</td>';
 
-                    if(count($closed_claim_till_date) > 0){
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_10_days_closure) / count($closed_claim_till_date).'</td>';
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_10_days_closure) / count($crm_claims_launched_each_day_closed).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
                     }
-                    if(count($closed_claim_till_date) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_status_10_days) / count($closed_claim_till_date).'</td>';
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_status_10_days) / count($crm_claims_launched_each_day_closed).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                     }
@@ -10717,7 +10697,7 @@ class NotificationsController extends Controller
                     $html .= '<br>'; 
 
                     //Agent Summary Report
-                    $html .= '<table style="=width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<table style="display: none; width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
                     $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Agents Summary Report</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
@@ -10726,7 +10706,7 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">New Tickets (Today)</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total In Process (Today)</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total Closure (Today)</th>';
-                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure in 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
@@ -10734,16 +10714,11 @@ class NotificationsController extends Controller
                     $index = 0;
 
                     foreach ($case_natures as $key => $value) {
-                        $today = Carbon::Today();
-                        $twoDaysAgo = $today->copy()->subDays(2);
-                        $createdDate = Carbon::parse($value['created_at']);
-                        if ($createdDate->lte($today) || $createdDate->gte($twoDaysAgo)) {
-                            $agent_id = $value["agent_id"];
-                            $agent[$agent_id]['status_id'][] = $value['status_id'];
-                            $agent[$agent_id]['ticket_id'][] = $value['id'];
-                            $agent[$agent_id]['created_at'][] = $value['created_at'];
-                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
-                        }
+                        $agent_id = $value["agent_id"];
+                        $agent[$agent_id]['status_id'][] = $value['status_id'];
+                        $agent[$agent_id]['ticket_id'][] = $value['id'];
+                        $agent[$agent_id]['created_at'][] = $value['created_at'];
+                        $agent[$agent_id]['updated_at'][] = $value['updated_at'];
                     }
 
                     foreach ($agent as $key => $value) 
@@ -10761,13 +10736,13 @@ class NotificationsController extends Controller
                             for ($i = 0; $i < count($created_at); $i++) {
                                 if(isset($created_at[$i], $updated_at[$i])){
                                     $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
-                                    if ($diffInDays == 2  && $statuses[$i] === 4) {
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4) {
                                         $closure_2_days[] = 1;
                                     }
                                     if ($created_at[$i]->isToday()) {
                                         $today_tickets[] = 1;
                                     }
-                                    if ($created_at[$i]->isToday() && $statuses[$i] === 4) {
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
                                         $today_closed[] = 1;
                                     }
                                     if ($created_at[$i]->isToday() && $statuses[$i] === 2) {
@@ -10786,8 +10761,8 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
-                        if(($total_count_closed) > 0){
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / ($total_count_closed) . '</td>';
+                        if(count($total_count_closed) > 0){
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($total_count_closed) . '</td>';
                         }else{
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                         }
