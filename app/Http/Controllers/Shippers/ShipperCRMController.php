@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\CRM\CrmComments;
