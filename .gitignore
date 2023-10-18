@@ -23,4 +23,4 @@ composer.lock
 !.elasticbeanstalk/*.global.yml
 /public/.DT_Store
 /public/file/.DT_Store
-*.DT_Store
+.DT_Store
