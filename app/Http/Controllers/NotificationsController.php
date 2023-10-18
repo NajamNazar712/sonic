@@ -10480,7 +10480,7 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                     }
                 } else if ($id == 223){
-
+                    $now = Carbon::now();
                     $to = 'mohsin.khan@trax.pk';
                     $cc = 'shahrukh.raheem@trax.pk';
 
@@ -10511,7 +10511,7 @@ class NotificationsController extends Controller
                         }
 
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->isToday()){
+                        if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
                             $crm_complaints_2_days_closure[] = $daysDifference;
                         }
 
@@ -10530,7 +10530,7 @@ class NotificationsController extends Controller
                         }
 
                         $daysDifference = $created_at->diffInDays($updated_at);
-                        if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->isToday()){
+                        if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
                             $crm_services_2_days_closure[] = $daysDifference;
                         }
                     }
