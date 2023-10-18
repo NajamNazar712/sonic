@@ -37,6 +37,7 @@
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
                             </select>
+                            <div class="danger d-none" id="operation_rider_error">This field is required</div>
                         </fieldset>
                     </div>
                     <div class="col-2">
@@ -306,6 +307,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            
+
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -485,23 +489,23 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     
-                    var fintech_sum = $(row).find('#myButton');
-                    var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
-                    fintech_sum = fintech_sum[0].innerText
-                    fintech_sum = parseFloat(fintech_sum)
+                    // var fintech_sum = $(row).find('#myButton');
+                    // var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
+                    // fintech_sum = fintech_sum[0].innerText
+                    // fintech_sum = parseFloat(fintech_sum)
 
-                    if(data.transactions_amount == null){
+                    // if(data.transactions_amount == null){
                         
-                        data.transactions_amount = 0
-                    }
-                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+                    //     data.transactions_amount = 0
+                    // }
+                    // value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
                     
-                    if (value < 0) {
-                        value = 0;
-                    }  
+                    // if (value < 0) {
+                    //     value = 0;
+                    // }  
 
-                    console.log(data.transactions_amount)
-                    $('td:eq(22)', row).html(value);
+                    // console.log(data.transactions_amount)
+                    // $('td:eq(22)', row).html(value);
 
 
                 },
@@ -570,8 +574,23 @@
                 }
             });
 
+
+            $('#search_filter_btn').on('click', function(){
+                
+            })
+
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var errors = 0;
+                var operation = $('#operation_rider_id').val();
+                if(!operation){
+                    $('#operation_rider_error').removeClass('d-none')
+                    errors = 1;
+                }
+                
+                if (errors == 0) {
+                    $('#operation_rider_error').addClass('d-none');
+                    table.draw();
+                }
             });
 
             function print(id) {
@@ -713,7 +732,6 @@
 
             $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                console.log(id);
                 $('#one_link_payment_details_modal').modal('show');
 
                 $.ajax({
@@ -729,9 +747,6 @@
                             var html = '';
 
                             if (data.transaction_data) {
-                                // $.each(data.shipments, function(index, tracking_number) {
-                                //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                // });
                                 $.each(data.transaction_data, function(index, values) {
                                     html+= `
 
@@ -779,7 +794,6 @@
                             html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.details, function (index, value) {
-                                console.log(value);
                                 var ind = index + 1;
                                 html += '<tr class=""><td>' + ind + '</td>';
                                 html += '<td>' + value.transaction_id + '</td>';
@@ -842,7 +856,6 @@
                     .done(function (data) {
                         if (data) {
                             var html = '';
-                            console.log(data);
                             if (data.shipments) {
                                 $.each(data.shipments, function (index, tracking_number) {
                                     html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
