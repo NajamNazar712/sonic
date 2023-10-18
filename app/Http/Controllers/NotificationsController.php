@@ -10733,7 +10733,6 @@ class NotificationsController extends Controller
                             $today_tickets = []; 
                             $today_closed = [];
                             $today_inprocess = [];
-                            $closure_within_2_days = []; 
 
                             for ($i = 0; $i < count($created_at); $i++) {
                                 if(isset($created_at[$i], $updated_at[$i])){
@@ -10747,7 +10746,7 @@ class NotificationsController extends Controller
                                     if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
                                         $today_closed[] = 1;
                                     }
-                                    if ($created_at[$i]->isToday() && $statuses[$i] === 2) {
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 2) {
                                         $today_inprocess[] = 1;
                                     }
                                 }
