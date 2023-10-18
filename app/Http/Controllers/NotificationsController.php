@@ -10641,7 +10641,7 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
                     if(count($crm_complaints_launched_each_day_closed) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_complaints_launched_each_day_closed) * 100 . '%'.'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_serviced_launched_each_day_closed) * 100 . '%'.'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
