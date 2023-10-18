@@ -78,6 +78,11 @@ return [
             'path' => storage_path('logs/last_mile_app_report.log'),
             'level' => 'debug',
         ],
+        'code_test_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/code_test.log'),
+            'level' => 'debug',
+        ],
     ],
 
 ];
