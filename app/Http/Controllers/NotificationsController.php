@@ -10736,7 +10736,7 @@ class NotificationsController extends Controller
                             for ($i = 0; $i < count($created_at); $i++) {
                                 if(isset($created_at[$i], $updated_at[$i])){
                                     $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
-                                    if ($diffInDays <= 2  && $statuses[$i] === 4) {
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
                                         $closure_2_days[] = 1;
                                     }
                                     if ($created_at[$i]->isToday()) {
