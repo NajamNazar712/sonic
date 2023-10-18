@@ -10762,7 +10762,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
-                        if(count($total_count_closed) > 0){
+                        if(count($today_closed) > 0){
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
                         }else{
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
