@@ -10484,7 +10484,7 @@ class NotificationsController extends Controller
                     $attachmentPath = $reference_2_id;                    
 
                     $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email') ->filter()->unique();
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
 
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
@@ -10494,7 +10494,7 @@ class NotificationsController extends Controller
                     $attachmentPath = $reference_2_id;                    
 
                     $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email');
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
 
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
