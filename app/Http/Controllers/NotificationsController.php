@@ -10486,6 +10486,8 @@ class NotificationsController extends Controller
                     $role_ids = [19,15,106,91,3,9,123,128,95];
                     $email = Admin::whereIn('role_id', $role_ids)->pluck('email');
 
+                    dd($email);
+
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
 
