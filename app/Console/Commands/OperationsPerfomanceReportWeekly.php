@@ -42,8 +42,9 @@ class OperationsPerfomanceReportWeekly extends Command
     {
         $id = 224;
         $currentDate = Carbon::now();
-        $from = $currentDate->copy()->previous(Carbon::FRIDAY)->toDateString();
-        $to = $currentDate->copy()->previous(Carbon::THURSDAY)->toDateString();
+        $from = $currentDate->copy()->previous(Carbon::FRIDAY);
+        $to = $from->copy()->next(Carbon::THURSDAY)->toDateString();
+        $from = $from->toDateString();
         $this->operations_performance_export_to_excel($from, $to, $id);
     }
 }
