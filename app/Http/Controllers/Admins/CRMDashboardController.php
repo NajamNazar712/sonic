@@ -95,6 +95,9 @@ class CRMDashboardController extends Controller
             $crm['closed_rate_avg'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4);
+            $crm['re_open'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 5);
             $crm['valid'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 6);
@@ -122,6 +125,9 @@ class CRMDashboardController extends Controller
             $crm['closed_rate_avg'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4)->where('agent_id',auth()->user()->id);
+            $crm['re_open'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 5)->where('agent_id',auth()->user()->id);
             $crm['valid'] = CrmRequestStatusHistory::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 6)->where('agent_id',auth()->user()->id);
@@ -135,6 +141,7 @@ class CRMDashboardController extends Controller
         $crm['in_process'] = $crm['in_process']->count();
         $crm['resolved'] = $crm['resolved']->count();
         $crm['closed'] = $crm['closed']->count();
+        $crm['re_open'] = $crm['re_open']->count();
         $crm['valid'] = $crm['valid']->count();
         $crm['in_valid'] = $crm['in_valid']->count();
         
@@ -145,20 +152,25 @@ class CRMDashboardController extends Controller
 //       dd($today,$thirtyDays,$crm['total'],$crm['closed'],$shipments);
         $crm['closed_rate'] = $crm['total'] !== 0 ? $crm['closed']/$crm['total'] : 0;
         $crm['in_process_ratio'] = $shipments !== 0 ? $crm['total']/$shipments : 0;
+        $crm['re_open_rate'] = $crm['closed'] !== 0 ? $crm['re_open']/$crm['closed'] : 0;
         
         $crm['in_valid_percentage'] = "0";
         $crm['closed_rate_percentage'] = "0";
         $crm['in_process_ratio_percentage'] = "0";
+        $crm['re_open_rate_percentage'] = "0.1";
+        
         if ($crm['total'] > 0) {
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
             $crm['closed_rate_percentage'] = $crm['total'] !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
             $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
+            $crm['re_open_rate_percentage'] =  $crm['total']!=0 ? round(($crm['re_open_rate']) * 100, 2) : 0;
         }
 
         $crm['launched'] = number_format($crm['launched']);
         $crm['in_process'] = number_format($crm['in_process']);
         $crm['resolved'] = number_format($crm['resolved']);
         $crm['closed'] = number_format($crm['closed']);
+        $crm['re_open'] = number_format($crm['re_open']);
         $crm['valid'] = number_format($crm['valid']);
         $crm['in_valid'] = number_format($crm['in_valid']);
         $crm['closed_rate'] = number_format($crm['closed_rate']);
