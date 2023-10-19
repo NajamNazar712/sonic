@@ -387,8 +387,10 @@ trait RvTrait
             }
         }
 
-        if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) {
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [7, 8, 9, 12, 15, 52, 65])->latest('id')->first();
+        // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) { old for rv
+        if (in_array($parcel->shipper_status_id, [12, 52, 65])) { 
+            // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [7, 8, 9, 12, 15, 52, 65])->latest('id')->first(); old for rv
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 65])->latest('id')->first();
 
             if ($journey) {
                 if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -461,7 +463,8 @@ trait RvTrait
         // 52 = Shipment - Re-Attempt Requested
         // 65 = Shipment - Shipper Advise Requested 
 
-        if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) {
+        // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) { old for rv
+        if (in_array($parcel->shipper_status_id, [12, 52, 65])) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -555,7 +558,8 @@ trait RvTrait
             }
 
             
-            if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) {
+            // if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) { old for rv
+            if (in_array($shipment->shipper_status_id, [12, 52, 65]) || $crm == true) {
                 if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name 
                 || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 
                 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email 
@@ -1413,6 +1417,55 @@ trait RvTrait
         }
     }
 
+    protected function shipment_status_update_admin($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id)
+    {
+        $shipper = User::where('id', $updated_by_id)->first();
+        if ($shipper) {
+
+            $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)
+            ->where('rv_assign_agent_status_id',7)
+            ->where('rv_state_id', 2)
+            ->latest()->first();
+
+            DB::beginTransaction();
+            try {
+                if ($rv_shipment_assign_agents) {
+                    $rv_shipment_assign_agents->rv_assign_agent_status_id = $update_rv_assign_agent_status_id;
+                    $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
+                    $rv_shipment_assign_agents->updated_type_id = $updated_type_id; //Shipper or retail
+                    $rv_shipment_assign_agents->updated_by_id = $updated_by_id;
+                    $rv_shipment_assign_agents->update();
+    
+                    $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
+                            'agent_id' => $rv_shipment_assign_agents->agent_id,
+                            'shipments_journey_id' => $rv_shipment_assign_agents->shipments_journey_id,
+                            'last_shipments_journey_id' => $rv_shipment_assign_agents->last_shipments_journey_id,
+                            'shipment_id' => $rv_shipment_assign_agents->shipment_id,
+                            'rv_assign_agent_status_id' => $rv_shipment_assign_agents->rv_assign_agent_status_id,
+                            'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agents->rv_assign_agent_sub_status_id,
+                            'rv_state_id' => $rv_shipment_assign_agents->rv_state_id,
+                            'updated_type_id' => $rv_shipment_assign_agents->updated_type_id,
+                            'updated_by_id' =>  $rv_shipment_assign_agents->updated_by_id,
+                            'is_fake_status' => $rv_shipment_assign_agents->is_fake_status,
+                            'rv_fake_status_id' => $rv_shipment_assign_agents->rv_fake_status_id,
+                            'remarks' => $rv_shipment_assign_agents->remarks,
+                            'call_to_id' => $rv_shipment_assign_agents->call_to_id,
+                        ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                    DB::commit();
+                    return true;
+                } 
+                else {
+                    DB::rollback();
+                    return ['status' => 1, 'error' => 'No Shipment ID Found'];
+                    } 
+                }
+            catch (\Throwable $th) {
+                return ['status' => 1, 'error' => $th->getMessage()];
+            }
+        }
+    }
+
     protected function included_shippers($sorted_agents, $agent_id, $agent_shipment_id = null)
     {
         $shipment = null;
@@ -1483,7 +1536,8 @@ trait RvTrait
                 }   
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                ->whereIn('shipper_status_id', [7,8,9,15,12,65,66])
+                // ->whereIn('shipper_status_id', [7,8,9,15,12,65,66]) old for rv
+                ->whereIn('shipper_status_id', [12,65,66])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
@@ -1530,7 +1584,8 @@ trait RvTrait
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    ->whereIn('shipper_status_id', [7,8,9,15,12,65,66])
+                    // ->whereIn('shipper_status_id', [7,8,9,15,12,65,66]) old for rv
+                    ->whereIn('shipper_status_id', [12,65,66])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
                         SELECT sj.id

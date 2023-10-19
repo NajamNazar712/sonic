@@ -83,6 +83,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Traits\RvTrait;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use DB;
@@ -112,6 +113,8 @@ use Vectorface\Whip\Whip;
 
 class APIController extends Controller
 {
+
+    use RvTrait;
     private $names = [
         'person_of_contact' => 'Person of Contact',
         'vendor' => 'Vendor',

@@ -212,7 +212,7 @@ class ReturnController extends Controller
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
          'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name')
-        // ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65,66])
+        // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
         ->whereIn('shipments.shipper_status_id', [12,65,66])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
@@ -1050,7 +1050,7 @@ class ReturnController extends Controller
         }
     }
 
-    //THIS FUNCTION IS CALLING ON CONFIRM BUTTON in Row ON Shipment - Reason Validation Required Screen
+    //THIS FUNCTION IS CALLING ON Return CONFIRM BUTTON in Row ON Shipment - Reason Validation Required Screen
     public function return_marked_single_status(Request $request)
     {
         $remark = $request->remark;
@@ -5418,7 +5418,8 @@ class ReturnController extends Controller
                     return abs($item->created_at->diffInSeconds($currentDateTime));
                 })->first();
                 if($shipment->exists()){
-                    if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                    if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
+                    $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                         DB::commit();
                         $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                         $assigned_shipment[] = $shipment->tracking_number;
@@ -5560,7 +5561,8 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
+                    // if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 65])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
                     if (!empty($row['agent_id'])) {
