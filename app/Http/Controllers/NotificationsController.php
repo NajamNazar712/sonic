@@ -10560,6 +10560,8 @@ class NotificationsController extends Controller
                     ->whereDate('updated_at', '<=', Carbon::today()->subDays(10))
                     ->get();
 
+                    dd($resolved_status_10_days);
+
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
      
                     $resolved_claimed = $crm_claims->map(function($result){
@@ -10568,6 +10570,7 @@ class NotificationsController extends Controller
                             'created_at' => $result['created_at'],
                         ];
                     });
+                    
         
                     $resolved_claimed = $resolved_claimed->filter(function ($item) {
                         return $item['status_id'] == 3 && $item['created_at']->isToday();
