@@ -157,7 +157,7 @@ class CRMDashboardController extends Controller
         $crm['in_valid_percentage'] = "0";
         $crm['closed_rate_percentage'] = "0";
         $crm['in_process_ratio_percentage'] = "0";
-        $crm['re_open_rate_percentage'] = "0.1";
+        $crm['re_open_rate_percentage'] = "0";
         
         if ($crm['total'] > 0) {
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
