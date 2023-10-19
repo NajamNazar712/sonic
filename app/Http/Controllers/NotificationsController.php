@@ -10557,10 +10557,11 @@ class NotificationsController extends Controller
 
                     $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
                     ->where('status_id', 3)
-                    ->whereDate('updated_at', '<=', Carbon::today()->subDays(10))
+                    ->where(function ($query) {
+                        $query->whereDate('updated_at', '<=', Carbon::today()->subDays(10))
+                              ->orWhereDate('updated_at', Carbon::today());
+                    })
                     ->get();
-
-                    dd($resolved_status_10_days);
 
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
      
