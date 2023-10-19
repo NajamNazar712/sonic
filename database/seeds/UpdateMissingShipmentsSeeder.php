@@ -18,7 +18,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $tracking_numbers = [20217228455686, 20217228455720, 20217228455783, 20222328456577, 20222328456600, 20211028456622, 20225128455335, 20213428455544, 22314428456829, 25125128455528, 20220228456524];
+        $tracking_numbers = [];
 
 
         foreach ($tracking_numbers as $tracking_number){

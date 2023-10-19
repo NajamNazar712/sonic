@@ -15,19 +15,9 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
     public function run()
     {
         $shipment_ids = [
-            27693536,
-            27756255,
-            27756503,
-            27756743,
-            27804952,
-            27821588,
-            27795590,
-            27795633,
-            27740395,
-            27730733,
-            27297627,
-            27225885,
-            27225631,
+            27315691,
+            27315284,
+            27302066
         ];
 
         foreach ($shipment_ids as $shipment_id){

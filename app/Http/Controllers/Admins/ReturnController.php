@@ -38,6 +38,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Facades\File;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\HR\StaffCategory;
@@ -139,14 +140,14 @@ class ReturnController extends Controller
             $join->on('sj.shipment_id', '=', 'shipments.id')
             ->where('sj.id','=',
                     DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-                })
-                ->leftJoin('shipments_journey as sret', function ($join) {
+        })
+        ->leftJoin('shipments_journey as sret', function ($join) {
             $join->on('sret.shipment_id', '=', 'shipments.id')
                 ->where('sret.shipper_status_id','=',13)
                 ->where('sret.verification','=',1);
-//                    ->where('sret.id','=',
-//                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
-})
+            //                    ->where('sret.id','=',
+            //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
+        })
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
         ->leftjoin('crm_requests as crm', function ($join) {
             $join->on('crm.shipment_id', '=', 'shipments.id')
