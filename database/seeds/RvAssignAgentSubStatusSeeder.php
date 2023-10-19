@@ -36,24 +36,24 @@ class RvAssignAgentSubStatusSeeder extends Seeder
             array('name' => 'A OPEN','shipment_status_reason_id'=> 62,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
 
             //Return Confirm Reasons Not Found in Shipment Status Reason Table
-            array('name' => 'Consignee is not interested','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Consignee wants to open the shipment','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Duplicate Order','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Number Not Pertain to Consignee','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Refused after opening the shipment','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Consignee is not interested','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Consignee wants to open the shipment','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Duplicate Order','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Number Not Pertain to Consignee','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Refused after opening the shipment','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
 
 
-            array('name' => 'Mark for self collection','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 5,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Mark for self collection','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 5,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'No One Came For Self-Collection','shipment_status_reason_id'=> 45,'rv_assign_agent_status_id'=> 5,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'NSA / OSA Hold','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Hold','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'NSA / OSA Hold','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Hold','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
 
             //Unresponsive Reasons
-            array('name' => 'Invalid','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Powered Off','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Not Answered','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Hang up by Customer','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Number Busy','shipment_status_reason_id'=>Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Invalid','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Powered Off','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Not Answered','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Hang up by Customer','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Number Busy','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }
