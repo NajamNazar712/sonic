@@ -10736,7 +10736,7 @@ class NotificationsController extends Controller
                             if (strpos($body, '[to]') !== FALSE) {
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
-                        }f
+                        }
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 } else if ($id == 14) {
