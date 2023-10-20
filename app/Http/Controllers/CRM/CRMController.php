@@ -25,7 +25,7 @@ class CRMController extends Controller
     //launched_by = 1 => Shipper
     //launched_by = 2 => Substitute Shipper
 
-    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL){
+    static public function add($case_nature_id, $case_nature_type_id = NULL, $channel_id, $status_id = 1, $launched_by_id = NULL, $launched_by, $shipment_id = NULL, $shipper_id = NULL, $agent_id = NULL,$description = NULL, $product_cost = NULL, $product_picture = NULL, $invoice_picture = NULL, $damage_product_picture = NULL, $product_packaging_picture = NULL, $actual_product_picture = NULL, $damage_product_price = NULL, $missing_product_picture = NULL, $product_packaging_picture_for_content_short = NULL, $actual_product_picture_for_content_short = NULL, $missing_product_price = NULL, $is_automated_cod_change = false){
         $crm_request = new CrmRequest();
         $crm_request->case_nature_id = $case_nature_id;
         $crm_request->case_nature_type_id = $case_nature_type_id;
@@ -369,7 +369,7 @@ class CRMController extends Controller
                     $crm_request_status_history->save();
                     
                 }
-                else if($case_nature_type_id == 12)
+                else if($case_nature_type_id == 12 && $is_automated_cod_change)
                 {
                     $crm_request->status_id = 4;
                     $crm_request->save();
@@ -441,10 +441,10 @@ class CRMController extends Controller
             }
 
             $comment = "Dear Customer,
-            Thank you for reaching out to us!
-            We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
-            UAN # 021-111-11-8729 
-            Email:Info@trax.pk";
+                        Thank you for reaching out to us!
+                        We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
+                        UAN # 021-111-11-8729 
+                        Email:Info@trax.pk";
             
             $comment_by = 0;
             $comment_type = 0;

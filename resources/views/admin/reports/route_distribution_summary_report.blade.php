@@ -43,8 +43,8 @@
                     <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @foreach($options as $option)
+                                    <option value="{{ $option['value'] }}">{{ $option['text'] }}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -89,6 +89,7 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Type</th>
                             <th class="border-primary border-darken-1">Delivery Note</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
@@ -293,6 +294,7 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
+                            head.push('Rider Trax ID');
                             head.push('Rider Type');
                             head.push('Delivery Note');
                             head.push('DNCC Amount');
@@ -315,6 +317,7 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
+                                row.push(values.rider_trax_id);
                                 row.push(values.rider_type);
                                 row.push(values.dn_no_count);
                                 row.push(values.dncc_amount);
@@ -348,6 +351,7 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push('');
@@ -411,6 +415,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
+                    { data:'rider_trax_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_trax_id'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
                     { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
                     { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},

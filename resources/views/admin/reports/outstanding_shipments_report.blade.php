@@ -55,7 +55,7 @@
 										</span>
                                 </div>
 
-                                <input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
+                                <input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" data-value="{{ Carbon\Carbon::today() }}" id="delivery_date_from" placeholder="Delivery Date (From)">
                             </div>
                         </div>
 
@@ -67,7 +67,7 @@
 										</span>
                                 </div>
 
-                                <input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
+                                <input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" data-value="{{ Carbon\Carbon::today() }}" id="delivery_date_to" placeholder="Delivery Date (To)">
                             </div>
                         </div>
 

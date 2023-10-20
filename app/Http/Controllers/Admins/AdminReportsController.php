@@ -1483,6 +1483,14 @@ class AdminReportsController extends Controller
             ->whereIn('delivery_note_shipments.status', [4, 5, 6, 7, 8, 11])
             ->where('s.booking_type_id', '!=', 4)
             ->whereIn('sj.shipper_status_id', [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46]);
+        
+        if ($request->get('delivery_date_from')) {
+            $shipments->where('delivery_note_shipments.created_at', '>=', $delivery_date_from);
+        }
+        if ($request->get('delivery_date_to')) {
+            $shipments->where('delivery_note_shipments.created_at', '>=', $delivery_date_to);
+        }
+        
         if (session('role_id') != 1 || in_array(session('id'), session('sale_users_bypass'))) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -7875,9 +7883,24 @@ class AdminReportsController extends Controller
         $destination_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('status', 1)->get();
         $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $riders_cat = OperationRidersCategory::all();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'trax_id', 'city_id']);
+        $cityIds = $riders->pluck('city_id')->toArray();
+        $rider_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('id',$cityIds)->get();
 
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
+        $options = [];
+
+        foreach ($riders as $rider) {
+            $riderCity = $rider_cities->firstWhere('id', $rider->city_id);
+
+            if ($riderCity) {
+                $options[] = [
+                    'value' => $rider->id,
+                    'text' => "{$rider->name} - {$rider->trax_id} ({$riderCity->name})",
+                ];
+            }
+        }
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 
+        'zones' => $zones, 'riders_cat' => $riders_cat, 'options' => $options]);
     }
 
     public function route_distribution_list(Request $request)
@@ -7943,10 +7966,9 @@ class AdminReportsController extends Controller
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), 
             DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 
             'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type',
-            'delivery_notes.id as delivery_note')
+            'delivery_notes.id as delivery_note','r.trax_id as rider_trax_id')
             ->groupBy('r.id');
 
-            // dd($route_distribution_summary);
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)

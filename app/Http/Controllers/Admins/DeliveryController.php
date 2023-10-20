@@ -148,8 +148,9 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
-        $shipments = DB::connection('reports_2')->table('shipments')
-            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+//        $shipments = DB::connection('reports_2')->table('shipments')
+//            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -7457,8 +7458,28 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('transactions_amount_link', function ($shipment) {
+                // if ($shipment->transactions_amount != null) {
+                //     $dncc_amount = $shipment->amount ?? 0; //3000
+                //     $hbl_connect_amount = $shipment->transactions_amount ?? 0; //2020
+                //     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $shipment->delivery_note)->pluck('shipment_id')->toArray();
+                //     $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                //     ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount') ?? 0; //3000
+                //     $one_link_amount = $shipment->one_link_amount ?? 0; //0
+                //     $total_amount = $dncc_amount - ($hbl_connect_amount + $amount + $one_link_amount);
+                //     return '<button class="btn btn-sm btn-outline-info align-middle">' . $total_amount . '</button>';
+                // } else {
+                //     return '-';
+                // }
                 if ($shipment->transactions_amount != null) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                    $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $shipment->delivery_note)
+                    ->selectRaw('SUM(amount) as total_amount')
+                    ->groupBy('delivery_note_id')
+                    ->first();
+                    if($hbl_konnect_transactions){
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $hbl_konnect_transactions->total_amount . '</button>';
+                    } else{
+                        return '-';
+                    }
                 } else {
                     return '-';
                 }
@@ -7469,11 +7490,6 @@ class DeliveryController extends Controller
                 $cash_amount = $dncc_amount - $hbl_connect_amount;
 
                 return number_format($cash_amount);
-                // if ($shipment->cash_amount != null) {
-                //     return number_format($shipment->cash_amount);
-                // } else {
-                //     return number_format($shipment->amount);
-                // }
             })
             ->editColumn('created_via', function ($delivery) {
                 if ($delivery->created_via == 0) {
