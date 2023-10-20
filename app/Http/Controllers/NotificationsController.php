@@ -10510,7 +10510,7 @@ class NotificationsController extends Controller
                             }
     
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2 && $updated_at->isToday()){
                                 $crm_complaints_2_days_closure[] = $daysDifference;
                             }
     
@@ -10530,7 +10530,7 @@ class NotificationsController extends Controller
                             }
     
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2 && $updated_at->isToday()){
                                 $crm_services_2_days_closure[] = $daysDifference;
                             }
                         }
@@ -10549,7 +10549,7 @@ class NotificationsController extends Controller
                             }
                             
                             $daysDifference = $created_at->diffInDays($updated_at);
-                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10){
+                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10 && $updated_at->isToday()){
                                 $crm_claims_10_days_closure[] = $daysDifference;
                             }
                         }
@@ -10728,7 +10728,7 @@ class NotificationsController extends Controller
                             for ($i = 0; $i < count($created_at); $i++) {
                                 if(isset($created_at[$i], $updated_at[$i])){
                                     $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
-                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2 && $updated_at[$i]->isToday()) {
                                         $closure_2_days[] = 1;
                                     }
                                     if ($created_at[$i]->isToday()) {

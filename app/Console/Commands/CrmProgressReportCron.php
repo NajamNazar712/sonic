@@ -40,18 +40,9 @@ class CrmProgressReportCron extends Command
      */
     public function handle()
     {
-        $crm_complaints = CrmRequest::where('case_nature_id', 1) ->where(function ($query) {
-            $query->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
-                  ->orWhereDate('updated_at', Carbon::today());
-        })->get();
-        $crm_service_requests = CrmRequest::where('case_nature_id', 2) ->where(function ($query) {
-            $query->whereDate('updated_at', '>=', Carbon::today()->subDays(2))
-                  ->orWhereDate('updated_at', Carbon::today());
-        })->get();
-        $crm_claims = CrmRequest::where('case_nature_id', 4) ->where(function ($query) {
-            $query->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
-                  ->orWhereDate('updated_at', Carbon::today());
-        })->get();
+        $crm_complaints = CrmRequest::where('case_nature_id', 1)->get();
+        $crm_service_requests = CrmRequest::where('case_nature_id', 2)->get();
+        $crm_claims = CrmRequest::where('case_nature_id', 4)->get();
 
         NotificationsController::send(223, $crm_complaints, $crm_service_requests, $crm_claims);
     }
