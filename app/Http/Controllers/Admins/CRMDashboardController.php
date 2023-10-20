@@ -149,7 +149,7 @@ class CRMDashboardController extends Controller
         whereBetween('created_at', [$thirtyDays, $today])->
         count();
         
-//       dd($today,$thirtyDays,$crm['total'],$crm['closed'],$shipments);
+
         $crm['closed_rate'] = $crm['total'] !== 0 ? $crm['closed']/$crm['total'] : 0;
         $crm['in_process_ratio'] = $shipments !== 0 ? $crm['total']/$shipments : 0;
         $crm['re_open_rate'] = $crm['closed'] !== 0 ? $crm['re_open']/$crm['closed'] : 0;
@@ -1220,7 +1220,7 @@ class CRMDashboardController extends Controller
                 if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
                     $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today, 0);
                 } else {
-//dd($card_data['in_valid']->get());
+        //dd($card_data['in_valid']->get());
                     $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today,0);
 
                 }
