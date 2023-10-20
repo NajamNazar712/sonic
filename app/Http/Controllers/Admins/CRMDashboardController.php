@@ -163,7 +163,7 @@ class CRMDashboardController extends Controller
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
             $crm['closed_rate_percentage'] = $crm['total'] !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
             $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
-            $crm['re_open_rate_percentage'] =  $crm['total']!=0 ? round(($crm['re_open_rate']) * 100, 2) : 0;
+            $crm['re_open_rate_percentage'] =  $crm['closed']!=0 ? round(($crm['re_open_rate']) * 100, 2) : 0;
         }
 
         $crm['launched'] = number_format($crm['launched']);
@@ -1095,15 +1095,11 @@ class CRMDashboardController extends Controller
 
             //Closed
             $card_data['closed'] = CrmRequest::where('crm_requests.status_id', 4);
-
-            // whereBetween('created_at', [$thirtyDays, $today])->
             
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['closed'] = self::agent($card_data['closed'],$agent_id);
             }
-            
-           
 
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date'))) {
                 $card_data['closed'] = self::dates($card_data['closed'], $from, $to);
@@ -1152,6 +1148,58 @@ class CRMDashboardController extends Controller
             if ($avg_tat = $request->get('avg_tat'))
             {   
                 $card_data['closed'] = self::avg_tat($card_data['closed'],$avg_tat);
+            }
+
+            //Re open
+            $card_data['re_open'] = CrmRequest::where('crm_requests.status_id', 5);
+
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['re_open'] = self::agent($card_data['re_open'],$agent_id);
+            }
+
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {
+                $card_data['re_open'] = self::dates($card_data['re_open'],$from,$to);
+            }
+            else
+            {
+                $card_data['re_open']->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
+            }
+
+            if ($origin = $request->get('search_origin'))
+            {  
+                $card_data['re_open'] = self::origin($card_data['re_open'],$origin); 
+            }
+
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['re_open'] = self::destination($card_data['re_open'],$destination);
+            }
+
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['re_open'] = self::zone($card_data['re_open'],$zone);
+            }
+
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {
+                $card_data['re_open'] = self::case_nature($card_data['re_open'],$search_case_nature);
+            } 
+
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['re_open'] = self::case_nature_type($card_data['re_open'],$search_case_nature_type);
+            } 
+
+            if ($shipment_status = $request->get('search_shipment_status'))
+            {   
+                $card_data['re_open'] = self::shipment_status($card_data['re_open'],$shipment_status);
+            }
+
+            if ($avg_tat = $request->get('avg_tat'))
+            {   
+                $card_data['re_open'] = self::avg_tat($card_data['re_open'],$avg_tat);
             }
 
             //Valid
@@ -1220,7 +1268,7 @@ class CRMDashboardController extends Controller
                 if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
                     $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today, 0);
                 } else {
-        //dd($card_data['in_valid']->get());
+                    //dd($card_data['in_valid']->get());
                     $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today,0);
 
                 }
@@ -1259,11 +1307,13 @@ class CRMDashboardController extends Controller
             $card_data['in_process'] = $card_data['in_process']->count();
             $card_data['resolved'] = $card_data['resolved']->count();
             $card_data['closed'] = $card_data['closed']->count();
+            $card_data['re_open'] = $card_data['re_open']->count();
             $card_data['valid'] = $card_data['valid']->count();
             $card_data['in_valid'] = $card_data['in_valid']->count();
             $card_data['in_valid_percentage'] = "0";
             $card_data['closed_rate_percentage'] = "0";
             $card_data['in_process_ratio'] = "0";
+            $card_data['re_open_rate_percentage'] = "0";
             $card_data['in_process_ratio_percentage'] = "0";
 
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
@@ -1280,15 +1330,14 @@ class CRMDashboardController extends Controller
                 
 
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
+                $card_data['re_open_rate'] = $card_data['closed'] !== 0 ? $card_data['re_open']/$card_data['closed'] : 0;
                 $card_data['total'] = $card_data['total']->count();
                 if ($card_data['total'] > 0) {
                     $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
-                    $card_data['closed_rate_percentage'] = $card_total !== 0
-                    ? round(($card_data['closed_rate']) * 100, 2)
+                    $card_data['closed_rate_percentage'] = $card_total !== 0 ? round(($card_data['closed_rate']) * 100, 2) : 0;
+                    $card_data['in_process_ratio_percentage'] = $shipments !== 0 ? round(($card_data['in_process_ratio']) * 100,2)
                     : 0;
-                    $card_data['in_process_ratio_percentage'] = $shipments !== 0
-                    ? round(($card_data['in_process_ratio']) * 100, 2)
-                    : 0;
+                    $card_data['re_open_rate_percentage'] =  $card_data['closed']!=0 ? round(($card_data['re_open_rate']) * 100, 2) : 0;
                 }
             }
             
@@ -1300,11 +1349,10 @@ class CRMDashboardController extends Controller
             $card_data['valid'] = number_format($card_data['valid']);
             $card_data['in_valid'] = number_format($card_data['in_valid']);
             $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
+            $card_data['re_open'] = number_format($card_data['re_open']);
 
             return response()->json(['status' => 1, 'card_data' => $card_data]);
-        // }else{
-        //     return response()->json(['status' => 0]);
-        // }
+            
     }
     // Cards Filter Functions
     static function agent($query,$id,$crm_request = 1)

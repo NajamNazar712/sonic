@@ -1059,7 +1059,6 @@
                     }
                 }).done(function (data) {
                     if(data.status){
-                        console.log(data.card_data);
                         $('#launched').text(data.card_data.launched);
                         $('#in_process').text(data.card_data.in_process);
                         $('#resolved').text(data.card_data.resolved);
@@ -1071,6 +1070,7 @@
                         $('#closed_rate_percentage').text(data.card_data.closed_rate_percentage);
                         $('#in_process_ratio').text(data.card_data.in_process_ratio);
                         $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);
+                        $('#re_open_rate_percentage').text(data.card_data.re_open_rate_percentage);
                     }else{
                         $('#launched').text(0);
                         $('#in_process').text(0);
@@ -1083,6 +1083,7 @@
                         $('#closed_rate_percentage').text(0);
                         $('#in_process_ratio').text(0);
                         $('#in_process_ratio_percentage').text(0);
+                        $('#re_open_rate_percentage').text(0);
                     }
                 });
             }
