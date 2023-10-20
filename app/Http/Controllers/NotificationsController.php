@@ -10700,7 +10700,7 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
-                    $agent = array();
+                    $agent = [];
                     $index = 0;
                     if($case_natures->isNotEmpty()){
                         foreach ($case_natures as $key => $value) {
@@ -10711,39 +10711,39 @@ class NotificationsController extends Controller
                             $agent[$agent_id]['updated_at'][] = $value['updated_at'];
                         }
                     }
-                    if(!empty($agent)){
-                        foreach ($agent as $key => $value) 
-                        {
-                            $index = $index + 1;
-                            $created_at = $value['created_at'];
-                            $updated_at = $value['updated_at'];
-                            $statuses = $value['status_id'] ;
+                    
+                    foreach ($agent as $key => $value) 
+                    {
+                        $index = $index + 1;
+                        $created_at = $value['created_at'];
+                        $updated_at = $value['updated_at'];
+                        $statuses = $value['status_id'] ;
 
-                            if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
-                                $closure_2_days = []; 
-                                $today_tickets = []; 
-                                $today_closed = [];
-                                $today_inprocess = [];
+                        if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
+                            $closure_2_days = []; 
+                            $today_tickets = []; 
+                            $today_closed = [];
+                            $today_inprocess = [];
 
-                                for ($i = 0; $i < count($created_at); $i++) {
-                                    if(isset($created_at[$i], $updated_at[$i])){
-                                        $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
-                                        if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
-                                            $closure_2_days[] = 1;
-                                        }
-                                        if ($created_at[$i]->isToday()) {
-                                            $today_tickets[] = 1;
-                                        }
-                                        if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
-                                            $today_closed[] = 1;
-                                        }
-                                        if ($updated_at[$i]->isToday() && $statuses[$i] === 2) {
-                                            $today_inprocess[] = 1;
-                                        }
+                            for ($i = 0; $i < count($created_at); $i++) {
+                                if(isset($created_at[$i], $updated_at[$i])){
+                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
+                                        $closure_2_days[] = 1;
+                                    }
+                                    if ($created_at[$i]->isToday()) {
+                                        $today_tickets[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
+                                        $today_closed[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 2) {
+                                        $today_inprocess[] = 1;
                                     }
                                 }
-                            }  
-                        }                                             
+                            }
+                    }  
+                                                                 
                         $agent = Admin::where('id', $key)->value('name');
                         $html .= '<tr>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
