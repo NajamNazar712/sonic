@@ -21,7 +21,7 @@ class OperationsPerfomanceReportMonthly extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'This Cron will send records that have been created in previous month';
 
     /**
      * Create a new command instance.

@@ -21,7 +21,7 @@ class OperationsPerfomanceReportWeekly extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'This Cron will send records that have been created in previous week (as mentioned in requirements)';
 
     /**
      * Create a new command instance.

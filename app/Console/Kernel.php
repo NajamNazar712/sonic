@@ -181,7 +181,6 @@ class Kernel extends ConsoleKernel
         //Operations Report
         //11th of every month
         $schedule->command('reports:operations_perfomance_monthly')->monthlyOn(11, '23:00')->runInBackground();
-
         //EveryTuesday
         $schedule->command('reports:operations_perfomance_weekly')->weeklyOn(2, '10:00')->runInBackground();
 
