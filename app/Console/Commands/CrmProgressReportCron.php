@@ -21,7 +21,7 @@ class CrmProgressReportCron extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'This cron will send crm_request that had been entertained and has status(closed, resolved, in_process)';
 
     /**
      * Create a new command instance.
