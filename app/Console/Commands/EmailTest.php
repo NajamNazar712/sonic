@@ -2,25 +2,25 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
-use App\Http\Controllers\Admins\AdminFinanceController;
-
-class GenerateInvoice extends Command
+class EmailTest extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'invoice:generate';
+    protected $signature = 'email:test';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Invoice Generate';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -39,6 +39,9 @@ class GenerateInvoice extends Command
      */
     public function handle()
     {
-       AdminFinanceController::generate_invoice();
+        Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
+        echo "Noman bhai ka log!";
+//        $ref = 'nothing';
+//        NotificationsController::send(219, $ref);
     }
 }

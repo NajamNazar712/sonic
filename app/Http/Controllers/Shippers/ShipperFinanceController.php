@@ -53,7 +53,8 @@ class ShipperFinanceController extends Controller
 
     public function payments_list(Request $request)
     {
-        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        // $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DB::connection('reports_2')->table('done_payments')->join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {
@@ -1958,20 +1959,20 @@ class ShipperFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -2827,24 +2828,20 @@ class ShipperFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -3429,24 +3426,20 @@ class ShipperFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                            <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
+                            <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
+                            <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                            <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                            <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                            <td>0104111731</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                            <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                            <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -3851,21 +3844,21 @@ class ShipperFinanceController extends Controller
                       <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                     </tr>
                     <tr>
-                      <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                      <td>Trax Online Private Limited</td>
-                    </tr>
-                    <tr>
-                      <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                      <td>Meezan Bank</td>
-                    </tr>
-                    <tr>
-                      <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                      <td>0102951143</td>
-                    </tr>
-                    <tr>
-                      <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                      <td>9912</td>
-                    </tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
+                          <td>Meezan Bank</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
+                        </tr>
                   </tbody>
                 </table>
 
@@ -4288,26 +4281,22 @@ class ShipperFinanceController extends Controller
                         <tr>
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
-                        </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
+                        <td>Meezan Bank</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                        <td>Trax Online Pvt. Ltd.</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                        <td>0104111731</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                        <td>PK02MEZN0099120104111731</td>
+                      </tr>
                         </tbody>
                     </table>
 
@@ -4715,20 +4704,20 @@ class ShipperFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>

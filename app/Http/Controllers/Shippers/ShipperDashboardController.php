@@ -85,6 +85,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
 use App\RouteLocations;
+use GuzzleHttp\Client;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -235,13 +236,20 @@ class ShipperDashboardController extends Controller
                         $kam[] = $detail;
                     }
                 }
+                $route_ids = array();
+                $routes = array();
+                $riders = array();
                 $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-                $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
-                $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                if(count($pickup_address_ids) > 0){
+                    $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
+                    $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                    $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
+                        ->wherein('riders.route_id',$routes)
+                        ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+                }
 
-                $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
-                ->wherein('riders.route_id',$routes)
-                ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+
+
 
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
@@ -684,17 +692,17 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->join('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) use($from) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.created_at > "'. $from .'")'));
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
+            ->join('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
             ->whereIn('shipments.user_id', $masp)
-            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking','shipments_journey.reference_1_id as deliverynote']);
+            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking']);
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
@@ -837,7 +845,7 @@ class ShipperDashboardController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('shipments_journey.shipper_status_id',$keyword);
+                    $query->where('shipments.shipper_status_id', $keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -2136,6 +2144,73 @@ class ShipperDashboardController extends Controller
         $visit->save();
 
         return back()->with(['success'=>'Visit Rated Successfully']);
+    }
+
+    public function mentor_health_index()
+    {
+        $details = User::join('cities as c','c.id','users.city_id')
+        ->where('users.id',session('user_id'))
+        ->select('users.id as user_id','users.name as company_name','users.email as company_email',
+            'users.phone as company_phone','users.city_id as company_city_id','c.name as company_city');
+        if ($details->exists())
+        {
+            $details = $details->first();
+        }
+        return view('client.mentor_health.mentor_health')->with(['details' => $details]);
+    }
+
+    public function mentor_health_add_request(Request $request)
+    {
+        if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
+        {
+            if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
+                try
+                {
+                    $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
+
+                    $client = new Client([
+                        'verify' => false, // Disable SSL verification
+                    ]);
+
+                    $postData = [
+                        'full_name' => $request->company_name,
+                        'email' => $request->company_email,
+                        'phone' => $request->company_phone,
+                        'city_name' => $request->company_city,
+                    ];
+
+                    $response = $client->post($url, [
+                        'json' => $postData, // Send data as JSON
+                    ]);
+
+                    $statusCode = $response->getStatusCode();
+                    $responseBody = $response->getBody()->getContents();
+
+                    if ($statusCode === 200) {
+                        $responseData = json_decode($responseBody, true);
+                        if (stripos($responseBody, "This company already exists") !== false) {
+                            return back()->with(['info' => $responseData['Message']]);
+                        }
+                        else
+                        {
+                            return back()->with(['success' => $responseData['Message']]);
+                            //todo need to make a migration in which mentor health data will be store for journey
+                        }
+
+                    } else {
+                        return back()->with(['error' => 'API request failed']);
+                    }
+                }
+                catch (\Throwable  $e)
+                {
+                    return back()->with(['error' => $e->getMessage()]);
+                }
+            }
+        }
+        else
+        {
+            return back()->with(['error' => 'please provide the complete details !']);
+        }
     }
 
     

@@ -1210,7 +1210,8 @@ class CRMDashboardController extends Controller
 
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {
-                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                // $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $stop_date = $to;
                 $card_feedback = CrmRequestFeedback::
                 whereBetween('created_at',[$from,$to])->
                 pluck('crm_request_id');
@@ -1253,7 +1254,8 @@ class CRMDashboardController extends Controller
     }
     static function dates($query,$from,$to)
     {
-        $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+        // $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+        $stop_date = $to;
         return $query->whereBetween('created_at', [$from, $stop_date]);
     }
     static function destination($query,$id)

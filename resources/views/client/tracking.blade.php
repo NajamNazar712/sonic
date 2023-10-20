@@ -983,12 +983,6 @@
                     // $('#cod_amount_input').addClass('d-none');
 
                 }
-                // cod_change
-                // else if($(this).val() == 12){
-                //     $('#cod_amount_input').removeClass('d-none');
-                //     $('#alternate_phone_input').addClass('d-none');
-
-                // }
                 else{
                     // $('#cod_amount_input').addClass('d-none');
                     $('#alternate_phone_input').addClass('d-none');
@@ -1218,85 +1212,190 @@
                     }
                     else {
                         $('#AddNewRequest').attr('disabled',true);
-                        swal({
-                                        title: 'Please Wait!',
-                                        text: 'Launching Request.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
-                        $.ajax({
-                            url: '{!! route('cod.crm.request.add') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'shipment_id': $('#requested_shipment_id').val(),
-                                'case_nature_id': case_nature_id,
-                                'complaint_id': complaint_id,
-                                'description': description,
-                                'alternate_phone': $('#alternate_phone').val(),
-                                // 'cod_amount': $('#cod_amount').val(),
-                            }
-                        })
-                            .done(function (data) {
-                                swal.close();
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
 
-                                if (data.status) {
-                                    if (data.flag) {
-                                        var html = '';
-
-                                        $.each(data.already_existed_shipments, function (index, tracking_number) {
-                                            html += tracking_number + '<br/>';
-                                        });
-
-                                        if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                            var complaint_id = $('#case_nature_requests').val();
+                        
+                            if(complaint_id == 12)
+                            {
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change COD!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
                                         }
-                                        else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('cod.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_id': $('#requested_shipment_id').val(),
+                                                'case_nature_id': case_nature_id,
+                                                'complaint_id': complaint_id,
+                                                'description': description,
+                                                'cod_new_amount': $('#new_amount').val(),
+                                                'cod_remarks': $('#cod_remarks').val(),
+                                                'is_automated_cod_change': 1,
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            swal.close();
 
-                                        content = document.createElement('div');
-                                        content.innerHTML = html;
+                                            if (data.status) {
+                                                if (data.flag) {
+                                                    var html = '';
 
-                                        swal({
-                                            title: 'Request / Complaint Cannot Be Lodged!',
-                                            content: content,
-                                            icon: 'warning',
-                                            buttons: {
-                                                cancel: {
-                                                    text: 'Close',
-                                                    value: null,
-                                                    visible: true,
-                                                    closeModal: true,
-                                                },
-                                            },
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false,
-                                            dangerMode: true
-                                        });
-                                    } else {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
+                                                    $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
+
+                                                    if (!data.cannot_change) {
+                                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                    }
+                                                    else {
+                                                        html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                    }
+
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
+
+                                                    swal({
+                                                        title: 'Request / Complaint Cannot Be Lodged!',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                // toastr.success(data.success, 'Success!', {
+                                                //     positionClass: 'toast-bottom-center',
+                                                //     containerId: 'toast-bottom-center'
+                                                // });
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                            $('#AddRequestModal').modal('hide');
+                                            $('#request_id').val('').trigger('change');
+                                            $('#receiving_sheet_div').addClass('d-none');
                                         });
                                     }
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center'
-                                    // });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                $('#AddRequestModal').modal('hide');
-                                $('#request_id').val('').trigger('change');
-                                $('#receiving_sheet_div').addClass('d-none');
-                                $('#AddNewRequest').attr('disabled',false);
-                            });
+                                    else{
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
+                            else{
+                                $.ajax({
+                                    url: '{!! route('cod.crm.request.add') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': $('#requested_shipment_id').val(),
+                                        'case_nature_id': case_nature_id,
+                                        'complaint_id': complaint_id,
+                                        'description': description,
+                                    }
+                                })
+                                .done(function (data) {
+                                    swal.close();
+
+                                    if (data.status) {
+                                        if (data.flag) {
+                                            var html = '';
+
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
+
+                                            if (!data.cannot_change) {
+                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                            }
+                                            else {
+                                                html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            }
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+
+                                            swal({
+                                                title: 'Request / Complaint Cannot Be Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        } else {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        // toastr.success(data.success, 'Success!', {
+                                        //     positionClass: 'toast-bottom-center',
+                                        //     containerId: 'toast-bottom-center'
+                                        // });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#request_id').val('').trigger('change');
+                                    $('#receiving_sheet_div').addClass('d-none');
+                                    $('#AddNewRequest').attr('disabled',false);
+                                });
+                            }   
                     }
                 }
             });

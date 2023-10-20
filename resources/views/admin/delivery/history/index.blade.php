@@ -37,6 +37,7 @@
                                     <option value="{{$category->id}}">{{$category->name}}</option>
                                 @endforeach
                             </select>
+                            <div class="danger d-none" id="operation_rider_error">This field is required</div>
                         </fieldset>
                     </div>
                     <div class="col-2">
@@ -71,6 +72,7 @@
                         <th class="border-primary border-darken-1">Fintech Amount</th>
                         <th class="border-primary border-darken-1">Fintech Amount %</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                        <th class="border-primary border-darken-1">HBL Konnect Amount %</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
                         <th class="border-primary border-darken-1">Created Via</th>
@@ -305,6 +307,9 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            
+
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -369,7 +374,8 @@
                             head.push('DNCC Amount');
                             head.push('Fintech Amount');
                             head.push('Fintech Amount %');
-                            head.push('HBL Konnect  Amount');
+                            head.push('HBL Konnect Amount');
+                            head.push('HBL Konnect Amount %');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
                             head.push('Created Via');
@@ -403,6 +409,7 @@
                                 row.push(values.fintech_shipments_charges.sum);
                                 row.push(values.fintech_amount_percent);
                                 row.push(values.transactions_amount);
+                                row.push(values.hbl_konnect_amount_percent);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
                                 row.push(values.created_via);
@@ -470,6 +477,7 @@
                     { data:'fintech_shipments_charges.link' ,name: 'fintech_shipments_charges.link', class: 'align-middle fintech_shipments_charges.link', orderable: false, searchable: false},
                     { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle fintech_amount_percent', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
+                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle hbl_konnect_amount_percent'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
@@ -481,23 +489,23 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     
-                    var fintech_sum = $(row).find('#myButton');
-                    var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
-                    fintech_sum = fintech_sum[0].innerText
-                    fintech_sum = parseFloat(fintech_sum)
+                    // var fintech_sum = $(row).find('#myButton');
+                    // var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
+                    // fintech_sum = fintech_sum[0].innerText
+                    // fintech_sum = parseFloat(fintech_sum)
 
-                    if(data.transactions_amount == null){
+                    // if(data.transactions_amount == null){
                         
-                        data.transactions_amount = 0
-                    }
-                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+                    //     data.transactions_amount = 0
+                    // }
+                    // value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
                     
-                    if (value < 0) {
-                        value = 0;
-                    }  
+                    // if (value < 0) {
+                    //     value = 0;
+                    // }  
 
-                    console.log(data.transactions_amount)
-                    $('td:eq(22)', row).html(value);
+                    // console.log(data.transactions_amount)
+                    // $('td:eq(22)', row).html(value);
 
 
                 },
@@ -566,8 +574,23 @@
                 }
             });
 
+
+            $('#search_filter_btn').on('click', function(){
+                
+            })
+
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var errors = 0;
+                var operation = $('#operation_rider_id').val();
+                if(!operation){
+                    $('#operation_rider_error').removeClass('d-none')
+                    errors = 1;
+                }
+                
+                if (errors == 0) {
+                    $('#operation_rider_error').addClass('d-none');
+                    table.draw();
+                }
             });
 
             function print(id) {
@@ -709,7 +732,6 @@
 
             $('#datatable tbody').on('click','tr td.one_link_payment_count button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                console.log(id);
                 $('#one_link_payment_details_modal').modal('show');
 
                 $.ajax({
@@ -725,9 +747,6 @@
                             var html = '';
 
                             if (data.transaction_data) {
-                                // $.each(data.shipments, function(index, tracking_number) {
-                                //     html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                // });
                                 $.each(data.transaction_data, function(index, values) {
                                     html+= `
 
@@ -775,7 +794,6 @@
                             html += '<thead><tr class="bg-primary white"><th>S No.</th><th><strong>Transaction ID</strong></th><th><strong>Amount</strong></th><th><strong>Deposited At</strong></th></tr></thead>';
                             html += '<tbody>';
                             $.each(data.details, function (index, value) {
-                                console.log(value);
                                 var ind = index + 1;
                                 html += '<tr class=""><td>' + ind + '</td>';
                                 html += '<td>' + value.transaction_id + '</td>';
@@ -838,7 +856,6 @@
                     .done(function (data) {
                         if (data) {
                             var html = '';
-                            console.log(data);
                             if (data.shipments) {
                                 $.each(data.shipments, function (index, tracking_number) {
                                     html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';

@@ -51,6 +51,11 @@ return [
             'path' => storage_path('logs/trax_pay.log'),
             'level' => 'debug',
         ],
+        'trax_pay_test' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/trax_pay_test.log'),
+            'level' => 'debug',
+        ],
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
@@ -66,6 +71,16 @@ return [
 
         'errorlog' => [
             'driver' => 'errorlog',
+            'level' => 'debug',
+        ],
+        'last_mile_app_report_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/last_mile_app_report.log'),
+            'level' => 'debug',
+        ],
+        'code_test_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/code_test.log'),
             'level' => 'debug',
         ],
     ],
