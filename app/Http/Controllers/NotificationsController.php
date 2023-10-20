@@ -10480,7 +10480,7 @@ class NotificationsController extends Controller
                     }
 
                 } else if($id == 224){
-                    //Weekly Operation Report
+                    //Weekly Operation Reports
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
@@ -10491,7 +10491,7 @@ class NotificationsController extends Controller
                 } 
 
                 else if($id == 225){
-                    //Monthly Operation Report
+                    //Monthly Operation Reports
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
