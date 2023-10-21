@@ -10561,15 +10561,16 @@ class NotificationsController extends Controller
                               ->orWhereDate('updated_at', Carbon::today());
                     })
                     ->get();
+
                     $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
                     $resolved_claimed = $crm_claims->map(function($result){
                         return [
                             'status_id' => $result['status_id'],
-                            'created_at' => $result['created_at'],
+                            'updated_at' => $result['updated_at'],
                         ];
                     });              
                     $resolved_claimed = $resolved_claimed->filter(function ($item) {
-                        return $item['status_id'] == 3 && $item['created_at']->isToday();
+                        return $item['status_id'] == 3 && $item['updated_at']->isToday();
                     });
                     // Table for CRM Complaints
                     $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
@@ -10711,7 +10712,6 @@ class NotificationsController extends Controller
                             $agent[$agent_id]['updated_at'][] = $value['updated_at'];
                         }
                     }
-                    
                     foreach ($agent as $key => $value) 
                     {
                         $index = $index + 1;
@@ -10742,23 +10742,25 @@ class NotificationsController extends Controller
                                     }
                                 }
                             }
-                    }  
-                                                                 
-                        $agent = Admin::where('id', $key)->value('name');
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_tickets) . '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
-                        if(count($today_closed) > 0){
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
-                        }else{
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                        }  
+                        
+                        if($key != ""){
+                            $agent = Admin::where('id', $key)->value('name');
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_tickets) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
+                            if(count($today_closed) > 0){
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
+                            }else{
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                            }
+                            $html .= '</tr>';
                         }
-                        $html .= '</tr>';
                     }                  
                     $html .= '</tbody>';
                     $html .= '</table>';
