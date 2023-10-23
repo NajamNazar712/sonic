@@ -407,6 +407,66 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-In Process</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-Resolved</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-Closed</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             @include('admin.inc.messages')
 
