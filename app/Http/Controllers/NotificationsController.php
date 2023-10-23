@@ -8602,7 +8602,7 @@ class NotificationsController extends Controller
                     
                     $cc = ['tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
 
-                    if (count($to) > 0) {
+                    if (count($email) > 0) {
                         self::email($subject, $body, $email, $cc);
                     }
 
