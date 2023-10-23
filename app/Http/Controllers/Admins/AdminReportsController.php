@@ -12812,7 +12812,6 @@ class AdminReportsController extends Controller
         ->leftjoin('user_shipping_infos as usi', 'usi.id','shipments.pickup_address_id')
         ->leftjoin('cities as citi', 'citi.id','usi.city_id')
         ->leftjoin('shipment_items as si', 'si.shipment_id','shipments.id')
-        // ->leftjoin('admin_hubs as ah', 'ah.admin_id','ordinary_discrepancy_reports.admin_id')
         ->leftjoin('cities as ch', 'ch.id','admins.default_hub_id')
         
         ->leftJoin('shipments_journey as sj', function ($join) {
