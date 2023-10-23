@@ -47,7 +47,6 @@ use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\DailyFakeStatus;
 use App\Jobs\ProcessOTPSMSForBotSMS;
-use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -79,7 +78,7 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\V2Pickup\V2PickupNote;
-//use App\ReturnDeliveredToShipperSms;
+use App\ReturnDeliveredToShipperSms;
 use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\ActivityTrailLog;
@@ -217,7 +216,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $attachmentPath = null, $attachmentName = null)
     {
         if ($to) {
 
@@ -245,7 +244,7 @@ class NotificationsController extends Controller
                 }
             }
 
-
+        
             $mail = Mail::to($to);
 
             if ($cc) {
@@ -255,8 +254,9 @@ class NotificationsController extends Controller
             if ($bcc) {
                 $mail->bcc($bcc);
             }
+            
 
-            $mail->send(new Notifications($subject, $body, $from));
+            $mail->send(new Notifications($subject, $body, $from, $attachmentPath, $attachmentName));
         }
     }
 
@@ -10477,8 +10477,31 @@ class NotificationsController extends Controller
 
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
+
                         self::email($subject, $body, $email);
+                        
                     }
+
+                } else if($id == 224){
+                    //Weekly Operation Reports
+                    $attachmentName = $reference_1_id;
+                    $attachmentPath = $reference_2_id;                    
+
+                    $role_ids = [19,15,106,91,3,9,123,128,95];
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
+
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
+                } 
+
+                else if($id == 225){
+                    //Monthly Operation Reports
+                    $attachmentName = $reference_1_id;
+                    $attachmentPath = $reference_2_id;                    
+
+                    $role_ids = [19,15,106,91,3,9,123,128,95];
+                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
+
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } else if ($id == 223){
                     //Crm Progress Report
                     $now = Carbon::now();

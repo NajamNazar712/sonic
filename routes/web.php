@@ -2929,6 +2929,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('operations_performance')->name('operations_performance.')->group(function () {
+            Route::get('data', 'Admins\AdminReportsController@ajax_load_operation_data')->name('data');
             Route::get('', 'Admins\AdminReportsController@operations_performance_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
