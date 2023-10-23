@@ -418,7 +418,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-in-process">{{ $crm['re_open_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-In Process</span>
                                                     </div>
@@ -438,7 +438,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-resolved">{{ $crm['re_open_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-Resolved</span>
                                                     </div>
@@ -458,7 +458,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-closed">{{ $crm['re_open_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-Closed</span>
                                                     </div>
