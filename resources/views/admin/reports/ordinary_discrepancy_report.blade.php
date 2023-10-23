@@ -37,8 +37,8 @@
                 </div>
                 
 
-                <?php 
-                if (session('role_id') == 1 || in_array(908, session('permissions'))) {?>
+                 
+                @if(session('role_id') == 1 || in_array(908, session('permissions')))
                     <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
             
                         <div class="form-group">
@@ -49,8 +49,7 @@
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Track</button>
                         </div>
                     </form>
-                    <?php }
-                ?>
+                    @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
