@@ -408,7 +408,7 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-launch-in-process pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
@@ -418,7 +418,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="launch-in-process">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-in-process">{{ $crm['launch_in_process_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-In Process</span>
                                                     </div>
@@ -428,7 +428,7 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-launch-resolved pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
@@ -438,7 +438,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="launch-resolved">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-resolved">{{ $crm['launch_resolved_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-Resolved</span>
                                                     </div>
@@ -448,7 +448,7 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="">
-                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
@@ -458,7 +458,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
-                                                            <span id="launch-closed">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                            <span id="launch-closed">{{ $crm['launch_closed_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Launch-Closed</span>
                                                     </div>
@@ -883,6 +883,18 @@
 
         .bg-gradient-directional-re-open {
             background-image: linear-gradient(45deg, #3421c7, #7a77d7);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-in-process {
+            background-image: linear-gradient(45deg, #21abc7, #77bcd7);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-resolved {
+            background-image: linear-gradient(45deg, #029c07, #78d777);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-closed {
+            background-image: linear-gradient(45deg, #ba0630, #de7575);
             background-repeat: repeat-x;
         }
 

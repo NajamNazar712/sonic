@@ -153,17 +153,33 @@ class CRMDashboardController extends Controller
         $crm['closed_rate'] = $crm['total'] !== 0 ? $crm['closed']/$crm['total'] : 0;
         $crm['in_process_ratio'] = $shipments !== 0 ? $crm['total']/$shipments : 0;
         $crm['re_open_rate'] = $crm['closed'] !== 0 ? $crm['re_open']/$crm['closed'] : 0;
+        $crm['launch_in_process_rate'] = $crm['in_process'] !== 0 ? $crm['launched']/$crm['in_process'] : 0;
+        $crm['launch_resolved_rate'] = $crm['resolved'] !== 0 ? $crm['launched']/$crm['resolved'] : 0;
+        $crm['launch_closed_rate'] = $crm['closed'] !== 0 ? $crm['launched']/$crm['closed'] : 0;
+
+        // dd($crm['launched'],$crm['in_process'],$crm['closed'],$crm['total']);
+        // dd($crm['launch_in_process_ratio'],
+        // $crm['launch_resolved_rate_percentage'],
+        // $crm['launch_closed_rate_percentage'],
+        // $crm['closed'] !== 0 ? number_format(($crm['launch_closed_rate_percentage']) * 100, 2) : 0);
         
         $crm['in_valid_percentage'] = "0";
         $crm['closed_rate_percentage'] = "0";
         $crm['in_process_ratio_percentage'] = "0";
         $crm['re_open_rate_percentage'] = "0";
+        $crm['launch_in_process_rate_percentage'] = "0";
+        $crm['launch_resolved_rate_percentage'] = "0";
+        $crm['launch_closed_rate_percentage'] = "0";
         
         if ($crm['total'] > 0) {
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
             $crm['closed_rate_percentage'] = $crm['total'] !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
             $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
             $crm['re_open_rate_percentage'] =  $crm['closed']!=0 ? round(($crm['re_open_rate']) * 100, 2) : 0;
+
+            $crm['launch_in_process_rate_percentage'] =  $crm['in_process'] !== 0 ? round(($crm['launch_in_process_rate']) * 100, 2) : 0;
+            $crm['launch_resolved_rate_percentage'] =  $crm['resolved'] !== 0 ? round(($crm['launch_resolved_rate']) * 100, 2) : 0;
+            $crm['launch_closed_rate_percentage'] =  $crm['closed'] !== 0 ? round($crm['launch_closed_rate'] * 100, 2) : 0;
         }
 
         $crm['launched'] = number_format($crm['launched']);
@@ -520,7 +536,18 @@ class CRMDashboardController extends Controller
                         }
                     }
 
-                    return $current_tat;
+                    if($current_tat >= 0 && $current_tat <= 1)
+                    {
+                        return $current_tat.' Day';
+                    }
+                    else if($current_tat > 1 && $current_tat <= 5)
+                    {
+                        return $current_tat.' Days';
+                    }
+                    else{
+                        return '5+ Days';
+                    }
+
                 }
                 return "-";
             })
