@@ -6302,16 +6302,16 @@ class AdminReportsController extends Controller
     public function crm_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 173);
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
-        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $zones = DB::connection('reports')->table('zones')->get();
-        $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        $shippers = DB::connection('reports_2')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $cities = DB::connection('reports_2')->table('cities')->select('id', 'name')->get();
+        $hubs = DB::connection('reports_2')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $zones = DB::connection('reports_2')->table('zones')->get();
+        $agents = DB::connection('reports_2')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 3)->get();
-        $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
-        $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
-        $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
-        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $case_natures = DB::connection('reports_2')->table('crm_request_case_nature')->select('id', 'name')->get();
+        $case_nature_types = DB::connection('reports_2')->table('crm_request_case_nature_types')->select('id', 'type')->get();
+        $statuses = DB::connection('reports_2')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
+        $shipping_modes = DB::connection('reports_2')->table('shipping_modes')->get(['id', 'mode']);
         return view('admin.reports.crm_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'agents' => $agents, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
 
