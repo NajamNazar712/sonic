@@ -8566,29 +8566,46 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $table, $body);
                     }
 
-                    $to = array();
-                    $other = array();
+                    $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
+                    $hubs = Shipment::with('destination_city')->whereIn('id', $shipment_ids)->get()->pluck('destination_city.hub_id')->toArray();
+                    $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
 
-                    $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-                    if ($sales_person) {
-                        $to[] = Admin::find($sales_person->admin_id)->email;
-                    }
-                    $kam = SaleTierTag::where('user_id', $shipper_id);
-                    if ($kam->exists()) {
-                        $kam = $kam->first();
-                        if ($kam) {
-                            $admin = Admin::where('id', $kam->kam)->first();
-                            if ($admin) {
-                                $to[] = $admin->email;
-                            }
+                    foreach($admin_ids as $admin_id){
+                        $admin = Admin::find($admin_id);
+                        $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
+                        if(in_array($admin->role_id, $roles)){
+                            $to[] = $admin->email;
                         }
                     }
+                    
+                    $sale_persons = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
+                    ->whereIn('sale_person_tags.user_id', $users)
+                    ->select(['sale_person.email as email', 'sale_person.name as name'])
+                    ->latest('sale_person_tags.created_at');
 
-                    $other = ['hassan@trax.pk', 'waqas@trax.pk', 'mohsin.ali@trax.pk', 'ali.qureshi@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'shahzad.farooq@trax.pk', 'm.sohail@trax.pk'];
-                    $to = array_merge($to, $other);
-                    if (count($to) > 0) {
-                        self::email($subject, $body, $to);
+                    $key_accounts = SaleTierTag::join('admins as key_account_executive', 'key_account_executive.id', '=', 'sale_tier_tags.kam')
+                    ->whereIn('sale_tier_tags.user_id', $users)
+                    ->select(['key_account_executive.email as email', 'key_account_executive.name as name'])
+                    ->latest('sale_tier_tags.created_at');
+
+                    $emails =  $sale_persons->union($key_accounts)->get();
+
+                    foreach($emails as $concern_email){
+                        $to[] = $concern_email->email;
                     }
+                    
+                    $email = array_filter(array_unique($to), function ($value) {
+                        return $value !== null;
+                    });
+
+                    $email = array_values($email);
+                    
+                    $cc = ['tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
+
+                    if (count($to) > 0) {
+                        self::email($subject, $body, $email, $cc);
+                    }
+
                 } else if ($id == 152) {
                     $shipment = Shipment::find($reference_1_id);
 
