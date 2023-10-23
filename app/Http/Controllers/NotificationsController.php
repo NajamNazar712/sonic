@@ -10502,6 +10502,293 @@ class NotificationsController extends Controller
                     $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
 
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
+                } else if ($id == 223){
+                    //Crm Progress Report
+                    $now = Carbon::now();
+                    $to = 'mohsin.khan@trax.pk';
+                    $cc = 'shahrukh.raheem@trax.pk';
+                    $crm_complaints_2_days_closure = [];
+                    $crm_services_2_days_closure = [];
+                    $crm_claims_10_days_closure = [];
+                    $crm_complaints_launched_each_day = [];
+                    $crm_complaints_launched_each_day_closed = [];
+                    $crm_serviced_launched_each_day = [];
+                    $crm_serviced_launched_each_day_closed = [];
+                    $crm_claims_launched_each_day = [];
+                    $crm_claims_launched_each_day_closed = [];
+                    $crm_complaints = $reference_1_id;
+                    $crm_service_requests = $reference_2_id;
+                    $crm_claims = $reference_3_id;
+                    if($crm_complaints->isNotEmpty()){
+                        foreach($crm_complaints as $crm_complaint){
+                            $created_at = $crm_complaint['created_at'];
+                            $updated_at = $crm_complaint['updated_at'];
+                            
+                            if($created_at->isToday()){
+                                $crm_complaints_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_complaint['status_id'] == 4){
+                                $crm_complaints_launched_each_day_closed[] = 1;
+                            }
+    
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                                $crm_complaints_2_days_closure[] = $daysDifference;
+                            }
+    
+                        }
+                    }                 
+                    if($crm_service_requests->isNotEmpty()){
+                        foreach($crm_service_requests as $crm_service_request){
+                            $created_at = $crm_service_request['created_at'];
+                            $updated_at = $crm_service_request['updated_at'];
+                            
+                            if($created_at->isToday()){
+                                $crm_serviced_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_service_request['status_id'] == 4){
+                                $crm_serviced_launched_each_day_closed[] = 1;
+                            }
+    
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                                $crm_services_2_days_closure[] = $daysDifference;
+                            }
+                        }
+                    }
+                    if($crm_claims->isNotEmpty()){
+                        foreach($crm_claims as $crm_claim){
+                            $created_at = $crm_claim['created_at'];
+                            $updated_at = $crm_claim['updated_at'];
+    
+                            if($created_at->isToday()){
+                                $crm_claims_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_claim['status_id'] == 4){
+                                $crm_claims_launched_each_day_closed[] = 1;
+                            }
+                            
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10){
+                                $crm_claims_10_days_closure[] = $daysDifference;
+                            }
+                        }
+                    }
+                    $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
+                    ->where('status_id', 3)
+                    ->where(function ($query) {
+                        $query->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
+                              ->orWhereDate('updated_at', Carbon::today());
+                    })
+                    ->get();
+
+                    $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
+                    $resolved_claimed = $crm_claims->map(function($result){
+                        return [
+                            'status_id' => $result['status_id'],
+                            'updated_at' => $result['updated_at'],
+                        ];
+                    });              
+                    $resolved_claimed = $resolved_claimed->filter(function ($item) {
+                        return $item['status_id'] == 3 && $item['updated_at']->isToday();
+                    });
+                    // Table for CRM Complaints
+                    $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Complaints</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day_closed).'</td>';
+                    if(count($crm_complaints_launched_each_day) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_complaints_launched_each_day_closed) / count($crm_complaints_launched_each_day)) * 100 . '%'.'</td>';
+
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
+                    if(count($crm_complaints_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure) / count($crm_complaints_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '</tr>';
+                    $html .= '<tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    // Table for CRM Service Requests
+                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7"><strong>Service Requests</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day_closed).'</td>';
+                    if(count($crm_serviced_launched_each_day) > 0){
+
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_serviced_launched_each_day_closed) / count($crm_serviced_launched_each_day)) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
+                    if(count($crm_serviced_launched_each_day_closed) > 0){
+
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_serviced_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '</tr>';
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    // Table for CRM Claims
+                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="9"><strong>Claims</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure In 10 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">10 Days Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">10 Days Resolved Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody style="margin-bottom:50px">';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day_closed).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_claimed).'</td>';
+                    if(count($crm_claims_launched_each_day) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_claims_launched_each_day_closed) / count($crm_claims_launched_each_day)) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_10_days_closure),2).'</td>';
+
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_10_days_closure) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_status_10_days) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '</tr>';
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    //Agent Summary Report
+                    $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Agents Summary Report</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:30px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Agent</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">New Tickets (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total In Process (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total Closure (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $agent = [];
+                    $index = 0;
+                    if($case_natures->isNotEmpty()){
+                        foreach ($case_natures as $key => $value) {
+                            $agent_id = $value["agent_id"];
+                            $agent[$agent_id]['status_id'][] = $value['status_id'];
+                            $agent[$agent_id]['ticket_id'][] = $value['id'];
+                            $agent[$agent_id]['created_at'][] = $value['created_at'];
+                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                        }
+                    }
+                    foreach ($agent as $key => $value) 
+                    {
+                        $index = $index + 1;
+                        $created_at = $value['created_at'];
+                        $updated_at = $value['updated_at'];
+                        $statuses = $value['status_id'] ;
+
+                        if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
+                            $closure_2_days = []; 
+                            $today_tickets = []; 
+                            $today_closed = [];
+                            $today_inprocess = [];
+
+                            for ($i = 0; $i < count($created_at); $i++) {
+                                if(isset($created_at[$i], $updated_at[$i])){
+                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
+                                        $closure_2_days[] = 1;
+                                    }
+                                    if ($created_at[$i]->isToday()) {
+                                        $today_tickets[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
+                                        $today_closed[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 2) {
+                                        $today_inprocess[] = 1;
+                                    }
+                                }
+                            }
+                        }  
+                        
+                        if($key != ""){
+                            $agent = Admin::where('id', $key)->value('name');
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_tickets) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
+                            if(count($today_closed) > 0){
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
+                            }else{
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                            }
+                            $html .= '</tr>';
+                        }
+                    }                  
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $body = str_replace('[preview]', $html, $notification->body);
+                    self::email($subject, $body, $to, $cc);
                 } 
             }
         }
