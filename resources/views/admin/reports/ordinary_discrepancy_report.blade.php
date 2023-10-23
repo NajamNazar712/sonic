@@ -37,15 +37,19 @@
                 </div>
                 
 
-                <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="form-group">
-                        <input type="text" id ="tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-                    </div>
-
-                    <div class="form-group ml-1">
-                        <button type="submit" name="add" class="btn btn-primary add" value="Add">Track</button>
-                    </div>
-                </form>
+                 
+                @if(session('role_id') == 1 || in_array(908, session('permissions')))
+                    <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+            
+                        <div class="form-group">
+                            <input type="text" id ="tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+    
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Track</button>
+                        </div>
+                    </form>
+                    @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
