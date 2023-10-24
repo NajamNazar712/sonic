@@ -8579,9 +8579,9 @@ class NotificationsController extends Controller
                         ];
                     })
                     ->toArray();
-                    $hubs = array_values($hubs);
+
+                    $hubs = $hubs[0];
                     $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
-                    dd($hubs, $admin_ids);
                     foreach($admin_ids as $admin_id){
                         $admin = Admin::find($admin_id);
                         $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
