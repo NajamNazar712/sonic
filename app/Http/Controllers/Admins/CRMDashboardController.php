@@ -1353,9 +1353,11 @@ class CRMDashboardController extends Controller
                     ->where('created_at','>',$from)
                     ->where('created_at','<',$stop_date)
                     ->count();
-                $shipments = Shipment::where('shipper_status_id',2)->whereBetween('created_at', [$from, $stop_date])->count();
+                $shipments = Shipment::join('crm_requests as cr','cr.shipment_id','shipments.id')
+                    ->where('shipments.shipper_status_id',2)
+                    ->whereBetween('shipments.created_at', [$from, $stop_date])
+                    ->count();
                 
-
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
                 $card_data['re_open_rate'] = $card_data['closed'] !== 0 ? $card_data['re_open']/$card_data['closed'] : 0;
                 $card_data['total'] = $card_data['total']->count();
