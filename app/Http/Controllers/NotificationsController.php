@@ -8567,9 +8567,20 @@ class NotificationsController extends Controller
                     }
 
                     $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
-                    $hubs = Shipment::with(['destination_city','pickup_address','consignee_city'])->whereIn('id', $shipment_ids)->get()->pluck('destination_city.hub_id','pickup_address.city_id','consignee_city.id')->toArray();    
-                    $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
+                    
+                    $hubs = Shipment::with(['destination_city', 'pickup_address', 'consignee_city'])
+                    ->whereIn('id', $shipment_ids)
+                    ->get()
+                    ->map(function ($shipment) {
+                        return [
+                            'destination_city' => $shipment->destination_city->hub_id,
+                            'pickup_address' => $shipment->pickup_address->city_id,
+                            'consignee_city' => $shipment->consignee_city->id,
+                        ];
+                    })
+                    ->toArray();
 
+                    $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
                     foreach($admin_ids as $admin_id){
                         $admin = Admin::find($admin_id);
                         $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
