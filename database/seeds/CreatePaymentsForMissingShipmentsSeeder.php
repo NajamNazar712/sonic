@@ -14,10 +14,7 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $shipment_ids = [
-            27229314,
-            27307402
-        ];
+        $shipment_ids = [20217426951433, 20214427776546, 22314427771148, 20228327282128, 27120227228632, 20231526630179, 20231526562560, 20222326528862, 20244427662399, 20240427206780, 20214427265168, 20222727227739, 14411226886180, 20217427235279 ];
 
         foreach ($shipment_ids as $shipment_id){
             $shipment = Shipment::find($shipment_id);
