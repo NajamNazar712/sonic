@@ -16,50 +16,50 @@
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
-
-							<form id="user_form" class="form-horizontal" method="POST" action="{{ route('admin.user_management.users.update.store', ['id' => $user->id]) }}" novalidate="novalidate">
+							<form id="user_form" class="id_{{ session('role_id') }} form-horizontal" method="POST" action="{{ route('admin.user_management.users.update.store', ['id' => $user->id]) }}" novalidate="novalidate">
 								{{ csrf_field() }}
-
+								
+								{{-- @if(session('role_id')==1) --}}
 								<div class="row">
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $user->name }}">
+											<input type="text" name="name" class="_readonly form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $user->name }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="phone_number" id="phone_number" class="form-control unique_phone" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Phone Number is not unique" value="{{ $user->phone_number }}">
+											<input type="text" name="phone_number" id="phone_number" class="_readonly form-control unique_phone" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Phone Number is not unique" value="{{ $user->phone_number }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
+											<input type="text" name="official_phone_number" id="official_phone_number" class="_readonly form-control unique_phone" placeholder="Official Phone Number" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="{{ $user->cnic }}">
+											<input type="text" name="cnic" id="cnic" class="_readonly form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="{{ $user->cnic }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="email" name="email" class="form-control" placeholder="Outlook Id" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
+											<input type="email" name="email" class="_readonly form-control" placeholder="Outlook Id" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
+											<input type="password" name="pin" id="pin" class="_readonly form-control" placeholder="Bolt & Sonic Pin" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="role_id" class="select2" id="role" data-rule-required="true" data-msg-required="Role is required">
+											<select name="role_id" class="_disable select2" id="role" data-rule-required="true" data-msg-required="Role is required">
 												@foreach($roles as $role)
 													@if ($role->id == $user->role_id)
 														<option value="{{ $role->id }}" selected="selected">{{ $role->name }} - {{ $role->department->name }}</option>
@@ -73,7 +73,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="designation_id" class="select2" id="designation_id" data-rule-required="true" data-msg-required="Designation is required">
+											<select name="designation_id" class="_disable select2" id="designation_id" data-rule-required="true" data-msg-required="Designation is required">
 												@foreach($designations as $designation)
 													@if ($designation->id == $user->designation_id)
 														<option value="{{ $designation->id }}" selected="selected">{{ $designation->name }} - {{$designation->department->name}}</option>
@@ -86,7 +86,7 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="default_hub" class="select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
+											<select name="default_hub" class="_disable select2" id="default_hub" data-rule-required="true" data-msg-required="Default hub is required">
 												@foreach($hubs as $hub)
 													@if ($hub->id == $user->default_hub_id)
 														<option value="{{ $hub->id }}" selected="selected">{{ $hub->name }}</option>
@@ -106,7 +106,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="shift_id" class="select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
+											<select name="shift_id" class="_disable select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
 												@foreach($shifts as $shift)
 													@if ($shift->id == $user->shift_id)
 														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}}</option>
@@ -117,13 +117,13 @@
 											</select>
 										</div>
 									</div>
+									{{-- @endif --}}
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
 										<div class=" text-center mt-2">
 											<button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
 											<button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
-											</di>
 										</div>
 										@foreach($hubs as $hub)
 											<fieldset class="d-inline-block m-1">
@@ -139,7 +139,7 @@
 
 									<div class="col-12">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Update</button>
+											<button id="updateBtn" type="submit" class="btn btn-primary">Update</button>
 										</div>
 									</div>
 								</div>
@@ -295,6 +295,16 @@
 				});
 			});
 		});
+
+		var role_id = {!! json_encode(session('role_id')) !!}
+		if (role_id !== 1 ) {
+			$('._readonly').prop('readonly', true);
+			$('._disable').prop('disabled', true);
+		}
+		$('#updateBtn').on('click', function (){
+			$('._disable').prop('disabled', false);
+		})
+		
 		$('#user_form').on('keypress',function (e) {
 			if(e.keyCode == 13) {
 				e.preventDefault();
