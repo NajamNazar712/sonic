@@ -47,6 +47,28 @@
 ">
     <style type="text/css">
         #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
+
+
+        /* Style the label to make it look like a button */
+        #checkboxContainer label {
+            display: inline-block;
+            padding: 10px;
+            margin: 5px;
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Style the checkbox to be hidden */
+        #checkboxContainer input[type="checkbox"] {
+            display: none;
+        }
+
+        /* Style the label when the checkbox is checked */
+        #checkboxContainer input[type="checkbox"]:checked + label {
+            background-color: #56e73c;
+        }
     </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
@@ -323,6 +345,27 @@
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                  <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="payment_cycles">payment_cycles:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="payment_cycles" id="payment_cycles" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($payment_cycles as $payment_cycle)
+                                                                    <option value="{{$payment_cycle->id}}"> {{$payment_cycle->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div id="checkboxContainer" class="d-none">
+                                                    </div>
+
+                                                    <span class="text-danger d-none" id="msg_payment">Uncheck one of the selectbox</span>
+                                                </div>
+                                                
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -909,6 +952,10 @@
            placeholder:'Select Bank',
        });
 
+       $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select Payment Cycle',
+        
+       });
 
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
@@ -1208,13 +1255,75 @@
 
     });
 
-    // var reset = document.querySelector('#reset');
-    // if (reset) {
-    //     reset.addEventListener('click', () => {
-    //       grecaptcha.reset()
-    //     });
-    // }
-    //         }
+    var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    // Loop through the array and create checkboxes with labels
+    for (var i = 0; i < days.length; i++) {
+        var day = days[i];
+        var checkboxId = "checkbox_" + day;
+        var labelId = "label_" + day;
+
+        // Create a checkbox input element
+        var checkbox = $("<input>", {
+            type: "checkbox",
+            id: checkboxId,
+            value: day // Set the value attribute to the day name
+        });
+
+        // Create a label element associated with the checkbox
+        var label = $("<label>", {
+            for: checkboxId,
+            text: day
+        });
+
+        // Append the checkbox and label to the container
+        $("#checkboxContainer").append(checkbox);
+        $("#checkboxContainer").append(label);
+    }
+    var numSelected = 1;
+    var maxSelections_2 = 2;
+    var maxSelections_3 = 3;
+    var maxSelections_1 = 1;
+
+    function handleCheckboxSelection(numSelectedVar, maxSelectionsVar) {
+        return function() {
+            var checkbox = $(this);
+
+            if (checkbox.is(':checked')) {
+                if (numSelectedVar <= maxSelectionsVar) {
+                    numSelectedVar++;
+                } else {
+                    checkbox.prop('checked', false);
+                    $('#msg_payment').removeClass("d-none");
+                }
+            } else {
+                numSelectedVar--;
+                $('#msg_payment').addClass("d-none");
+            }
+        }
+    }
+
+    $('#payment_cycles').on('change', function() {
+        $("#checkboxContainer input[type='checkbox']").prop('checked', false);
+        $('#msg_payment').addClass("d-none");
+
+        var id = $(this).val();
+
+        if (id == 4 ||id == 3 || id == 2) {
+            $("#checkboxContainer").removeClass("d-none");
+
+            if (id == 2) {
+                $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(numSelected, maxSelections_2));
+            } else if (id == 3) {
+                $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(numSelected, maxSelections_3));
+            }else if (id == 4) {
+                $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(numSelected, maxSelections_1));
+            }
+        } else {
+            $("#checkboxContainer").addClass("d-none");
+        }
+    });
+
 
 </script>
 </body>
