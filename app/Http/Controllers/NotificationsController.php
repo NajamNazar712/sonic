@@ -8567,7 +8567,7 @@ class NotificationsController extends Controller
                     }
 
                     $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
-                    $hubs = Shipment::with('destination_city')->whereIn('id', $shipment_ids)->get()->pluck('destination_city.hub_id')->toArray();
+                    $hubs = Shipment::with(['destination_city','pickup_address'])->whereIn('id', $shipment_ids)->get()->pluck('destination_city.hub_id','pickup_address.city_id')->toArray();    
                     $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
 
                     foreach($admin_ids as $admin_id){
