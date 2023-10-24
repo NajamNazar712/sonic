@@ -1136,7 +1136,9 @@ class CRMDashboardController extends Controller
                 $card_total = $card_data['total']->filter(function ($item) use ($from, $to, $card_feedback) {
                     return $item->created_at >= $from && $item->created_at <= $to && !in_array($item->id, $card_feedback);
                 })->count();
-                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+                //$card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+                $lounched = CrmRequest::where('status_id',1)->whereBetween('created_at',[$from,$to])->count();
+                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $lounched : 0;
             } else {
                 $thirtyDaysAgo = now()->subDays(1);
                 $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
@@ -1145,7 +1147,9 @@ class CRMDashboardController extends Controller
                 $card_total = $card_data['total']->filter(function ($item) use ($thirtyDaysAgo, $card_feedback) {
                     return $item->created_at >= $thirtyDaysAgo && $item->created_at <= now() && !in_array($item->id, $card_feedback);
                 })->count();
-                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+                //$card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+                $lounched = CrmRequest::where('status_id',1)->whereBetween('created_at',[$from,$to])->count();
+                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $lounched : 0;
             }
 
             if ($origin = $request->get('search_origin'))
