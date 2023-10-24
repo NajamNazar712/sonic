@@ -8567,7 +8567,6 @@ class NotificationsController extends Controller
                     }
 
                     $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
-
                     $hubs = Shipment::with(['destination_city', 'pickup_address', 'consignee_city'])
                     ->whereIn('id', $shipment_ids)
                     ->get()
@@ -8611,9 +8610,8 @@ class NotificationsController extends Controller
                     });
 
                     $email = array_values($email);
-                    
-                    $cc = ['m.sohail@trax.pk','tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
 
+                    $cc = ['m.sohail@trax.pk','tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
                     if (count($email) > 0) {
                         self::email($subject, $body, $email, $cc);
                     }
