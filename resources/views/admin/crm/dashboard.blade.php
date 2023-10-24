@@ -183,16 +183,16 @@
                                     </div>
                 --}}
                 
-                                    <div class="col-4">
-                                        {{-- <div class="form-group input-group">
+                                    {{-- <div class="col-4">
+                                        <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                             </div>
                                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
-                                        </div> --}}
-                                    </div>
+                                        </div>
+                                    </div> --}}
                 
                 
                                     <div class="col-4">
@@ -1143,6 +1143,9 @@
                         $('#in_process_ratio').text(data.card_data.in_process_ratio);
                         $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);
                         $('#re_open_rate_percentage').text(data.card_data.re_open_rate_percentage);
+                        $('#launch-in-process').text(data.card_data.launch_in_process_rate_percentage);
+                        $('#launch-resolved').text(data.card_data.launch_resolved_rate_percentage);
+                        $('#launch-closed').text(data.card_data.launch_closed_rate_percentage);
                     }else{
                         $('#launched').text(0);
                         $('#in_process').text(0);
@@ -1156,6 +1159,9 @@
                         $('#in_process_ratio').text(0);
                         $('#in_process_ratio_percentage').text(0);
                         $('#re_open_rate_percentage').text(0);
+                        $('#launch-in-process').text(0);
+                        $('#launch-resolved').text(0);
+                        $('#launch-closed').text(0);
                     }
                 });
             }

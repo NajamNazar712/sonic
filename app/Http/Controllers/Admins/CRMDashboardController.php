@@ -1341,11 +1341,21 @@ class CRMDashboardController extends Controller
             $card_data['re_open'] = $card_data['re_open']->count();
             $card_data['valid'] = $card_data['valid']->count();
             $card_data['in_valid'] = $card_data['in_valid']->count();
+
+            $card_data['launch_in_process_rate'] = $card_data['in_process'] !== 0 ? $card_data['launched']/$card_data['in_process'] : 0;
+            $card_data['launch_resolved_rate'] = $card_data['resolved'] !== 0 ? $card_data['launched']/$card_data['resolved'] : 0;
+            $card_data['launch_closed_rate'] = $card_data['closed'] !== 0 ? $card_data['launched']/$card_data['closed'] : 0;
+
             $card_data['in_valid_percentage'] = "0";
             $card_data['closed_rate_percentage'] = "0";
             $card_data['in_process_ratio'] = "0";
             $card_data['re_open_rate_percentage'] = "0";
             $card_data['in_process_ratio_percentage'] = "0";
+            $card_data['launch_in_process_rate_percentage'] = "0";
+            $card_data['launch_resolved_rate_percentage'] = "0";
+            $card_data['launch_closed_rate_percentage'] = "0";
+            
+            
 
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {
@@ -1368,9 +1378,11 @@ class CRMDashboardController extends Controller
                 if ($card_data['total'] > 0) {
                     $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
                     $card_data['closed_rate_percentage'] = $card_total !== 0 ? round(($card_data['closed_rate']) * 100, 2) : 0;
-                    $card_data['in_process_ratio_percentage'] = $shipments !== 0 ? round(($card_data['in_process_ratio']) * 100,2)
-                    : 0;
+                    $card_data['in_process_ratio_percentage'] = $shipments !== 0 ? round(($card_data['in_process_ratio']) * 100,2) : 0;
                     $card_data['re_open_rate_percentage'] =  $card_data['closed']!=0 ? round(($card_data['re_open_rate']) * 100, 2) : 0;
+                    $card_data['launch_in_process_rate_percentage'] =  $card_data['in_process'] !== 0 ? round(($card_data['launch_in_process_rate']) * 100, 2) : 0;
+                    $card_data['launch_resolved_rate_percentage'] =  $card_data['resolved'] !== 0 ? round(($card_data['launch_resolved_rate']) * 100, 2) : 0;
+                    $card_data['launch_closed_rate_percentage'] =  $card_data['closed'] !== 0 ? round($card_data['launch_closed_rate'] * 100, 2) : 0;
                 }
             }
             
