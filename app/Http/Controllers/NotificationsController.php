@@ -8567,7 +8567,7 @@ class NotificationsController extends Controller
                     }
 
                     $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
-                    
+
                     $hubs = Shipment::with(['destination_city', 'pickup_address', 'consignee_city'])
                     ->whereIn('id', $shipment_ids)
                     ->get()
@@ -8579,8 +8579,9 @@ class NotificationsController extends Controller
                         ];
                     })
                     ->toArray();
-
+                    
                     $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
+                    dd($hubs, $admin_ids);
                     foreach($admin_ids as $admin_id){
                         $admin = Admin::find($admin_id);
                         $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
