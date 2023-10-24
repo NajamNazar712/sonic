@@ -8579,7 +8579,7 @@ class NotificationsController extends Controller
                         ];
                     })
                     ->toArray();
-                    
+                    $hubs = array_values($hubs);
                     $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
                     dd($hubs, $admin_ids);
                     foreach($admin_ids as $admin_id){
