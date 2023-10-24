@@ -1644,7 +1644,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub') || $(header).is('.responsible_zone') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
