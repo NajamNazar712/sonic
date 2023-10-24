@@ -1401,7 +1401,9 @@
             });
 
             $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                var old_amount = $('#old_amount').val();
                 $('#add_request_form')[0].reset();
+                $('#old_amount').val(old_amount);
                 $('#case_nature_complaints').val('').trigger('change');
                 $('#case_nature_select').val('').trigger('change');
                 $('#case_nature_requests').val('').trigger('change');
