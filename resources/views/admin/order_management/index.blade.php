@@ -1567,6 +1567,7 @@
                                                 'channel_id': case_nature_channel_id,
                                                 'description': service_description,
                                                 'cod_new_amount': $('#new_amount').val(),
+                                                'cod_remarks': $('#cod_remarks').val(),
                                                 'is_automated_cod_change': 1,
                                             }
                                         })
