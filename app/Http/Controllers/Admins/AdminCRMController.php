@@ -516,7 +516,7 @@ class AdminCRMController extends Controller
                                             }
                                         }
                                         $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                        return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                                        return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                     }
                                 }
                                 else{
@@ -601,7 +601,7 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                    return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                                    return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                 }
                             }else{
                                 $present_shipments[] = $shipment->tracking_number;
@@ -698,7 +698,7 @@ class AdminCRMController extends Controller
                                         }
                                     }
                                     $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                    return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                                    return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                                 }
                             }
                             else{
@@ -784,7 +784,7 @@ class AdminCRMController extends Controller
                                     }
                                 }
                                 $crm_request_padded_id = str_pad($crm_request_padded_id, 6, 0, STR_PAD_LEFT);
-                                return ['status' => 1, 'success' => 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                                return ['status' => 1, 'success' => $message ?? 'Request ('. $crm_request_padded_id .') successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
                             }
                         }
                     }
