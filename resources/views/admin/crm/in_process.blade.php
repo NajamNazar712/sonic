@@ -281,6 +281,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Who’s at Fault</h4>
                 </div>
+                <input type="hidden" name="close_reason_type" id="close_reason_type" value="">
                 <input type="hidden" name="close_reason_crm_ids" id="close_reason_crm_ids" value="0">
                 <div class="modal-body">
                     <select name="closed_reason_status" id="closed_reason_status" class="form-control select2">
@@ -460,6 +461,33 @@
                         }
                     },
                     @endif
+                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(787, session('permissions')))
+                    {
+                        text: 'In-Valid',
+                        className: 'btn btn-danger in_valid',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $.ajax({
+                                url: '{!! route('admin.crm.close_reason') !!}',
+                                method: 'POST',
+                                data: {
+                                    // 'closed_reason_status':closed_reason_status,
+                                    'crm_request_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function (data) {
+                                if(data.status == 1){
+                                    $('#close_reason_crm_ids').val(data.crm_ids);
+                                    $('#close_reason_type').val(1);
+                                    $('#CloseReasonModal').modal('show');
+                                }else{
+                                    mark_valid_invalid(0);
+                                }
+                            });
+                        }
+                    },
+                    @endif
                     
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(309, session('permissions')))
                         {
@@ -580,6 +608,7 @@
                             .done(function (data) {
                                 if(data.status == 1){
                                     $('#close_reason_crm_ids').val(data.crm_ids);
+                                    $('#close_reason_type').val(2);
                                     $('#CloseReasonModal').modal('show');
                                 }else{
                                     mark_close();
@@ -611,6 +640,7 @@
 
                                     table.button('.assign').enable();
                                     table.button('.close_request').enable();
+                                    table.button('.in_valid').enable();
                                     table.button('.tag').enable();
                                     table.button('.un_tag').enable();
                                     table.button('.bulk_external_comment').enable();
@@ -643,6 +673,7 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_request').disable();
+                                        table.button('.in_valid').disable();
                                         table.button('.tag').disable();
                                         table.button('.un_tag').disable();
                                         table.button('.bulk_external_comment').enable();
@@ -1077,6 +1108,7 @@
             $('#CloseReasonModal').on('hide.bs.modal', function (e) {
                 $('#closed_reason_status').val('').trigger('change');
                 $('#close_reason_crm_ids').val('');
+                $('#close_reason_type').val();
             });
             $('#assign_agentSubmit').on('click',function () {
                 var assign = parseInt($('#assign_agent').val());
@@ -1164,7 +1196,15 @@
 
             $('#closed_reason_submit').on('click',function () {
                 //mark_close
-                mark_close();
+                $close_type = $('#close_reason_type').val();
+
+                if($close_type == 1)
+                {
+                    mark_valid_invalid();
+                }
+                else{
+                    mark_close();
+                }
             });
             
 
@@ -1183,6 +1223,7 @@
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
                     table.button('.close_request').enable();
+                    table.button('.in_valid').enable();
                     table.button('.tag').enable();
                     table.button('.un_tag').enable();
                     table.button('.bulk_external_comment').enable();
@@ -1191,6 +1232,7 @@
                 else {
                     table.button('.assign').disable();
                     table.button('.close_request').disable();
+                    table.button('.in_valid').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
                     table.button('.bulk_external_comment').disable();
@@ -1513,6 +1555,75 @@
                         }
                     });
                 
+            }
+
+            function mark_valid_invalid(valid){
+                
+                if(valid == 0){
+                    valid_text = 'Invalid';
+                }else{
+                    valid_text = 'Valid';
+
+                }
+                
+                var closed_reason_status = $('#closed_reason_status').val();
+                var close_reason_crm_ids = $('#close_reason_crm_ids').val();
+                swal({
+                text: 'Are you sure, you want to Mark these Request(s) '+valid_text+'?',
+                icon: 'info',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.bulk_valid_invalid') !!}',
+                        method: 'POST',
+                        data: {
+                            'crm_request_ids[]': selected_rows,
+                            'closed_reason_status': closed_reason_status,
+                            'close_reason_crm_ids': close_reason_crm_ids,
+                            'valid': valid,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#AssignAgentModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw();
+                            $('#CloseReasonModal').modal('hide');
+
+                        });
+                    }
+                });
             }
 
             $('#star_shippers_filter').on('click',function () {
