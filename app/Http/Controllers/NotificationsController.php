@@ -8584,7 +8584,7 @@ class NotificationsController extends Controller
                     foreach($admin_ids as $admin_id){
                         $admin = Admin::find($admin_id);
                         $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
-                        if(in_array($admin->role_id, $roles)){
+                        if($admin && isset($admin->role_id) && in_array($admin->role_id, $roles)){
                             $to[] = $admin->email;
                         }
                     }
