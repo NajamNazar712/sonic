@@ -72,6 +72,7 @@ $(".steps-validation").steps({
             var cpoc = $('input[name="shipper_poc"]').val();
             var ccity = $('#shipper_city').val();
             var cproduct = $('#shipper_product_type').val();
+            var payment_cycle = $('#payment_cycles').val();
             var scity = $('#shipping_city').find('option[value="'+ccity+'"]').val();
             if(scity !== undefined){
 
@@ -81,6 +82,69 @@ $(".steps-validation").steps({
                 $('#shipping_city').val(ccity).trigger('change');
                 $('#product_select').val(cproduct).trigger('change');
             }
+
+            if(payment_cycle == 2){
+                var twice_a_day = $('#selected_days').val();
+                var daysArray = twice_a_day.split(',');
+
+                if(!(daysArray.length === 2)){
+                    $('#payment_cycle_msg').removeClass('d-none')
+                    $('#payment_cycle_msg').text('Select Exactly Two Days')
+                    return currentIndex;
+
+                }else{
+                    $('#payment_cycle_msg').addClass('d-none')
+
+                }
+            }
+
+            if(payment_cycle == 3){
+                var thrice_a_day = $('#selected_days').val();
+                var daysArray = thrice_a_day.split(',');
+
+                if(!(daysArray.length === 3)){
+                    $('#payment_cycle_msg').removeClass('d-none')
+                    $('#payment_cycle_msg').text('Select Exactly Three Days')
+                    return currentIndex;
+                }else{
+                    $('#payment_cycle_msg').addClass('d-none')
+                }
+            }
+
+            if(payment_cycle == 4){
+                var weekly = $('#selected_days').val();
+                if(weekly == ''){
+                    $('#payment_cycle_msg').removeClass('d-none')
+                    $('#payment_cycle_msg').text('Select Exactly One Day')
+                    return currentIndex;
+                }else{
+                    $('#payment_cycle_msg').addClass('d-none')
+                }
+            }
+
+            if(payment_cycle == 6){
+                var day = $('#monthly').val();
+                if(day == 'none'){
+                    $('#payment_cycle_msg').removeClass('d-none')
+                    $('#payment_cycle_msg').text('Select Exactly One Day')
+                    return currentIndex;
+                }else{
+                    $('#payment_cycle_msg').addClass('d-none')
+                }
+            }
+
+            if(payment_cycle == 5){
+                var day = $('#fornite').val();
+                if(day == 'none'){
+                    $('#payment_cycle_msg').removeClass('d-none')
+                    $('#payment_cycle_msg').text('Select Exactly One Day')
+                    return currentIndex;
+                }else{
+                    $('#payment_cycle_msg').addClass('d-none')
+                }
+            }
+
+            
         }
         // Allways allow previous action even if the current form is not valid!
         if (currentIndex > newIndex)

@@ -149,7 +149,8 @@ class RegisterController extends Controller
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'segments' => 'required',
                 'sub_segments' => 'required',
-                'referral' => ''
+                'referral' => '',
+                
                 
             ]);
         }else{
@@ -342,7 +343,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {     
-        dd($data); 
+        dd($data);
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
@@ -393,7 +394,10 @@ class RegisterController extends Controller
             'referral_id' => $referral_id,
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
-            'territory_id' =>  $territory_id
+            'territory_id' =>  $territory_id,
+            'payment_cycle_id' =>  3,
+            'payment_day' => ($data['payment_cycles'] == '4' || $data['payment_cycles'] == '2' || $data['payment_cycles'] == '3') ? $data['selected_days'] : $data['days']
+
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);

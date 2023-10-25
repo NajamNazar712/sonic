@@ -431,7 +431,7 @@
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
-                                                                <select name="payment_cycles" id="payment_cycles"
+                                                                <select name="payment_cycles" id="payment_cycles" required
                                                                     class="select2 form-control"
                                                                     style="width: 100%">
                                                                     @foreach ($payment_cycles as $payment_cycle)
@@ -445,14 +445,16 @@
                                                         <div id="checkboxContainer" class="d-none">
                                                         </div>
 
-                                                        <span class="text-danger d-none" id="msg_payment">Uncheck one
-                                                            of the selectbox</span>
+                                                        <span class="text-danger d-none" id="payment_cycle_msg"></span>
+                                                        <span class="text-danger d-none" id="msg_payment">Maximum Selected</span>
 
                                                         <div>
                                                             <label class="d-none" id="label">Day 1</label>
                                                             <select name="fornite" id="fornite"
                                                                 class="select2 form-control d-none"
                                                                 style="width: 100%">
+
+                                                                <option value="none">Please Select Day</option>
                                                                 @for ($i = 1; $i < 14; $i++)
                                                                     <option value="{{ $i }}">
                                                                         {{ $i . ' day' }}</option>
@@ -460,10 +462,21 @@
                                                             </select>
                                                         </div>
 
+
+                                                        <div class="mt-2">
+                                                            <label class="d-none" id="label_2">Day 2</label>
+                                                            <select name="fornite_2" id="fornite_2"
+                                                                class="select2 form-control d-none"
+                                                                style="width: 100%">
+                                                            </select>
+                                                        </div>
+
                                                         <div>
                                                             <select name="monthly" id="monthly"
                                                                 class="select2 form-control d-none"
                                                                 style="width: 100%">
+                                                                <option value="none">Please Select Day</option>
+
                                                                 @for ($i = 1; $i < 29; $i++)
                                                                     <option value="{{ $i }}">
                                                                         {{ $i . ' day' }}</option>
@@ -471,17 +484,9 @@
                                                             </select>
                                                         </div>
 
-                                                        <div class="mt-2">
-                                                            <label class="d-none" id="label_2">Day 2</label>
-
-                                                            <select name="fornite_2" id="fornite_2"
-                                                                class="select2 form-control d-none"
-                                                                style="width: 100%">
-                                                            </select>
-                                                        </div>
-
                                                     </div>
 
+                                                    <input type="hidden" name="selected_days" value="" id="selected_days">
                                                 </div>
                                             </fieldset>
                                             <!-- Step 2 -->
@@ -1574,16 +1579,16 @@
 
 
         var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
+        var selectedValues = []; // Create an array to store selected values
         for (var i = 0; i < days.length; i++) {
             var day = days[i];
-            var checkboxId = "checkbox_" + day;
+            var checkboxId = day;
             var labelId = "label_" + day;
 
             var checkbox = $("<input>", {
                 type: "checkbox",
                 id: checkboxId,
-                value: day
+                value: day,
             });
 
             var label = $("<label>", {
@@ -1595,6 +1600,7 @@
             $("#checkboxContainer").append(label);
         }
 
+
         var numSelected = 1;
         var maxSelections_2 = 2;
         var maxSelections_3 = 3;
@@ -1603,10 +1609,13 @@
         function handleCheckboxSelection(numSelectedVar, maxSelectionsVar) {
             return function() {
                 var checkbox = $(this);
-
+                var value = checkbox.val()
                 if (checkbox.is(':checked')) {
                     if (numSelectedVar <= maxSelectionsVar) {
                         numSelectedVar++;
+                        selectedValues.push(value);
+                        $('#selected_days').val(selectedValues);
+
                     } else {
                         checkbox.prop('checked', false);
                         $('#msg_payment').removeClass("d-none");
@@ -1614,6 +1623,12 @@
                 } else {
                     numSelectedVar--;
                     $('#msg_payment').addClass("d-none");
+                    var index = selectedValues.indexOf(value);
+                    if (index !== -1) {
+                        selectedValues.splice(index, 1);
+                        $('#selected_days').val(selectedValues);
+
+                    }
                 }
             }
         }
@@ -1621,9 +1636,9 @@
         $('#payment_cycles').on('change', function() {
             $("#checkboxContainer input[type='checkbox']").prop('checked', false);
             $('#msg_payment').addClass("d-none");
-
+            selectedValues = [];
+            $('#payment_cycle_msg').text('')
             var id = $(this).val();
-
             if (id == 4 || id == 3 || id == 2) {
                 $("#checkboxContainer").removeClass("d-none");
                 $('#fornite').addClass('d-none')
@@ -1631,6 +1646,8 @@
                 $('#monthly').addClass('d-none');
                 $('#label').addClass('d-none');
                 $('#label_2').addClass('d-none');
+                $('#fornite').removeAttr('name');
+                $('#monthly').removeAttr('name');
 
                 if (id == 2) {
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
@@ -1649,6 +1666,7 @@
                 $('#monthly').addClass('d-none');
 
             } else if (id == 6) {
+                $('#selected_days').removeAttr('name');
                 $('#monthly').removeClass('d-none')
                 $("#checkboxContainer").addClass("d-none");
                 $('#fornite').addClass('d-none');
@@ -1670,8 +1688,6 @@
             var value = parseInt($(this).val(), 10);
             var new_day = value + 15;
             var option = $('<option></option>').attr('value', new_day).text(new_day + " Days");
-            option.prop('disabled', true); 
-            option.prop('selected', true); 
             $("#fornite_2").empty().append(option);
             $('#fornite_2').removeClass('d-none');
             $('#label_2').removeClass('d-none');
