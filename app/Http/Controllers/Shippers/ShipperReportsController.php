@@ -54,10 +54,11 @@ class ShipperReportsController extends Controller
     }
     public function sales_list(Request $request)
     {
+        // For the shippers have large shipments
         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
             $connection = 'reports';
         } else {
-            $connection = 'mysql';
+            $connection = 'reports_2';
         }
 
         if (empty($request->get('search_tracking')) && empty($request->get('search_date_from')) && empty($request->get('dr_search_date_from'))) {
