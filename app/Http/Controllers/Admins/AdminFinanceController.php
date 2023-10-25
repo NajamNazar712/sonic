@@ -101,8 +101,7 @@ use App\Http\Models\InvoiceForReimbursement;
 use SnappyImage;
 use SnappyPDF;
 use Auth;
-use DB;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -4546,13 +4545,13 @@ class AdminFinanceController extends Controller
 
     public function make_payments_list(Request $request)
     {
-
-      
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 89);
         }
 
-        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
+//        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
+        $pending_payments = DB::connection('reports_2')->table('pending_payments')
+            ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
                 $join->on('pending_payments.user_id', '=', 'ubi.user_id')
@@ -4561,14 +4560,14 @@ class AdminFinanceController extends Controller
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+//            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
             ->leftjoin('pending_payment_calculations as ppc', 'ppc.pending_payment_id', '=', 'pending_payments.id')
-            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
-            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+//            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+//            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'),'sts.status as star_status')
-            ->groupBy('pending_payments.id');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
+            // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
             // dd($pending_payments);
         if (session('department_id') == 7) {
@@ -4601,41 +4600,25 @@ class AdminFinanceController extends Controller
                 return $fn_charges;
             })
             ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4)
+                if ($shipment->star_status == 1)
                 {
-                    if ($shipment->star_status == 1)
-                    {
-                        return '<p><i class="star_shippers_icon"></i>'.$shipment->shipper.'(' . $shipment->poc . ')'.'</p>';
-                    }
-                    else
-                    {
-                        return $shipment->shipper . ' (' . $shipment->poc . ')';
-                    }
+                    return '<p><i class="star_shippers_icon"></i>'.$shipment->shipper.'</p>';
                 }
                 else
-                    {
-                        if ($shipment->star_status == 1)
-                        {
-                            return '<p><i class="star_shippers_icon"></i>'.$shipment->shipper.'</p>';
-                        }
-                        else
-                        {
-                            return $shipment->shipper;
-                        }
+                {
+                    return $shipment->shipper;
                 }
+            
 
             })
             ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('s.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('s.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
+                if ($keyword != '') {
+                    $query->where('u.name', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
             })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
@@ -4669,9 +4652,9 @@ class AdminFinanceController extends Controller
             ->editColumn('total_wht', function ($pending_payment) {
                 return number_format($pending_payment->total_wht, 2);
             })
-            ->editColumn('packaging_charges', function ($pending_payment) {
-                return number_format($pending_payment->packaging_charges, 2);
-            })
+            // ->editColumn('packaging_charges', function ($pending_payment) {
+            //     return number_format($pending_payment->packaging_charges, 2);
+            // })
             ->editColumn('total_payable', function ($pending_payment) {
                 return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
             })
@@ -4775,7 +4758,8 @@ class AdminFinanceController extends Controller
         }
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+            $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
+            ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
                 ->where('ss.tracking_number', '=', $tracking_number);
         }
 
@@ -4924,6 +4908,7 @@ class AdminFinanceController extends Controller
         return $details;
     }
 
+
     function calculate_fintech_charges($fn_charges)
     {
       
@@ -4965,7 +4950,6 @@ class AdminFinanceController extends Controller
 
     public function make_payments_shipment_list(Request $request)
     {
-        // dd($request->all());
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -4985,7 +4969,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -5042,6 +5026,9 @@ class AdminFinanceController extends Controller
             ->editColumn('wht', function ($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->wht, 2);
             })
+            ->editColumn('packaging_charges', function ($pending_payment_shipment) {
+                return number_format($pending_payment_shipment->packaging_charges, 2);
+            })
             ->editColumn('payable', function ($pending_payment_shipment) {
                 // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipment->ShipmentID);
                 return number_format($pending_payment_shipment->payable - $pending_payment_shipment->fintech_charges, 2);
@@ -5067,10 +5054,6 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
 
-            if (($from = $request->get('requested_from_date')) && ($to = $request->get('requested_to_date'))) {
-                $datatables->whereBetween('pending_payment_shipments.created_at', [$from, $to]);
-            }
-
         return $datatables->make(true);
     }
 
@@ -5082,12 +5065,13 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'Deductable', 'Payable', 'Arrival Date' ];
+        $details[] = ['S. No.', 'Shipper', 'Shipment', 'Origin','Type', 'Status', 'Delivery / Return Datetime', 'Aging', 'Amount', 'Charges', 'GST', 'WHT', 'Packing Charges', 'Deductable', 'Payable', 'Arrival Date' ];
 
         $serial_number = 1;
 
         foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
+            $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
             $shipment = $pending_payment_shipment->shipment;
 
@@ -5117,6 +5101,8 @@ class AdminFinanceController extends Controller
             $row[] = $pending_payment_shipment->amount;
             $row[] = $pending_payment_shipment->charges;
             $row[] = $pending_payment_shipment->gst;
+            $row[] = $pending_payment_shipment->wht;
+            $row[] = $shipment->packaging_charges;
             $row[] = ($pending_payment_shipment->charges + $pending_payment_shipment->gst);
             $row[] = $pending_payment_shipment->payable;
             $row[] = ($arrival_date) ? $arrival_date->created_at : '';
@@ -5625,94 +5611,99 @@ class AdminFinanceController extends Controller
     {
         $shipment = Shipment::find($shipment_id);
         if ($shipment->shipment_type == 1) {
-            $user_bank_id = NULL;
+            if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
-            $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
-
-            if ($user_bank_id) {
-                $user_bank_id = $user_bank_id->id;
-            }
-
-            $done_payment = new DonePayment();
-
-            $done_payment->user_id = $shipment->user_id;
-            $done_payment->total_shipments = 1;
-
-            if ($type == 0) {
-                $done_payment->delivered_shipments = 1;
-            } else {
-                $done_payment->returned_shipments = 1;
-            }
-            $done_payment->user_bank_info_id = $user_bank_id;
-            $done_payment->status = 1;
-
-            $done_payment->save();
-            if ($type == 0) {
-                $charges = ($shipment->amount - $shipment->gst);
-            } else {
-                $charges = ($shipment->received_amount - $shipment->gst);
-            }
-
-            $done_payment_shipment = new DonePaymentShipment();
-
-            $done_payment_shipment->done_payment_id = $done_payment->id;
-            $done_payment_shipment->shipment_id = $shipment_id;
-            $done_payment_shipment->type = $type;
-            $done_payment_shipment->amount = 0;
-            $done_payment_shipment->charges = $charges;
-            $done_payment_shipment->gst = $shipment->gst;
-            $done_payment_shipment->payable = $shipment->amount;
-
-            $done_payment_shipment->save();
-
-            $shipment->payment_status_id = 7;
-
-            $shipment->save();
-            $packaging_material_charges = 0;
-            $adjustment_amount = 0;
-            $shipment = Shipment::find($shipment_id);
-
-            if ($shipment->packaging_material_request) {
-                $packaging_material_charges = $shipment->packaging_material_charges;
-                if ($packaging_material_charges == null) {
-                    $packaging_material_charges = 0;
+                $user_bank_id = NULL;
+    
+                $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
+    
+                if ($user_bank_id) {
+                    $user_bank_id = $user_bank_id->id;
                 }
+    
+                $done_payment = new DonePayment();
+    
+                $done_payment->user_id = $shipment->user_id;
+                $done_payment->total_shipments = 1;
+    
+                if ($type == 0) {
+                    $done_payment->delivered_shipments = 1;
+                } else {
+                    $done_payment->returned_shipments = 1;
+                }
+                $done_payment->user_bank_info_id = $user_bank_id;
+                $done_payment->status = 1;
+    
+                $done_payment->save();
+                if ($type == 0) {
+                    $charges = ($shipment->amount - $shipment->gst);
+                } else {
+                    $charges = ($shipment->received_amount - $shipment->gst);
+                }
+    
+                $done_payment_shipment = new DonePaymentShipment();
+    
+                $done_payment_shipment->done_payment_id = $done_payment->id;
+                $done_payment_shipment->shipment_id = $shipment_id;
+                $done_payment_shipment->type = $type;
+                $done_payment_shipment->amount = 0;
+                $done_payment_shipment->charges = $charges;
+                $done_payment_shipment->gst = $shipment->gst;
+                $done_payment_shipment->payable = $shipment->amount;
+    
+                $done_payment_shipment->save();
+    
+                $shipment->payment_status_id = 7;
+    
+                $shipment->save();
+                $packaging_material_charges = 0;
+                $adjustment_amount = 0;
+                $shipment = Shipment::find($shipment_id);
+    
+                if ($shipment->packaging_material_request) {
+                    $packaging_material_charges = $shipment->packaging_material_charges;
+                    if ($packaging_material_charges == null) {
+                        $packaging_material_charges = 0;
+                    }
+                }
+                self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges, $adjustment_amount);
+                ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
             }
-            self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges, $adjustment_amount);
-            ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
-            ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
         } else {
             if ($type == 0) {
                 $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
 
                 if ($retail_shipment->shipping_mode == 3) {
+                    if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
-                    $done_payment = new DonePayment();
+                        $done_payment = new DonePayment();
 
-                    $done_payment->user_id = $retail_shipment->shipper_account_no;
-                    $done_payment->total_shipments = 1;
-                    $done_payment->delivered_shipments = 1;
-                    $done_payment->status = 1;
+                        $done_payment->user_id = $retail_shipment->shipper_account_no;
+                        $done_payment->total_shipments = 1;
+                        $done_payment->delivered_shipments = 1;
+                        $done_payment->status = 1;
 
-                    $done_payment->save();
+                        $done_payment->save();
 
-                    $done_payment_shipment = new DonePaymentShipment();
+                        $done_payment_shipment = new DonePaymentShipment();
 
-                    $done_payment_shipment->retail_done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $shipment_id;
-                    $done_payment_shipment->type = $type;
-                    $done_payment_shipment->amount = 0;
-                    $done_payment_shipment->payable = $shipment->amount;
+                        $done_payment_shipment->retail_done_payment_id = $done_payment->id;
+                        $done_payment_shipment->shipment_id = $shipment_id;
+                        $done_payment_shipment->type = $type;
+                        $done_payment_shipment->amount = 0;
+                        $done_payment_shipment->payable = $shipment->amount;
 
-                    $done_payment_shipment->save();
+                        $done_payment_shipment->save();
 
-                    $shipment->payment_status_id = 7;
+                        $shipment->payment_status_id = 7;
 
-                    $shipment->save();
-                    $adjustment_amount = 0;
-                    self::add_done_payment_charges($done_payment->id, 0, 0, 0, $shipment->amount, 0, $adjustment_amount, 1);
-                    ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id, 1);
-                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
+                        $shipment->save();
+                        $adjustment_amount = 0;
+                        self::add_done_payment_charges($done_payment->id, 0, 0, 0, $shipment->amount, 0, $adjustment_amount, 1);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id, 1);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
+                    }
                 }
             }
         }
@@ -7919,20 +7910,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8102,7 +8093,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -8110,7 +8101,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -8507,7 +8498,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words() . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words($invoice->total_invoice_amount) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8518,20 +8509,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -9006,25 +8997,21 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
-                        </tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
+                        <td>Meezan Bank</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                        <td>Trax Online Pvt. Ltd.</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                        <td>0104111731</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                        <td>PK02MEZN0099120104111731</td>
+                      </tr>
                         </tbody>
                     </table>
 
@@ -9190,7 +9177,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -9198,7 +9185,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -9603,24 +9590,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -10041,20 +10024,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -10316,7 +10299,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -10324,7 +10307,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -10742,20 +10725,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -10865,12 +10848,14 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftJoin(DB::raw('(SELECT invoice_id, MAX(deposit_date) as latest_deposit_date, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
             'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
             'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
             'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
-            'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 
+            'ius_sub.total_received_amount as received_amount',
+            'invoices.tax_amount as tax_amount', 'ius_sub.latest_deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
@@ -10959,6 +10944,9 @@ class AdminFinanceController extends Controller
                     return $invoice->shipper;
                 }
             })
+            ->addColumn('excel_shipper', function ($invoice) {
+                return $invoice->shipper;
+            })
             ->addColumn('account', function ($invoice) {
                 if ($invoice->account_type == 2) {
                     return 'Corporate Account';
@@ -11036,7 +11024,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deposit_date', function ($invoice) {
                 if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->deposit_date)->format('Y-m-d');
                 } else {
                     return '';
                 }
@@ -12104,7 +12092,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -12112,7 +12100,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
@@ -14611,7 +14599,7 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="text-left align-middle">
                             <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1">
-                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Trax Online Pvt. Ltd.</strong></div>
                             <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
                             <div><strong>NTN:</strong> 7930679-5</div>
                           </td>
@@ -15208,24 +15196,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -15634,20 +15618,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -15770,7 +15754,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -15778,7 +15762,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>

@@ -540,7 +540,7 @@
 										row.push(values.account);
 										row.push(values.invoice_number);
 										row.push(values.shipper_account_id);
-										row.push(values.shipper);
+										row.push(values.excel_shipper);
 										row.push(values.sales_person_name);
 										row.push(values.city);
 										row.push(values.total_charges);

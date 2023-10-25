@@ -95,6 +95,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit', 'Shippers\ShipperConsolidatedController@consolidate_shipment_submit')->name('submit');
         });
     });
+    Route::prefix('mentor_health')->name('mentor_health.')->group(function () {
+        Route::get('', 'Shippers\ShipperDashboardController@mentor_health_index')->name('index');
+        Route::post('add_request', 'Shippers\ShipperDashboardController@mentor_health_add_request')->name('add_request');
+    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
@@ -2925,6 +2929,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('operations_performance')->name('operations_performance.')->group(function () {
+            Route::get('data', 'Admins\AdminReportsController@ajax_load_operation_data')->name('data');
             Route::get('', 'Admins\AdminReportsController@operations_performance_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
@@ -3578,9 +3583,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
-        Route::prefix('sms_notification_return_delivered_to_shipper')->name('sms_notification_return_delivered_to_shipper.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_index')->name('index');
-            Route::post('update', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_update')->name('update');
+        Route::prefix('sms_notifications_limit')->name('sms_notifications_limit.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sms_notifications_limit_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@sms_notifications_limit_update')->name('update');
         });
 
 
@@ -4539,7 +4544,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('verification')->name('verification.')->group(function () {
             Route::get('/', 'Admins\VigilanceController@verification_index')->name('index');
             Route::get('/list', 'Admins\VigilanceController@verification_list')->name('list');
-            Route::get('delivery_note_info', 'Admins\verification_index@delivery_note_info')->name('delivery_note_info');
+            Route::get('delivery_note_info', 'Admins\VigilanceController@delivery_note_info')->name('delivery_note_info');
             //            Route::post('/info', 'Admins\VigilanceController@verification_info')->name('info');
 //            Route::post('/add', 'Admins\VigilanceController@vigilance_note_add')->name('add');
             Route::post('/excess_cns', 'Admins\VigilanceController@verification_excess_cns')->name('excess_cns');

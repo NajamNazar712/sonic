@@ -637,6 +637,8 @@ class Permission
 
             'reports.fintech_report.index' => 896,
             'reports.fintech_report.list' => 896,
+            'reports.ordinary_discrepancy_report.index' => 901,
+            'reports.ordinary_discrepancy_report.list' => 901,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1393,7 +1395,7 @@ class Permission
             'delivery.delivery_shipments.index'=> 859,
         
             'management.riders.rider_remarks.index'=>862,
- 			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+ 			'settings.sms_notifications_limit.index' => 861,
             'return.rcp_agent_cn.index' => 876,
             'return.new_rcp_agent_shipments.index' => 876,
  			'accounts.substitute_account_management.index' => 873,

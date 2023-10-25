@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Order Management')
 
 @section('content')
     <div class="app-content content">
@@ -1194,12 +1194,7 @@
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
@@ -1212,12 +1207,7 @@
                     });
                     var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.text = obj.booking_type;
-
                         return obj;
                     });
 
@@ -1230,12 +1220,7 @@
                     });
                     var data3 = $.map({!! $products !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data3 = $.map({!! $products !!}, function (obj) {
                         obj.text = obj.product_name;
-
                         return obj;
                     });
 
@@ -1248,14 +1233,10 @@
                     });
                     var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
+
                     $("#payment_select").prepend('<option value="" selected></option>').select2({
                         data: data4,
                         placeholder: "Select Payment",
@@ -1267,7 +1248,6 @@
                     var data6 = $.map({!! $payment_module !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.mode;
-
                         return obj;
                     });
                     $("#payment_mode").prepend('<option value="" selected></option>').select2({
@@ -2150,20 +2130,152 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-                        $.ajax({
-                            url: '{!! route('cod.crm.request.add') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'shipment_ids': selected_rows,
-                                'case_nature_id': case_nature_id,
-                                'complaint_id': complaint_id,
-                                'description': description,
-                                'alternate_phone': $('#alternate_phone').val(),
-                                'cod_new_amount': $('#new_amount').val(),
-                                // 'cod_amount': $('#cod_amount').val(),
-                            }
-                        })
+
+                        var complaint_id = $('#case_nature_requests').val();
+                        
+                        if(complaint_id == 12)
+                        {
+
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to change COD!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Launching Request.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+
+                                    $.ajax({
+                                        url: '{!! route('cod.crm.request.add') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'shipment_ids': selected_rows,
+                                            'case_nature_id': case_nature_id,
+                                            'complaint_id': complaint_id,
+                                            'description': description,
+                                            'cod_new_amount': $('#new_amount').val(),
+                                            'is_automated_cod_change': 1,
+                                        }
+                                    })
+                                    .done(function (data) {
+                                        swal.close();
+
+                                        if (data.status) {
+                                            if (data.flag) {
+                                                var html = '';
+
+                                                $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+
+                                                if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+
+                                                swal({
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            } else {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                            // toastr.success(data.success, 'Success!', {
+                                            //     positionClass: 'toast-bottom-center',
+                                            //     containerId: 'toast-bottom-center'
+                                            // });
+                                        } else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+
+                                        table.button('.print').disable();
+                                        table.button('.cancel').disable();
+                                        table.button('.consolidate').disable();
+
+                                        selected_rows = [];
+
+                                        table.rows().deselect();
+
+                                        table.draw('false');
+
+                                        $('#AddRequestModal').modal('hide');
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    });
+                                }
+                                else{
+                                    $('#AddNewRequest').attr('disabled',false);
+                                }
+                            });
+
+                        }
+                        else{
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            $.ajax({
+                                url: '{!! route('cod.crm.request.add') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'shipment_ids': selected_rows,
+                                    'case_nature_id': case_nature_id,
+                                    'complaint_id': complaint_id,
+                                    'description': description,
+                                }
+                            })
                             .done(function (data) {
                                 swal.close();
 
@@ -2231,6 +2343,9 @@
                                 $('#AddRequestModal').modal('hide');
                                 $('#AddNewRequest').attr('disabled',false);
                             });
+                        }
+
+                        
                     }
                 }
             });
