@@ -453,7 +453,7 @@ class ShipperCRMController extends Controller
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
 
-                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 12, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                         }
@@ -623,7 +623,7 @@ class ShipperCRMController extends Controller
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
 
-                    if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 12, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                    if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                     {
                         return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                     }
