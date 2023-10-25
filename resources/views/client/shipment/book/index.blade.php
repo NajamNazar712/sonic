@@ -738,38 +738,35 @@
 			//todo: for parcel value end
 
 			//todo : increse of pieces to 500
-			$(this).find('.pieces').TouchSpin({
-				min: 1,
-				max: 10,
-				buttondown_class: 'btn btn-primary rounded-left',
-				buttonup_class: 'btn btn-primary rounded-right',
-				buttondown_txt: '<i class="ft-minus"></i>',
-				buttonup_txt: '<i class="ft-plus"></i>'
-			}).bind('input change', function() {
-				$(this).tooltip('show');
+				$(this).find('.pieces').TouchSpin({
+					min: 1,
+					max: 10,
+					buttondown_class: 'btn btn-primary rounded-left',
+					buttonup_class: 'btn btn-primary rounded-right',
+					buttondown_txt: '<i class="ft-minus"></i>',
+					buttonup_txt: '<i class="ft-plus"></i>'
+				}).bind('input change', function() {
+					$(this).tooltip('show');
 
-				if ($(this).hasClass('danger')) {
-					$(this).valid();
-				}
-				if ($(this).hasClass('exceed_pieces')) {
-					$("#pieces").trigger("touchspin.updatesettings", {max: 15});
-				}
-			});
+					if ($(this).hasClass('danger'))
+						$(this).valid();
 
-			$(".pieces").change(function () {
-				if($('#shipping_mode').val() == 2)
-				{
-					$(".pieces").addClass("exceed_pieces");
-				}
-				else
-                {
-                    $(".pieces").removeClass("exceed_pieces");
-                }
-			});
+					if ($(this).hasClass('exceed_pieces'))
+						$("#pieces").trigger("touchspin.updatesettings", {max: 500});
+					else
+						$("#pieces").trigger("touchspin.updatesettings", {max: 10});
+				});
 
-			$("#shipping_mode").change(function () {
-				$('#pieces').val(null).trigger('change');
-			});
+				$(".pieces").change(function () {
+					if($('#shipping_mode').val() == 2)
+						$(".pieces").addClass("exceed_pieces");
+					else
+						$(".pieces").removeClass("exceed_pieces");
+				});
+
+				$("#shipping_mode").change(function () {
+					$('#pieces').val(null).trigger('change');
+				});
 			//todo : increse of pieces to 500 end
 
             $('#open_shipment').checkboxpicker();
