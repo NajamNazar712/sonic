@@ -364,6 +364,28 @@
                                                     </div>
 
                                                     <span class="text-danger d-none" id="msg_payment">Uncheck one of the selectbox</span>
+
+                                                    <div class="col-8">
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                      </span>
+                                                            </div>
+                                                            <input type="text" name="search_date_from"   class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Booking Date From">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-8">
+                                                        <div class="form-group input-group">
+                                                            <div class="input-group-prepend">
+                                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                        </span>
+                                                            </div>
+                                                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Booking Date To">
+                                                        </div>
+                                                    </div>
+
                                                 </div>
                                                 
                                             </div>
@@ -1255,28 +1277,52 @@
 
     });
 
+    var search_date_from = $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_to = $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
     var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-    // Loop through the array and create checkboxes with labels
     for (var i = 0; i < days.length; i++) {
         var day = days[i];
         var checkboxId = "checkbox_" + day;
         var labelId = "label_" + day;
 
-        // Create a checkbox input element
         var checkbox = $("<input>", {
             type: "checkbox",
             id: checkboxId,
-            value: day // Set the value attribute to the day name
+            value: day 
         });
 
-        // Create a label element associated with the checkbox
         var label = $("<label>", {
             for: checkboxId,
             text: day
         });
 
-        // Append the checkbox and label to the container
         $("#checkboxContainer").append(checkbox);
         $("#checkboxContainer").append(label);
     }
