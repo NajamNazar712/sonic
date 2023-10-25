@@ -147,7 +147,6 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'referral' => ''
@@ -191,7 +190,6 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'cycle_of_invoicing' => 'required',
@@ -343,7 +341,8 @@ class RegisterController extends Controller
      * @return \App\User
      */
     protected function create(array $data)
-    {      
+    {     
+        dd($data); 
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
