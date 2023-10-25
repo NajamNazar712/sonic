@@ -26,6 +26,7 @@ class LastMileAppReport implements ShouldQueue
      */
     public function __construct($shipment_id,$delivery_note_id,$rider_id,$shipper_status_id,$added_at,$rider_delivery,$via)
     {
+        $this->queue = 'last_mile_app_report';
         $this->shipment_id = $shipment_id;
         $this->delivery_note_id = $delivery_note_id;
         $this->rider_id = $rider_id;
