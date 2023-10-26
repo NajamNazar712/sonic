@@ -11784,6 +11784,9 @@ class RiderAPIController extends Controller
                                 NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
                             }
                         }
+                    }else {
+                        //create pickup note id and pickup request id of current rider
+                        
                     }
                 }
             } catch (Exception $ex) {
