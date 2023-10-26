@@ -103,6 +103,7 @@ use App\Http\Models\UserDefaultBankDuration;
 use Auth;
 use App\Http\Models\Segment;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -2168,8 +2169,12 @@ class ShipperDashboardController extends Controller
                 {
                     $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
 
+                    $verify = true;
+                    if(App::environment() == 'local')
+                        $verify = false;
+
                     $client = new Client([
-                        'verify' => false, // Disable SSL verification
+                        'verify' => $verify, // Disable SSL verification
                     ]);
 
                     $postData = [
