@@ -52,6 +52,9 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Trax ID</th>
                             <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Delivery Note ID</th>
                             <th class="border-primary border-darken-1">Transaction ID</th>
@@ -201,6 +204,9 @@
 
                             head.push('S. No.');
                             head.push('Tracking Number');
+                            head.push('Destination');
+                            head.push('Rider Name');
+                            head.push('Trax ID');
                             head.push('COD Amount');
                             head.push('Delivery Note ID');
                             head.push('Transaction ID');

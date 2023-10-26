@@ -97,6 +97,7 @@
                             <th class="border-primary border-darken-1">HBL Konnect Amount %</th>
                             <th class="border-primary border-darken-1">Fintech Amount</th>
                             <th class="border-primary border-darken-1">Fintech Amount %</th>
+                            <th class="border-primary border-darken-1">Cash Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -302,6 +303,7 @@
                             head.push('HBL Konnect Amount %');
                             head.push('Fintech Shipments Amount');
                             head.push('Fintech Shipments Amount %');
+                            head.push('Cash Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -325,6 +327,8 @@
                                 row.push(values.hbl_konnect_amount_percent);
                                 row.push(values.fintech_shipments_charges);
                                 row.push(values.fintech_amount_percent);
+                                var cashAmount = (values.dncc_amount-(values.hbl_konnect_amount+values.fintech_shipments_charges));
+                                row.push(cashAmount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);

@@ -11380,7 +11380,8 @@ class AdminReportsController extends Controller
         if ($delivery_note_id = $request->get('delivery_note_id')) {
             $datatable->where('delivery_note_id', $delivery_note_id);
         }
-
+        printf(json_encode($datatable));
+        die();
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
