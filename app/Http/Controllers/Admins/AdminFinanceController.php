@@ -4566,7 +4566,7 @@ class AdminFinanceController extends Controller
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
             // dd($pending_payments);
@@ -4740,67 +4740,81 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
-        if ($payment_filter = $request->get('payment_filter')) {
-            if ($payment_filter == 1) {
-                $dayOfweek = Carbon::today()->dayOfWeek;
-                $dayOfMonth = Carbon::today()->format('d');
-                $datatables = $datatables->where(function ($query) use ($payment_filter, $dayOfweek, $dayOfMonth) {
-                    $query->where(function ($sub_query) use ($payment_filter) {
-                        $sub_query->where('u.payment_cycle_id', 1);
-                    })
-                        ->orwhere(function ($sub_query) use ($payment_filter, $dayOfweek, $dayOfMonth) {
-                            $sub_query->where('u.payment_day', '=', DB::raw("IF (u.payment_cycle_id = 2, $dayOfweek, IF  (u.payment_cycle_id = 3, $dayOfMonth,''))"));
+            if ($payment_filter = $request->get('payment_filter')) {
+                $datatables = $datatables->where(function ($query) use ($payment_filter, $pending_payments) {
+                    if ($payment_filter == 1) {
+                        $dayOfWeek = Carbon::today()->dayOfWeek;
+                        $dayOfMonth = Carbon::today()->format('d');            
+                        $query->where(function ($sub_query) {
+                            $sub_query->where('u.payment_cycle_id', 1);
+                        })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                            $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
+                                ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                    $sub_query->where(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->where('u.payment_cycle_id', 2)
+                                            ->where('u.payment_cycle_days', $dayOfWeek);
+                                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 3)
+                                            ->where('u.payment_cycle_days', $dayOfMonth);
+                                    })->orWhere(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->whereIn('u.payment_cycle_id', [4,5])
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 6)
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
+                                    });
+                                });
                         });
+                    } else {
+                        $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
+                    }
                 });
-            } else {
-                $datatables->whereIn('u.payment_cycle_id', [1, 2, 3]);
             }
-        }
-
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
-            ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
-                ->where('ss.tracking_number', '=', $tracking_number);
-        }
-
-        if ($positive_negative_filter = $request->get('positive_negative_filter')) {
-            if ($positive_negative_filter == 1) {
-                $datatables->having('total_payable', '>=', 0);
-            } else if ($positive_negative_filter == 2) {
-                $datatables->having('total_payable', '<', 0);
+            
+            if ($tracking_number = $request->get('tracking_number')) {
+                $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
+                ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+                    ->where('ss.tracking_number', '=', $tracking_number);
             }
-        }
 
-        if ($shipper = $request->get('search_shipper')) {
-            $datatables->where('u.id', '=', $shipper);
-        }
-
-        if ($shipper_status = $request->get('shipper_status')) {
-            if ($shipper_status == 1) {
-                $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
-            } else {
-                $datatables->where('u.status', '!=', 3);
+            if ($positive_negative_filter = $request->get('positive_negative_filter')) {
+                if ($positive_negative_filter == 1) {
+                    $datatables->having('total_payable', '>=', 0);
+                } else if ($positive_negative_filter == 2) {
+                    $datatables->having('total_payable', '<', 0);
+                }
             }
-        }
-        if ($request->get('shipper_document_status') !== null) {
-            $shipper_document_status = $request->get('shipper_document_status');
-            if ($shipper_document_status == 0) {
-                $datatables->where('u.documents_status', '=', 0);
-            } else if ($shipper_document_status == 1) {
-                $datatables->where('u.documents_status', '=', 1);
-            } else if ($shipper_document_status == 2) {
-                $datatables->where('u.documents_status', '=', 2);
-            } else if ($shipper_document_status == 3) {
-                $datatables->where('u.documents_status', '=', 3);
-            } else {
-                $datatables->whereRaw('false');
-            }
-        }
 
-        if($request->get('star_shipper_filter') == 1)
-        {
-            $datatables->where('sts.status',1);
-        }
+            if ($shipper = $request->get('search_shipper')) {
+                $datatables->where('u.id', '=', $shipper);
+            }
+
+            if ($shipper_status = $request->get('shipper_status')) {
+                if ($shipper_status == 1) {
+                    $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
+                } else {
+                    $datatables->where('u.status', '!=', 3);
+                }
+            }
+            if ($request->get('shipper_document_status') !== null) {
+                $shipper_document_status = $request->get('shipper_document_status');
+                if ($shipper_document_status == 0) {
+                    $datatables->where('u.documents_status', '=', 0);
+                } else if ($shipper_document_status == 1) {
+                    $datatables->where('u.documents_status', '=', 1);
+                } else if ($shipper_document_status == 2) {
+                    $datatables->where('u.documents_status', '=', 2);
+                } else if ($shipper_document_status == 3) {
+                    $datatables->where('u.documents_status', '=', 3);
+                } else {
+                    $datatables->whereRaw('false');
+                }
+            }
+
+            if($request->get('star_shipper_filter') == 1)
+            {
+                $datatables->where('sts.status',1);
+            }
 
         return $datatables->make(true);
     }

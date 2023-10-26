@@ -449,6 +449,7 @@
                                                         <span class="text-danger d-none" id="msg_payment">Maximum Selected</span>
 
                                                         <div>
+                                                            <input type="hidden" id="fortnite_val" name="fortnite" value="">
                                                             <label class="d-none" id="label">Day 1</label>
                                                             <select name="fornite" id="fornite"
                                                                 class="select2 form-control d-none"
@@ -1584,11 +1585,12 @@
             var day = days[i];
             var checkboxId = day;
             var labelId = "label_" + day;
+            var value = parseInt([i], 10) + 1;
 
             var checkbox = $("<input>", {
                 type: "checkbox",
                 id: checkboxId,
-                value: day,
+                value: value,
             });
 
             var label = $("<label>", {
@@ -1639,7 +1641,7 @@
             selectedValues = [];
             $('#payment_cycle_msg').text('')
             var id = $(this).val();
-            if (id == 4 || id == 3 || id == 2) {
+            if (id == 4 || id == 5 || id == 2) {
                 $("#checkboxContainer").removeClass("d-none");
                 $('#fornite').addClass('d-none')
                 $('#fornite_2').addClass('d-none');
@@ -1648,24 +1650,25 @@
                 $('#label_2').addClass('d-none');
                 $('#fornite').removeAttr('name');
                 $('#monthly').removeAttr('name');
+                $('#fornite_2').removeAttr('name');
 
-                if (id == 2) {
+                if (id == 4) {
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_2));
-                } else if (id == 3) {
+                } else if (id == 5) {
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_3));
-                } else if (id == 4) {
+                } else if (id == 2) {
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_1));
                 }
-            } else if (id == 5) {
+            } else if (id == 6) {
                 $("#checkboxContainer").addClass("d-none");
                 $('#fornite').removeClass('d-none')
                 $('#label').removeClass('d-none')
                 $('#monthly').addClass('d-none');
 
-            } else if (id == 6) {
+            } else if (id == 3) {
                 $('#selected_days').removeAttr('name');
                 $('#monthly').removeClass('d-none')
                 $("#checkboxContainer").addClass("d-none");
@@ -1685,13 +1688,17 @@
             }
         });
         $('#fornite').on('change', function() {
-            var value = parseInt($(this).val(), 10);
-            var new_day = value + 15;
-            var option = $('<option></option>').attr('value', new_day).text(new_day + " Days");
+            var fornite = parseInt($(this).val(), 10);
+            var fornite_2 = fornite + 15;
+            var value = $(this).val() + ',' + fornite_2;
+            var option = $('<option></option>').attr('value', fornite_2).text(fornite_2 + " Days");
             $("#fornite_2").empty().append(option);
             $('#fornite_2').removeClass('d-none');
             $('#label_2').removeClass('d-none');
-
+            $('#fornite_2').removeAttr('name');
+            $('#fornite').removeAttr('name');
+            $('#msg_payment').addClass("d-none");
+            $('#fortnite_val').val(value);
         });
 
     </script>

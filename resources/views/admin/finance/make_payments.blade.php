@@ -545,10 +545,6 @@
                             head.push('Payment Cycle');
                             head.push('Return Shipments Avg. Aging');
 
-
-
-
-
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -778,6 +774,10 @@
                         '<option value="1">Daily</option>' +
                         '<option value="2">Weekly</option>' +
                         '<option value="3">Monthly</option>' +
+						'<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
+
                         '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;

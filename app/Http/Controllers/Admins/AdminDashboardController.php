@@ -9494,7 +9494,8 @@ public function payfast_payment(Request $request){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                     }
                     if (session('role_id') == 1 || in_array(365, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
+                        // hide this because change in payment cycle scenario when register shipper, now this should be change similarly while edit
+                        /*$dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';*/
                     }
                     if ((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';

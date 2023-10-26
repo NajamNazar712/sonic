@@ -343,7 +343,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {     
-        dd($data);
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
@@ -368,6 +367,23 @@ class RegisterController extends Controller
         }else{
             $referral_id = null;
         }
+
+        switch ($data['payment_cycles']) {
+            case '2':
+            case '4':
+            case '5':
+                $payment_cycle_days = $data['selected_days'];
+                break;
+            case '6':
+                $payment_cycle_days = $data['fortnite'];
+                break;
+            case '3':
+                $payment_cycle_days = $data['monthly'];
+                break;
+            default:
+                $payment_cycle_days = 0;
+        }
+
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -395,9 +411,8 @@ class RegisterController extends Controller
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
             'territory_id' =>  $territory_id,
-            'payment_cycle_id' =>  3,
-            'payment_day' => ($data['payment_cycles'] == '4' || $data['payment_cycles'] == '2' || $data['payment_cycles'] == '3') ? $data['selected_days'] : $data['days']
-
+            'payment_cycle_id' =>  $data['payment_cycles'],
+            'payment_cycle_days' => $payment_cycle_days
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);

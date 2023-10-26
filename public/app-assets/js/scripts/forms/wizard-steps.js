@@ -83,7 +83,7 @@ $(".steps-validation").steps({
                 $('#product_select').val(cproduct).trigger('change');
             }
 
-            if(payment_cycle == 2){
+            if(payment_cycle == 4){
                 var twice_a_day = $('#selected_days').val();
                 var daysArray = twice_a_day.split(',');
 
@@ -98,7 +98,7 @@ $(".steps-validation").steps({
                 }
             }
 
-            if(payment_cycle == 3){
+            if(payment_cycle == 5){
                 var thrice_a_day = $('#selected_days').val();
                 var daysArray = thrice_a_day.split(',');
 
@@ -111,7 +111,7 @@ $(".steps-validation").steps({
                 }
             }
 
-            if(payment_cycle == 4){
+            if(payment_cycle == 2){
                 var weekly = $('#selected_days').val();
                 if(weekly == ''){
                     $('#payment_cycle_msg').removeClass('d-none')
@@ -122,7 +122,7 @@ $(".steps-validation").steps({
                 }
             }
 
-            if(payment_cycle == 6){
+            if(payment_cycle == 3){
                 var day = $('#monthly').val();
                 if(day == 'none'){
                     $('#payment_cycle_msg').removeClass('d-none')
@@ -133,7 +133,7 @@ $(".steps-validation").steps({
                 }
             }
 
-            if(payment_cycle == 5){
+            if(payment_cycle == 6){
                 var day = $('#fornite').val();
                 if(day == 'none'){
                     $('#payment_cycle_msg').removeClass('d-none')
