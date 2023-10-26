@@ -4741,7 +4741,7 @@ class AdminFinanceController extends Controller
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
             if ($payment_filter = $request->get('payment_filter')) {
-                $datatables = $datatables->where(function ($query) use ($payment_filter, $pending_payments) {
+                $datatables = $datatables->where(function ($query) use ($payment_filter) {
                     if ($payment_filter == 1) {
                         $dayOfWeek = Carbon::today()->dayOfWeek;
                         $dayOfMonth = Carbon::today()->format('d');            
@@ -4753,7 +4753,7 @@ class AdminFinanceController extends Controller
                                     $sub_query->where(function ($sub_query) use ($dayOfWeek) {
                                         $sub_query->where('u.payment_cycle_id', 2)
                                             ->where('u.payment_cycle_days', $dayOfWeek);
-                                    })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
                                         $sub_query->where('u.payment_cycle_id', 3)
                                             ->where('u.payment_cycle_days', $dayOfMonth);
                                     })->orWhere(function ($sub_query) use ($dayOfWeek) {

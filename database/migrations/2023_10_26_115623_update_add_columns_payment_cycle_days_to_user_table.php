@@ -14,7 +14,7 @@ class UpdateAddColumnsPaymentCycleDaysToUserTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('payment_cycle_days')->after('payment_cycle_id');
+            $table->string('payment_cycle_days')->after('payment_cycle_id')->default(0);
         });
     }
 
