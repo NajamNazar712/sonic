@@ -642,9 +642,7 @@
                                                 <div class="form-group">
                                                     <select name="product_id" id="product_select" class="form-control select2"
                                                             data-rule-required="true" data-msg-required="Product is required">
-                                                        @foreach($products as $product)
-                                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                                        @endforeach
+                                                     
                                                     </select>
                                                 </div>
                                             </div>
@@ -1261,6 +1259,7 @@
                 }
             });
             var shipper_pickup_addresses = [];
+            var products=@json($products);
             $('#shippers_select').prepend('<option value="" selected="selected">Select Shippers</option>').select2({
                 placeholder: 'Select Customer',
                 width: '100%',
@@ -1278,6 +1277,7 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
+                        $('#product_select').empty();
                         if (data.status == 0) {
                             shipper_pickup_addresses = data.pickup_addresses;
                             $.each(data.pickup_addresses,function(key,value) {
@@ -1290,8 +1290,17 @@
                                 width: '100%',
                                 dropdownParent:$('#add_pickup_request')
                             }).val(null).trigger('change');
-                            $('#product_select').val(data.product_id).trigger('change');
-                            $('#product_select').attr('disabled', true);
+                         
+                            $.each(products,function(key,value){
+                                if(value.id==data.product_id){
+                                    var product = new Option(value.name, value.id, false, false);
+                                    // console.log(product);
+                                     $('#product_select').append(product).trigger('change');
+                                    //  .prop('selected', true);
+                                }
+                            });
+                            // $('#product_select').val(data.product_id).trigger('change');
+                            // $('#product_select').attr('disabled', true);
                         } else {
                             toastr.error('No pickup address found!', 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -1321,7 +1330,8 @@
             });
 
             var services = @json($services);
-            $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
+        
+            $('#product_select').select2({
                 placeholder: 'Select Product',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
@@ -1426,13 +1436,23 @@
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
             });
-
+            
+            // var products=@json($products);
             $('#customer_type').on('click', 'a',function (){
+                $('#product_select').empty();
                 if($(this).hasClass('registered')){
                     $('#pickup_type_id').val(1);
+                    $("#service_select").removeAttr('data-rule-required').removeAttr('data-msg-required');
+
                 }
                 else if($(this).hasClass('walk_in')){
                     $('#pickup_type_id').val(2);
+                    $('#product_select').append(new Option('Select Product', '', false, true));
+                    $.each(products,function(key,value){
+                       var product = new Option(value.name, value.id, false, false);
+                       $('#product_select').append(product);
+                    });
+                  
                     $("#service_select").attr('data-rule-required',true).attr('data-msg-required',"Service is required");
                 }
             });
@@ -2199,7 +2219,7 @@
                 },
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
-                    $('#product_select').attr('disabled', false);
+                    // $('#product_select').attr('disabled', false);
                     swal({
                         title: 'Please Wait!',
                         text: 'Pickup request is being added!',
