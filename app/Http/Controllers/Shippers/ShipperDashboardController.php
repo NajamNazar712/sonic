@@ -1221,7 +1221,7 @@ class ShipperDashboardController extends Controller
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             if ($pickup->default_address == 1) {
-                $dropdown = 'Default Address';
+                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
             else {
                 if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
@@ -1239,8 +1239,11 @@ class ShipperDashboardController extends Controller
                 }
             }
 
-            if(!$pickup->default_return_address){
+            if((!$pickup->default_return_address) && ($pickup->status == 1)){
                 $dropdown .= $return_default_button;
+            }
+            elseif ($pickup->default_return_address){
+                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
             }
             $dropdown .= '
                     </div>

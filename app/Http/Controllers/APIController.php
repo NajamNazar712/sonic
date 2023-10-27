@@ -806,7 +806,7 @@ class APIController extends Controller
                 }
 
                 if ($service_type_id == 1) {
-                    if ($request->has('return_address_id') && $request->input('return_address_id') != null) {
+                    if ($request->has('return_address_id')) {
 
                         $settings = GlobalSettings::where('type', 'omni_users');
                         if ($settings->exists()) {
@@ -818,8 +818,21 @@ class APIController extends Controller
                                 }
                             }
                         }
+                        $return_address_id = NULL;
+                        if($request->input('return_address') != null){
+                            $return_address_id = $request->input('return_address_id');
+                        }
+                        else{
+                            $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                            if($return_address->exists()){
+                                $return_address_id = $return_address->first()->id;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Default return address is not set!']);
+                            }
+                        }
 
-                        $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
+                        $user_shipping_info_return = UserShippingInfo::find($return_address_id);
 
                         if (!$user_shipping_info_return->status) {
                             return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
