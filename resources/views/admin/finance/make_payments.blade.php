@@ -67,6 +67,19 @@
 									</div>
 									</form>
 								</div>
+
+								<div class="col-3">
+									<form id="payment_cycles_form" class="mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="payment_cycles" class="select2 payment_cycles">
+											@foreach($payment_cycles as $payment_cycle)
+												<option value="{{$payment_cycle->id}}">{{$payment_cycle->name}}</option>
+											@endforeach
+										</select>
+									</div>
+									</form>
+								</div>
+
 								<div class="col-3">
 									<form id="shipper_document_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
@@ -137,7 +150,8 @@
 										<th class="border-primary border-darken-1">IBAN</th>
 										<th class="border-primary border-darken-1">Account City</th>
 										<th class="border-primary border-darken-1">Payment Cycle</th>
-										
+										<th class="border-primary border-darken-1">Payment Cycle Days</th>
+
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -482,6 +496,14 @@
 				table.draw(false);
 			});
 
+			$('#payment_cycles_form select.payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Payment Cycle',
+                width:'100%',
+                allowClear:true
+            }).bind('change', function() {
+				table.draw(false);
+			});
+
 			$('#shipper_document_status_form select.shipper_document_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Shipper Document Status',
                 width:'100%',
@@ -543,6 +565,7 @@
                             head.push('IBAN');
                             head.push('Account City');
                             head.push('Payment Cycle');
+							head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
 
                             $.each(result.data, function(index, values) {
@@ -573,6 +596,7 @@
                                 row.push(values.iban);
                                 row.push(values.account_city);
                                 row.push(values.payment_cycle);
+								row.push(values.payment_cycle_days);
                                 row.push(values.return_shipments_average_aging);
 
                                 body.push(row);
@@ -706,8 +730,10 @@
 						d.positive_negative_filter = $('#positive_negative_filter_form select.positive_negative_filter').val();
 						d.search_shipper = $('#search_shipper').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
+						d.payment_cycles = $('#payment_cycles_form select.payment_cycles').val();
 						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
 						d.star_shipper_filter = $('#star_shippers_filter').val();
+						
 					}
 				},
 				rowId: 'id',
@@ -740,7 +766,7 @@
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
 					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
-				
+					{data:'payment_cycle_days', name: 'u.payment_cycle_days', class: 'align-middle text-center payment_cycle_days'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],

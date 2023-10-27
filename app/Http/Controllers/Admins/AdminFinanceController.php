@@ -2,117 +2,118 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Models\Admin\AdjustmentLog;
-use App\Http\Models\Admin\AdjustmentType;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\Http\Models\Admin\ChangeShipmentWeightLog;
-use App\Http\Models\Admin\CorporateUserPackagingInvoice;
-use App\Http\Models\Admin\InvoiceAdjustment;
-use App\Http\Models\Admin\InvoiceAdjustmentReasons;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\ResolvedOutstandingShipment;
-use App\Http\Models\Admin\ReversionDeliveredShipment;
-use App\Http\Models\Admin\RevertStatusRequest;
-use App\Http\Models\Admin\StationDepositNoteAdjustment;
-use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
-use App\Http\Models\ChargesModes;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CorporateDiscountCharge;
-use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\DonePaymentCalculation;
-use App\Http\Models\InternationalDhlZone;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\InternationalUserRate;
-use App\Http\Models\InternationalUsersCreditLimit;
-use App\Http\Models\InvoiceUploadSlip;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestDetail;
-use App\Http\Models\PackagingMaterialRequestHistory;
-use App\Http\Models\PendingPaymentCalculation;
-use App\Http\Models\PickupAddressIbanMapping;
-use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ReimbursementInvoiceShipment;
-use App\Http\Models\RetailAdjustmentLog;
-use App\Http\Models\RetailDonePayment;
-use App\Http\Models\RetailDonePaymentCalculation;
-use App\Http\Models\RetailDonePaymentShipment;
-use App\Http\Models\RetailPendingPayment;
-use App\Http\Models\RetailPendingPaymentCalculation;
-use App\Http\Models\RetailPendingPaymentShipment;
-
-use App\Http\Models\Admin\shipmentFintechCharges;
-
-use App\Http\Models\RevertStatusRequestLog;
-use App\Http\Models\Rider;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentsPaymentJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\Warehouse\Warehouse;
-use App\Http\Models\WeightCharge;
-use App\Http\Models\ZoneClassCity;
+use Auth;
 use DateTime;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\ShipmentsPaymentJourneyController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Models\Admin\PettyCashStatement;
-
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Notification;
-use App\Http\Models\BanksList;
+use SnappyPDF;
+use SnappyImage;
+use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
-use App\Http\Models\BookingType;
-use App\Http\Models\Admin\StationDepositNote;
-use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\LostShipmentAdmin;
-use App\Http\Models\Admin\LostShipmentShipper;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\PendingPayment;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\Rider;
 use App\Http\Models\Invoice;
-use App\Http\Models\InvoiceShipment;
-use App\Http\Models\InvoiceStatus;
-use App\Http\Models\Sister_account\MergedSisterAccount;
-use App\Http\Models\InvoiceForReimbursement;
-use SnappyImage;
-use SnappyPDF;
-use Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Http\Models\RateStatus;
 use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\DonePayment;
+use NumberToWords\NumberToWords;
 use Yajra\Datatables\Datatables;
-use Carbon\Carbon;
+use App\Http\Models\ChargesModes;
+use App\Http\Models\Notification;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\InvoiceStatus;
+use App\Http\Models\ZoneClassCity;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\InvoiceUploadSlip;
+use App\Http\Models\RetailDonePayment;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\RetailAdjustmentLog;
+use App\Http\Models\Warehouse\Warehouse;
+use App\Http\Models\Admin\AdjustmentType;
+use App\Http\Models\Admin\GlobalSettings;
+
+use App\Http\Models\InternationalDhlZone;
+
+use App\Http\Models\RetailPendingPayment;
+use App\Http\Models\Shipper\UserBankInfo;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use NumberToWords\NumberToWords;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\InternationalUserRate;
 use App\Http\Models\Admin\WalkinFtlInvoice;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DonePaymentCalculation;
+use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\RevertStatusRequestLog;
+use App\Http\Models\Admin\InvoiceAdjustment;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\CorporateDiscountCharge;
+
+use App\Http\Models\InvoiceForReimbursement;
+use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PickupAddressIbanMapping;
+use App\Http\Models\Admin\LostShipmentShipper;
+use App\Http\Models\Admin\RevertStatusRequest;
+use App\Http\Models\PendingPaymentCalculation;
+use App\Http\Models\RetailDonePaymentShipment;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\shipmentFintechCharges;
+use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\ReimbursementInvoiceShipment;
+use App\Http\Models\RetailDonePaymentCalculation;
+use App\Http\Models\RetailPendingPaymentShipment;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\ChangeShipmentWeightLog;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\InternationalUsersCreditLimit;
+use App\Http\Models\Admin\InvoiceAdjustmentReasons;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Models\RetailPendingPaymentCalculation;
+use App\Http\Models\Admin\ReversionDeliveredShipment;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CorporateUserPackagingInvoice;
+use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Controllers\ShipmentsPaymentJourneyController;
+use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
+use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 
 class AdminFinanceController extends Controller
 {
@@ -156,6 +157,44 @@ class AdminFinanceController extends Controller
             return $zone->gst;
         } else {
             return 0.13;
+        }
+    }
+
+    static private function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
+        $dayNames = [];
+    
+        foreach ($days as $day) {
+            if (array_key_exists($day, $dayMap)) {
+                $dayName = $dayMap[$day];
+                $dayNames[] = $dayName;
+            }
+        }
+    
+        if (count($dayNames) === 0) {
+            return '-';
+        } elseif (count($dayNames) === 1) { //weekly
+            return "Every $dayNames[0] $cycleSuffix";
+        } elseif (count($dayNames) === 2) { //twice a day
+            return "Every $dayNames[0] and $dayNames[1] $cycleSuffix";
+        } else { //thrice a week
+            return "Every " . implode(', ', $dayNames) . " $cycleSuffix";
+        }
+    } 
+
+    static private function getDayOfMonthText($day) {
+        if ($day % 100 >= 11 && $day % 100 <= 13) {
+            return $day . 'th';
+        } else {
+            switch ($day % 10) {    
+                case 1:
+                    return $day . 'st';
+                case 2:
+                    return $day . 'nd';
+                case 3:
+                    return $day . 'rd';
+                default:
+                    return $day . 'th';
+            }
         }
     }
 
@@ -4530,6 +4569,7 @@ class AdminFinanceController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 29);
         $banks = BanksList::all();
+        $payment_cycles = PaymentCycle::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
@@ -4540,8 +4580,10 @@ class AdminFinanceController extends Controller
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers]);
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
     }
+
+  
 
     public function make_payments_list(Request $request)
     {
@@ -4566,7 +4608,7 @@ class AdminFinanceController extends Controller
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
             // dd($pending_payments);
@@ -4640,6 +4682,41 @@ class AdminFinanceController extends Controller
                     return 0;
                 }
             })
+            ->editColumn('payment_cycle_days', function ($pending_payment) {
+                $payment_cycle = $pending_payment->payment_cycle_id;
+                $payment_cycle_days = $pending_payment->payment_cycle_days;
+                $dayMap = [
+                    1 => 'Monday',
+                    2 => 'Tuesday',
+                    3 => 'Wednesday',
+                    4 => 'Thursday',
+                    5 => 'Friday',
+                    6 => 'Saturday',
+                ];
+            
+                if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $cycleText = $this->getCycleText($payment_cycle_days, $dayMap);
+                    return $cycleText;
+                }
+            
+                if ($payment_cycle == 3 || $payment_cycle == 6) {//Monthly And Fortnightly
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    if (count($payment_cycle_days) == 1) {
+                        $day = (int)$payment_cycle_days[0];
+                        return $this->getDayOfMonthText($day);
+                    } elseif (count($payment_cycle_days) == 2) {
+                        $day1 = (int)$payment_cycle_days[0];
+                        $day2 = (int)$payment_cycle_days[1];
+                        return $this->getDayOfMonthText($day1) . " And " . $this->getDayOfMonthText($day2);
+                    }
+                }
+            
+                if ($payment_cycle == 1) {// Daily
+                    return '-';
+                }
+            })
+            
             ->editColumn('total_amount', function ($pending_payment) {
                 return number_format($pending_payment->total_amount, 2);
             })
@@ -4807,6 +4884,26 @@ class AdminFinanceController extends Controller
                 } else if ($shipper_document_status == 3) {
                     $datatables->where('u.documents_status', '=', 3);
                 } else {
+                    $datatables->whereRaw('false');
+                }
+            }
+
+            if ($request->get('payment_cycles') !== null) {
+                $payment_cycles = $request->get('payment_cycles');
+                if ($payment_cycles == 1) {
+                    $datatables->where('u.payment_cycle_id', '=', 1);
+                } else if ($payment_cycles == 2) {
+                    $datatables->where('u.payment_cycle_id', '=', 2);
+                } else if ($payment_cycles == 3) {
+                    $datatables->where('u.payment_cycle_id', '=', 3);
+                } else if ($payment_cycles == 4) {
+                    $datatables->where('u.payment_cycle_id', '=', 4);
+                }  else if ($payment_cycles == 5) {
+                    $datatables->where('u.payment_cycle_id', '=', 5);
+                }  else if ($payment_cycles == 6) {
+                    $datatables->where('u.payment_cycle_id', '=', 6);
+                }
+                else {
                     $datatables->whereRaw('false');
                 }
             }
