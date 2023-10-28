@@ -1604,9 +1604,9 @@
 
 
         var numSelected = 1;
-        var maxSelections_2 = 2;
-        var maxSelections_3 = 3;
-        var maxSelections_1 = 1;
+        var maxSelections_1 = 1; //Weekly
+        var maxSelections_2 = 2; //Twice A Week
+        var maxSelections_3 = 3; //Thrice A Week
 
         function handleCheckboxSelection(numSelectedVar, maxSelectionsVar) {
             return function() {
@@ -1652,13 +1652,13 @@
                 $('#monthly').removeAttr('name');
                 $('#fornite_2').removeAttr('name');
 
-                if (id == 4) {
+                if (id == 4) {//Twice A Day
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_2));
-                } else if (id == 5) {
+                } else if (id == 5) {//Thrice A Day
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_3));
-                } else if (id == 2) {
+                } else if (id == 2) {//Weekly
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_1));
                 }

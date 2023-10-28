@@ -4700,7 +4700,7 @@ class AdminFinanceController extends Controller
                     return $cycleText;
                 }
             
-                if ($payment_cycle == 3 || $payment_cycle == 6) {//Monthly And Fortnightly
+                if (($payment_cycle == 3 || $payment_cycle == 6) && $payment_cycle_days != '0') {//Monthly And Fortnightly
                     $payment_cycle_days = explode(',', $payment_cycle_days);
                     if (count($payment_cycle_days) == 1) {
                         $day = (int)$payment_cycle_days[0];
@@ -4710,6 +4710,8 @@ class AdminFinanceController extends Controller
                         $day2 = (int)$payment_cycle_days[1];
                         return $this->getDayOfMonthText($day1) . " And " . $this->getDayOfMonthText($day2);
                     }
+                }else{
+                    return '-';
                 }
             
                 if ($payment_cycle == 1) {// Daily
