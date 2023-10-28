@@ -104,6 +104,7 @@
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Service</th>
                                     <th class="border-primary border-darken-1">Shippment Type</th>
+                                    <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
@@ -111,7 +112,6 @@
                                     <th class="border-primary border-darken-1">Rider Phone</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Assigned Courier Phone</th>
-                                    <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Admin Generated</th>
                                     <th class="border-primary border-darken-1">Client Generated</th>
@@ -1715,6 +1715,7 @@
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
                     {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
+                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
@@ -1742,7 +1743,7 @@
                     },
                     {data: 'current_rider_phone', name: 'current_rider_phone', class: 'align-middle current_rider_phone'},
 
-                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                    
                   
                     // {data: 'shipper', name: 'shipper', class: 'align-middle shipper',},
                    
