@@ -9964,13 +9964,40 @@ public function payfast_payment(Request $request){
 
     }
 
+    function user_payment_cycles_days($user){
+        $payment_cycle_days = explode(',', $user->payment_cycle_days);
+        $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
+        $fort_month = [3, 6]; // Monthly and Fortnight.
+        $days = [];
+    
+        if (isset($user->payment_cycle->id)) {
+            if (in_array($user->payment_cycle->id, $weekly)) {
+                foreach ($payment_cycle_days as $payment_cycle_day) {
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $dayName = $date->format('l');
+                    $days[] = $dayName;
+                }
+            } else if (in_array($user->payment_cycle->id, $fort_month)) {
+                $days[] = "Every " . implode(', ', $payment_cycle_days) . " of the month";
+            } else {//Daily
+                $days[] = 'Daily';
+            }
+        } else {
+            $days[] = 'Payment Cycle Not Defined'; 
+        }
+    
+        $days = implode(', ', $days);
+    
+        return $days;
+    }
+    
     //User Profile Methods
 
     public function userProfile($id)
     {
         $user = User::find($id);
-
         $product = Product::find($user->product_id);
+        $payment_cycle_days = $this->user_payment_cycles_days($user);
         $products = Product::all();
         $banks = BanksList::all();
         $invoicing_cycle = InvoicingCycle::all();
@@ -9985,7 +10012,7 @@ public function payfast_payment(Request $request){
         $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
     }
 
     public function updateProfile(Request $request)

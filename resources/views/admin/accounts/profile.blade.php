@@ -132,11 +132,22 @@
                                         <td>{{$user->sub_segment->name}}
                                         </td>
                                     </tr>
-                                @endif
-                                
+                                @endif                              
                                 <tr>
                                     <td><b>API Key</b></td>
                                     <td>{{$user->api_token}}</td>
+                                </tr>                             
+                                <tr>
+                                    <td><b>Payment Cycle</b></td>
+                                    <td>
+                                       {{$user->payment_cycle->name}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><b>Payment Cycle Days</b></td>
+                                    <td>
+                                      {{ $days }}
+                                    </td>
                                 </tr>
                                 </tbody>
                             </table>
