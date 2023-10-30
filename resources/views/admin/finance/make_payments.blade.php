@@ -81,6 +81,19 @@
 								</div>
 
 								<div class="col-3">
+									<form id="payment_cycle_days_form" class="mb-1 justify-content-center" novalidate="novalidate">
+									<div class="form-group">
+										<select name="payment_cycle_days" class="select2 payment_cycle_days">
+											@for($i = 1; $i < 29; $i++)
+											<option value="{{ $i }}">
+												{{ $i . ' day' }}</option>
+											@endfor
+										</select>
+									</div>
+									</form>
+								</div>
+
+								<div class="col-3">
 									<form id="shipper_document_status_form" class="mb-1 justify-content-center" novalidate="novalidate">
 									<div class="form-group">
 										<select name="shipper_document_status" class="select2 shipper_document_status">
@@ -503,6 +516,14 @@
             }).bind('change', function() {
 				table.draw(false);
 			});
+			
+			$('#payment_cycle_days_form select.payment_cycle_days').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Payment Cycle Days',
+                width:'100%',
+                allowClear:true
+            }).bind('change', function() {
+				table.draw(false);
+			});
 
 			$('#shipper_document_status_form select.shipper_document_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Shipper Document Status',
@@ -731,6 +752,7 @@
 						d.search_shipper = $('#search_shipper').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
 						d.payment_cycles = $('#payment_cycles_form select.payment_cycles').val();
+						d.payment_cycle_days = $('#payment_cycle_days_form select.payment_cycle_days').val();
 						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
 						d.star_shipper_filter = $('#star_shippers_filter').val();
 						

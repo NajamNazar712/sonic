@@ -4868,6 +4868,11 @@ class AdminFinanceController extends Controller
                 $datatables->where('u.id', '=', $shipper);
             }
 
+            
+            if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+                $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
+            }
+
             if ($shipper_status = $request->get('shipper_status')) {
                 if ($shipper_status == 1) {
                     $datatables->where('u.status', '=', 3)->where('u.blacklist', 0);
