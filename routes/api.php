@@ -192,12 +192,15 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
                 Route::post('pickup_in_route', 'Rider\RiderAPIController@pickup_in_route')->name('pickup_in_route');
                 Route::post('scan_rider_picked_shipment', 'Rider\RiderAPIController@scan_rider_picked_shipment')->name('scan_rider_picked_shipment');
-
+                Route::post('scan_shipment_detail_v3', 'Rider\RiderAPIController@scan_shipment_detail_v3')->name('scan_shipment_detail_v3');
+                Route::post('scan_shipment_assign_v3', 'Rider\RiderAPIController@scan_shipment_assign_v3')->name('scan_shipment_assign_v3');
+                Route::post('scan_rider_picked_shipment_v3', 'Rider\RiderAPIController@scan_rider_picked_shipment_v3')->name('scan_rider_picked_shipment_v3');
+                
                 Route::prefix('v3')->name('v3.')->group(function (){
                     Route::get('summary', 'Rider\RiderAPIController@pickup_summary_v3')->name('pickup_summary');
                     Route::post('acknowledge', 'Rider\RiderAPIController@pickup_Accept_Reject_v3')->name('pickup_Accept_Reject_v3');
                     Route::post('pick', 'Rider\RiderAPIController@pickup_pick_v4')->name('pickup_pick_v4');
-                
+                    
                 });
             });
 
