@@ -232,11 +232,7 @@
                         url: '{{ route('admin.reports.csat_report.list') }}',
                         data: params,
                         success: function(result) {
-
                             head = [];
-
-
-
                             head.push('S. No.');
                             head.push('Agent');
                             head.push('Complaint ID');
