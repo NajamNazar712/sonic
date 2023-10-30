@@ -9871,7 +9871,10 @@ class NotificationsController extends Controller
                     if (strpos($body, '[preview]') !== FALSE) {
                         $body = str_replace('[preview]', $html, $body);
                     }
-                    $to = $admin->email;
+                    $to = array();
+
+                    $to[] = $admin->email;
+                    $to[] = 'talha.hussain@trax.pk';
 
                     self::email($subject, $body, $to);
                 } else if ($id == 206) {

@@ -17,7 +17,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                             </div>
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" data-value="{{ Carbon\Carbon::today() }}" id="search_date_from" placeholder="Search Date (From)">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -27,7 +27,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" data-value="{{ Carbon\Carbon::today() }}" id="search_date_to" placeholder="Search Date (To)">
                         </div>
                     </div>
                     
@@ -37,15 +37,20 @@
                 </div>
                 
 
-                <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="form-group">
-                        <input type="text" id ="tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-                    </div>
+                 
+                @if(session('role_id') == 1 || in_array(908, session('permissions')))
+                    <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="col-lg-2 col-md-2 col-sm-6">
+                            <div class="form-group">
+                                <input type="text" id ="tracking_number" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                        </div>
 
-                    <div class="form-group ml-1">
-                        <button type="submit" name="add" class="btn btn-primary add" value="Add">Track</button>
-                    </div>
-                </form>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary" value="Add">Track</button>
+                        </div>
+                    </form>
+                @endif
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -467,6 +472,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
                     url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
                     method: 'POST',
