@@ -160,7 +160,11 @@
                                             <tr>
                                                 <td><b>Payment Cycle</b></td>
                                                 <td>
-                                                   {{$user->payment_cycle->name}}
+                                                    @if(isset($user->payment_cycle))
+                                                        {{ $user->payment_cycle->name }}
+                                                    @else
+                                                        No payment cycle found
+                                                    @endif
                                                 </td>
                                             </tr>
                                             <tr>
