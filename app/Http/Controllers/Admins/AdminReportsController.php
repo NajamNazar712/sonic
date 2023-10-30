@@ -9843,19 +9843,11 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
         }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->leftJoin('shipments_journey as bkg_date', function ($join) {
-                $join->on('bkg_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'bkg_date.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)')
-                    );
-            })
+            ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', function ($join) {
                 $join->on('arv_date.shipment_id', '=', 'shipments.id')
                     ->where(
@@ -9864,8 +9856,9 @@ class AdminReportsController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'bkg_date.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
-            ->whereNotNull('shipments.actual_weight');
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
+            ->whereNotNull('shipments.actual_weight')
+            ->whereBetween('arv_date.created_at', [$request->get('search_date_from'), $request->get('search_date_to')]);;
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -9888,7 +9881,7 @@ class AdminReportsController extends Controller
                 return $difference;
             })
             ->addColumn('weighted_as', function ($shipment) {
-                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
+                if ($shipment->length != null) {
                     return 'Volumetric';
                 } else {
                     return 'Dense';
@@ -9918,11 +9911,6 @@ class AdminReportsController extends Controller
             } else {
                 $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
             }
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('arv_date.created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
