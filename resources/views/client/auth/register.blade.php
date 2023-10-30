@@ -1652,10 +1652,10 @@
                 $('#monthly').removeAttr('name');
                 $('#fornite_2').removeAttr('name');
 
-                if (id == 4) {//Twice A Day
+                if (id == 4) {//Twice A Week
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_2));
-                } else if (id == 5) {//Thrice A Day
+                } else if (id == 5) {//Thrice A Week
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
                         numSelected, maxSelections_3));
                 } else if (id == 2) {//Weekly
