@@ -612,7 +612,7 @@ class APIController extends Controller
                 'pieces_quantity' => [
                     'nullable',
                     'integer',
-                    'digits_between:1,10',
+                    //'digits_between:1,10',
                     //'between:1,10',
                     function ($attribute, $value, $fail) use ($request) {
                         if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
