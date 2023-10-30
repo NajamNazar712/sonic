@@ -9828,7 +9828,10 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
         }
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+        $connection = 'reports';
+
+
+        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -9844,7 +9847,26 @@ class AdminReportsController extends Controller
             })
             ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
             ->whereNotNull('shipments.actual_weight')
-            ->whereBetween('arv_date.created_at', [$request->get('search_date_from'), $request->get('search_date_to')]);;
+            ->whereBetween('arv_date.created_at', [$request->get('search_date_from'), $request->get('search_date_to')]);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('arv_date.id', '>=', $from_id)
+                        ->where('arv_date.id', '<=', $to_id);
+                }
+            }
+        }
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
