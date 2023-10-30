@@ -9848,8 +9848,12 @@ class AdminReportsController extends Controller
         $from_id = null;
         $to_id = null;
 
+        $count = DB::connection($connection)->table('shipments');
+        $count = $count->join('users as u', 'shipments.user_id', '=', 'u.id');
+
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
 
+            $count = $count->whereBetween('shipments.created_at', [$from, $to]);
             $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
@@ -9861,6 +9865,7 @@ class AdminReportsController extends Controller
                 }
             }
         }
+        $count = $count->count();
 
         $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
@@ -9870,8 +9875,7 @@ class AdminReportsController extends Controller
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', function ($join) use($from_id, $to_id) {
                 $join->on('arv_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'arv_date.id',
+                    ->where('arv_date.id',
                         '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id .'" )')
                     );
@@ -9881,11 +9885,11 @@ class AdminReportsController extends Controller
 
 
         if($from_id != null){
-            $shipments->where('arv_date.id', '>=', $from_id)
-                ->where('arv_date.id', '<=', $to_id);
+            $shipments->where('arv_date.created_at', '>=', $from)
+                ->where('arv_date.created_at', '<=', $to);
         }
 
-        $shipments->whereBetween('arv_date.created_at', [$from, $to]);
+        $shipments->whereDate('shipments.created_at', '>=', $from);
 
 
 
@@ -9902,6 +9906,7 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($shipments)
+            ->setTotalRecords($count)
             ->editColumn('tracking_number_link', function ($shipment) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
@@ -9918,13 +9923,13 @@ class AdminReportsController extends Controller
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', $search_shipping_mode);
+            $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($user = $request->get('search_user')) {
-            $datatable->where('u.id', $user);
+            $datatable->where('shipments.user_id', $user);
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('dc.hub_id', $hub);
