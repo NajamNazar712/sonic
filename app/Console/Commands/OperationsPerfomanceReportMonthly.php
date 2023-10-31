@@ -4,11 +4,11 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use App\Http\Traits\CommonTrait;
+use App\Http\Traits\OperationReportTrait;
 
 class OperationsPerfomanceReportMonthly extends Command
 {
-    use CommonTrait;
+    use OperationReportTrait;
     /**
      * The name and signature of the console command.
      *
@@ -21,7 +21,7 @@ class OperationsPerfomanceReportMonthly extends Command
      *
      * @var string
      */
-    protected $description = 'This Cron will send records that have been created in previous month';
+    protected $description = 'This Cron will send records that had been created in previous month';
 
     /**
      * Create a new command instance.
@@ -42,15 +42,14 @@ class OperationsPerfomanceReportMonthly extends Command
     {
         $id = 225;
         $currentDate = Carbon::now();
-        $previousMonth = $currentDate->subMonth();
-        $startOfCurrentMonth = $previousMonth->startOfMonth();
-        $from = $startOfCurrentMonth->toDateString();
-
+        $previousMonth = $currentDate->subMonth()->subMonth(); 
+        $startOfPreviousMonth = $previousMonth->startOfMonth();
+        $from = $startOfPreviousMonth->toDateString();
+        
         $currentDate = Carbon::now();
-        $previousMonth = $currentDate->subMonth();
         $lastDayOfPreviousMonth = $previousMonth->endOfMonth();
         $to = $lastDayOfPreviousMonth->toDateString();
-
-        $this->operations_performance_export_to_excel($from, $to, $id);
+        
+        $this->operations_performance_export_to_excel_automated($from, $to, $id);
     }
 }
