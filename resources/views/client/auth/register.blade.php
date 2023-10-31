@@ -1114,7 +1114,10 @@
 
                                                             </div>
                                                         </div>
-                                                       
+                                                        <div class="form-group">
+                                                            {!! app('captcha')->display() !!}
+                                                            <!--<button id="reset" class="btn btn-primary btn-min-width mr-1 mb-1">Reset</button>-->
+                                                        </div>
                                                         {{-- <div class="form-group"> --}}
                                                         {{-- <label for="password-confirm"> --}}
                                                         {{-- Confirm Password : --}}
