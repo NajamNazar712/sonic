@@ -12716,7 +12716,7 @@ class RiderAPIController extends Controller
     public function delivery_summary_multiple_v6(Request $request)
     {
         $rider_id = $request->rider_id;
-
+        
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
         if ($delivery_notes->exists()) {
@@ -12751,7 +12751,8 @@ class RiderAPIController extends Controller
             }
 
             $nodes = array();
-
+           // return response()->json(['status' => 0, 'message' => 'No Delivery Note Assigned']);
+           
             foreach ($delivery_notes as $delivery_note) {
 
                 //                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
