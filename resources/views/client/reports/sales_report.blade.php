@@ -145,6 +145,8 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
+                        <th class="border-primary border-darken-1">Proceed Date</th>
+                        <th class="border-primary border-darken-1">Paid Date</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Product Category</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -441,6 +443,8 @@
                             head.push('Reason');
                             head.push('Payment Status');
                             head.push('Payment ID');
+                            head.push('Proceed Date');
+                            head.push('Paid Date');
                             head.push('Service Type');
                             head.push('Product Category');
                             head.push('Description');
@@ -494,6 +498,8 @@
                                 row.push(values.reason_name);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
+                                row.push(values.proceed_date);
+                                row.push(values.paid_date);
                                 row.push(values.service_type);
                                 row.push(values.product_name);
                                 row.push(values.description);
@@ -594,6 +600,8 @@
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
+                    { data:'proceed_date' ,name: 'pps.created_at', class: 'align-middle proceed_date'},
+                    { data:'paid_date' ,name: 'dps.created_at', class: 'align-middle paid_date'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
