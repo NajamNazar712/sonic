@@ -9848,19 +9848,20 @@ class AdminReportsController extends Controller
         $from_id = null;
         $to_id = null;
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
 
-            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($from_id->exists()) {
-                $from_id = $from_id->first()->id;
-
-                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-                if ($to_id->exists()) {
-                    $to_id = $to_id->first()->id;
-                }
-            }
-        }
+//        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+//
+//            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+//            if ($from_id->exists()) {
+//                $from_id = $from_id->first()->id;
+//
+//                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+//
+//                if ($to_id->exists()) {
+//                    $to_id = $to_id->first()->id;
+//                }
+//            }
+//        }
 
         $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
@@ -9868,27 +9869,16 @@ class AdminReportsController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->leftJoin('shipments_journey as arv_date', function ($join) use($from_id, $to_id) {
-                $join->on('arv_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'arv_date.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= "' . $from_id . '" and shipments_journey.id <= "' . $to_id .'" )')
-                    );
-            })
+            ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
             ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
+            ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
 
-        if($from_id != null){
-            $shipments->where('arv_date.id', '>=', $from_id)
-                ->where('arv_date.id', '<=', $to_id);
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $shipments->where('arv_date.created_at', '>=', $from)
+                ->where('arv_date.created_at', '<=', $to);
         }
-
-        $shipments->whereBetween('arv_date.created_at', [$from, $to]);
-
-
-
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -9918,13 +9908,13 @@ class AdminReportsController extends Controller
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', $search_shipping_mode);
+            $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($user = $request->get('search_user')) {
-            $datatable->where('u.id', $user);
+            $datatable->where('shipments.user_id', $user);
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('dc.hub_id', $hub);
