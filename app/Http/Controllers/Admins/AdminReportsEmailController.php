@@ -3296,16 +3296,6 @@ class AdminReportsEmailController extends Controller
             )
             ->whereIn('shipments.shipper_status_id', $status)
             ->whereBetween('shipments_journey.created_at', [$from, $to])->get();
-                
-                // $shipments = $shipments->map(function ($shipment) {
-                
-                    
-                //     $shipment->destination_arrival = $shipment->destination_arrival ? "-" : $shipment->destination_arrival;
-                //     $shipment->arrival = $shipment->arrival ? "-" : $shipment->arrival;
-                
-                //     return $shipment;
-                // });
-
 
             $pending_deliveries_report_array[] = ['Pending Deliveries Report'];
             $pending_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
