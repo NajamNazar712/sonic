@@ -58,8 +58,7 @@ class QsrEmail extends Command
 
 
         $response = AdminReportsEmailController::qsr_daily_report($start_date, $end_date);
-        dd($response);
-        
+        // $id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL
         NotificationsController::send(226, $response);
 
     }

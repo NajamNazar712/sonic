@@ -10815,48 +10815,14 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);
                 } 
                 else if ($id == 226){
-
-                    // else if ($id == 111) {
-                    //     $date = $reference_1_id;
-                    //     $file = $reference_2_id;
-                    //     $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
-                    //     if (strpos($body, '[link]') !== FALSE) {
-                    //         $body = str_replace('[link]', $link, $body);
-                    //     }
-                    //     $to = ['uzair.anees@trax.pk'];
-                    //     $cc = ['shahbaz.abbasi@trax.pk'];
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
     
-                    //     self::email($subject, $body, $to, $cc);
-                    // }
-
-                    
-                    
-                    // $file_path = $reference_1_id['file_path'];
-
-                    // $from = $reference_1_id['from'];
-                    // $to = $reference_1_id['to'];
-                    // $subject = 'Revenue Daily Report By Arrival Date  | ';
-
-                    // $subject .= $from;
-
-                    // $file = Storage::disk('public')->url($file_path);
-
-                    // $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
-
-                    // if (strpos($body, '[link]') !== FALSE) {
-                    //     $body = str_replace('[link]', $link, $body);
-                    // }
-
-                    // $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk', 'shafay.tariq@trax.pk', 'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
-
-                    // $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk", "faisal.hasan@trax.pk"];
-
-                    // self::email($subject, $body, $to, $cc);
-
-                    
-                    $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
-
-                    self::email($subject, $body, $to);
+                        self::email($subject, $body, $to);
                 } 
             }
         }
