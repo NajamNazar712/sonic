@@ -1476,6 +1476,9 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             ];
         }
+        else{
+            return response()->json(['status' => 1, 'message' => 'International rates are not set']);
+        }
         
         $validate = Validator::make($request->all(), $rules, $this->messages);
         
