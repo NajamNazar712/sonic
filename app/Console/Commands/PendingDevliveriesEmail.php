@@ -6,23 +6,22 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Http\Request;
 
-class QsrEmail extends Command
+class PendingDevliveriesEmail extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'email:qsrreport';
+    protected $signature = 'email:pendingdeliveriesreport';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Quality of Service Report';
+    protected $description = 'Pending Deliveries Report';
 
     /**
      * Create a new command instance.
@@ -41,15 +40,14 @@ class QsrEmail extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
-        $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
+        $start_date = Carbon::yesterday()->startOfDay()->addHours(9)->toDateTimeString();
+        $end_date = Carbon::today()->startOfDay()->addHours(9)->toDateTimeString();
 
         // $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
         // $end_date = Carbon::today()->toDateTimeString();
 
-        $response = AdminReportsEmailController::qsr_daily_report($start_date, $end_date);
+        $response = AdminReportsEmailController::pending_deliveries_daily_report($start_date, $end_date);
         // $id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL
-        NotificationsController::send(226, $response);
-
+        NotificationsController::send(227, $response);
     }
 }

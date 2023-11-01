@@ -2990,24 +2990,9 @@ class AdminReportsEmailController extends Controller
         return $link;
     }
 
-    static public function qsr_daily_report($from, $to){
-
-        // $request = new Request(['arrival_search_from' => $from, 'arrival_search_to' => $to]);
-        // $adminReportsController = new AdminReportsController();
-        // $deliveries = $adminReportsController->qsr_list($request);
+    static public function qsr_daily_report($from, $to)
+    {
         $serial = 0;
-//         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
-//         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-//             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-//             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
-//             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-//             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-//             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
-//             ->whereBetween('delivery_notes.created_at', [$date_from, $date_to])
-//             ->where('delivery_notes.status', 0)
-//             ->orderBy('delivery_notes.created_at', 'desc')->get();
-
-
 
         $connection = 'reports';
 
@@ -3144,8 +3129,6 @@ class AdminReportsEmailController extends Controller
             'Product Type' => '', 'Product Description' => '', 'Collection Amount' => '', 'Aging (Arrival)' => '', 'Aging (Last Status)' => '', 'Request' => '', 'Request Status' => '', 'Case Nature' => '', 'Case Nature Type' => '', 'Adjusted amount' => '',];
 
 
-            // $receive_deliveries_report_array[] = ['S. No.' => '', 'Delivery Note No.' => '', 'Hub' => '', 'Rider' => '', 'Route' => '', 'No. Of Shipments' => '', 'No. of Pending Shipments' => '', 'No. of Delivered Shipments' => '', 'Assigned By' => '', 'Assigned Date' => '', 'Total Collection' => '', 'Status' => '', 'Last Updated (Date)' => '', 'Last Updated By' => ''];
-
             if($deliveries) {
                 foreach ($deliveries as $shipment) {
                     $serial++;
@@ -3224,5 +3207,196 @@ class AdminReportsEmailController extends Controller
                 return url('/') . '/' . $file_name_without_path;
             }
         }
+    static public function pending_deliveries_daily_report($from, $to)
+    {
+        $serial = 0;
+
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'shipments_journey.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('shipments_journey as ras', function ($join) {
+                $join->on('ras.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'ras.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)')
+                    );
+            })
+            ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
+            ->join('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjd', function ($join) {
+                $join->on('sjd.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjd.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                    );
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
+            ->leftjoin('crm_requests as crm', function ($join) {
+                $join->on('crm.shipment_id', '=', 'shipments.id')
+                    ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
+                    ->where('crm.case_nature_id', DB::raw(1));
+            })
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'si.id',
+                        '=',
+                        DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
+            ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
+
+            ->leftjoin('delivery_note_shipments as dns', function ($join) {
+                $join->on('dns.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'dns.delivery_note_id',
+                        '=',
+                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
+                    );
+            })
+            ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+
+            ->select([
+                'agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin',
+                'dc.name as destination', 'dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 
+                'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type',
+                'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date',
+                'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id',
+                'usi.poc', 'crm.id as complaint', 'shipments.actual_weight as weight', 'si.description as shipment_description',
+                'prod.product_name as product_type', 'sts.status as star_status', 'ca.name as area', 'r.name as last_rider', 'z.name as d_zone', 'r.trax_id as rider_trax_id'
+            ])->whereBetween('journey.created_at', [$from, $to])->get();
+
+                
+                
+                $shipments = $shipments->map(function ($shipment) {
+                    if ($shipment->current_hub_id != null) {
+                        $currentHub = $shipment->current_hub_name;
+                    } else {
+                        if (in_array($shipment->shipper_status_id, [1, 2, 61])) {
+                            $currentHub = $shipment->origin;
+                        } else {
+                            $currentHub = $shipment->hub;
+                        }
+                    }
+                
+                    $days = Carbon::now()->diffInDays($shipment->arrival);
+                    $shipment->aging = ($days == 0) ? "-" : $days;
+
+                    $days = Carbon::now()->diffInDays($shipment->last_status_date);
+                    $shipment->aging_last_status = ($days == 0) ? "-" : $days;
+
+                    $shipment->crm_id_padded = null;
+                
+                    return $shipment;
+                });
+
+
+            $receive_deliveries_report_array[] = ['Pending Deliveries Report'];
+            $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
+            'Consignee Name', 'Consignee Phone', 'Reattempt By', 'Address', 'Sub Station', 'Weight', 'Collection Amount', 'Product Type', 'Product Description', 'Shipping Mode', 'Service Type', 
+            'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Zone', 'Destination Arrival Date', 'Last Rider', 'Last Rider Trax ID', 'Status Date'];
+
+            $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Area' => '', 
+            'Consignee Name' => '', 'Consignee Phone' => '', 'Reattempt By' => '', 'Address' => '', 'Sub Station' => '', 'Weight' => '', 'Collection Amount' => '', 'Product Type' => '', 
+            'Product Description' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Zone' => '', 
+            'Destination Arrival Date' => '', 'Last Rider' => '', 'Last Rider Trax ID' => '', 'Status Date' => ''];
+
+            if($shipments) {
+                foreach ($shipments as $shipment) {
+                    $serial++;
+                    $tracking_number = $shipment->tracking_number;
+                    $shipper = $shipment->shipper;
+                    $origin = $shipment->origin;
+                    $destination = $shipment->destination;
+                    $hub = $shipment->hub;
+                    $area = $shipment->area;
+                    $consignee_name = $shipment->consignee_name;
+                    $consignee_phone = $shipment->consignee_phone;
+                    $agent = $shipment->agent;
+                    $consignee_address = $shipment->consignee_address;
+                    $sub_station = $shipment->sub_station;
+                    $weight = $shipment->history_weight;
+                    $amount = $shipment->amount;
+                    $product_type = $shipment->product_type;
+                    $shipment_description = $shipment->shipment_description;
+                    $shipping_mode = $shipment->shipping_mode;
+                    $service_type = $shipment->service_type;
+                    $status = $shipment->status;
+                    $reason = $shipment->reason;
+                    $remarks = $shipment->remarks;
+                    $arrival = $shipment->arrival;
+                    $d_zone = $shipment->last_status_date;
+                    $destination_arrival = $shipment->destination_arrival;
+                    $last_rider = $shipment->last_rider;
+                    $rider_trax_id = $shipment->rider_trax_id;
+                    $current_status_date = $shipment->current_status_date;
+                   
+
+
+                    $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking No.' => $tracking_number, 'Order ID' => $order_id, 'Account No.' => $account_no, 'Shipper' => $shipper, 'Sub Segment' => $sub_segment,
+                    'Consignee Name' => $name, 'First Attempt Date' => $first_attempt_date, 'Rider Picked Status Date' => $rider_picked_status_date, 
+                    'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Total Attempt' => $total_attempt, 'History Status' => $history_status, 'Cargo Status' => $cargo_status, 'Bag Seal Number' => $seal_number,
+                    'Bag Status' => $bag_status, 'Service' => $service_type, 'Arrival Date' => $arrival, 'Last Status Date' => $last_status_date, 'Booked Status Date' => $created_at, 'Shipping Mode' => $shipping_mode, 
+                    'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Concerned Hub' => $current_hub, 'Return City' => $return_city, 'Zone' => $zone, 'Product Type' => $product_type, 
+                    'Product Description' => $description, 'Collection Amount' => $amount, 'Aging (Arrival)' => $aging, 'Aging (Last Status)' => $aging_last_status, 'Request' => $crm_id_padded, 
+                    'Request Status' => $crm_request_status, 'Case Nature' => $crm_request_case_nature, 'Case Nature Type' => $crm_request_case_nature_type, 'Adjusted amount' => $adjusted_amount];
+                }
+                $cell_st = [
+                    'font' => ['bold' => true],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                ];
+                $serial = $serial + 6;
+                
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->getDefaultColumnDimension()->setWidth(38);
+                $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
+                $sheet->getStyle("A2:AL2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:AL3")->applyFromArray($cell_st);
+                $sheet->getStyle("A" . $serial . ":N" . $serial)->applyFromArray($cell_st);
+                $sheet->setTitle('Quality of Service Report');
+                $sheet->mergeCells('A2:AL2');
+                
+                $writer = new Xlsx($spreadsheet);
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename=quality_service_report_.xlsx"');
+                header('Cache-Control: max-age=0');
+                $date_file_name = Carbon::today()->format('Y_m_d');
+                $file_name_without_path = "reports/quality_service_report_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/quality_service_report_report_" . $date_file_name . ".xlsx";
+                $writer->save($file_name);
+                return url('/') . '/' . $file_name_without_path;
+            }
     }
+}
         

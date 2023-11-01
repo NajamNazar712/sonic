@@ -10824,6 +10824,16 @@ class NotificationsController extends Controller
     
                         self::email($subject, $body, $to);
                 } 
+                else if ($id == 227){
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+    
+                        self::email($subject, $body, $to);
+                } 
             }
         }
     }

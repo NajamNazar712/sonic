@@ -498,6 +498,7 @@ class Kernel extends ConsoleKernel
 
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
 		$schedule->command('sms:email:qsrreport')->dailyAt('10:01')->runInBackground();
+		$schedule->command('sms:email:qsrreport')->dailyAt('10:01')->runInBackground();
     }
     /**
      * Register the commands for the application.
