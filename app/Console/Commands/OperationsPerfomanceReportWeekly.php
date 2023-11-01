@@ -14,7 +14,7 @@ class OperationsPerfomanceReportWeekly extends Command
      *
      * @var string
      */
-    protected $signature = 'reports:operations_perfomance_weekly';
+    protected $signature = 'reports:operations_performance_weekly';
 
     /**
      * The console command description.

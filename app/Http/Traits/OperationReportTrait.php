@@ -2,17 +2,17 @@
 
 namespace App\Http\Traits;
 
-use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
+use PHPExcel_Style_Fill;
 use App\Http\Models\Rider;
 use App\Http\Models\Admin\Admin;
 use Illuminate\Support\Facades\DB;
 use App\Http\Models\ShipmentStatus;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Models\ShipmentStatusReason;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
-use PHPExcel_Style_Fill;
+use App\Http\Controllers\NotificationsController;
 
 trait OperationReportTrait{
     public function operations_performance_export_to_excel_automated($from, $to, $id)
@@ -407,7 +407,13 @@ trait OperationReportTrait{
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
-                $file_name = public_path() . '/' . $file_name_without_path;  
+                $file_name = public_path() . '/storage/OperationReports' . $file_name_without_path;  
+                $directoryPath = 'OperationReports'; 
+
+                if (!Storage::exists($directoryPath)) {
+                    Storage::makeDirectory($directoryPath);
+                }
+                $file_name = Storage::put($directoryPath . '/' . $file_name_without_path, $file_name);
                 $writer->save($file_name);
                 if($id == 224){
                     NotificationsController::send(224, $file_name_without_path, $file_name);
