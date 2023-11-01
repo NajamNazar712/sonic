@@ -3170,7 +3170,6 @@ class AdminReportsEmailController extends Controller
                     $crm_request_case_nature_type = $shipment->crm_request_case_nature_type;
                     $adjusted_amount = $shipment->adjusted_amount;
 
-
                     $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking No.' => $tracking_number, 'Order ID' => $order_id, 'Account No.' => $account_no, 'Shipper' => $shipper, 'Sub Segment' => $sub_segment,
                     'Consignee Name' => $name, 'First Attempt Date' => $first_attempt_date, 'Rider Picked Status Date' => $rider_picked_status_date, 
                     'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Total Attempt' => $total_attempt, 'History Status' => $history_status, 'Cargo Status' => $cargo_status, 'Bag Seal Number' => $seal_number,
@@ -3179,6 +3178,7 @@ class AdminReportsEmailController extends Controller
                     'Product Description' => $description, 'Collection Amount' => $amount, 'Aging (Arrival)' => $aging, 'Aging (Last Status)' => $aging_last_status, 'Request' => $crm_id_padded, 
                     'Request Status' => $crm_request_status, 'Case Nature' => $crm_request_case_nature, 'Case Nature Type' => $crm_request_case_nature_type, 'Adjusted amount' => $adjusted_amount];
                 }
+
                 $cell_st = [
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -3285,7 +3285,7 @@ class AdminReportsEmailController extends Controller
             ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
 
-            ->select([
+            ->select(
                 'agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin',
                 'dc.name as destination', 'dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 
                 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type',
@@ -3293,39 +3293,26 @@ class AdminReportsEmailController extends Controller
                 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id',
                 'usi.poc', 'crm.id as complaint', 'shipments.actual_weight as weight', 'si.description as shipment_description',
                 'prod.product_name as product_type', 'sts.status as star_status', 'ca.name as area', 'r.name as last_rider', 'z.name as d_zone', 'r.trax_id as rider_trax_id'
-            ])->whereBetween('journey.created_at', [$from, $to])->get();
-
+            )
+            ->whereIn('shipments.shipper_status_id', $status)
+            ->whereBetween('shipments_journey.created_at', [$from, $to])->get();
                 
+                // $shipments = $shipments->map(function ($shipment) {
                 
-                $shipments = $shipments->map(function ($shipment) {
-                    if ($shipment->current_hub_id != null) {
-                        $currentHub = $shipment->current_hub_name;
-                    } else {
-                        if (in_array($shipment->shipper_status_id, [1, 2, 61])) {
-                            $currentHub = $shipment->origin;
-                        } else {
-                            $currentHub = $shipment->hub;
-                        }
-                    }
+                    
+                //     $shipment->destination_arrival = $shipment->destination_arrival ? "-" : $shipment->destination_arrival;
+                //     $shipment->arrival = $shipment->arrival ? "-" : $shipment->arrival;
                 
-                    $days = Carbon::now()->diffInDays($shipment->arrival);
-                    $shipment->aging = ($days == 0) ? "-" : $days;
-
-                    $days = Carbon::now()->diffInDays($shipment->last_status_date);
-                    $shipment->aging_last_status = ($days == 0) ? "-" : $days;
-
-                    $shipment->crm_id_padded = null;
-                
-                    return $shipment;
-                });
+                //     return $shipment;
+                // });
 
 
-            $receive_deliveries_report_array[] = ['Pending Deliveries Report'];
-            $receive_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
+            $pending_deliveries_report_array[] = ['Pending Deliveries Report'];
+            $pending_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
             'Consignee Name', 'Consignee Phone', 'Reattempt By', 'Address', 'Sub Station', 'Weight', 'Collection Amount', 'Product Type', 'Product Description', 'Shipping Mode', 'Service Type', 
             'Status', 'Reason', 'Remarks', 'Origin Arrival Date', 'Destination Zone', 'Destination Arrival Date', 'Last Rider', 'Last Rider Trax ID', 'Status Date'];
 
-            $receive_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Area' => '', 
+            $pending_deliveries_report_array[] = ['S. No.' => '', 'Tracking No.' => '', 'Shipper' => '', 'Origin' => '', 'Destination' => '', 'Hub' => '', 'Area' => '', 
             'Consignee Name' => '', 'Consignee Phone' => '', 'Reattempt By' => '', 'Address' => '', 'Sub Station' => '', 'Weight' => '', 'Collection Amount' => '', 'Product Type' => '', 
             'Product Description' => '', 'Shipping Mode' => '', 'Service Type' => '', 'Status' => '', 'Reason' => '', 'Remarks' => '', 'Origin Arrival Date' => '', 'Destination Zone' => '', 
             'Destination Arrival Date' => '', 'Last Rider' => '', 'Last Rider Trax ID' => '', 'Status Date' => ''];
@@ -3341,7 +3328,7 @@ class AdminReportsEmailController extends Controller
                     $area = $shipment->area;
                     $consignee_name = $shipment->consignee_name;
                     $consignee_phone = $shipment->consignee_phone;
-                    $agent = $shipment->agent;
+                    $reattempt_by = $shipment->agent;
                     $consignee_address = $shipment->consignee_address;
                     $sub_station = $shipment->sub_station;
                     $weight = $shipment->history_weight;
@@ -3353,47 +3340,47 @@ class AdminReportsEmailController extends Controller
                     $status = $shipment->status;
                     $reason = $shipment->reason;
                     $remarks = $shipment->remarks;
-                    $arrival = $shipment->arrival;
-                    $d_zone = $shipment->last_status_date;
+                    $origin_arrival_date = $shipment->arrival;
+                    $destination_zone = $shipment->last_status_date;
                     $destination_arrival = $shipment->destination_arrival;
                     $last_rider = $shipment->last_rider;
                     $rider_trax_id = $shipment->rider_trax_id;
                     $current_status_date = $shipment->current_status_date;
                    
 
-
-                    $receive_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking No.' => $tracking_number, 'Order ID' => $order_id, 'Account No.' => $account_no, 'Shipper' => $shipper, 'Sub Segment' => $sub_segment,
-                    'Consignee Name' => $name, 'First Attempt Date' => $first_attempt_date, 'Rider Picked Status Date' => $rider_picked_status_date, 
-                    'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks, 'Total Attempt' => $total_attempt, 'History Status' => $history_status, 'Cargo Status' => $cargo_status, 'Bag Seal Number' => $seal_number,
-                    'Bag Status' => $bag_status, 'Service' => $service_type, 'Arrival Date' => $arrival, 'Last Status Date' => $last_status_date, 'Booked Status Date' => $created_at, 'Shipping Mode' => $shipping_mode, 
-                    'Origin' => $origin, 'Destination' => $destination, 'Hub' => $hub, 'Concerned Hub' => $current_hub, 'Return City' => $return_city, 'Zone' => $zone, 'Product Type' => $product_type, 
-                    'Product Description' => $description, 'Collection Amount' => $amount, 'Aging (Arrival)' => $aging, 'Aging (Last Status)' => $aging_last_status, 'Request' => $crm_id_padded, 
-                    'Request Status' => $crm_request_status, 'Case Nature' => $crm_request_case_nature, 'Case Nature Type' => $crm_request_case_nature_type, 'Adjusted amount' => $adjusted_amount];
+                    $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking No.' => $tracking_number, 'Shipper' => $shipper ,'Origin' => $origin ,'Destination' => $destination, 
+                    'Hub' => $hub ,'Area' => $area ,'Consignee Name' => $consignee_name , 'Consignee Phone' => $consignee_phone , 'Reattempt By' => $reattempt_by, 'Address' => $consignee_address, 
+                    'Sub Station' => $sub_station, 'Weight' => $weight, 'Collection Amount' => $amount, 'Product Type' => $product_type ,'Product Description' => $shipment_description, 
+                    'Shipping Mode' => $shipping_mode, 'Service Type' => $service_type, 'Status' => $status, 'Reason' => $reason, 'Remarks' => $remarks,'Origin Arrival Date' => $origin_arrival_date , 
+                    'Destination Zone' => $destination_zone ,'Destination Arrival Date' => $destination_arrival , 'Last Rider' => $last_rider,'Last Rider Trax ID' => $rider_trax_id, 
+                    'Status Date' => $current_status_date ];
                 }
+
                 $cell_st = [
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
                     'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
                 ];
+
                 $serial = $serial + 6;
                 
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->getDefaultColumnDimension()->setWidth(38);
-                $sheet->fromArray($receive_deliveries_report_array, NULL, 'A2', true);
-                $sheet->getStyle("A2:AL2")->applyFromArray($cell_st);
-                $sheet->getStyle("A3:AL3")->applyFromArray($cell_st);
+                $sheet->getDefaultColumnDimension()->setWidth(27);
+                $sheet->fromArray($pending_deliveries_report_array, NULL, 'A2', true);
+                $sheet->getStyle("A2:AA2")->applyFromArray($cell_st);
+                $sheet->getStyle("A3:AA3")->applyFromArray($cell_st);
                 $sheet->getStyle("A" . $serial . ":N" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Quality of Service Report');
                 $sheet->mergeCells('A2:AL2');
                 
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                header('Content-Disposition: attachment;filename=quality_service_report_.xlsx"');
+                header('Content-Disposition: attachment;filename=pending_deliveries_report_.xlsx"');
                 header('Cache-Control: max-age=0');
                 $date_file_name = Carbon::today()->format('Y_m_d');
-                $file_name_without_path = "reports/quality_service_report_report_" . $date_file_name . ".xlsx";
-                $file_name = public_path() . "/reports/quality_service_report_report_" . $date_file_name . ".xlsx";
+                $file_name_without_path = "reports/pending_deliveries_report_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/pending_deliveries_report_report_" . $date_file_name . ".xlsx";
                 $writer->save($file_name);
                 return url('/') . '/' . $file_name_without_path;
             }

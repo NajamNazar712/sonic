@@ -40,14 +40,13 @@ class PendingDevliveriesEmail extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::yesterday()->startOfDay()->addHours(9)->toDateTimeString();
-        $end_date = Carbon::today()->startOfDay()->addHours(9)->toDateTimeString();
+        // $start_date = Carbon::yesterday()->startOfDay()->addHours(9)->toDateTimeString();
+        // $end_date = Carbon::today()->startOfDay()->addHours(9)->toDateTimeString();
 
-        // $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
-        // $end_date = Carbon::today()->toDateTimeString();
+        $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
+        $end_date = Carbon::today()->toDateTimeString();
 
         $response = AdminReportsEmailController::pending_deliveries_daily_report($start_date, $end_date);
-        // $id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL
         NotificationsController::send(227, $response);
     }
 }
