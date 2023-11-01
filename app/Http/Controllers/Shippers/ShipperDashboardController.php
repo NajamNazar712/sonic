@@ -1225,28 +1225,44 @@ class ShipperDashboardController extends Controller
             if ($pickup->default_address == 1) {
                 $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
-            else {
-                if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
-                    $dropdown .= $edit_button;
-                }
-                if ($pickup->status == 0) {
-                    $dropdown .= $enable_button;
-                }
-                else {
-                    $dropdown .= $default_button;
+            else{
+                $dropdown .= $default_button;
+            }
 
-                    if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
-                        $dropdown .= $disable_button;
+            if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
+                $dropdown .= $edit_button;
+            }
+            if ($pickup->status == 0) {
+                $dropdown .= $enable_button;
+            }
+            else {
+                if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
+                    $dropdown .= $disable_button;
+                }
+            }
+
+
+            $omni_user = false;
+            $settings = GlobalSettings::where('type', 'omni_users');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if ($settings->text != NULL) {
+                    $omni_accounts = array_map('intval', explode(',', $settings->text));
+                    if (in_array($pickup->user_id, $omni_accounts)) {
+                        $omni_user = true;
                     }
                 }
             }
 
-            if((!$pickup->default_return_address) && ($pickup->status == 1)){
-                $dropdown .= $return_default_button;
+            if($omni_user){
+                if((!$pickup->default_return_address) && ($pickup->status == 1)){
+                    $dropdown .= $return_default_button;
+                }
+                elseif ($pickup->default_return_address){
+                    $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
+                }
             }
-            elseif ($pickup->default_return_address){
-                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
-            }
+
             $dropdown .= '
                     </div>
                 </div>
