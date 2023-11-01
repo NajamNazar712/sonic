@@ -7883,9 +7883,24 @@ class AdminReportsController extends Controller
         $destination_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('status', 1)->get();
         $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $riders_cat = OperationRidersCategory::all();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'trax_id', 'city_id']);
+        $cityIds = $riders->pluck('city_id')->toArray();
+        $rider_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('id',$cityIds)->get();
 
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
+        $options = [];
+
+        foreach ($riders as $rider) {
+            $riderCity = $rider_cities->firstWhere('id', $rider->city_id);
+
+            if ($riderCity) {
+                $options[] = [
+                    'value' => $rider->id,
+                    'text' => "{$rider->name} - {$rider->trax_id} ({$riderCity->name})",
+                ];
+            }
+        }
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 
+        'zones' => $zones, 'riders_cat' => $riders_cat, 'options' => $options]);
     }
 
     public function route_distribution_list(Request $request)
@@ -7951,10 +7966,9 @@ class AdminReportsController extends Controller
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), 
             DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 
             'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type',
-            'delivery_notes.id as delivery_note')
+            'delivery_notes.id as delivery_note','r.trax_id as rider_trax_id')
             ->groupBy('r.id');
 
-            // dd($route_distribution_summary);
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
@@ -9828,30 +9842,43 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 142);
         }
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+        $connection = 'reports';
+        $from = $request->get('search_date_from');
+        $to = $request->get('search_date_to');
+        $from_id = null;
+        $to_id = null;
+
+
+//        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+//
+//            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+//            if ($from_id->exists()) {
+//                $from_id = $from_id->first()->id;
+//
+//                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+//
+//                if ($to_id->exists()) {
+//                    $to_id = $to_id->first()->id;
+//                }
+//            }
+//        }
+
+        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->leftJoin('shipments_journey as bkg_date', function ($join) {
-                $join->on('bkg_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'bkg_date.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)')
-                    );
-            })
-            ->leftJoin('shipments_journey as arv_date', function ($join) {
-                $join->on('arv_date.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'arv_date.id',
-                        '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
-                    );
-            })
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'bkg_date.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
+            ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+            ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
+            ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
+
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $shipments->where('arv_date.created_at', '>=', $from)
+                ->where('arv_date.created_at', '<=', $to);
+        }
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -9874,20 +9901,20 @@ class AdminReportsController extends Controller
                 return $difference;
             })
             ->addColumn('weighted_as', function ($shipment) {
-                if ($shipment->length != null && $shipment->breadth != null && $shipment->height != null) {
+                if ($shipment->length != null) {
                     return 'Volumetric';
                 } else {
                     return 'Dense';
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', $search_shipping_mode);
+            $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($user = $request->get('search_user')) {
-            $datatable->where('u.id', $user);
+            $datatable->where('shipments.user_id', $user);
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('dc.hub_id', $hub);
@@ -9904,11 +9931,6 @@ class AdminReportsController extends Controller
             } else {
                 $datatable->whereNotNull('shipments.length')->whereNotNull('shipments.breadth')->whereNotNull('shipments.height');
             }
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatable->whereBetween('arv_date.created_at', [$from, $to]);
         }
         return $datatable->make(true);
     }
@@ -12108,9 +12130,14 @@ class AdminReportsController extends Controller
 
     }
 
-    public function operations_performance_index()
+     public function operations_performance_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 684);
+        return view('admin.reports.operations_performance_report');
+    }
+
+    public function ajax_load_operation_data()
+    {
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
         } else {
@@ -12125,11 +12152,10 @@ class AdminReportsController extends Controller
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
 
-        return view('admin.reports.operations_performance_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
+        return response()->json(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
     }
 
-        public function operations_performance_export_to_excel(Request $request)
-    {
+        public function operations_performance_export_to_excel(Request $request){
         $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
@@ -12275,8 +12301,6 @@ class AdminReportsController extends Controller
     
                     $journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->latest()->first();
     
-                   
-    
                     $first_status_journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where(
                         'id', '>',
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipment_id = $shipment->shipment_id and shipments_journey.shipper_status_id = 5)")
@@ -12284,8 +12308,6 @@ class AdminReportsController extends Controller
     
                     if($first_status_journey){
     
-                        
-                   
                         if($first_status_journey->admin_id != null)
                         {
                             $admin = Admin::find($first_status_journey->admin_id);
@@ -12294,8 +12316,8 @@ class AdminReportsController extends Controller
                                 $data[$key]['first_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
-                            $data[$key]['first_admin_name'] = $admin->name;
-                            $data[$key]['first_admin_trax_id'] = $admin->trax_id;
+                            $data[$key]['first_admin_name'] = $admin->name ?? '-';
+                            $data[$key]['first_admin_trax_id'] = $admin->trax_id ?? '-';
     
                         }
                         else if($first_status_journey->rider_id != null){
@@ -12306,13 +12328,16 @@ class AdminReportsController extends Controller
                                 $data[$key]['first_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
-                            $data[$key]['first_rider_name'] = $rider->name;
-                            $data[$key]['first_rider_trax_id'] = $rider->trax_id;
+                            $data[$key]['first_rider_name'] = $rider->name ?? '-';
+                            $data[$key]['first_rider_trax_id'] = $rider->trax_id ?? '-';
                         }
                        
     
-                        $data[$key]['first_status'] =  $shipment_statuses[$first_status_journey->shipper_status_id];
-                        $data[$key]['first_reason'] = $first_status_journey->status_reason_id ? (ShipmentStatusReason::find($first_status_journey->status_reason_id)->name) : '-';
+                        $data[$key]['first_status'] =  $shipment_statuses[$first_status_journey->shipper_status_id] ?? '-';
+                        $firstReasonId = $first_status_journey->status_reason_id;
+                        $shipmentStatusReason = ShipmentStatusReason::find($firstReasonId);
+                        $firstReason = $shipmentStatusReason ? $shipmentStatusReason->name : '-';
+                        $data[$key]['first_reason'] = $firstReason;
                         $data[$key]['first_status_date'] = $first_status_journey->created_at;
                         
                     }
@@ -12332,8 +12357,8 @@ class AdminReportsController extends Controller
                                 $data[$key]['current_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
-                            $data[$key]['current_admin_name'] = $admin->name;
-                            $data[$key]['current_admin_trax_id'] = $admin->trax_id;
+                            $data[$key]['first_admin_name'] = $admin->name ?? '-';
+                            $data[$key]['first_admin_trax_id'] = $admin->trax_id ?? '-';
     
                         }
                         else if($current_status_journey->rider_id != null){
@@ -12344,12 +12369,22 @@ class AdminReportsController extends Controller
                                 $data[$key]['current_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
-                            $data[$key]['current_rider_name'] = $rider->name;
-                            $data[$key]['current_rider_trax_id'] = $rider->trax_id;
+                            $data[$key]['current_rider_name'] = $rider->name ?? '-';
+                            $data[$key]['current_rider_trax_id'] = $rider->trax_id ?? '-';
                         }
     
-                        $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id];
-                        $data[$key]['current_reason'] = $current_status_journey->status_reason_id ? (ShipmentStatusReason::find($current_status_journey->status_reason_id)->name) : '-';
+                        $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id] ?? '-';
+                        $currentReasonId = $current_status_journey->status_reason_id;
+                        $shipmentStatusReason = ShipmentStatusReason::find($currentReasonId);
+                        
+                        if ($shipmentStatusReason) {
+                            $currentReason = $shipmentStatusReason->name;
+                        } else {
+                            $currentReason = '-';
+                        }
+                        
+                        $data[$key]['current_reason'] = $currentReason;
+                        
                         $data[$key]['current_remarks'] = $current_status_journey->remarks;
                         $data[$key]['current_status_date'] = $current_status_journey->created_at;
                     }
@@ -12445,7 +12480,16 @@ class AdminReportsController extends Controller
                     
                     if($return_reason)
                     {
-                        $data[$key]['return_reason'] = $return_reason->status_reason_id ? (ShipmentStatusReason::find($return_reason->status_reason_id)->name) : '-';
+                        $returnReasonId = $return_reason->status_reason_id;
+
+                        if ($returnReasonId) {
+                            $shipmentStatusReason = ShipmentStatusReason::find($returnReasonId);
+                            $returnReason = $shipmentStatusReason ? $shipmentStatusReason->name : '-';
+                        } else {
+                            $returnReason = '-';
+                        }
+                        
+                        $data[$key]['return_reason'] = $returnReason;
                     }
     
                     $transit_journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where(
@@ -12952,7 +12996,6 @@ class AdminReportsController extends Controller
 
     public function csat_report_index()
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 694);
         $agents = Admin::all();
         $ratings = CrmRequestRating::all();
@@ -12963,14 +13006,12 @@ class AdminReportsController extends Controller
         ->whereIn('crm_request_feedbacks.rating_id', $formula_value ?? [])
         ->count();
         $csat_score = $csat_score / ((CrmRequestFeedback::count() != 0 ? CrmRequestFeedback::count() : 1)) * 100; 
-
         return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings, 'csat_score'=>$csat_score]);
     }
 
 
     public function csat_report_list(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
         }
@@ -12984,13 +13025,13 @@ class AdminReportsController extends Controller
             $case_types = [];
         }
 
-
         $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
-                ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));
-        })->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
-        ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
-        ->where('crm_requests.status_id', 4)->whereIn('crm_requests.case_nature_type_id', $case_types);
+            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));})
+            ->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
+            ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
+            ->where('crm_requests.status_id', 4)
+            ->whereIn('crm_requests.case_nature_type_id', $case_types);
 
         $datatable = Datatables::of($csat_report)->editColumn('agent_id', function($result){
             if(isset($result->agent_id))
