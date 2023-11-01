@@ -250,9 +250,6 @@ class AdminReportsController extends Controller
                 'sjfa.created_at as first_attempt_date',
                 'sjrp.created_at as rider_picked_status_date'
             ]);
-        //        ->where('sj.created_at','2023-07-05 17:08:15')
-//            ->get();
-//        dd($shipments);
 
         $type = $request->get('search_types');
 
@@ -262,7 +259,7 @@ class AdminReportsController extends Controller
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38, 51]);
         }
 
-        if (session('role_id') != 1) {
+        if (session('role_id') != 1 && !empty(session('role_id'))) {
             $shipments = $shipments->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->whereIn('dc.hub_id', session('hubs'));
@@ -376,9 +373,6 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
-        /*if ($shipper = $request->get('search_shipper')) {
-            $datatable->where('u.id', '=', $shipper);
-        }*/
         if ($search_shipper = $request->get('search_shipper')) {
             $datatable->where('shipments.user_id', $search_shipper);
         }
