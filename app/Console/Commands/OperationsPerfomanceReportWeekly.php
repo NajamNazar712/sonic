@@ -4,24 +4,24 @@ namespace App\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use App\Http\Traits\CommonTrait;
+use App\Http\Traits\OperationReportTrait;
 
 class OperationsPerfomanceReportWeekly extends Command
 {
-    use CommonTrait;
+    use OperationReportTrait;
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'reports:operations_perfomance_weekly';
+    protected $signature = 'reports:operations_performance_weekly';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'This Cron will send records that have been created in previous week (as mentioned in requirements)';
+    protected $description = 'This Cron will send records that had been created in previous week (as mentioned in requirements)';
 
     /**
      * Create a new command instance.
@@ -45,6 +45,6 @@ class OperationsPerfomanceReportWeekly extends Command
         $from = $currentDate->copy()->previous(Carbon::FRIDAY)->previous(Carbon::FRIDAY);
         $to = $from->copy()->next(Carbon::THURSDAY)->toDateString();
         $from = $from->toDateString();
-        $this->operations_performance_export_to_excel($from, $to, $id);
+        $this->operations_performance_export_to_excel_automated($from, $to, $id);
     }
 }
