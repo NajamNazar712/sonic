@@ -1410,7 +1410,6 @@ class APIController extends Controller
     }
     public function shipment_book_international(Request $request)
     {
-        // dd($request->all());
         $user_id = $request->user_id;
         $flag = null;
         
@@ -1418,17 +1417,7 @@ class APIController extends Controller
             $data = $validator->getData();
             $shipping_mode_id = 2;
             $service_type_id = 1;
-            // if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
-            //     $shipping_mode_id = $data['shipping_mode_id'];
-            //     $service_type_id = $data['service_type_id'];
-            // } else {
-            //     return false;
-            // }
-
             if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
                 $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
                 if ($result) {
                     return true;
@@ -1438,32 +1427,20 @@ class APIController extends Controller
             }
         });
 
-        Validator::extend('destination_check', function ($attribute, $consignee_city_id, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            // if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {
-            //     $shipping_mode_id = $data['shipping_mode_id'];
-            //     $service_type_id = $data['service_type_id'];
-            // } else {
-            //     return false;
-            // }
-            $shipping_mode_id = 2;
-            $service_type_id = 1;
+        // Validator::extend('destination_check', function ($attribute, $consignee_city_id, $parameters, $validator) use ($user_id) {
+        //     $data = $validator->getData();
+        //     $shipping_mode_id = 2;
+        //     $service_type_id = 1;
 
-            if ($consignee_city_id) {
-                // if ($service_type_id == 5) {
-                //     dd(123);
-                //     return true;
-                // }
-                //     dd(12312);
-                // dd($consignee_city_id, $shipping_mode_id, $user_id, 2);
-                $result = ShipperShipmentBookController::check_destination($consignee_city_id, $shipping_mode_id, $user_id, 2);
-                if ($result) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
+        //     if ($consignee_city_id) {
+        //         $result = ShipperShipmentBookController::check_destination($consignee_city_id, $shipping_mode_id, $user_id, 2);
+        //         if ($result) {
+        //             return true;
+        //         } else {
+        //             return false;
+        //         }
+        //     }
+        // });
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
@@ -1485,7 +1462,8 @@ class APIController extends Controller
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'origin_check'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 2), 'destination_check'],
+                // 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 2), 'destination_check'],
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 2)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -1513,7 +1491,6 @@ class APIController extends Controller
                 'shipper_reference_number_3' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             ];
-            // dd($rules);
         }
         
         $validate = Validator::make($request->all(), $rules, $this->messages);
