@@ -1427,21 +1427,6 @@ class APIController extends Controller
             }
         });
 
-        // Validator::extend('destination_check', function ($attribute, $consignee_city_id, $parameters, $validator) use ($user_id) {
-        //     $data = $validator->getData();
-        //     $shipping_mode_id = 2;
-        //     $service_type_id = 1;
-
-        //     if ($consignee_city_id) {
-        //         $result = ShipperShipmentBookController::check_destination($consignee_city_id, $shipping_mode_id, $user_id, 2);
-        //         if ($result) {
-        //             return true;
-        //         } else {
-        //             return false;
-        //         }
-        //     }
-        // });
-
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
                 $value = $this->phone_number($value);
@@ -1462,7 +1447,6 @@ class APIController extends Controller
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'origin_check'],
-                // 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 2), 'destination_check'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 2)],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
@@ -1689,7 +1673,7 @@ class APIController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
             }
-            return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+            return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
 
