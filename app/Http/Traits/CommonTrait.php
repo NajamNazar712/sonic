@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
 
-
 trait CommonTrait
 {
     public function getAvailedLeaves($employee_id)
@@ -85,6 +84,5 @@ trait CommonTrait
         } catch (\Throwable $th) {
             return ['status' => 0, 'msg' => $th->getMessage()];
         }
-
     }
 }

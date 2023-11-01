@@ -46,7 +46,6 @@ class OperationsPerfomanceReportMonthly extends Command
         $startOfPreviousMonth = $previousMonth->startOfMonth();
         $from = $startOfPreviousMonth->toDateString();
         
-        $currentDate = Carbon::now();
         $lastDayOfPreviousMonth = $previousMonth->endOfMonth();
         $to = $lastDayOfPreviousMonth->toDateString();
         
