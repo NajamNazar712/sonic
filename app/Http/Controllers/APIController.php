@@ -1500,39 +1500,17 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } 
-        //////////
+        
         else {
-            // $user_id = session('user_id');
             $user_id = $request->user_id;
             $service_type_id = 1;
-            
-            // if ($request->input('pickup_address') == 0) {
-            //     $pickup_city_id = $request->input('new_pickup_city');
-            //     if($request->input('make_default_address') == 1){
-            //         $default = 1;
-            //     }
-            //     else{
-            //         $default = 0;
-            //     }
-            //     UserShippingInfo::where('user_id', $user_id)->update(['default_address' => 0]);
-    
-            //     $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_vendor'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id, $default);
-            // }
-            // else {
                 $pickup_address_id = $request->input('pickup_address_id');
     
                 $user_shipping_info = UserShippingInfo::find($pickup_address_id);
     
                 $pickup_city_id = $user_shipping_info->city_id;
-            // }
-            // if ($request->filled('information_display')) {
-            //     $information_display = TRUE;
-            // } else {
-            //     $information_display = FALSE;
-            // }
 
             $information_display = 1;
-                // dd(1);
     
             if ($request->filled('self_collection')) {
                 $self_collection = TRUE;
@@ -1610,11 +1588,7 @@ class APIController extends Controller
             $international_shipment->save();
     
             ShipperShipmentBookController::add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
-            // if(Session::has('prefix')){
-            //     $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $request->order_id);
-            // }
-            // else{
-            // }
+
             $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             if($request->has('order_date_formatted')){
                 if($request->order_date_formatted != null){
@@ -1715,7 +1689,7 @@ class APIController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
             }
-            return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+            return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
         }
     }
 
