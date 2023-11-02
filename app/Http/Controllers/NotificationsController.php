@@ -10517,7 +10517,7 @@ class NotificationsController extends Controller
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
-                    $email = ['tauseef.sarfaraz@trax.pk','shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk','sahban.ghani@trax.pk','ahmdkhn2123@gmail.com'];
+                    $email = ['tauseef.sarfaraz@trax.pk','shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk','sahban.ghani@trax.pk','muhammad.ahmed@trax.pk'];
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
 
