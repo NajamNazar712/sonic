@@ -41,13 +41,14 @@ class QsrEmail extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
-        $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
+        // $start_date = Carbon::yesterday()->startOfDay()->addHours(10)->toDateTimeString();
+        // $end_date = Carbon::today()->startOfDay()->addHours(10)->toDateTimeString();
 
-        // $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
-        // $end_date = Carbon::today()->toDateTimeString();
+        $start_date = Carbon::yesterday()->subYear()->toDateTimeString();
+        $end_date = Carbon::today()->toDateTimeString();
 
         $response = AdminReportsEmailController::qsr_daily_report($start_date, $end_date);
+        dd($response);
         NotificationsController::send(226, $response);
 
     }
