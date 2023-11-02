@@ -1829,7 +1829,7 @@
                                                     Setting</a> </li>
                                         @endif
 
-                                        @if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                        @if (session('role_id') == 1 || in_array(909, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.settings.shippers.bypass_weight.index') }}">Bypassing of weight entry</a> </li>
                                     @endif
