@@ -2974,7 +2974,7 @@ class RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $tracking_no = $request->tracking_no;
         try {
-            $result = DB::table('sonic.shipments as sp')
+            $result = DB::table('shipments as sp')
                 ->select(
                     'sp.id as shipment_id',
                     DB::raw('ifnull(spj.status_id, "") as status_id'),
@@ -2986,9 +2986,9 @@ class RiderAPIController extends Controller
                     'usi.location_latitude as location_latitude',
                     'usi.location_longitude as location_longitude'
                 )
-                ->join('sonic.user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
-                ->join('sonic.users as ur', 'ur.id', '=', 'usi.user_id')
-                ->leftJoin('sonic.shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+                ->join('user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
+                ->join('users as ur', 'ur.id', '=', 'usi.user_id')
+                ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
                 ->where('sp.tracking_number', $tracking_no)
                 ->get();
 
@@ -3008,11 +3008,11 @@ class RiderAPIController extends Controller
                     $pickup['location_latitude'] = $row->location_latitude;
                     $pickup['location_longitude'] = $row->location_longitude;
 
-                    //     $userShipments = DB::table('sonic.users as ur')
+                    //     $userShipments = DB::table('users as ur')
                     //     ->select('ur.id as user_id', 'sp.id as shipment_id', 'spj.status_id')
-                    //     ->join('sonic.user_shipping_infos as usi', 'usi.user_id', '=', 'ur.id')
-                    //     ->join('sonic.shipments as sp', 'sp.pickup_address_id', '=', 'usi.id')
-                    //     ->leftJoin('sonic.shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+                    //     ->join('user_shipping_infos as usi', 'usi.user_id', '=', 'ur.id')
+                    //     ->join('shipments as sp', 'sp.pickup_address_id', '=', 'usi.id')
+                    //     ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
                     //     ->where('ur.id', $row->user_id)
                     //     ->get();
                     // $totalShipmentsOfShipper = count($userShipments);
@@ -3220,7 +3220,7 @@ class RiderAPIController extends Controller
         $tracking_no = $request->tracking_no;
         $global_admin_id = 346;
 
-        $pickup_requests = DB::table('sonic.shipments as sp')
+        $pickup_requests = DB::table('shipments as sp')
             ->select(
                 'sp.id as shipment_id',
                 DB::raw('ifnull(spj.status_id, "") as status_id'),
@@ -3232,9 +3232,9 @@ class RiderAPIController extends Controller
                 'usi.location_latitude as location_latitude',
                 'usi.location_longitude as location_longitude'
             )
-            ->join('sonic.user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
-            ->join('sonic.users as ur', 'ur.id', '=', 'usi.user_id')
-            ->leftJoin('sonic.shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+            ->join('user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
+            ->join('users as ur', 'ur.id', '=', 'usi.user_id')
+            ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
             ->where('sp.tracking_number', $tracking_no)
             ->whereIn('sp.shipper_status_id', [1, 17])
             ->get();
@@ -3306,11 +3306,11 @@ class RiderAPIController extends Controller
 
     public function getShipmentsCount($user_id)
     {
-        $userShipments = DB::table('sonic.users as ur')
+        $userShipments = DB::table('users as ur')
             ->select('ur.id as user_id', 'sp.id as shipment_id', 'spj.status_id')
-            ->join('sonic.user_shipping_infos as usi', 'usi.user_id', '=', 'ur.id')
-            ->join('sonic.shipments as sp', 'sp.pickup_address_id', '=', 'usi.id')
-            ->leftJoin('sonic.shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+            ->join('user_shipping_infos as usi', 'usi.user_id', '=', 'ur.id')
+            ->join('shipments as sp', 'sp.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
             ->where('ur.id', $user_id)
             ->get();
         $totalShipmentsOfShipper = count($userShipments);
