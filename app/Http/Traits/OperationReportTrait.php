@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\NotificationsController;
 
 trait OperationReportTrait{
-    public function operations_performance_export_to_excel_automated($from, $to, $id)
+    public function operations_performance_export_to_excel_automated($from, $to, $id, $mode)
     {
         $connection = 'reports';
         $to = Carbon::parse($to)->addDay()->toDateString();
@@ -60,9 +60,14 @@ trait OperationReportTrait{
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
                 'si.quantity as quantity'
-            )
-            ->whereBetween('sja.created_at', [$from, $to]);
-        
+            );
+            if($mode == 'test'){
+                $shipments->whereDate('sja.created_at', Carbon::today())
+                ->where('u.id', 24032);
+            }else{
+                $shipments->whereBetween('sja.created_at', [$from, $to]);
+            }
+            
             $shipments = $shipments->get();
 
             $data = [];
