@@ -3245,18 +3245,22 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
-//                if (array_key_exists("amount", $row))
-//                {
-//                    if ($row['amount'] == 0) {
-//                        $rules['parcel_value'] = [
-//                            'required_if:amount,0',
-//                            'numeric',
-//                            'digits_between:1,20',
-//                            'min:1'];
-//                    }
-//                }
+                if($omni == 1){
+                    if($rows[$key]['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
                 if(in_array($row['service_type_id'],[1,2]))
                 {
@@ -5294,8 +5298,22 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
+                if($omni == 1){
+                    if($row['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
 //                if (array_key_exists("amount", $row))
 //                {
