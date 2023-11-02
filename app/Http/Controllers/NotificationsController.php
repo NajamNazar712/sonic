@@ -10512,7 +10512,8 @@ class NotificationsController extends Controller
                         
                     }
                 } else if($id == 224 || $id == 225){
-                    //Weekly Operation Reports
+                    //Weekly Operation Reports And Monthly Operation Reports
+                    $mode = $reference_3_id;
                     $attachmentPath = $reference_1_id;                    
                     $date = $reference_2_id;
                     $file = Storage::disk('public')->url('OperationReports/' . $attachmentPath);
@@ -10529,7 +10530,10 @@ class NotificationsController extends Controller
                     }
                     
                     $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
+                    $email = ($mode !== 'test')
+                    ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
+                    : ['muhammad.ahmed@trax.pk','sahban.ghani@trax.pk'];
+                
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null);
                 } else if ($id == 223){
                     //Crm Progress Report

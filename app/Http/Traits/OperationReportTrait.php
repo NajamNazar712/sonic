@@ -418,9 +418,9 @@ trait OperationReportTrait{
                 $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
                 $writer->save($file_name);                
                 if($id == 224){
-                    NotificationsController::send(224, $file_name_without_path, $date_file_name);
+                    NotificationsController::send(224, $file_name_without_path, $date_file_name, $mode);
                 }else{
-                    NotificationsController::send(225, $file_name_without_path, $date_file_name);
+                    NotificationsController::send(225, $file_name_without_path, $date_file_name, $mode);
                 }
             }
             else{
