@@ -819,7 +819,7 @@ class APIController extends Controller
                             }
                         }
 
-                        if($request->input('return_address') != null){
+                        if($request->input('return_address_id') != null){
                             $return_address_id = $request->input('return_address_id');
                         }
                         else{
