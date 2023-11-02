@@ -3202,11 +3202,6 @@ class AdminReportsEmailController extends Controller
                 header('Content-Disposition: attachment;filename=quality_service_report_.xlsx"');
                 header('Cache-Control: max-age=0');
                 $date_file_name = Carbon::today()->format('Y_m_d');
-                // $file_name_without_path = "qsr_pending_deliveries_reports/quality_service_report_report_" . $date_file_name . ".xlsx";
-                // $file_name = public_path() . "/qsr_pending_deliveries_reports/quality_service_report_report_" . $date_file_name . ".xlsx";
-                // $writer->save($file_name);
-                // return url('/') . '/' . $file_name_without_path;
-
                 $file_name_without_path = "qsr_pending_deliveries_reports/quality_service_report_" . $date_file_name . ".xlsx";
                 $file_path = public_path("qsr_pending_deliveries_reports"); // Specify the directory where you want to save the file
                 $file_name = $file_path . "/quality_service_report_" . $date_file_name . ".xlsx";
