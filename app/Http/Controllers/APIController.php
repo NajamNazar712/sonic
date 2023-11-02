@@ -770,7 +770,7 @@ class APIController extends Controller
             } else {
                 $open_shipment = 0;
             }
-
+            $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
             if ($shipment_pre_book->exists()) {
                 $shipment_pre_book = $shipment_pre_book->first();
@@ -818,7 +818,7 @@ class APIController extends Controller
                                 }
                             }
                         }
-                        $return_address_id = NULL;
+
                         if($request->input('return_address') != null){
                             $return_address_id = $request->input('return_address_id');
                         }
@@ -846,7 +846,6 @@ class APIController extends Controller
                         }
                     }
                 }
-
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
                 if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
@@ -1043,13 +1042,6 @@ class APIController extends Controller
                             $self_collection = true;
                         }
                     }
-                }
-            }
-
-            $return_address_id = null;
-            if ($service_type_id == 1) {
-                if ($request->filled('return_address_id')) {
-                    $return_address_id = $request->input('return_address_id');
                 }
             }
 

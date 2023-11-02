@@ -5389,6 +5389,12 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
+                            else{
+                                $return_address_id = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                                if($return_address_id->exists()){
+                                    $row['return_address_id'] = $return_address_id->first()->id;
+                                }
+                            }
 
                         }
 
