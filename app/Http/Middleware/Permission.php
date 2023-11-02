@@ -1401,7 +1401,7 @@ class Permission
  			'accounts.substitute_account_management.index' => 873,
  			'accounts.substitute_account_management.add.index' => 874,
  			'accounts.substitute_account_management.update.index' => 875,
-            'settings.airway_bill_address_visibility.index' => 877,
+            'settings.airway_bill_address_visibility.index' => 887,
  			'management.shipment_received.index' => 878,
             'return.shipper_return_receiving.history.index' => 885,
             'reports.overland.index' => 886,
