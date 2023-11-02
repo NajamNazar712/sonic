@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Controllers\NotificationsController;
 
 trait OperationReportTrait{
-    public function operations_performance_export_to_excel_automated($from, $to, $id)
+    public function operations_performance_export_to_excel_automated($from, $to, $id, $mode)
     {
         $connection = 'reports';
         $to = Carbon::parse($to)->addDay()->toDateString();
@@ -60,9 +60,14 @@ trait OperationReportTrait{
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
                 'si.quantity as quantity'
-            )
-            ->whereBetween('sja.created_at', [$from, $to]);
-        
+            );
+            if($mode == 'test'){
+                $shipments->whereDate('sja.created_at', Carbon::today())
+                ->where('u.id', 24032);
+            }else{
+                $shipments->whereBetween('sja.created_at', [$from, $to]);
+            }
+            
             $shipments = $shipments->get();
 
             $data = [];
@@ -407,13 +412,8 @@ trait OperationReportTrait{
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
-                $file_name = public_path() . '/storage/OperationReports' . $file_name_without_path;  
-                $directoryPath = 'OperationReports'; 
-
-                if (!Storage::exists($directoryPath)) {
-                    Storage::makeDirectory($directoryPath);
-                }
-                $file_name = Storage::put($directoryPath . '/' . $file_name_without_path, $file_name);
+                $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
+                Storage::disk('public')->put($file_name_without_path, file_get_contents($file_name));
                 $writer->save($file_name);
                 if($id == 224){
                     NotificationsController::send(224, $file_name_without_path, $file_name);
