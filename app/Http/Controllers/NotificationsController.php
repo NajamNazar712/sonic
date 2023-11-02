@@ -10819,7 +10819,7 @@ class NotificationsController extends Controller
                         $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
-                            $body .= '<br/>Note: This link will expire after 7 days.';
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
                         }
                         $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
     
@@ -10830,7 +10830,7 @@ class NotificationsController extends Controller
                         $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
-                            $body .= '<br/>Note: This link will expire after 7 days.';
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
                         }
                         $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
     
