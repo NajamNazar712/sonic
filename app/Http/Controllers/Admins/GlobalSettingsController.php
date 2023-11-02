@@ -8582,15 +8582,16 @@ class GlobalSettingsController extends Controller
             $bypass_excluded_shippers = $bypass_excluded_shippers->first();
             $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
         }
-
-        $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
-            ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
-            ->whereIn('notification_id', [11, 12]);
         $notification_details = array();
-        $details = array();
-        if($notification_settings->exists()){
-            $notification_settings = $notification_settings->get();
-            foreach ($notification_settings as $notification_setting){
+        $shipper_notification_ids = [11, 12, 132];
+        foreach ($shipper_notification_ids as $notification_id){
+            $details = array();
+            $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->where('notification_id', $notification_id);
+
+            if($notification_settings->exists()){
+                $notification_setting = $notification_settings->first();
                 $details['id'] = $notification_setting->notification_id;
                 $details['name'] = $notification_setting->notification_name;
                 $details['shipper_toggle'] = $notification_setting->shipper_toggle;
@@ -8602,12 +8603,12 @@ class GlobalSettingsController extends Controller
                 else{
                     $details['shippers'] = null;
                 }
+
                 $notification_details[] = $details;
+
             }
-        }
-        else{
-            $notification_settings = Notification::whereIn('id', [11, 12])->get();
-            foreach ($notification_settings as $notification_setting){
+            else{
+                $notification_setting = Notification::find($notification_id);
                 $details['id'] = $notification_setting->id;
                 $details['name'] = $notification_setting->name;
                 $details['shipper_toggle'] = 1;
