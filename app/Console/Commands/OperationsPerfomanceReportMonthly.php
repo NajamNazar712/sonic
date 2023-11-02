@@ -14,7 +14,7 @@ class OperationsPerfomanceReportMonthly extends Command
      *
      * @var string
      */
-    protected $signature = 'reports:operations_performance_monthly';
+    protected $signature = 'reports:operations_performance_monthly {mode?}';
 
     /**
      * The console command description.
@@ -41,6 +41,7 @@ class OperationsPerfomanceReportMonthly extends Command
     public function handle()
     {
         $id = 225;
+        $mode = $this->argument('mode'); // Access the 'mode' argument
         $currentDate = Carbon::now();
         $previousMonth = $currentDate->subMonth(); 
         $startOfPreviousMonth = $previousMonth->startOfMonth();
@@ -49,6 +50,6 @@ class OperationsPerfomanceReportMonthly extends Command
         $lastDayOfPreviousMonth = $previousMonth->endOfMonth();
         $to = $lastDayOfPreviousMonth->toDateString();
         
-        $this->operations_performance_export_to_excel_automated($from, $to, $id);
+        $this->operations_performance_export_to_excel_automated($from, $to, $id, $mode);
     }
 }

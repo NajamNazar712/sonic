@@ -62,8 +62,7 @@ trait OperationReportTrait{
                 'si.quantity as quantity'
             );
             if($mode == 'test'){
-                $shipments->whereDate('sja.created_at', Carbon::today())
-                ->where('u.id', 24032);
+                $shipments->whereDate('sja.created_at', Carbon::today());
             }else{
                 $shipments->whereBetween('sja.created_at', [$from, $to]);
             }
@@ -411,14 +410,17 @@ trait OperationReportTrait{
                 $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_". Carbon::parse($to)->format('Y_m_d');
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
+                $directoryPath = 'OperationReports'; 
+                if (!Storage::exists($directoryPath)) {
+                    Storage::makeDirectory($directoryPath);
+                }                
                 $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
-                Storage::disk('public')->put($file_name_without_path, file_get_contents($file_name));
-                $writer->save($file_name);
+                $writer->save($file_name);                
                 if($id == 224){
-                    NotificationsController::send(224, $file_name_without_path, $file_name);
+                    NotificationsController::send(224, $file_name_without_path, $date_file_name);
                 }else{
-                    NotificationsController::send(225, $file_name_without_path, $file_name);
+                    NotificationsController::send(225, $file_name_without_path, $date_file_name);
                 }
             }
             else{
