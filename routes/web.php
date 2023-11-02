@@ -2991,6 +2991,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
 
         });
+        Route::prefix('pickup_arival')->name('pickup_arival.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@pickup_arival_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@pickup_arival_list')->name('list');
+            Route::post('shipper_address','Admins\AdminReportsController@get_shipper_addresses')->name('shipper_address');
+            Route::post('shipments','Admins\AdminReportsController@get_shipments')->name('shipments');
+            Route::post('rider_details','Admins\AdminReportsController@get_rider_details')->name('rider_details');
+            Route::post('arrived_shipments','Admins\AdminReportsController@get_arrived_shipments')->name('arrived_shipments');
+            Route::post('balance_Shipments','Admins\AdminReportsController@get_balance_Shipments')->name('balance_Shipments');
+
+
+        });
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function () {
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
             Route::post('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');

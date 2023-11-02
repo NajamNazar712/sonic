@@ -1634,6 +1634,9 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rider Wise
                                     Pickup</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(823, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.pickup_arival.index') }}">Pickup vs Arival</a></li>
+                        @endif
                         @if (session('role_id') == 1 || in_array(839, session('permissions')))
                             <li><a class="menu-item"
                                    href="{{ route('admin.reports.revenue_report_by_invoice.index') }}">Revenue Report By
