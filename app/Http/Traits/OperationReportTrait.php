@@ -412,13 +412,8 @@ trait OperationReportTrait{
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
-                $file_name = public_path() . '/storage/OperationReports' . $file_name_without_path;  
-                $directoryPath = 'OperationReports'; 
-
-                if (!Storage::exists($directoryPath)) {
-                    Storage::makeDirectory($directoryPath);
-                }
-                $file_name = Storage::put($directoryPath . '/' . $file_name_without_path, $file_name);
+                $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
+                Storage::disk('public')->put($file_name_without_path, file_get_contents($file_name));
                 $writer->save($file_name);
                 if($id == 224){
                     NotificationsController::send(224, $file_name_without_path, $file_name);
