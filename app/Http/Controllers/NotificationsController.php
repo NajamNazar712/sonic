@@ -10517,9 +10517,7 @@ class NotificationsController extends Controller
                     $attachmentName = $reference_1_id;
                     $attachmentPath = $reference_2_id;                    
 
-                    $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
-
+                    $email = ['tauseef.sarfaraz@trax.pk','shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk','sahban.ghani@trax.pk','muhammad.ahmed@trax.pk'];
                     self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
                 } 
 
