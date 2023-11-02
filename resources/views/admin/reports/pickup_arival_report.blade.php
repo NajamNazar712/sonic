@@ -670,7 +670,7 @@ aria-hidden="true">
             }).done(function(data){
                if(data.status==1){
                     $.each(data.balance_Shipments ,function(key,value){
-                        $("#BalanceShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+value.id+'-'+value.name+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                        $("#BalanceShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.id==null?'':value.id +'-'+ value.name)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
                     });
                     $("#BalanceShipmentModal").modal('show');
                }

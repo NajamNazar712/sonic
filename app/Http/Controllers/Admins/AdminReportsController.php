@@ -11396,7 +11396,7 @@ class AdminReportsController extends Controller
                 $qurey->selectRaw('count(*) from (SELECT  COUNT(sqqq.id) FROM shipments AS sqqq JOIN shipments_journey AS sj ON sj.shipment_id=sqqq.id WHERE sqqq.id NOT IN (SELECT sjq.shipment_id FROM shipments_journey sjq WHERE sjq.shipment_id=sqqq.id  AND sjq.shipper_status_id=2) AND sqqq.user_id = s.user_id GROUP BY sqqq.id) as sunqurey');
             },'shipment_balance')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->where('s.user_id', 137)
+            // ->where('s.user_id', 137)
             // ->whereBetween('s.created_at', [
             //     Carbon::now()->startOfDay(),
             //     Carbon::now()->endOfDay()
@@ -11505,60 +11505,63 @@ class AdminReportsController extends Controller
     }   
     public function get_shipments(Request $request){
         $shipper_id=$request->shipper_id;
-        if($request->from_date && $request->to_date){
-            $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-            $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
-        }else{
-            $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-            $to_date=Carbon::now()->format('Y-m-d 00:00:00');
-        }
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d H:i:s');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d H:i:s');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d H:i:s');
+        //     $to_date=Carbon::now()->format('Y-m-d H:i:s');
+        // }
+        // dd($to_date);
        
-        $shipments=Shipment::where('user_id','=',$shipper_id)->whereBetween('created_at',[$from_date,$to_date])->get();
+        $shipments=Shipment::where('user_id','=',$shipper_id)->get();
+        ///->whereBetween('created_at',[$from_date,$to_date])->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
     public function get_rider_details(Request $request){
         $shipper_id=$request->shipper_id;
-        if($request->from_date && $request->to_date){
-            $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-            $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
-        }else{
-            $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-            $to_date=Carbon::now()->format('Y-m-d 00:00:00');
-        }
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        // }
        
         $rider_detail=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')->join('riders as r','sj.rider_id','=','r.id')
         ->select('r.id','r.name','shipments.tracking_number')
         ->addSelect(DB::raw("(SELECT sjq.shipper_status_id FROM shipments_journey AS sjq WHERE sjq.shipment_id = shipments.id AND sjq.shipper_status_id = 2) as arrived_status"))
-        ->where('sj.shipper_status_id','=',53)->where('shipments.user_id','=',$shipper_id)->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
+        ->where('sj.shipper_status_id','=',53)->where('shipments.user_id','=',$shipper_id)->get();
+        ///->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
         return response()->json(['status'=>1,'rider_details'=>$rider_detail]);
     }
 
     public function get_arrived_shipments(Request $request){
         $shipper_id=$request->shipper_id;
-        if($request->from_date && $request->to_date){
-            $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-            $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
-        }else{
-            $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-            $to_date=Carbon::now()->format('Y-m-d 00:00:00');
-        }
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        // }
         $arrived_shipments=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')->join('riders as r','sj.rider_id','=','r.id')
-        ->select('r.id','r.name','shipments.tracking_number')->where('sj.shipper_status_id','=',2)->where('shipments.user_id','=',$shipper_id)
-        ->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
+        ->select('r.id','r.name','shipments.tracking_number')->where('sj.shipper_status_id','=',2)->where('shipments.user_id','=',$shipper_id)->get();
+        // ->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
     }
     public function get_balance_Shipments(Request $request){
         $shipper_id=$request->shipper_id;
-        if($request->from_date && $request->to_date){
-            $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-            $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
-        }else{
-            $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-            $to_date=Carbon::now()->format('Y-m-d 00:00:00');
-        }
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        // }
         $balance_Shipments= Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-        ->join('riders as r', 'sj.rider_id', '=', 'r.id')
+        ->leftjoin('riders as r', 'sj.rider_id', '=', 'r.id')
         ->whereNotIn('sj.shipment_id', function ($query) {
             $query->select('sjq.shipment_id')
                 ->from('shipments_journey as sjq')
@@ -11567,7 +11570,7 @@ class AdminReportsController extends Controller
         })
         ->select('r.id', 'r.name', 'shipments.tracking_number')
         ->where('shipments.user_id', $shipper_id)
-        ->whereBetween('shipments.created_at',[$from_date,$to_date])
+        // ->whereBetween('shipments.created_at',[$from_date,$to_date])
         ->get();
         return response()->json(['status'=>1,'balance_Shipments'=>$balance_Shipments]);
 
