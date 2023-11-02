@@ -38,7 +38,8 @@ class Cleanup7DaysQrsPDReportStorage extends Command
      */
     public function handle()
     {
-        $directory = storage_path('public/qsr_pending_deliveries_reports'); 
+        // $directory = storage_path('public/qsr_pending_deliveries_reports'); 
+        $directory = public_path("qsr_pending_deliveries_reports");
 
         $sevenDaysAgo = now()->subDays(7);
 
