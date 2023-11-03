@@ -1340,6 +1340,7 @@ class AdminReportsEmailController extends Controller
                     $done_payment_report->shipper_id = $done_payment->done_payment->shipper->id;
                     $done_payment_report->shipper_name = $done_payment->done_payment->shipper->name;
                     $done_payment_report->amount = $done_payment->payable;
+                    $done_payment_report->ibft_charges = $done_payment->ibft_charges;
                     $done_payment_report->iban_number = $iban;
                     $done_payment_report->save();
                     $serial++;
