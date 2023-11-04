@@ -407,16 +407,19 @@ trait OperationReportTrait{
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="operations_performance_report.xlsx"');
                 header('Cache-Control: max-age=0');
-                $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_". Carbon::parse($to)->format('Y_m_d');
+                $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_" . Carbon::parse($to)->format('Y_m_d');
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
-                $directoryPath = 'OperationReports'; 
+                $directoryPath = 'OperationReports';
+                
                 if (!Storage::exists($directoryPath)) {
                     Storage::makeDirectory($directoryPath);
-                }                
+                }
+                
                 $file_name_without_path = "ops_perf_report_" . $date_file_name  . ".xlsx";
-                $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
-                $writer->save($file_name);                
+                $file_path = Storage::path($directoryPath . '/' . $file_name_without_path);
+                $writer->save($file_path);
+                
                 if($id == 224){
                     NotificationsController::send(224, $file_name_without_path, $date_file_name, $mode);
                 }else{
