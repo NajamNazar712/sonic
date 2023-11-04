@@ -62,13 +62,14 @@ trait OperationReportTrait{
                 'si.quantity as quantity'
             );
             if($mode == 'test'){
-                $shipments->whereDate('sja.created_at', Carbon::today());
+                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04'])
+                ->where('u.id', 26618);
             }else{
                 $shipments->whereBetween('sja.created_at', [$from, $to]);
             }
             
+            
             $shipments = $shipments->get();
-
             $data = [];
 
             if(count($shipments) > 0)
@@ -207,8 +208,7 @@ trait OperationReportTrait{
                         }
                         
                         $data[$key]['current_reason'] = $currentReason;
-                        
-                        $data[$key]['current_remarks'] = $current_status_journey->remarks;
+                                                $data[$key]['current_remarks'] = $current_status_journey->remarks;
                         $data[$key]['current_status_date'] = $current_status_journey->created_at;
                     }
     
