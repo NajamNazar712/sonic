@@ -414,7 +414,7 @@ trait OperationReportTrait{
                 if (!Storage::exists($directoryPath)) {
                     Storage::makeDirectory($directoryPath);
                 }                
-                $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
+                $file_name_without_path = "ops_perf_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
                 $writer->save($file_name);                
                 if($id == 224){
