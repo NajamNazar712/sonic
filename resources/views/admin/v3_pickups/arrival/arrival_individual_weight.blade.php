@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                 Individual Arrival of Shipments
+                 V3 Individual Arrival of Shipments
                 </h1>
 
                 <div class="card">
@@ -77,16 +77,17 @@
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Destination Hub</th>
+                                    <th class="border-primary border-darken-1">Rider Picked</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Pickup Request ID</th>
-                                    <th class="border-primary border-darken-1">Rider</th>
-                                    <th class="border-primary border-darken-1">Weight (kg)</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    {{-- <th class="border-primary border-darken-1">Pickup Request ID</th>
+                                    <th class="border-primary border-darken-1">Rider</th> --}}
+                                    <th class="border-primary border-darken-1">Weight</th>
+                                    {{-- <th class="border-primary border-darken-1">(kg)</th> --}}
                                 </tr>
                                 </thead>
                             </table>
 
-                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v2_pickups.arrival.individual.store') }}" novalidate="novalidate">
+                            <form id="arrival_of_shipments_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.v3_pickups.arrival.individual.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -371,11 +372,13 @@
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
                     {name: 'city', class: 'align-middle city', orderable: false, searchable: false},
                     {name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
+                    {name: 'rider_picked', class: 'align-middle rider_picked', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
-                    {name: 'pickup_request_id', class: 'align-middle pickup_request_id', orderable: false, searchable: false},
-                    {name: 'rider', class: 'align-middle rider', orderable: false, searchable: false},
-                    {name: 'weight', class: 'align-middle actual_weight', orderable: false, searchable: false},
-                    {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false},
+                    {name: 'weight',  class: 'align-middle actual_weight', orderable: false, searchable: false}
+
+                    // {name: 'pickup_request_id', class: 'align-middle pickup_request_id', orderable: false, searchable: false},
+                    // {name: 'rider', class: 'align-middle rider', orderable: false, searchable: false},
+                    // {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false},
 
 
                 ],
@@ -384,6 +387,7 @@
                 },
                 initComplete: function() {
                     this.api().columns().every(function(column_id) {
+                     
                         var column = this;
                         var header = column.header();
                     });
@@ -552,7 +556,7 @@
                     var height = $(form).find('input.height').val();
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.shipment_details') !!}',
+                            url: '{!! route('admin.v3_pickups.arrival.individual.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
@@ -564,6 +568,7 @@
                             },
                             timeout: 5000,
                             error: function (data) {
+                                console.log(data);
                                 form.reset();
 
                                 $('#add_shipment_form input.tracking_number').val('').focus();
@@ -601,7 +606,9 @@
                                          if(data.details.rider_picked == false){
                                                 check_pickup_requests(data.details.tracking_number,data.details.rider);
                                         }
-                                        table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button,]).node().id = data.details.id;
+                                        // table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button,]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.rider_picked,data.details.shipper,  data.details.weight, ]).node().id = data.details.id;
+
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -728,7 +735,7 @@
                         var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
                         var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.item_details') !!}',
+                            url: '{!! route('admin.v3_pickups.arrival.individual.try_and_buy.item_details') !!}',
                             method: 'POST',
                             data: {
                                 'shipment_id': shipment_id,
@@ -809,7 +816,7 @@
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
                     $.ajax({
-                        url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.shipment_details') !!}',
+                        url: '{!! route('admin.v3_pickups.arrival.individual.try_and_buy.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
@@ -1032,7 +1039,7 @@
                 var id = parseInt(parent.attr('id'));
 
                 $.ajax({
-                    url: '{!! route('admin.v2_pickups.arrival.individual.shipment_remove') !!}',
+                    url: '{!! route('admin.v3_pickups.arrival.individual.shipment_remove') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -1114,7 +1121,7 @@
                         var shipment_tracking_number = $('#piece_tracking_number').val();
                         var shipment_piece_count = $('#piece_shipment_count').val();
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}',
+                            url: '{!! route('admin.v3_pickups.arrival.bulk.piece.piece_details') !!}',
                             method: 'POST',
                             data: {
                                 'shipment_id': shipment_id,
@@ -1182,8 +1189,9 @@
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     var weight = $(form).find('input.pieces_weight').val();
+                    
                     $.ajax({
-                        url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
+                        url: '{!! route('admin.v3_pickups.arrival.bulk.piece.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,

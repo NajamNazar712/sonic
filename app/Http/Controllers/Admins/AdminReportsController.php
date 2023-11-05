@@ -11348,60 +11348,49 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
         }
+        // if ($request->get('search_from') && $request->get('search_to')) {
+           
+        //     // $pickup_arival = $pickup_arival->whereBetween('s.created_at', [$from, $to]);
+        // }else{
 
-        // $pickup_arival =Shipment::join('users as u','shipments.user_id','=','u.id')
-        //  ->select('u.id', 'u.name')
-        // ->selectRaw('COUNT(shipments.pickup_address_id) AS address_count')
-        // ->selectRaw('COUNT(shipments.id) as shipment_created')->where('u.id', 137)->groupBy('shipments.user_id')->get();
-        //  DB::table('shipments as s')
-        // ->select('u.id', 'u.name')
-        // ->selectRaw('COUNT(s.pickup_address_id) AS address_count')
-        // ->selectRaw('COUNT(s.id) as shipment_created')
-        // ->selectSub(function ($query) {
-        //     $query->selectRaw('COUNT(sq.id)')
-        //         ->from('shipments as  sq')
-        //         ->where('sq.shipper_status_id', 53)
-        //         ->where('sq.user_id', DB::raw('s.user_id'));
-        // }, 'rider_picked')
-        // ->selectSub(function ($query) {
-        //     $query->selectRaw('COUNT(sqq.id)')
-        //         ->from('shipments as sqq')
-        //         ->where('sqq.shipper_status_id', 2)
-        //         ->where('sqq.user_id', '=', DB::raw('s.user_id'));
-        // }, 'shipment_arrived')
-        // ->join('users as u', 's.user_id', '=', 'u.id')
-        // ->where('s.user_id', 137)
-        // ->groupBy('s.user_id')
-        // ->get();
-        
+        // }
+        $from =Carbon::parse($request->get('search_from'))->format('Y-m-d');
+        $to = Carbon::parse($request->get('search_to'))->format('Y-m-d');
+
         $pickup_arival= DB::connection('reports')->table('shipments as s')
             ->select('u.id as shipper_id', 'u.name as shipper_name')
             ->selectRaw('COUNT(s.id) as shipment_created')
-            ->selectSub(function($qurey){
-                $qurey->selectRaw('count(*) from (SELECT COUNT(sqqq.pickup_address_id) FROM shipments as sqqq WHERE sqqq.user_id = s.user_id GROUP BY sqqq.pickup_address_id) as sunqurey');
+         
+            ->selectSub(function($qurey) use ($from,$to){
+                $qurey->selectRaw('COUNT(sq.id)') 
+                ->from('shipments as sq')->where('sq.user_id',DB::raw('s.user_id'))->whereBetween(DB::raw('DATE(sq.created_at)'),[$from,$to])->where('sq.shipper_status_id', 1);      
+            },'not_picked')
+            ->selectSub(function($qurey) use ($from,$to){
+                $qurey->selectRaw('count(*) from (SELECT COUNT(sqqq.pickup_address_id) FROM shipments as sqqq WHERE sqqq.user_id = s.user_id AND DATE(sqqq.created_at) between "'.$from.'" AND "'.$to.'" GROUP BY sqqq.pickup_address_id) as sunqurey');
             },'address_count')
-            ->selectSub(function ($query) {
+            ->selectSub(function ($query) use ($from,$to) {
                 $query->selectRaw('COUNT(sq.id)')
                     ->from('shipments as  sq')->join('shipments_journey as sj','sq.id','=','sj.shipment_id')
                     ->where('sj.shipper_status_id', 53)
-                    ->where('sq.user_id', DB::raw('s.user_id'));
+                    ->where('sq.user_id', DB::raw('s.user_id'))->whereBetween(DB::raw('DATE(sq.created_at)'),[$from,$to]);
             }, 'rider_picked')
-            ->selectSub(function ($query) {
+            ->selectSub(function ($query) use ($from,$to){
                 $query->selectRaw('COUNT(sqq.id)')
                     ->from('shipments as sqq')
                     ->where('sqq.shipper_status_id', 2)
-                    ->where('sqq.user_id', DB::raw('s.user_id'));
+                    ->where('sqq.user_id', DB::raw('s.user_id'))->whereBetween(DB::raw('DATE(sqq.created_at)'),[$from,$to]);
             }, 'shipment_arrived')
-            ->selectSub(function($qurey){
-                $qurey->selectRaw('count(*) from (SELECT  COUNT(sqqq.id) FROM shipments AS sqqq JOIN shipments_journey AS sj ON sj.shipment_id=sqqq.id WHERE sqqq.id NOT IN (SELECT sjq.shipment_id FROM shipments_journey sjq WHERE sjq.shipment_id=sqqq.id  AND sjq.shipper_status_id=2) AND sqqq.user_id = s.user_id GROUP BY sqqq.id) as sunqurey');
-            },'shipment_balance')
-            ->join('users as u', 's.user_id', '=', 'u.id')
+            // ->selectSub(function($qurey){
+            //     $qurey->selectRaw('count(*) from (SELECT  COUNT(sqqq.id) FROM shipments AS sqqq JOIN shipments_journey AS sj ON sj.shipment_id=sqqq.id WHERE sqqq.id NOT IN (SELECT sjq.shipment_id FROM shipments_journey sjq WHERE sjq.shipment_id=sqqq.id  AND sjq.shipper_status_id=2) AND sqqq.user_id = s.user_id GROUP BY sqqq.id) as sunqurey');
+            // },'shipment_balance')
+            ->join('users as u', 's.user_id', '=', 'u.id')->whereBetween(DB::raw('DATE(s.created_at)'),[$from,$to])
+            ->groupBy('s.user_id');
             // ->where('s.user_id', 137)
             // ->whereBetween('s.created_at', [
             //     Carbon::now()->startOfDay(),
             //     Carbon::now()->endOfDay()
             // ])
-            ->groupBy('s.user_id');
+          
         // if ($rider = $request->get('search_rider')) {
         //     $rider_pickup = $rider_pickup->where('r.id', '=', $rider);
         // }
@@ -11409,11 +11398,7 @@ class AdminReportsController extends Controller
         //     $rider_pickup = $rider_pickup->where('c.hub_id', '=', $hub);
         // }
 
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $pickup_arival = $pickup_arival->whereBetween('s.created_at', [$from, $to]);
-        }
+     
 
         $datatables = Datatables::of($pickup_arival)
         
@@ -11427,6 +11412,13 @@ class AdminReportsController extends Controller
             ->addColumn('shipment_created_btn', function ($pickup_arival) {
                 if ($pickup_arival->shipment_created > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle shipment_created_btn">'.$pickup_arival->shipment_created.'</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('not_picked_btn', function ($pickup_arival) {
+                if ($pickup_arival->not_picked > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle not_picked_btn">'.$pickup_arival->not_picked.'</button>';
                 } else {
                     return 0;
                 }
@@ -11446,8 +11438,9 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('shipment_balance_btn', function ($pickup_arival) {
-                if ($pickup_arival->shipment_balance > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle shipment_balance_btn">'.$pickup_arival->shipment_balance.'</button>';
+                if ($pickup_arival->shipment_arrived > 0 ||  $pickup_arival->rider_picked >0 ) {
+                    $balance=($pickup_arival->rider_picked-$pickup_arival->shipment_arrived );
+                    return '<button class="btn btn-sm btn-outline-info align-middle shipment_balance_btn">'.$balance.'</button>';
                 } else {
                     return 0;
                 }
@@ -11497,68 +11490,117 @@ class AdminReportsController extends Controller
 
     public function get_shipper_addresses(Request $request){
         $shipper_id=$request->shipper_id;
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
+        // }
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
+
         $pickup_address=Shipment::join('user_shipping_infos as usi','usi.id','=','shipments.pickup_address_id')
-        ->select('usi.pickup_address',DB::raw('COUNT(shipments.id) as booked_shipments'))->where('shipments.user_id', $shipper_id)->groupBy('shipments.pickup_address_id')->get();
+        ->select('usi.pickup_address',DB::raw('COUNT(shipments.id) as booked_shipments'))->where('shipments.user_id', $shipper_id)
+        ->whereRaw("DATE(shipments.created_at) BETWEEN '$from_date' AND '$to_date'")
+        ->groupBy('shipments.pickup_address_id')->get();
         return response()->json(['status'=>1,'pickup_address'=>$pickup_address]);
     
         
     }   
     public function get_shipments(Request $request){
         $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // if($request->from_date && $request->to_date){
-        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d H:i:s');
-        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d H:i:s');
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // }else{
-        //     $from_date=Carbon::now()->format('Y-m-d H:i:s');
-        //     $to_date=Carbon::now()->format('Y-m-d H:i:s');
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
         // }
-        // dd($to_date);
-       
-        $shipments=Shipment::where('user_id','=',$shipper_id)->get();
-        ///->whereBetween('created_at',[$from_date,$to_date])->get();
+        $shipments=Shipment::where('user_id','=',$shipper_id)
+        ->whereBetween(DB::raw('DATE(created_at)'),[$from_date,$to_date])->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
+    public function get_not_picked_shipments(Request $request){
+        $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
+        // if($request->from_date && $request->to_date){
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
+        // }else{
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
+        // }
+        $not_picked_shipments=Shipment::where('user_id','=',$shipper_id)->where('shipper_status_id',1)
+        ->whereBetween(DB::raw('DATE(created_at)'),[$from_date,$to_date])->get();
+
+        return response()->json(['status'=>1,'not_picked_shipments'=>$not_picked_shipments]);
+    }
+
     public function get_rider_details(Request $request){
         $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // if($request->from_date && $request->to_date){
-        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // }else{
-        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
         // }
        
-        $rider_detail=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')->join('riders as r','sj.rider_id','=','r.id')
-        ->select('r.id','r.name','shipments.tracking_number')
+        $rider_detail=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')
+        ->join('riders as r','sj.rider_id','=','r.id')
+        ->leftjoin('v3_pickup_requests as pr',function($join) use ($from_date,$to_date){
+            $join->on('pr.shipper_id', '=', 'shipments.user_id')
+            ->on('pr.pickup_address_id','=','shipments.pickup_address_id')
+            ->whereBetween(DB::raw('DATE(pr.pickup_date)'),[$from_date,$to_date])->groupBy([DB::raw('DATE(pr.pickup_date)'),'pr.shipper_id','pr.pickup_address_id']);
+        })
+        ->leftjoin('riders as ra','pr.current_rider_id','=','ra.id')
+        ->select('r.id as picked_rider_id','r.name as picked_rider_name','shipments.tracking_number','pr.id as pickup_request_id','ra.id as assigned_rider_id','ra.name as assigned_rider_name',DB::raw('DATE(pr.pickup_date) as pickup_date'))
         ->addSelect(DB::raw("(SELECT sjq.shipper_status_id FROM shipments_journey AS sjq WHERE sjq.shipment_id = shipments.id AND sjq.shipper_status_id = 2) as arrived_status"))
-        ->where('sj.shipper_status_id','=',53)->where('shipments.user_id','=',$shipper_id)->get();
-        ///->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
+        ->where('sj.shipper_status_id','=',53)->where('shipments.user_id','=',$shipper_id)
+        ->whereBetween(DB::raw('DATE(shipments.created_at)'),[$from_date,$to_date])
+        ->get();
+        // dd($rider_detail);
         return response()->json(['status'=>1,'rider_details'=>$rider_detail]);
     }
 
     public function get_arrived_shipments(Request $request){
         $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // if($request->from_date && $request->to_date){
-        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // }else{
-        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
         // }
-        $arrived_shipments=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')->join('riders as r','sj.rider_id','=','r.id')
-        ->select('r.id','r.name','shipments.tracking_number')->where('sj.shipper_status_id','=',2)->where('shipments.user_id','=',$shipper_id)->get();
-        // ->whereBetween('shipments.created_at',[$from_date,$to_date])->get();
+        $arrived_shipments=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')
+        ->leftjoin('riders as r','sj.rider_id','=','r.id')
+        ->leftjoin('global_settings as gs','gs.setting_value','=','sj.rider_id')
+        ->select('r.id AS rider_id','r.name AS rider_name','gs.setting_value AS global_rider_id','gs.text AS global_rider_name','shipments.tracking_number')
+        ->where('sj.shipper_status_id','=',2)
+        ->where('shipments.user_id','=',$shipper_id)
+        ->whereBetween(DB::raw('DATE(shipments.created_at)'),[$from_date,$to_date])->get();
+
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
     }
     public function get_balance_Shipments(Request $request){
         $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // if($request->from_date && $request->to_date){
-        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        //     $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
         // }else{
-        //     $from_date=Carbon::now()->format('Y-m-d 00:00:00');
-        //     $to_date=Carbon::now()->format('Y-m-d 00:00:00');
+        //     $from_date=Carbon::now()->format('Y-m-d');
+        //     $to_date=Carbon::now()->format('Y-m-d');
         // }
         $balance_Shipments= Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
         ->leftjoin('riders as r', 'sj.rider_id', '=', 'r.id')
@@ -11568,10 +11610,10 @@ class AdminReportsController extends Controller
                 ->whereColumn('sjq.shipment_id', 'shipments.id')
                 ->where('sjq.shipper_status_id', 2);
         })
-        ->select('r.id', 'r.name', 'shipments.tracking_number')
+        ->select('r.id', 'r.name', 'shipments.tracking_number')->where('sj.shipper_status_id',53)
         ->where('shipments.user_id', $shipper_id)
-        // ->whereBetween('shipments.created_at',[$from_date,$to_date])
-        ->get();
+        ->whereBetween(DB::raw('DATE(shipments.created_at)'),[$from_date,$to_date])->get();
+  
         return response()->json(['status'=>1,'balance_Shipments'=>$balance_Shipments]);
 
       

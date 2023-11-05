@@ -5,7 +5,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Pickup vs Arival Rreport
+        Pickup vs Arrival Rreport
     </h1>
 
     <div class="card">
@@ -61,6 +61,7 @@
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Created Shipments</th>
+                            <th class="border-primary border-darken-1">Not Picked Shipments</th>
                             <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Balance Shipments</th>
@@ -158,6 +159,36 @@ aria-hidden="true">
 </div>
 <!----end of show Created Shipment modal --->
 
+<div class="modal fade text-left" id="NotPickedShipmentModal" data-backdrop="static" tabindex="-1" role="dialog"
+aria-labelledby="NotPickedShipmentModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Not Pick Shipments</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <table class="table table-bordered">
+                            <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Tracking No</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!---- start of show Rider Detail  modal---->
 <div class="modal fade text-left" id="RiderdetailModal" data-backdrop="static" tabindex="-1" role="dialog"
 aria-labelledby="RiderdetailModal"
@@ -176,8 +207,11 @@ aria-hidden="true">
                             <thead>
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Rider</th>
                                         <th class="border-primary border-darken-1">Tracking No</th>
+                                        <th class="border-primary border-darken-1">Picked Rider</th>
+                                        <th class="border-primary border-darken-1">Pickup Request Id</th>
+                                        <th class="border-primary border-darken-1">Assigned Rider</th>
+                                        <th class="border-primary border-darken-1">Pickup Request Date</th>
                                     </tr>
                             </thead>
                             <tbody>
@@ -211,6 +245,7 @@ aria-hidden="true">
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Rider</th>
+                                        <th class="border-primary border-darken-1">Global Rider</th>
                                         <th class="border-primary border-darken-1">Tracking No</th>
                                     </tr>
                             </thead>
@@ -487,6 +522,7 @@ aria-hidden="true">
                     { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                     
                     { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
+                    { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
                     { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
                     { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
                     { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
@@ -552,11 +588,15 @@ aria-hidden="true">
             // 
             $("#AddressModal table tbody").empty();
             var shipper_id=$(this).parent('td').parent('tr').attr('id');
+            var from_date=$("#from_date").val();
+            var to_date=$("#to_date").val();
             $.ajax({
                 url:'{{ route('admin.reports.pickup_arival.shipper_address') }}',
                 method:'POST',
                 data:{
                     'shipper_id':shipper_id,
+                    'from_date':from_date,
+                    'to_date':to_date,
                     '_token':'{{ csrf_token() }}'
                 }
             }).done(function(data){
@@ -598,7 +638,31 @@ aria-hidden="true">
                }
             });
         });
-
+        $("body").on('click','.not_picked_btn',function(){
+            // 
+            $("#NotPickedShipmentModal table tbody").empty();
+            var shipper_id=$(this).parent('td').parent('tr').attr('id');
+            var from_date=$("#from_date").val();
+            var to_date=$("#to_date").val();
+            $.ajax({
+                url:'{{ route('admin.reports.pickup_arival.not_picked_shipments') }}',
+                method:'POST',
+                data:{
+                    'shipper_id':shipper_id,
+                    'from_date':from_date,
+                    'to_date':to_date,
+                    '_token':'{{ csrf_token() }}'
+                }
+            }).done(function(data){
+               if(data.status==1){
+                    $.each(data.not_picked_shipments,function(key,value){
+                       $("#NotPickedShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                    });
+                    $("#NotPickedShipmentModal").modal('show');
+               }
+            });
+        });
+        
         $("body").on('click','.rider_picked_btn',function(){
             // 
             $("#RiderdetailModal table tbody").empty();
@@ -618,11 +682,10 @@ aria-hidden="true">
                if(data.status==1){
                     $.each(data.rider_details ,function(key,value){
                         if(value.arrived_status!=2){
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+value.id+'-'+value.name+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
 
                         }else{
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+value.id+'-'+value.name+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
-
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
                         }
                     });
                     $("#RiderdetailModal").modal('show');
@@ -646,7 +709,7 @@ aria-hidden="true">
             }).done(function(data){
                if(data.status==1){
                     $.each(data.arrived_shipments ,function(key,value){
-                        $("#ShipmentArrivedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+value.id+'-'+value.name+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                        $("#ShipmentArrivedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.rider_id!=null?value.rider_id+'-'+value.rider_name:'')+'</td><td class=" align-middle global_rider">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
                     });
                     $("#ShipmentArrivedModal").modal('show');
                }
