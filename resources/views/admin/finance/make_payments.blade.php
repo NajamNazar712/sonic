@@ -2087,7 +2087,7 @@
 					select.add(option);
 					}
 				}
-				});
+			});
 
         });
     </script>
