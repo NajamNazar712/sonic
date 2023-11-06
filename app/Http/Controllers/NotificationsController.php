@@ -5832,7 +5832,7 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
                             $html .= '</tr>';
                             $total_amount = $total_amount + $done_payment->amount;
-                            $$total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
+                            $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
                             $serial++;
                         }
                         $html .= '<tr>';
