@@ -11353,7 +11353,6 @@ RiderAPIController extends Controller
 
     public function shipment_undelivered_v3(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
@@ -12366,13 +12365,21 @@ RiderAPIController extends Controller
 //                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
 //                    continue;
 //                }
+
+                $user_included_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
+                ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
+                ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
+                ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
+                ->first();
+
                 $information = array();
 
                 $information['delivery_note_id'] = $delivery_note->id;
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
-
+                $information['user_included_otp_shippers'] = $user_included_otp_shippers['shipper_toggle'] ? $user_included_otp_shippers['shipper_toggle'] : 0;
                 $information['pending_shipment_count'] = 0;
                 $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
                 if($pending_shipments_count == 0){
