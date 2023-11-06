@@ -623,7 +623,7 @@ class ShipperFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
-                              <td>' . number_format(ROUND($total_payable, 0, PHP_ROUND_HALF_DOWN), 2) . '</td>
+                              <td>' . number_format(ROUND($total_payable - $done_payment->ibft_charges, 0, PHP_ROUND_HALF_DOWN), 2) . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -730,8 +730,12 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_adjustments, 2) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>IBFT Charges</strong></td>
+                                        <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments - $total_wht), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
