@@ -607,6 +607,7 @@
                                                 check_pickup_requests(data.details.tracking_number,data.details.rider);
                                         }
                                         // table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button,]).node().id = data.details.id;
+                                      //test clear
                                         table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.rider_picked,data.details.shipper,  data.details.weight, ]).node().id = data.details.id;
 
                                         table.draw(false);
@@ -1225,7 +1226,10 @@
                                         unassigned_pickups = true;
                                     }
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.city, data.details.hub , data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button,]).draw().node();
+                                    //test
+                                    // var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.city, data.details.hub , data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button,]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.rider_picked,data.details.shipper,  data.details.weight, ]).draw().node();
+
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();

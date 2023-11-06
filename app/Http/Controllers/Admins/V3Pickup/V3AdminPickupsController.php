@@ -2636,6 +2636,13 @@ class V3AdminPickupsController extends Controller
                 
                     $shipment->save();
                     
+
+                    $shipment_journey=$shipment->shipment_journey->where('shipper_status_id',53)->first();
+                   
+                    if($shipment_journey){
+                            $picked_rider=$shipment_journey->rider;
+                    }
+
                     $details = array();
 
                     $details['id'] = $shipment->id;
@@ -2643,12 +2650,14 @@ class V3AdminPickupsController extends Controller
                     $details['shipper'] = $shipment->user->name;
                     // $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
                     // $details['rider'] = $rider;
-                    $details['amount'] = $shipment->amount;
-                    $details['weight'] = floatval($shipment->actual_weight);
+                    // $details['amount'] = $shipment->amount;
+                
                     // $details['pickup_request_id_unpadded'] = $pickup_request_id;
-                    $details['rider_assigned'] = $rider_assigned_flag;
+                    // $details['rider_assigned'] = $rider_assigned_flag;
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['weight'] = floatval($shipment->actual_weight);
+                    $details['rider_picked'] = ( $picked_rider->id .'-'. $picked_rider->name);
                     // dd( $details);
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
