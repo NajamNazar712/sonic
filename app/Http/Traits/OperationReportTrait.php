@@ -63,7 +63,8 @@ trait OperationReportTrait{
                 'si.quantity as quantity'
             );
             if($mode == 'test'){
-                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04']);
+                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04'])
+                ->where('u.id', 26618);
             }else{
                 $shipments->whereBetween('sja.created_at', [$from, $to]);
             }
