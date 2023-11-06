@@ -980,24 +980,17 @@ class CRMDashboardController extends Controller
     }
 
     public function card_data(Request $request){
-        
-            $from_date = Carbon::now()->endOfDay();
-            $to_date = Carbon::now()->subDays(1)->startOfDay();
-            
-            if($request->get('from_date') && $request->get('to_date'))
-            {
-                $from_date = Carbon::parse($request->get('from_date'));
-                $to_date = Carbon::parse($request->get('to_date'));
-            }
-            
+            $today = Carbon::now()->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(1)->startOfDay();
+
             // $card_data['total'] = CrmRequest::
             // // whereBetween('created_at', [$thirtyDays, $today])
             // get();
-            $card_data['total'] = CrmRequest::whereBetween('created_at', [$from_date, $to_date])->get();
+            $card_data['total'] = CrmRequest::get();
 
             //Launched
-            $card_data['launched'] = CrmRequest::where('crm_requests.status_id', 1)->whereBetween('created_at', [$from_date, $to_date]);
-            
+            $card_data['launched'] = CrmRequest::where('crm_requests.status_id', 1);
+            // whereBetween('created_at', [$thirtyDays, $today]);
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['launched'] = self::agent($card_data['launched'],$agent_id);
@@ -1040,7 +1033,7 @@ class CRMDashboardController extends Controller
             }  
 
             //In_process
-            $card_data['in_process'] = CrmRequest::where('crm_requests.status_id', 2)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['in_process'] = CrmRequest::where('crm_requests.status_id', 2);
             // ->whereBetween('created_at', [$thirtyDays, $today])
             if($agent_id = $request->get('agent_id'))
             {
@@ -1084,7 +1077,7 @@ class CRMDashboardController extends Controller
             } 
 
             //Resolved
-            $card_data['resolved'] = CrmRequest::where('crm_requests.status_id', 3)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['resolved'] = CrmRequest::where('crm_requests.status_id', 3);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
@@ -1128,7 +1121,7 @@ class CRMDashboardController extends Controller
             }      
 
             //Closed
-            $card_data['closed'] = CrmRequest::where('crm_requests.status_id', 4)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['closed'] = CrmRequest::where('crm_requests.status_id', 4);
             
             if($agent_id = $request->get('agent_id'))
             {
@@ -1189,7 +1182,7 @@ class CRMDashboardController extends Controller
             }
 
             //Re open
-            $card_data['re_open'] = CrmRequest::where('crm_requests.status_id', 5)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['re_open'] = CrmRequest::where('crm_requests.status_id', 5);
 
             if($agent_id = $request->get('agent_id'))
             {
@@ -1241,7 +1234,7 @@ class CRMDashboardController extends Controller
             }
 
             //Valid
-            $card_data['valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 6)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 6);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
@@ -1286,7 +1279,7 @@ class CRMDashboardController extends Controller
             }
 
             //InValid
-            $card_data['in_valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 7)->whereBetween('created_at', [$from_date, $to_date]);
+            $card_data['in_valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 7);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
