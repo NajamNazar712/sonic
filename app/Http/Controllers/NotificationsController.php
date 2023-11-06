@@ -5841,7 +5841,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
                         $html .= '</tr>';
                         $html .= '</tbody></table>';
 
