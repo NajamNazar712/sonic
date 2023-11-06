@@ -10516,7 +10516,7 @@ class NotificationsController extends Controller
                     $mode = $reference_3_id;
                     $attachmentPath = $reference_1_id;                    
                     $date = $reference_2_id;
-                    $file = Storage::disk('public')->url('OperationReports/' . $attachmentPath);
+                    $file = Storage::disk('public')->url('operation_reports/' . $attachmentPath);
                     $link = '<br/><a href="' . $file . '" target="_blank"><u>Click Here To Download</u></a>';
                     $replacements = [
                         '[link]' => $link,

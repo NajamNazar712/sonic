@@ -2,6 +2,7 @@
 
 namespace App\Http\Traits;
 
+use Exception;
 use Carbon\Carbon;
 use PHPExcel_Style_Fill;
 use App\Http\Models\Rider;
@@ -62,8 +63,7 @@ trait OperationReportTrait{
                 'si.quantity as quantity'
             );
             if($mode == 'test'){
-                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04'])
-                ->where('u.id', 26618);
+                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04']);
             }else{
                 $shipments->whereBetween('sja.created_at', [$from, $to]);
             }
@@ -410,16 +410,17 @@ trait OperationReportTrait{
                 $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_" . Carbon::parse($to)->format('Y_m_d');
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
-                $directoryPath = 'OperationReports';
+                $directoryPath = 'operation_reports';
                 
                 if (!Storage::exists($directoryPath)) {
                     Storage::makeDirectory($directoryPath);
                 }
-                
-                $file_name_without_path = "ops_perf_report_" . $date_file_name  . ".xlsx";
-                $file_path = Storage::path($directoryPath . '/' . $file_name_without_path);
-                $writer->save($file_path);
-                
+                    $file_name_without_path = "ops_perf_report_" . $date_file_name . ".xlsx";
+                    $file_path = Storage::path($directoryPath . '/' . $file_name_without_path);
+                    $writer->save($file_path);
+                    Storage::disk('public')->put('operation_reports/'.$file_name_without_path, file_get_contents($file_path));
+          
+
                 if($id == 224){
                     NotificationsController::send(224, $file_name_without_path, $date_file_name, $mode);
                 }else{
