@@ -181,7 +181,7 @@
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Invoice No.</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
-                        <th class="border-primary border-darken-1">Proceed Date</th>
+                        <th class="border-primary border-darken-1">Processed Date</th>
                         <th class="border-primary border-darken-1">Paid Date</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -477,7 +477,7 @@
                             head.push('Payment Status');
                             head.push('Invoice No.');
                             head.push('Payment ID');
-                            head.push('Proceed Date');
+                            head.push('Processed Date');
                             head.push('Paid Date');
                             head.push('Service Type');
                             head.push('Arrival Date');
@@ -535,7 +535,7 @@
                                 row.push(values.payment_status);
                                 row.push(values.invoice_number);
                                 row.push(values.payment_id);
-                                row.push(values.proceed_date);
+                                row.push(values.processed_date);
                                 row.push(values.paid_date);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
@@ -646,7 +646,7 @@
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
-                    { data:'proceed_date' ,name: 'pps.created_at', class: 'align-middle proceed_date'},
+                    { data:'processed_date' ,name: 'pps.created_at', class: 'align-middle processed_date'},
                     { data:'paid_date' ,name: 'dps.created_at', class: 'align-middle paid_date'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
