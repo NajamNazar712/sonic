@@ -216,7 +216,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $attachmentPath = null, $attachmentName = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
         if ($to) {
 
@@ -256,7 +256,7 @@ class NotificationsController extends Controller
             }
             
 
-            $mail->send(new Notifications($subject, $body, $from, $attachmentPath, $attachmentName));
+            $mail->send(new Notifications($subject, $body, $from));
         }
     }
 
@@ -10511,25 +10511,30 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                         
                     }
-
-                } else if($id == 224){
-                    //Weekly Operation Reports
-                    $attachmentName = $reference_1_id;
-                    $attachmentPath = $reference_2_id;                    
-
-                    $email = ['tauseef.sarfaraz@trax.pk','shahbaz.abbasi@trax.pk', 'mansoor.ahmad@trax.pk','sahban.ghani@trax.pk','muhammad.ahmed@trax.pk'];
-                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
-                } 
-
-                else if($id == 225){
-                    //Monthly Operation Reports
-                    $attachmentName = $reference_1_id;
-                    $attachmentPath = $reference_2_id;                    
-
+                } else if($id == 224 || $id == 225){
+                    //Weekly Operation Reports And Monthly Operation Reports
+                    $mode = $reference_3_id;
+                    $attachmentPath = $reference_1_id;                    
+                    $date = $reference_2_id;
+                    $file = Storage::disk('public')->url('operation_reports/' . $attachmentPath);
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Click Here To Download</u></a>';
+                    $replacements = [
+                        '[link]' => $link,
+                        '[date_time]' => "Dated: ". $date,
+                    ];
+                    
+                    foreach ($replacements as $placeholder => $replacement) {
+                        if (strpos($body, $placeholder) !== false) {
+                            $body = str_replace($placeholder, $replacement, $body);
+                        }
+                    }
+                    
                     $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
-
-                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
+                    $email = ($mode !== 'test')
+                    ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
+                    : ['muhammad.ahmed@trax.pk','sahban.ghani@trax.pk'];
+                
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null);
                 } else if ($id == 223){
                     //Crm Progress Report
                     $now = Carbon::now();

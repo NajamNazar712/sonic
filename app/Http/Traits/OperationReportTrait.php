@@ -2,6 +2,7 @@
 
 namespace App\Http\Traits;
 
+use Exception;
 use Carbon\Carbon;
 use PHPExcel_Style_Fill;
 use App\Http\Models\Rider;
@@ -62,14 +63,14 @@ trait OperationReportTrait{
                 'si.quantity as quantity'
             );
             if($mode == 'test'){
-                $shipments->whereDate('sja.created_at', Carbon::today())
-                ->where('u.id', 24032);
+                $shipments->whereBetween('sja.created_at', ['2023-10-01', '2023-11-04'])
+                ->where('u.id', 26618);
             }else{
                 $shipments->whereBetween('sja.created_at', [$from, $to]);
             }
             
+            
             $shipments = $shipments->get();
-
             $data = [];
 
             if(count($shipments) > 0)
@@ -208,8 +209,7 @@ trait OperationReportTrait{
                         }
                         
                         $data[$key]['current_reason'] = $currentReason;
-                        
-                        $data[$key]['current_remarks'] = $current_status_journey->remarks;
+                                                $data[$key]['current_remarks'] = $current_status_journey->remarks;
                         $data[$key]['current_status_date'] = $current_status_journey->created_at;
                     }
     
@@ -408,17 +408,24 @@ trait OperationReportTrait{
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="operations_performance_report.xlsx"');
                 header('Cache-Control: max-age=0');
-                $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_". Carbon::parse($to)->format('Y_m_d');
+                $date_file_name = Carbon::parse($from)->format('Y_m_d') . "_to_" . Carbon::parse($to)->format('Y_m_d');
                 $time_string = Carbon::now()->toTimeString();
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
-                $file_name_without_path = "operations_performance_report_" . $date_file_name  . ".xlsx";
-                $file_name = public_path() . '/storage/OperationReports/' . $file_name_without_path;  
-                Storage::disk('public')->put($file_name_without_path, file_get_contents($file_name));
-                $writer->save($file_name);
+                $directoryPath = 'operation_reports';
+                
+                if (!Storage::exists($directoryPath)) {
+                    Storage::makeDirectory($directoryPath);
+                }
+                    $file_name_without_path = "ops_perf_report_" . $date_file_name . ".xlsx";
+                    $file_path = Storage::path($directoryPath . '/' . $file_name_without_path);
+                    $writer->save($file_path);
+                    Storage::disk('public')->put('operation_reports/'.$file_name_without_path, file_get_contents($file_path));
+          
+
                 if($id == 224){
-                    NotificationsController::send(224, $file_name_without_path, $file_name);
+                    NotificationsController::send(224, $file_name_without_path, $date_file_name, $mode);
                 }else{
-                    NotificationsController::send(225, $file_name_without_path, $file_name);
+                    NotificationsController::send(225, $file_name_without_path, $date_file_name, $mode);
                 }
             }
             else{
