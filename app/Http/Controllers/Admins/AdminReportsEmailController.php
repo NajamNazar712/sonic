@@ -1297,8 +1297,8 @@ class AdminReportsEmailController extends Controller
             $total_ibft = 0;
             $done_payment_array = array();
             $done_payments_array = array();
-            $done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
-            $done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
+            $done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount', 'IBFT Charges'];
+            $done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => '', 'IBFT Charges' => ''];
             $done_payments = $done_payments->get();
             $shippers = array();
             $shipper_ids = array();
@@ -1345,7 +1345,7 @@ class AdminReportsEmailController extends Controller
                     $done_payment_report->iban_number = $iban;
                     $done_payment_report->save();
                     $serial++;
-                    $done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable)];
+                    $done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $done_payment->done_payment_id, 'Shipper Name' => $done_payment->done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($done_payment->payable), 'IBFT Charges' => number_format($done_payment->ibft_charges)];
                     $total_amount = $total_amount + $done_payment->payable;
                     $total_ibft = $total_ibft + $done_payment->ibft_charges;
                 }
