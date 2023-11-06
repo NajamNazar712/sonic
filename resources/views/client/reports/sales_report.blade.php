@@ -600,7 +600,7 @@
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
-                    { data:'processed_date' ,name: 'pps.created_at', class: 'align-middle processed_date'},
+                    { data:'processed_date' ,name: 'spj.created_at', class: 'align-middle processed_date'},
                     { data:'paid_date' ,name: 'dps.created_at', class: 'align-middle paid_date'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},

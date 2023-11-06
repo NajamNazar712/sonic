@@ -646,7 +646,7 @@
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
-                    { data:'processed_date' ,name: 'pps.created_at', class: 'align-middle processed_date'},
+                    { data:'processed_date' ,name: 'spj.created_at', class: 'align-middle processed_date'},
                     { data:'paid_date' ,name: 'dps.created_at', class: 'align-middle paid_date'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
