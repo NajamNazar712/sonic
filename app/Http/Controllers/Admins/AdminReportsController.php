@@ -31,6 +31,7 @@ use function GuzzleHttp\Promise\all;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\BusinessCategory;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\ShipmentsJourney;
 use App\RiderWiseDeliveryNoteSummary;
@@ -45,6 +46,7 @@ use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Models\Admin\AdminDepartment;
@@ -77,12 +79,11 @@ use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
-use Illuminate\Support\Facades\Validator;
-use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 
@@ -12139,17 +12140,17 @@ class AdminReportsController extends Controller
     public function ajax_load_operation_data()
     {
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = User::whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
         } else {
-            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+            $shippers = User::whereIn('status', [3, 4])->select('id', 'name')->get();
         }
 
-        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-        $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
-        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        $cities = City::select('id', 'name')->get();
+        $hubs = City::where('hub', 1)->select('id', 'name')->get();
+        $statuses = ShipmentStatus::whereNotIn('id', [1, 17])->get();
+        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+        $shipping_modes = ShippingMode::get(['id', 'mode']);
+        $business_categories = BusinessCategory::select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
 
         return response()->json(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
