@@ -13,7 +13,7 @@ class AddCloumnDonePaymentReportTable extends Migration
      */
     public function up()
     {
-        Schema::table('retail_done_payments_reports', function (Blueprint $table) {
+        Schema::table('done_payments_reports', function (Blueprint $table) {
             $table->integer('ibft_charges')->after('amount')->nullable(); 
         });
     }
@@ -26,7 +26,7 @@ class AddCloumnDonePaymentReportTable extends Migration
     public function down()
     {
         
-        Schema::table('retail_done_payments_reports', function (Blueprint $table) {
+        Schema::table('done_payments_reports', function (Blueprint $table) {
             $table->dropColumn('ibft_charges');
         });
     }
