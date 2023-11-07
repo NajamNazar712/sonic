@@ -593,7 +593,7 @@
 
             $('#payment_cycle_days_form select.payment_cycle_days').prepend(
                 '<option value="" selected="selected"></option>').select2({
-                placeholder: 'Payment Cycle Days',
+                placeholder: 'Payment Cycle Date',
                 width: '100%',
                 allowClear: true
             }).bind('change', function() {
