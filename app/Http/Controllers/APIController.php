@@ -595,7 +595,7 @@ class APIController extends Controller
                 'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
                 'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
                 'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -615,7 +615,21 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email']
+                'substitute_user_email' => ['nullable', 'filled', 'email'],
+
+                'pieces_quantity' => [
+                    'nullable',
+                    'integer',
+                    //'digits_between:1,10',
+                    //'between:1,10',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
+                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
+                        } elseif($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
+                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        }
+                    },
+                ],
             ];
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
