@@ -181,9 +181,10 @@ class Kernel extends ConsoleKernel
 
         //Operations Report
         //11th of every month
-        $schedule->command('reports:operations_perfomance_monthly')->monthlyOn(11, '23:00')->runInBackground();
+        $schedule->command('reports:operations_performance_monthly')->monthlyOn(11, '23:00')->runInBackground();
         //EveryTuesday
-        $schedule->command('reports:operations_perfomance_weekly')->weeklyOn(2, '10:00')->runInBackground();
+        // $schedule->command('reports:operations_performance_weekly')->weeklyOn(2, '10:00')->runInBackground();
+        $schedule->command('reports:operations_performance_weekly test')->weeklyOn(1, '15:00')->runInBackground();
 
         $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
         if($shifts){
