@@ -2989,7 +2989,7 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_value' => ':attribute is required',
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
-            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus(shipping mode = 2), 0 to 10 for other modes !',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
         ];
 
         $rules = [
