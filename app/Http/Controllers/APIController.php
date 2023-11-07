@@ -620,8 +620,6 @@ class APIController extends Controller
                 'pieces_quantity' => [
                     'nullable',
                     'integer',
-                    //'digits_between:1,10',
-                    //'between:1,10',
                     function ($attribute, $value, $fail) use ($request) {
                         if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
                             $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
@@ -696,7 +694,7 @@ class APIController extends Controller
                 'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
                 'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
                 'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
                 'shipper_reference_number_1' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_2' => ['nullable', 'between:0,190'],
@@ -708,7 +706,17 @@ class APIController extends Controller
 
                 'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
                 'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
-
+                'pieces_quantity' => [
+                    'nullable',
+                    'integer',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
+                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
+                        } elseif($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
+                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        }
+                    },
+                ],
             ];
 
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
