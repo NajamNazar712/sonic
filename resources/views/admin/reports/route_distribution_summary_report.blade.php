@@ -316,6 +316,9 @@
                             head.push('RCP %');
                             
                             $.each(result.data, function(index, values) {
+
+                                var cashAmount = (values.dncc_amount-(values.hbl_konnect_amount+values.fintech_shipments_charges));
+
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
@@ -327,7 +330,6 @@
                                 row.push(values.hbl_konnect_amount_percent);
                                 row.push(values.fintech_shipments_charges);
                                 row.push(values.fintech_amount_percent);
-                                var cashAmount = (values.dncc_amount-(values.hbl_konnect_amount+values.fintech_shipments_charges));
                                 row.push(cashAmount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
@@ -355,6 +357,7 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push('');
@@ -427,6 +430,11 @@
                     { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle text-center hbl_konnect_amount_percent', orderable: false, searchable: false},
                     { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle text-center fintech_shipments_charges', orderable: false, searchable: false},
                     { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle text-center fintech_amount_percent', orderable: false, searchable: false},
+                    { data:null ,name: 'cash_amount', class: 'align-middle text-center cash_amount', orderable: false, searchable: false, render: function (data, type, row) 
+                    {
+                        var cashAmount = (data.dncc_amount-(data.hbl_konnect_amount+data.fintech_shipments_charges));
+                        return cashAmount;
+                    }},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},

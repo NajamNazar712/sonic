@@ -8012,7 +8012,7 @@ class AdminReportsController extends Controller
                 }
                 else
                 {
-                    return '-';
+                    return 0;
                 }             
             })
             ->editColumn('fintech_amount_percent', function ($entry) {
@@ -8027,7 +8027,7 @@ class AdminReportsController extends Controller
                 }
                 else
                 {
-                    return '-';
+                    return 0;
                 }     
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
