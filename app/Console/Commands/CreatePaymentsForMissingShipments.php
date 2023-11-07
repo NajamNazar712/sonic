@@ -21,7 +21,7 @@ class CreatePaymentsForMissingShipments extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Payment Command for missing payments in make payment';
 
     /**
      * Create a new command instance.
