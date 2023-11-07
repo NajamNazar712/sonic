@@ -8012,7 +8012,7 @@ class AdminReportsController extends Controller
                 }
                 else
                 {
-                    return '-';
+                    return 0;
                 }             
             })
             ->editColumn('fintech_amount_percent', function ($entry) {
@@ -8027,7 +8027,7 @@ class AdminReportsController extends Controller
                 }
                 else
                 {
-                    return '-';
+                    return 0;
                 }     
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
@@ -11376,10 +11376,27 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 620);
         }
-        $one_link_data = OneLinkOutForDeliveryShipmentPayment::select('tracking_number', 'transaction_amount', 'delivery_note_id', 'transaction_authentication_id', 'created_at', 'one_link_charges');
+        $one_link_data = OneLinkOutForDeliveryShipmentPayment::select('shipment_id', 'tracking_number', 'transaction_amount', 'delivery_note_id', 'transaction_authentication_id', 'created_at', 'one_link_charges');
 
 
-        $datatable = Datatables::of($one_link_data);
+        $datatable = Datatables::of($one_link_data)
+        ->editColumn('tracking_number', function ($one_link_data) {
+
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$one_link_data->tracking_number' class='tracking' target='_blank'>$one_link_data->tracking_number</a></u>";
+        })
+        ->addColumn('destination', function ($one_link_data) {
+            
+            $consignee_city_id = Shipment::find($one_link_data->shipment_id)->consignee_city_id ?? 0;
+            $destination = City::find($consignee_city_id)->name;
+            return $destination;
+        })
+        ->addColumn('rider_detail', function ($one_link_data) {
+            $rider_id = DeliveryNote::find($one_link_data->delivery_note_id)->rider_id ?? 0;
+            $rider = Rider::find($rider_id);
+            $rider_name = $rider ?  $rider->name . ' - '. $rider->trax_id : '';
+            return $rider_name;
+        });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('tracking_number', explode(',', $tracking_numbers));
@@ -11388,7 +11405,7 @@ class AdminReportsController extends Controller
         if ($delivery_note_id = $request->get('delivery_note_id')) {
             $datatable->where('delivery_note_id', $delivery_note_id);
         }
-
+        
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
