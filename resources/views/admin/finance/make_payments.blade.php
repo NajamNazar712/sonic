@@ -2066,7 +2066,7 @@
 
 				// Create a placeholder option
 				var placeholderOption = document.createElement("option");
-				placeholderOption.text = "Select payment day";
+				placeholderOption.text = "Select payment date";
 				placeholderOption.value = "";
 				select.add(placeholderOption);
 
