@@ -2864,6 +2864,22 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $pieces_quantity = $data['pieces_quantity'];
+            if ($value) {
+                if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
+                    return false;
+                }
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                    return false;
+                }
+                else
+                    return true;
+            }
+        });
+
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -2973,6 +2989,7 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_value' => ':attribute is required',
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus(shipping mode = 2), 0 to 10 for other modes !',
         ];
 
         $rules = [
@@ -3053,7 +3070,7 @@ class ShipperShipmentBookController extends Controller
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
                 $query->whereIn('id', [4]);
             })],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
@@ -3064,7 +3081,11 @@ class ShipperShipmentBookController extends Controller
             'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
-
+            'pieces_quantity' => [
+                'nullable',
+                'integer',
+                'pieces_check'
+            ],
         ];
 
 
