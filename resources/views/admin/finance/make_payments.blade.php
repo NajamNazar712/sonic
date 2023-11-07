@@ -98,7 +98,7 @@
                                                 id="payment_cycle_days_val">
                                                 @for ($i = 1; $i < 29; $i++)
                                                     <option value="{{ $i }}">
-                                                        {{ $i . ' day' }}</option>
+                                                        {{ $i . ' date' }}</option>
                                                 @endfor
                                             </select>
                                         </div>
@@ -2070,7 +2070,7 @@
 				placeholderOption.value = "";
 				select.add(placeholderOption);
 
-				if (id == 4 || id == 5) {
+				if (id ==2 || id == 4 || id == 5) {
 					var daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 					for (var i = 0; i < daysOfWeek.length; i++) {
 					var option = document.createElement("option");
@@ -2083,7 +2083,7 @@
 					for (var i = 1; i < 29; i++) {
 					var option = document.createElement("option");
 					option.value = i;
-					option.text = i + ' day';
+					option.text = i + ' date';
 					select.add(option);
 					}
 				}
