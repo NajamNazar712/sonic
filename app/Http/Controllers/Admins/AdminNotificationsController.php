@@ -813,7 +813,26 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
-
+        else if($id == 221)
+        {
+            $details['fields'] = ['preview'];
+        }
+        else if($id == 222)
+        {
+            $details['fields'] = ['shipper', 'preview'];
+        }
+        else if($id == 223)
+        {
+            $details['fields'] = ['preview'];
+        }
+        else if($id == 224)
+        {
+            $details['fields'] = ['date_time', 'link'];
+        }
+        else if($id == 225)
+        {
+            $details['fields'] = ['date_time', 'link'];
+        }
         return $details;
     }
 
