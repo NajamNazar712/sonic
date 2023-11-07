@@ -266,7 +266,7 @@
                                             </div>
                                             <div class="col-12">
                                                 <fieldset class="form-group">
-                                                    <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                                    <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -274,7 +274,7 @@
 
                                     <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -2178,6 +2178,7 @@
                                             'complaint_id': complaint_id,
                                             'description': description,
                                             'cod_new_amount': $('#new_amount').val(),
+                                            'cod_remarks': $('#cod_remarks').val(),
                                             'is_automated_cod_change': 1,
                                         }
                                     })

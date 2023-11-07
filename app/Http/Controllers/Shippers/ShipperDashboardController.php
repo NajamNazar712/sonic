@@ -85,6 +85,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
 use App\RouteLocations;
+use GuzzleHttp\Client;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -102,6 +103,7 @@ use App\Http\Models\UserDefaultBankDuration;
 use Auth;
 use App\Http\Models\Segment;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -1121,9 +1123,37 @@ class ShipperDashboardController extends Controller
 
     //User Profile
 
+    function user_payment_cycles_days($user){
+        $payment_cycle_days = explode(',', $user->payment_cycle_days);
+        $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
+        $fort_month = [3, 6]; // Monthly and Fortnight.
+        $days = [];
+    
+        if (isset($user->payment_cycle->id)) {
+            if (in_array($user->payment_cycle->id, $weekly)) {
+                foreach ($payment_cycle_days as $payment_cycle_day) {
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $dayName = $date->format('l');
+                    $days[] = $dayName;
+                }
+            } else if (in_array($user->payment_cycle->id, $fort_month)) {
+                $days[] = "Every " . implode(', ', $payment_cycle_days) . " of the month";
+            } else {//Daily
+                $days[] = 'Daily';
+            }
+        } else {
+            $days[] = 'Payment Cycle Not Defined'; 
+        }
+    
+        $days = implode(', ', $days);
+    
+        return $days;
+    }
+
     public function userProfile()
     {
         $user = User::find(session('user_id'));
+        $payment_cycle_days = $this->user_payment_cycles_days($user);
         $product = Product::find($user->product_id);
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
@@ -1133,7 +1163,7 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function verifyPincode(Request $request)
@@ -2143,6 +2173,77 @@ class ShipperDashboardController extends Controller
         $visit->save();
 
         return back()->with(['success'=>'Visit Rated Successfully']);
+    }
+
+    public function mentor_health_index()
+    {
+        $details = User::join('cities as c','c.id','users.city_id')
+        ->where('users.id',session('user_id'))
+        ->select('users.id as user_id','users.name as company_name','users.email as company_email',
+            'users.phone as company_phone','users.city_id as company_city_id','c.name as company_city');
+        if ($details->exists())
+        {
+            $details = $details->first();
+        }
+        return view('client.mentor_health.mentor_health')->with(['details' => $details]);
+    }
+
+    public function mentor_health_add_request(Request $request)
+    {
+        if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
+        {
+            if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
+                try
+                {
+                    $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
+
+                    $verify = true;
+                    if(App::environment() == 'local')
+                        $verify = false;
+
+                    $client = new Client([
+                        'verify' => $verify, // Disable SSL verification
+                    ]);
+
+                    $postData = [
+                        'full_name' => $request->company_name,
+                        'email' => $request->company_email,
+                        'phone' => $request->company_phone,
+                        'city_name' => $request->company_city,
+                    ];
+
+                    $response = $client->post($url, [
+                        'json' => $postData, // Send data as JSON
+                    ]);
+
+                    $statusCode = $response->getStatusCode();
+                    $responseBody = $response->getBody()->getContents();
+
+                    if ($statusCode === 200) {
+                        $responseData = json_decode($responseBody, true);
+                        if (stripos($responseBody, "This company already exists") !== false) {
+                            return back()->with(['info' => $responseData['Message']]);
+                        }
+                        else
+                        {
+                            return back()->with(['success' => $responseData['Message']]);
+                            //todo need to make a migration in which mentor health data will be store for journey
+                        }
+
+                    } else {
+                        return back()->with(['error' => 'API request failed']);
+                    }
+                }
+                catch (\Throwable  $e)
+                {
+                    return back()->with(['error' => $e->getMessage()]);
+                }
+            }
+        }
+        else
+        {
+            return back()->with(['error' => 'please provide the complete details !']);
+        }
     }
 
     
