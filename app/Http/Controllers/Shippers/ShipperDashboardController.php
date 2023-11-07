@@ -1233,7 +1233,7 @@ class ShipperDashboardController extends Controller
 
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name'])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -1249,22 +1249,45 @@ class ShipperDashboardController extends Controller
             $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
+            $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             if ($pickup->default_address == 1) {
-                $dropdown = 'Default Address';
+                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
+            }
+            else{
+                $dropdown .= $default_button;
+            }
+
+            if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
+                $dropdown .= $edit_button;
+            }
+            if ($pickup->status == 0) {
+                $dropdown .= $enable_button;
             }
             else {
-                if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
-                    $dropdown .= $edit_button;
+                if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
+                    $dropdown .= $disable_button;
                 }
-                if ($pickup->status == 0) {
-                    $dropdown .= $enable_button;
-                }
-                else {
-                    $dropdown .= $default_button;
+            }
 
-                    if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
-                        $dropdown .= $disable_button;
+
+            $omni_user = false;
+            $settings = GlobalSettings::where('type', 'omni_users');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if ($settings->text != NULL) {
+                    $omni_accounts = array_map('intval', explode(',', $settings->text));
+                    if (in_array($pickup->user_id, $omni_accounts)) {
+                        $omni_user = true;
                     }
+                }
+            }
+
+            if($omni_user){
+                if((!$pickup->default_return_address) && ($pickup->status == 1)){
+                    $dropdown .= $return_default_button;
+                }
+                elseif ($pickup->default_return_address){
+                    $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
                 }
             }
 
@@ -1323,6 +1346,20 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already default Pickup Address"]);
                 }
 
+            }
+            else if ($status == 'return_default')
+            {
+                if($shipping_info->default_return_address == 0)
+                {
+                    $shipping_info->default_return_address = 1;
+                    $shipping_info->save();
+                    UserShippingInfo::where('user_id', $shipping_info->user_id)->where('id', '!=', $pickup_id)->update(['default_return_address' => 0]);
+                    return response()->json(['status'=>1,'success'=>"This Address is now default Return Address"]);
+                }
+                else
+                {
+                    return response()->json(['status'=>0,'error'=>"This Address is already default Return Address"]);
+                }
             }
         }else{
             return response()->json(['status'=>0,'error'=>"Pickup Address doesn\'t exist!"]);

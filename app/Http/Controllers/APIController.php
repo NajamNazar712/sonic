@@ -595,7 +595,7 @@ class APIController extends Controller
                 'item_insurance' => ['required_if:service_type_id,1,2,5', 'boolean'],
                 'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
                 'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
@@ -615,7 +615,19 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-                'substitute_user_email' => ['nullable', 'filled', 'email']
+                'substitute_user_email' => ['nullable', 'filled', 'email'],
+
+                'pieces_quantity' => [
+                    'nullable',
+                    'integer',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
+                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
+                        } elseif($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
+                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        }
+                    },
+                ],
             ];
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
@@ -682,7 +694,7 @@ class APIController extends Controller
                 'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,10000'],
                 'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
                 'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
-                'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+                //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
                 'shipper_reference_number_1' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_2' => ['nullable', 'between:0,190'],
@@ -694,7 +706,17 @@ class APIController extends Controller
 
                 'ftl_collection_type' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
                 'approve_freight_request' => ['required_if:service_type_id,6', 'integer', 'digits_between:1,10'],
-
+                'pieces_quantity' => [
+                    'nullable',
+                    'integer',
+                    function ($attribute, $value, $fail) use ($request) {
+                        if ($request->input('shipping_mode_id') == 2 && ($value < 1 || $value > 500)) {
+                            $fail('The pieces quantity must be between 1 and 500 when shipping mode is Saver Plus.');
+                        } elseif($request->input('shipping_mode_id') != 2 && ($value < 1 || $value > 10)) {
+                            $fail('Pieces quantity must be between 1 and 10 if shipping mode are Rush,Swift or Sameday.');
+                        }
+                    },
+                ],
             ];
 
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -778,7 +800,7 @@ class APIController extends Controller
             } else {
                 $open_shipment = 0;
             }
-
+            $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
             if ($shipment_pre_book->exists()) {
                 $shipment_pre_book = $shipment_pre_book->first();
@@ -813,7 +835,7 @@ class APIController extends Controller
                 }
 
                 if ($service_type_id == 1) {
-                    if ($request->has('return_address_id') && $request->input('return_address_id') != null) {
+                    if ($request->has('return_address_id')) {
 
                         $settings = GlobalSettings::where('type', 'omni_users');
                         if ($settings->exists()) {
@@ -826,7 +848,20 @@ class APIController extends Controller
                             }
                         }
 
-                        $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
+                        if($request->input('return_address_id') != null){
+                            $return_address_id = $request->input('return_address_id');
+                        }
+                        else{
+                            $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                            if($return_address->exists()){
+                                $return_address_id = $return_address->first()->id;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Default return address is not set!']);
+                            }
+                        }
+
+                        $user_shipping_info_return = UserShippingInfo::find($return_address_id);
 
                         if (!$user_shipping_info_return->status) {
                             return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
@@ -840,7 +875,6 @@ class APIController extends Controller
                         }
                     }
                 }
-
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
                 if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
@@ -1037,13 +1071,6 @@ class APIController extends Controller
                             $self_collection = true;
                         }
                     }
-                }
-            }
-
-            $return_address_id = null;
-            if ($service_type_id == 1) {
-                if ($request->filled('return_address_id')) {
-                    $return_address_id = $request->input('return_address_id');
                 }
             }
 
