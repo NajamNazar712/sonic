@@ -26,7 +26,7 @@ class EmailOperationPerformanceReportMonthlySeeder extends Seeder
                 'name' => 'Monthly Operation Performance Report Email',
                 'type_id' => 1,
                 'subject' => 'Monthly Operation Performance Report',
-                'body' => 'Monthly Operation Performance Report',
+                'body' =>  "[date_time]".PHP_EOL."[link]",
                 'updated_by' => 615,
                 'status' => 1,
             )

@@ -506,14 +506,18 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
-        } else {
+        }
+        else {
+            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            {
+                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+            }
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
             if ($request->filled('open_shipment')) {

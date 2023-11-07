@@ -9010,4 +9010,42 @@ class GlobalSettingsController extends Controller
 
         return response(['hubs'=>$hubs]);
     }
+
+    public function bypass_weight_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 706);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+        $bypassed_shippers = array();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $bypassed_shippers = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.bypass_weight')->with(['shippers' => $shippers, 'bypassed_shippers'=> $bypassed_shippers]);
+    }
+
+    public function bypass_weight_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'bypass_weight_setting';
+                }
+                $settings->setting_value = 1;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
 }
