@@ -398,7 +398,6 @@ class DeliveryController extends Controller
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
                 $str_arr = null;
-                //                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
                 $str_arr = preg_split("/[ ,]+/", $shipments->consignee_address);
                 foreach ($check as $nsa) {
                     foreach ($str_arr as $arr_value) {

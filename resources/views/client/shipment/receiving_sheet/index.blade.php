@@ -26,6 +26,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
+										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Pickup Address</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
@@ -282,6 +283,7 @@
                             head.push('Shipper');
                             head.push('Order ID');
                             head.push('Service Type');
+                            head.push('Status');
                             head.push('Pickup Address');
                             head.push('Origin');
                             head.push('Destination');
@@ -298,6 +300,7 @@
                                 row.push(values.user);
                                 row.push(values.order_id);
                                 row.push(values.service_type);
+                                row.push(values.shipment_status);
                                 row.push(values.pickup_address);
                                 row.push(values.origin_city);
                                 row.push(values.destination_city);
@@ -489,6 +492,7 @@
 					{data: 'user', name: 'u.name', class: 'align-middle user'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+					{data: 'shipment_status', name: 'ss.name', class: 'align-middle shipment_status'},
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
