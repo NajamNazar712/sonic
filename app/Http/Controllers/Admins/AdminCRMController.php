@@ -194,7 +194,7 @@ class AdminCRMController extends Controller
                         if($shipment){
 
                             
-                            if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                            if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                             {
                                 return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                             }
@@ -346,7 +346,7 @@ class AdminCRMController extends Controller
                                 else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                                 {
                                     if($request->has('cod_new_amount')){
-                                        if($request->cod_new_amount && $shipment->shipper_status_id != 5){
+                                        if($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5){
 
                                             $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
                                             $default_agent_id = 306;
@@ -357,11 +357,19 @@ class AdminCRMController extends Controller
                                                         
                                                         CRM automated Comment";
                                             
-                                            CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
-                                            
                                             $old_amount = $shipment->amount;
                                             $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                             $shipment->amount = $request->cod_new_amount;
+                                            
+                                            if($request->is_zero_cod == 1)
+                                            {
+                                                $comment = "Dear Customer,
+                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                                
+                                                CRM automated Comment";
+                                                $shipment->parcel_value = $request->cod_parcel_value;
+                                            }
                                             ChangeShipmentAmountLog::create([
                                                 'shipment_id' => $shipment->id,
                                                 'old_amount' => $old_amount,
@@ -370,6 +378,8 @@ class AdminCRMController extends Controller
                                                 'admin_id' => 346 // for global admin
                                             ]);
                                             $shipment->save();
+
+                                            CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                         }
                                     }
                                 }
@@ -417,7 +427,7 @@ class AdminCRMController extends Controller
                         // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->first();
                         // $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
-                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [3, 14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
+                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 18, 30, 36, 37, 20, 21, 22, 23, 24, 25, 26, 32, 44, 47, 48, 57, 60, 51])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                         }
@@ -462,20 +472,29 @@ class AdminCRMController extends Controller
                                             else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                                             {
                                                 if($request->has('cod_new_amount')){
-                                                    if($request->cod_new_amount && $shipment->shipper_status_id != 5){
+                                                    if($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5){
 
                                                         $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
                                                         $default_agent_id = 306;
                                                         $comment_by = 0;
                                                         $comment_type = 0;
                                                         $comment = "Dear Customer,
-                                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
                                                         
-                                                        CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
-
+                                                                    CRM automated Comment";
+                                                     
                                                         $old_amount = $shipment->amount;
                                                         $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                         $shipment->amount = $request->cod_new_amount;
+                                                        if($request->is_zero_cod == 1)
+                                                        {
+                                                            $comment = "Dear Customer,
+                                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                            Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                                            
+                                                            CRM automated Comment";
+                                                            $shipment->parcel_value = $request->cod_parcel_value;
+                                                        }
                                                         ChangeShipmentAmountLog::create([
                                                             'shipment_id' => $shipment->id,
                                                             'old_amount' => $old_amount,
@@ -484,6 +503,8 @@ class AdminCRMController extends Controller
                                                             'admin_id' => 346 // for global admin
                                                         ]);
                                                         $shipment->save();
+
+                                                        CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                     }
                                                 }
                                                 
@@ -547,20 +568,29 @@ class AdminCRMController extends Controller
                                         else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                                         {
                                             if($request->has('cod_new_amount')){
-                                                if($request->cod_new_amount && $shipment->shipper_status_id != 5){
+                                                if($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5){
 
                                                     $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
                                                     $default_agent_id = 306;
                                                     $comment_by = 0;
                                                     $comment_type = 0;
                                                     $comment = "Dear Customer,
-                                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system 
+                                                        
+                                                                CRM automated Comment";
                                                     
-                                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
-
                                                     $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
+                                                    if($request->is_zero_cod == 1)
+                                                    {
+                                                        $comment = "Dear Customer,
+                                                        Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                        Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                                        
+                                                        CRM automated Comment";
+                                                        $shipment->parcel_value = $request->cod_parcel_value;
+                                                    }
                                                     ChangeShipmentAmountLog::create([
                                                         'shipment_id' => $shipment->id,
                                                         'old_amount' => $old_amount,
@@ -569,6 +599,8 @@ class AdminCRMController extends Controller
                                                         'admin_id' => 346 // for global admin
                                                     ]);
                                                     $shipment->save();
+
+                                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                 }
                                             }
                                             
@@ -643,20 +675,29 @@ class AdminCRMController extends Controller
                                         else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                                         {
                                             if($request->has('cod_new_amount')){
-                                                if($request->cod_new_amount && $shipment->shipper_status_id != 5){
+                                                if($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5){
 
                                                     $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
                                                     $default_agent_id = 306;
                                                     $comment_by = 0;
                                                     $comment_type = 0;
                                                     $comment = "Dear Customer,
-                                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
-                                                    
-                                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
+                                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system 
+                                                        
+                                                                CRM automated Comment";
 
                                                     $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
+                                                    if($request->is_zero_cod == 1)
+                                                    {
+                                                        $comment = "Dear Customer,
+                                                        Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                        Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                                        
+                                                        CRM automated Comment";
+                                                        $shipment->parcel_value = $request->cod_parcel_value;
+                                                    }
                                                     ChangeShipmentAmountLog::create([
                                                         'shipment_id' => $shipment->id,
                                                         'old_amount' => $old_amount,
@@ -665,6 +706,8 @@ class AdminCRMController extends Controller
                                                         'admin_id' => 346 // for global admin
                                                     ]);
                                                     $shipment->save();
+
+                                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                                 }
                                             }
                                             
@@ -729,20 +772,29 @@ class AdminCRMController extends Controller
                                     else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                                     {
                                         if($request->has('cod_new_amount')){
-                                            if($request->cod_new_amount && $shipment->shipper_status_id != 5){
+                                            if($request->cod_new_amount >= 0 && $shipment->shipper_status_id != 5){
 
                                                 $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
                                                 $default_agent_id = 306;
                                                 $comment_by = 0;
                                                 $comment_type = 0;
                                                 $comment = "Dear Customer,
-                                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
-                                                
-                                                CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
-
+                                                            Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system 
+                                                        
+                                                            CRM automated Comment";
+                                              
                                                 $old_amount = $shipment->amount;
                                                 $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                 $shipment->amount = $request->cod_new_amount;
+                                                if($request->is_zero_cod == 1)
+                                                {
+                                                    $comment = "Dear Customer,
+                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                    Due to change of COD amount 0. parcel value has been updated from ($shipment->parcel_value) to ($request->cod_parcel_value)
+                                                    
+                                                    CRM automated Comment";
+                                                    $shipment->parcel_value = $request->cod_parcel_value;
+                                                }
                                                 ChangeShipmentAmountLog::create([
                                                     'shipment_id' => $shipment->id,
                                                     'old_amount' => $old_amount,
@@ -751,6 +803,8 @@ class AdminCRMController extends Controller
                                                     'admin_id' => 346 // for global admin
                                                 ]);
                                                 $shipment->save();
+
+                                                CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                             }
                                         }
                                         
