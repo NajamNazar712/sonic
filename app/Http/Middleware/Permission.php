@@ -779,7 +779,6 @@ class Permission
             'settings.shippers.status_webhook.list' => 646,
             'settings.shippers.status_webhook.edit' => 646,
             'settings.shippers.status_webhook.update' => 646,
-
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 
@@ -989,6 +988,8 @@ class Permission
             'settings.background_image.store' => 891,
 
             'settings.rider_assigned_hub.index' => 893,
+
+            'settings.shippers.bypass_weight.index'=> 909,
 
 
             'dashboard.userwise' => 333,
@@ -1401,7 +1402,7 @@ class Permission
  			'accounts.substitute_account_management.index' => 873,
  			'accounts.substitute_account_management.add.index' => 874,
  			'accounts.substitute_account_management.update.index' => 875,
-            'settings.airway_bill_address_visibility.index' => 877,
+            'settings.airway_bill_address_visibility.index' => 887,
  			'management.shipment_received.index' => 878,
             'return.shipper_return_receiving.history.index' => 885,
             'reports.overland.index' => 886,
