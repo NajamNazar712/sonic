@@ -25,7 +25,7 @@ class EmailOperationPerformanceReportWeeklySeeder extends Seeder
                 'name' => 'Weekly Operation Performance Report Email',
                 'type_id' => 1,
                 'subject' => 'Weekly Operation Performance Report',
-                'body' => 'Weekly Operation Performance Report (Monday To Thurday)',
+                'body' =>  "[date_time]".PHP_EOL."[link]",
                 'updated_by' => 615,
                 'status' => 1,
             )

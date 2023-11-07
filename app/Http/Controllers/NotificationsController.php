@@ -216,7 +216,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null, $attachmentPath = null, $attachmentName = null)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
         if ($to) {
 
@@ -256,7 +256,7 @@ class NotificationsController extends Controller
             }
             
 
-            $mail->send(new Notifications($subject, $body, $from, $attachmentPath, $attachmentName));
+            $mail->send(new Notifications($subject, $body, $from));
         }
     }
 
@@ -5814,8 +5814,10 @@ class NotificationsController extends Controller
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
                                            </tr></thead><tbody>';
                         $total_amount = 0;
+                        $total_ibft_amount = 0;
                         $serial = 1;
                         foreach ($done_payment_report as $done_payment) {
                             if (!in_array($done_payment->shipper_id, $shippers)) {
@@ -5827,8 +5829,10 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
                             $html .= '</tr>';
                             $total_amount = $total_amount + $done_payment->amount;
+                            $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
                             $serial++;
                         }
                         $html .= '<tr>';
@@ -5837,6 +5841,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
                         $html .= '</tr>';
                         $html .= '</tbody></table>';
 
@@ -10511,27 +10516,30 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                         
                     }
-
-                } else if($id == 224){
-                    //Weekly Operation Reports
-                    $attachmentName = $reference_1_id;
-                    $attachmentPath = $reference_2_id;                    
-
+                } else if($id == 224 || $id == 225){
+                    //Weekly Operation Reports And Monthly Operation Reports
+                    $mode = $reference_3_id;
+                    $attachmentPath = $reference_1_id;                    
+                    $date = $reference_2_id;
+                    $file = Storage::disk('public')->url('operation_reports/' . $attachmentPath);
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Click Here To Download</u></a>';
+                    $replacements = [
+                        '[link]' => $link,
+                        '[date_time]' => "Dated: ". $date,
+                    ];
+                    
+                    foreach ($replacements as $placeholder => $replacement) {
+                        if (strpos($body, $placeholder) !== false) {
+                            $body = str_replace($placeholder, $replacement, $body);
+                        }
+                    }
+                    
                     $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
-
-                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
-                } 
-
-                else if($id == 225){
-                    //Monthly Operation Reports
-                    $attachmentName = $reference_1_id;
-                    $attachmentPath = $reference_2_id;                    
-
-                    $role_ids = [19,15,106,91,3,9,123,128,95];
-                    $email = Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique();
-
-                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null, $attachmentPath, $attachmentName);
+                    $email = ($mode !== 'test')
+                    ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
+                    : ['muhammad.ahmed@trax.pk','sahban.ghani@trax.pk'];
+                
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null);
                 } else if ($id == 223){
                     //Crm Progress Report
                     $now = Carbon::now();

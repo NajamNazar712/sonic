@@ -5418,7 +5418,7 @@ class AdminFinanceController extends Controller
                                 }
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht);
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0));
                             $pending_payment_shipment->delete();
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
@@ -5518,7 +5518,7 @@ class AdminFinanceController extends Controller
                                 $adjustment_amount = $pending_payment_shipment->amount;
                             }
 
-                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht);
+                            self::add_done_payment_charges($done_payment->id, $pending_payment_shipment->amount, $pending_payment_shipment->charges, $pending_payment_shipment->gst, $pending_payment_shipment->payable, $packaging_material_charges, $adjustment_amount, null, $pending_payment_shipment->wht, ($done_payment->ibft_charges ?? 0));
 
                             self::adjustment_logs_done(1, $pending_payment_shipment_id, $done_payment_shipment->id);
 
@@ -12305,7 +12305,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges, $adjustment_amount, $retail = NULL, $wht = 0)
+    static public function add_done_payment_charges($done_payment_id, $amount, $charges, $gst, $payable, $packaging_material_charges, $adjustment_amount, $retail = NULL, $wht = 0, $ibft_charges = 0)
     {
         if ($retail != null) {
             $done_payment_charges = RetailDonePaymentCalculation::where('retail_done_payment_id', $done_payment_id);
@@ -12334,6 +12334,10 @@ class AdminFinanceController extends Controller
                 $done_payment_charges->payable = $done_payment_charges->payable + $payable;
                 $done_payment_charges->packaging_charges = $done_payment_charges->packaging_charges + $packaging_material_charges;
                 $done_payment_charges->adjustment = $done_payment_charges->adjustment + $adjustment_amount;
+                if($ibft_charges)
+                {
+                    $done_payment_charges->ibft_charges = $ibft_charges;
+                }
                 $done_payment_charges->save();
             } else {
                 $done_payment_charges = new DonePaymentCalculation();
@@ -12345,6 +12349,10 @@ class AdminFinanceController extends Controller
                 $done_payment_charges->payable = $payable;
                 $done_payment_charges->packaging_charges = $packaging_material_charges;
                 $done_payment_charges->adjustment = $adjustment_amount;
+                if($ibft_charges)
+                {
+                    $done_payment_charges->ibft_charges = $ibft_charges;
+                }
                 $done_payment_charges->save();
             }
         }
