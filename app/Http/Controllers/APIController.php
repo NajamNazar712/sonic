@@ -800,7 +800,7 @@ class APIController extends Controller
             } else {
                 $open_shipment = 0;
             }
-
+            $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
             if ($shipment_pre_book->exists()) {
                 $shipment_pre_book = $shipment_pre_book->first();
@@ -835,7 +835,7 @@ class APIController extends Controller
                 }
 
                 if ($service_type_id == 1) {
-                    if ($request->has('return_address_id') && $request->input('return_address_id') != null) {
+                    if ($request->has('return_address_id')) {
 
                         $settings = GlobalSettings::where('type', 'omni_users');
                         if ($settings->exists()) {
@@ -848,7 +848,20 @@ class APIController extends Controller
                             }
                         }
 
-                        $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
+                        if($request->input('return_address_id') != null){
+                            $return_address_id = $request->input('return_address_id');
+                        }
+                        else{
+                            $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                            if($return_address->exists()){
+                                $return_address_id = $return_address->first()->id;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Default return address is not set!']);
+                            }
+                        }
+
+                        $user_shipping_info_return = UserShippingInfo::find($return_address_id);
 
                         if (!$user_shipping_info_return->status) {
                             return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
@@ -862,7 +875,6 @@ class APIController extends Controller
                         }
                     }
                 }
-
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
                 if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
@@ -1059,13 +1071,6 @@ class APIController extends Controller
                             $self_collection = true;
                         }
                     }
-                }
-            }
-
-            $return_address_id = null;
-            if ($service_type_id == 1) {
-                if ($request->filled('return_address_id')) {
-                    $return_address_id = $request->input('return_address_id');
                 }
             }
 

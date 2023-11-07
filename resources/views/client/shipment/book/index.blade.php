@@ -95,16 +95,16 @@
 										</div>
 
 										@if($omni_user == 1)
+
 											<div class="form-group" id="return_address_div">
+												<h5><b>Return Address :</b></h5>
+
 												<select name="return_address" class="select2" id="return_address">
 													<option value="0">New</option>
 
-													@php ($default_pickup_address = FALSE)
-
 													@foreach($user->shipping as $shipping_information)
 														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
-															@if ($shipping_information['default_address'] == 1)
-																@php ($default_pickup_address = TRUE)
+															@if ($shipping_information['default_return_address'] == 1)
 
 																<option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 															@else
@@ -1213,21 +1213,41 @@
 
 			}
 
-			$('#return_address').prepend('<option value="" selected="selected"></option>').select2({
-				width: '100%',
-				placeholder: 'Return Address'
-			}).bind('change', function () {
-				$(this).valid();
+			if($('#return_address').val() == 0 | $('#return_address').val() == ''){
+				$('#return_address').prepend('<option value="" selected="selected"></option>').select2({
+					width: '100%',
+					placeholder: 'Return Address'
+				}).bind('change', function () {
+					$(this).valid();
 
-				if (this.value == 0) {
-					$('#new_return_address').removeClass('d-none');
-				}
-				else {
-					$('#new_return_address').addClass('d-none');
-				}
+					if (this.value == 0) {
+						$('#new_return_address').removeClass('d-none');
+					}
+					else {
+						$('#new_return_address').addClass('d-none');
+					}
 
-				set_return_city();
-			});
+					set_return_city();
+				});
+			}
+			else{
+				$('#return_address').select2({
+					width: '100%',
+					placeholder: 'Return Address'
+				}).bind('change', function () {
+					$(this).valid();
+
+					if (this.value == 0) {
+						$('#new_return_address').removeClass('d-none');
+					}
+					else {
+						$('#new_return_address').addClass('d-none');
+					}
+
+					set_return_city();
+				});
+			}
+
 			
 
 			$("#consignee_info").select2({
