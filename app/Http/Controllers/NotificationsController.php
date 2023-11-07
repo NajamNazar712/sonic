@@ -10262,7 +10262,6 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 214) {
-                    //                    $subject = $notification->subject;
                     $file_path = $reference_1_id['file_path'];
 
                     $from = $reference_1_id['from'];
@@ -10274,11 +10273,6 @@ class NotificationsController extends Controller
                     $file = Storage::disk('public')->url($file_path);
 
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
-
-                    //                    $date = $from;
-                    //                    if (strpos($subject, '[date]') !== FALSE) {
-                    //                        $subject = str_replace('[date]', $date, $subject);
-                    //                    }
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
@@ -10827,6 +10821,28 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
+                } 
+                else if ($id == 226){
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+    
+                        self::email($subject, $body, $to);
+                } 
+                else if ($id == 227){
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+    
+                        self::email($subject, $body, $to);
                 } 
             }
         }
