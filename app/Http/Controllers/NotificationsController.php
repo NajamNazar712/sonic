@@ -5814,8 +5814,10 @@ class NotificationsController extends Controller
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
                                            </tr></thead><tbody>';
                         $total_amount = 0;
+                        $total_ibft_amount = 0;
                         $serial = 1;
                         foreach ($done_payment_report as $done_payment) {
                             if (!in_array($done_payment->shipper_id, $shippers)) {
@@ -5827,8 +5829,10 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
                             $html .= '</tr>';
                             $total_amount = $total_amount + $done_payment->amount;
+                            $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
                             $serial++;
                         }
                         $html .= '<tr>';
@@ -5837,6 +5841,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
                         $html .= '</tr>';
                         $html .= '</tbody></table>';
 

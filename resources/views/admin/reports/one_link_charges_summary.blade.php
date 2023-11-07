@@ -52,6 +52,8 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Rider</th>
                             <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Delivery Note ID</th>
                             <th class="border-primary border-darken-1">Transaction ID</th>
@@ -201,6 +203,8 @@
 
                             head.push('S. No.');
                             head.push('Tracking Number');
+                            head.push('Destination');
+                            head.push('Rider');
                             head.push('COD Amount');
                             head.push('Delivery Note ID');
                             head.push('Transaction ID');
@@ -214,6 +218,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.destination);
+                                row.push(values.rider_detail);
                                 row.push(values.transaction_amount);
                                 row.push(values.delivery_note_id);
                                 row.push(values.transaction_authentication_id);
@@ -264,6 +270,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'destination' ,name: 'destination', class: 'align-middle text-center destination',orderable: false, searchable: false},
+                    { data:'rider_detail' ,name: 'rider_detail', class: 'align-middle text-center rider_detail',orderable: false, searchable: false},
                     { data:'transaction_amount' ,name: 'transaction_amount', class: 'align-middle text-center transaction_amount'},
                     { data:'delivery_note_id' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note_id'},
                     { data:'transaction_authentication_id' ,name: 'transaction_authentication_id', class: 'align-middle text-center transaction_authentication_id'},
