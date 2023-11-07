@@ -112,6 +112,9 @@
                                                 <td><b>Average Shipments</b></td>
                                                 <td>{{$user->average_shipments}}@if($average_shipment_duration != null) / {{$average_shipment_duration->name}}@endif</td>
                                             </tr>
+
+                                    
+                                            
                                             @if($reference)
                                                 <tr>
                                                     <td><b>Reference</b></td>
@@ -153,6 +156,22 @@
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Payment Cycle</b></td>
+                                                <td>
+                                                    @if(isset($user->payment_cycle))
+                                                        {{ $user->payment_cycle->name }}
+                                                    @else
+                                                        No payment cycle found
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Payment Cycle Days</b></td>
+                                                <td>
+                                                  {{ $days }}
+                                                </td>
                                             </tr>
                                             </tbody>
                                         </table>

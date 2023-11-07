@@ -407,7 +407,7 @@
 										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
 
 										<div id="pieces_quantity" class="form-group input-group d-none">
-											<input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
+											<input  type="text" name="pieces_quantity" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required" data-toggle="tooltip" data-placement="top" title="" data-original-title="Here you enter the no. of individual flyers or boxes your shipment is separated into, so each can have it's own indentity slip and be accounted for.">
 										</div>
 
 										<div class="form-group">
@@ -737,6 +737,38 @@
 			// if((amt !== 0) || (amt == null) || (isEmpty(amt)))
 			//todo: for parcel value end
 
+			//todo : increse of pieces to 500
+				$(this).find('.pieces').TouchSpin({
+					min: 1,
+					max: 10,
+					buttondown_class: 'btn btn-primary rounded-left',
+					buttonup_class: 'btn btn-primary rounded-right',
+					buttondown_txt: '<i class="ft-minus"></i>',
+					buttonup_txt: '<i class="ft-plus"></i>'
+				}).bind('input change', function() {
+					$(this).tooltip('show');
+
+					if ($(this).hasClass('danger'))
+						$(this).valid();
+
+					if ($(this).hasClass('exceed_pieces'))
+						$("#pieces").trigger("touchspin.updatesettings", {max: 500});
+					else
+						$("#pieces").trigger("touchspin.updatesettings", {max: 10});
+				});
+
+				$(".pieces").change(function () {
+					if($('#shipping_mode').val() == 2)
+						$(".pieces").addClass("exceed_pieces");
+					else
+						$(".pieces").removeClass("exceed_pieces");
+				});
+
+				$("#shipping_mode").change(function () {
+					$('#pieces').val(null).trigger('change');
+				});
+			//todo : increse of pieces to 500 end
+
             $('#open_shipment').checkboxpicker();
 
 			
@@ -751,21 +783,6 @@
 				hiddenSuffix: '_formatted',
 				onOpen: function() {
 					$('#from_date_root').css('top','40px');
-				}
-			});
-
-			$(this).find('.pieces').TouchSpin({
-				min: 1,
-				max: 10,
-				buttondown_class: 'btn btn-primary rounded-left',
-				buttonup_class: 'btn btn-primary rounded-right',
-				buttondown_txt: '<i class="ft-minus"></i>',
-				buttonup_txt: '<i class="ft-plus"></i>'
-			}).bind('input change', function() {
-				$(this).tooltip('show');
-
-				if ($(this).hasClass('danger')) {
-					$(this).valid();
 				}
 			});
 
