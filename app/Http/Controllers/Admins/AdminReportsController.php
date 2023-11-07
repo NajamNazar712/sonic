@@ -3432,10 +3432,6 @@ class AdminReportsController extends Controller
             }
         }
 
-        // $sales = $sales->get();
-
-        // dd($sales);
-
         $datatable = Datatables::of($sales)
             ->addColumn('attempts', function ($shipment) {
                 $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where('shipper_status_id', 5)->count();
