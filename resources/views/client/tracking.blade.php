@@ -1005,7 +1005,8 @@
                 submitHandler: function(form) {
                     var case_nature_id = parseInt($('#case_nature_select').val());
                     if(case_nature_id === 1){
-                        var complaint_id = $('#case_nature_complaints').val();
+                        // var complaint_id = $('#case_nature_complaints').val();
+                        var complaint_id = $('#case_nature_requests').val();
                         var description = $('#complaint_description').val();
                     }
                     else if(case_nature_id === 3){
@@ -1031,8 +1032,6 @@
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'shipment_id': $('#requested_shipment_id').val(),
-                                    'case_nature_id': case_nature_id,
-                                    'complaint_id': complaint_id,
                                     'description' : feedback_description
                                 }
                             })
