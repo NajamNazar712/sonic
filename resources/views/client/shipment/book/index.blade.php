@@ -472,11 +472,16 @@
 											<div class="input-group-prepend">
 												<span class="input-group-text">Rs</span>
 											</div>
-
-											<input type="text" name="parcel_value" id="parcel_value"
-												   class="form-control rounded-right parcel_value"
-												   placeholder="Parcel Value*" data-rule-required="true"
-												   data-msg-required="Parcel Value is Required"  oninput="if(this.value==='0') this.value=''">
+											@if($parcel_bypass)
+												<input type="text" name="parcel_value" id="parcel_value"
+													   class="form-control rounded-right parcel_value"
+													   placeholder="Parcel Value*" oninput="if(this.value==='0') this.value=''">
+											@else
+												<input type="text" name="parcel_value" id="parcel_value"
+													   class="form-control rounded-right parcel_value"
+													   placeholder="Parcel Value*" data-rule-required="true"
+													   data-msg-required="Parcel Value is Required"  oninput="if(this.value==='0') this.value=''">
+											@endif
 										</div>
 										{{-- todo : Parcle Value End--}}
 									</div>

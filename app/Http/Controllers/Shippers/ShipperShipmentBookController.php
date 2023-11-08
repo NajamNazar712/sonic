@@ -416,19 +416,31 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        $airway_bill_address_visibility_users = 1;
-        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        $parcel_bypass = 0;
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
         if ($settings->exists()) {
             $settings = $settings->first();
             if ($settings->text != NULL) {
-                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                    $parcel_bypass = 1;
+                }
+            }
+        }
+
+        $airway_bill_address_visibility_users = 1;
+        $bypass_settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($bypass_settings->exists()) {
+            $bypass_settings = $bypass_settings->first();
+            if ($bypass_settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $bypass_settings->text));
                 if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
                     $airway_bill_address_visibility_users = 0;
                 }
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
     }
 
     public function shipping_modes(Request $request)
@@ -3260,15 +3272,28 @@ class ShipperShipmentBookController extends Controller
 
                 if(in_array($row['service_type_id'],[1,2]))
                 {
-                    $rules['parcel_value'] = [
-                        'nullable',
-                        'integer',
-                        'min:1',
-                        'digits_between:1,20' ,
-                        Rule::requiredIf(function () use ($row) {
-                            return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                        })
-                    ];
+                    $parcel_bypass = 0;
+                    $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        if ($settings->text != NULL) {
+                            $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                            if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                                $parcel_bypass = 1;
+                            }
+                        }
+                    }
+                    if(!$parcel_bypass){
+                        $rules['parcel_value'] = [
+                            'nullable',
+                            'integer',
+                            'min:1',
+                            'digits_between:1,20' ,
+                            Rule::requiredIf(function () use ($row) {
+                                return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                            })
+                        ];
+                    }
                 }
 
 
@@ -5063,13 +5088,6 @@ class ShipperShipmentBookController extends Controller
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'parcel_value' => [
-                'required_if:amount,0',
-                'nullable',
-                'integer',
-                'digits_between:1,20' ,
-                //'check_parcel_value',
-                'min:1'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -5303,15 +5321,28 @@ class ShipperShipmentBookController extends Controller
 //                    }
 //                }
 
-                $rules['parcel_value'] = [
-                    'nullable',
-                    'integer',
-                    'min:1',
-                    'digits_between:1,20' ,
-                    Rule::requiredIf(function () use ($row) {
-                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                    })
-                ];
+                $parcel_bypass = 0;
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    if ($settings->text != NULL) {
+                        $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                        if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                            $parcel_bypass = 1;
+                        }
+                    }
+                }
+                if(!$parcel_bypass){
+                    $rules['parcel_value'] = [
+                        'nullable',
+                        'integer',
+                        'min:1',
+                        'digits_between:1,20' ,
+                        Rule::requiredIf(function () use ($row) {
+                            return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                        })
+                    ];
+                }
 
                 $validate = Validator::make($row, $rules, $messages);
 
