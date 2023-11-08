@@ -1005,8 +1005,7 @@
                 submitHandler: function(form) {
                     var case_nature_id = parseInt($('#case_nature_select').val());
                     if(case_nature_id === 1){
-                        // var complaint_id = $('#case_nature_complaints').val();
-                        var complaint_id = $('#case_nature_requests').val();
+                        var complaint_id = $('#case_nature_complaints').val();
                         var description = $('#complaint_description').val();
                     }
                     else if(case_nature_id === 3){
@@ -1222,7 +1221,13 @@
                                 closeOnEsc: false
                             });
 
-                            var complaint_id = $('#case_nature_requests').val();
+                            /*********
+                            // Commented this because in Complain type = 1, the value set in different variable
+                            // i.e: $('#case_nature_complaints').val();
+                            // so this should be manage according to case nature except here, which seems like it already handled in first two, 
+                            // if required for three four, then adjust this on top like case nature
+                            *********/
+                            // var complaint_id = $('#case_nature_requests').val();
                         
                             if(complaint_id == 12)
                             {
