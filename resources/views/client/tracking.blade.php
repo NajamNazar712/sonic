@@ -134,7 +134,7 @@
                                                         <span class="input-group-text">Enter Parcel Value</span>
                                                     </div>
         
-                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required">
+                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
                                                 </fieldset>
                                             </div>
                                             <div class="col-12">

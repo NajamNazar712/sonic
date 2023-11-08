@@ -361,7 +361,7 @@ class AdminCRMController extends Controller
                                             $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                             $shipment->amount = $request->cod_new_amount;
                                             
-                                            if($request->is_zero_cod == 1)
+                                            if($request->is_zero_cod == 1  && $request->cod_parcel_value > 0)
                                             {
                                                 $comment = "Dear Customer,
                                                 Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
@@ -486,7 +486,7 @@ class AdminCRMController extends Controller
                                                         $old_amount = $shipment->amount;
                                                         $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                         $shipment->amount = $request->cod_new_amount;
-                                                        if($request->is_zero_cod == 1)
+                                                        if($request->is_zero_cod == 1 && $request->cod_parcel_value > 0)
                                                         {
                                                             $comment = "Dear Customer,
                                                             Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
@@ -582,7 +582,7 @@ class AdminCRMController extends Controller
                                                     $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
-                                                    if($request->is_zero_cod == 1)
+                                                    if($request->is_zero_cod == 1  && $request->cod_parcel_value > 0)
                                                     {
                                                         $comment = "Dear Customer,
                                                         Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
@@ -689,7 +689,7 @@ class AdminCRMController extends Controller
                                                     $old_amount = $shipment->amount;
                                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                     $shipment->amount = $request->cod_new_amount;
-                                                    if($request->is_zero_cod == 1)
+                                                    if($request->is_zero_cod == 1  && $request->cod_parcel_value > 0)
                                                     {
                                                         $comment = "Dear Customer,
                                                         Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
@@ -786,7 +786,7 @@ class AdminCRMController extends Controller
                                                 $old_amount = $shipment->amount;
                                                 $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                                 $shipment->amount = $request->cod_new_amount;
-                                                if($request->is_zero_cod == 1)
+                                                if($request->is_zero_cod == 1  && $request->cod_parcel_value > 0)
                                                 {
                                                     $comment = "Dear Customer,
                                                     Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
