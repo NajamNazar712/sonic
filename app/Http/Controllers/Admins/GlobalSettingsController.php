@@ -9009,4 +9009,45 @@ class GlobalSettingsController extends Controller
 
         return response(['hubs'=>$hubs]);
     }
+
+    public function parcel_value_bypass_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 483);
+
+        $shippers = array();
+        $parcel_value_bypass_accounts = array();
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.settings.parcel_value_bypass_users')->with(['shippers' => $parcel_value_bypass_accounts, 'users' => $users]);
+    }
+
+    public function parcel_value_bypass_setting_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'parcel_value_bypass_users';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
 }

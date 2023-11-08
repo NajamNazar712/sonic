@@ -3797,6 +3797,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('hub_count', 'Admins\GlobalSettingsController@rider_assigned_hub_count')->name('hub_count');
         });
 
+        Route::prefix('parcel_value_bypass')->name('parcel_value_bypass.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@parcel_value_bypass_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@parcel_value_bypass_setting_update')->name('update');
+        });
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
