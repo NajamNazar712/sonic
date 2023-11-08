@@ -2197,8 +2197,6 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => ' No City Present']);
             }
         }
-
-
     }
 
     public function shopify_cities(Request $request)
