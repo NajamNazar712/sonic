@@ -8609,11 +8609,13 @@ class GlobalSettingsController extends Controller
             }
             else{
                 $notification_setting = Notification::find($notification_id);
-                $details['id'] = $notification_setting->id;
-                $details['name'] = $notification_setting->name;
-                $details['shipper_toggle'] = 1;
-                $details['shippers'] = null;
-                $notification_details[] = $details;
+                if($notification_setting){
+                    $details['id'] = $notification_setting->id;
+                    $details['name'] = $notification_setting->name;
+                    $details['shipper_toggle'] = 1;
+                    $details['shippers'] = null;
+                    $notification_details[] = $details;
+                }
             }
         }
 

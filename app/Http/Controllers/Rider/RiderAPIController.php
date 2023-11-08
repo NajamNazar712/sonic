@@ -8943,14 +8943,14 @@ RiderAPIController extends Controller
                 //code...
                 DB::beginTransaction();
 
-                $user_included_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
                 ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
                 ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
 
-                $user_included_otp_shippers = $user_included_otp_shippers['shipper_toggle'] ? $user_included_otp_shippers['shipper_toggle'] : 0;
+                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 
                 $rider_id = $request->rider_id;
 
@@ -9213,7 +9213,7 @@ RiderAPIController extends Controller
                     $delivery_note_data->save();
                 }
                 DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_included_otp_shippers'=>$user_included_otp_shippers]);
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
             } catch (\Throwable $th) {
                 DB::rollback();
 
@@ -11397,14 +11397,14 @@ RiderAPIController extends Controller
                 $rc_flag = false;
                 $rider_id = $request->rider_id;
 
-                $user_included_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
                 ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
                 ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
 
-                $user_included_otp_shippers = $user_included_otp_shippers['shipper_toggle'] ? $user_included_otp_shippers['shipper_toggle'] : 0;
+                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
                 //$added_at = $request->added_at;
@@ -11597,7 +11597,7 @@ RiderAPIController extends Controller
                     $message = 'Shipment is not for Out for Delivery';
                 }
                 DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_included_otp_shippers'=>$user_included_otp_shippers]);
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
             }
             catch (\Throwable $th)
             {
@@ -12385,7 +12385,7 @@ RiderAPIController extends Controller
 //                    continue;
 //                }
 
-                $user_included_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
                 ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
                 ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
@@ -12398,7 +12398,7 @@ RiderAPIController extends Controller
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
-                $information['user_included_otp_shippers'] = $user_included_otp_shippers['shipper_toggle'] ? $user_included_otp_shippers['shipper_toggle'] : 0;
+                $information['user_excluded_otp_shippers'] = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 $information['pending_shipment_count'] = 0;
                 $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
                 if($pending_shipments_count == 0){
