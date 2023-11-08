@@ -1031,6 +1031,8 @@
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'shipment_id': $('#requested_shipment_id').val(),
+                                    'case_nature_id': case_nature_id,
+                                    'complaint_id': complaint_id,
                                     'description' : feedback_description
                                 }
                             })
