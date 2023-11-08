@@ -2136,45 +2136,66 @@ class APIController extends Controller
     public function cities(Request $request)
     {
         $user_id = $request->user_id;
+        $rules = [
+            'business_category' => ['nullable', 'filled', 'integer', 'between:1,2'],
+        ];
 
-        $cities = City::where('status', 1);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
-        if ($cities->exists()) {
-            $cities = $cities->with(['hub_city', 'zone', 'deliveries.booking_type', 'deliveries.shipping_mode'])->get();
+        $validate->setAttributeNames($this->names);
 
-            $details = array();
-
-            foreach ($cities as $city) {
-                $detail = array();
-
-                $detail['id'] = $city->id;
-                $detail['name'] = $city->name;
-
-                $hub = $city->hub_city;
-                $detail['hub'] = array();
-
-                $detail['hub']['id'] = $hub->id;
-                $detail['hub']['name'] = $hub->name;
-
-                $zone = $city->zone;
-                $detail['zone'] = array();
-
-                $detail['zone']['id'] = $zone->id;
-                $detail['zone']['name'] = $zone->name;
-
-                $detail['pickup'] = ($city->pickup) ? true : false;
-                $detail['delivery'] = array();
-
-                foreach ($city->deliveries as $delivery) {
-                    $detail['delivery'][$delivery->booking_type->booking_type][] = $delivery->shipping_mode->mode;
-                }
-
-                $details[] = $detail;
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $business_category_id = NULL;
+            if($request->filled('business_category')){
+                $business_category_id = $request->business_category;
+            }
+            if($business_category_id){
+                $cities = City::where('status', 1)->where('business_category_id', $business_category_id);
+            }
+            else{
+                $cities = City::where('status', 1);
             }
 
-            return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
-        } else {
-            return response()->json(['status' => 1, 'message' => ' No City Present']);
+            if ($cities->exists()) {
+                $cities = $cities->with(['hub_city', 'zone', 'deliveries.booking_type', 'deliveries.shipping_mode'])->get();
+
+                $details = array();
+
+                foreach ($cities as $city) {
+                    $detail = array();
+
+                    $detail['id'] = $city->id;
+                    $detail['name'] = $city->name;
+
+                    $hub = $city->hub_city;
+                    $detail['hub'] = array();
+
+                    $detail['hub']['id'] = $hub->id;
+                    $detail['hub']['name'] = $hub->name;
+
+                    $zone = $city->zone;
+                    $detail['zone'] = array();
+
+                    $detail['zone']['id'] = $zone->id;
+                    $detail['zone']['name'] = $zone->name;
+
+                    $detail['pickup'] = ($city->pickup) ? true : false;
+                    $detail['delivery'] = array();
+
+                    foreach ($city->deliveries as $delivery) {
+                        $detail['delivery'][$delivery->booking_type->booking_type][] = $delivery->shipping_mode->mode;
+                    }
+
+                    $details[] = $detail;
+                }
+
+                return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+            } else {
+                return response()->json(['status' => 1, 'message' => ' No City Present']);
+            }
         }
     }
 
