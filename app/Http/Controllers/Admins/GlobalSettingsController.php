@@ -9012,7 +9012,7 @@ class GlobalSettingsController extends Controller
 
     public function parcel_value_bypass_setting_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 483);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 707);
 
         $shippers = array();
         $parcel_value_bypass_accounts = array();

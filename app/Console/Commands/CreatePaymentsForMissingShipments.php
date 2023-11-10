@@ -41,6 +41,7 @@ class CreatePaymentsForMissingShipments extends Command
     public function handle()
     {
         $shipment_ids = $this->argument('shipment_ids');
+        dd($shipment_ids);
         $shipment_ids = explode(',', $shipment_ids);
         if(count($shipment_ids) > 0){
             foreach ($shipment_ids as $shipment_id){
