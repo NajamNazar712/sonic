@@ -5814,8 +5814,10 @@ class NotificationsController extends Controller
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBFT Charges</th>
                                            </tr></thead><tbody>';
                         $total_amount = 0;
+                        $total_ibft_amount = 0;
                         $serial = 1;
                         foreach ($done_payment_report as $done_payment) {
                             if (!in_array($done_payment->shipper_id, $shippers)) {
@@ -5827,8 +5829,10 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->shipper_name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment->iban_number . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->amount) . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($done_payment->ibft_charges ?? 0) . '</td>';
                             $html .= '</tr>';
                             $total_amount = $total_amount + $done_payment->amount;
+                            $total_ibft_amount = $total_ibft_amount + $done_payment->ibft_charges;
                             $serial++;
                         }
                         $html .= '<tr>';
@@ -5837,6 +5841,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_ibft_amount) . '</td>';
                         $html .= '</tr>';
                         $html .= '</tbody></table>';
 
@@ -7730,72 +7735,76 @@ class NotificationsController extends Controller
 
                         $shipper = $shipment->user;
 
-                        $to = $shipment->consignee_phone_number_1;
+                        $sms_setting = self::sms_notification_setting(132, $shipper->id);
+                        if($sms_setting){
+                            $to = $shipment->consignee_phone_number_1;
 
-                        foreach ($delivery_note_fields as $key => $field) {
-                            if (strpos($body, '[' . $key . ']') !== FALSE) {
-                                if ($key == 'delivery_note_number') {
-                                    $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
-                                } else {
-                                    $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                            foreach ($delivery_note_fields as $key => $field) {
+                                if (strpos($body, '[' . $key . ']') !== FALSE) {
+                                    if ($key == 'delivery_note_number') {
+                                        $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                                    } else {
+                                        $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                                    }
                                 }
                             }
-                        }
 
-                        foreach ($shipment_fields as $key => $field) {
+                            foreach ($shipment_fields as $key => $field) {
 
-                            if (strpos($body, '[' . $key . ']') !== FALSE) {
+                                if (strpos($body, '[' . $key . ']') !== FALSE) {
 
-                                if ($shipment['consignee_name']) {
-                                    $first_name = explode(' ', trim($shipment['consignee_name']));
-                                    $shipment['consignee_name'] = $first_name[0];
-                                }
+                                    if ($shipment['consignee_name']) {
+                                        $first_name = explode(' ', trim($shipment['consignee_name']));
+                                        $shipment['consignee_name'] = $first_name[0];
+                                    }
 
-                                $body = str_replace('[' . $key . ']', $shipment[$field], $body);
-                            }
-                        }
-                        if ($delivery_note->special_rider) {
-                            if (strpos($body, '[rider]') !== FALSE) {
-                                if ($delivery_note_shipment->rider_information) {
-                                    $body = str_replace('[rider]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
-                                } else {
-                                    $body = str_replace('[rider]', '', $body);
+                                    $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                                 }
                             }
-                        } else {
-                            if (strpos($body, '[rider]') !== FALSE) {
-                                if ($delivery_note_shipment->rider_information) {
-                                    $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
-                                } else {
-                                    $body = str_replace('[rider]', '', $body);
+                            if ($delivery_note->special_rider) {
+                                if (strpos($body, '[rider]') !== FALSE) {
+                                    if ($delivery_note_shipment->rider_information) {
+                                        $body = str_replace('[rider]', str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                                    } else {
+                                        $body = str_replace('[rider]', '', $body);
+                                    }
                                 }
-                            }
-                        }
-
-                        if ($shipment->pickup_address->pickup_brand_name != NULL) {
-                            $brand_name = $shipment->pickup_address->pickup_brand_name;
-                        } else {
-                            if ($shipper->brand_name != NULL) {
-                                $brand_name = $shipper->brand_name;
                             } else {
-                                $brand_name = $shipper->name;
+                                if (strpos($body, '[rider]') !== FALSE) {
+                                    if ($delivery_note_shipment->rider_information) {
+                                        $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
+                                    } else {
+                                        $body = str_replace('[rider]', '', $body);
+                                    }
+                                }
                             }
-                        }
-                        if (strpos($body, '[company_name]') !== FALSE) {
-                            $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
+
+                            if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                                $brand_name = $shipment->pickup_address->pickup_brand_name;
+                            } else {
+                                if ($shipper->brand_name != NULL) {
+                                    $brand_name = $shipper->brand_name;
+                                } else {
+                                    $brand_name = $shipper->name;
+                                }
+                            }
+                            if (strpos($body, '[company_name]') !== FALSE) {
+                                $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
+                            }
+
+                            if (strpos($body, '[payment_mode]') !== FALSE) {
+                                $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
+                            }
+
+                            if ($shipment_otp->exists()) {
+                                $shipment_otp = $shipment_otp->first();
+                                if (strpos($body, '[refusal_otp]') !== FALSE) {
+                                    $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                                }
+                            }
+                            self::sms($body, $to);
                         }
 
-                        if (strpos($body, '[payment_mode]') !== FALSE) {
-                            $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
-                        }
-
-                        if ($shipment_otp->exists()) {
-                            $shipment_otp = $shipment_otp->first();
-                            if (strpos($body, '[refusal_otp]') !== FALSE) {
-                                $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
-                            }
-                        }
-                        self::sms($body, $to);
                     }
                 } else if ($id == 134) {
                     $user = User::find($reference_1_id);
@@ -10257,7 +10266,6 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 214) {
-                    //                    $subject = $notification->subject;
                     $file_path = $reference_1_id['file_path'];
 
                     $from = $reference_1_id['from'];
@@ -10269,11 +10277,6 @@ class NotificationsController extends Controller
                     $file = Storage::disk('public')->url($file_path);
 
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
-
-                    //                    $date = $from;
-                    //                    if (strpos($subject, '[date]') !== FALSE) {
-                    //                        $subject = str_replace('[date]', $date, $subject);
-                    //                    }
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
@@ -10822,6 +10825,28 @@ class NotificationsController extends Controller
                     $html .= '</table>';
                     $body = str_replace('[preview]', $html, $notification->body);
                     self::email($subject, $body, $to, $cc);
+                } 
+                else if ($id == 226){
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+    
+                        self::email($subject, $body, $to);
+                } 
+                else if ($id == 227){
+                    $file = $reference_1_id;
+                        $link = '<br/><a href="' . $file . '" target="_blank"><u>Download</u></a>';
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                            $body .= '<br/><br/><strong>Note: This link will expire after 7 days.</strong>';
+                        }
+                        $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
+    
+                        self::email($subject, $body, $to);
                 } 
             }
         }

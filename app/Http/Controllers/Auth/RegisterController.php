@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AutoTagTerritory;
+use App\Http\Models\PaymentCycle;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -97,12 +98,13 @@ class RegisterController extends Controller
 //        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
         $segments = Segment::all();
         $sub_segments = SubCategorySegment::all();
-        
+        $payment_cycles = PaymentCycle::all();
+
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle]);
+        return view('client.auth.register')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -148,7 +150,8 @@ class RegisterController extends Controller
                 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
-                'referral' => ''
+                'referral' => '',
+                
                 
             ]);
         }else{
@@ -341,7 +344,7 @@ class RegisterController extends Controller
      * @return \App\User
      */
     protected function create(array $data)
-    {      
+    {     
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
@@ -366,6 +369,23 @@ class RegisterController extends Controller
         }else{
             $referral_id = null;
         }
+
+        switch ($data['payment_cycles']) {
+            case '2':
+            case '4':
+            case '5':
+                $payment_cycle_days = $data['selected_days'];
+                break;
+            case '6':
+                $payment_cycle_days = $data['fortnite'];
+                break;
+            case '3':
+                $payment_cycle_days = $data['monthly'];
+                break;
+            default:
+                $payment_cycle_days = 0;
+        }
+
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -392,7 +412,9 @@ class RegisterController extends Controller
             'referral_id' => $referral_id,
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
-            'territory_id' =>  $territory_id
+            'territory_id' =>  $territory_id,
+            'payment_cycle_id' =>  $data['payment_cycles'],
+            'payment_cycle_days' => $payment_cycle_days
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
