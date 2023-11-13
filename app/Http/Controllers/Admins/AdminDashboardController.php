@@ -213,7 +213,6 @@ class AdminDashboardController extends Controller
     }
     public function index()
     {
-
         /*$stats = array();
         $graph = array();
         $sales=array();

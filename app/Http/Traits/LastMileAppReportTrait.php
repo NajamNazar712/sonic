@@ -8,8 +8,6 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\RiderWiseDeliveryNoteSummary;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use phpDocumentor\Reflection\Types\Null_;
 
 trait LastMileAppReportTrait
 {
@@ -33,8 +31,8 @@ trait LastMileAppReportTrait
              $rider = Rider::select('name as rider_name', 'trax_id')
                  ->where('id', $rider_id);
 
-             $added_at1 = Carbon::now();
-             $rider_delivery_date = $added_at1->toDateTimeString();
+             $added_at1 = Carbon::now()->toDateTimeString();
+             $rider_delivery_date = $added_at1;
          }
          else
          {
@@ -46,91 +44,29 @@ trait LastMileAppReportTrait
 
          if($rider->exists()){
              $rider = $rider->first();
-             $added_at_from = Carbon::parse($rider_delivery_date);
-             $added_at_from = $added_at_from->startOfDay();
-             $added_at_to = Carbon::parse($rider_delivery_date);
-             $added_at_to = $added_at_to->endOfDay();
-             $added_at_from = $added_at_from->toDateTimeString();
-             $added_at_to = $added_at_to->toDateTimeString();
 
-             $rider_request_datetime = Carbon::parse($rider_delivery_date);
-             $time = $rider_request_datetime->format('H:i:s');
-             $flag = false;
+             $today = Carbon::today();
 
-             $current_date = Carbon::now();
-             $current_date = Carbon::parse($current_date);
-             $current_date = $current_date->toDateString();
+             $time = Carbon::parse($rider_delivery_date)->format('H:i:s');
 
              $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
                  ->join('zones as z', 'c.zone_id', 'z.id')
+                 ->select('delivery_notes.created_at as created_at', 'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments', 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
                  ->where('delivery_notes.id', $delivery_note_id)
-                 ->select('delivery_notes.created_at as created_at',
-                     'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments',
-                     'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
-                 ->first();
+                 ->whereDate('delivery_notes.created_at', $today);
+             if($delivery_note_data->exists()){
+                 $delivery_note_data = $delivery_note_data->first();
 
-             $delivery_note_creation_date = Carbon::parse($delivery_note_data->delivery_note_creation_date);
+                 $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
 
-             $delivery_note_creation_date = $delivery_note_creation_date->toDateString();
-             $rider_request_datetime = $rider_request_datetime->toDateString(); // date at which rider mark status
-
-             $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)
-                 ->whereBetween('delivery_date',[$added_at_from,$added_at_to]);
-
-             if (($rider_request_datetime == $delivery_note_creation_date) && ($delivery_note_creation_date == $current_date))
-             {
                  if($check_summary->exists())
                  {
                      $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
 
-                     $existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)
-                     ->where('rwdnsum_id',$rwdnsum_id);
-                     if($existing_shipment->exists())
-                     {
-                         $existing_shipment = $existing_shipment->orderBy('id','desc')->first();
-                         $existing_time = $existing_shipment->updated_time;
+                     $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
+                     $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
 
-                         Log::channel('last_mile_app_report_log')->info('Last Mile App Report, Shipment ID : '.$shipment_id.' Delivery Note ID : '.$delivery_note_id.' with DN Creation Date : '.$delivery_note_creation_date.', Rider Requested Date : '.$rider_request_datetime.' and Rider Requested time : '.$time.' with status id : '.$shipper_status_id.' Existing Time : '.$existing_time);
-
-                         if ($existing_time <= '10:59:59') {
-                             $check_summary->before_11_count = $check_summary->before_11_count - 1;
-                         } elseif ($existing_time > '10:59:59' && $existing_time <= '11:59:59') {
-                             $check_summary->at_11_count = $check_summary->at_11_count - 1;
-                         } elseif ($existing_time > '11:59:59' && $existing_time <= '12:59:59') {
-                             $check_summary->at_12_count = $check_summary->at_12_count - 1;
-                         } elseif ($existing_time > '12:59:59' && $existing_time <= '13:59:59') {
-                             $check_summary->at_13_count = $check_summary->at_13_count - 1;
-                         } elseif ($existing_time > '13:59:59' && $existing_time <= '14:59:59') {
-                             $check_summary->at_14_count = $check_summary->at_14_count - 1;
-                         } elseif ($existing_time > '14:59:59' && $existing_time <= '15:59:59') {
-                             $check_summary->at_15_count = $check_summary->at_15_count - 1;
-                         } elseif ($existing_time > '15:59:59' && $existing_time <= '16:59:59') {
-                             $check_summary->at_16_count = $check_summary->at_16_count - 1;
-                         } elseif ($existing_time > '16:59:59' && $existing_time <= '17:59:59') {
-                             $check_summary->at_17_count = $check_summary->at_17_count - 1;
-                         } elseif ($existing_time > '17:59:59' && $existing_time <= '18:59:59') {
-                             $check_summary->at_18_count = $check_summary->at_18_count - 1;
-                         } elseif ($existing_time > '18:59:59' && $existing_time <= '19:59:59') {
-                             $check_summary->at_19_count = $check_summary->at_19_count - 1;
-                         } elseif ($existing_time > '19:59:59' && $existing_time <= '20:59:59') {
-                             $check_summary->at_20_count = $check_summary->at_20_count - 1;
-                         } elseif ($existing_time > '20:59:59' && $existing_time <= '21:59:59') {
-                             $check_summary->at_21_count = $check_summary->at_21_count - 1;
-                         } elseif ($existing_time > '21:59:59' && $existing_time <= '22:59:59') {
-                             $check_summary->at_22_count = $check_summary->at_22_count - 1;
-                         } elseif ($existing_time > '22:59:59' && $existing_time <= '23:59:59') {
-                             $check_summary->after_23_count = $check_summary->after_23_count - 1;
-                         }
-
-                         $flag = true;
-                     }
-
-                     if (!$flag)
-                     {
-                         $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
-                         $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
-                     }
 
                      if ($time <= '10:59:59') {
                          $check_summary->before_11_count = $check_summary->before_11_count + 1;
@@ -192,12 +128,8 @@ trait LastMileAppReportTrait
                      else
                      {
                          $check_existing_note = $check_existing_note->first();
-
-                         if (!$flag)
-                         {
-                             $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
-                             $check_existing_note->save();
-                         }
+                         $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
+                         $check_existing_note->save();
 
                          $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                          $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
@@ -275,6 +207,8 @@ trait LastMileAppReportTrait
                      $new_delivery_note_shipment->save();
                  }
              }
+
+
          }
     }
 }
