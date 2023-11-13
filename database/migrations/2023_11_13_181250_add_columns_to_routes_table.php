@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateRoutesForShortCode extends Migration
+class AddColumnsToRoutesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,12 @@ class UpdateRoutesForShortCode extends Migration
     public function up()
     {
         Schema::table('routes', function (Blueprint $table) {
-            $table->string('short_code')->nullable();
+            $table->string('route_code')->nullable();
+            $table->integer('product_id')->nullable();
+            $table->integer('sub_area_id')->nullable();
+            $table->integer('hub_id')->nullable();
+            $table->string('route_ship_type',10)->nullable();
+
         });
     }
 
@@ -26,7 +31,7 @@ class UpdateRoutesForShortCode extends Migration
     public function down()
     {
         Schema::table('routes', function (Blueprint $table) {
-            $table->dropColumn('short_code');
+            //
         });
     }
 }
