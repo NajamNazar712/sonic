@@ -11343,6 +11343,11 @@ class AdminReportsController extends Controller
         return view ('admin.reports.pickup_arival_report');
 
     }
+    public function shipment_picked_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        return view ('admin.reports.shipment_pickup_report');
+
+    }
     public function pickup_arival_list(Request $request){
        
         if ($request->get('excel') && $request->get('excel') == true) {

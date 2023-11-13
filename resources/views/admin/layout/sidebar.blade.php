@@ -1635,7 +1635,10 @@
                                     Pickup</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(823, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.pickup_arival.index') }}">Pickup vs Arrival</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.shipment_picked.index') }}">Shipment Creation versus Unpicked Shipment</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(823, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.pickup_arival.index') }}">Pickup versus Arrival</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(839, session('permissions')))
                             <li><a class="menu-item"

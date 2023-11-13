@@ -17,7 +17,6 @@ class V3PickupCronController extends Controller
         $day = Carbon::today()->dayOfWeek;
         $today = Carbon::today();
         $regular_pickups = V3RegularPickup::where('pickup', 1)->where('approval', 1)->get();
-      
         if (count($regular_pickups) > 0){
             $global_rider_id = 346;
             $settings = GlobalSettings::where('type', 'global_rider_id')->first();

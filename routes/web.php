@@ -3001,7 +3001,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('arrived_shipments','Admins\AdminReportsController@get_arrived_shipments')->name('arrived_shipments');
             Route::post('balance_Shipments','Admins\AdminReportsController@get_balance_Shipments')->name('balance_Shipments');
 
+        });
 
+        Route::prefix('shipment_picked')->name('shipment_picked.')->group(function(){
+            Route::get('','Admins\AdminReportsController@shipment_picked_index')->name('index');
         });
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function () {
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');

@@ -174,7 +174,7 @@ class V3AdminPickupsController extends Controller
                 $days[] = $index;
             }
             $days = implode(',', $days);
-            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1);
+            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1,$time_range_id);
         }
 
         // if($pickup_type_id == 1){
@@ -368,9 +368,6 @@ class V3AdminPickupsController extends Controller
 
     public function pending_requests_list(Request $request){
 
-   
-       
-    
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }

@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <div class="container">
+                            {{-- <div class="container">
                                 <div class="row justify-content-center">
 
                                     <div class="col">
@@ -51,9 +51,7 @@
                                         </button>
                                     </div>
                                 </div>
-
-
-                            </div>
+                            </div> --}}
 
                             <div class="container-fluid">
                                 <div class="row justify-content-center">

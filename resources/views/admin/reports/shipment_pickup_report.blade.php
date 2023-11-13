@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pickup versus Arrival Report')
+@section('title', 'Shipment Creation versus Unpicked Shipment Report')
 
 
 @section('content')
     <h1 class="mb-1">
-        Pickup versus Arrival Report
+        Shipment Creation versus Unpicked Shipment Report
     </h1>
 
     <div class="card">
@@ -60,11 +60,11 @@
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Address</th>
-                            {{-- <th class="border-primary border-darken-1">Created Shipments</th>
-                            <th class="border-primary border-darken-1">Not Picked Shipments</th> --}}
-                            <th class="border-primary border-darken-1">Rider Picked</th>
+                            <th class="border-primary border-darken-1">Created Shipments</th>
+                            <th class="border-primary border-darken-1">Unpicked Shipments</th>
+                            {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Balance Shipments</th>
+                            <th class="border-primary border-darken-1">Balance Shipments</th> --}}
                               {{-- <th class="border-primary border-darken-1">Rider</th> --}}
 
                         </tr>
@@ -165,7 +165,7 @@ aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Not Pick Shipments</h4>
+                <h4 class="modal-title white">Unpicked Shipments</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -521,11 +521,11 @@ aria-hidden="true">
                     // { data:'shipper_name' ,name: 'shipper_name', class: 'align-middle text-center shipper_name'},
                     { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                     
-                    // { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
-                    // { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
-                    { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
-                    { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
-                    { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
+                    { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
+                    { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
+                    // { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
+                    // { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
+                    // { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
 
                     // { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
                     // { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
