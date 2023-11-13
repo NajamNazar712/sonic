@@ -93,10 +93,11 @@
                             <th class="border-primary border-darken-1">Rider Type</th>
                             <th class="border-primary border-darken-1">Delivery Note</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
-                            <th class="border-primary border-darken-1">HBL Konnect Amount</th>
-                            <th class="border-primary border-darken-1">HBL Konnect Amount %</th>
                             <th class="border-primary border-darken-1">Fintech Amount</th>
                             <th class="border-primary border-darken-1">Fintech Amount %</th>
+                            <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                            <th class="border-primary border-darken-1">HBL Konnect Amount %</th>
+                            <th class="border-primary border-darken-1">Cash Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -298,10 +299,11 @@
                             head.push('Rider Type');
                             head.push('Delivery Note');
                             head.push('DNCC Amount');
-                            head.push('HBL Konnect Amount');
-                            head.push('HBL Konnect Amount %');
                             head.push('Fintech Shipments Amount');
                             head.push('Fintech Shipments Amount %');
+                            head.push('HBL Konnect Amount');
+                            head.push('HBL Konnect Amount %');
+                            head.push('Cash Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -314,6 +316,9 @@
                             head.push('RCP %');
                             
                             $.each(result.data, function(index, values) {
+
+                                var cashAmount = (values.dncc_amount-values.fintech_shipments_charges-values.hbl_konnect_amount);
+
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
@@ -321,10 +326,11 @@
                                 row.push(values.rider_type);
                                 row.push(values.dn_no_count);
                                 row.push(values.dncc_amount);
-                                row.push(values.hbl_konnect_amount);
-                                row.push(values.hbl_konnect_amount_percent);
                                 row.push(values.fintech_shipments_charges);
                                 row.push(values.fintech_amount_percent);
+                                row.push(values.hbl_konnect_amount);
+                                row.push(values.hbl_konnect_amount_percent);
+                                row.push(cashAmount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);
@@ -351,6 +357,7 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push('');
@@ -419,10 +426,15 @@
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
                     { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
                     { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},
-                    { data:'hbl_konnect_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},
-                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle text-center hbl_konnect_amount_percent', orderable: false, searchable: false},
                     { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle text-center fintech_shipments_charges', orderable: false, searchable: false},
                     { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle text-center fintech_amount_percent', orderable: false, searchable: false},
+                    { data:'hbl_konnect_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},
+                    { data:'hbl_konnect_amount_percent' ,name: 'hbl_konnect_amount_percent', class: 'align-middle text-center hbl_konnect_amount_percent', orderable: false, searchable: false},
+                    { data:null ,name: 'cash_amount', class: 'align-middle text-center cash_amount', orderable: false, searchable: false, render: function (data, type, row) 
+                    {
+                        var cashAmount = (data.dncc_amount-data.fintech_shipments_charges-data.hbl_konnect_amount);
+                        return cashAmount;
+                    }},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
