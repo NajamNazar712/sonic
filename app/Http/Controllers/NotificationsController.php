@@ -2,123 +2,124 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\AdminReportsController;
-use App\Http\Controllers\Admins\AdminReportsEmailController;
-use App\Http\Models\Admin\ActivityTrailLog;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AdminUserRequest;
-use App\Http\Models\Admin\CompletedAgingReport;
-use App\Http\Models\Admin\CrmSmsLog;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\MasterCargo\MasterCargo;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\AppNotification;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\ConsigneeUser;
-use App\Http\Models\CRFTermsConditions;
-use App\Http\Models\CRM\CrmComments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestStatus;
-use App\Http\Models\CRM\CrmRequestTagging;
-use App\Http\Models\DailyFakeStatus;
-use App\Http\Models\DeliveryNoteOtpSms;
-use App\Http\Models\ReturnNoteRequest;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\EmployeeNotificationHistory;
-use App\Http\Models\EmployeeRequisition;
-use App\Http\Models\Excel_reports\Debriefing;
-use App\Http\Models\Excel_reports\DonePaymentsReport;
-use App\Http\Models\Excel_reports\HubWiseSplit;
-use App\Http\Models\Excel_reports\KaeNumber;
-use App\Http\Models\Excel_reports\MonthAverage;
-use App\Http\Models\Excel_reports\MonthAverageDestination;
-use App\Http\Models\Excel_reports\QaReportPettyCash;
-use App\Http\Models\Excel_reports\SalePersonNumbers;
-use App\Http\Models\FnfSectionEmployee;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeAttendanceAdjustment;
-use App\Http\Models\HR\EmployeeLeave;
-use App\Http\Models\HR\LeaveStatus;
-use App\Http\Models\OvernightOverlandReportData;
-use App\Http\Models\PickupRequest;
-use App\Http\Models\RetailDonePayment;
+use Carbon\Carbon;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Client;
+use App\Http\Models\SMS;
+use App\Jobs\ProcessSMS;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderDelivery;
 use App\Http\Models\Runner;
-use App\Http\Models\RunnerDetail;
+use App\Jobs\ProcessOTPSMS;
+use App\Mail\Notifications;
+use App\Http\Models\Dispute;
+use App\Http\Models\Invoice;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel;
+use App\Http\Models\Shipment;
+use App\Jobs\ProcessOTPSMSITS;
+use App\Http\Models\PickupNote;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\DonePayment;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOtp;
-use App\Http\Models\ShipmentPiecesRequest;
-use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Notification;
+use App\Http\Models\RunnerDetail;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\User;
+use App\Jobs\GenerateDeliveryOTP;
+use App\Http\Models\ConsigneeUser;
+use App\Http\Models\PickupRequest;
+use App\Http\Models\RiderDelivery;
+use App\PayFastTransactionDetials;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CrmSmsLog;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\AppNotification;
+use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\DailyFakeStatus;
+use App\Jobs\ProcessOTPSMSForBotSMS;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\ShipmentsJourney;
+use App\Jobs\ProcessPushNotification;
+use App\Http\Models\RetailDonePayment;
+use App\Http\Models\ReturnNoteRequest;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\FnfSectionEmployee;
+use App\Jobs\ProcessDeliveryNoteOtpSms;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\EmployeeRequisition;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\ReturnDeliveredToShipperSms;
+use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
+use GuzzleHttp\Exception\RequestException;
+use App\Http\Models\Admin\ActivityTrailLog;
+use App\Http\Models\Admin\AdminUserRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Excel_reports\KaeNumber;
+use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
-use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\Zone;
-use App\Jobs\ProcessDeliveryNoteOtpSms;
-use App\Jobs\ProcessOTPSMS;
-use App\Jobs\ProcessOTPSMSITS;
-use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
-use App\Jobs\ProcessPushNotification;
-//use App\ReturnDeliveredToShipperSms;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\GlobalSettingsController;
-use App\Http\Models\Notification;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\PickupNote;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Dispute;
-use App\Http\Models\DonePayment;
-use App\Http\Models\City;
-use App\Http\Models\Invoice;
-use App\Http\Models\SMS;
-use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Excel_reports\HubWiseSplit;
+use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Admin\FintechPaymentDetails;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\RequestException;
-use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\OvernightOverlandReportData;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Excel_reports\QaReportPettyCash;
+use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\Excel_reports\DonePaymentsReport;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Controllers\Admins\GlobalSettingsController;
+use App\Http\Models\Excel_reports\MonthAverageDestination;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use App\Mail\Notifications;
-use App\Jobs\ProcessOTPSMSForBotSMS;
-use App\PayFastTransactionDetials;
-use App\Jobs\ProcessSMS;
-use Maatwebsite\Excel\Excel;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use App\ReturnDeliveredToShipperSms;
-use App\Jobs\GenerateDeliveryOTP;
 
 class NotificationsController extends Controller
 {
@@ -212,7 +213,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
+    static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
         if ($to) {
 
@@ -240,7 +241,7 @@ class NotificationsController extends Controller
                 }
             }
 
-
+        
             $mail = Mail::to($to);
 
             if ($cc) {
@@ -250,6 +251,7 @@ class NotificationsController extends Controller
             if ($bcc) {
                 $mail->bcc($bcc);
             }
+            
 
             $mail->send(new Notifications($subject, $body, $from));
         }
@@ -269,6 +271,7 @@ class NotificationsController extends Controller
                 }
 
                 $body = $notification->body;
+                $head = $notification->head;
 
 
                 if ($id == 1) {
@@ -529,7 +532,7 @@ class NotificationsController extends Controller
                         } else {
                             $to = $shipper->email;
                         }
-                        $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+                        $shipment_details = '<table style=\"padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
                         $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
 
@@ -953,7 +956,10 @@ class NotificationsController extends Controller
                         $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
-                    self::sms($body, $to);
+                    $sms_setting = self::sms_notification_setting(11, $shipper->id);
+                    if($sms_setting){
+                        self::sms($body, $to);
+                    }
                 } else if ($id == 12) {
 
                     $payment_link = $reference_3_id;
@@ -1035,7 +1041,11 @@ class NotificationsController extends Controller
                             $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
                         }
                     }
-                    self::sms($body, $to);
+
+                    $sms_setting = self::sms_notification_setting(12, $shipper->id);
+                    if($sms_setting){
+                        self::sms($body, $to);
+                    }
                 } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -2588,9 +2598,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'rahat.ali@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'rahat.ali@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $bcc = ['muhammad.waqas@trax.pk', 'danish.zahid@trax.pk'];
+                    $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 
@@ -2662,7 +2672,7 @@ class NotificationsController extends Controller
 
                     $cc = array();
 
-                    $cc[] = 'shafay.tariq@trax.pk';
+                    $cc[] = '';
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
                     // $sales_person_admin = Admin::find($sales_person->admin_id);
 
@@ -3970,11 +3980,11 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
-                    $bcc = ['muhammad.waqas@trax.pk'];
+                    $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 48) {
 
@@ -4163,7 +4173,7 @@ class NotificationsController extends Controller
                     //                    $extra_admins = ['rahat.ali@trax.pk'];
                     //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -4596,7 +4606,7 @@ class NotificationsController extends Controller
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
-                                $to[] = 'shafay.tariq@trax.pk';
+                                $to[] = '';
                                 if ($check == true) {
                                     self::email($subject, $body, $to, $cc);
                                 }
@@ -5266,7 +5276,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $html, $body);
                     }
 
-                    $to = ['hassan@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['m.sohail@trax.pk'];
                     $cc = array();
 
                     $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 25, 34, 36])->where('status', 1);
@@ -5547,7 +5557,7 @@ class NotificationsController extends Controller
                     } else {
                         $to[] = 'aamir.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $cc[] = 'shafay.tariq@trax.pk';
+                        $cc[] = '';
                     }
 
                     self::email($subject, $body, $to, $cc);
@@ -5841,15 +5851,15 @@ class NotificationsController extends Controller
 
                         $to = array();
                         $bcc = array();
-                        $to[] = 'hassan@trax.pk';
+                        $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'shafay.tariq@trax.pk';
+                        $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
                         $to[] = 'mohsin.khan@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahid@trax.pk';
+                        $bcc[] = 'noman.arshad@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -6117,7 +6127,7 @@ class NotificationsController extends Controller
                     if ($finance->exists()) {
                         $to = array_merge($to, $finance->pluck('email')->toArray());
                     }
-                    $to[] = 'shafay.tariq@trax.pk';
+                    $to[] = '';
 
                     self::email($subject, $body, $to);
                 } else if ($id == 86) {
@@ -6308,7 +6318,7 @@ class NotificationsController extends Controller
                         $cc[] = $sale_person_email;
                     }
                     $to[] = 'wajiha.majeed@trax.pk';
-                    $to[] = 'shafay.tariq@trax.pk';
+                    $to[] = '';
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 93) {
@@ -7613,9 +7623,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk'];
+                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 133) {
@@ -8174,15 +8184,15 @@ class NotificationsController extends Controller
 
                         $to = array();
                         $bcc = array();
-                        $to[] = 'hassan@trax.pk';
+                        $to[] = 'syed.furqan@trax.pk';
                         $to[] = 'm.sohail@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'shafay.tariq@trax.pk';
+                        $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
                         $to[] = 'mohsin.khan@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahid@trax.pk';
+                        $bcc[] = 'noman.arshad@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8554,29 +8564,56 @@ class NotificationsController extends Controller
                         $body = str_replace('[preview]', $table, $body);
                     }
 
-                    $to = array();
-                    $other = array();
+                    $users = Shipment::whereIn('id', $shipment_ids)->pluck('user_id')->toArray();
+                    $hubs = Shipment::with(['destination_city', 'pickup_address', 'consignee_city'])
+                    ->whereIn('id', $shipment_ids)
+                    ->get()
+                    ->map(function ($shipment) {
+                        return [
+                            'destination_city' => $shipment->destination_city->hub_id,
+                            'pickup_address' => $shipment->pickup_address->city_id,
+                            'consignee_city' => $shipment->consignee_city->id,
+                        ];
+                    })
+                    ->toArray();
 
-                    $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-                    if ($sales_person) {
-                        $to[] = Admin::find($sales_person->admin_id)->email;
-                    }
-                    $kam = SaleTierTag::where('user_id', $shipper_id);
-                    if ($kam->exists()) {
-                        $kam = $kam->first();
-                        if ($kam) {
-                            $admin = Admin::where('id', $kam->kam)->first();
-                            if ($admin) {
-                                $to[] = $admin->email;
-                            }
+                    $hubs = $hubs[0];
+                    $admin_ids = AdminHub::whereIn('hub_id', $hubs)->pluck('admin_id')->toArray();
+                    foreach($admin_ids as $admin_id){
+                        $admin = Admin::find($admin_id);
+                        $roles = [3,81,125]; //Area Operation Manager of Origin & Destination, Regional Director Operations of Origin & Destination, Regional Director of Origin & Destination.
+                        if($admin && isset($admin->role_id) && in_array($admin->role_id, $roles)){
+                            $to[] = $admin->email;
                         }
                     }
+                    
+                    $sale_persons = SalePersonTag::join('admins as sale_person', 'sale_person.id', '=', 'sale_person_tags.admin_id')
+                    ->whereIn('sale_person_tags.user_id', $users)
+                    ->select(['sale_person.email as email', 'sale_person.name as name'])
+                    ->latest('sale_person_tags.created_at');
 
-                    $other = ['hassan@trax.pk', 'waqas@trax.pk', 'mohsin.ali@trax.pk', 'ali.qureshi@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'shahzad.farooq@trax.pk', 'm.sohail@trax.pk'];
-                    $to = array_merge($to, $other);
-                    if (count($to) > 0) {
-                        self::email($subject, $body, $to);
+                    $key_accounts = SaleTierTag::join('admins as key_account_executive', 'key_account_executive.id', '=', 'sale_tier_tags.kam')
+                    ->whereIn('sale_tier_tags.user_id', $users)
+                    ->select(['key_account_executive.email as email', 'key_account_executive.name as name'])
+                    ->latest('sale_tier_tags.created_at');
+
+                    $emails =  $sale_persons->union($key_accounts)->get();
+
+                    foreach($emails as $concern_email){
+                        $to[] = $concern_email->email;
                     }
+                    
+                    $email = array_filter(array_unique($to), function ($value) {
+                        return $value !== null;
+                    });
+
+                    $email = array_values($email);
+
+                    $cc = ['m.sohail@trax.pk','tauseef.sarfaraz@trax.pk', 'Shahrukh.raheem@trax.pk', 'Mohsin.khan@trax.pk', 'ops.excellence@trax.pk'];
+                    if (count($email) > 0) {
+                        self::email($subject, $body, $email, $cc);
+                    }
+
                 } else if ($id == 152) {
                     $shipment = Shipment::find($reference_1_id);
 
@@ -8657,7 +8694,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk', 'ali.raza@trax.pk'];
+                    $to = ['abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -8675,9 +8712,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk'];
+                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
@@ -8829,7 +8866,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
@@ -9331,7 +9368,7 @@ class NotificationsController extends Controller
                     if ($erf->status_id == 2) {
                         $admin = Admin::find($erf->department_head_id);
                         $name = $admin->name . ' ' . '(HOD)';
-                        $to = ['hassan@trax.pk', 'm.sohail@trax.pk'];
+                        $to = ['m.sohail@trax.pk'];
                     } else if ($erf->status_id == 3) {
                         $name = 'Muhammad Hassan Khan' . '(CEO)';
                         $to = 'hr.dept@trax.pk';
@@ -9674,7 +9711,7 @@ class NotificationsController extends Controller
                         if (strpos($body, '[role]') !== FALSE) {
                             $body = str_replace('[role]', $role, $body);
                         }
-                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
+                        $to = ['faisal.hasan@trax.pk', 'muhammad.waqas@trax.pk'];
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 190) {
@@ -9750,8 +9787,8 @@ class NotificationsController extends Controller
                     }
 
                     $to = array();
-                    // $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
-                    $to = ['info@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    // $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['info@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -9859,7 +9896,10 @@ class NotificationsController extends Controller
                     if (strpos($body, '[preview]') !== FALSE) {
                         $body = str_replace('[preview]', $html, $body);
                     }
-                    $to = $admin->email;
+                    $to = array();
+
+                    $to[] = $admin->email;
+                    $to[] = 'talha.hussain@trax.pk';
 
                     self::email($subject, $body, $to);
                 } else if ($id == 206) {
@@ -9877,9 +9917,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk'];
+                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 207) {
@@ -9896,9 +9936,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk'];
+                    $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk", "faisal.hasan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 210) {
@@ -10237,9 +10277,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk', 'shafay.tariq@trax.pk', 'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk',  'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["muhammad.waqas@trax.pk", "noman.arshad@trax.pk", "faisal.hasan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 215) {
@@ -10289,11 +10329,12 @@ class NotificationsController extends Controller
                     // $user_ids = $reference_1_id->pluck('user_id')->toArray();
                     // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
                     // ReturnDeliveredToShipperSms::insert($notify);
-                }  else if ($id == 217) {
-                    $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions', 'fintech_payment_details.trax_pay_id', 'trax_pay_transactions.id')
-                        ->join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')
-                        ->select(
-                            'trax_pay_transactions.cod_amount as Amont',
+                }
+
+                else if ($id == 217) {
+                   $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                    ->join('shipments','trax_pay_transactions.shipment_id','shipments.id')
+                    ->select('trax_pay_transactions.cod_amount as Amont',
                             'shipments.tracking_number as tracking_no',
                             'fintech_payment_details.rider_tip as tip'
                         )
@@ -10420,8 +10461,8 @@ class NotificationsController extends Controller
 
                     $email_to = $reference_1_id['email_to'];
 
-                    $shipper = $reference_1_id['shipper_name']; 
-                    $tagged_by = $reference_1_id['admin_name']; 
+                    $shipper = $reference_1_id['shipper_name'];
+                    $tagged_by = $reference_1_id['admin_name'];
 
                     $new_poc_person = $reference_1_id['new_poc_person'];
                     $new_kam_person = $reference_1_id['new_kam_person'];
@@ -10434,9 +10475,9 @@ class NotificationsController extends Controller
                     $old_person_date = $reference_1_id['old_person_date'];
                     $old_person_email = $reference_1_id['old_person_email'];
 
-                     
-                    
-                    
+
+
+
 
                     $html = '<table style="width:100%;">';
                     $html .= '<thead><tr>
@@ -10451,43 +10492,434 @@ class NotificationsController extends Controller
                     $cc = array('Waqas@trax.pk', 'shahrukh.raheem@trax.pk', 'khan.usama@trax.pk');
 
                     $old_person_header = '<tr> <th> POC </th> <th> KAM </th> <th> REF </th> </tr>';
-                    
+
                     $html .= '<tr>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
 
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $old_poc_person . '</td> <td>' . $old_kam_person . '</td> <td>' . $old_ref_person . '</td> </tr> </table> </td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> ' . $old_person_header . ' <tr> <td>' . $old_poc_person . '</td> <td>' . $old_kam_person . '</td> <td>' . $old_ref_person . '</td> </tr> </table> </td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $old_person_date . '</td>';
-                    
-                    
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $new_poc_person . '</td> <td>' . $new_kam_person . '</td> <td>' . $new_ref_person . '</td> </tr> </table> </td>';
+
+
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> ' . $old_person_header . ' <tr> <td>' . $new_poc_person . '</td> <td>' . $new_kam_person . '</td> <td>' . $new_ref_person . '</td> </tr> </table> </td>';
                     $html .= '</tr>';
 
                     $to = $email_to;
-                    
+
 
                     if (!empty($old_person_email)) {
-                        $cc = array_merge($cc,$old_person_email);
+                        $cc = array_merge($cc, $old_person_email);
                     }
-                    
+
                     $html .= '</tbody></table>';
 
                     if (strpos($body, '[preview]') !== FALSE) {
                         $body = str_replace('[preview]', $html, $body);
                     }
-                    
+
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);    
-                 }
+                }
                 else if($id == 219){
                     $subject = $notification->subject;
                     $body = $notification->body;
 
-                    $to = array('noumanarshad.83@gmail.com', 'muhammad.waqas@trax.pk');
+                    $to = array('noumanarshad.83@gmail.com', 'muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk');
 
                     self::email($subject, $body, $to);
-                }
+                }else if ($id == 221) {
+                    $responses = $reference_1_id;
+                    $to = 'mohsin.khan@trax.pk';
+                    $cc = 'shahrukh.raheem@trax.pk';
 
+                    $date = Carbon::now()->toFormattedDateString();
+
+                    $preview = view('email.crm-response-rate-email-template', [
+                        'responses' => $responses,
+                        'date' => $date
+                        ])->render();
+
+                    $body=str_replace('[preview]', $preview, $body);
+
+                    self::email($subject, $body, $to, $cc);
+                } else if ($id == 222) {
+                    $array = array();
+                    $crm_case_closeds = $reference_1_id;
+                    
+                    foreach ($crm_case_closeds as $item) {
+                        $shipperId = $item['shipper_id'];
+
+                        if (!isset($array[$shipperId])) {
+                            $array[$shipperId] = [];
+                        }
+
+                        $array[$shipperId][] = $item;
+                    }
+
+                    foreach ($array as $shipperId => $items) {
+                        $ids = array();
+                        $email = User::where('id', $shipperId)->pluck('email')->toArray();
+                        $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
+                        
+                        foreach ($items as $key => $value) {
+                            $ids[] = $value['id'];
+                        }
+
+                        $ids = implode(',', $ids);
+
+                        $html = '<div style="text-align: center; margin-top: 20px;">';
+                        $html .= '<a style="margin-bottom:10px; display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
+                        $html .= '</div>';
+               
+                        $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                        $html .= '<thead>';
+                        $html .= '<tr style="background-color: #f2f2f2;">';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
+                        $html .= '</tr>';
+                        $html .= '</thead>';
+                        $html .= '<tbody>';
+
+                        foreach ($items as $item) {
+                            $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
+                            $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
+                        
+                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
+                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
+                        
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
+                            $html .= '</tr>';
+                        }
+                        
+                        $html .= '</tbody>';
+                        $html .= '</table>';
+
+                        $body = str_replace('[preview]', $html, $notification->body);
+                        $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
+
+                        self::email($subject, $body, $email);
+                        
+                    }
+                } else if($id == 224 || $id == 225){
+                    //Weekly Operation Reports And Monthly Operation Reports
+                    $mode = $reference_3_id;
+                    $attachmentPath = $reference_1_id;                    
+                    $date = $reference_2_id;
+                    $file = Storage::disk('public')->url('operation_reports/' . $attachmentPath);
+                    $link = '<br/><a href="' . $file . '" target="_blank"><u>Click Here To Download</u></a>';
+                    $replacements = [
+                        '[link]' => $link,
+                        '[date_time]' => "Dated: ". $date,
+                    ];
+                    
+                    foreach ($replacements as $placeholder => $replacement) {
+                        if (strpos($body, $placeholder) !== false) {
+                            $body = str_replace($placeholder, $replacement, $body);
+                        }
+                    }
+                    
+                    $role_ids = [19,15,106,91,3,9,123,128,95];
+                    $email = ($mode !== 'test')
+                    ? Admin::whereIn('role_id', $role_ids)->pluck('email')->filter()->unique()
+                    : ['muhammad.ahmed@trax.pk','sahban.ghani@trax.pk'];
+                
+                    self::email($subject, $body, $email, $cc = null, $bcc = null, $from = null);
+                } else if ($id == 223){
+                    //Crm Progress Report
+                    $now = Carbon::now();
+                    $to = 'mohsin.khan@trax.pk';
+                    $cc = 'shahrukh.raheem@trax.pk';
+                    $crm_complaints_2_days_closure = [];
+                    $crm_services_2_days_closure = [];
+                    $crm_claims_10_days_closure = [];
+                    $crm_complaints_launched_each_day = [];
+                    $crm_complaints_launched_each_day_closed = [];
+                    $crm_serviced_launched_each_day = [];
+                    $crm_serviced_launched_each_day_closed = [];
+                    $crm_claims_launched_each_day = [];
+                    $crm_claims_launched_each_day_closed = [];
+                    $crm_complaints = $reference_1_id;
+                    $crm_service_requests = $reference_2_id;
+                    $crm_claims = $reference_3_id;
+                    if($crm_complaints->isNotEmpty()){
+                        foreach($crm_complaints as $crm_complaint){
+                            $created_at = $crm_complaint['created_at'];
+                            $updated_at = $crm_complaint['updated_at'];
+                            
+                            if($created_at->isToday()){
+                                $crm_complaints_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_complaint['status_id'] == 4){
+                                $crm_complaints_launched_each_day_closed[] = 1;
+                            }
+    
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_complaint['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                                $crm_complaints_2_days_closure[] = $daysDifference;
+                            }
+    
+                        }
+                    }                 
+                    if($crm_service_requests->isNotEmpty()){
+                        foreach($crm_service_requests as $crm_service_request){
+                            $created_at = $crm_service_request['created_at'];
+                            $updated_at = $crm_service_request['updated_at'];
+                            
+                            if($created_at->isToday()){
+                                $crm_serviced_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_service_request['status_id'] == 4){
+                                $crm_serviced_launched_each_day_closed[] = 1;
+                            }
+    
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_service_request['status_id'] == 4 && $daysDifference <= 2 && $updated_at->diffInDays($now) <= 2){
+                                $crm_services_2_days_closure[] = $daysDifference;
+                            }
+                        }
+                    }
+                    if($crm_claims->isNotEmpty()){
+                        foreach($crm_claims as $crm_claim){
+                            $created_at = $crm_claim['created_at'];
+                            $updated_at = $crm_claim['updated_at'];
+    
+                            if($created_at->isToday()){
+                                $crm_claims_launched_each_day[] = 1;
+                            }
+    
+                            if($updated_at->isToday() && $crm_claim['status_id'] == 4){
+                                $crm_claims_launched_each_day_closed[] = 1;
+                            }
+                            
+                            $daysDifference = $created_at->diffInDays($updated_at);
+                            if ($crm_claim['status_id'] == 4 && $daysDifference <= 10 && $updated_at->diffInDays($now) <= 10){
+                                $crm_claims_10_days_closure[] = $daysDifference;
+                            }
+                        }
+                    }
+                    $resolved_status_10_days = CrmRequest::where('case_nature_id', 4)
+                    ->where('status_id', 3)
+                    ->where(function ($query) {
+                        $query->whereDate('updated_at', '>=', Carbon::today()->subDays(10))
+                              ->orWhereDate('updated_at', Carbon::today());
+                    })
+                    ->get();
+
+                    $case_natures = $crm_complaints->merge($crm_service_requests)->merge($crm_claims);
+                    $resolved_claimed = $crm_claims->map(function($result){
+                        return [
+                            'status_id' => $result['status_id'],
+                            'updated_at' => $result['updated_at'],
+                        ];
+                    });              
+                    $resolved_claimed = $resolved_claimed->filter(function ($item) {
+                        return $item['status_id'] == 3 && $item['updated_at']->isToday();
+                    });
+                    // Table for CRM Complaints
+                    $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Complaints</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_launched_each_day_closed).'</td>';
+                    if(count($crm_complaints_launched_each_day) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_complaints_launched_each_day_closed) / count($crm_complaints_launched_each_day)) * 100 . '%'.'</td>';
+
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
+                    if(count($crm_complaints_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure) / count($crm_complaints_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '</tr>';
+                    $html .= '<tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    // Table for CRM Service Requests
+                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7"><strong>Service Requests</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_serviced_launched_each_day_closed).'</td>';
+                    if(count($crm_serviced_launched_each_day) > 0){
+
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_serviced_launched_each_day_closed) / count($crm_serviced_launched_each_day)) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
+                    if(count($crm_serviced_launched_each_day_closed) > 0){
+
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure) / count($crm_serviced_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    $html .= '</tr>';
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    // Table for CRM Claims
+                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="9"><strong>Claims</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure In 10 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">10 Days Closure Rate</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">10 Days Resolved Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody style="margin-bottom:50px">';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">1</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.date('y-m-d').'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_launched_each_day_closed).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_claimed).'</td>';
+                    if(count($crm_claims_launched_each_day) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_claims_launched_each_day_closed) / count($crm_claims_launched_each_day)) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_10_days_closure),2).'</td>';
+
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_10_days_closure) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+
+                    }
+                    if(count($crm_claims_launched_each_day_closed) > 0){
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($resolved_status_10_days) / count($crm_claims_launched_each_day_closed) * 100 . '%'.'</td>';
+                    }else{
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                    }
+                    $html .= '</tr>';
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $html .= '<br>'; 
+                    //Agent Summary Report
+                    $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Agents Summary Report</strong></td></tr>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
+                    $html .= '<th style="padding:30px; border: 1px solid #ccc; text-align: left;">Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Agent</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">New Tickets (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total In Process (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Total Closure (Today)</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Closure Within 2 Days</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">2 Days Closure Rate</th>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $agent = [];
+                    $index = 0;
+                    if($case_natures->isNotEmpty()){
+                        foreach ($case_natures as $key => $value) {
+                            $agent_id = $value["agent_id"];
+                            $agent[$agent_id]['status_id'][] = $value['status_id'];
+                            $agent[$agent_id]['ticket_id'][] = $value['id'];
+                            $agent[$agent_id]['created_at'][] = $value['created_at'];
+                            $agent[$agent_id]['updated_at'][] = $value['updated_at'];
+                        }
+                    }
+                    foreach ($agent as $key => $value) 
+                    {
+                        $index = $index + 1;
+                        $created_at = $value['created_at'];
+                        $updated_at = $value['updated_at'];
+                        $statuses = $value['status_id'] ;
+
+                        if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
+                            $closure_2_days = []; 
+                            $today_tickets = []; 
+                            $today_closed = [];
+                            $today_inprocess = [];
+
+                            for ($i = 0; $i < count($created_at); $i++) {
+                                if(isset($created_at[$i], $updated_at[$i])){
+                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                    if ($diffInDays <= 2  && $statuses[$i] === 4  && $updated_at[$i]->diffInDays($now) <= 2) {
+                                        $closure_2_days[] = 1;
+                                    }
+                                    if ($created_at[$i]->isToday()) {
+                                        $today_tickets[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 4) {
+                                        $today_closed[] = 1;
+                                    }
+                                    if ($updated_at[$i]->isToday() && $statuses[$i] === 2) {
+                                        $today_inprocess[] = 1;
+                                    }
+                                }
+                            }
+                        }  
+                        
+                        if($key != ""){
+                            $agent = Admin::where('id', $key)->value('name');
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_tickets) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_inprocess) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($today_closed) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
+                            if(count($today_closed) > 0){
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) / count($today_closed) * 100  . '%'.'</td>';
+                            }else{
+                                $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
+                            }
+                            $html .= '</tr>';
+                        }
+                    }                  
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $body = str_replace('[preview]', $html, $notification->body);
+                    self::email($subject, $body, $to, $cc);
+                } 
             }
         }
     }
@@ -10869,4 +11301,31 @@ class NotificationsController extends Controller
         }
     }
 
+    static public function sms_notification_setting($id, $shipper_id){
+        $notification_setting = NotificationSetting::where('notification_id', $id);
+        if($notification_setting->exists()){
+            $notification_setting = $notification_setting->first();
+            $notification_setting_shipper = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id)->where('shipper_id', $shipper_id);
+            if($notification_setting->shipper_toggle == 1){
+                if($notification_setting_shipper->exists()){
+                    return false; //All shipper selected but this shipper is excluded
+                }
+                else{
+                    return true; //All shipper selected
+                }
+            }
+            else{
+                if($notification_setting_shipper->exists()){
+                    return true; //All shipper excluded but this shipper is selected
+                }
+                else{
+                    return false; //All shipper excluded
+                }
+            }
+        }
+        else{
+            return true; //Notification not updated yet so by default selected
+        }
+    }
+   
 }

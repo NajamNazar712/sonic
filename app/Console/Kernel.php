@@ -20,6 +20,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         '\App\Console\Commands\ReturnConfirmationPendingEmail',
+        '\App\Console\Commands\CrmResponseRate',
+        '\App\Console\Commands\CrmClosedReasonCron',
         '\App\Console\Commands\ReturnConfirmEmail',
         '\App\Console\Commands\ShipmentReAttemptEmail',
         '\App\Console\Commands\AutoDisableShipperAccount',
@@ -161,12 +163,16 @@ class Kernel extends ConsoleKernel
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:response_rate')->dailyAt('18:00')->runInBackground();
+
         // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
         $schedule->command('inactive_employee:resign_date')->dailyAt('05:00')->runInBackground();
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
         $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:closed_reason')->dailyAt('23:50')->runInBackground();
+        $schedule->command('crm:progress_report')->dailyAt('23:57')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
@@ -175,6 +181,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
         $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
+
+        //Operations Report
+        //11th of every month
+        $schedule->command('reports:operations_performance_monthly')->monthlyOn(11, '23:00')->runInBackground();
+        //EveryTuesday
+        $schedule->command('reports:operations_performance_weekly')->weeklyOn(2, '10:00')->runInBackground();
+        // $schedule->command('reports:operations_performance_weekly test')->weeklyOn(1, '15:00')->runInBackground();
+
         $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
         if($shifts){
             foreach($shifts as $shift)

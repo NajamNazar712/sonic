@@ -2,10 +2,10 @@
 
 namespace App\Http\Traits;
 
+use Carbon\Carbon;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\ReportingLocation;
-use Carbon\Carbon;
 
 trait CommonTrait
 {

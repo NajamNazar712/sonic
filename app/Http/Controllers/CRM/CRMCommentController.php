@@ -10,22 +10,16 @@ use App\Http\Controllers\Controller;
 
 class CRMCommentController extends Controller
 {
-    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments, $shipper_email, $sms = NULL)
+    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments, $shipper_email, $sms = NULL, $manual_comment= 0)
     {
 
-        $pattern = '/<p>(.*?)<\/p>/';
-        $replacement = function ($matches) {
-            return '<p>' . ucwords($matches[1]) . '</p>';
-        };
-
-        $capitalizedString = preg_replace_callback($pattern, $replacement, $comments);
-        
         $comment = new CrmComments();
         $comment->crm_request_id = $crm_request_id;
         $comment->comment_by_id = $comment_by_id;
         $comment->comment_by = $comment_by;
         $comment->comment_type = $comment_type;
-        $comment->comment = $capitalizedString;
+        $comment->comment = $comments;
+        $comment->manual_comment = $manual_comment;
         $comment->save();
 
         if ($comment_type == 0 && $comment_by == 0) {

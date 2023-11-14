@@ -67,7 +67,7 @@
                             </div>
                             <hr>
                             <div class="row justify-content-center">
-                                <div class="col-8">
+                                <div class="col-10">
                                     <fieldset class="form-group">
                                         <select name="case_nature_select" id="case_nature_select"
                                             class="form-control select2" data-rule-required="true"
@@ -81,7 +81,7 @@
                             </div>
                             <div class="complaints d-none" id="request_complaints">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_complaint" id="case_nature_complaints"
                                                 class="form-control select2" data-rule-required="true"
@@ -92,7 +92,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5"
                                                 placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
@@ -102,7 +102,7 @@
                             </div>
                             <div class="service d-none" id="request_service">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_request" id="case_nature_requests"
                                                 class="form-control select2" data-rule-required="true"
@@ -113,7 +113,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 d-none" id="alternate_phone_input">
+                                    <div class="col-10 d-none" id="alternate_phone_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="alternate_phone" class="form-control"
                                                 id="alternate_phone" placeholder="Enter Alternate Number"
@@ -121,23 +121,44 @@
                                                 data-msg-required="Alternate Number is required">
                                         </fieldset>
                                     </div>
-                                    {{-- <div class="col-8 d-none" id="cod_amount_input">
-                                        <fieldset class="form-group">
-                                            <input type="text" name="cod_amount" class="form-control" id="cod_amount" placeholder="Enter COD Amount" data-rule-required="true" data-msg-required="COD Amount is required">
-                                        </fieldset>
-                                    </div> --}}
+                                    <div  class="col-10 d-none" id="cod_change">
+                                        <div class="row justify-content-center">
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Old COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="old_amount" id="old_amount" readonly class="form-control rounded-right">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">New COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-12">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5"
-                                                placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5"
                                                 placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
@@ -150,7 +171,7 @@
                                 <input type="hidden" name="case_nature_id" id="case_nature_id">
                                 <input type="hidden" name="complaint_id" id="complaint_id">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_tclaim" id="case_nature_claim"
                                                 class="form-control select2">
@@ -160,13 +181,13 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="claim_product_cost_div">
+                                    <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost"
                                                 value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                    <div class="col-10 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
                                             <select name="receiving_sheet_id" id="request_id"
                                                 class="form-control select2" data-rule-required="true"
@@ -175,7 +196,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left" id="claim_product_picture_div">
+                                    <div class="col-10 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file"
@@ -189,7 +210,7 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-8 text-left" id="claim_invoice_picture_div">
+                                    <div class="col-10 text-left" id="claim_invoice_picture_div">
                                         <fieldset class="form-group">
                                             <label for="invoice_picture"><b>Invoice Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file"
@@ -203,7 +224,7 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">
+                                    <div class="col-10 text-left d-none" id="claim_shipment_damage_div">
                                         <fieldset class="form-group">
                                             <label for="damage_product_picture"><b>Damage Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file"
@@ -246,7 +267,7 @@
 
                                     </div>
 
-                                    <div class="col-8 text-left d-none" id="claim_content_short_div">
+                                    <div class="col-10 text-left d-none" id="claim_content_short_div">
                                         <fieldset class="form-group">
                                             <label for="missing_product_picture"><b>Missing Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file"
@@ -291,7 +312,7 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="description" id="claim_description" rows="5"
                                                 placeholder="Enter Description Here..."></textarea>
@@ -436,17 +457,23 @@
             //     'max': 1000000
             // });
 
-            var select = $('#track_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)*',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
+            $('.new_amount').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+			var select = $('#track_form .tracking_numbers').selectize({
+				placeholder: 'Tracking Number(s)*',
+				delimiter: ',',
+				createOnBlur: true,
+				persist: false,
+				plugins: ['remove_button'],
+				onDropdownOpen: function(dropdown) {
+					dropdown.remove();
+				},
+				onType: function(str) {
+					var regex = /^[0-9,]+$/;
 
                     if (!regex.test(str)) {
                         select[0].selectize.setTextboxValue('');
@@ -844,6 +871,7 @@
                                 shipment += '</div>';
 
                                 $('#tracking').append(shipment);
+                                $('#old_amount').val(details.order_information.amount);
                             });
 
                             $('#tracking table.datatable.tracking_history').DataTable({
@@ -1099,14 +1127,17 @@
                     // $('#cod_amount_input').addClass('d-none');
 
                 }
-                // else if($(this).val() == 12){
-                //     $('#cod_amount_input').removeClass('d-none');
-                //     $('#alternate_phone_input').addClass('d-none');
-
-                // }
-                else {
+                else{
                     // $('#cod_amount_input').addClass('d-none');
                     $('#alternate_phone_input').addClass('d-none');
+
+                }
+
+                if($(this).val() == 12){
+                    $('#cod_change').removeClass('d-none');
+                }
+                else{
+                    $('#cod_change').addClass('d-none');
 
                 }
             });
@@ -1336,95 +1367,207 @@
                                     $('#AddNewRequest').attr('disabled', false);
                                 });
                         }
-                    } else {
-                        $('#AddNewRequest').attr('disabled', true);
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Launching Request.',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        $.ajax({
-                                url: '{!! route('cod.crm.request.add') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'shipment_id': $('#requested_shipment_id').val(),
-                                    'case_nature_id': case_nature_id,
-                                    'complaint_id': complaint_id,
-                                    'description': description,
-                                    'alternate_phone': $('#alternate_phone').val(),
-                                    // 'cod_amount': $('#cod_amount').val(),
-                                }
-                            })
-                            .done(function(data) {
-                                swal.close();
+                    }
+                    else {
+                        $('#AddNewRequest').attr('disabled',true);
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
 
-                                if (data.status) {
-                                    if (data.flag) {
-                                        var html = '';
-
-                                        $.each(data.already_existed_shipments, function(index,
-                                            tracking_number) {
-                                            html += tracking_number + '<br/>';
-                                        });
-
-                                        if (!data.cannot_change) {
-                                            html +=
-                                                '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                        } else {
-                                            html +=
-                                                '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                            /*********
+                            // Commented this because in Complain type = 1, the value set in different variable
+                            // i.e: $('#case_nature_complaints').val();
+                            // so this should be manage according to case nature except here, which seems like it already handled in first two, 
+                            // if required for three four, then adjust this on top like case nature
+                            *********/
+                            // var complaint_id = $('#case_nature_requests').val();
+                        
+                            if(complaint_id == 12)
+                            {
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change COD!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
                                         }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('cod.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_id': $('#requested_shipment_id').val(),
+                                                'case_nature_id': case_nature_id,
+                                                'complaint_id': complaint_id,
+                                                'description': description,
+                                                'cod_new_amount': $('#new_amount').val(),
+                                                'cod_remarks': $('#cod_remarks').val(),
+                                                'is_automated_cod_change': 1,
+                                            }
+                                        })
+                                        .done(function (data) {
+                                            swal.close();
 
-                                        content = document.createElement('div');
-                                        content.innerHTML = html;
+                                            if (data.status) {
+                                                if (data.flag) {
+                                                    var html = '';
 
-                                        swal({
-                                            title: 'Request / Complaint Cannot Be Lodged!',
-                                            content: content,
-                                            icon: 'warning',
-                                            buttons: {
-                                                cancel: {
-                                                    text: 'Close',
-                                                    value: null,
-                                                    visible: true,
-                                                    closeModal: true,
-                                                },
-                                            },
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false,
-                                            dangerMode: true
-                                        });
-                                    } else {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
+                                                    $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
+
+                                                    if (!data.cannot_change) {
+                                                        html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                    }
+                                                    else {
+                                                        html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                    }
+
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
+
+                                                    swal({
+                                                        title: 'Request / Complaint Cannot Be Lodged!',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                // toastr.success(data.success, 'Success!', {
+                                                //     positionClass: 'toast-bottom-center',
+                                                //     containerId: 'toast-bottom-center'
+                                                // });
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                            $('#AddRequestModal').modal('hide');
+                                            $('#request_id').val('').trigger('change');
+                                            $('#receiving_sheet_div').addClass('d-none');
                                         });
                                     }
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center'
-                                    // });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                $('#AddRequestModal').modal('hide');
-                                $('#request_id').val('').trigger('change');
-                                $('#receiving_sheet_div').addClass('d-none');
-                                $('#AddNewRequest').attr('disabled', false);
-                            });
+                                    else{
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
+                            else{
+                                $.ajax({
+                                    url: '{!! route('cod.crm.request.add') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_id': $('#requested_shipment_id').val(),
+                                        'case_nature_id': case_nature_id,
+                                        'complaint_id': complaint_id,
+                                        'description': description,
+                                    }
+                                })
+                                .done(function (data) {
+                                    swal.close();
+
+                                    if (data.status) {
+                                        if (data.flag) {
+                                            var html = '';
+
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
+
+                                            if (!data.cannot_change) {
+                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                            }
+                                            else {
+                                                html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            }
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+
+                                            swal({
+                                                title: 'Request / Complaint Cannot Be Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        } else {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        // toastr.success(data.success, 'Success!', {
+                                        //     positionClass: 'toast-bottom-center',
+                                        //     containerId: 'toast-bottom-center'
+                                        // });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#request_id').val('').trigger('change');
+                                    $('#receiving_sheet_div').addClass('d-none');
+                                    $('#AddNewRequest').attr('disabled',false);
+                                });
+                            }   
                     }
                 }
             });
 
-            $('#AddRequestModal').on('hide.bs.modal', function(e) {
+            $('#AddRequestModal').on('hide.bs.modal', function (e) {
+                var old_amount = $('#old_amount').val();
                 $('#add_request_form')[0].reset();
+                $('#old_amount').val(old_amount);
                 $('#case_nature_complaints').val('').trigger('change');
                 $('#case_nature_select').val('').trigger('change');
                 $('#case_nature_requests').val('').trigger('change');
@@ -1538,6 +1681,21 @@
                 $('#call_finding_dropdown').val('').change();
             });
 
-        });
-    </script>
+            var textarea = $('#cod_remarks');
+
+            textarea.on('input', function() {
+                var wordLimit = 10;
+                var textarea = $('#cod_remarks');
+                var text = textarea.val();
+                var words = text.trim().split(/\s+/); // Split the text into words
+
+                if (words.length > wordLimit) {
+                    
+                    words = words.slice(0, wordLimit); // Keep only the first 10 words
+                    textarea.val(words.join(' ')); // Update the textarea value
+                }
+            });
+            
+		});
+	</script>
 @endsection
