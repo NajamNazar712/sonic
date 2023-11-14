@@ -713,7 +713,7 @@
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                             { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
                             { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
-                            { data:'rider_time' ,name: 'rider_deliveries.update_time', class: 'align-middle rider_time'},
+                            { data:'rider_time' ,name: 'rider_deliveries.added_at', class: 'align-middle rider_time'},
                             { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
