@@ -76,7 +76,7 @@ class ShipperPickupController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        $pickup_addresses = UserShippingInfo::with('city')->where('user_id',  117)->where('status', 1)->where('hidden', 0)->get();
+        $pickup_addresses = UserShippingInfo::with('city')->where('user_id',  $user->id)->where('status', 1)->where('hidden', 0)->get();
         $product = Segment::with('subCategorySegment')->find($segment_id);
         $pickup_shipment_types = V3PickupShipmentType::all();
         $additional_services = V3PickupService::all();

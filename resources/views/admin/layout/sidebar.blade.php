@@ -253,6 +253,9 @@
                                         <li><a class="menu-item"
                                                href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual
                                                 Arrival</a></li>
+                                       <li><a class="menu-item"
+                                                href="{{ route('admin.v3_pickups.arrival.individual.index') }}">V3 Individual
+                                                Arrival</a></li>
                                         <li><a class="menu-item"
                                                href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk
                                                 Arrival</a></li>
