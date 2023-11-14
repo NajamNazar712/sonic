@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Retail;
 use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\Admin\RcpAssignedShipment;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
+use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -22,6 +23,7 @@ use Yajra\Datatables\Datatables;
 
 class RetailReturnController extends Controller
 {
+    use RvTrait;
     public function __construct()
     {
         $this->middleware('auth:retail');
@@ -212,10 +214,15 @@ class RetailReturnController extends Controller
     public function mark_reattempt(Request $request){
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
-            if($parcel->shipper_status_id != 52){
+            // if($parcel->shipper_status_id != 52){
+            if($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66){
                 if($parcel->shipper_status_id == 12){
+                    // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                    // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
+
+
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
+                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 66,'consignee_status_id' => 66]);
 
                     if (session('user_type') != 1) {
                         $reference_1_id = Auth::id();
@@ -231,19 +238,11 @@ class RetailReturnController extends Controller
                     else{
                         $last_reason_id = NULL;
                     }
-                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-                    
-                //     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-                //    if($return_assign_shipment){
-                //        $return_assign_shipment->status = 0;
-                //        $return_assign_shipment->save();
+                    // ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
 
-                //        $return_assign_log = new ReturnAssignedShipmentLogs();
-                //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                //         $return_assign_log->status = 5;
-                //         $return_assign_log->assigned_by = Auth::id();
-                //         $return_assign_log->save();
-                //    }
+                    //Update shipment status id to 66 (Shipment - Re-Attempt Call Requested)
+                    ShipmentsJourneyController::add($request->shipment_id, 66, 66, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
+                    
                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -265,6 +264,12 @@ class RetailReturnController extends Controller
                        $return_assign_log->admin_id = Auth::id();
                        $return_assign_log->save();
                    }
+
+                   request()->request->add(['shipment_id' => $request->shipment_id]);
+                    //$updated_type_id updated by retail = 5
+                    //$updated_rv_assign_agent_status_id, reattempt requested i.e is 2
+                    //$updated_rv_state_id updating rv status to 3 i.e open 
+                    $this->shipment_status_update_shipper($request, Auth::id(), 5, 2, 3);
                    
                     if($journey){
                         NotificationsController::send(33, $request->shipment_id);

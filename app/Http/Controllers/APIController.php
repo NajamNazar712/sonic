@@ -83,6 +83,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\ZoneClassCity;
+use App\Http\Traits\RvTrait;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use DB;
@@ -104,7 +105,7 @@ use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Admin\UserFintectCharges;
-
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 
 
@@ -112,6 +113,8 @@ use Vectorface\Whip\Whip;
 
 class APIController extends Controller
 {
+
+    use RvTrait;
     private $names = [
         'person_of_contact' => 'Person of Contact',
         'vendor' => 'Vendor',
@@ -4456,23 +4459,13 @@ class APIController extends Controller
                         $remark = null;
                     }
                     if ($shipment->shipper_status_id == 12) {
-                        //                        if (!$shipment->packaging_material_request) {
+                        
                         Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                         ShipmentChargesController::return($shipment->id);
-                        //                NotificationsController::send(15, 0, $request->shipment_id);
-                        //                NotificationsController::send(16, 0, $request->shipment_id);
-
                         AdminFinanceController::add_payment($shipment->id, 1);
                         ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
-                        //                        } else {
-                        //                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-                        //                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                        //                            ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, $remark, $user_id, null);
-                        //                            //                NotificationsController::send(15, 0, $request->shipment_id);
-                        //                            //                NotificationsController::send(16, 0, $request->shipment_id);
-                        //                        }
-                        
+
                         //Rcp Request Create
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if ($rcp_assigned_shipment->exists()) {
@@ -4496,6 +4489,15 @@ class APIController extends Controller
                             $return_assign_log->user_id = $user_id;
                             $return_assign_log->save();
                         }
+
+                        $rv_shipment_assign_agent_data = [
+                                'agent_id' => $user_id,
+                                'shipment_id' => $shipment->id,
+                                'rv_assign_agent_status_id' => 1, //ReturnConfirm
+                                'updated_by_id' =>  $user_id,
+                            ];
+                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+
 
                         return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
                     }
@@ -4522,7 +4524,6 @@ class APIController extends Controller
                             ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, null, null);
 
                             //Reattempt Request
-                            // $rcp_assigned_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
                             $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                             if ($rcp_assigned_shipment) {
                                 $rcp_assigned_shipment->shipment_status = 10; //reattempt request 
@@ -4544,6 +4545,17 @@ class APIController extends Controller
                                 $return_assign_log->user_id = $user_id;
                                 $return_assign_log->save();
                             }
+
+                            //Reattempt Request
+                            $rv_shipment_assign_agent_data = [
+                                'agent_id' => $user_id,
+                                'shipment_id' => $shipment->id,
+                                'rv_assign_agent_status_id' => 2, //Reattempt
+                                'updated_by_id' =>  $user_id,
+                            ];
+                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+
+                            
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
                             }
@@ -4644,6 +4656,14 @@ class APIController extends Controller
                                                 $return_assign_log->save(); 
                                             }  
 
+                                            $rv_shipment_assign_agent_data = [
+                                                    'agent_id' => $user_id,
+                                                    'shipment_id' => $shipment->id,
+                                                    'rv_assign_agent_status_id' => 4, //Intercept Approved
+                                                    'updated_by_id' =>  $user_id,
+                                                ];
+                                            $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, NULL, NULL, $user_id, NULL);
 
                                             // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
@@ -4741,6 +4761,15 @@ class APIController extends Controller
                                                     $return_assign_log->save();
                                                         
                                                 }  
+
+
+                                                $rv_shipment_assign_agent_data = [
+                                                    'agent_id' => $user_id,
+                                                    'shipment_id' => $shipment->id,
+                                                    'rv_assign_agent_status_id' => 3, //Intercept Request
+                                                    'updated_by_id' =>  $user_id,
+                                                ];
+                                                $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
 
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
@@ -5062,28 +5091,6 @@ class APIController extends Controller
                                         }
                                     }
                                     ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 1728);
-
-                                    // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
-                                    // if ($rcp_assigned_shipment->exists()) {
-                                    //     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
-                                    //     $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                                    //     $rcp_assigned_shipment->admin_id = 1728;
-                                    //     $rcp_assigned_shipment->save();
-            
-                                    //     //updating already_updated & pending of agent if shipment is updated by shipper 
-                                    //     $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                                    //     $already_updated = $rcp_assigned_agent->increment('already_updated');
-                                    //     $rcp_assigned_agent->decrement('pending_shipments');
-                                    //     $rcp_assigned_agent->save();
-            
-            
-                                    //     $return_assign_log = new RcpAssignedShipmentLog ();
-                                    //     $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                                    //     $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                                    //     $return_assign_log->status = 4; //return confirm status
-                                    //     $return_assign_log->admin_id = 1728;
-                                    //     $return_assign_log->save();
-                                    // }
                                 }
 
                                 $res_from_consignee = $data[0] . " " . $res;

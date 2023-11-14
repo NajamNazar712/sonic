@@ -26,7 +26,7 @@ class Permission
             'dispute.update' => 3,
             'dispute.update.submit' => 3,
             'dispute.shipments.index' => 702,
-
+            'team_lead.index' => 903,
             'accounts.pending' => 5,
             'accounts.pending.ajax' => 5,
             'accounts.active' => 11,
@@ -869,6 +869,7 @@ class Permission
             'settings.multiple_sale_tagging.list' => 279,
 
             'settings.foc_account.index' => 302,
+            'settings.rv_shipper_priority.index'=> 906,
             'settings.minimum_chargeable_weight.index' => 303,
 
             'settings.sales.projection.percentage.index' => 313,
@@ -971,7 +972,7 @@ class Permission
             'settings.consignee_sms_expire.index' => 683,
 			'settings.sales.user_restriction.index' => 681,
 
-            'settings.return_shipments_address.index' => 689,
+            'settings.return_shFipments_address.index' => 689,
 
             'settings.return_reason_mandatory.index' => 684,
             'settings.return_reason_mandatory.list' => 684,
@@ -985,6 +986,8 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
+            'admin.settings.rv_disable_shippers.index'=> 889,
+            'admin.settings.rv_disable_shippers.store'=> 889,
             'settings.background_image.index' => 891,
             'settings.background_image.store' => 891,
 
@@ -1217,7 +1220,7 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-
+            'reports.rv_report.index'=>905,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
 

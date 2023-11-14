@@ -43,4 +43,8 @@ class City extends Model
     public function zone() {
        return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
     }
+    public function agentAssignHub() {
+        return $this->hasMany('App\Http\Models\RvAgentAssignHub');
+    }
+
 }

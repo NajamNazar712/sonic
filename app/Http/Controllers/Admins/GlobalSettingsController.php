@@ -1941,6 +1941,51 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    
+    public function rv_shipper_priority_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 906);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'rv_shipper_priority');
+        $rv_shipper_priorities = array();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $rv_shipper_priorities = array_map('strval', explode(',', $settings->text));
+        }
+        return view('admin.settings.rv_priority_shippers')->with(['shippers' => $shippers, 'rv_shipper_priorities' => $rv_shipper_priorities]);
+    }
+
+
+    public function rv_shipper_priority_store(Request $request)
+    {
+        $values_array = array_map('trim', explode(',', $request->unsorted_zones));
+        $values_array_1 = implode(',', $request->shippers ?? []);
+
+        $unique_values_array = array_unique($values_array);
+        $result_str = implode(',', $unique_values_array);
+
+        if ($request->has('unsorted_zones')) {
+            
+            if (count($unique_values_array) > 0) {
+                $settings = GlobalSettings::where('type', 'rv_shipper_priority');                
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'rv_shipper_priority';
+                    $settings->setting_value = 1;
+                }
+                $settings->text = $result_str != "" ?  $result_str : $values_array_1;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
     /*for mms setting controller*/
     public function mms_report_index()
     {
@@ -8760,6 +8805,106 @@ class GlobalSettingsController extends Controller
 
     }*/
 
+
+
+    public function rv_disable_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 681);
+        $excluded_shippers = array();
+        $only_shippers = array();
+
+        $excluded_shipper = GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers');
+        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers');
+        $all_shipper = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
+
+        if ($excluded_shipper->exists()) {
+            $excluded_shipper = $excluded_shipper->first();
+            $excluded_shippers = array_map('intval', explode(',', $excluded_shipper->text));
+        } else {
+            $excluded_shipper = new GlobalSettings();
+            $excluded_shipper->setting_value = 0;
+            $excluded_shipper->type = "rv_disable_shippers_excluded_shippers";
+            $excluded_shipper->save();
+        }
+
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $only_shipper->text));
+        } else {
+            $only_shipper = new GlobalSettings();
+            $only_shipper->setting_value = 0;
+            $only_shipper->type = "rv_disable_shippers_only_shippers";
+            $only_shipper->save();
+        }
+
+        if ($all_shipper->exists()) {
+            $all_shipper = $all_shipper->first();
+        } else {
+            $all_shipper = new GlobalSettings();
+            $all_shipper->setting_value = 1;
+            $all_shipper->type = "rv_disable_shippers_all_shippers";
+            $all_shipper->save();
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.settings.rv_disable_shippers.index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shipper]);
+    }
+
+
+    public function rv_disable_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 682);
+
+        $all_shipper_settings = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers');
+        if ($all_shipper_settings->exists()) {
+            $all_shipper_settings = $all_shipper_settings->first();
+        } else {
+            $all_shipper_settings = new GlobalSettings();
+            $all_shipper_settings->type = 'rv_disable_shippers_all_shippers';
+        }
+        $all_shipper_settings->setting_value = ($request->has('all_shipper_toggle')) ? 1 : 0;
+
+        $all_shipper_settings->save();
+
+        if ($request->has('all_shipper_toggle') && $request->has('excluded_users')) {
+            $excluded_users = implode(',', $request->excluded_users);
+            $settings = GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'rv_disable_shippers_excluded_shippers';
+            }
+            $settings->setting_value = 1;
+            $settings->text = $excluded_users;
+            $settings->save();
+
+        } else {
+            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+        }
+        if (!$request->has('all_shipper_toggle') && $request->has('only_users')) {
+            $only_users = implode(',', $request->only_users);
+            $settings = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+                $settings->type = 'rv_disable_shippers_only_shippers';
+            }
+            $settings->setting_value = 1;
+            $settings->text = $only_users;
+            $settings->save();
+            GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+            GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+        } else {
+            GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->update(['setting_value'=> 0, 'text'=>NULL]);
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
     public function get_hub(Request  $request){
         if(isset($request->zone_id)) {
             $zone = $request->zone_id;

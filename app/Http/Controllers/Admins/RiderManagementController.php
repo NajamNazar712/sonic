@@ -1604,6 +1604,7 @@ class RiderManagementController extends Controller
                 $rider_remark = RiderRemark::find($id);
                 $response = new RiderRemarksResponse();
 
+                
 
                 if (isset($request->initial_response)) {
                     $rider_remark->updated_by = Auth::id();

@@ -146,6 +146,9 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
+        // 'App\Console\Commands\AgentUnassignedTicket ',
+        'App\Console\Commands\AgentSarNotification',
+
         'App\Console\Commands\AutoAssignCrmAgentNew',
         ];
 
@@ -203,6 +206,26 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
             }
         }
+        //rv agent cron jobs start
+        $employee_shifts = EmployeeShift::where('shift_type_id', 2)->get();
+        if(count($employee_shifts)){
+            foreach($employee_shifts as $employee_shift)
+            {
+                // run after 30 mins from the employee_shift ends, to unassign ticket from the contractual employees
+                $dailyAt = Carbon::parse($employee_shift->end_time)->addMinutes(30)->format('H:i:s');
+                $schedule->command('agent:unassignedTicket')->dailyAt('22:30')->runInBackground();
+            }
+        }
+        $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
+        $agent_sar_notify_time = '11:00';
+        if ($agent_sar_settings->exists()) {
+            $sar_setting = $agent_sar_settings->first();
+            $agent_sar_notify_time = $sar_setting->setting_value . ':00';
+        }
+        $schedule->command('agent:SarNotification')->dailyAt($agent_sar_notify_time)->runInBackground();
+
+        //rv agent cron jobs end
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 

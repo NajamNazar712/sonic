@@ -1,9 +1,9 @@
 @extends('client.layout.master')
-@section('title','Return Confirmation Pending Shipments')
+@section('title','Shipper Advise Requested')
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmation Pending Shipments
+        Shipper Advise Requested
     </h1>
 
     <div class="card">
@@ -893,7 +893,7 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
-                                url:"{{route('cod.return.pending.marked.status.single')}}",
+                                url:"{{route('cod.return.pending.marked.status')}}",
                                 method:'POST',
                                 data:{
                                     'shipment_id':row_id,

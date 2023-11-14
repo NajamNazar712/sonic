@@ -5,6 +5,7 @@ namespace App\Http\Traits;
 use Carbon\Carbon;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\ReportingLocation;
 
 trait CommonTrait
 {
@@ -84,5 +85,54 @@ trait CommonTrait
         } catch (\Throwable $th) {
             return ['status' => 0, 'msg' => $th->getMessage()];
         }
+
+    }
+
+
+    private function distance($origin, $destination)
+    {
+        return $this->vincenty_distance($origin, $destination);
+    }
+
+
+    private function vincenty_distance($origin, $destination)
+    {
+        $earth_radius = 6371;
+
+        list($origin_latitude, $origin_longitude) = explode(',', $origin);
+        list($destination_latitude, $destination_longitude) = explode(',', $destination);
+
+        $origin_latitude = deg2rad($origin_latitude);
+        $origin_longitude = deg2rad($origin_longitude);
+        $destination_latitude = deg2rad($destination_latitude);
+        $destination_longitude = deg2rad($destination_longitude);
+
+        $longitude_delta = $destination_longitude - $origin_longitude;
+
+        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
+
+        return $distance;
+    }
+
+    private function calculate_location_status($latitude, $longitude)
+    {
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if ($reporting_locations->exists()) {
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location) {
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        } else {
+            $location_status = 0;
+        }
+        return $location_status;
     }
 }
