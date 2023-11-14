@@ -112,6 +112,9 @@
                                                 <td><b>Average Shipments</b></td>
                                                 <td>{{$user->average_shipments}}@if($average_shipment_duration != null) / {{$average_shipment_duration->name}}@endif</td>
                                             </tr>
+
+                                    
+                                            
                                             @if($reference)
                                                 <tr>
                                                     <td><b>Reference</b></td>
@@ -153,6 +156,22 @@
                                             <tr>
                                                 <td><b>API Key</b></td>
                                                 <td>{{$user->api_token}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Payment Cycle</b></td>
+                                                <td>
+                                                    @if(isset($user->payment_cycle))
+                                                        {{ $user->payment_cycle->name }}
+                                                    @else
+                                                        No payment cycle found
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Payment Cycle Days</b></td>
+                                                <td>
+                                                  {{ $days }}
+                                                </td>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -1082,6 +1101,55 @@
                     $('#edit_city_id').val(city_id).trigger('change');
                     $('#EditPickup').modal('show');
                     
+                }
+
+                if ($(this).hasClass('return_default')) {
+                    var status  = "return_default";
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to make this default Return Address',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            if(id){
+                                $.ajax({
+                                    url: '{!! route('cod.change.pickup.status') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'id':id,
+                                        'status':status,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 1){
+                                        table.draw('false');
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+
+                                });
+                            }
+                        }
+                    });
+
                 }
             });
 

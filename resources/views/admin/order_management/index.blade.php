@@ -201,6 +201,15 @@
                                                     <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
                                                 </fieldset>
                                             </div>
+                                            <div class="col-6 d-none" id="cod_parcel_value_change">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Enter Parcel Value</span>
+                                                    </div>
+        
+                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
+                                                </fieldset>
+                                            </div>
                                             <div class="col-12">
                                                 <fieldset class="form-group">
                                                     <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
@@ -470,6 +479,12 @@
             // });
 
             $('.new_amount').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+            $('.cod_parcel_value').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
@@ -1555,6 +1570,14 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         swal.close();
+                                        
+                                        var is_zero_cod = 0;
+                                        console.log($('#new_amount').val());
+                                        if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
+                                        {
+                                            console.log('is_zero_cod = 1');
+                                            is_zero_cod = 1;
+                                        }
 
                                         $.ajax({
                                             url: '{!! route('admin.crm.request.add') !!}',
@@ -1568,6 +1591,8 @@
                                                 'description': service_description,
                                                 'cod_new_amount': $('#new_amount').val(),
                                                 'cod_remarks': $('#cod_remarks').val(),
+                                                'is_zero_cod': is_zero_cod,
+                                                'cod_parcel_value': $('#cod_parcel_value').val(),
                                                 'is_automated_cod_change': 1,
                                             }
                                         })
@@ -1992,6 +2017,7 @@
             });
             $('#AddRequestModal').on('hide.bs.modal', function (e) {
                 $('#add_request_form')[0].reset();
+                $('#cod_parcel_value_change').addClass('d-none');
                 $('#case_nature_complaints').val('').trigger('change');
                 $('#case_nature_select').val('').trigger('change');
                 $('#case_nature_requests').val('').trigger('change');
@@ -2224,18 +2250,32 @@
            $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
        });
        function validateRemarks() {
-        var remarks = $('#cancel_remarks').val().trim();
+            var remarks = $('#cancel_remarks').val().trim();
 
-        if (remarks === '') {
-            $('#cancel_remarks').addClass('is-invalid');
-            $('#cancel_remarks_error').text('Remark is required').addClass('cancel-error-message');
-            return false;
-        } else {
-            $('#cancel_remarks').removeClass('is-invalid');
-            $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
-            return true;
+            if (remarks === '') {
+                $('#cancel_remarks').addClass('is-invalid');
+                $('#cancel_remarks_error').text('Remark is required').addClass('cancel-error-message');
+                return false;
+            } else {
+                $('#cancel_remarks').removeClass('is-invalid');
+                $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
+                return true;
+            }
         }
-    }
+
+        $('#new_amount').on('keyup', function () {
+            
+            var new_amount = $(this).val();
+
+            if(new_amount == 0 && new_amount != '')
+            {
+                $('#cod_parcel_value_change').removeClass('d-none');
+            }
+            else{
+                $('#cod_parcel_value_change').addClass('d-none');
+            }
+
+        });
 
     });
     </script>
