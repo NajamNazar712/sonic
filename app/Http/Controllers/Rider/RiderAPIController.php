@@ -12398,7 +12398,7 @@ RiderAPIController extends Controller
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
-                $information['user_excluded_otp_shippers'] = $user_excluded_otp_shippers['shipper_toggle'] ? 1 : 0;
+                $information['user_excluded_otp_shippers'] = $user_excluded_otp_shippers ? 1 : 0;
                 $information['pending_shipment_count'] = 0;
                 $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
                 if($pending_shipments_count == 0){
