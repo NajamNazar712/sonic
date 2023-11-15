@@ -154,6 +154,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\NotificationSetting;
 use App\ReturnDeliveredToShipperSms;
 use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
@@ -12385,12 +12386,10 @@ RiderAPIController extends Controller
 //                    continue;
 //                }
 
-                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
-                ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
-                ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
-                ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
-                ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
-                ->first();
+                
+
+                
+
 
                 $information = array();
 
@@ -12398,7 +12397,6 @@ RiderAPIController extends Controller
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
-                $information['user_excluded_otp_shippers'] = $user_excluded_otp_shippers ? 1 : 0;
                 $information['pending_shipment_count'] = 0;
                 $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
                 if($pending_shipments_count == 0){
@@ -12664,6 +12662,42 @@ RiderAPIController extends Controller
                     }
 
                     $information['deliveries'][] = $deliveries;
+                    // Notification Setting Work after amount calculation
+
+                    // if amount greater than 0 check in Notification ID : 12
+                    if($cod_amount > 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 12)->first();
+                    }
+
+                    // if amount is equal to 0 check in Notification ID: 132
+                    if($cod_amount == 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 132)->first();
+                    }
+
+                    // check shipper toggle is set to 0 then only shipper id exist getSms set to true
+                    if($notification_setting->shipper_toggle == 1)
+                        $getSmsAndOtp = false;
+                    else if($notification_setting->shipper_toggle == 0)
+                        $getSmsAndOtp = true;
+
+                    $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                    
+                    ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
+                    ->select('shipments.user_id as shipper_id')
+                    ->first();
+
+                    $shipperIdToCheck = $user_excluded_otp_shippers['shipper_id'];
+
+                    $notification_setting_shippers = $notification_setting->notification_setting_shippers;
+                    $exists = $notification_setting_shippers->contains('shipper_id', $shipperIdToCheck);
+
+                    if($notification_setting->shipper_toggle == 1 && $exists)
+                        $getSmsAndOtp = true;
+
+                    else if($notification_setting->shipper_toggle == 0 && $exists)
+                        $getSmsAndOtp = false;
+
+                    $information['user_excluded_otp_shippers'] = $getSmsAndOtp;
                 }
 
                 usort($information['deliveries'], function ($a, $b) {
