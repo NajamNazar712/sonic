@@ -1374,7 +1374,7 @@
                                     row.push(values.nsa_osa_estimated_charges);
                                     row.push(values.arrival);
                                     row.push(values.last_status_date);
-                                    row.push(values.reattemp_status_remarks);
+                                    row.push(values.reattempt_status_remarks);
                                     row.push(values.confirmation_req);
                                     row.push(values.confirmation_on);
                                     row.push(values.delivery_attempt);
@@ -1967,7 +1967,7 @@
                         {data: 'nsa_osa_estimated_charges',name: 'nsa_osa_estimated_charges',class: 'align-middle nsa_osa_estimated_charges'},
                         {data: 'arrival',name: 'sj.created_at',class: 'align-middle arrival' },
                         {data: 'status_date',name: 'shipments_journey.created_at',class: 'align-middle status_date'},
-                        {data: 'reattemp_status_remarks',name: 'reattempt_shipment_status_remarks.remarks',class: 'align-middle reattemp_status_remarks',orderable: false,searchable: false},
+                        {data: 'reattempt_status_remarks',name: 'reattempt_shipment_status_remarks.remarks',class: 'align-middle reattempt_status_remarks',orderable: false,searchable: false},
                         {data: 'confirmation_req',name: '',class: 'align-middle confirmation_req', orderable: false,searchable: false},
                         {data: 'confirmation_on',name: '',class: 'align-middle confirmation_on', orderable: false,searchable: false},
                         {data: 'delivery_attempt',name: '',class: 'align-middle reattempts', orderable: false,searchable: false},
@@ -2027,7 +2027,7 @@
                             if ($(header).is('.select') || $(header).is('.serial_number') || $(
                                     header).is('.action') || $(header).is('.shipment_remarks') || $(
                                     header).is('.reattempts') || $(header).is('.consolidation') ||
-                                $(header).is('.reattemp_status_remarks')) {
+                                $(header).is('.reattempt_status_remarks')) {
                                 $(td).appendTo($(search) || $(header).is('sub_station'));
                             } else if ($(header).is('.status')) {
                                 $(drop_select).appendTo($(search))

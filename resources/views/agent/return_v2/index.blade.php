@@ -451,7 +451,6 @@
                     placeholder: 'Consignee*'
                 }).bind('change', function() {
                     if (this.value == 2) {
-                        console.log(this.value)
                         $('#consignee_city').val();
                         $('#consignee_city').trigger('change');
                         var hiddenInput = $('<input/>', {
@@ -797,10 +796,13 @@
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
                                 shipment += '<option hidden value="">Select Action *</option>';
 
+                                @if($shipment_statuses)
                                 @foreach ($shipment_statuses as $status)
+                                
                                 shipment +=
-                                        '<option value="{{ $status->id }}" id="status_value">{{ $status->name }}</option>';
+                                '<option value="{{ $status->id }}" id="status_value">{{ $status->name }}</option>';
                                 @endforeach
+                                @endif
                                 shipment += '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
 
                                 shipment += '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
