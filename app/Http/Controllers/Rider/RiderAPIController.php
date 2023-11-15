@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
-use App\Jobs\ProcessTraxPayExpireDeliveryNote;
-use App\RiderWiseDeliveryNoteSummary;
-use App\RiderAssignedHubForDeliveryNote;
 use DB;
-use phpDocumentor\Reflection\Types\This;
 use Validator;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -20,18 +16,21 @@ use App\Http\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
+use App\RiderWiseDeliveryNote;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\PickupNote;
+use App\Jobs\LastMileAppReport;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RiderPickup;
 use App\Http\Models\ShipmentOtp;
 use App\RiderDeliveryNoteStatus;
+use App\BoltUndeliveredReasonMap;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\HR\LeaveType;
 use App\Http\Models\ShipmentItem;
-//use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\EmployeeShift;
+//use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
@@ -44,6 +43,7 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\ShipmentOpenBox;
+use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\ReturnNote;
@@ -52,6 +52,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\ShipmentsJourney;
+use App\RiderWiseDeliveryNoteSummary;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\HR\EmployeeGender;
@@ -59,6 +60,7 @@ use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRemark;
+use App\RiderWiseDeliveryNoteShipment;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\HR\EmployeePayslip;
@@ -68,6 +70,8 @@ use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\RiderAssignedHubForDeliveryNote;
+use phpDocumentor\Reflection\Types\This;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
@@ -86,12 +90,14 @@ use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Traits\LastMileAppReportTrait;
 use App\Http\Controllers\AdminAPIController;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\ShipmentOtpVerification;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -99,14 +105,15 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\Rider\RiderIncentivePickup;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
@@ -133,6 +140,7 @@ use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\HR\EmployeeAttendanceAdjustment;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Controllers\UndeliveredReasonController;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\EmployeeAttendanceController;
@@ -153,13 +161,6 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Models\Admin\TraxPayTransaction;
-use App\ReturnDeliveredToShipperSms;
-use App\RiderWiseDeliveryNote;
-use App\RiderWiseDeliveryNoteShipment;
-use App\Http\Traits\LastMileAppReportTrait;
-use App\Jobs\LastMileAppReport;
-use App\Http\Controllers\UndeliveredReasonController;
 
 class RiderAPIController extends Controller
 {
@@ -11822,6 +11823,13 @@ class RiderAPIController extends Controller
                 //throw $th;
             }
         }
+    }
+    
+    public function undelivered_reason_map()
+    {
+        $undelivered_reason_map = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')->select('ssr.id','ssr.name')->get();
+        return response()->json(['status' => 0, 'message' => $undelivered_reason_map]);
+
     }
 
     public function check_profile_v3(Request $request)
