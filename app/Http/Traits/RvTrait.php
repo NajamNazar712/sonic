@@ -140,7 +140,7 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
-            dd($th->getMessage());
+            // dd($th->getMessage());
             DB::rollBack();
         }
        
