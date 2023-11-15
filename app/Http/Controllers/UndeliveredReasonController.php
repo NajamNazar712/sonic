@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\BoltUndeliveredReasonMap;
-use App\Http\Models\ShipmentsJourney;
 use App\BoltUndeliveredReasonMapCount;
-use App\Http\Controllers\ShipmentsJourneyController;
 
 class UndeliveredReasonController extends Controller
 {
