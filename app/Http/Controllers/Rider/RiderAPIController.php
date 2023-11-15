@@ -15084,7 +15084,7 @@ class RiderAPIController extends Controller
                 $this->set_order_v3($starting_location, $pickup_note->id, $pickup_note_requests);
             }
             else {
-                return response()->json(['status' => 0, 'message' => "Origin not assign"]);
+                // return response()->json(['status' => 0, 'message' => "Origin not assign"]);
             
             }
 
