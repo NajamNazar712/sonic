@@ -1,5 +1,5 @@
 @extends('client.layout.master')
-@section('title','Pickups History')
+@section('title','Pickups Request')
 
 @section('content')
     <div class="app-content content">
@@ -351,7 +351,7 @@
                                                 <div class="form-group">
                                                     <label>Shipments Qty*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                                        data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9">
                                                 </div>
                                             </div>
 
@@ -359,7 +359,7 @@
                                                 <div class="form-group">
                                                     <label>Total Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="Total Pieces is required">
+                                                        data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
@@ -395,7 +395,7 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group input-group mb-0">
-                                                            <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                                            <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty." maxlength="4">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -776,6 +776,7 @@
             //             }
             //         });
             // });
+           
             $('#regular_section').on('click', 'a',function (){
                 if($(this).hasClass('onetime')){
                     $('#regular_pickup').val(1);
@@ -801,12 +802,16 @@
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             });
+            
+
+
+         
             // $('#product_select').select2({
             //     placeholder: 'Select Product',
             //     width: '100%',
             //     dropdownParent:$('#add_pickup_request')
             // });
-            $('#product_select').prop('disabled', true);
+            // $('#product_select').prop('disabled', true);
 
             var booking_to_date = $('#requested_to_date').pickadate({
                 firstDay: 1,
@@ -920,6 +925,7 @@
                         action: function (e, dt, node, config) {
                             $("#add_pickup_request")[0].reset();
                             $("#add_pickup_request select").val(null).trigger('change.select2');
+                            $('#product_select').prop('selectedIndex', 0);
                             $('#AddRequestModal').modal('show');
                         }
                     },
@@ -1118,7 +1124,7 @@
                 },
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
-                    $('#product_select').attr('disabled', false);
+                    // $('#product_select').attr('disabled', false);
                     swal({
                         title: 'Please Wait!',
                         text: 'Pickup request is being added!',

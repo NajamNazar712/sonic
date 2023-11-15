@@ -11338,6 +11338,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.rider_pickup_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
     }
     
+    //pickup vs arrival report
     public function pickup_arival_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
         return view ('admin.reports.pickup_arival_report');

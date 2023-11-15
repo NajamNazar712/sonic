@@ -675,7 +675,7 @@
                                                 <div class="form-group">
                                                     <label>Shipments*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                                        data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9" >
                                                 </div>
                                             </div>
 
@@ -683,7 +683,7 @@
                                                 <div class="form-group">
                                                     <label>Total Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="Total Pieces is required">
+                                                        data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3" >
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
@@ -725,7 +725,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group input-group mb-0">
-                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty." maxlength="4">
                                             </div>
                                         </div>
                                     </div>
@@ -894,14 +894,14 @@
                                 <div class="col-4">
                                     <div class="form-group input-group">
                                         <input type="text" id="edit_shipments_count" placeholder="Shipments*" name="shipments_count" class="form-control text-left"
-                                            data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                            data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9">
                                     </div>
                                 </div>
 
                                 <div class="col-4 pl-0">
                                     <div class="form-group input-group">
                                         <input type="text" id="edit_total_pieces_count" placeholder="Total Pieces*" name="pieces" class="form-control text-left"
-                                            data-rule-required="true" data-msg-required="Total Pieces is required">
+                                            data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3">
                                     </div>
                                 </div>
                                 <div class="col-4 pl-0">
@@ -939,7 +939,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group input-group mb-0">
-                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="edit_a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="edit_a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty." maxlength="4">
                                             </div>
                                         </div>
                                     </div>
@@ -1215,12 +1215,17 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
+                'length':9
+                
+                
+                
             });
 
             $('#total_pieces_count').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
+                'length':3,
             });
 
             // $('#status_filter_input').prepend('<option value="0" selected="selected">All</option>').select2({
@@ -2065,7 +2070,7 @@
                             $("#edit_pickup_address").val(shipinfos.pickup_address).attr('disabled',true);
                             $("#edit_product_select").val(pickup_request.segment_id).trigger('change').attr('disabled',true);
                             $(".pickup_address_div").show();
-                        } else{
+                        } else{edit_total_pieces_count
                             $("#edit_customer_name").val(pickup_request.walkin_name).attr('disabled',false);
                              $("#edit_product_select").val(pickup_request.segment_id).trigger('change');
 
@@ -2137,7 +2142,7 @@
                 })
                     .done(function (data) {
                         if (data) {
-                            console.log(data.remarks);
+                            // console.log(data.remarks);
 
                             $('#rider_remarks_td').html(data.remarks.rider_remarks);
                             $('#shipper_remarks_td').html(data.remarks.shipper_remarks);
