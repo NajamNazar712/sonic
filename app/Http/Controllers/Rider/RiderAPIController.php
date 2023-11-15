@@ -11828,7 +11828,7 @@ class RiderAPIController extends Controller
     public function undelivered_reason_map()
     {
         $undelivered_reason_map = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')->select('ssr.id','ssr.name')->get();
-        return response()->json(['status' => 0, 'undelivered_reason_map'=> $undelivered_reason_map]);
+        return response()->json(['status' => 0, 'message' => $undelivered_reason_map]);
 
     }
 
