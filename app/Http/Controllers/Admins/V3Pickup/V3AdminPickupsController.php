@@ -347,7 +347,6 @@ class V3AdminPickupsController extends Controller
         }
 
 
-        $pickup_reasons = V3PickupRequestReason::all();
         $riders = $riders->get();
 
         $pickup_shipment_types = V3PickupShipmentType::all();
@@ -362,6 +361,8 @@ class V3AdminPickupsController extends Controller
         }
 
         $additional_services = V3PickupService::all();
+        $pickup_reasons=V3PickupRequestReason::where('active','t')->get();
+
 
         return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'pickup_reasons' => $pickup_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses, 'cities' => $cities]);
     }

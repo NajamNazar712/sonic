@@ -56,6 +56,7 @@
                             <div class="container-fluid">
                                 <div class="row justify-content-center">
                                     <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
+                                    <input type="hidden" value="0" id="status_filter_input_reason" name="pickup_reason_id">
                                     <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="0">All
                                     </button>
                                    
@@ -70,8 +71,8 @@
                                    
                                     <select class="select select2 mb-1" id="select_status">
                                         <option value="0" selected>All</option>
-                                        @foreach ($statuses as $id => $status)
-                                             <option value="{{ $id }}">{{  $status['name'] }}</option>
+                                        @foreach ($pickup_reasons as $id => $pickup_reason)
+                                             <option value="{{ $id }}">{{  $pickup_reason['name'] }}</option>
                                         @endforeach
                                         
                                     </select>
@@ -434,7 +435,7 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label>Address</label>
+                                                <label>Address*</label>
                                                 <input type="text" placeholder="Address" name="address" id="reg_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
                                             </div>
@@ -442,7 +443,7 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label>Phone</label>
+                                                <label>Phone*</label>
                                                 <input type="text" placeholder="Caller Contact No" name="phone" id="reg_phone" class="form-control" data-rule-required="true"  data-msg-required="Contact Number is Required"/>
 
                                             </div>
@@ -559,7 +560,7 @@
 
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <input type="text" placeholder="Customer Name" name="walkin_name"
+                                            <input type="text" placeholder="Customer Name*" name="walkin_name"
                                                    id="customer_name" class="form-control" data-rule-required="true"
                                                    data-msg-required="Customer Name is Required"/>
 
@@ -568,7 +569,7 @@
 
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <input type="text" placeholder="Mobile Number" name="walkin_phone"
+                                            <input type="text" placeholder="Mobile Number*" name="walkin_phone"
                                                    id="mobile_no" class="form-control" data-rule-required="true"
                                                    data-msg-required="Mobile is Required"/>
 
@@ -576,7 +577,7 @@
                                     </div>
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <input type="text" placeholder="Address" name="walkin_address" id="walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
+                                            <input type="text" placeholder="Address*" name="walkin_address" id="walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
                                         </div>
                                     </div>
@@ -672,7 +673,7 @@
                                             <div class="col-4">
                                                 {{-- input-group --}}
                                                 <div class="form-group">
-                                                    <label>Shipments</label>
+                                                    <label>Shipments*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required">
                                                 </div>
@@ -680,14 +681,14 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Total Pieces</label>
+                                                    <label>Total Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Weight</label>
+                                                    <label>Weight*</label>
                                                     <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
@@ -808,14 +809,14 @@
 
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <label>Address</label>
+                                                    <label>Address*</label>
                                                     <input type="text" placeholder="Address" name="walkin_address" id="edit_walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
                                                 </div>
                                             </div>
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <label>Phone</label>
+                                                    <label>Phone*</label>
                                                     <input type="text" placeholder="Mobile Number" name="walkin_phone"
                                                             id="edit_mobile_no" class="form-control" data-rule-required="true"
                                                             data-msg-required="Mobile is Required"/>
@@ -892,20 +893,20 @@
                             <div class="row align-items-center vh-100 px-1">
                                 <div class="col-4">
                                     <div class="form-group input-group">
-                                        <input type="text" id="edit_shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
+                                        <input type="text" id="edit_shipments_count" placeholder="Shipments*" name="shipments_count" class="form-control text-left"
                                             data-rule-required="true" data-msg-required="No. of Shipments is required">
                                     </div>
                                 </div>
 
                                 <div class="col-4 pl-0">
                                     <div class="form-group input-group">
-                                        <input type="text" id="edit_total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
+                                        <input type="text" id="edit_total_pieces_count" placeholder="Total Pieces*" name="pieces" class="form-control text-left"
                                             data-rule-required="true" data-msg-required="Total Pieces is required">
                                     </div>
                                 </div>
                                 <div class="col-4 pl-0">
                                     <div class="form-group input-group">
-                                        <input type="text" id="edit_estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
+                                        <input type="text" id="edit_estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight*" data-rule-required="true" data-msg-required="Weight is required">
                                     </div>
                                 </div>
                             </div>
@@ -1259,7 +1260,7 @@
             var shipper_pickup_addresses = [];
             var products=@json($products);
             $('#shippers_select').prepend('<option value="" selected="selected">Select Shippers</option>').select2({
-                placeholder: 'Select Customer',
+                placeholder: 'Select Customer*',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             }).bind('select2:select', function () {
@@ -1284,7 +1285,7 @@
                                 $('#pickup_address_id').append(pickup).trigger('change');
                             });
                             $('#pickup_address_id').select2({
-                                placeholder: 'Select Pickup Address',
+                                placeholder: 'Select Pickup Address*',
                                 width: '100%',
                                 dropdownParent:$('#add_pickup_request')
                             }).val(null).trigger('change');
@@ -1311,7 +1312,7 @@
 
             $('#reg_phone').inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $('#pickup_address_id').prepend('<option value="" selected="selected">Select Pickup Address</option>').select2({
-               placeholder: 'Select Pickup Address',
+               placeholder: 'Select Pickup Address*',
                width: '100%',
                dropdownParent:$('#add_pickup_request')
             }).bind('select2:select', function () {
@@ -1330,7 +1331,7 @@
             var services = @json($services);
         
             $('#product_select').select2({
-                placeholder: 'Select Product',
+                placeholder: 'Select Product*',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             }).bind('change', function () {
@@ -1351,7 +1352,7 @@
             });
 
             $('#edit_product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
-                placeholder: 'Select Product',
+                placeholder: 'Select Product*',
                 width: '100%',
                 dropdownParent:$('#update_pickup_request')
             }).bind('change', function () {
@@ -1372,7 +1373,7 @@
             });
 
             $('#city_id_select').prepend('<option value="" selected="selected">Select Pickup City</option>').select2({
-                placeholder: 'Select Pickup City',
+                placeholder: 'Select Pickup City*',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             });
@@ -1389,12 +1390,12 @@
             });
 
             $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
+                placeholder: 'Select Shipment Type*',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             });
             $('#edit_shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
+                placeholder: 'Select Shipment Type*',
                 width: '100%',
                 dropdownParent:$('#update_pickup_request')
             });
@@ -1677,6 +1678,7 @@
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
                         d.pickup_status_id = $('#status_filter_input').val();
+                        d.pickup_reason_id = $('#status_filter_input_reason').val();
                     }
                 },
                 rowId: 'id',
@@ -2162,7 +2164,7 @@
             });
             $("body").on('change','#select_status',function(){
                 var status_id=$(this).val();
-                $('#status_filter_input').val(status_id);
+                $('#status_filter_input_reason').val(status_id);
                 table.draw();
             });
 

@@ -170,7 +170,7 @@
                                                   
                                                     <div class="col-12">
                                                         <div class="form-group">
-                                                            <label>Pickup Address</label>
+                                                            <label>Pickup Address*</label>
                                                             <select name="pickup_address_id" id="pickup_address_id" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
                                                                 @foreach ($pickup_addresses as $pickup_address)
                                                                      <option value="{{ $pickup_address->id }}" data-address="{{ $pickup_address->pickup_address }}" data-phone="{{ $pickup_address->phone }}" data-poc="{{ $pickup_address->poc }}">{{$pickup_address->city->name .'-'.$pickup_address->pickup_address  }}</option>
@@ -180,14 +180,14 @@
                                                     </div>
                                                     <div class="col-12">
                                                         <div class="form-group">
-                                                            <label>Address</label>
+                                                            <label>Address*</label>
                                                             <input type="text" placeholder="Address" name="address" id="reg_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
                                                         <div class="form-group">
-                                                            <label>Phone</label>
+                                                            <label>Phone*</label>
                                                             <input type="text" placeholder="Caller Contact No" name="phone" id="reg_phone" class="form-control" data-rule-required="true"  data-msg-required="Contact Number is Required"/>
 
                                                         </div>
@@ -349,7 +349,7 @@
                                             <div class="col-4">
                                                 {{-- input-group --}}
                                                 <div class="form-group">
-                                                    <label>Shipments</label>
+                                                    <label>Shipments Qty*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required">
                                                 </div>
@@ -357,14 +357,14 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Total Pieces</label>
+                                                    <label>Total Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Weight</label>
+                                                    <label>Weight*</label>
                                                     <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
@@ -796,8 +796,8 @@
                     dropdownParent:$('#add_pickup_request')
             });
             
-            $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
+            $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type*</option>').select2({
+                placeholder: 'Select Shipment Type*',
                 width: '100%',
                 dropdownParent:$('#add_pickup_request')
             });
