@@ -15,7 +15,6 @@ class UndeliveredReasonController extends Controller
         $status = BoltUndeliveredReasonMap::where('reason_id', $reason_id)->first();
         $shipment = BoltUndeliveredReasonMapCount::where('shipment_id', $shipment_id);
         $journey_status = null;
-        $remarks = null;
         
         if ($shipment->exists()) {
             $shipment = $shipment->latest()->first();
@@ -31,7 +30,6 @@ class UndeliveredReasonController extends Controller
         }
 
         $journey_status = ($count <= 1) ? $status->status_attempt_count_1 : $status->status_attempt_count_2;
-        $remarks = in_array($status->reason_id, [17, 18, 27, 35]) ? $status->remarks : '-';
         
         if (!in_array($reason_id, [14, 23, 25])) { 
             BoltUndeliveredReasonMapCount::updateOrCreate(
@@ -45,6 +43,7 @@ class UndeliveredReasonController extends Controller
                 ]
             );
         }
+        
         return $journey_status;
     }
 }
