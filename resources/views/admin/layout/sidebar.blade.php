@@ -1894,7 +1894,14 @@
                                                    href="{{ route('admin.settings.mms_report.index') }}">MMS Report
                                                     Setting</a> </li>
                                         @endif
-
+                                        
+                                        @if (session('role_id') == 1 || in_array(889, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.rv_disable_shippers.index') }}">
+                                                Rv Disable Shippers
+                                            </a>
+                                        </li>
+                                        @endif
                             
                                         @if (session('role_id') == 1 || in_array(906, session('permissions')))
                                             <li><a class="menu-item"
