@@ -918,6 +918,8 @@
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
+                            $("#add_pickup_request")[0].reset();
+                            $("#add_pickup_request select").val(null).trigger('change.select2');
                             $('#AddRequestModal').modal('show');
                         }
                     },

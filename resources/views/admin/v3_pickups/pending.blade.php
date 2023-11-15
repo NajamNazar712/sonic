@@ -1182,6 +1182,10 @@
             /* background-color: #FF0000; */
             /* background-color: #FFA500; */
         }
+        .status_tab_active{
+            color: #fff;
+            background-color: #649bc8;
+        }
 
     </style>
 @endsection
@@ -2159,6 +2163,8 @@
 
             $('body').on('click', 'button.pickup_status_btn', function(){
                 var status_id = $(this).attr('rel');
+                $('.pickup_status_btn').removeClass('status_tab_active');
+                $(this).addClass('status_tab_active');
                $('#status_filter_input').val(status_id);
                table.draw();
             });
