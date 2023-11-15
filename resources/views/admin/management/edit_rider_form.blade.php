@@ -238,7 +238,7 @@
 
         var area_list = $('#area_list');
         area_list.empty();
-        @if(count($areas_list) > 0);
+        @if(!empty($areas_list))
             var areas = @json($areas_list);
             area_list.attr("disabled", false);
             area_list.append(`<option value="">Select Area</option>`)
