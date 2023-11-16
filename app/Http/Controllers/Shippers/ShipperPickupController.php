@@ -153,43 +153,43 @@ class ShipperPickupController extends Controller
                         }
                     }
                     return $attempted_date;
-                })
-                ->addColumn('action', function ($reminder_request) {
-                    // $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
+                });
+                // ->addColumn('action', function ($reminder_request) {
+                //     // $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
 
-                    $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
+                //     $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
-                    $edit_button='<a href="javascript:void(0);" class="dropdown-item edit_pickup_request" data-action="edit"><i class="ft-plus-square primary"></i> 
-                    Edit </a>';
+                //     $edit_button='<a href="javascript:void(0);" class="dropdown-item edit_pickup_request" data-action="edit"><i class="ft-plus-square primary"></i> 
+                //     Edit </a>';
     
                     
-                    $dropdown = "
-                        <div class='btn-group'>
-                        <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
-                            <div class='dropdown-menu dropdown-menu-sm'>";
+                //     $dropdown = "
+                //         <div class='btn-group'>
+                //         <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                //             <div class='dropdown-menu dropdown-menu-sm'>";
 
-                    // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
-                    //     $dropdown .= $reminder_button;
-                    // }
+                //     // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
+                //     //     $dropdown .= $reminder_button;
+                //     // }
 
-                    // if($reminder_request->status_id==1){
+                //     // if($reminder_request->status_id==1){
                        
-                    //     $dropdown.=$edit_button;
-                    // }
+                //     //     $dropdown.=$edit_button;
+                //     // }
                    
-                    if ($reminder_request->reverse_pickup == 1 && $reminder_request->rev_remarks == null) {
+                //     if ($reminder_request->reverse_pickup == 1 && $reminder_request->rev_remarks == null) {
 
-                        $dropdown .= $remarks_button;
-                    }
+                //         $dropdown .= $remarks_button;
+                //     }
 
-                    $dropdown .= "
-                            </div>
-                        </div>
-                    ";
+                //     $dropdown .= "
+                //             </div>
+                //         </div>
+                //     ";
 
-                    return $dropdown;
+                //     return $dropdown;
                     
-                });
+                // });
 
             if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
                 $from = $request->get('requested_from_date');

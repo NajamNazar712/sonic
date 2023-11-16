@@ -83,7 +83,7 @@
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
-                                    <th class="border-primary border-darken-1">Action</th>
+                                    {{-- <th class="border-primary border-darken-1">Action</th> --}}
                                 </tr>
                                 </thead>
                             </table>
@@ -1021,14 +1021,14 @@
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
-                    {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'align-middle text-center action',
-                        orderable: false,
-                        searchable: false
-                    }
+                    {data: 'special_request', name: 'special_request', class: 'align-middle special_request'}
+                    // {
+                    //     data: 'action',
+                    //     name: 'action',
+                    //     class: 'align-middle text-center action',
+                    //     orderable: false,
+                    //     searchable: false
+                    // }
 
                 ],
                 rowCallback: function (row, data, index) {
