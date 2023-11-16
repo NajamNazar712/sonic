@@ -38,6 +38,15 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col">
+                                            <div class="form-group mr-1">
+                                                <select name="origin_hub_id" id="origin_hub_id" class="form-control select2">
+                                                    @foreach($origin_hubs as $origin_hub)
+                                                        <option value="{{$origin_hub->id}}">{{$origin_hub->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
 
                                         <div class="col">
                                             <div class="form-group input-group ">
@@ -243,6 +252,7 @@
                     data: function (d) {
                         d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
                         d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
+                        d.origin_hub_id = $('#shipment_type_search_form #origin_hub_id').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
@@ -383,6 +393,12 @@
             $('#shipment_type_search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Shipping Mode',
+                allowClear:true
+            });
+            
+            $('#shipment_type_search_form #origin_hub_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Origin Hub',
                 allowClear:true
             });
 

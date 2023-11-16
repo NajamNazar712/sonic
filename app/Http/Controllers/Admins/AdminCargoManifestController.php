@@ -308,7 +308,8 @@ class AdminCargoManifestController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $service_type = BookingType::all();
         $shipping_mode = ShippingMode::all();
-        return view('admin.cargo.manifest.bags.pending')->with(['shipment_status' => $shipment_status, 'service_type' => $service_type, 'shipping_mode' => $shipping_mode]);
+        $origin_hubs = City::all();
+        return view('admin.cargo.manifest.bags.pending')->with(['origin_hubs' => $origin_hubs, 'shipment_status' => $shipment_status, 'service_type' => $service_type, 'shipping_mode' => $shipping_mode]);
     }
 
     public function pending_bag_list(Request $request)
@@ -427,6 +428,10 @@ class AdminCargoManifestController extends Controller
                 $from = $request->get('search_date_from');
                 $shipments->whereDate('shipments_journey.created_at', $from);
             }
+        }
+        
+        if ($origin_hub_id = $request->get('origin_hub_id')) {
+            $shipments->where('ohc.id', $origin_hub_id);
         }
 
         $datatables = Datatables::of($shipments)
