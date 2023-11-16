@@ -129,7 +129,7 @@
                             shipment += '<th><strong>Scanned By</strong></th>';
                             shipment += '<th><strong>City</strong></th>';
                             shipment += '<th><strong>Area</strong></th>';
-                            // shipment += '<th><strong>Scanned Via</strong></th>';
+                            shipment += '<th><strong>Scanned Via</strong></th>';
                             shipment += '<th><strong>Scanned At</strong></th>';
                             shipment += '<th><strong>IP Address</strong></th>';
                             shipment += '<th><strong>Latitude</strong></th>';
@@ -145,7 +145,7 @@
                                 shipment += '<td>' + history.scanned_by + '</td>';
                                 shipment += '<td>' + history.city + '</td>';
                                 shipment += '<td>' + history.area + '</td>';
-                                // shipment += '<td>' + history.updated_via + '</td>';
+                                shipment += '<td>' + history.updated_via + '</td>';
                                 shipment += '<td>' + history.scanned_at + '</td>';
                                 shipment += '<td>' + history.ip_address + '</td>';
                                 shipment += '<td>' + history.latitude + '</td>';
