@@ -187,6 +187,7 @@ Route::name('api.')->group(function () {
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
                 Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
                 Route::post('not_pick_v4','Rider\RiderAPIController@pickup_not_pick_v4')->name('pickup_not_pick_v4');
+                Route::post('not_pick_without_v4','Rider\RiderAPIController@pickup_not_pick_without_picture_v4')->name('pickup_not_pick_without_picture_v4');
                 Route::post('pick_v3', 'Rider\RiderAPIController@pickup_pick_v3')->name('pickup_pick_v3');
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
