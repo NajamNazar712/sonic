@@ -312,7 +312,7 @@
                         <select name="monthly" id="monthly"
                             class="select2 form-control d-none"
                             style="width: 100%">
-                            <option value="none">Please Select Day</option>
+                            <option value="nonem">Please Select Day</option>
 
                             @for ($i = 1; $i < 29; $i++)
                                 <option value="{{ $i }}">
@@ -2696,11 +2696,11 @@ function checkboxStatus() {
             submitHandler: function (form) {
                 var formData = $(form).serializeArray();
                 var fortnite = formData[3]['value'].split(',');
-                var monthly = formData[4]['value'];
+                var monthly = formData[5]['value'];
                 var selected_days = [];
 
-                if (formData[5] && formData[5]['value']) {
-                    var splitValues = formData[5]['value'].split(',');
+                if (formData[6] && formData[6]['value']) {
+                    var splitValues = formData[6]['value'].split(',');
                     if (splitValues.length > 0) {
                         selected_days = splitValues;
                     }
@@ -2721,9 +2721,9 @@ function checkboxStatus() {
                     (formData[2]['value'] == '2' && selected_days === 1) || 
                     (formData[2]['value'] == '6' && fortnite > 1) || 
                     (formData[2]['value'] == '1') ||
-                    (formData[2]['value'] == '3' && (monthly !== "none"))) {
-                        swal(swalConfig);
-                        form.submit();
+                    (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
+                        // swal(swalConfig);
+                        // form.submit();
                 } 
                 else {
                     if(formData[2]['value'] == '4'){
@@ -2971,9 +2971,7 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                 $('#monthly').addClass('d-none');
                 $('#label').addClass('d-none');
                 $('#label_2').addClass('d-none');
-                $('#fornite').removeAttr('name');
-                $('#fornite_2').removeAttr('name');
-                // $('#monthly').removeAttr('name');
+              
 
                 if (id == 4) {//Twice A Week
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
@@ -3017,8 +3015,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             $("#fornite_2").empty().append(option);
             $('#fornite_2').removeClass('d-none');
             $('#label_2').removeClass('d-none');
-            $('#fornite_2').removeAttr('name');
-            $('#fornite').removeAttr('name');
             $('#msg_payment').addClass("d-none");
             $('#fortnite_val').val(value);
         });
