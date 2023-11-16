@@ -255,6 +255,7 @@
                             <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Status Update Time</th>
+                            <th class="border-primary border-darken-1">Rider Update Time</th>
                             <th class="border-primary border-darken-1">Delivered / Undelivered Status</th>
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
@@ -712,6 +713,7 @@
                             { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                             { data:'status' ,name: 'status', class: 'align-middle status',orderable: false, searchable: false},
                             { data:'update_date_time' ,name: 'shipments_journey.created_at', class: 'align-middle update_date_time'},
+                            { data:'rider_time' ,name: 'rider_deliveries.added_at', class: 'align-middle rider_time'},
                             { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
