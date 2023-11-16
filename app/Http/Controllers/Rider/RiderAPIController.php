@@ -14930,6 +14930,7 @@ class RiderAPIController extends Controller
         $rules = [
             'tracking_number' => 'required',
             'call_from' => 'required',
+            
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -14975,7 +14976,13 @@ class RiderAPIController extends Controller
         $rules = [
             'tracking_number' => 'required',
             'call_from' => 'required',
+            'pickup_request_id' =>['nullable', 'string']
         ];
+
+        // check if pickup request id is not null or empty 
+        // then check check their user_id and shipment user_id 
+        // and match it with each other if pms_user_id is equal to shipment_user_id then return success with allow to 
+        // add in list of shippment scanning other wise return message with tracking (shipment / consignment number) is assign some on else 
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -14984,8 +14991,32 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $pickup_request_id = '';
+            $pms_user_id = '';
+            $shippment_user_id = '';
             $tracking_number = $request->tracking_number;
-            $shipper_status_id = Shipment::where('tracking_number', $tracking_number)->first()->shipper_status_id ?? NULL;
+            $shipper = Shipment::where('tracking_number', $tracking_number);
+            if($shipper->exists()){
+                $shipper = $shipper->first();
+                $shippment_user_id = $shipper->user_id;
+                try{
+                    $pickup_request_id = $request->pickup_request_id;
+                    $pickup_request = V3PickupRequest::where('id',$pickup_request_id);
+                    if($pickup_request->exists()){
+                        $pickup_request = $pickup_request->first();
+                        $pms_user_id = $pickup_request->shipper_id;
+                     
+                    }
+                    }catch(Exception $e){
+        
+                    }
+                    if($pickup_request_id){
+                        if($pms_user_id!=$shippment_user_id){
+                            return response()->json(['status' => 1, 'message' => 'tracking(Consignment) number assign someon else p:) ']);
+                        }
+                    }
+
+                        $shipper_status_id = $shipper->shipper_status_id ?? NULL;
             if (!$shipper_status_id) {
                 return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
             } else {
@@ -15011,7 +15042,10 @@ class RiderAPIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Shipment is not on booked status']);
                         break;
                 }
+            
+                    }
             }
+            
         }
     }
     public function pending_for_verification(Request $request)
