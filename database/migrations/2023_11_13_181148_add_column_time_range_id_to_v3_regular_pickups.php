@@ -26,7 +26,8 @@ class AddColumnTimeRangeIdToV3RegularPickups extends Migration
     public function down()
     {
         Schema::table('v3_regular_pickups', function (Blueprint $table) {
-            //
+            $table->dropColumn('time_range_id');
         });
+        
     }
 }

@@ -31,7 +31,7 @@ class AddColumnsToRoutesTable extends Migration
     public function down()
     {
         Schema::table('routes', function (Blueprint $table) {
-            //
+            $table->dropColumn('route_code','product_id','sub_area_id','hub_id','route_ship_type');
         });
     }
 }
