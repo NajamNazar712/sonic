@@ -12492,6 +12492,43 @@ RiderAPIController extends Controller
                         $status = 1;
                     }
 
+
+                    // if amount greater than 0 check in Notification ID : 12
+                    if($cod_amount > 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 12)->first();
+                    }
+
+                    // if amount is equal to 0 check in Notification ID: 132
+                    if($cod_amount == 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 132)->first();
+                    }
+
+                    // check shipper toggle is set to 0 then only shipper id exist getSms set to true
+                    if($notification_setting->shipper_toggle == 1)
+                        $getSmsAndOtp = 0;
+                    else if($notification_setting->shipper_toggle == 0)
+                        $getSmsAndOtp = 1;
+
+                    // $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                    
+                    // ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
+                    // ->select('shipments.user_id as shipper_id')
+                    // ->first();
+
+                   
+
+                    $shipperIdToCheck = $shipment_data->user_id;
+
+                    $notification_setting_shippers = $notification_setting->notification_setting_shippers;
+                    $exists = $notification_setting_shippers->contains('shipper_id', $shipperIdToCheck);
+
+                    if($notification_setting->shipper_toggle == 1 && $exists)
+                        $getSmsAndOtp = 1;
+
+                    else if($notification_setting->shipper_toggle == 0 && $exists)
+                        $getSmsAndOtp = 0;
+
+
                     $deliveries = array();
                     $deliveries['distribution'] = 0;
                     $shipment_status_count = ShipmentsJourney::where('shipment_id', $shipment_id)
@@ -12564,6 +12601,7 @@ RiderAPIController extends Controller
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
+                    $deliveries['user_excluded_otp_shippers'] = $getSmsAndOtp;
                     if ($delivery_otp == 1) {
                         if ($all_shippers->setting_value == 1) {
                             if (count($excluded_shippers) > 0) {
@@ -12664,40 +12702,9 @@ RiderAPIController extends Controller
                     $information['deliveries'][] = $deliveries;
                     // Notification Setting Work after amount calculation
 
-                    // if amount greater than 0 check in Notification ID : 12
-                    if($cod_amount > 0) {
-                        $notification_setting = NotificationSetting::where('notification_id', 12)->first();
-                    }
-
-                    // if amount is equal to 0 check in Notification ID: 132
-                    if($cod_amount == 0) {
-                        $notification_setting = NotificationSetting::where('notification_id', 132)->first();
-                    }
-
-                    // check shipper toggle is set to 0 then only shipper id exist getSms set to true
-                    if($notification_setting->shipper_toggle == 1)
-                        $getSmsAndOtp = 0;
-                    else if($notification_setting->shipper_toggle == 0)
-                        $getSmsAndOtp = 1;
-
-                    $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                     
-                    ->where('delivery_note_shipments.delivery_note_id', $delivery_note->id)
-                    ->select('shipments.user_id as shipper_id')
-                    ->first();
 
-                    $shipperIdToCheck = $user_excluded_otp_shippers['shipper_id'];
-
-                    $notification_setting_shippers = $notification_setting->notification_setting_shippers;
-                    $exists = $notification_setting_shippers->contains('shipper_id', $shipperIdToCheck);
-
-                    if($notification_setting->shipper_toggle == 1 && $exists)
-                        $getSmsAndOtp = 1;
-
-                    else if($notification_setting->shipper_toggle == 0 && $exists)
-                        $getSmsAndOtp = 0;
-
-                    $information['user_excluded_otp_shippers'] = $getSmsAndOtp;
+                    // $information['user_excluded_otp_shippers'] = $getSmsAndOtp;
                 }
 
                 usort($information['deliveries'], function ($a, $b) {
