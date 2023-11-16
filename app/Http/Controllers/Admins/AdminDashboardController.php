@@ -11885,23 +11885,29 @@ public function payfast_payment(Request $request){
                 default:
                     $payment_cycle_days = 0;
             }
-            dd($payment_cycle_days);
 
+            $shipper_id =  $request->shipper_id;
+            $shipper = User::find($shipper_id);
+            if($shipper){
+                $shipper->update([
+                    'payment_cycle_id' => $payment_cycles, 
+                    'payment_cycle_days' => $payment_cycle_days
+                ]);
+                return redirect()->back()->with(['success' => 'Payment Cycle updated successfully']);
+            }else{
+                return redirect()->back()->with(['error' => 'Shipper not found']);
+            }
         }catch(Exception $th){
-
-            dd($th->getMessage());
+            return redirect()->back()->with(['error' => $th->getMessage()]);
         }
 
     }
-
-
     public function getInternationalCityForm()
     {
         $hubs = City::where('hub', 1)->where('business_category_id', 2)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 2)->get();
         return view('admin.management.add_international_city_form')->with(['hubs' => $hubs, 'zones' => $zones]);
     }
-
     public function getEditInternationalCityForm($id)
     {
         $city = City::find($id);

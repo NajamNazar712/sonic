@@ -2447,10 +2447,7 @@ function checkboxStatus() {
             var paymentDayString = data;
             var paymentDayArray = paymentDayString.split(',');
             $('#selected_days').val(paymentDayArray);            
-            // Track the number of currently selected checkboxes
             var selectedCount = 0;
-
-            // Array to store the values of selected checkboxes
             var selectedValues = [];
 
             $('#checkboxContainer input[type="checkbox"]').each(function() {
