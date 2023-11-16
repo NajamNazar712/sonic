@@ -71,7 +71,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">ID</th>
-                                    <th class="border-primary border-darken-1">Date & Time</th>
+                                    <th class="border-primary border-darken-1">Pickup Date</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
@@ -349,7 +349,7 @@
                                             <div class="col-4">
                                                 {{-- input-group --}}
                                                 <div class="form-group">
-                                                    <label>Shipments Qty*</label>
+                                                    <label>Estimated Shipments Qty*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9">
                                                 </div>
@@ -357,14 +357,14 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Total Pieces*</label>
+                                                    <label>Estimated Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Weight*</label>
+                                                    <label>Estimated Weight*</label>
                                                     <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
@@ -844,64 +844,106 @@
                         success: function (result) {
                             head = [];
 
-                            head.push('S.No');
-                            head.push('Pickup Request ID');
-                            head.push('Requested Date');
-                            head.push('Current Rider');
-                            head.push('Last Rider');
-                            head.push('Pickup Note ID');
-                            head.push('Shipment(s) Booked');
-                            head.push('Shipment(s) Rider Picked');
-                            // head.push('Shipment(s) Received');
-                            head.push('Shipper');
-                            head.push('Territory');
-                            head.push('Contact Person');
-                            head.push('Vendor');
-                            head.push('Brand Name');
-                            head.push('Contact No(s).');
-                            head.push('Address');
-                            head.push('City');
-                            head.push('Status');
-                            head.push('Trax Reason');
-                            head.push('Trax Remark(s)');
-                            head.push('Shipper Remark(s)');
-                            head.push('Rider Remark(s)');
-                            head.push('Assigned Date');
-                            head.push('Attempt Date');
-                            head.push('Aging');
-                            head.push('Attempt(s)');
-
+                            // head.push('S.No');
+                            // head.push('Pickup Request ID');
+                            // head.push('Requested Date');
+                            // head.push('Current Rider');
+                            // head.push('Last Rider');
+                            // head.push('Pickup Note ID');
+                            // head.push('Shipment(s) Booked');
+                            // head.push('Shipment(s) Rider Picked');
+                            // // head.push('Shipment(s) Received');
+                            // head.push('Shipper');
+                            // head.push('Territory');
+                            // head.push('Contact Person');
+                            // head.push('Vendor');
+                            // head.push('Brand Name');
+                            // head.push('Contact No(s).');
+                            // head.push('Address');
+                            // head.push('City');
+                            // head.push('Status');
+                            // head.push('Trax Reason');
+                            // head.push('Trax Remark(s)');
+                            // head.push('Shipper Remark(s)');
+                            // head.push('Rider Remark(s)');
+                            // head.push('Assigned Date');
+                            // head.push('Attempt Date');
+                            // head.push('Aging');
+                            // head.push('Attempt(s)');
+                                head.push('S.No');
+                                head.push('Pickup Request ID');
+                                head.push('Pickup Date');
+                                head.push('Ask Time');
+                                head.push('Shipments/Pieces');
+                                head.push('Weight (KG)');
+                                head.push('Additional Services');
+                                head.push('Status');
+                                head.push('Product');
+                                head.push('Service');
+                                // head.push('Shipment Type');
+                                head.push('Shipper');
+                                head.push('Contact Person');
+                                head.push('Contact No(s).');
+                                head.push('Address');
+                                head.push('City');
+                                // head.push('Route Code');
+                                // head.push('Route Rider');
+                                // head.push('Route Rider Phone');
+                                head.push('Assigned Courier');
+                                // head.push('Assigned Courier Phone');
+                     
 
                             $.each(result.data, function (index, values) {
                                 row = [];
 
+                                // row.push(index + 1);
+                                // row.push(values.pickup_request_id);
+                                // row.push(values.requested_date);
+                                // row.push(values.current_rider);
+                                // row.push(values.last_rider);
+                                // row.push(values.pickup_note_id);
+                                // row.push(values.booked);
+                                // row.push(values.shipments_rider_picked);
+                                // // row.push(values.received);
+                                // row.push(values.shipper);
+                                // row.push(values.territory);
+                                // row.push(values.contact_person);
+                                // row.push(values.vendor_name);
+                                // row.push(values.brand_name);
+                                // row.push(values.contact_number);
+                                // row.push(values.address);
+                                // row.push(values.city);
+                                // row.push(values.pickup_status);
+                                // row.push(values.trax_reason);
+                                // row.push(values.trax_remarks);
+                                // row.push(values.shipper_remarks);
+                                // row.push(values.rider_remarks);
+                                // row.push(values.assigned_date);
+                                // row.push(values.attempted_date);
+                                // row.push(values.aging);
+                                // row.push(values.attempts);
+
                                 row.push(index + 1);
                                 row.push(values.pickup_request_id);
-                                row.push(values.requested_date);
-                                row.push(values.current_rider);
-                                row.push(values.last_rider);
-                                row.push(values.pickup_note_id);
-                                row.push(values.booked);
-                                row.push(values.shipments_rider_picked);
-                                // row.push(values.received);
+                                row.push(values.pickup_date);
+                                row.push(values.time_range);
+                                row.push(values.shipment_pieces);
+                                row.push(values.weight);
+                                row.push(values.services_count);
+                                row.push(values.status);
+                                row.push(values.product);
+                                row.push(values.service);
+                                // row.push(values.shippment_type);
                                 row.push(values.shipper);
-                                row.push(values.territory);
                                 row.push(values.contact_person);
-                                row.push(values.vendor_name);
-                                row.push(values.brand_name);
                                 row.push(values.contact_number);
                                 row.push(values.address);
                                 row.push(values.city);
-                                row.push(values.pickup_status);
-                                row.push(values.trax_reason);
-                                row.push(values.trax_remarks);
-                                row.push(values.shipper_remarks);
-                                row.push(values.rider_remarks);
-                                row.push(values.assigned_date);
-                                row.push(values.attempted_date);
-                                row.push(values.aging);
-                                row.push(values.attempts);
-
+                                // row.push(values.route_code);
+                                // row.push((values.rider_id!=null?values.rider_id + '-' + values.rider_name:''));
+                                // row.push(values.rider_phone);
+                                row.push((values.current_rider_id !=null?values.current_rider_id + '-' + values.current_rider:''));
+                                // row.push(values.current_rider_phone);
 
                                 body.push(row);
                             });
