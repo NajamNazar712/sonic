@@ -2,202 +2,203 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\CityArea;
-use App\Http\Controllers\Admins\DwsWeightChargesController;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\CorporateRateType;
-use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-use App\Http\Models\CorporateDefaultHistoryRateStatus;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\Survey\DisableAccountIntimationQuestion;
-use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\HistoryShipperBankAccount;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\Lead\LeadLog;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\Segment;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\Admin\WalkInStandardWeightCharge;
-use App\Http\Models\AdminLogs;
-use App\Http\Models\AverageShipmentCycle;
-use App\Http\Models\BusinessCategory;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\BanksList;
-use App\Http\Models\CityHistory;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Commission\SalesCommissionExternalUser;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\Commission\SalesTier;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\DeliveryType;
-use App\Http\Models\DiscountWeightCharge;
-use App\Http\Models\DuplicateUser;
-use App\Http\Models\DwsWeightCharges;
-use App\Http\Models\EmployeeShift;
-use App\Http\Models\HistoryDiscountWeightCharge;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeBloodGroup;
-use App\Http\Models\HR\EmployeeDomicile;
-use App\Http\Models\HR\EmployeeGender;
-use App\Http\Models\HR\EmployeeMaritalStatus;
-use App\Http\Models\HR\EmployeeReligion;
-use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\InternationalUsersInformation;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\Operataions\OperationForecast;
-use App\Http\Models\PaymentCycle;
-use App\Http\Models\PendingCorporateDefaultRateStatus;
-use App\Http\Models\PendingDiscountWeightCharge;
-use App\Http\Models\RateRemark;
-use App\Http\Models\PendingPayment;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\Rates\HistoryCorporateRateStatus;
-use App\Http\Models\Rates\HistoryRateDestinationHub;
-use App\Http\Models\Rates\HistoryRateOriginHub;
-use App\Http\Models\Rates\InternationalEconomyRate;
-use App\Http\Models\Rates\InternationalEconomyRateStatus;
-use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Models\Rates\PendingCorporateRateStatus;
-use App\Http\Models\Rates\PendingRateDestinationHub;
-use App\Http\Models\Rates\PendingRateOriginHub;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
-use App\Http\Models\Reference;
-use App\Http\Models\Operataions\OperationForecastShipments;
-use App\Http\Models\Operataions\OperationForecastWeightRange;
-use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
-use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
-use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
-use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
-use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
-use App\Http\Models\PackagingMaterialTypeSizes;
-use App\Http\Models\Rates\HistoryBookingTypeCharges;
-use App\Http\Models\Rates\HistoryCashHandlingCharge;
-use App\Http\Models\Rates\HistoryDiscountCharge;
-use App\Http\Models\Rates\HistoryFuelSurcharge;
-use App\Http\Models\Rates\HistoryInsuranceCharge;
-use App\Http\Models\Rates\HistoryPackagingCharge;
-use App\Http\Models\Rates\HistoryRateStatus;
-use App\Http\Models\Rates\HistoryReturnCharge;
-use App\Http\Models\Rates\HistoryWeightCharge;
-use App\Http\Models\Rates\PendingRateStatus;
-use App\Http\Models\Rates\RateHistory;
-use App\Http\Models\SalesTierTypeTag;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\SaleTierTagHistory;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\SubstituteUserModulePermission;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\SubstituteUserPermission;
-use App\Http\Models\ShipperContact;
-use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\Sister_account\MergedAccountHead;
-use App\Http\Models\Sister_account\MergedSisterAccount;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\UserDocumentAttachment;
-use App\Http\Models\WalkInCities;
-use App\Http\Models\ZoneClassCity;
+use Exception;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
 use App\RouteLocations;
-use App\Http\Models\RouteType;
-use App\TerritoryTagHistory;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Models\Admin\StandardWeightCharge;
-use App\Http\Models\Admin\StandardCashHandlingCharge;
-use App\Http\Models\Admin\StandardInsuranceCharge;
-use App\Http\Models\Admin\StandardReturnCharge;
-use App\Http\Models\Admin\StandardPackagingCharge;
-use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\Http\Models\Admin\StandardBookingTypeCharge;
-use App\Http\Models\Admin\UserCheckStatus;
-use App\Http\Models\BookingType;
-use App\Http\Models\Rates\PendingCashHandlingCharge;
-use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use App\Http\Models\Route;
+use App\Http\Models\Product;
+use App\TerritoryTagHistory;
+use CreateCityOsaRatesTable;
+use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
+use App\Http\Models\AdminLogs;
+use App\Http\Models\BanksList;
+use App\Http\Models\Reference;
+use App\Http\Models\RouteType;
+use App\Http\Models\PickupType;
+use App\Http\Models\RateRemark;
+use App\Http\Models\RateStatus;
+use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\CityHistory;
+use App\Http\Models\CityOsaRate;
+use App\Http\Models\HR\Employee;
+use App\Http\Models\SaleTierTag;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\DeliveryType;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\ReturnCharge;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\WalkInCities;
+use App\Http\Models\WeightCharge;
+use App\Jobs\CountFintechCharges;
+use App\Http\Models\Admin\Segment;
+use App\Http\Models\DuplicateUser;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\RiderCategory;
+use App\Http\Models\ZoneClassCity;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipperContact;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
-use App\Http\Models\Rates\PendingFuelSurcharge;
-use App\Http\Models\Rates\PendingInsuranceCharge;
-use App\Http\Models\Rates\PendingPackagingCharge;
-use App\Http\Models\Product;
-use App\Http\Models\Rider;
-use App\Http\Models\RiderCategory;
-use App\Http\Models\Route;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentPaymentStatus;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsPendingUserInformation;
-use App\Http\Models\WMS\WmsPendingPerProductCharge;
-use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
-use App\Http\Models\WMS\WmsPendingLabellingCharge;
-use App\Http\Models\WMS\WmsPendingPackingCharge;
-use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
-use App\Http\Models\WMS\WmsHistoryUserInformation;
-use App\Http\Models\WMS\WmsHistoryPerProductCharge;
-use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
-use App\Http\Models\WMS\WmsHistoryLabellingCharge;
-use App\Http\Models\WMS\WmsHistoryPackingCharge;
-use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\PickupType;
-use App\Http\Models\WeightCharge;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\DwsWeightCharges;
+use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\SalesTierTypeTag;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\BookingTypeCharges;
-use App\Http\Models\CityOsaRate;
-use App\Http\Models\ReturnCharge;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\DwsWeightChargesHistory;
-use App\Http\Models\PendingDwsWeightCharges;
-use App\Http\Models\Rates\PendingWeightCharge;
-use App\Http\Models\Rates\PendingBookingTypeCharges;
-use App\Http\Models\Rates\PendingReturnCharge;
-use App\Http\Models\Rates\PendingDiscountCharge;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ShippingMode;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\SaleTierTagHistory;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Yajra\Datatables\Datatables;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Models\HR\EmployeeDesignation;
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\WMS\WmsPackingCharge;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Http\Models\Admin\ShipementReceiveDetails;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Jobs\CountFintechCharges;
-use App\Http\Models\Admin\standard_fintech_charges;
-use GuzzleHttp\Client;
+use App\Http\Models\Admin\UserCheckStatus;
+use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\Admin\CorporateRateType;
+use App\Http\Models\DwsWeightChargesHistory;
+use App\Http\Models\PendingDwsWeightCharges;
+use App\Http\Models\Rates\HistoryRateStatus;
+use App\Http\Models\Rates\PendingRateStatus;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use Illuminate\Database\Eloquent\Collection;
 use App\Http\Models\Admin\UserFintectCharges;
-use CreateCityOsaRatesTable;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\Rates\HistoryReturnCharge;
+use App\Http\Models\Rates\HistoryWeightCharge;
+use App\Http\Models\Rates\PendingReturnCharge;
+use App\Http\Models\Rates\PendingWeightCharge;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Rates\HistoryRateOriginHub;
+use App\Http\Models\Rates\PendingFuelSurcharge;
+use App\Http\Models\Rates\PendingRateOriginHub;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\HistoryDiscountWeightCharge;
+use App\Http\Models\PendingDiscountWeightCharge;
+use App\Http\Models\Rates\HistoryDiscountCharge;
+use App\Http\Models\Rates\PendingDiscountCharge;
+use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsPendingPackingCharge;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Rates\HistoryInsuranceCharge;
+use App\Http\Models\Rates\HistoryPackagingCharge;
+use App\Http\Models\Rates\PendingInsuranceCharge;
+use App\Http\Models\Rates\PendingPackagingCharge;
+use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\WMS\WmsHistoryLabellingCharge;
+use App\Http\Models\WMS\WmsHistoryUserInformation;
+use App\Http\Models\WMS\WmsPendingLabellingCharge;
+use App\Http\Models\WMS\WmsPendingUserInformation;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\WMS\WmsHistoryPerProductCharge;
+use App\Http\Models\WMS\WmsPendingPerProductCharge;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\HistoryShipperBankAccount;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\Rates\HistoryBookingTypeCharges;
+use App\Http\Models\Rates\HistoryCashHandlingCharge;
+use App\Http\Models\Rates\HistoryRateDestinationHub;
+use App\Http\Models\Rates\PendingBookingTypeCharges;
+use App\Http\Models\Rates\PendingCashHandlingCharge;
+use App\Http\Models\Rates\PendingRateDestinationHub;
+use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
+use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\PendingCorporateRateStatus;
+use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\Sister_account\MergedAccountHead;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\PendingCorporateDefaultRateStatus;
+use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\Commission\SalesCommissionExternalUser;
+use App\Http\Models\Operataions\OperationForecastShipments;
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
+
+use App\Http\Models\Survey\DisableAccountIntimationQuestion;
+use App\Http\Models\Operataions\OperationForecastWeightRange;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
+use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
+use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
+use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
+use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
+use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 class AdminDashboardController extends Controller
 {
@@ -9494,7 +9495,7 @@ public function payfast_payment(Request $request){
                     }
                     if (session('role_id') == 1 || in_array(365, session('permissions'))) {
                         // hide this because change in payment cycle scenario when register shipper, now this should be change similarly while edit
-                        /*$dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';*/
+                        $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
                     if ((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
@@ -11852,9 +11853,9 @@ public function payfast_payment(Request $request){
         if ($user_id) {
             $user = User::find($user_id);
             if ($user) {
-                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
+                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_cycle_days];
                 return response()->json(['status' => 0, 'details' => $details]);
-
+                
             } else {
                 return response()->json(['status' => 1, 'error' => 'User not found!']);
             }
@@ -11863,46 +11864,34 @@ public function payfast_payment(Request $request){
 
     public function payment_cycle_submit(Request $request)
     {
-        $payment_cycle_id = $request->payment_cycle_select;
-        if ($payment_cycle_id) {
-            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                $payment_day = $request->payment_day;
+        try{
+            $payment_cycles = $request->payment_cycles;
+            $selected_days = $request->selected_days;
+            $fortnite = $request->fortnite;
+            $monthly = $request->monthly;
+    
+            switch ($payment_cycles) {
+                case '2':
+                case '4':
+                case '5':
+                    $payment_cycle_days = $selected_days;
+                    break;
+                case '6':
+                    $payment_cycle_days = $fortnite;
+                    break;
+                case '3':
+                    $payment_cycle_days = $monthly;
+                    break;
+                default:
+                    $payment_cycle_days = 0;
             }
-            if ($request->has('shipper_ids')) {
-                $shipper_ids = explode(',', $request->shipper_ids);
-                if (count($shipper_ids) > 0) {
-                    foreach ($shipper_ids as $shipper_id) {
-                        $shipper = User::find($shipper_id);
-                        if ($shipper) {
-                            $shipper->payment_cycle_id = $payment_cycle_id;
-                            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                                $shipper->payment_day = $payment_day;
-                            } else {
-                                $shipper->payment_day = NULL;
-                            }
-                            $shipper->save();
-                        }
-                    }
-                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
-                }
-            } else {
-                $shipper_id = $request->shipper_id;
-                $shipper = User::find($shipper_id);
-                if ($shipper) {
-                    $shipper->payment_cycle_id = $payment_cycle_id;
-                    if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                        $shipper->payment_day = $payment_day;
-                    } else {
-                        $shipper->payment_day = NULL;
-                    }
-                    $shipper->save();
-                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
-                }
-            }
+            dd($payment_cycle_days);
 
-            return redirect()->back()->with('error', 'Shipper not found!');
+        }catch(Exception $th){
+
+            dd($th->getMessage());
         }
-        return redirect()->back()->with('error', 'Payment Cycle not selected!');
+
     }
 
 

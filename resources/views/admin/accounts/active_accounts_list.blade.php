@@ -280,7 +280,7 @@
                     </div>
                     <div id="checkboxContainer" class="d-none">
                     </div>
-
+                
                     <span class="text-danger d-none" id="payment_cycle_msg"></span>
                     <span class="text-danger d-none" id="msg_payment">Maximum Selected</span>
 
@@ -298,7 +298,7 @@
                             @endfor
                         </select>
                     </div>
-
+                   
 
                     <div class="mt-2">
                         <label class="d-none" id="label_2">Day 2</label>
@@ -320,9 +320,12 @@
                             @endfor
                         </select>
                     </div>
+                    <div id="msg_limit_days" class="d-none text-danger">
+                    </div>
                     <input type="hidden" name="selected_days" value="" id="selected_days">
 
                 </div>
+           
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
@@ -2405,6 +2408,8 @@ function checkboxStatus() {
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Payment Cycle'
+        }).on('change', function () {
+            $('#msg_limit_days').addClass('d-none')
         });
 
         $( "#set_territory" ).validate({
@@ -2436,65 +2441,60 @@ function checkboxStatus() {
             }
         });
 
+        var len = null;
+
         function updateCheckboxValues(limit, data) {
             var paymentDayString = data;
             var paymentDayArray = paymentDayString.split(',');
-            $('#selected_days').val(paymentDayArray);
-
+            $('#selected_days').val(paymentDayArray);            
             // Track the number of currently selected checkboxes
             var selectedCount = 0;
 
             // Array to store the values of selected checkboxes
             var selectedValues = [];
 
-            // Assuming checkboxes have values corresponding to the items in paymentDayArray
             $('#checkboxContainer input[type="checkbox"]').each(function() {
                 var checkboxValue = $(this).val();
                 if (paymentDayArray.includes(checkboxValue)) {
-                    // If checkbox is in paymentDayArray
                     if (selectedCount < limit) {
                         $(this).prop('checked', true);
-                        selectedValues.push(checkboxValue); // Add the selected value to the array
+                        selectedValues.push(checkboxValue); 
                         selectedCount++;
                     } else {
-                        // If user tries to select more than limit, deselect one first
                         $(this).prop('checked', false);
                     }
                 } else {
-                    // If checkbox is not in paymentDayArray
                     $(this).prop('checked', false);
                 }
             });
 
-            // Add a click event listener to the checkboxes to handle user interactions
             $('#checkboxContainer input[type="checkbox"]').on('click', function() {
                 var checkboxValue = $(this).val();
 
-                // If the checkbox is being checked
                 if ($(this).prop('checked')) {
                     if (selectedCount >= limit) {
-                        // If user tries to select more than limit, deselect one first
                         $(this).prop('checked', false);
                     } else {
-                        // If there are less than limit selected checkboxes, increment the count and add value to array
                         selectedCount++;
                         selectedValues.push(checkboxValue);
                     }
                 } else {
-                    // If the checkbox is being unchecked, decrement the count and remove value from array
                     selectedCount--;
                     selectedValues = selectedValues.filter(function(value) {
                         return value !== checkboxValue;
                     });
                 }
 
+                selectedValues = selectedValues.sort(function(a, b) {
+                    return a - b;
+                });
                 if(selectedValues.length != 0){
                     $('#selected_days').val(selectedValues);
-                }else{
+                }else if (paymentDayArray.length == selectedValues.length){
                     $('#selected_days').val(paymentDayArray);
-
+                }else{
+                    $('#selected_days').val('');
                 }
-
             });
         }
 
@@ -2521,21 +2521,17 @@ function checkboxStatus() {
                                 $('#fortnite_val').val(value);
                                 $('#fornite_2').removeClass('d-none');
                                 $('#label_2').removeClass('d-none');
-
                             }else if(data.details.payment_cycle_id == 3){// Monthly
                                 $('#monthly').removeClass('d-none');
                                 $('#monthly').val(data.details.payment_day);
-
                             }else if (data.details.payment_cycle_id == 4) { // Twice a week
                                 updateCheckboxValues(2, data.details.payment_day);
                             }else if(data.details.payment_cycle_id == 5){//Thrice a week
                                 updateCheckboxValues(3, data.details.payment_day);
                             }else if(data.details.payment_cycle_id == 2){//weekly
                                 updateCheckboxValues(1, data.details.payment_day);
-                            }
-                            else if(data.details.payment_cycle_id != 1){//Daily
+                            }else if(data.details.payment_cycle_id != 1){//Daily
                                 $('#payment_day').val(data.details.payment_day);
-
                             } else{
                                 $('#payment_day_div').addClass('d-none');
                             }
@@ -2549,7 +2545,7 @@ function checkboxStatus() {
         });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-            var id = $(this).parents('tr').attr('id');
+            var id = $(this).parents('tr').attr('id');  
             if($(this).hasClass('restrict_order_id')){
                 if(id){
                     $.ajax({
@@ -2694,24 +2690,69 @@ function checkboxStatus() {
         $('#payment_cycle_form').validate({
             errorClass: 'danger',
             successClass: 'success',
-            normalizer: function(value) {
+            normalizer: function (value) {
                 return $.trim(value);
             },
-            errorPlacement: function(error, element) {
+            errorPlacement: function (error, element) {
                 error.addClass('w-100').appendTo(element.parent('.form-group'));
             },
-            submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Payment Cycle is being Updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+            submitHandler: function (form) {
+                var formData = $(form).serializeArray();
+                var fortnite = formData[3]['value'].split(',');
+                var monthly = formData[4]['value'];
+                var selected_days = [];
+
+                if (formData[5] && formData[5]['value']) {
+                    var splitValues = formData[5]['value'].split(',');
+                    if (splitValues.length > 0) {
+                        selected_days = splitValues;
+                    }
+                }                
+
+                var swalConfig = {
+                    title: 'Please Wait!',
+                    text: 'Payment Cycle is being Updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                };
+                fortnite = fortnite.length;
+                selected_days = selected_days.length;
+                if ((formData[2]['value'] == '4' && selected_days === 2) ||
+                    (formData[2]['value'] == '5' && selected_days === 3) ||
+                    (formData[2]['value'] == '2' && selected_days === 1) || 
+                    (formData[2]['value'] == '6' && fortnite > 1) || 
+                    (formData[2]['value'] == '1') ||
+                    (formData[2]['value'] == '3' && (monthly !== "none"))) {
+                        swal(swalConfig);
+                        form.submit();
+                } 
+                else {
+                    if(formData[2]['value'] == '4'){
+                        days = 2;
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '5'){
+                        days = 3
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '2'){
+                        days = 1;
+                        $('#msg_limit_days').text('Select ' + days + ' day only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '6'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '3'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+
+                    }
+                }
             }
         });
+
         $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
             $('#SalesTierTypeTagModal #poc').val('').trigger('change');
             $('#SalesTierTypeTagModal #kam').val('').trigger('change');
@@ -2934,8 +2975,8 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                 $('#label').addClass('d-none');
                 $('#label_2').addClass('d-none');
                 $('#fornite').removeAttr('name');
-                $('#monthly').removeAttr('name');
                 $('#fornite_2').removeAttr('name');
+                // $('#monthly').removeAttr('name');
 
                 if (id == 4) {//Twice A Week
                     $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
@@ -2954,7 +2995,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
                 $('#monthly').addClass('d-none');
 
             } else if (id == 3) {
-                $('#selected_days').removeAttr('name');
                 $('#monthly').removeClass('d-none')
                 $("#checkboxContainer").addClass("d-none");
                 $('#fornite').addClass('d-none');
