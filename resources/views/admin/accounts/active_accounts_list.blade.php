@@ -2722,8 +2722,8 @@ function checkboxStatus() {
                     (formData[2]['value'] == '6' && fortnite > 1) || 
                     (formData[2]['value'] == '1') ||
                     (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
-                        // swal(swalConfig);
-                        // form.submit();
+                        swal(swalConfig);
+                        form.submit();
                 } 
                 else {
                     if(formData[2]['value'] == '4'){
