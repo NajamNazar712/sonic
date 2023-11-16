@@ -12676,9 +12676,9 @@ RiderAPIController extends Controller
 
                     // check shipper toggle is set to 0 then only shipper id exist getSms set to true
                     if($notification_setting->shipper_toggle == 1)
-                        $getSmsAndOtp = false;
+                        $getSmsAndOtp = 0;
                     else if($notification_setting->shipper_toggle == 0)
-                        $getSmsAndOtp = true;
+                        $getSmsAndOtp = 1;
 
                     $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                     
@@ -12692,10 +12692,10 @@ RiderAPIController extends Controller
                     $exists = $notification_setting_shippers->contains('shipper_id', $shipperIdToCheck);
 
                     if($notification_setting->shipper_toggle == 1 && $exists)
-                        $getSmsAndOtp = true;
+                        $getSmsAndOtp = 1;
 
                     else if($notification_setting->shipper_toggle == 0 && $exists)
-                        $getSmsAndOtp = false;
+                        $getSmsAndOtp = 0;
 
                     $information['user_excluded_otp_shippers'] = $getSmsAndOtp;
                 }
