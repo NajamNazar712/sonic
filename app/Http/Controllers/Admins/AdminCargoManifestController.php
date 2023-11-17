@@ -607,6 +607,15 @@ class AdminCargoManifestController extends Controller
                             ->where('olddhci.name', 'like', '%' . $keyword . '%');
                     });
             })
+            ->filterColumn('z.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('z.name', 'like', '%'.$keyword.'%');
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('dc.name', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
