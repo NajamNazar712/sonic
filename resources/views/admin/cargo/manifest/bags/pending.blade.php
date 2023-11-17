@@ -38,15 +38,6 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col">
-                                            <div class="form-group mr-1">
-                                                <select name="origin_hub_id" id="origin_hub_id" class="form-control select2">
-                                                    @foreach($origin_hubs as $origin_hub)
-                                                        <option value="{{$origin_hub->id}}">{{$origin_hub->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
 
                                         <div class="col">
                                             <div class="form-group input-group ">
@@ -104,6 +95,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Origin Hub</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Sub Station</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
@@ -187,6 +179,7 @@
                             head.push('Status');
                             head.push('Origin');
                             head.push('Origin Hub');
+                            head.push('Zone');
                             head.push('Destination');
                             head.push('Sub Station');
                             head.push('Shipper');
@@ -207,6 +200,7 @@
                                 row.push(values.status);
                                 row.push(values.origin);
                                 row.push(values.origin_hub);
+                                row.push(values.zone_name);
                                 row.push(values.destination);
                                 row.push(values.sub_station);
                                 row.push(values.shipper);
@@ -252,14 +246,13 @@
                     data: function (d) {
                         d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
                         d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
-                        d.origin_hub_id = $('#shipment_type_search_form #origin_hub_id').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -268,6 +261,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'origin_hub', name: 'ohc.name', class: 'align-middle origin_hub'},
+                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -396,12 +390,6 @@
                 allowClear:true
             });
             
-            $('#shipment_type_search_form #origin_hub_id').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Origin Hub',
-                allowClear:true
-            });
-
             $('#star_shippers_filter').on('click',function () {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
