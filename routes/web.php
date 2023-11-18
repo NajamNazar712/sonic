@@ -2994,17 +2994,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pickup_arival')->name('pickup_arival.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@pickup_arival_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pickup_arival_list')->name('list');
-            Route::post('shipper_address','Admins\AdminReportsController@get_shipper_addresses')->name('shipper_address');
-            Route::post('shipments','Admins\AdminReportsController@get_shipments')->name('shipments');
-            Route::post('not_picked_shipments','Admins\AdminReportsController@get_not_picked_shipments')->name('not_picked_shipments');
             Route::post('rider_details','Admins\AdminReportsController@get_rider_details')->name('rider_details');
             Route::post('arrived_shipments','Admins\AdminReportsController@get_arrived_shipments')->name('arrived_shipments');
             Route::post('balance_Shipments','Admins\AdminReportsController@get_balance_Shipments')->name('balance_Shipments');
 
         });
 
-        Route::prefix('shipment_picked')->name('shipment_picked.')->group(function(){
-            Route::get('','Admins\AdminReportsController@shipment_picked_index')->name('index');
+        Route::prefix('created_shipment')->name('created_shipment.')->group(function(){
+            Route::get('','Admins\AdminReportsController@created_shipment_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@created_shipment_list')->name('list');
+            Route::post('shipper_address','Admins\AdminReportsController@get_shipper_addresses')->name('shipper_address');
+            Route::post('shipments','Admins\AdminReportsController@get_shipments')->name('shipments');
+            Route::post('not_picked_shipments','Admins\AdminReportsController@get_not_picked_shipments')->name('not_picked_shipments');
         });
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function () {
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');

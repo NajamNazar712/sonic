@@ -1874,7 +1874,11 @@ class V3AdminPickupsController extends Controller
                    
                     if($shipment_journey){
                             $picked_rider=$shipment_journey->rider;
+                    }else
+                    {
+                            $global_rider=($settings->setting_value.'-'.$settings->text);
                     }
+
 
                   
                     // $shipment_journey=$shipment->with('shipment_journey.rider')->where('shipper_status_id',53);
@@ -1893,8 +1897,11 @@ class V3AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
                     // $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     // $details['rider_assigned'] = $rider_assigned_flag;
-                    $details['rider_picked'] = ( $picked_rider->id .'-'. $picked_rider->name);
-                  
+                    if(isset($picked_rider))
+                         $details['rider_picked'] = ( $picked_rider->id .'-'. $picked_rider->name);
+                    else
+                        $details['rider_picked']=$global_rider;
+                    
 
 
 
@@ -2648,11 +2655,14 @@ class V3AdminPickupsController extends Controller
                 
                     $shipment->save();
                     
-
+          
                     $shipment_journey=$shipment->shipment_journey->where('shipper_status_id',53)->first();
                    
                     if($shipment_journey){
                             $picked_rider=$shipment_journey->rider;
+                    }else
+                    {
+                        $global_rider=($settings->setting_value.'-'.$settings->text);
                     }
 
                     $details = array();
@@ -2663,13 +2673,16 @@ class V3AdminPickupsController extends Controller
                     // $details['pickup_request_id'] = str_pad($pickup_request->id, 6, '0', STR_PAD_LEFT);
                     // $details['rider'] = $rider;
                     // $details['amount'] = $shipment->amount;
-                
                     // $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     // $details['rider_assigned'] = $rider_assigned_flag;
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
                     $details['weight'] = floatval($shipment->actual_weight);
-                    $details['rider_picked'] = ( $picked_rider->id .'-'. $picked_rider->name);
+                    if(isset($picked_rider))
+                        $details['rider_picked'] = ( $picked_rider->id .'-'. $picked_rider->name);
+                    else
+                        $details['rider_picked']=$global_rider;
+                   
                     // dd( $details);
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -2809,12 +2822,16 @@ class V3AdminPickupsController extends Controller
         $print_shipment_ids = array();
 
         $unassigned_pickup_requests = array();
+        
+        $admin_id=session('id');
 
         $settings = GlobalSettings::where('type', 'global_rider_id');
         $pickup_rider_id = null;
+        // $global_rider_id = null;
         if ($settings->exists()) {
             $settings = $settings->first();
             $pickup_rider_id = $settings->setting_value;
+            // $global_rider_id = $settings->setting_value;
         }
 
         //by pass this stage
@@ -2867,15 +2884,15 @@ class V3AdminPickupsController extends Controller
                     // }
                     // add new part
                     $reference_1_id=null;
-                    //add new part
                     $picked_rider=ShipmentsJourney::leftjoin('shipments_v2_pickup_journeys as spj','spj.shipment_id','=','shipments_journey.shipment_id')
                     ->select('shipments_journey.rider_id')->where('spj.status_id',6)->where('shipper_status_id',53)->where('shipments_journey.shipment_id',$shipment_id)->first();
-                    if($picked_rider->exists()){
+                    if($picked_rider){
                         $rider_id = $picked_rider->rider_id;
+                        $global_rider_id=null;
                     }else{
-                        $rider_id = $pickup_rider_id;
+                        $global_rider_id = $pickup_rider_id;
+                        $rider_id=null;
                     }
-                    
                     //by pass this stage
                     // if ($pickup_request->current_rider_id == null) {
                     //     $rider_id = $pickup_rider_id;
@@ -2920,7 +2937,7 @@ class V3AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id,$global_rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {

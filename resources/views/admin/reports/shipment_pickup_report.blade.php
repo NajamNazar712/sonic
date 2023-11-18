@@ -417,69 +417,6 @@ aria-hidden="true">
                 }
             });
 
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         blockPagePermanently();
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         params.excel = true;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.reports.rider_pickup.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
-            //                 footer = [];
-            //                 head.push('S.No');
-            //                 head.push('Pickup Date');
-            //                 head.push('Rider ID');
-            //                 head.push('Rider Name');
-            //                 head.push('Origin');
-            //                 head.push('Pickup Note ID');
-            //                 head.push('No. of Scanned Shipments');
-            //                 head.push('No. of Arrived Shipments');
-            //                 head.push('Arrival Without Scan Shipments');
-
-            //                 var scanned_shipments = 0;
-            //                 var arrived_shipments = 0;
-            //                 var without_scan_shipments = 0;
-
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
-            //                     row.push(index + 1);
-            //                     row.push(values.date);
-            //                     row.push(values.rider_id);
-            //                     row.push(values.rider_name);
-            //                     row.push(values.origin);
-            //                     row.push(values.pickup_note_id);
-            //                     row.push(values.shipments_scanned_by_rider);
-            //                     row.push(values.total_arrived_shipments);
-            //                     row.push(values.without_scan_shipments);
-            //                     scanned_shipments += values.shipments_scanned_by_rider;
-            //                     arrived_shipments += values.total_arrived_shipments;
-            //                     without_scan_shipments += values.without_scan_shipments;
-            //                     body.push(row);
-            //                 });
-
-            //                 footer.push('-');
-            //                 footer.push('Total');
-            //                 footer.push('');
-            //                 footer.push('');
-            //                 footer.push('');
-            //                 footer.push('');
-            //                 footer.push(scanned_shipments);
-            //                 footer.push(arrived_shipments);
-            //                 footer.push(without_scan_shipments);
-            //             },
-            //             async: false
-            //         });
-            //         UnblockPagePermanently();
-
-            //         return {body: body, header: head, footer: footer};
-            //     }
-            // } );
-
             // $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
               var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -503,7 +440,7 @@ aria-hidden="true">
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.pickup_arival.list') }}',
+                    url: '{{ route('admin.reports.created_shipment.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
@@ -518,18 +455,11 @@ aria-hidden="true">
                     { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle text-center shipper_id',render:function(data,type,row){
                         return row.shipper_id +'-'+ row.shipper_name;
                     }},
-                    // { data:'shipper_name' ,name: 'shipper_name', class: 'align-middle text-center shipper_name'},
                     { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                     
                     { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
                     { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
-                    // { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
-                    // { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
-                    // { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
-
-                    // { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
-                    // { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    // { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
+    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -591,7 +521,7 @@ aria-hidden="true">
             var from_date=$("#from_date").val();
             var to_date=$("#to_date").val();
             $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.shipper_address') }}',
+                url:'{{ route('admin.reports.created_shipment.shipper_address') }}',
                 method:'POST',
                 data:{
                     'shipper_id':shipper_id,
@@ -615,7 +545,7 @@ aria-hidden="true">
             var from_date=$("#from_date").val();
             var to_date=$("#to_date").val();
             $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.shipments') }}',
+                url:'{{ route('admin.reports.created_shipment.shipments') }}',
                 method:'POST',
                 data:{
                     'shipper_id':shipper_id,
@@ -645,7 +575,7 @@ aria-hidden="true">
             var from_date=$("#from_date").val();
             var to_date=$("#to_date").val();
             $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.not_picked_shipments') }}',
+                url:'{{ route('admin.reports.created_shipment.not_picked_shipments') }}',
                 method:'POST',
                 data:{
                     'shipper_id':shipper_id,
@@ -663,82 +593,7 @@ aria-hidden="true">
             });
         });
         
-        $("body").on('click','.rider_picked_btn',function(){
-            // 
-            $("#RiderdetailModal table tbody").empty();
-            var shipper_id=$(this).parent('td').parent('tr').attr('id');
-            var from_date=$("#from_date").val();
-            var to_date=$("#to_date").val();
-            $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.rider_details') }}',
-                method:'POST',
-                data:{
-                    'shipper_id':shipper_id,
-                    'from_date':from_date,
-                    'to_date':to_date,
-                    '_token':'{{ csrf_token() }}'
-                }
-            }).done(function(data){
-               if(data.status==1){
-                    $.each(data.rider_details ,function(key,value){
-                        if(value.arrived_status!=2){
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
-
-                        }else{
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
-                        }
-                    });
-                    $("#RiderdetailModal").modal('show');
-               }
-            });
-        });
-        $("body").on('click','.shipment_arrived_btn',function(){
-            $("#ShipmentArrivedModal table tbody").empty();
-            var shipper_id=$(this).parent('td').parent('tr').attr('id');
-            var from_date=$("#from_date").val();
-            var to_date=$("#to_date").val();
-            $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.arrived_shipments') }}',
-                method:'POST',
-                data:{
-                    'shipper_id':shipper_id,
-                    'from_date':from_date,
-                    'to_date':to_date,
-                    '_token':'{{ csrf_token() }}'
-                }
-            }).done(function(data){
-               if(data.status==1){
-                    $.each(data.arrived_shipments ,function(key,value){
-                        $("#ShipmentArrivedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.rider_id!=null?value.rider_id+'-'+value.rider_name:'')+'</td><td class=" align-middle global_rider">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
-                    });
-                    $("#ShipmentArrivedModal").modal('show');
-               }
-            });
-        });
-        
-        $("body").on('click','.shipment_balance_btn',function(){
-            $("#BalanceShipmentModal table tbody").empty();
-            var shipper_id=$(this).parent('td').parent('tr').attr('id');
-            var from_date=$("#from_date").val();
-            var to_date=$("#to_date").val();
-            $.ajax({
-                url:'{{ route('admin.reports.pickup_arival.balance_Shipments') }}',
-                method:'POST',
-                data:{
-                    'shipper_id':shipper_id,
-                    'from_date':from_date,
-                    'to_date':to_date,
-                    '_token':'{{ csrf_token() }}'
-                }
-            }).done(function(data){
-               if(data.status==1){
-                    $.each(data.balance_Shipments ,function(key,value){
-                        $("#BalanceShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.id==null?'':value.id +'-'+ value.name)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
-                    });
-                    $("#BalanceShipmentModal").modal('show');
-               }
-            });
-        });
+      
         
 
     </script>
