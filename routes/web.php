@@ -3010,6 +3010,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}/edit', 'Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
                 Route::put('update', 'Admins\GlobalSettingsController@status_webhook_update')->name('update');
             });
+
+            Route::prefix('bypass_weight')->name('bypass_weight.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
+                Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');
+      
+            });
         });
 
         Route::prefix('fleet')->name('fleet.')->group(function () {

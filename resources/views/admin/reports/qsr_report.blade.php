@@ -395,7 +395,6 @@
             });
 
             $('#from_date1').change(function() {
-                console.log('jjj');
                 var selectedOption = $(this).val();
                 if (selectedOption != null)
                 {
@@ -405,7 +404,6 @@
                 }
             });
             $('#to_date1').change(function() {
-                console.log('jjj');
                 var selectedOption = $(this).val();
                 if (selectedOption != null)
                 {

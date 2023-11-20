@@ -518,14 +518,18 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
-        } else {
+        }
+        else {
+            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            {
+                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+            }
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
             if ($request->filled('open_shipment')) {
@@ -2872,6 +2876,22 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $pieces_quantity = $data['pieces_quantity'];
+            if ($value) {
+                if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
+                    return false;
+                }
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                    return false;
+                }
+                else
+                    return true;
+            }
+        });
+
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -2981,6 +3001,7 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_value' => ':attribute is required',
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
         ];
 
         $rules = [
@@ -3061,7 +3082,7 @@ class ShipperShipmentBookController extends Controller
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
                 $query->whereIn('id', [4]);
             })],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
@@ -3072,7 +3093,11 @@ class ShipperShipmentBookController extends Controller
             'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
-
+            'pieces_quantity' => [
+                'nullable',
+                'integer',
+                'pieces_check'
+            ],
         ];
 
 
@@ -3257,18 +3282,22 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
-//                if (array_key_exists("amount", $row))
-//                {
-//                    if ($row['amount'] == 0) {
-//                        $rules['parcel_value'] = [
-//                            'required_if:amount,0',
-//                            'numeric',
-//                            'digits_between:1,20',
-//                            'min:1'];
-//                    }
-//                }
+                if($omni == 1){
+                    if($rows[$key]['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
                 if(in_array($row['service_type_id'],[1,2]))
                 {
@@ -3351,6 +3380,12 @@ class ShipperShipmentBookController extends Controller
 
                                 if (!$user_return_info->status) {
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
+                                }
+                            }
+                            else{
+                                $return_address_id = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                                if($return_address_id->exists()){
+                                    $row['return_address_id'] = $return_address_id->first()->id;
                                 }
                             }
                         }
@@ -5306,8 +5341,22 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
+                if($omni == 1){
+                    if($row['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
 //                if (array_key_exists("amount", $row))
 //                {
@@ -5412,6 +5461,12 @@ class ShipperShipmentBookController extends Controller
 
                                 if (!$user_return_info->status) {
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
+                                }
+                            }
+                            else{
+                                $return_address_id = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                                if($return_address_id->exists()){
+                                    $row['return_address_id'] = $return_address_id->first()->id;
                                 }
                             }
 
