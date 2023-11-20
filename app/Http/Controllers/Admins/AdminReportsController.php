@@ -11339,30 +11339,38 @@ class AdminReportsController extends Controller
     }
     
     
+    public function city_shippers(Request $request){
+        $city_id=$request->get('city_id');
+        $shippers=User::select('id','name')->where('status',3,'city',$city_id)->get();
+        return response()->json(['shippers'=>$shippers]);
+    }
     //created shipment vs unpicked shipment
 
     public function created_shipment_index(){
+      
         // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
-        return view ('admin.reports.shipment_pickup_report');
+        $cities=City::select('id','name')->where('status',1)->get();
+        return view ('admin.reports.shipment_pickup_report')->with(['cities'=>$cities]);
     }
+
+
     public function created_shipment_list(Request $request){
 
         $from =Carbon::parse($request->get('search_from'))->format('Y-m-d');
         $to = Carbon::parse($request->get('search_to'))->format('Y-m-d');
-
-        $shipment_picked=DB::connection('reports')->table('shipments as s')
-        ->join('users as u', 's.user_id', '=', 'u.id')
-        ->leftJoin('shipments as sq', 'sq.user_id', '=', 's.user_id')
+        // DB::connection('reports')->table('shipments as s')
+        $shipment_picked= Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->leftJoin('shipments as sq', 'sq.user_id', '=', 'shipments.user_id')
         ->leftJoin('shipments as sqqq', function ($join) use ($from,$to) {
-            $join->on('sqqq.user_id', '=', 's.user_id')
+            $join->on('sqqq.user_id', '=', 'shipments.user_id')
                 ->whereBetween(DB::raw('DATE(sqqq.created_at)'), [$from,$to]);
         })
-        ->whereBetween(DB::raw('DATE(s.created_at)'), [$from,$to])
-        ->groupBy('s.user_id', 'u.id', 'u.name')
+        ->whereBetween(DB::raw('DATE(shipments.created_at)'), [$from,$to])
+        ->groupBy('shipments.user_id', 'u.id', 'u.name')
         ->select([
             'u.id as shipper_id',
             'u.name as shipper_name',
-            DB::raw('COUNT(DISTINCT s.id) as shipment_created'),
+            DB::raw('COUNT(DISTINCT shipments.id) as shipment_created'),
             DB::raw('COUNT(DISTINCT IF(sq.shipper_status_id = 1, sq.id, NULL)) as not_picked'),
             DB::raw('COUNT(DISTINCT sqqq.pickup_address_id) as address_count'),
         ]);

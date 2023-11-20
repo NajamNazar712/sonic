@@ -16,15 +16,17 @@
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
-                               
+                            <select name="search_city" id="search_city" class="form-control select2">
+                                @foreach ($cities as $city)
+                                     <option value="{{ $city->id }}"> {{ $city->name }}</option>
+                                @endforeach
                             </select>
                         </fieldset>
                     </div>
                     <div class="col-5">
                         <fieldset class="form-group">
-                            <select name="search_rider" id="search_rider" class="form-control select2">
-                           
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                             
                             </select>
                         </fieldset>
                     </div>
@@ -366,14 +368,14 @@ aria-hidden="true">
             
             
 
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select City',
                 width:'100%',
                 allowClear:true
             });
             
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Rider',
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
             });
@@ -592,6 +594,8 @@ aria-hidden="true">
                }
             });
         });
+
+        
         
       
         
