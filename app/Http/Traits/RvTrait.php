@@ -140,7 +140,7 @@ trait RvTrait
         }
         catch(\Throwable $th)
         {
-            dd($th->getMessage());
+            // dd($th->getMessage());
             DB::rollBack();
         }
        
@@ -462,9 +462,10 @@ trait RvTrait
         // 15 = Shipment - On Hold for Self Collection
         // 52 = Shipment - Re-Attempt Requested
         // 65 = Shipment - Shipper Advise Requested 
+        // 66 = Shipment - Re-Attempt Call Requested (from shipper)
 
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) { old for rv
-        if (in_array($parcel->shipper_status_id, [12, 52, 65])) {
+        if (in_array($parcel->shipper_status_id, [12, 52, 65, 66])) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -1743,14 +1744,16 @@ trait RvTrait
             $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
-            $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'] ? $data['rv_assign_agent_sub_status_id'] : null;
+            // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'] ? $data['rv_assign_agent_sub_status_id'] : null;
+            $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
             $rv_shipment_assign_agent->rv_state_id = 4;
             $rv_shipment_assign_agent->is_fake_status = 0;
             $rv_shipment_assign_agent->rv_fake_status_id = 0;
             $rv_shipment_assign_agent->rv_shipment_agent_id = 0; 
             $rv_shipment_assign_agent->updated_type_id = 1; 
             $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
-            $rv_shipment_assign_agent->remarks = $data['remarks'] ? $data['remarks'] : null;
+            // $rv_shipment_assign_agent->remarks = $data['remarks'] ? $data['remarks'] : null;
+            $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
             $rv_shipment_assign_agent->call_to_id  = 1;
             $rv_shipment_assign_agent->assigned_by  = 0;
             $rv_shipment_assign_agent->unresponsive_count  = 0;

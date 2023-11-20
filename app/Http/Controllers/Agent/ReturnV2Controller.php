@@ -30,6 +30,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use Illuminate\Support\Facades\DB;
 
@@ -52,7 +53,7 @@ class ReturnV2Controller extends Controller
     public function index()
     {
         $user = Auth::user();
-        $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
+        // $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
         $fake_status_remarks = RvFakeStatus::get();
         $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
         $agent = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->get();
@@ -62,7 +63,7 @@ class ReturnV2Controller extends Controller
         $hold_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->count();
         $refused_on_call = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 1)->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->count();
 
-        return view('agent.return_v2.index')->with(['hold_count'=>$hold_count,'intercept_count'=>$intercept_count,'user' => $user, 'shipment_statuses' => $shipment_statuses, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
+        return view('agent.return_v2.index')->with(['hold_count'=>$hold_count,'intercept_count'=>$intercept_count,'user' => $user, 'shipment_statuses' => null, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
     }
 
     // Heading: N/A
@@ -108,7 +109,7 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-        
+
         $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
 
         $admin = Admin::where('id', Auth::id());
@@ -139,9 +140,22 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
                         
-
+                    
                         if ($shipment) {
                             try {
+                                $shipment = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
+                                ->where('delivery_note_shipments.shipment_id', $shipment->id)
+                                ->where('dn.pending_status', 1)
+                                ->first();
+                                
+                                if($shipment){
+                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
+                                }
+                                else{
+                                    //if pending status is not 1 dont show return confirm status in the dropdown
+                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
+                                }
+
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
                                 $service_type = $shipment->booking_type;
@@ -210,19 +224,20 @@ class ReturnV2Controller extends Controller
                                 }
 
 
-                                if (isset($shipment_assigned_agents)) {
-                                    return response()->json(['status' => 1, 'call_history' => $call_history ,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
-                                } 
-                                else {
-                                    return response()->json(['status' => 0, 'call_history' => $call_history ,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
-                                }
+                                // if (isset($shipment_assigned_agents)) {
+                                //     return response()->json(['status' => 1, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
+                                // } 
+                                // else {
+                                //     return response()->json(['status' => 0, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
+                                // }
+                                
+                                return response()->json(['status' => 0, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                             } catch (Exception $ex) {
                                 return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
                             }
                         }
 
                         else{
-                            //No Shipment Found in Assigned Hub
                             return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
                         }
 
