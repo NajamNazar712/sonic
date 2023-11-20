@@ -420,96 +420,96 @@ aria-hidden="true">
             });
 
             // $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
-              var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Rider Wise Pickup Report',   
-                        className: 'btn btn-primary excel',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-                    },
-                ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                autoWidth:false,
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: true,
-                ajax:{
-                    url: '{{ route('admin.reports.created_shipment.list') }}',
-                    data: function (d) {
-                        d.search_hub = $('#search_hub').val();
-                        d.search_rider = $('#search_rider').val();
-                        d.search_from = $('input[name="from_date_formatted"]').val();
-                        d.search_to = $('input[name="to_date_formatted"]').val();
-                    }
-                },
-                rowId: 'shipper_id',
-                order: [[1, 'desc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle text-center shipper_id',render:function(data,type,row){
-                        return row.shipper_id +'-'+ row.shipper_name;
-                    }},
-                    { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
-                    
-                    { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
-                    { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
-    
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                },
-                footerCallback: function(row, data, start, end, display) {
-                    var scanned_shipments_count = 0;
-                    var arrived_shipments_count = 0;
-                    var without_scan_shipments_count = 0;
-                    
-                    $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
-                        arrived_shipments_count += shipment_data.total_arrived_shipments;
-                        without_scan_shipments_count += shipment_data.without_scan_shipments;
-                    });
-                    var api = this.api();
-                    api.columns('.date', {
-                        page: 'current'
-                    }).every(function() {
-                        $(this.footer()).html('Total');
-                    });
-                    
-                    api.columns('.scanned_shipments', {
-                        page: 'current'
-                    }).every(function() {
-                        
-                        $(this.footer()).html(scanned_shipments_count);
-                    });
-                    api.columns('.arrived_shipments', {
-                        page: 'current'
-                    }).every(function() {
-                        $(this.footer()).html(arrived_shipments_count);
-                    });
-                    api.columns('.without_scan_shipments', {
-                        page: 'current'
-                    }).every(function() {
-                       
-                        $(this.footer()).html(without_scan_shipments_count);
-                    });
-                }
-            });
+           
 
             $('#search_filter_btn').on('click',function () {
                 $('#datatable_wrapper').show();
-                table.draw();
+                    var table = $('#datatable').DataTable({
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    scrollX: true, scrollY: '500px',
+                    buttons: [
+                        {
+                            extend: 'excelHtml5',
+                            title: 'Shipment Report',   
+                            className: 'btn btn-primary excel',
+                            text:'<i class="la la-file-excel-o"></i> Excel',
+                            footer: true
+                        },
+                    ],
+                    lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                    autoWidth:false,
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: true,
+                    language: {
+                        processing: data_table_loader
+                    },
+                    serverSide: true,
+                    ajax:{
+                        url: '{{ route('admin.reports.created_shipment.list') }}',
+                        data: function (d) {
+                            d.search_hub = $('#search_hub').val();
+                            d.search_rider = $('#search_rider').val();
+                            d.search_from = $('input[name="from_date_formatted"]').val();
+                            d.search_to = $('input[name="to_date_formatted"]').val();
+                        }
+                    },
+                    rowId: 'shipper_id',
+                    order: [[1, 'desc']],
+                    columns: [
+                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                        { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle text-center shipper_id',render:function(data,type,row){
+                            return row.shipper_id +'-'+ row.shipper_name;
+                        }},
+                        { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
+                        
+                        { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
+                        { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
+        
+                    ],
+                    rowCallback: function(row, data, index) {
+                        var info = table.page.info();
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    },
+                    initComplete: function() {
+                        this.api().table().columns.adjust();
+                    },
+                    footerCallback: function(row, data, start, end, display) {
+                        var scanned_shipments_count = 0;
+                        var arrived_shipments_count = 0;
+                        var without_scan_shipments_count = 0;
+                        
+                        $.each(data, function(index, shipment_data) {
+                            scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
+                            arrived_shipments_count += shipment_data.total_arrived_shipments;
+                            without_scan_shipments_count += shipment_data.without_scan_shipments;
+                        });
+                        var api = this.api();
+                        api.columns('.date', {
+                            page: 'current'
+                        }).every(function() {
+                            $(this.footer()).html('Total');
+                        });
+                        
+                        api.columns('.scanned_shipments', {
+                            page: 'current'
+                        }).every(function() {
+                            
+                            $(this.footer()).html(scanned_shipments_count);
+                        });
+                        api.columns('.arrived_shipments', {
+                            page: 'current'
+                        }).every(function() {
+                            $(this.footer()).html(arrived_shipments_count);
+                        });
+                        api.columns('.without_scan_shipments', {
+                            page: 'current'
+                        }).every(function() {
+                        
+                            $(this.footer()).html(without_scan_shipments_count);
+                        });
+                    }
+                });
             });
 
         

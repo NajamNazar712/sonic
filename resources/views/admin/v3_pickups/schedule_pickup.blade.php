@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Pickups')
+@section('title', 'Schedule Pickups')
 
 @section('content')
     <div class="app-content content">
