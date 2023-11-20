@@ -773,23 +773,35 @@ class APIController extends Controller
                 $amount = $request->input('amount');
                 $parcel_value = $request->input('parcel_value');
                 if ($amount == 0) {
-                    $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-                        if ($settings->text != NULL) {
-                            $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
-                            if (in_array($user_id, $parcel_value_bypass_accounts)) {
+                    if($request->has('parcel_value') && $request->input('parcel_value') != null){
+                        $flag = true;
+                    }
+                    else{
+                        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if ($settings->text != NULL) {
+                                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                                if (in_array($user_id, $parcel_value_bypass_accounts)) {
+                                    $flag = true;
+                                }
+                                else{
+                                    $flag = false;
+                                }
+                            }
+                            else{
+                                $flag = false;
+                            }
+                        }
+                        else{
+                            if ($parcel_value <= 0 || $parcel_value == null) {
+                                $flag = false;
+                            } else {
                                 $flag = true;
                             }
                         }
                     }
-                    else{
-                        if ($parcel_value <= 0 || $parcel_value == null) {
-                            $flag = false;
-                        } else {
-                            $flag = true;
-                        }
-                    }
+
 
                 } else {
                     $flag = true;
