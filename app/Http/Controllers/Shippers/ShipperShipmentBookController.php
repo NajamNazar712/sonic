@@ -3862,6 +3862,10 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
+        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            {
+                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+            }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
@@ -4958,6 +4962,22 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $pieces_quantity = $data['pieces_quantity'];
+            if ($value) {
+                if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
+                    return false;
+                }
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                    return false;
+                }
+                else
+                    return true;
+            }
+        });
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -5054,6 +5074,7 @@ class ShipperShipmentBookController extends Controller
             'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'origin_check' => 'Origin city not allowed, please contact your sales person!',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
         ];
 
         $rules = [
@@ -5082,7 +5103,7 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => ['required_if:service_type_id,1,2,5', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
             'item_product_type_id_1' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description_1' => ['required_if:service_type_id,3', 'nullable', 'between:0,1000'],
@@ -5137,6 +5158,11 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+            'pieces_quantity' => [
+                'nullable',
+                'integer',
+                'pieces_check'
+            ],
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
