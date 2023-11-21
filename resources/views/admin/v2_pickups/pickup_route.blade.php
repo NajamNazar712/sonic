@@ -80,7 +80,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                                <input type="text" class="form-control" name="code" placeholder="Route Description" required data-rule-required="true" data-msg-required="This field is required">
                             </fieldset>
 
                         </div>
@@ -110,7 +110,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control" name="short_code" placeholder="Short Code" required data-rule-required="true" data-msg-required="This field is required">
+                                <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
                             </fieldset>
                         </div>
                     </div>
@@ -166,7 +166,7 @@
                             <div class="row mb-2">
                                 <div class="col">
                                     <fieldset class="form-group">
-                                        <input type="text" class="form-control" id="route_code" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                                        <input type="text" class="form-control" id="code" name="code" placeholder="Route Description" required data-rule-required="true" data-msg-required="This field is required">
                                     </fieldset>
 
                                 </div>
@@ -196,7 +196,7 @@
                             <div class="row mb-2">
                                 <div class="col">
                                     <fieldset class="form-group">
-                                        <input type="text" class="form-control" name="short_code"  id="short_code" placeholder="Short Code" required data-rule-required="true" data-msg-required="This field is required">
+                                        <input type="text" class="form-control" name="route_code"  id="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
                                     </fieldset>
                                 </div>
                             </div>
@@ -600,20 +600,20 @@
                             if(data.details.length != 0 ){
                                 /*$.each(data.details, function(index, value) {*/
                                     var city_id = data.details.city_id;
-                                    var route_code = data.details.code;
+                                    var code = data.details.code;
                                     var start = data.details.start;
                                     var end = data.details.end;
                                     var rider_id = data.details.rider_id;
                                     var junctions = data.details.junctions;
-                                    var short_code=data.details.short_code;
+                                    var route_code=data.details.route_code;
 
                                     $('#city_id').val(city_id).trigger('change');
-                                    $('#route_code').val(route_code);
+                                    $('#code').val(code);
                                     $('#start').val(start);
                                     $('#end').val(end);
                                     $('#rider_id').val(rider_id).trigger('change');
                                     $('#junstion_edit').val(junctions);
-                                    $('#short_code').val(short_code);
+                                    $('#route_code').val(route_code);
                                 //});
                                 $('#edit_route_modal').modal('show');
                                 var route = '{!! route('admin.management.route.edit', ':id') !!}';

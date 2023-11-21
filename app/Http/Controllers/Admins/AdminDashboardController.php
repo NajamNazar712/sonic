@@ -10801,11 +10801,11 @@ public function payfast_payment(Request $request){
         
         $validations = [
             'city_id' => 'required|numeric',
-            'route_code' => 'required',
+            'code' => 'required',
             'start' => 'required',
             'route_type_id' => 'required',
             'end' => 'required',
-            'short_code'=>'required',
+            'route_code'=>'required',
             'junction' => 'required'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -10816,11 +10816,11 @@ public function payfast_payment(Request $request){
         }
         $route = Route::create([
             'city_id' => $request->city_id,
-            'code' => $request->route_code,
+            'code' => $request->code,
             'start' => $request->start,
             'route_type_id' => $request->route_type_id,
             'end' => $request->end,
-            'short_code' => $request->short_code,
+            'short_code' => $request->route_code,
             'junction' => $request->junction,
             'status' => 1
         ]);
