@@ -61,7 +61,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
                             <th class="border-primary border-darken-1">Shipper</th>
-                            <th class="border-primary border-darken-1">Address</th>
+                            {{-- <th class="border-primary border-darken-1">Address</th> --}}
                             <th class="border-primary border-darken-1">Created Shipments</th>
                             <th class="border-primary border-darken-1">Unpicked Shipments</th>
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
@@ -304,6 +304,8 @@ aria-hidden="true">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -361,6 +363,8 @@ aria-hidden="true">
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -372,6 +376,32 @@ aria-hidden="true">
                 placeholder:'Select City',
                 width:'100%',
                 allowClear:true
+            }).bind('select2:select',function(){
+                var city_id = parseInt($(this).val());
+             
+                if(city_id){
+                    $('#search_shipper').empty();
+                    $.ajax({
+                        url: '{{ route('admin.reports.created_shipment.city_shippers') }}',
+                        method: 'POST',
+                        data: {
+                            'city_id': city_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data){
+                        if(data.status==0){
+                            $.each(data.shippers,function(key,value) {
+                                var name = value.id + ' - ' + value.name;
+                                var shipper = new Option(name, value.id, false, false);
+                                $('#search_shipper').append(shipper).trigger('change');
+                            });
+                            $('#search_shipper').select2({
+                                placeholder: 'Select Shipper',
+                                width: '100%',
+                            }).val(null).trigger('change');
+                        }
+                    });
+                }
             });
             
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
@@ -421,20 +451,18 @@ aria-hidden="true">
 
             // $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
            
-
-            $('#search_filter_btn').on('click',function () {
-                $('#datatable_wrapper').show();
-                    var table = $('#datatable').DataTable({
+            var table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     scrollX: true, scrollY: '500px',
+                    deferLoading:0,
                     buttons: [
-                        {
-                            extend: 'excelHtml5',
-                            title: 'Shipment Report',   
-                            className: 'btn btn-primary excel',
-                            text:'<i class="la la-file-excel-o"></i> Excel',
-                            footer: true
-                        },
+                        // {
+                        //     extend: 'excelHtml5',
+                        //     title: 'Shipment Report',   
+                        //     className: 'btn btn-primary excel',
+                        //     text:'<i class="la la-file-excel-o"></i> Excel',
+                        //     footer: true
+                        // },
                     ],
                     lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                     autoWidth:false,
@@ -448,8 +476,8 @@ aria-hidden="true">
                     ajax:{
                         url: '{{ route('admin.reports.created_shipment.list') }}',
                         data: function (d) {
-                            d.search_hub = $('#search_hub').val();
-                            d.search_rider = $('#search_rider').val();
+                            d.city_id = $('#search_city').val();
+                            d.shipper_id = $('#search_shipper').val();
                             d.search_from = $('input[name="from_date_formatted"]').val();
                             d.search_to = $('input[name="to_date_formatted"]').val();
                         }
@@ -461,7 +489,7 @@ aria-hidden="true">
                         { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle text-center shipper_id',render:function(data,type,row){
                             return row.shipper_id +'-'+ row.shipper_name;
                         }},
-                        { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
+                        // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         
                         { data:'shipment_created_btn',class: 'align-middle text-center shipment_created', orderable: false, searchable: false},
                         { data:'not_picked_btn',class: 'align-middle text-center not_picked_shipment', orderable: false, searchable: false},
@@ -510,6 +538,14 @@ aria-hidden="true">
                         });
                     }
                 });
+            $('#search_filter_btn').on('click',function () {
+                var city_id=$("#search_city").val();
+                if(city_id==''){
+                    toastr.error('Please Select City', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }else{
+                    $('#datatable_wrapper').show();
+                    table.draw();
+                }
             });
 
         
