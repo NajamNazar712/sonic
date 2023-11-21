@@ -3459,7 +3459,7 @@ class V2AdminPickupsController extends Controller
             $code = $route->code;
             $start = $route->start;
             $end = $route->end;
-            $short_code = $route->short_code;
+            $route_code = $route->route_code;
             $junctions = $route->junction;
             $rider = Rider::where('route_id', $id);
             if ($rider->exists()) {
@@ -3468,7 +3468,7 @@ class V2AdminPickupsController extends Controller
             } else {
                 $rider_id = null;
             }
-            $data = (['city_id' => $city_id, 'code' => $code, 'start' => $start, 'end' => $end,'short_code'=>$short_code, 'rider_id' => $rider_id, 'junctions' => $junctions]);
+            $data = (['city_id' => $city_id, 'code' => $code, 'start' => $start, 'end' => $end,'route_code'=>$route_code, 'rider_id' => $rider_id, 'junctions' => $junctions]);
             return response()->json(['details' => $data]);
         }
     }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Route extends Model
 {
     protected $fillable = [
-        'city_id','code','start','end','junction','status','route_type_id','short_code'
+        'city_id','code','start','end','junction','status','route_type_id','route_code'
     ];
     public function city(){
         return $this->belongsTo('App\Http\Models\City');
