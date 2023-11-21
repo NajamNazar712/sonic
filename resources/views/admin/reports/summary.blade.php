@@ -680,7 +680,7 @@
                 var search_shipper = $('#search_shipper').val();
                 var search_sub_segment = $('#search_sub_segment').val();
                 if(!(search_sub_segment || search_shipper)){
-                    toastr.error('Select Shipper OR Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    toastr.error('Select Shipper or Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
 
