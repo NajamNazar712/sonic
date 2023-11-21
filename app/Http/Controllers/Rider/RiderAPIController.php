@@ -15442,8 +15442,8 @@ class RiderAPIController extends Controller
         } else {
             return response()->json(['status' => 1, 'message' => 'PMS Status Not Changed!']);
         }
-    }catch(Exception $e){
-        return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $information]);
+    }catch(\Exception $e){
+        return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $e->getMessage()]);
        
     }
     }
