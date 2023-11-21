@@ -15362,6 +15362,8 @@ class RiderAPIController extends Controller
         $pickup_note = V3PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
         try{
         if ($pickup_note->exists()) {
+            $information['1'] = 'found';
+        
             $pickup_note = $pickup_note->first();
             $pickupAcknowledgRequest = $request->pickup_acknowledge_request;
             $pickupAcknowledgRequest = json_decode($pickupAcknowledgRequest, true);
@@ -15372,6 +15374,7 @@ class RiderAPIController extends Controller
                 $pickupRequestList = $pickupAcknowledgRequest['pickup_acknowledge_request'];
             } catch (Exception $e) {
                 $pickupRequestList = $pickupAcknowledgRequest;
+                $information['error_pickupRequestList'] = 'error';
         
             }
             foreach ($pickupRequestList as $pickupAck) {
@@ -15385,50 +15388,62 @@ class RiderAPIController extends Controller
                     $reason_id = $pickups['reason_id'];
                     $added_at = Carbon::createFromTimestampMs($pickups['added_at'])->toDateTimeString();
                     $is_rejected_hide = $pickups['is_rejected_hide'];
-                    $pickup_request = V3PickupRequest::find($pickup_request_id);
-                    $result['pickup_request_id'] = $pickup_request_id;
-                    if($type=='cm'){
-
-                        $pickup_request->status_id = 3;
-                    }else if($type=='ap'){
-                        $pickup_request->status_id = 4;
-                    }else if($type=='rd'){
-                        $pickup_request->status_id = 5;
-                    }else if($type=='pk'){
-                        $pickup_request->status_id = 6;
-                    }else if($type=='rj'){
-                        $pickup_request->status_id = 7;
+                    $pickup_requests = V3PickupRequest::where('id',$pickup_request_id);
+                    
+                    try{
+                    if($pickup_requests->exists()){
+                        $pickup_request=$pickup_requests->first();
+                        $result['pickup_request_id'] = $pickup_request_id;
+                        if($type=='cm'){
+    
+                            $pickup_request->status_id = 3;
+                        }else if($type=='ap'){
+                            $pickup_request->status_id = 4;
+                        }else if($type=='rd'){
+                            $pickup_request->status_id = 5;
+                        }else if($type=='pk'){
+                            $pickup_request->status_id = 6;
+                        }else if($type=='rj'){
+                            $pickup_request->status_id = 7;
+                      
+                        }
+                        $result['type'] = $type;
+                        $result['status_id'] = $pickup_request->status_id;
+                        $result['added_at'] = $added_at;
+                        $mainResult[$rCount] = $result;
+                        $pickup_request->save();
+                        $rCount++;
+                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, 4, 2, $rider_id, $added_at);
+                        if($reason_id>0){
+                        $v3PickupRequestAttempt = new V2PickupRequestAttempt();
+                        $v3PickupRequestAttempt['pickup_request_id'] = $pickup_request_id;
+                        $v3PickupRequestAttempt['rider_id'] = $rider_id;
+                        $v3PickupRequestAttempt['reason_id'] = $reason_id;
+                        $v3PickupRequestAttempt['attempt_date'] = $added_at;
+                        $v3PickupRequestAttempt->save();
+                        }    
+                    }else {
+                        $information[$pickup_request_id] = 'not found';
+                    }
+                }catch(\Exception $e){
+                    $mainResult['error_in_pms_id'] = $e->getMessage();; 
+                }
+                    
                   
-                    }
-                    $result['type'] = $type;
-                    $result['status_id'] = $pickup_request->status_id;
-                    $result['added_at'] = $added_at;
-                    $mainResult[$rCount] = $result;
-                    $pickup_request->save();
-                    $rCount++;
-                    V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, 4, 2, $rider_id, $added_at);
-                    if($reason_id>0){
-                    $v3PickupRequestAttempt = new V2PickupRequestAttempt();
-                    $v3PickupRequestAttempt['pickup_request_id'] = $pickup_request_id;
-                    $v3PickupRequestAttempt['rider_id'] = $rider_id;
-                    $v3PickupRequestAttempt['reason_id'] = $reason_id;
-                    $v3PickupRequestAttempt['attempt_date'] = $added_at;
-                    $v3PickupRequestAttempt->save();
-                    }
                 }
                 
                 $information[$count] = $mainResult;
-
+                $count++;
 
 
             }
 
-            return response()->json(['status' => 0, 'message' => 'Pickup(s) are Saved!', 'information' => $information]);
+            return response()->json(['status' => 0, 'message' => 'PMS Status changed!', 'informations' => $information]);
         } else {
-            return response()->json(['status' => 0, 'message' => 'No Pickup(s) Assigned']);
+            return response()->json(['status' => 1, 'message' => 'PMS Status Not Changed!']);
         }
     }catch(Exception $e){
-        return response()->json(['status' => 0, 'message' => 'Pickup(s) are Saved!', 'information' => $e]);
+        return response()->json(['status' => 1, 'message' => 'Pickup(s) are Saved!', 'information' => $information]);
        
     }
     }
