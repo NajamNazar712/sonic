@@ -1065,6 +1065,9 @@ class V3AdminPickupsController extends Controller
     public function pending_requests_assign(Request $request)
     {
       
+        printf('hello');
+        die();
+        
         $pickup_request_ids = $request->input('pickup_request_ids');
         $pickup_request_ids = explode(',', $pickup_request_ids);
         $rider_id = $request->input('rider');
@@ -1114,7 +1117,6 @@ class V3AdminPickupsController extends Controller
         $end_date = Carbon::now()->endOfDay();
         $today = Carbon::today();
         $today->hour($arrival_cut_off_time)->minute(0)->second(0);
-
         $allowed_pickup_requests = array();
         foreach ($pickup_request_ids as $pickup_request_id) {
             //            $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('rider_id', $rider_id)->whereBetween('attempt_date', [$start_date, $end_date]);
