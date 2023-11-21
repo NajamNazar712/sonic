@@ -350,7 +350,7 @@
                                                 {{-- input-group --}}
                                                 <div class="form-group">
                                                     <label>Est Shipments Qty*</label>
-                                                    <input type="number" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
+                                                    <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9">
                                                 </div>
                                             </div>
@@ -358,14 +358,14 @@
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
                                                     <label>Est Pieces*</label>
-                                                    <input type="number" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
+                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3">
                                                 </div>
                                             </div>
                                             <div class="col-3 pl-0">
                                                 <div class="form-group">
                                                     <label>Est Weight*</label>
-                                                    <input type="number" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
+                                                    <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
                                     </div>
