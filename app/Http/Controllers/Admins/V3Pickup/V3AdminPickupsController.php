@@ -403,8 +403,12 @@ class V3AdminPickupsController extends Controller
             //         //  ->groupBy('v3_pickup_requests.shipper_id','v3_pickup_requests.pickup_address_id');
             // })
             // ->leftjoin('users as us','us.id','=','v3_pickup_requests')
-            ->leftjoin('users as us','us.id','=','v3_pickup_requests.generated_by')
-            ->leftjoin('admins as ad','ad.id','=','v3_pickup_requests.generated_by')
+            ->leftjoin('users as us',function($qurey){
+                $qurey->on('us.id','=','v3_pickup_requests.generated_by')->where('generated_type',0);
+            })
+            ->leftjoin('admins as ad',function($qurey){
+                $qurey->on('ad.id','=','v3_pickup_requests.generated_by')->where('generated_type',1);
+            })
 
            ->leftjoin('sub_category_segments as sub_seg', 'sub_seg.id', '=', 'v3_pickup_requests.sub_segment_id')
             ->leftJoin('v3_pickup_request_attempts as vpa', function ($join) {

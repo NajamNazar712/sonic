@@ -11646,7 +11646,7 @@ class AdminReportsController extends Controller
         //     $to_date=Carbon::now()->format('Y-m-d');
         // }
         $shipments=Shipment::where('user_id','=',$shipper_id)
-        ->whereBetween(DB::raw('DATE(created_at)'),[$from_date,$to_date])->get();
+        ->whereBetween(DB::raw('created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
     public function get_not_picked_shipments(Request $request){
@@ -11661,7 +11661,7 @@ class AdminReportsController extends Controller
         //     $to_date=Carbon::now()->format('Y-m-d');
         // }
         $not_picked_shipments=Shipment::where('user_id','=',$shipper_id)->where('shipper_status_id',1)
-        ->whereBetween(DB::raw('DATE(created_at)'),[$from_date,$to_date])->get();
+        ->whereBetween(DB::raw('created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
 
         return response()->json(['status'=>1,'not_picked_shipments'=>$not_picked_shipments]);
     }
@@ -11699,12 +11699,12 @@ class AdminReportsController extends Controller
         ->leftJoin('v3_pickup_requests as pr', function ($join) use ($from_date, $to_date) {
             $join->on('pr.shipper_id', '=', 'shipments.user_id')
                 ->on('pr.pickup_address_id', '=', 'shipments.pickup_address_id')
-                ->whereBetween(DB::raw('DATE(pr.pickup_date)'), [$from_date, $to_date]);
+                ->whereBetween(DB::raw('pr.pickup_date'), [$from_date.' 00:00:01',$to_date.' 23:59:59']);
         })
         ->leftJoin('riders as ra', 'pr.current_rider_id', '=', 'ra.id')
         ->where('sj.shipper_status_id', '=', 53)
         ->where('shipments.user_id', '=', $shipper_id)
-        ->whereBetween(DB::raw('DATE(shipments.created_at)'), [$from_date, $to_date])
+        ->whereBetween(DB::raw('shipments.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         ->select([
             'r.id as picked_rider_id',
             'r.name as picked_rider_name',
@@ -11737,7 +11737,7 @@ class AdminReportsController extends Controller
         ->select('r.id AS rider_id','r.name AS rider_name','gs.setting_value AS global_rider_id','gs.text AS global_rider_name','shipments.tracking_number')
         ->where('sj.shipper_status_id','=',2)
         ->where('shipments.user_id','=',$shipper_id)
-        ->whereBetween(DB::raw('DATE(shipments.created_at)'),[$from_date,$to_date])->get();
+        ->whereBetween(DB::raw('shipments.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
 
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
@@ -11763,7 +11763,7 @@ class AdminReportsController extends Controller
         })
         ->select('r.id', 'r.name', 'shipments.tracking_number')->where('sj.shipper_status_id',53)
         ->where('shipments.user_id', $shipper_id)
-        ->whereBetween(DB::raw('DATE(shipments.created_at)'),[$from_date,$to_date])->get();
+        ->whereBetween(DB::raw('shipments.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
   
         return response()->json(['status'=>1,'balance_Shipments'=>$balance_Shipments]);
 
