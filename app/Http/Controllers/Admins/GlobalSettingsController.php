@@ -9138,4 +9138,21 @@ class GlobalSettingsController extends Controller
             });
         return $datatables->make(true);
     }
+
+    public function product_type_add(Request $request){
+        
+        if($request->has('product_name')){
+            $product_name = $request->get('product_name');
+
+            $products = new Product();
+            $products->product_name = $product_name;
+            $products->save();
+
+            return response()->json(['status' => 0, 'message' => 'Product Added Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'No Product name found!']);
+        }
+
+    }
 }

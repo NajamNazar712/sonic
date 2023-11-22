@@ -3811,6 +3811,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('product_type')->name('product_type.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@product_type_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@product_type_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@product_type_add')->name('add');
         });
 
     });
