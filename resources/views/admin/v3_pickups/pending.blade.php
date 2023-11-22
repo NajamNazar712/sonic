@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Pickups')
+@section('title', 'Pickups Request')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Pending Pickups
+                     Pickups Request
                 </h1>
 
                 <div class="card">

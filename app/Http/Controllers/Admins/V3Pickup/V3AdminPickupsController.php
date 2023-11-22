@@ -96,7 +96,7 @@ class V3AdminPickupsController extends Controller
         $shipper_id = $request->shipper_id;
         $pickup_address_id = $request->pickup_address_id;
         $time_range_id = $request->preferred_time_range;
-        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('status_id', 1)->exists()){
+        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('pickup_date',$pickup_date)->where('status_id', 1)->exists()){
             return redirect()->back()->with('error', 'Pickup request already in-process!');
         }
 
@@ -627,6 +627,7 @@ class V3AdminPickupsController extends Controller
     }
 
     public function schedule_requests_index(){
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
 
         $statuses = array();
@@ -710,7 +711,7 @@ class V3AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                     );
             })
-            ->select('rp.id','rp.days','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','rp.pickup','rp.approval','rt.route_code as route_code','rd.id as rider_id');
+            ->select('rp.id','rp.days','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','rp.pickup','rp.approval','rt.route_code as route_code','rd.id as rider_id','rd.name as rider_name')->groupBy('v3_pickup_requests.id');
             // ->whereDate('v3_pickup_requests.pickup_date', Carbon::today());
     
 

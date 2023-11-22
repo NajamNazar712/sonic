@@ -75,6 +75,7 @@
                                     <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -790,6 +791,7 @@
                         url: '{{ route('admin.v3_pickups.history.list') }}',
                         data: params,
                         success: function (result) {
+                            dd(result);
                             head = [];
 
                             head.push('S.No');
@@ -936,9 +938,29 @@
                     
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id'},
+                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
+                    render: function (data, type, row) {
+                            if (row.rider_id !== null) {
+                                return row.rider_id + ' - ' + row.rider_name;
+                            } else {
+                                return ''; 
+                            }
+                        }
+                    },
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
+                    {data: 'approval', name: 'approval', class: 'align-middle approval',render:function(data,type,row){
+                        if(row.approval==1)
+                        {
+                            return'Approved';
+                        }else if(row.approval==2)
+                        {
+                            return'Rejected';
+                        }else{
+                            return 'Pending'
+                        }
+                     
+                    }},
                     {
                         data: 'action',
                         name: 'action',
