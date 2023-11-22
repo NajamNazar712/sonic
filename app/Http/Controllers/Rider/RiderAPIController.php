@@ -15413,7 +15413,7 @@ class RiderAPIController extends Controller
                         $mainResult[$rCount] = $result;
                         $pickup_request->save();
                         $rCount++;
-                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, 4, 2, $rider_id, $added_at);
+                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, $pickup_request->status_id, 2, $rider_id, $added_at);
                         if($reason_id>0){
                         $v3PickupRequestAttempt = new V2PickupRequestAttempt();
                         $v3PickupRequestAttempt['pickup_request_id'] = $pickup_request_id;
