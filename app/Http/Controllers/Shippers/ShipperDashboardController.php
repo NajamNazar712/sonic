@@ -143,7 +143,6 @@ class ShipperDashboardController extends Controller
 
             $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
             $special_shippers = explode(',', $shippers->text);
-       
 
             if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
@@ -241,7 +240,7 @@ class ShipperDashboardController extends Controller
                 $routes = array();
                 $riders = array();
                 $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-                if(count($pickup_address_ids) > 0){
+                if((count($pickup_address_ids) > 0) && (count($pickup_address_ids) < 100)){
                     $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
                     $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
                     $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
