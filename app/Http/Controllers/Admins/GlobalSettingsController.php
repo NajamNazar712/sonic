@@ -162,7 +162,10 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\BookingType;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Product;
 
 class GlobalSettingsController extends Controller
 {
@@ -9089,5 +9092,50 @@ class GlobalSettingsController extends Controller
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
+    }
+
+    public function product_type_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),27);
+        
+        return view('admin.settings.product_type');
+    }
+
+    public function product_type_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),87);
+        }
+
+        $products = Product::select('product_name');
+    
+        $datatables = Datatables::of($products)
+            ->addColumn('action', function($shipment) {
+                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+					$flag = true;
+				        if($flag == true){
+				            $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
+				            $dropdown = '
+				              <div class="btn-group">
+				                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+				                <div class="dropdown-menu dropdown-menu-sm">
+				            ';
+				                $dropdown .= $revert_button;
+				            $dropdown .= '
+				                </div>
+				              </div>
+				            ';
+				                return $dropdown;
+				        }
+				        else{
+				            return '';
+				        }
+				    }
+				    else {
+				        return '';
+				    }
+            });
+        return $datatables->make(true);
     }
 }
