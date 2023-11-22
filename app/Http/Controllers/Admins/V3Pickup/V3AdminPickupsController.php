@@ -426,10 +426,14 @@ class V3AdminPickupsController extends Controller
                         '=',
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                     );
+            })->leftJoin('shipments AS sp',function($qurey){
+                $qurey->on('sp.user_id','=',DB::raw('v3_pickup_requests.shipper_id'))
+                ->where('sp.pickup_address_id','=',DB::raw('v3_pickup_requests.pickup_address_id'))
+                ->where('sp.shipper_status_id',53)->whereDate('sp.created_at','=',DB::raw('v3_pickup_requests.pickup_date'));
             })
             
            
-          ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts','cr.id as current_rider_id', 'cr.name as current_rider', 'cr.phone as current_rider_phone', 'v3_pickup_requests.status_id as v3_status_id',DB::raw('(SELECT COUNT(DISTINCT sp.id) AS shipment_picked FROM shipments AS sp WHERE sp.pickup_address_id = v3_pickup_requests.pickup_address_id AND sp.user_id = v3_pickup_requests.shipper_id AND sp.shipper_status_id = 53  AND DATE(sp.created_at)=v3_pickup_requests.pickup_date GROUP BY sp.user_id, sp.pickup_address_id) AS shipment_picked'), 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','sub_seg.name as service','rt.route_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','pst.name as shippment_type','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','us.name as username','ad.name as adminname')
+          ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts','cr.id as current_rider_id', 'cr.name as current_rider', 'cr.phone as current_rider_phone', 'v3_pickup_requests.status_id as v3_status_id',DB::raw('count(sp.id) as shipment_picked'), 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','sub_seg.name as service','rt.route_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','pst.name as shippment_type','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','us.name as username','ad.name as adminname')
             ->whereDate('v3_pickup_requests.pickup_date', Carbon::today())->groupBy('v3_pickup_requests.id');
            
             // ->where('v3_pickup_requests.received'v3_pickup_requests.status_id', '=',1);
@@ -2852,11 +2856,11 @@ class V3AdminPickupsController extends Controller
         $admin_id=session('id');
 
         $settings = GlobalSettings::where('type', 'global_rider_id');
-        $pickup_rider_id = null;
-        // $global_rider_id = null;
+        // $pickup_rider_id = null;
+        $global_rider_id = 346;
         if ($settings->exists()) {
             $settings = $settings->first();
-            $pickup_rider_id = $settings->setting_value;
+            $global_rider_id = $settings->setting_value;
             // $global_rider_id = $settings->setting_value;
         }
 
@@ -2916,7 +2920,6 @@ class V3AdminPickupsController extends Controller
                         $rider_id = $picked_rider->rider_id;
                         $global_rider_id=null;
                     }else{
-                        $global_rider_id = $pickup_rider_id;
                         $rider_id=null;
                     }
                     //by pass this stage

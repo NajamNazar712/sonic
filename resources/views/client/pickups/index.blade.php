@@ -80,6 +80,7 @@
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
@@ -1035,6 +1036,7 @@
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
+                    {data: 'address', name: 'address', class: 'align-middle address'},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'}

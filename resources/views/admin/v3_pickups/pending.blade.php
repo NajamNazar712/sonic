@@ -105,6 +105,7 @@
                                     <th class="border-primary border-darken-1">Shippment Type</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
                                     <th class="border-primary border-darken-1">Rider</th>
@@ -1792,6 +1793,8 @@ aria-hidden="true">
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
+                    
+                    {data: 'address', name: 'address', class: 'align-middle address'},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
                     {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
