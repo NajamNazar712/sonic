@@ -1788,7 +1788,7 @@ aria-hidden="true">
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
                     {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
-                    {data: 'shipments_picked_btn', class: 'align-middle shipments_picked'},
+                    {data: 'shipments_picked_btn',name:'shipments_picked_btn' class: 'align-middle shipments_picked'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
