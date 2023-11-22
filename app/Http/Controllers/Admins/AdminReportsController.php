@@ -206,7 +206,7 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53)')
                     );
             })
-            ->leftjoin('consignee_address_areas as caa', 'caa.id', '=', 'shipments.id')
+            ->leftjoin('consignee_address_areas as caa', 'shipment_id.id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->select([
                 'z.name  as zone',
