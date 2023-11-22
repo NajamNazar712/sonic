@@ -2896,6 +2896,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@csat_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@csat_report_list')->name('list');
         });
+
         Route::prefix('rider_pickup')->name('rider_pickup.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');
@@ -2945,6 +2946,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
             Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
             Route::post('submit_tracking', 'Admins\AdminReportsController@submit_tracking')->name('submit_tracking');
+        });
+
+        Route::prefix('ops')->name('ops_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@ops_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@ops_report_list')->name('list');
         });
     });
 

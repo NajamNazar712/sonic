@@ -1409,6 +1409,9 @@ class Permission
 
             'reports.operations_performance.index' => 892,
             'reports.operations_performance.export_to_excel' => 892,
+
+            'reports.ops_report.index' => 911,
+            'reports.ops_report.list' => 911,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

@@ -7,6 +7,8 @@ use PHPExcel_Cell;
 use App\DailyVisit;
 use PHPExcel_Style_Fill;
 use App\Http\Models\City;
+use App\Http\Models\Region;
+use App\Http\Models\ZoneRegion;
 use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
@@ -13125,6 +13127,56 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
+    public function ops_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 708);
+        return view('admin.reports.ops_report');
+    }
 
+
+    public function ops_report_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 709);
+        }
+
+        $regions = Region::select('id','name')->get();
+        $ops_data = [];
+
+        foreach ($regions as $region_key => $region) {
+
+            $zones = ZoneRegion::join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
+
+            foreach ($zones as $key => $zone) {
+                
+                $data = [];
+                $data['zone'] = $zone->name;
+                $data['ready_for_delivery'] = "-";
+                $data['out_for_delivery'] = "-";
+                $data['out_for_delivery_percentage'] = "-";
+                $data['delivery_note'] = "-";
+                $data['pending_deliveries'] = "-";
+                $data['pending_deliveries_percentage'] = "-";
+                $data['delivered'] = "-";
+                $data['delivered_percentage'] = "-";
+                $data['delivered_cod_amount'] = "-";
+                $data['cod_submitted_via_konnect'] = "-";
+                $data['cod_submitted_via_fintech'] = "-";
+                $data['cod_submitted_via_cash'] = "-";
+                $data['cod_submitted_by_rider'] = "-";
+                $data['pending'] = "-";
+                $data['pending_percentage'] = "-";
+                $data['undelivered'] = "-";
+                $data['undelivered_percentage'] = "-";
+                $data['rcp'] = "-";
+                $data['rcp_percentage'] = "-";
+
+                $ops_data[$region->name][] = $data;
+            }
+        }
+
+        
+        return response()->json(['status' => 200 , 'data' => $ops_data],200);
+    }
 
 }
