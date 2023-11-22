@@ -11513,10 +11513,15 @@ class AdminReportsController extends Controller
         ->leftJoin('shipments_journey AS sj',function($qurey){
             $qurey->on('sj.shipment_id','=','s.id')->where('sj.shipper_status_id',53);
         })
+        ->leftJoin('shipments_journey AS sjq',function($qurey){
+            $qurey->on('sjq.shipment_id','=','s.id')->where('sjq.shipper_status_id',2)->whereNotNull('sjq.global_rider_id');
+        })
         ->leftJoin('shipments AS sq',function($qurey){
             $qurey->on('sq.id','=','s.id')->where('sq.shipper_status_id',2);
-        })->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
-        ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT(sj.shipment_id) AS rider_picked'),DB::raw('COUNT(sq.id) AS shipment_arrived'))->orderByDesc('s.id')->get();
+        })
+        
+        ->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
+        ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT(sj.shipment_id) AS rider_picked'),DB::raw('COUNT(sjq.shipment_id) AS global_rider_picked'),DB::raw('COUNT(sq.id) AS shipment_arrived'))->orderByDesc('s.id')->get();
 
         if($city_id){
             $pickup_arival->where('s.consignee_city_id',$city_id);
@@ -11552,6 +11557,13 @@ class AdminReportsController extends Controller
             ->addColumn('rider_picked_btn', function ($pickup_arival) {
                 if ($pickup_arival->rider_picked > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle rider_picked_btn">'.$pickup_arival->rider_picked.'</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('global_picked_btn', function ($pickup_arival) {
+                if ($pickup_arival->global_rider_picked > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle global_picked_btn">'.$pickup_arival->global_rider_picked.'</button>';
                 } else {
                     return 0;
                 }

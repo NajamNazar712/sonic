@@ -1282,6 +1282,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
             Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit')->name('edit');
             Route::PUT('update_status','Admins\V3Pickup\V3AdminPickupsController@pending_request_status_update')->name('update_status');
+            Route::post('shipment_picked_detail', 'Admins\V3Pickup\V3AdminPickupsController@get_shipment_picked_detail')->name('shipment_picked_detail');
 
             Route::prefix('schedule')->name('schedule.')->group(function(){
                 Route::get('/','Admins\V3Pickup\V3AdminPickupsController@schedule_requests_index')->name('index');

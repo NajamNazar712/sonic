@@ -502,41 +502,41 @@ aria-hidden="true">
                     initComplete: function() {
                         this.api().table().columns.adjust();
                     },
-                    footerCallback: function(row, data, start, end, display) {
-                        var scanned_shipments_count = 0;
-                        var arrived_shipments_count = 0;
-                        var without_scan_shipments_count = 0;
+                    // footerCallback: function(row, data, start, end, display) {
+                    //     var scanned_shipments_count = 0;
+                    //     var arrived_shipments_count = 0;
+                    //     var without_scan_shipments_count = 0;
                         
-                        $.each(data, function(index, shipment_data) {
-                            scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
-                            arrived_shipments_count += shipment_data.total_arrived_shipments;
-                            without_scan_shipments_count += shipment_data.without_scan_shipments;
-                        });
-                        var api = this.api();
-                        api.columns('.date', {
-                            page: 'current'
-                        }).every(function() {
-                            $(this.footer()).html('Total');
-                        });
+                    //     $.each(data, function(index, shipment_data) {
+                    //         scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
+                    //         arrived_shipments_count += shipment_data.total_arrived_shipments;
+                    //         without_scan_shipments_count += shipment_data.without_scan_shipments;
+                    //     });
+                    //     var api = this.api();
+                    //     api.columns('.date', {
+                    //         page: 'current'
+                    //     }).every(function() {
+                    //         $(this.footer()).html('Total');
+                    //     });
                         
-                        api.columns('.scanned_shipments', {
-                            page: 'current'
-                        }).every(function() {
+                    //     api.columns('.scanned_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
                             
-                            $(this.footer()).html(scanned_shipments_count);
-                        });
-                        api.columns('.arrived_shipments', {
-                            page: 'current'
-                        }).every(function() {
-                            $(this.footer()).html(arrived_shipments_count);
-                        });
-                        api.columns('.without_scan_shipments', {
-                            page: 'current'
-                        }).every(function() {
+                    //         $(this.footer()).html(scanned_shipments_count);
+                    //     });
+                    //     api.columns('.arrived_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
+                    //         $(this.footer()).html(arrived_shipments_count);
+                    //     });
+                    //     api.columns('.without_scan_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
                         
-                            $(this.footer()).html(without_scan_shipments_count);
-                        });
-                    }
+                    //         $(this.footer()).html(without_scan_shipments_count);
+                    //     });
+                    // }
                 });
             $('#search_filter_btn').on('click',function () {
                 var city_id=$("#search_city").val();
@@ -551,6 +551,8 @@ aria-hidden="true">
         
             
         });
+
+    
 
         $("body").on('click','.address_btn',function(){
             // 
@@ -577,7 +579,7 @@ aria-hidden="true">
             });
         });
         $("body").on('click','.shipment_created_btn',function(){
-            // 
+            var tracking_route='{{ route('admin.tracking.index') }}';
             $("#ShipmentModal table tbody").empty();
             var shipper_id=$(this).parent('td').parent('tr').attr('id');
             var from_date=$("#from_date").val();
@@ -595,10 +597,10 @@ aria-hidden="true">
                if(data.status==1){
                     $.each(data.shipments,function(key,value){
                         if(value.shipper_status_id==1){
-                            $("#ShipmentModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                            $("#ShipmentModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td></tr>');
 
                         }else{
-                            $("#ShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                            $("#ShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td></tr>');
 
                         }
                     });
@@ -607,7 +609,7 @@ aria-hidden="true">
             });
         });
         $("body").on('click','.not_picked_btn',function(){
-            // 
+            var tracking_route='{{ route('admin.tracking.index') }}';
             $("#NotPickedShipmentModal table tbody").empty();
             var shipper_id=$(this).parent('td').parent('tr').attr('id');
             var from_date=$("#from_date").val();
@@ -624,7 +626,7 @@ aria-hidden="true">
             }).done(function(data){
                if(data.status==1){
                     $.each(data.not_picked_shipments,function(key,value){
-                       $("#NotPickedShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                       $("#NotPickedShipmentModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td></tr>');
                     });
                     $("#NotPickedShipmentModal").modal('show');
                }

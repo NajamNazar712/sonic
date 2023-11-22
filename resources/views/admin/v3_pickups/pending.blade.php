@@ -1018,6 +1018,40 @@
     </div>
     <!----end of show additional services modal --->
 
+    <!---- start of show Shipment Arrived   modal---->
+<div class="modal fade text-left" id="ShipmentPickedModal" data-backdrop="static" tabindex="-1" role="dialog"
+aria-labelledby="ShipmentPickedModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Shipments Picked</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <table class="table table-bordered">
+                            <thead>
+                                    <tr role="row" class="bg-primary white">
+                                         <th class="border-primary border-darken-1">S. No.</th>
+                                        {{--<th class="border-primary border-darken-1">Rider</th>
+                                        <th class="border-primary border-darken-1">Global Rider</th> --}}
+                                        <th class="border-primary border-darken-1">Tracking No</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!----end of show  Shipment Arrived modal --->
 @endsection
 
 @section('css')
@@ -1754,7 +1788,7 @@
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
                     {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
-                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                    {data: 'shipments_picked_btn', class: 'align-middle shipments_picked'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
@@ -2213,6 +2247,28 @@
             $('#status_id').select2({
                 width: '100%',
                 dropdownParent: $('#UpdateRequestStatusModal')
+            });
+
+            $('body').on('click','button.shipments_picked_btn',function(){
+                var pickup_request_id=$(this).closest('tr').attr('id');
+                var tracking_route='{{ route('admin.tracking.index') }}';
+                $("#ShipmentPickedModal tbody").empty();
+                $.ajax({
+                    url:'{{ route('admin.v3_pickups.pending.shipment_picked_detail') }}',
+                    method:'POST',
+                    data:{
+                        'pickup_request_id':pickup_request_id,
+                        '_token':'{{ csrf_token() }}'
+                    }
+                }).done(function(data){
+                    if(data.status==1){
+                            $.each(data.shipment_picked_detail ,function(key,value){
+                                $("#ShipmentPickedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><u><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></u></td></tr>');
+                            });
+                            $("#ShipmentPickedModal").modal('show');
+                    }
+                });
+
             });
             
             var statuses=@json($statuses);

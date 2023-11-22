@@ -65,6 +65,7 @@
                             {{-- <th class="border-primary border-darken-1">Created Shipments</th>
                             <th class="border-primary border-darken-1">Not Picked Shipments</th> --}}
                             <th class="border-primary border-darken-1">Rider Picked</th>
+                            <th class="border-primary border-darken-1">Global Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Balance Shipments</th>
                               {{-- <th class="border-primary border-darken-1">Rider</th> --}}
@@ -490,6 +491,8 @@ aria-hidden="true">
                         }},
                         // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
+                        { data:'global_picked_btn',class: 'align-middle text-center global_rider_picked', orderable: false, searchable: false},
+
                         { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
                         { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
 
@@ -501,41 +504,41 @@ aria-hidden="true">
                     initComplete: function() {
                         this.api().table().columns.adjust();
                     },
-                    footerCallback: function(row, data, start, end, display) {
-                        var scanned_shipments_count = 0;
-                        var arrived_shipments_count = 0;
-                        var without_scan_shipments_count = 0;
+                    // footerCallback: function(row, data, start, end, display) {
+                    //     var scanned_shipments_count = 0;
+                    //     var arrived_shipments_count = 0;
+                    //     var without_scan_shipments_count = 0;
                         
-                        $.each(data, function(index, shipment_data) {
-                            scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
-                            arrived_shipments_count += shipment_data.total_arrived_shipments;
-                            without_scan_shipments_count += shipment_data.without_scan_shipments;
-                        });
-                        var api = this.api();
-                        api.columns('.date', {
-                            page: 'current'
-                        }).every(function() {
-                            $(this.footer()).html('Total');
-                        });
+                    //     $.each(data, function(index, shipment_data) {
+                    //         scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
+                    //         arrived_shipments_count += shipment_data.total_arrived_shipments;
+                    //         without_scan_shipments_count += shipment_data.without_scan_shipments;
+                    //     });
+                    //     var api = this.api();
+                    //     api.columns('.date', {
+                    //         page: 'current'
+                    //     }).every(function() {
+                    //         $(this.footer()).html('Total');
+                    //     });
                         
-                        api.columns('.scanned_shipments', {
-                            page: 'current'
-                        }).every(function() {
+                    //     api.columns('.scanned_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
                             
-                            $(this.footer()).html(scanned_shipments_count);
-                        });
-                        api.columns('.arrived_shipments', {
-                            page: 'current'
-                        }).every(function() {
-                            $(this.footer()).html(arrived_shipments_count);
-                        });
-                        api.columns('.without_scan_shipments', {
-                            page: 'current'
-                        }).every(function() {
+                    //         $(this.footer()).html(scanned_shipments_count);
+                    //     });
+                    //     api.columns('.arrived_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
+                    //         $(this.footer()).html(arrived_shipments_count);
+                    //     });
+                    //     api.columns('.without_scan_shipments', {
+                    //         page: 'current'
+                    //     }).every(function() {
                         
-                            $(this.footer()).html(without_scan_shipments_count);
-                        });
-                    }
+                    //         $(this.footer()).html(without_scan_shipments_count);
+                    //     });
+                    // }
                 });
             $('#search_filter_btn').on('click',function () {
                 var city_id=$("#search_city").val();
@@ -553,7 +556,7 @@ aria-hidden="true">
         });
         
         $("body").on('click','.rider_picked_btn',function(){
-            // 
+            var tracking_route='{{ route('admin.tracking.index') }}';
             $("#RiderdetailModal table tbody").empty();
             var shipper_id=$(this).parent('td').parent('tr').attr('id');
             var from_date=$("#from_date").val();
@@ -571,10 +574,10 @@ aria-hidden="true">
                if(data.status==1){
                     $.each(data.rider_details ,function(key,value){
                         if(value.arrived_status!=2){
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
 
                         }else{
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
                         }
                     });
                     $("#RiderdetailModal").modal('show');
@@ -582,6 +585,7 @@ aria-hidden="true">
             });
         });
         $("body").on('click','.shipment_arrived_btn',function(){
+            var tracking_route='{{ route('admin.tracking.index') }}';
             $("#ShipmentArrivedModal table tbody").empty();
             var shipper_id=$(this).parent('td').parent('tr').attr('id');
             var from_date=$("#from_date").val();
@@ -598,7 +602,7 @@ aria-hidden="true">
             }).done(function(data){
                if(data.status==1){
                     $.each(data.arrived_shipments ,function(key,value){
-                        $("#ShipmentArrivedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.rider_id!=null?value.rider_id+'-'+value.rider_name:'')+'</td><td class=" align-middle global_rider">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle tracking_number">'+value.tracking_number+'</td></tr>');
+                        $("#ShipmentArrivedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle rider">'+(value.rider_id!=null?value.rider_id+'-'+value.rider_name:'')+'</td><td class=" align-middle global_rider">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td></tr>');
                     });
                     $("#ShipmentArrivedModal").modal('show');
                }
