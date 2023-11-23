@@ -4815,7 +4815,8 @@ class ReturnController extends Controller
             }
         }
 
-        $files = File::glob(asset('storage/uploads/return_notes/*.*'));
+        $path = storage_path('app/public/uploads/return_notes');
+        $files = File::glob("$path/2020_*.*");
         $now = Carbon::now();
         foreach ($files as $file) {
             if (is_file($file)) {
