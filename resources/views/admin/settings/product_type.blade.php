@@ -25,10 +25,40 @@
                     <tr role="row" class="bg-primary white">
                         {{-- <th class="border-primary border-darken-1"></th> --}}
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
+                        <th class="border-primary border-darken-1"> Action</th>
                     </tr>
                     </thead>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="edit_product_name" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" class="edit_product_name">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <Form method="POST" id="edit_fields_form" enctype="multipart/form-data" action="{{route('admin.settings.product_type.edit')}}">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Product Type Name</h5>
+                        <button type="button" id="edit_fields_form_button_close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group display-hidden">
+                            <div id="product_type_id"></div>
+                        </div>
+                        <div class="form-group" id="select_head">
+                            {{-- <input type="hidden" name="product_type_id" id="product_type_id" class="form-control"/> --}}
+                            <input type="text" name="product_type_name" id="product_type_name" class="form-control" />
+                            <label id="product_type_name-error" class="error" for="product_type_name"></label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="edit_fields_form_button_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit_fields_form_button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
@@ -120,6 +150,40 @@
             //         }
             //     }
             // });
+
+            
+
+            $('#edit_fields_form_button').on('click', function (e) {
+            var test = $('#edit_fields_form').valid();
+            if (test === true) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Update !',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#edit_fields_form').submit();
+                    }
+                });
+            }
+            });
 
             $('#add_product_form').validate({
                 errorClass: 'danger',
@@ -235,13 +299,13 @@
                 ajax:{
                     url:'{{ route('admin.settings.product_type.list') }}',
                 },
-               
+               rowId:'product_type_id',
                 order: [[1, 'desc']],
                 columns: [
-                    // {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id', defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'product_type_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'serial_number', defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'product_name', name: 'product_name', class: 'align-middle product_name'},
-                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -254,37 +318,29 @@
                 },
             });
                 
-            //Selectize
-            // var select = $('#tracking_number').selectize({
-            //     placeholder: 'Add Product',
-            //     delimiter: ',',
-            //     createOnBlur: true,
-            //     persist: false,
-            //     plugins: ['remove_button'],
-            //     onDropdownOpen: function(dropdown) {
-            //         dropdown.remove();
-            //     },
-            //     onType: function(str) {
-            //         var regex = /^[0-9,]+$/;
+            $('#edit_product_name').on('show.bs.modal', function(e) {
+            // var id = parseInt($(this).parents('tr').attr('id'));
+            // var shipment_id = table.row($(this).parents('tr')).data().product_type_id;
+            // // var rowID = $(this).data('rowid');
+            // console.log(shipment_id);
 
-            //         if (!regex.test(str)) {
-            //             select[0].selectize.setTextboxValue('');
-            //         }
-            //     },
-            //     create: function(input) {
-            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-            //             return {
-            //                 value: input,
-            //                 text: input
-            //             }
-            //         }
-            //         else {
-            //             return false;
-            //         }
-            //     },
+            var id = $(this).parents('tr').attr('product_type_id');
+            console.log($(this).parents('tr'));
+                if (id) {
+                    // $('#EditEstimateChargesModal').modal('show');
+                    $('#eec_shipment_id').val(id);
+                }
+            });
+
+            // $('#datatable').on('click', '.edit_product_name', function() {
+            //     console.log(123);
+            //     return;
+            //     var id = $(this).parents('tr').attr('id');
+            //     console.log(id);
+               
+
             // });
 
-           
         });
     </script>
 @endsection
