@@ -93,7 +93,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">ID</th>
+                                    <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Pickup Date</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>

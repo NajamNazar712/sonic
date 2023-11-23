@@ -5,7 +5,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Pickup versus Arrival Report
+        Rider Picked Vs Arrival Shipments Report
     </h1>
 
     <div class="card">

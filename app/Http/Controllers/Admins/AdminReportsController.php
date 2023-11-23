@@ -11350,7 +11350,7 @@ class AdminReportsController extends Controller
       
         // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
         $cities=City::select('id','name')->where('status',1)->get();
-        return view ('admin.reports.shipment_pickup_report')->with(['cities'=>$cities]);
+        return view ('admin.reports.created_shipment_report')->with(['cities'=>$cities]);
     }
 
 
@@ -11381,12 +11381,13 @@ class AdminReportsController extends Controller
         ->join('users AS u','u.id','=','s.user_id')
         ->leftJoin('shipments AS sq',function($qurey){
             $qurey->on('sq.id','=','s.id')->where('sq.shipper_status_id',1);
-        })->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
+        })->leftJoin('user_shipping_infos as us','us.id','=','s.pickup_address_id')
+        ->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
         ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT( s.id) AS shipment_created'),DB::raw('COUNT( sq.id) AS not_picked'))
         ->orderByDesc('s.id');
 
         if($city_id){
-            $shipment_picked->where('s.consignee_city_id',$city_id);
+            $shipment_picked->where('us.city_id',$city_id);
         }
         if($shipper_id)
         {
@@ -11518,13 +11519,13 @@ class AdminReportsController extends Controller
         })
         ->leftJoin('shipments AS sq',function($qurey){
             $qurey->on('sq.id','=','s.id')->where('sq.shipper_status_id',2);
-        })
+        })->leftJoin('user_shipping_infos as us','us.id','=','s.pickup_address_id')
         
         ->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
         ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT(sj.shipment_id) AS rider_picked'),DB::raw('COUNT(sjq.shipment_id) AS global_rider_picked'),DB::raw('COUNT(sq.id) AS shipment_arrived'))->orderByDesc('s.id')->get();
-
+   
         if($city_id){
-            $pickup_arival->where('s.consignee_city_id',$city_id);
+            $pickup_arival->where('us.city_id',$city_id);
         }
         if($shipper_id)
         {
@@ -11577,8 +11578,9 @@ class AdminReportsController extends Controller
             })
             ->addColumn('shipment_balance_btn', function ($pickup_arival) {
                 if ($pickup_arival->shipment_arrived > 0 ||  $pickup_arival->rider_picked >0 ) {
-                    $balance=($pickup_arival->shipment_arrived-$pickup_arival->rider_picked);
-                    return '<button class="btn btn-sm btn-outline-info align-middle shipment_balance_btn">'.$balance.'</button>';
+                         $totalshipment=($pickup_arival->rider_picked+$pickup_arival->global_rider_picked);
+                         $balance=abs(($pickup_arival->shipment_arrived-$totalshipment));
+                         return '<button class="btn btn-sm btn-outline-info align-middle shipment_balance_btn">'.$balance.'</button>';
                 } else {
                     return 0;
                 }
@@ -11709,9 +11711,9 @@ class AdminReportsController extends Controller
         $rider_detail=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
         ->join('riders as r', 'sj.rider_id', '=', 'r.id')
         ->leftJoin('v3_pickup_requests as pr', function ($join) use ($from_date, $to_date) {
-            $join->on('pr.shipper_id', '=', 'shipments.user_id')
-                ->on('pr.pickup_address_id', '=', 'shipments.pickup_address_id')
-                ->whereBetween(DB::raw('pr.pickup_date'), [$from_date.' 00:00:01',$to_date.' 23:59:59']);
+            $join->on('pr.shipper_id', '=', DB::raw('shipments.user_id'))
+                ->on('pr.pickup_address_id', '=', DB::raw('shipments.pickup_address_id'))
+                ->whereBetween(DB::raw('pr.pickup_date'), [$from_date,$to_date]);
         })
         ->leftJoin('riders as ra', 'pr.current_rider_id', '=', 'ra.id')
         ->where('sj.shipper_status_id', '=', 53)
@@ -11724,11 +11726,11 @@ class AdminReportsController extends Controller
             'pr.id as pickup_request_id',
             'ra.id as assigned_rider_id',
             'ra.name as assigned_rider_name',
-            DB::raw('DATE(pr.pickup_date) as pickup_date'),
+            DB::raw('pr.pickup_date as pickup_date'),
             'shipments.shipper_status_id as arrived_status',
         ])
         ->get();
-      
+        // dd($rider_detail);
         return response()->json(['status'=>1,'rider_details'=>$rider_detail]);
     }
 

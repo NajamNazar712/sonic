@@ -5,7 +5,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Shipment Creation versus Unpicked Shipment Report
+        Created Shipments vs Unpicked Shipments
     </h1>
 
     <div class="card">

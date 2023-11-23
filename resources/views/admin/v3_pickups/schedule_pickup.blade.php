@@ -60,7 +60,6 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">ID</th>
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Date & Time</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
@@ -72,10 +71,11 @@
                                     <th class="border-primary border-darken-1">Scheduled Days</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
-                                    <th class="border-primary border-darken-1">Rider ID</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Update by</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -918,7 +918,6 @@
                             return '';
                         }
                     },
-                    {data: 'id', name: 'id', class: 'align-middle id'},
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
 
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
@@ -961,6 +960,7 @@
                         }
                      
                     }},
+                    {data: 'updated_by', name: 'updated_by', class: 'align-middle updated_by'},
                     {
                         data: 'action',
                         name: 'action',
