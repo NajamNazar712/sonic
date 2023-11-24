@@ -11843,7 +11843,7 @@ class RiderAPIController extends Controller
                         ),
                         '[]'
                     )
-                    FROM shipment_status_further_reason as ssfr
+                    FROM sub_reasons as ssfr
                     WHERE ssfr.reason_id = shr.id
                 ) 
             )) as result")
