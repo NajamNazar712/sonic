@@ -398,22 +398,26 @@ class V3AdminPickupsController extends Controller
             })
 
            ->leftjoin('sub_category_segments as sub_seg', 'sub_seg.id', '=', 'v3_pickup_requests.sub_segment_id')
-            ->leftJoin('v3_pickup_request_attempts as vpa', function ($join) {
-                $join->on('vpa.pickup_request_id', '=', 'v3_pickup_requests.id')
-                    ->where(
-                        'vpa.id',
-                        '=',
-                        DB::raw('(select max(id) from v3_pickup_request_attempts where v3_pickup_request_attempts.pickup_request_id = v3_pickup_requests.id)')
-                    );
-            })
-            ->leftJoin('v3_rider_pickups as vpr', function ($join) {
-                $join->on('vpr.pickup_request_id', '=', 'v3_pickup_requests.id')
-                    ->where(
-                        'vpr.id',
-                        '=',
-                        DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
-                    );
-            })->leftJoin('shipments AS sp',function($qurey){
+           ->leftJoin('v3_pickup_request_attempts as vpa','vpa.pickup_request_id','=','v3_pickup_requests.id')
+        //    ->leftJoin('admins as ad','ad.id','=','vpa.assigned_by')
+           //test
+            // ->leftJoin('v3_pickup_request_attempts as vpa', function ($join) {
+            //     $join->on('vpa.pickup_request_id', '=', 'v3_pickup_requests.id')
+            //         ->where(
+            //             'vpa.id',
+            //             '=',
+            //             DB::raw('(select max(id) from v3_pickup_request_attempts where v3_pickup_request_attempts.pickup_request_id = v3_pickup_requests.id)')
+            //         );
+            // })
+            // ->leftJoin('v3_rider_pickups as vpr', function ($join) {
+            //     $join->on('vpr.pickup_request_id', '=', 'v3_pickup_requests.id')
+            //         ->where(
+            //             'vpr.id',
+            //             '=',
+            //             DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
+            //         );
+            // })
+            ->leftJoin('shipments AS sp',function($qurey){
                 $qurey->on('sp.user_id','=',DB::raw('v3_pickup_requests.shipper_id'))
                 ->where('sp.pickup_address_id','=',DB::raw('v3_pickup_requests.pickup_address_id'))
                 ->where('sp.shipper_status_id',53)->whereDate('sp.created_at','=',DB::raw('v3_pickup_requests.pickup_date'));

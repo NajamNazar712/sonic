@@ -1267,7 +1267,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('v3_pickups')->name('v3_pickups.')->group(function () {
-        Route::get('add', 'Admins\V3Pickup\V3AdminPickupsController@add_pickup_request')->name('add');
+        // Route::get('add', 'Admins\V3Pickup\V3AdminPickupsController@add_pickup_request')->name('add');
         Route::post('get_pickup_address', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_address')->name('get_pickup_address');
         Route::post('add', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_add')->name('add');
         Route::PUT('update', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_update')->name('update');
