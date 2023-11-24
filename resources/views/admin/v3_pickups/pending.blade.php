@@ -517,7 +517,7 @@
                                                 <label for="su" class="w-100 text-center" id="su">S</label>
                                            </div> --}}
                                             <div class="col-1 mb-0 item-column p-0">
-                                                    <input class="apply-checked" type="checkbox" name='days[1]' id="mo">
+                                                    <input class="apply-checked" type="checkbox" name='days[1]' id="mo" >
                                                     <label for="mo" class="w-100 text-center" id="mo">Mo</label>
                                             </div>
 
@@ -671,10 +671,10 @@
                                         </div>
 
                                         <div class="row align-items-center vh-100 px-1">
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 {{-- input-group --}}
                                                 <div class="form-group">
-                                                    <label>Shipments*</label>
+                                                    <label>Est Shipments Qty*</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required" maxlength="9" >
                                                 </div>
@@ -682,14 +682,14 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group">
-                                                    <label>Total Pieces*</label>
+                                                    <label>Est Pieces*</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required" maxlength="3" >
                                                 </div>
                                             </div>
-                                            <div class="col-4 pl-0">
+                                            <div class="col-3 pl-0">
                                                 <div class="form-group">
-                                                    <label>Weight*</label>
+                                                    <label>Est Weight*</label>
                                                     <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>

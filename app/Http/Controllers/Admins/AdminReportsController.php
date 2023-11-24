@@ -11521,7 +11521,7 @@ class AdminReportsController extends Controller
             $qurey->on('sq.id','=','s.id')->where('sq.shipper_status_id',2);
         })->leftJoin('user_shipping_infos as us','us.id','=','s.pickup_address_id')
         
-        ->whereBetween(DB::raw('s.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
+        ->whereBetween(DB::raw('sj.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
         ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT(sj.shipment_id) AS rider_picked'),DB::raw('COUNT(sjq.shipment_id) AS global_rider_picked'),DB::raw('COUNT(sq.id) AS shipment_arrived'))->orderByDesc('s.id')->get();
    
         if($city_id){
@@ -11718,7 +11718,7 @@ class AdminReportsController extends Controller
         ->leftJoin('riders as ra', 'pr.current_rider_id', '=', 'ra.id')
         ->where('sj.shipper_status_id', '=', 53)
         ->where('shipments.user_id', '=', $shipper_id)
-        ->whereBetween(DB::raw('shipments.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         ->select([
             'r.id as picked_rider_id',
             'r.name as picked_rider_name',
@@ -11751,7 +11751,7 @@ class AdminReportsController extends Controller
         ->select('r.id AS rider_id','r.name AS rider_name','gs.setting_value AS global_rider_id','gs.text AS global_rider_name','shipments.tracking_number')
         ->where('sj.shipper_status_id','=',2)
         ->where('shipments.user_id','=',$shipper_id)
-        ->whereBetween(DB::raw('shipments.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
+        ->whereBetween(DB::raw('sj.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
 
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
