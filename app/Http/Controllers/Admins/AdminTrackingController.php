@@ -709,14 +709,11 @@ class AdminTrackingController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
-        }
-        elseif($request->bag && $bag_no != null)
-        {
+        } elseif ($request->bag && $bag_no != null) {
 
             $bag = CargoManifestBag::where('seal_number', $bag_no);
 
-            if($bag->exists())
-            {
+            if ($bag->exists()) {
                 $bag = $bag->first();
                 $details = array();
                 $details['bag_number'] = $bag->seal_number;
@@ -727,15 +724,13 @@ class AdminTrackingController extends Controller
                 $details['pieces'] = $bag->quantity;
                 $details['number_of_shipments'] = $bag->shipments;
                 $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
-                if ($manifest !== null)
-                {
-                    if($manifest->exists())
-                    {
-                        $manifest =  $manifest->latest()->first()->id;
-                    }else{
+                if ($manifest !== null) {
+                    if ($manifest->exists()) {
+                        $manifest = $manifest->latest()->first()->id;
+                    } else {
                         $manifest = '-';
                     }
-                }else{
+                } else {
                     $manifest = '-';
 
                 }
@@ -751,15 +746,31 @@ class AdminTrackingController extends Controller
                 }
                 $details['bag_status_hub'] = $bag;
                 return response()->json(['status' => 1, 'details' => $details]);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Bag Number not found']);
             }
-            
-
         }
     }
+    public function quick_tracking_shipment_remark_update(Request $request)
+    {
+        $tracking_numbers = explode(',' , $request->tracking_numbers);
+        foreach($tracking_numbers as $tracking_number)
+        {
+            $shipment = Shipment::where('tracking_number', $tracking_number);
+            if($shipment->exists()){
+                $shipment = $shipment->with(['shipment_journey' => function ($query) {
+                    $query->take(1); 
+                }])->first();
+                
+                $shipment = $shipment->shipment_journey->first();
+                $shipment->remarks = $request->add_remark;
+                $shipment->save();
+            }            
+        }
 
+        return redirect()->back()->with('success', 'Shipment Remark updated successfully!');
+
+    }
     public function cx_quick_tracking_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 272);

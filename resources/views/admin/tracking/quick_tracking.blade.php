@@ -14,7 +14,9 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <div>
+                                <button class="btn btn-primary d-none" id="remarks_btn">Add Remarks</button>
+                            </div>
                             <form action="#" id="quick_tracking_form">
                                 <div class="row justify-content-center mb-2">
                                     <div class="row">
@@ -40,9 +42,11 @@
                                             </div>
                                         </fieldset>
                                     </div>
+
+                                   
                                 </div>
                             </form>
-
+                          
                             <div id="single_div" class="d-none">
                                 <div class="row">
                                 <div class="col-3"><div class="card text-center">
@@ -174,10 +178,35 @@
                             </div>
 
                 
-
-
-
-
+                        <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Add Remarks</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
+                                            class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                                            @csrf
+                                            <input type="text" id="tracking_numbers" name="tracking_numbers">
+                                            <div class="form-group ml-1">
+                                                <textarea name="add_remark" id="add_remark" class="form-control" rows="4"
+                                                data-rule-required="true" data-msg-required="Remarks is required"
+                                                placeholder="Add Remarks*"></textarea>
+                                            </div>
+                                            <div class="form-group ml-1">
+                                                <button type="submit" name="add" class="btn btn-primary">Add</button>
+                                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <div id="bag_single_div" class="d-none">
                                 <div class="row">
                                 <div class="col-3"><div class="card text-center">
@@ -470,7 +499,6 @@
             var selection = true;
             var isSingleMode = true; 
             
-
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
                 isSingleMode = single_multiple_switch.checked;
@@ -537,7 +565,6 @@
                     ],
                     rowCallback: function(row, data, index) {
                         var complaint_id = $(row).find("td:eq(3)").html();
-                        console.log(complaint_id);
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
@@ -640,29 +667,7 @@
                 });
             }
 
-            $('#scan_btn').change(function() {
-                if ($(this).is(':checked')) {
-                    $('#scan_bag').show();
-                    $('#multiple_div').hide();
-                    $('#bag_multiple_div').show();
-                    $('#scan_tracking').hide();
-                    $('#single_div').hide();
-                    $('#bag_single_div').show();
-
-                    
-
-                }else {
-                    $('#scan_tracking').show();
-                    $('#multiple_div').show();
-                    $('#bag_multiple_div').hide();
-                    $('#scan_bag').hide();
-                    $('#bag_single_div').hide();
-                    $('#single_div').show();
-
-
-
-                }
-            });
+            
 
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
@@ -683,15 +688,25 @@
             $('input#scan_tracking').focus();
             $('input#scan_bag').focus();
 
-           
 
+            $('#remarks_btn').on('click', function(){
+                $('#AddRemarksModal').modal('show');
+            })
 
+            setTimeout(function () {
+                $(".alert-success").fadeOut(1000);
+            }, 3000); 
+            
+            var tracking_numbers_remarks = [];
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
-
-
+                tracking_numbers_remarks.push(tracking);
+                if (tracking_numbers_remarks.length > 0 ) {
+                    $('#remarks_btn').removeClass('d-none');
+                    $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
+                }
                 if (tracking != '') {
                     scan.attr('disabled', true);
                     if(selection === false){
@@ -971,6 +986,29 @@
                         });
 
                     }
+                }
+            });
+
+            $('#scan_btn').change(function() {
+                var isChecked = $(this).is(':checked');
+                if (isChecked) {
+                    // If the checkbox is checked
+                    $('#remarks_btn').addClass('d-none');
+                    $('#scan_bag').show();
+                    $('#multiple_div').hide();
+                    $('#bag_multiple_div').show();
+                    $('#scan_tracking').hide();
+                    $('#single_div').hide();
+                    $('#bag_single_div').show();
+                } else {
+                    // If the checkbox is not checked
+                    $('#remarks_btn').removeClass('d-none');
+                    $('#scan_tracking').show();
+                    $('#multiple_div').show();
+                    $('#bag_multiple_div').hide();
+                    $('#scan_bag').hide();
+                    $('#bag_single_div').hide();
+                    $('#single_div').show();
                 }
             });
         });
