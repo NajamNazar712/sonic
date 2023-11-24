@@ -9108,12 +9108,12 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),87);
         }
 
-        $products = Product::select('id as product_type_id','product_name');
+        $products = Product::select('id as product_type_id','product_name')->orderby('product_type_id','desc');
     
         $datatables = Datatables::of($products)
             ->addColumn('action', function($product_type) {
-                    $edit_product_type = '<button data-id="'.$product_type->product_type_id.'" data-product_type_name="'.$product_type->product_name.'" data-target="#edit_product_name" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
-                    $delete_product_type = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    $edit_product_type = '<button data-id="'.$product_type->product_type_id.'" data-product_type_name="'.$product_type->product_name.'" data-target="#edit_product_name_modal" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                    $delete_product_type = '<button data-id="'.$product_type->product_type_id.'" type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
                     $dropdown = '
                         <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -9126,10 +9126,6 @@ class GlobalSettingsController extends Controller
                         </div>
                     ';
                         return $dropdown;
-				    // }
-				    // else {
-				    //     return '';
-				    // }
             });
         return $datatables->make(true);
     }
@@ -9137,34 +9133,61 @@ class GlobalSettingsController extends Controller
     public function product_type_add(Request $request){
         
         if($request->has('product_name')){
-            $product_name = $request->get('product_name');
+            $product_type_name = $request->get('product_name');
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
+
+            if(!$existing_product_type_name){
 
             $products = new Product();
-            $products->product_name = $product_name;
+            $products->product_name = $product_type_name;
             $products->save();
 
-            return response()->json(['status' => 0, 'message' => 'Product Added Successfully!']);
+            return response()->json(['status' => 0, 'message' => 'Product Type Added Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Product Type Already Exist!']);
+            }
         }
         else{
-            return response()->json(['status' => 1, 'message' => 'No Product name found!']);
+            return response()->json(['status' => 1, 'message' => 'No Product Type Name found!']);
         }
 
     }
     public function product_type_edit(Request $request){
-        
-        dd($request->all());
-        if($request->has('product_name')){
-            $product_name = $request->get('product_name');
+        if($request->has('product_type_name')){
+            $product_type_id = $request->get('product_type_id');
+            $product_type_name = $request->get('product_type_name');
 
-            $products = new Product();
-            $products->product_name = $product_name;
-            $products->save();
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
 
-            return response()->json(['status' => 0, 'message' => 'Product Added Successfully!']);
+            if(!$existing_product_type_name){
+                $update_product_type_name = Product::where('id', $product_type_id)->update(['product_name' => $product_type_name]);
+                if($update_product_type_name){
+                    return redirect()->back()->with('success', 'Product Type Updated Successfully!');
+                }
+                else{
+                    return redirect()->back()->with('error', 'Something went wrong!');
+                }
+            }
+            else{
+                return redirect()->back()->with('error', 'Product Type Already Exist!');
+            }
+            
         }
         else{
-            return response()->json(['status' => 1, 'message' => 'No Product name found!']);
+            return redirect()->back()->with('error', 'No Product Name Found!');
         }
 
     }
+
+    public function product_type_delete(Request $request){
+
+        $product = Product::find($request->id);
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product Type Not Found']);
+        }
+        
+        $product->delete();
+        return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
+        }
 }

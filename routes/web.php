@@ -3813,7 +3813,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\GlobalSettingsController@product_type_list')->name('list');
             Route::post('add', 'Admins\GlobalSettingsController@product_type_add')->name('add');
             Route::post('edit', 'Admins\GlobalSettingsController@product_type_edit')->name('edit');
-            // Route::post('delete', 'Admins\GlobalSettingsController@product_type_add')->name('add');
+            Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
         });
 
     });

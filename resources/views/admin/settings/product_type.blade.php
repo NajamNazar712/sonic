@@ -13,7 +13,7 @@
 
                 <form id="add_product_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="form-group">
-                        <input type="text" name="product_name" class="form-control product_name" placeholder="Add Product" data-rule-required="true" data-msg-required="Product Name is required">
+                        <input type="text" name="product_name" class="form-control product_name" placeholder="Add Product Type" data-rule-required="true" data-msg-required="Product Type is required">
                     </div>
                     <div class="form-group ml-1">
                         <button type="submit" id="add_product" name="add" class="btn btn-primary add" value="Add">Add</button>
@@ -23,8 +23,6 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%;">
                     <thead>
                     <tr role="row" class="bg-primary white">
-                        {{-- <th class="border-primary border-darken-1"></th> --}}
-                        <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1"> Action</th>
@@ -35,22 +33,20 @@
         </div>
     </div>
 
-    <div class="modal fade" id="edit_product_name" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" class="edit_product_name">
+    <div class="modal fade" id="edit_product_name_modal" tabindex="-1" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <Form method="POST" id="edit_fields_form" enctype="multipart/form-data" action="{{route('admin.settings.product_type.edit')}}">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Product Type Name</h5>
-                        <button type="button" id="edit_fields_form_button_close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <button type="button" id="edit_fields_form_button_close_modal" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group display-hidden">
-                            <div id="product_type_id"></div>
-                        </div>
-                        <div class="form-group" id="select_head">
-                            {{-- <input type="hidden" name="product_type_id" id="product_type_id" class="form-control"/> --}}
-                            <input type="text" name="product_type_name" id="product_type_name" class="form-control" />
+                        <div class="form-group">
+                            <input type="hidden" name="product_type_id" id="product_type_id" class="form-control"/>
+                            <input type="text" name="product_type_name" id="product_type_name" class="form-control" placeholder="Write Product Type" data-rule-required="true" data-msg-required="Product Type is required"/>
                             <label id="product_type_name-error" class="error" for="product_type_name"></label>
                         </div>
                     </div>
@@ -299,14 +295,15 @@
                 ajax:{
                     url:'{{ route('admin.settings.product_type.list') }}',
                 },
-               rowId:'product_type_id',
+               rowId:'id',
                 order: [[1, 'desc']],
                 columns: [
-                    {data: 'product_type_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'serial_number', defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'id', defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'product_name', name: 'product_name', class: 'align-middle product_name'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
+
+                //
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     // $('td:eq(1)', row).html(index + 1 + info.page * info.length);
@@ -318,29 +315,59 @@
                 },
             });
                 
-            $('#edit_product_name').on('show.bs.modal', function(e) {
-            // var id = parseInt($(this).parents('tr').attr('id'));
-            // var shipment_id = table.row($(this).parents('tr')).data().product_type_id;
-            // // var rowID = $(this).data('rowid');
-            // console.log(shipment_id);
 
-            var id = $(this).parents('tr').attr('product_type_id');
-            console.log($(this).parents('tr'));
-                if (id) {
-                    // $('#EditEstimateChargesModal').modal('show');
-                    $('#eec_shipment_id').val(id);
-                }
+            // Open edit product type name modal 
+            $('#edit_product_name_modal').on('show.bs.modal', function(e) {
+            var id = $(e.relatedTarget).data('id');
+            var name = $(e.relatedTarget).data('product_type_name');
+            $('#product_type_id').val(id);
+            $('#product_type_name').val(name);
             });
 
-            // $('#datatable').on('click', '.edit_product_name', function() {
-            //     console.log(123);
-            //     return;
-            //     var id = $(this).parents('tr').attr('id');
-            //     console.log(id);
-               
 
-            // });
 
+            // deleting product type
+            $('#datatable tbody').on('click', '.dropdown-item.delete', function() {
+                var id = $(this).data('id');
+                swal({
+                text: 'Are you sure, you want to Delete?',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+                }).then(function(confirm) {
+
+                    
+                    $.ajax({
+                        url: '{{ route('admin.settings.product_type.delete') }}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+                        table.draw();
+                    });
+                });
+            });
         });
     </script>
 @endsection
