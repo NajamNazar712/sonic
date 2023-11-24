@@ -83,11 +83,12 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Controllers\Admins\AdminReportsController;
+// use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Traits\RvTrait;
 
 class AdminReportsController extends Controller
 {
@@ -12131,7 +12132,6 @@ class AdminReportsController extends Controller
 
     }
 
-<<<<<<< HEAD
     public function rv_report_index()
     {
 
@@ -12286,10 +12286,8 @@ class AdminReportsController extends Controller
         return response()->json(['data' => $mergedArray]);
     }
 
-    public function operations_performance_index()
-=======
+    
      public function operations_performance_index()
->>>>>>> ab21d90695536cd805418c871479633880f6cbbe
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 684);
         return view('admin.reports.operations_performance_report');

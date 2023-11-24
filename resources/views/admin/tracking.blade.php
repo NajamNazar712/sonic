@@ -700,7 +700,7 @@
             });
             
 
-            $('#update_call_status_modal').modal('show');
+            // $('#update_call_status_modal').modal('show');
         });
 
         $('#update_call_status_modal').on('shown.bs.modal', function () {
@@ -2549,7 +2549,7 @@
                         }
                     });
             });
-        });
+        // });
 
 
 
