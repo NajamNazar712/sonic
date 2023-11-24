@@ -160,7 +160,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
+    static public function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
         $dayNames = [];
     
         foreach ($days as $day) {
@@ -181,7 +181,7 @@ class AdminFinanceController extends Controller
         }
     } 
 
-    static private function getDayOfMonthText($day) {
+    static public function getDayOfMonthText($day) {
         if ($day % 100 >= 11 && $day % 100 <= 13) {
             return $day . 'th';
         } else {

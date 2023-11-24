@@ -90,6 +90,8 @@
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Referral Code</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -665,6 +667,9 @@
                         head.push('Segment');
                         head.push('Sub Category Segment');
                         head.push('Referral Code');
+                        head.push('Payment Cycle');
+                        head.push('Payment Cycle Days');
+
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -705,7 +710,8 @@
                             row.push(values.segment);
                             row.push(values.sub_segment);
                             row.push(values.referral_name);
-
+                            row.push(values.payment_cycle);
+                            row.push(values.payment_cycle_days);
                             body.push(row);
                         });
                     },
@@ -1224,6 +1230,8 @@
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                {data: 'payment_cycle', name: 'pc.name', class: 'align-middle payment_cycle'},
+                {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
