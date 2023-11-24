@@ -161,6 +161,7 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\SubReason;
 
 class RiderAPIController extends Controller
 {
@@ -11827,8 +11828,12 @@ class RiderAPIController extends Controller
     
     public function undelivered_reason_map()
     {
-        $undelivered_reason_map = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')->select('ssr.id','ssr.name')->get();
-        return response()->json(['status' => 0, 'message' => $undelivered_reason_map]);
+        $undelivered_reason_map = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')
+        ->leftjoin('sub_reasons as sr','sr.reason_id','ssr.id')
+        ->select('ssr.id','ssr.name', 'sr.id', 'sr.name')
+        ->get();
+
+        return response()->json(['status' => 0, 'message' => $undelivered_reason_map, 'audio' => 0]);
 
     }
 
