@@ -106,13 +106,13 @@
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Rider Phone</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Assigned Courier Phone</th>
-                                    <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Admin Generated</th>
                                     <th class="border-primary border-darken-1">Client Generated</th>
                                 </tr>
@@ -648,6 +648,8 @@
                     }},
                     
                     {data: 'address', name: 'address', class: 'align-middle address'},
+                    {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
+
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
                     {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
@@ -672,7 +674,6 @@
                     },
                     {data: 'current_rider_phone', name: 'current_rider_phone', class: 'align-middle current_rider_phone'},
                   
-                    {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
                     {
                         data:'adminname',name:'adminname',class:'align-middle adminname',orderable: false,
                         render:function(data,type,row){
