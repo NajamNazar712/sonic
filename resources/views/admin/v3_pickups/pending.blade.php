@@ -548,7 +548,7 @@
                                             </div>
 
                                         </div>
-
+                                       
                                         </div>
 
                                     </div>
@@ -2315,18 +2315,26 @@
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
+              
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
                     // $('#product_select').attr('disabled', false);
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Pickup request is being added!',
-                        icon: 'info',
+                    if($('.apply-checked:checked').length>0){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Pickup request is being added!',
+                            icon: 'info',
                         buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        // form.submit();
+                    }else{
+                        toastr.error('Select Days in Schedule', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                    }
+                  
+               
                 }
             });
 
