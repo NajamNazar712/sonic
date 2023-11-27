@@ -4660,6 +4660,33 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('u.payment_cycle_days', function ($query, $keyword) {
+                $dayMaps = [
+                    1 => 'Monday',
+                    2 => 'Tuesday',
+                    3 => 'Wednesday',
+                    4 => 'Thursday',
+                    5 => 'Friday',
+                    6 => 'Saturday',
+                ];
+
+                $keywordFound = [];
+                foreach($dayMaps as $key => $dayMap){
+                    if (stripos($dayMap, $keyword) !== false) {
+                        $keywordFound[] = $key;
+                    }
+                }
+                if(count($keywordFound) > 0){
+                    $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->where('pc.id', '!=', 1);
+                }else if (is_numeric($keyword) || is_numeric($keyword) . 'rd' || is_numeric($keyword) . 'nd' || is_numeric($keyword) . 'th') {
+                    $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                    $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                }else if (ucwords($keyword) == 'Day'){
+                    $query->whereIn('pc.id', [2,4,5]);
+                } else{
+                    $query->whereRaw('false');
+                }
+            })
             ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {

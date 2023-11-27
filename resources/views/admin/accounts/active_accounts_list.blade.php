@@ -1674,7 +1674,7 @@ function checkboxStatus() {
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
-                {data: 'payment_cycle', name: 'pc.name', class: 'align-middle payment_cycle'},
+                {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
@@ -1710,7 +1710,16 @@ function checkboxStatus() {
                     '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
 
+                        '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1737,7 +1746,12 @@ function checkboxStatus() {
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }
+                    } else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1747,6 +1761,15 @@ function checkboxStatus() {
                             current.val(column.search());
                         }
                     }
+                });
+                $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
