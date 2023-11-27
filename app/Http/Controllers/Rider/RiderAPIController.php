@@ -11863,13 +11863,36 @@ class RiderAPIController extends Controller
 
         $reasons = [];
 
+        // foreach ($shipment_status_reason as $reason) {
+        //     $reasonId = $reason->id;
+        //     $reasonName = $reason->name;
+        //     $reasonAudio = $reason->audio;
+        //     $subReasonId = $reason->sub_id;
+        //     $subReasonName = $reason->sub_name;
+
+        //     if (!isset($reasons[$reasonId])) {
+        //         $reasons[$reasonId] = [
+        //             'id' => $reasonId,
+        //             'name' => $reasonName,
+        //             'audio' => $reasonAudio,
+        //             'sub_reasons' => [],
+        //         ];
+        //     }
+
+        //     if ($subReasonId && !isset($reasons[$reasonId]['sub_reasons'][$subReasonId])) {
+        //         $reasons[$reasonId]['sub_reasons'][$subReasonId] = [
+        //             'id' => $subReasonId,
+        //             'name' => $subReasonName,
+        //         ];
+        //     }
+        // }
         foreach ($shipment_status_reason as $reason) {
             $reasonId = $reason->id;
             $reasonName = $reason->name;
             $reasonAudio = $reason->audio;
             $subReasonId = $reason->sub_id;
             $subReasonName = $reason->sub_name;
-
+        
             if (!isset($reasons[$reasonId])) {
                 $reasons[$reasonId] = [
                     'id' => $reasonId,
@@ -11878,14 +11901,15 @@ class RiderAPIController extends Controller
                     'sub_reasons' => [],
                 ];
             }
-
-            if ($subReasonId && !isset($reasons[$reasonId]['sub_reasons'][$subReasonId])) {
-                $reasons[$reasonId]['sub_reasons'][$subReasonId] = [
+        
+            if ($subReasonId) {
+                $reasons[$reasonId]['sub_reasons'][] = [
                     'id' => $subReasonId,
                     'name' => $subReasonName,
                 ];
             }
         }
+        
 
         $finalReasons = array_values($reasons); // Re-index the array
 
