@@ -698,13 +698,25 @@
             setTimeout(function () {
                 $(".alert-success").fadeOut(1000);
             }, 3000); 
+
+            var remarksChecked = null;
+            $('#scan_btn').change(function() {
+                remarksChecked = $(this).is(':checked');;
+                if (!remarksChecked && tracking_numbers_remarks.length > 0 ) {
+                    $('#remarks_btn').removeClass('d-none');
+                }else{
+                    $('#remarks_btn').addClass('d-none');
+                }
+            })
             
             var tracking_numbers_remarks = [];
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
-                tracking_numbers_remarks.push(tracking);
+                if(!remarksChecked){
+                    tracking_numbers_remarks.push(tracking);
+                }
                 if (tracking_numbers_remarks.length > 0 ) {
                     $('#remarks_btn').removeClass('d-none');
                     $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
@@ -990,18 +1002,8 @@
                     }
                 }
             });
-
-            $('#scan_btn').change(function() {
-                console.log(tracking_numbers_remarks.length);
-                var isChecked = $(this).is(':checked');
-                if (!isChecked && tracking_numbers_remarks.length > 0 ) {
-                    $('#remarks_btn').removeClass('d-none');
-
-                }else{
-                    $('#remarks_btn').addClass('d-none');
-
-                }
-            });
+            
+      ;
 
             $('#scan_btn').change(function() {
                 var isChecked = $(this).is(':checked');
