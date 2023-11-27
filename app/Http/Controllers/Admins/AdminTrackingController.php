@@ -758,6 +758,7 @@ class AdminTrackingController extends Controller
         {
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if($shipment->exists()){
+                //take latest shipment
                 $shipment = $shipment->with(['shipment_journey' => function ($query) {
                     $query->take(1); 
                 }])->first();
