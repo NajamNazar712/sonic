@@ -554,7 +554,7 @@
                         if(parseInt(weight) >= 50){
                             swal({
                                 text: 'Are you certain about proceeding when your weight surpasses 49KG??',
-                                title: 'Cautionary notice',
+                                title: 'Are You Sure',
                                 icon: 'warning',
                                 buttons: {
                                     cancel: {
