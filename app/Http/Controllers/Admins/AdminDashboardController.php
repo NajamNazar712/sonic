@@ -208,10 +208,6 @@ class AdminDashboardController extends Controller
         $this->middleware('Permission')->except('payfast_payment');
     }
 
-
-    public function payfast_payment_details(){
-        return view('payfast-payment-view');
-    }
     public function index()
     {
         /*$stats = array();
@@ -514,11 +510,6 @@ class AdminDashboardController extends Controller
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
         return view('admin.simple_dashboard');
     }
-
-public function payfast_payment(Request $request){
-    dd($request->all());
-}
-
 
     public function user_fintech_charges(Request $req){
         $UserFintectCharges = new UserFintectCharges();
