@@ -504,7 +504,8 @@
                    return true;
                }
             });
-
+            
+            var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
             $('#add_shipment_form').validate({
 
