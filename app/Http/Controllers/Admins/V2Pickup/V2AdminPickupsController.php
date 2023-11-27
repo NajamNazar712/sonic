@@ -1724,7 +1724,6 @@ class V2AdminPickupsController extends Controller
         
         $walkin_shipment_ids = array();
         $print_shipment_ids = array();
-        $walkin_shipment_ids = array();
         $pickup_request_ids = array();
         $unassigned_pickup_requests = array();
 
