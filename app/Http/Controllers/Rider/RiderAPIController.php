@@ -11828,32 +11828,6 @@ class RiderAPIController extends Controller
     
     public function undelivered_reason_map()
     {
-
-        // $results = DB::table('shipment_status_reason as shr')
-        // ->select(
-        //     DB::raw("JSON_ARRAY(
-        //         JSON_OBJECT('id', shr.id),
-        //         JSON_OBJECT('name', shr.name),
-        //         JSON_OBJECT('audio', shr.audio),
-        //         JSON_OBJECT('further_reason', (
-        //             SELECT IFNULL(
-        //                 GROUP_CONCAT(
-        //                     JSON_OBJECT('id', ssfr.id),
-        //                     JSON_OBJECT('name', ssfr.name)
-        //                 ),
-        //                 '[]'
-        //             )
-        //             FROM sub_reasons as ssfr
-        //             WHERE ssfr.reason_id = shr.id
-        //         ) 
-        //     )) as result")
-        // )
-        // ->get();
-
-     
-        // return response()->json($results);
-
-
         $shipment_status_reason = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')
         ->leftjoin('sub_reasons as sr','sr.reason_id', 'ssr.id')
         ->select('ssr.id', 'ssr.name', 'ssr.audio', 'sr.id as sub_id', 'sr.name as sub_name')
@@ -11863,29 +11837,6 @@ class RiderAPIController extends Controller
 
         $reasons = [];
 
-        // foreach ($shipment_status_reason as $reason) {
-        //     $reasonId = $reason->id;
-        //     $reasonName = $reason->name;
-        //     $reasonAudio = $reason->audio;
-        //     $subReasonId = $reason->sub_id;
-        //     $subReasonName = $reason->sub_name;
-
-        //     if (!isset($reasons[$reasonId])) {
-        //         $reasons[$reasonId] = [
-        //             'id' => $reasonId,
-        //             'name' => $reasonName,
-        //             'audio' => $reasonAudio,
-        //             'sub_reasons' => [],
-        //         ];
-        //     }
-
-        //     if ($subReasonId && !isset($reasons[$reasonId]['sub_reasons'][$subReasonId])) {
-        //         $reasons[$reasonId]['sub_reasons'][$subReasonId] = [
-        //             'id' => $subReasonId,
-        //             'name' => $subReasonName,
-        //         ];
-        //     }
-        // }
         foreach ($shipment_status_reason as $reason) {
             $reasonId = $reason->id;
             $reasonName = $reason->name;
@@ -11910,7 +11861,6 @@ class RiderAPIController extends Controller
             }
         }
         
-
         $finalReasons = array_values($reasons); // Re-index the array
 
         return response()->json(['status' => 0, 'message' => $finalReasons]);
