@@ -4678,11 +4678,11 @@ class AdminFinanceController extends Controller
                 }
                 if(count($keywordFound) > 0){
                     $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->where('pc.id', '!=', 1);
+                }else if (ucwords($keyword) == 'Every'){
+                    $query->whereIn('pc.id', [2,4,5]);
                 }else if (is_numeric($keyword) || is_numeric($keyword) . 'rd' || is_numeric($keyword) . 'nd' || is_numeric($keyword) . 'th') {
                     $keyword = preg_replace("/[^0-9]/", "", $keyword);
                     $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
-                }else if (ucwords($keyword) == 'Day'){
-                    $query->whereIn('pc.id', [2,4,5]);
                 } else{
                     $query->whereRaw('false');
                 }
