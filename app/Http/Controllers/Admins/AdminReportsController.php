@@ -11745,13 +11745,29 @@ class AdminReportsController extends Controller
         //     $from_date=Carbon::now()->format('Y-m-d');
         //     $to_date=Carbon::now()->format('Y-m-d');
         // }
-        $arrived_shipments=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')
-        ->leftjoin('riders as r','sj.rider_id','=','r.id')
-        ->leftjoin('global_settings as gs','gs.setting_value','=','sj.global_rider_id')
-        ->select('r.id AS rider_id','r.name AS rider_name','gs.setting_value AS global_rider_id','gs.text AS global_rider_name','shipments.tracking_number')
-        ->where('sj.shipper_status_id','=',2)
-        ->where('shipments.user_id','=',$shipper_id)
-        ->whereBetween(DB::raw('sj.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
+        // $arrived_shipments=Shipment::join('shipments_journey as sj','sj.shipment_id','=','shipments.id')
+        // ->leftjoin('riders as r','sj.rider_id','=','r.id')
+        // ->leftjoin('global_settings as gs','gs.setting_value','=','sj.global_rider_id')
+        // ->select('r.id AS rider_id','r.name AS rider_name','gs.setting_value AS global_rider_id','gs.text AS global_rider_name','shipments.tracking_number')
+        // ->where('sj.shipper_status_id','=',2)
+        // ->where('shipments.user_id','=',$shipper_id)
+        // ->whereBetween(DB::raw('sj.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
+        $arrived_shipments=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+        ->join('shipments_journey as sjq', 'sjq.shipment_id', '=', 'sj.shipment_id')
+        ->leftJoin('riders as r', 'sj.rider_id', '=', 'r.id')
+        ->leftJoin('global_settings as gs', 'gs.setting_value', '=', 'sj.global_rider_id')
+        ->select(
+            'r.id AS rider_id',
+            'r.name AS rider_name',
+            'gs.setting_value AS global_rider_id',
+            'gs.text AS global_rider_name',
+            'shipments.tracking_number'
+        )
+        ->where('sj.shipper_status_id', '=', 53)
+        ->where('sjq.shipper_status_id', '=', 2)
+        ->where('shipments.user_id', '=', $shipper_id)
+        ->whereBetween('sj.created_at', [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        ->get();
 
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
