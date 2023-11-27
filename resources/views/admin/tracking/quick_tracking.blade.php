@@ -192,7 +192,7 @@
                                         <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
                                             class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                                             @csrf
-                                            <input type="hidden" id="tracking_numbers" name="tracking_numbers">
+                                            <input type="text" id="tracking_numbers" name="tracking_numbers">
                                             <div class="form-group ml-1">
                                                 <textarea name="add_remark" id="add_remark" class="form-control" rows="4"
                                                 data-rule-required="true" data-msg-required="Remarks is required"
@@ -710,17 +710,21 @@
             })
             
             var tracking_numbers_remarks = [];
+
+            function updateRemarks(tracking, byDefault) {
+                tracking_numbers_remarks = (!remarksChecked && byDefault === 'single') ? [tracking] : tracking_numbers_remarks.concat(!remarksChecked ? [tracking] : []);
+
+                if (tracking_numbers_remarks.length > 0) {
+                    $('#remarks_btn').removeClass('d-none');
+                    $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
+                }
+            }
+
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
-                if(!remarksChecked){
-                    tracking_numbers_remarks.push(tracking);
-                }
-                if (tracking_numbers_remarks.length > 0 ) {
-                    $('#remarks_btn').removeClass('d-none');
-                    $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
-                }
+           
                 if (tracking != '') {
                     scan.attr('disabled', true);
                     if(selection === false){
@@ -740,7 +744,7 @@
                                     scan_sound(2);
                                 }else{
                                     var rowNo = table.rows().count();
-
+                                    updateRemarks(tracking, 'multiple')
                                     table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
@@ -765,7 +769,7 @@
                                         scan_sound(2);
                                     }else{
                                         var rowNo = table.rows().count();
-
+                                        updateRemarks(tracking, 'multiple')
                                         table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
@@ -810,6 +814,7 @@
                                     $('#status_card').removeClass('cyanClass');
                                     $('#status_card').removeClass('grey');
                                 }
+                                updateRemarks(tracking, 'single')
 
                                 scan_sound(1);
                                 $('#single_div p.track').text(data.details.tracking_number);
