@@ -139,9 +139,9 @@
                     <form id="add_shipment_weight_form" class="form-inline mt-2 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
                         {{ csrf_field() }}
 
-                        <input type="text" name="shipment_ids" class="shipment_ids">
-                        <input type="text" name="rider_id" class="rider_id">
-                        <input type="text" name="pickup_request_ids" class="pickup_request_ids">
+                        <input type="hidden" name="shipment_ids" class="shipment_ids">
+                        <input type="hidden" name="rider_id" class="rider_id">
+                        <input type="hidden" name="pickup_request_ids" class="pickup_request_ids">
 
                         <div class="row align-items-center">
                             <div class="col">
@@ -505,7 +505,6 @@
                }
             });
 
-            var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
             $('#add_shipment_form').validate({
 
@@ -843,9 +842,7 @@
 
                 $.each(allData, function(index, row) {
                     var weightValue = row[1];
-                    var pickupRequestValue = row[5];
                     weight_bypass.push(weightValue);
-                    pickup_request_bypass.push(pickupRequestValue);
                 });
   
 
@@ -855,8 +852,6 @@
                     data: {
                         _token: csrfToken,
                         tracking_numbers: weight_bypass,
-                        pickup_requests: pickup_request_bypass,
-
                     }
                 })
                 .done(function(response) {  

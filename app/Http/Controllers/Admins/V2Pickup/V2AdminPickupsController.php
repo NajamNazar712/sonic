@@ -971,7 +971,6 @@ class V2AdminPickupsController extends Controller
             $settings = $settings->first();
             $pickup_rider_id = $settings->setting_value;
         }
-        dd($request->all());
         if ($pickup_rider_id) {
             $unassigned_pickup_requests = explode(',', $request->pickup_request_ids);
         }
@@ -1295,7 +1294,6 @@ class V2AdminPickupsController extends Controller
             $pickup_request = V2PickupRequest::find($pickup_request_id);
             
             if ($pickup_request->received >= 1) {
-                dd($pickup_request, in_array($pickup_request_id, $unassigned_pickup_requests));
                 if ($pickup_rider_id && in_array($pickup_request_id, $unassigned_pickup_requests)) {
                     $pickup_note_id = $this->generate_assigned_pickup($pickup_request_id, $pickup_rider_id);
                     if (!in_array($pickup_note_id, $pickup_note_ids)) {
@@ -1345,11 +1343,8 @@ class V2AdminPickupsController extends Controller
     }
 
 
-    public function add_weight_bypass($shipments, $pickup_requests, $print_shipment_ids, $walkin_shipment_ids)
+    public function add_weight_bypass($shipments, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests)
     {
-        $pickup_request_ids = array();
-        $unassigned_pickup_requests = array();
-
         $settings = GlobalSettings::where('type', 'global_rider_id');
         $pickup_rider_id = null;
         if ($settings->exists()) {
@@ -1358,10 +1353,9 @@ class V2AdminPickupsController extends Controller
         }
 
         if ($pickup_rider_id) {
-            $unassigned_pickup_requests = $pickup_requests;
+            $unassigned_pickup_requests;
         }
-
-
+        
         foreach ($shipments as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1723,7 +1717,6 @@ class V2AdminPickupsController extends Controller
             foreach ($shipments as $key => $shipment){
                 if(in_array($shipment->user_id, $bypassed_users)){
                     $shipments_to_be_bypassed[] = $shipment->id;   
-                    $pickup_request_to_be_passed[] = $pickup_request[$key];    
  
                 }else{
                     $shipments_to_be_not_bypassed[] = $shipment->id;
@@ -1733,8 +1726,11 @@ class V2AdminPickupsController extends Controller
         
         $walkin_shipment_ids = array();
         $print_shipment_ids = array();
+        $walkin_shipment_ids = array();
+        $pickup_request_ids = array();
+        $unassigned_pickup_requests = array();
 
-        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_to_be_passed, $print_shipment_ids, $walkin_shipment_ids);
+        $this->add_weight_bypass($shipments_to_be_bypassed, $pickup_request_ids, $print_shipment_ids, $walkin_shipment_ids, $unassigned_pickup_requests);
         return response()->json(['status' => 0, 'shipments_to_be_bypassed'=> $shipments_to_be_bypassed, 'shipments_to_be_not_bypassed' => $shipments_to_be_not_bypassed]);
     }
     
