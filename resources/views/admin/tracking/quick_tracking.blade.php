@@ -192,7 +192,7 @@
                                         <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
                                             class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                                             @csrf
-                                            <input type="text" id="tracking_numbers" name="tracking_numbers">
+                                            <input type="hidden" id="tracking_numbers" name="tracking_numbers">
                                             <div class="form-group ml-1">
                                                 <textarea name="add_remark" id="add_remark" class="form-control" rows="4"
                                                 data-rule-required="true" data-msg-required="Remarks is required"
@@ -502,6 +502,8 @@
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
                 isSingleMode = single_multiple_switch.checked;
+                tracking_numbers_remarks = []
+                $('#remarks_btn').addClass('d-none');
 
                 if (isSingleMode === true) {
                    selection = true;
@@ -990,10 +992,21 @@
             });
 
             $('#scan_btn').change(function() {
+                console.log(tracking_numbers_remarks.length);
+                var isChecked = $(this).is(':checked');
+                if (!isChecked && tracking_numbers_remarks.length > 0 ) {
+                    $('#remarks_btn').removeClass('d-none');
+
+                }else{
+                    $('#remarks_btn').addClass('d-none');
+
+                }
+            });
+
+            $('#scan_btn').change(function() {
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
                     // If the checkbox is checked
-                    $('#remarks_btn').addClass('d-none');
                     $('#scan_bag').show();
                     $('#multiple_div').hide();
                     $('#bag_multiple_div').show();
@@ -1002,7 +1015,6 @@
                     $('#bag_single_div').show();
                 } else {
                     // If the checkbox is not checked
-                    $('#remarks_btn').removeClass('d-none');
                     $('#scan_tracking').show();
                     $('#multiple_div').show();
                     $('#bag_multiple_div').hide();
