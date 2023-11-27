@@ -1355,7 +1355,7 @@ class V2AdminPickupsController extends Controller
         if ($pickup_rider_id) {
             $unassigned_pickup_requests;
         }
-        
+
         foreach ($shipments as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -1705,16 +1705,14 @@ class V2AdminPickupsController extends Controller
 
     public function weight_bypass(Request $request){
         $tracking_numbers = $request->tracking_numbers;
-        $pickup_request = $request->pickup_requests;
         $by_passed_users_setting = GlobalSettings::where('type', 'bypass_weight_setting')->first();
         $bypassed_users = $by_passed_users_setting ? explode(',', $by_passed_users_setting->text) : [];    
         $shipments = Shipment::whereIn('tracking_number', $tracking_numbers)->get();
         $shipments_to_be_bypassed = [];
         $shipments_to_be_not_bypassed = [];
-        $pickup_request_to_be_passed = [];
 
         if(!$shipments->isEmpty()){
-            foreach ($shipments as $key => $shipment){
+            foreach ($shipments as $shipment){
                 if(in_array($shipment->user_id, $bypassed_users)){
                     $shipments_to_be_bypassed[] = $shipment->id;   
  
