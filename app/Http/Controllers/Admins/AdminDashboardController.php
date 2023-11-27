@@ -9321,7 +9321,7 @@ public function payfast_payment(Request $request){
                     }
                 }
                 if(count($keywordFound) > 0){
-                    $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->where('pc.id', '!=', 1);
+                    $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
                 }else if (ucwords($keyword) == 'Every'){
                     $query->whereIn('pc.id', [2,4,5]);
                 }else if (is_numeric($keyword) || is_numeric($keyword) . 'rd' || is_numeric($keyword) . 'nd' || is_numeric($keyword) . 'th') {
@@ -9753,7 +9753,7 @@ public function payfast_payment(Request $request){
                     }
                 }
                 if(count($keywordFound) > 0){
-                    $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->where('pc.id', '!=', 1);
+                    $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);;
                 }else if (ucwords($keyword) == 'Every'){
                     $query->whereIn('pc.id', [2,4,5]);
                 }else if (is_numeric($keyword) || is_numeric($keyword) . 'rd' || is_numeric($keyword) . 'nd' || is_numeric($keyword) . 'th') {
