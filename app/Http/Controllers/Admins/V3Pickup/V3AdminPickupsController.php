@@ -600,19 +600,32 @@ class V3AdminPickupsController extends Controller
     public function get_shipment_picked_detail(Request $request){
        
         $pickup_request_id=$request->pickup_request_id;
-        // $shipment_picked_detail = Shipment::join('v3_pickup_requests as pr',function($query){
-        //     $query->on('pr.shipper_id','=','shipments.user_id')
-        //     ->where('pr.pickup_address_id','=',DB::raw('shipments.pickup_address_id'))
-        //     ->where('pr.pickup_date','=',DB::raw('DATE(shipments.created_at)'));
+        $shipment_picked_detail = Shipment::join('v3_pickup_requests as pr',function($query){
+            $query->on('pr.shipper_id','=','shipments.user_id')
+            ->where('pr.pickup_address_id','=',DB::raw('shipments.pickup_address_id'))
+            ->where('pr.pickup_date','=',DB::raw('DATE(shipments.created_at)'))
+            ->where('shipments.shipper_status_id',53);
           
-        // })->select('shipments.tracking_number')->where('pr.id',$pickup_request_id)->get();
-        $shipment_picked_detail=Shipment::join('v3_pickup_requests AS pr', 'pr.shipper_id', '=', 'shipments.user_id')
-        ->join('shipments_journey AS sj', 'shipments.id', '=', 'sj.shipment_id')
-        ->where('pr.pickup_address_id', '=',DB::raw( 'shipments.pickup_address_id'))
-        ->where('sj.shipper_status_id', '=', 53)
-        ->whereRaw('DATE(pr.pickup_date) = DATE(sj.created_at)')
-        ->select('shipments.tracking_number')
-        ->get();
+        })->select('shipments.tracking_number')->where('pr.id',$pickup_request_id)->get();
+        // $shipment_picked_detail=Shipment::join('v3_pickup_requests AS pr',function($query){
+        //    $query->on(DB::raw('shipments.user_id'),'=','pr.shipper_id')
+        //    ->where(DB::raw('shipments.pickup_address_id'),'=','pr.pickup_address_id') ;
+        // })->join('shipments_journey as sj',function($query){
+        //     $query->on('sj.shipment_id','=','shipments.id');
+        // })->where('sj.shipper_status_id',53)->where('pr.pickup_date','=',DB::raw('DATE(sj.created_at)'))
+        // ->where('pr.id',$pickup_request_id)
+        // ->select('shipments.tracking_number')
+        // ->get();
+        
+        
+        
+        // 'pr.shipper_id', '=', 'shipments.user_id')
+        // ->join('shipments_journey AS sj', 'shipments.id', '=', 'sj.shipment_id')
+        // ->where('pr.pickup_address_id', '=',DB::raw( 'shipments.pickup_address_id'))
+        // ->where('sj.shipper_status_id', '=', 53)
+        // ->where('DATE(pr.pickup_date) = DATE(sj.created_at)')
+        // ->select('shipments.tracking_number')
+        // ->get();
         
         return response()->json(['status'=>1,'shipment_picked_detail'=>$shipment_picked_detail]);
     }
