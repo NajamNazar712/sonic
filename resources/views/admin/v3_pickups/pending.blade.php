@@ -2319,7 +2319,7 @@
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
                     // $('#product_select').attr('disabled', false);
-                    if($('.apply-checked:checked').length>0){
+                    if($('.apply-checked:checked').length>0 || $("#regular_pickup").val()==1){
                         swal({
                             title: 'Please Wait!',
                             text: 'Pickup request is being added!',
@@ -2328,7 +2328,7 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-                        // form.submit();
+                        form.submit();
                     }else{
                         toastr.error('Select Days in Schedule', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
