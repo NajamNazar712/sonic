@@ -2368,7 +2368,7 @@ class AdminPettyCashController extends Controller
                 'title_id' => 'required|int|max:255',
                 'city_id' => 'required|int|max:255',
                 'expense_details' => 'required|string',
-                'employee_id' => 'required|int',
+                'employee_id' => 'required|string',
                 'reference_no' => 'required|int',
                 'remarks' => 'required|string|max:255',
                 'reference_document' => 'image|mimes:jpeg,png,jpg,gif',
