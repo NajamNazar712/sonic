@@ -9310,7 +9310,7 @@ class AdminDashboardController extends Controller
             ->filterColumn('users.payment_cycle_days', function ($query, $keyword) {                
                 $keywordLower = strtolower($keyword);
                 
-                $paymentCycleDays = $this->paymentCycleDays;
+                $paymentCycleDays = self::$paymentCycleDays;
                 if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
                     $query->whereIn('pc.id', [2, 4, 5]);
                 } else {
@@ -9406,6 +9406,7 @@ class AdminDashboardController extends Controller
             
                 if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
                     $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $dayMap = self::$paymentCycleDays;
                     $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $dayMap);
                 
                     return $cycleText;
@@ -9733,7 +9734,7 @@ class AdminDashboardController extends Controller
                 }
             })->filterColumn('users.payment_cycle_days', function ($query, $keyword) {
                 
-                $paymentCycleDays = $this->paymentCycleDays;
+                $paymentCycleDays = self::$paymentCycleDays;
                 $keywordLower = strtolower($keyword);
             
                 if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
