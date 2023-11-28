@@ -62,16 +62,16 @@ class UpdateV3PickupsTableSeeder extends Seeder
 
         DB::table('v3_pickup_request_reasons')->truncate();
         DB::table('v3_pickup_request_reasons')->insert(array(
-            array('id' => 1, 'name' => 'Address Closed', 'type' => 2),
-            array('id' => 2, 'name' => 'Address Incomplete', 'type' => 2),
-            array('id' => 3, 'name' => 'Incorrect Location', 'type' => 2),
-            array('id' => 4, 'name' => 'Shipments are not Ready', 'type' => 2),
-            array('id' => 5, 'name' => 'Contact Person Unavailable', 'type' => 2),
-            array('id' => 6, 'name' => 'To be Picked Later', 'type' => 2),
-            array('id' => 7, 'name' => 'Not Attempted', 'type' => 2),
-            array('id' => 8, 'name' => 'Late Attempted', 'type' => 2),
-            array('id' => 9, 'name' => 'Accident/Snatching', 'type' => 2),
-            array('id' => 10, 'name' => 'Refused on Call', 'type' => 2)
+            array('id' => 1, 'name' => 'Address Closed', 'type' => 2,'active'=>'t'),
+            array('id' => 2, 'name' => 'Address Incomplete', 'type' => 2,'status'=>'Y','active'=>'t'),
+            array('id' => 3, 'name' => 'Incorrect Location', 'type' => 2,'active'=>'t'),
+            array('id' => 4, 'name' => 'Shipments are not Ready', 'type' => 2,'active'=>'t'),
+            array('id' => 5, 'name' => 'Contact Person Unavailable', 'type' => 2,'active'=>'t'),
+            array('id' => 6, 'name' => 'To be Picked Later', 'type' => 2,'status'=>'Y','active'=>'t'),
+            array('id' => 7, 'name' => 'Not Attempted', 'type' => 2,'active'=>'t'),
+            array('id' => 8, 'name' => 'Late Attempted', 'type' => 2,'active'=>'t'),
+            array('id' => 9, 'name' => 'Accident/Snatching', 'type' => 2,'status'=>'Y','active'=>'t'),
+            array('id' => 10, 'name' => 'Refused on Call', 'type' => 2,'active'=>'t')
         ));
 
 

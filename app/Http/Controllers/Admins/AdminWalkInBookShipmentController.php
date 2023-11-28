@@ -2091,4 +2091,10 @@ class AdminWalkInBookShipmentController extends Controller
         }
     }
 
+    public function logistic_book_index()
+    {
+       
+        return view('admin.shipment.book.logistic.add_logistic_book');
+    }
+
 }

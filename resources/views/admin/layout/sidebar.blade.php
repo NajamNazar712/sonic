@@ -153,6 +153,8 @@
                                         <li><a class="menu-item"
                                                href="{{ route('admin.shipment.book.international_walk_in') }}">International
                                                 Book</a></li>
+                                         <li><a class="menu-item"
+                                               href="{{ route('admin.shipment.book.logistic.book_index') }}">Logistic Book</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(209, session('permissions')))
                                         <li><a class="menu-item"

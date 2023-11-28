@@ -3910,7 +3910,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store', 'Admins\AdminWalkInBookShipmentController@ftl_store')->name('store');
                 Route::post('print_ftl_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_ftl_air_waybill')->name('print_air_waybill');
             });
+            Route::prefix('logistic')->name('logistic.')->group(function(){
+                Route::get('', 'Admins\AdminWalkInBookShipmentController@logistic_book_index')->name('book_index');
+            });
+
         });
+     
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');
             Route::get('list', 'Admins\AdminWalkInBookShipmentController@history_list')->name('walk_in_history_list');
