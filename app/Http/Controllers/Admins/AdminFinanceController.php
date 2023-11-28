@@ -4669,22 +4669,28 @@ class AdminFinanceController extends Controller
                     5 => 'Friday',
                     6 => 'Saturday',
                 ];
-
-                $keywordFound = [];
-                foreach($dayMaps as $key => $dayMap){
-                    if (stripos($dayMap, $keyword) !== false) {
-                        $keywordFound[] = $key;
+                
+                $keywordLower = strtolower($keyword);
+                
+                if (str_replace(['e', 'v', 'e', 'r', 'y','w','e','e','k','d','a','y'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($dayMaps as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
                     }
-                }
-                if(count($keywordFound) > 0){
-                    $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
-                }else if (ucwords($keyword) == 'Every'){
-                    $query->whereIn('pc.id', [2,4,5]);
-                }else if (is_numeric($keyword) || is_numeric($keyword) . 'rd' || is_numeric($keyword) . 'nd' || is_numeric($keyword) . 'th') {
-                    $keyword = preg_replace("/[^0-9]/", "", $keyword);
-                    $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
-                } else{
-                    $query->whereRaw('false');
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
                 }
             })
             ->orderColumn('u.name', 'u.name $1')
