@@ -391,12 +391,13 @@
                                             </div>
                                         </div>
                                         <div class="col-md-4" >
-                                            <div class="row">
-                                                <div class="col-md-12 label_img">
-                                                    <img src="https://s3-alpha-sig.figma.com/img/86e8/adaf/faac25d739496f20479b375198134418?Expires=1702252800&Signature=pJLjhK-vvxibwXmz-9zbvdcROb3MGCm9SCg-R--qEqkvvv2WFaghHEvz3PSg4wlUhuu5zVBmY-vIcoIYJnMhW2YPFA52R6Kj8DQM3AZxcW2aNbR94tgAuyus~7SHuVfzQwPn~3ldo5ruXWJWU1N0VuDQ6~VnQefUD9hjX1n7uW1eDy61D4W~Cc~j0BYYoUsYhJrWXAcHs7NG85hEBemIocGZM4f4eZHhIxqLH7H8SKbndWo-lyDBKit3KRl2g2Bb32YDkj1tw3SgAXwvktY7GTX~XWxrGwgCR~QEpszmLLgiM9tg~cJ0aR~sBofk5iASo0qNhsch8cVRRIy7AkuUOA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4" >
-                                                    <hr>
+                                            <div class="row" >
+                                                <div class="col-md-12" >
+                                                    <div class="label_img">
+                                                        <img id="myimage" src="https://s3-alpha-sig.figma.com/img/86e8/adaf/faac25d739496f20479b375198134418?Expires=1702252800&Signature=pJLjhK-vvxibwXmz-9zbvdcROb3MGCm9SCg-R--qEqkvvv2WFaghHEvz3PSg4wlUhuu5zVBmY-vIcoIYJnMhW2YPFA52R6Kj8DQM3AZxcW2aNbR94tgAuyus~7SHuVfzQwPn~3ldo5ruXWJWU1N0VuDQ6~VnQefUD9hjX1n7uW1eDy61D4W~Cc~j0BYYoUsYhJrWXAcHs7NG85hEBemIocGZM4f4eZHhIxqLH7H8SKbndWo-lyDBKit3KRl2g2Bb32YDkj1tw3SgAXwvktY7GTX~XWxrGwgCR~QEpszmLLgiM9tg~cJ0aR~sBofk5iASo0qNhsch8cVRRIy7AkuUOA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4" >
+                                                        <hr>
+                                                    </div>
                                                 </div>
-                                              <div class="loupe"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -434,32 +435,25 @@
 
         .label_img {
             max-width: 445px;
-            height: 500px;
+            height: 400px;
             background-color: red;
             position: relative;
         }
-
         .label_img img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Maintain image aspect ratio and cover the entire container */
+            /* object-fit: cover; Maintain image aspect ratio and cover the entire container */
         }
-
-        .loupe {
+        .img-magnifier-glass{
             display: none;
             position: absolute;
-            width: 200px;
-            height: 200px;
             border: 1px solid black;
+            /* border-radius: 50%; */
+            cursor: none;
             box-shadow: 5px 5px 12px black;
-            background: rgba(0, 0, 0, 0.25);
-            cursor: crosshair;
-            overflow: hidden;
-        }
-
-        .loupe img {
-            position: absolute;
-            right: 0;
+            /*Set the size of the magnifier glass:*/
+            width: 250px;
+            height: 250px; 
         }
 
     </style>
@@ -479,50 +473,74 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     
   <script>
-   $(document).ready(function () {
-    var $loupe = $(".loupe"),
-        loupeWidth = $loupe.outerWidth(),
-        loupeHeight = $loupe.outerHeight(),
-        $img;
 
-    $(document).on("mouseenter", ".label_img", function (e) {
-        var $currImage = $(this),
-            $img = $("<img/>")
-                .attr("src", $("img", this).attr("src"))
-                .css({ width: $currImage.outerWidth() * 2, height: $currImage.outerHeight() * 2 });
-
-        $loupe.html($img).fadeIn(100);
-
-        function moveHandler(e) {
-            var imageOffset = $currImage.offset(),
-                fx = imageOffset.left - loupeWidth / 2,
-                fy = imageOffset.top - loupeHeight / 2,
-                fh = imageOffset.top + $currImage.outerHeight() + loupeHeight / 2,
-                fw = imageOffset.left + $currImage.outerWidth() + loupeWidth / 2;
-
-            $loupe.css({
-                left: e.pageX - loupeWidth / 2,
-                top: e.pageY - loupeHeight / 2
-            });
-
-            var loupeOffset = $loupe.offset(),
-                lx = loupeOffset.left,
-                ly = loupeOffset.top,
-                lw = lx + loupeWidth,
-                lh = ly + loupeHeight,
-                bigy = (ly - loupeHeight / 4 - fy) * 2,
-                bigx = (lx - loupeWidth / 4 - fx) * 2;
-
-            $img.css({ left: -bigx, top: -bigy });
-
-            if (lx < fx || lh > fh || ly < fy || lw > fw) {
-                // $loupe.fadeOut(100);
+    $(document).ready(function(){
+        function magnify(imgID, zoom) {
+            
+            var img, glass, w, h, bw;
+            img = document.getElementById(imgID);
+           
+            /*create magnifier glass:*/
+            glass = document.createElement("DIV");
+            glass.setAttribute("class", "img-magnifier-glass");
+            /*insert magnifier glass:*/
+            img.parentElement.insertBefore(glass, img);
+            /*set background properties for the magnifier glass:*/
+            glass.style.backgroundImage = "url('" + img.src + "')";
+            glass.style.backgroundRepeat = "no-repeat";
+            glass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+            bw = 3;
+            w = glass.offsetWidth / 2;
+            h = glass.offsetHeight / 2;
+            /*execute a function when someone moves the magnifier glass over the image:*/
+            glass.addEventListener("mousemove", moveMagnifier);
+            img.addEventListener("mousemove", moveMagnifier);
+            /*and also for touch screens:*/
+            glass.addEventListener("touchmove", moveMagnifier);
+            img.addEventListener("touchmove", moveMagnifier);
+            function moveMagnifier(e) {
+             
+                $(".img-magnifier-glass").css('display','block');
+                var pos, x, y;
+                /*prevent any other actions that may occur when moving over the image*/
+                e.preventDefault();
+                /*get the cursor's x and y positions:*/
+                pos = getCursorPos(e);
+                x = pos.x;
+                y = pos.y;
+                /*prevent the magnifier glass from being positioned outside the image:*/
+                if (x > img.width - (w / zoom)) {x = img.width - (w / zoom);}
+                if (x < w / zoom) {x = w / zoom;}
+                if (y > img.height - (h / zoom)) {y = img.height - (h / zoom);}
+                if (y < h / zoom) {y = h / zoom;}
+                /*set the position of the magnifier glass:*/
+                glass.style.left = (x - w) + "px";
+                glass.style.top = (y - h) + "px";
+                /*display what the magnifier glass "sees":*/
+                glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
             }
-        }
+            function getCursorPos(e) {
+                var a, x = 0, y = 0;
+                e = e || window.event;
+                /*get the x and y positions of the image:*/
+                a = img.getBoundingClientRect();
+                /*calculate the cursor's x and y coordinates, relative to the image:*/
+                x = e.pageX - a.left;
+                y = e.pageY - a.top;
+                /*consider any page scrolling:*/
+                x = x - window.pageXOffset;
+                y = y - window.pageYOffset;
+                return {x : x, y : y};
+            }
+            }
 
-        $(document).on("mousemove", moveHandler);
+            magnify("myimage", 2.5);
+
     });
-});
 
+    function hidemagnify(){
+        $(".img-magnifier-glass").css('display','none');
+
+    }
   </script>
 @endsection

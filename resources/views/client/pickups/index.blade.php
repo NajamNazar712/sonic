@@ -1197,9 +1197,10 @@
 
             
             $('body').on('click','button.shipments_picked_btn',function(){
+                $(this).prop('disabled', true);
+                $("#ShipmentPickedModal tbody").empty();
                 var pickup_request_id=$(this).closest('tr').attr('id');
                 var tracking_route='{{ route('admin.tracking.index') }}';
-                $("#ShipmentPickedModal tbody").empty();
                 $.ajax({
                     url:'{{ route('cod.pickup.shipment_picked_detail') }}',
                     method:'POST',
@@ -1208,6 +1209,7 @@
                         '_token':'{{ csrf_token() }}'
                     }
                 }).done(function(data){
+                    $('button.shipments_picked_btn').prop('disabled', false);
                     if(data.status==1){
                             $.each(data.shipment_picked_detail ,function(key,value){
                                 $("#ShipmentPickedModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><u><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></u></td></tr>');
