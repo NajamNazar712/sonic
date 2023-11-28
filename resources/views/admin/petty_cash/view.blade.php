@@ -93,19 +93,19 @@
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
-                            <th class="border-primary border-darken-1"> Amount </th>
-                            <th class="border-primary border-darken-1"> Employee Id </th>
-                            <th class="border-primary border-darken-1">Name </th>
-                            <th class="border-primary border-darken-1"> Designation </th>
+                            <th class="border-primary border-darken-1">Amount</th>
+                            <th class="border-primary border-darken-1">Employee Id</th>
+                            <th class="border-primary border-darken-1">Name</th>
+                            <th class="border-primary border-darken-1">Designation</th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1"> DNCC/RNCC </th>
-                            <th class="border-primary border-darken-1"> Delivered Shipments</th>
+                            <th class="border-primary border-darken-1">DNCC/RNCC</th>
+                            <th class="border-primary border-darken-1">Delivered Shipments</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
-                            <th class="border-primary border-darken-1"> Status</th>
-                            <th class="border-primary border-darken-1"> Updated By</th>
-                            <th class="border-primary border-darken-1"> Updated At</th>
-                            <th class="border-primary border-darken-1"> Action</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Updated By</th>
+                            <th class="border-primary border-darken-1">Updated At</th>
+                            <th class="border-primary border-darken-1">Action</th>
                         </tr>
                         </thead>
                     </table>
@@ -173,9 +173,9 @@
                             <input type="text" name="expense_details" id="expense_details" value="expense_details" class="form-control" data-rule-required="true" data-msg-required="Expense Details is required" placeholder="Expense Details">
                             <label id="expense_details-error" class="error" for="expense_details"></label>
                         </div>
-                        <div class="form-group" id="employee_id">
-                            <input type="text" name="employee_id" id="employee_id" value="employee_id" class="form-control" data-rule-required="true" data-msg-required="Employee ID is required" placeholder="Employee ID">
-                            <label id="employee_id-error" class="error" for="employee_id"></label>
+                        <div class="form-group" id="employee_trax_id">
+                            <input type="text" name="employee_trax_id" id="employee_trax_id" value="employee_trax_id" class="form-control" data-rule-required="true" data-msg-required="Employee ID is required" placeholder="Employee ID">
+                            <label id="employee_trax_id-error" class="error" for="employee_trax_id"></label>
                         </div>
                         <div class="form-group" id="reference_no">
                             <input type="text" name="reference_no" id="reference_no" value="reference_no" class="form-control" data-rule-required="true" data-msg-required="Reference No. is required" placeholder="Reference No">
@@ -291,8 +291,8 @@
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},
-                    {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle employee_name custom-col-width'},
-                    {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width'},
+                    {data:'employee_name' ,name: 'a.name', class: 'align-middle employee_name custom-col-width'},
+                    {data:'employee_designation' ,name: 'a.designation', class: 'align-middle employee_designation custom-col-width'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
                     {data:'dncc' ,name: 'petty_cash_statement_details.dncc_id', class: 'align-middle dncc custom-col-width'},
@@ -438,7 +438,7 @@
                 var head_id = $(e.relatedTarget).data('account_head_id');
                 var city_id = $(e.relatedTarget).data('account_city_id');
                 var expense_details = $(e.relatedTarget).data('account_expense_details');
-                var employee_id = $(e.relatedTarget).data('account_employee_id');
+                var employee_trax_id = $(e.relatedTarget).data('account_employee_trax_id');
                 var reference_no = $(e.relatedTarget).data('account_reference_no');
                 var remarks = $(e.relatedTarget).data('account_remarks');
                 var title_id = $(e.relatedTarget).data('account_title_id');
@@ -448,7 +448,7 @@
                 $('#head_id').val(head_id).trigger('change');
                 $('#city_id').val(city_id).trigger('change');
                 $('#expense_details').find('input').val(expense_details);
-                $('#employee_id').find('input').val(employee_id);
+                $('#employee_trax_id').find('input').val(employee_trax_id);
                 $('#reference_no').find('input').val(reference_no);
                 $('#remarks').find('input').val(remarks);
                 setTimeout(function() {
