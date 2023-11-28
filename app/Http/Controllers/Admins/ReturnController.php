@@ -4815,8 +4815,10 @@ class ReturnController extends Controller
             }
         }
 
-        $files = File::glob(asset('storage/uploads/return_notes/*.*'));
+        $path = storage_path('app/public/uploads/return_notes');
+        $files = File::glob("$path/2021_*.*");
         $now = Carbon::now();
+//        $counter = 0;
         foreach ($files as $file) {
             if (is_file($file)) {
                 $created = date("F d Y H:i:s.",filemtime($file));
@@ -4829,6 +4831,11 @@ class ReturnController extends Controller
                     }
                 }
             }
+//            $counter++;
+
+//            if($counter > 1500){
+//                break;
+//            }
         }
     }
 
