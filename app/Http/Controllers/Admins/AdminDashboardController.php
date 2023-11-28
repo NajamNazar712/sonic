@@ -207,7 +207,15 @@ class AdminDashboardController extends Controller
     {   $this->middleware('auth:admin')->except('payfast_payment');
         $this->middleware('Permission')->except('payfast_payment');
     }
-
+    
+    static $paymentCycleDays = [
+        1 => 'Monday',
+        2 => 'Tuesday',
+        3 => 'Wednesday',
+        4 => 'Thursday',
+        5 => 'Friday',
+        6 => 'Saturday',
+    ];
 
     public function payfast_payment_details(){
         return view('payfast-payment-view');
@@ -9304,24 +9312,16 @@ public function payfast_payment(Request $request){
                     $query->whereRaw('false');
                 }
             })
-            ->filterColumn('users.payment_cycle_days', function ($query, $keyword) {
-                $dayMaps = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
-                
+            ->filterColumn('users.payment_cycle_days', function ($query, $keyword) {                
                 $keywordLower = strtolower($keyword);
                 
+                $paymentCycleDays = $this->paymentCycleDays;
                 if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
                     $query->whereIn('pc.id', [2, 4, 5]);
                 } else {
                     $keywordFound = [];
                 
-                    foreach ($dayMaps as $key => $dayMap) {
+                    foreach ($paymentCycleDays as $key => $dayMap) {
                         if (stripos($dayMap, $keywordLower) !== false) {
                             $keywordFound[] = $key;
                         }
@@ -9407,18 +9407,12 @@ public function payfast_payment(Request $request){
             })->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
-                $dayMap = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
+               
             
                 if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
                     $payment_cycle_days = explode(',', $payment_cycle_days);
                     $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $dayMap);
+                
                     return $cycleText;
                 }
             
@@ -9743,23 +9737,16 @@ public function payfast_payment(Request $request){
                     $query->whereRaw('false');
                 }
             })->filterColumn('users.payment_cycle_days', function ($query, $keyword) {
-                $dayMaps = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
                 
+                $paymentCycleDays = $this->paymentCycleDays;
                 $keywordLower = strtolower($keyword);
-                
+            
                 if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
                     $query->whereIn('pc.id', [2, 4, 5]);
                 } else {
                     $keywordFound = [];
                 
-                    foreach ($dayMaps as $key => $dayMap) {
+                    foreach ($paymentCycleDays as $key => $dayMap) {
                         if (stripos($dayMap, $keywordLower) !== false) {
                             $keywordFound[] = $key;
                         }
@@ -9837,18 +9824,11 @@ public function payfast_payment(Request $request){
             })->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
-                $dayMap = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
+                $daysMap = self::$paymentCycleDays;;
             
                 if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
                     $payment_cycle_days = explode(',', $payment_cycle_days);
-                    $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $dayMap);
+                    $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $daysMap);
                     return $cycleText;
                 }
             
