@@ -298,7 +298,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
         $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
 
-        $schedule->command('archive:returnnoteimage')->dailyAt('04:00')->runInBackground();
+        $schedule->command('archive:returnnoteimage')->dailyAt('02:00')->runInBackground();
 
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
