@@ -3980,6 +3980,8 @@ class RiderAPIController extends Controller
 
     public function pickup_not_pick_v4(Request $request)
     {
+
+          
         $rules = [
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v3_pickup_notes,id'],
@@ -3993,6 +3995,7 @@ class RiderAPIController extends Controller
             'picture' => ['required', 'image'],
             'audio' => ['nullable', 'file']
         ];
+        
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -4003,7 +4006,7 @@ class RiderAPIController extends Controller
                 $rider_id = $request->rider_id;
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-
+                
                 if (!V3RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 0)->where('added_at', $added_at)->exists()) {
                     if (V3PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                         $pickup_request = V3PickupRequest::find($request->pickup_request_id);
@@ -4011,13 +4014,22 @@ class RiderAPIController extends Controller
                         $pickup_address = $pickup_request->pickup_address;
 
                         $pickup_request->status_id = 3;
+                       
                         // $pickup_request->pickup_in_route = 0;
                         // $pickup_request->save();
                         try {
-                            $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
-                            $pickup_request_attempt->reason_id = $request->reason_id;
-                            $pickup_request_attempt->save();
-
+                           
+                            // try{
+                            //     return response()->json(['status' => 1, 'message' => 'Start(s) in Input', 'Mesage' => '']);
+        
+                            // $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
+                           
+                            // $pickup_request_attempt->reason_id = $request->reason_id;
+                            // $pickup_request_attempt->save();
+                            // }catch(\Exception $ex){
+                            //     return response()->json(['status' => 1, 'message' => 'Start(s) in Input', 'Mesage' => $ex->getMessage()]);
+        
+                            // }
                             $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
                             $rider_pickup = new V3RiderPickup();
@@ -4053,7 +4065,7 @@ class RiderAPIController extends Controller
                                     $rider_pickup->distance_from_current_to_actual = 0;
                                 }
                             }
-
+                            
                             $rider_pickup->pickup_not_pick_reason_id = $request->reason_id;
                             $rider_pickup->rider_remarks = str_replace("\"", "", $request->rider_remarks);
 
