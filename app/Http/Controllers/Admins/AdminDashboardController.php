@@ -204,8 +204,8 @@ class AdminDashboardController extends Controller
 {
 
     public function __construct()
-    {   $this->middleware('auth:admin')->except('payfast_payment');
-        $this->middleware('Permission')->except('payfast_payment');
+    {   $this->middleware('auth:admin');
+        $this->middleware('Permission');
     }
     
     static $paymentCycleDays = [
@@ -522,11 +522,6 @@ class AdminDashboardController extends Controller
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
         return view('admin.simple_dashboard');
     }
-
-public function payfast_payment(Request $request){
-    dd($request->all());
-}
-
 
     public function user_fintech_charges(Request $req){
         $UserFintectCharges = new UserFintectCharges();
