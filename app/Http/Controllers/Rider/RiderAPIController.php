@@ -15044,6 +15044,8 @@ class RiderAPIController extends Controller
                 }
             
                     }
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Tracking Number', 'errors' => " Not Found"]);
             }
             
         }
