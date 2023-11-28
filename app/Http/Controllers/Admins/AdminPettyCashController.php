@@ -2362,6 +2362,7 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(),
             [
                 'head_id' => 'required|int|max:255',
@@ -2371,8 +2372,8 @@ class AdminPettyCashController extends Controller
                 'employee_id' => 'required|string',
                 'reference_no' => 'required|int',
                 'remarks' => 'required|string|max:255',
-                'reference_document' => 'image|mimes:jpeg,png,jpg,gif',
-                'reference_document2' => 'image|mimes:jpeg,png,jpg,gif',
+                'reference_document' => 'file|mimes:jpeg,png,jpg,gif',
+                'reference_document2' => 'file|mimes:jpeg,png,jpg,gif',
             ],
             [
                 'head_id.required' => 'The head field is required.',

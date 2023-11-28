@@ -186,9 +186,11 @@
                             <label id="remarks-error" class="error" for="remarks"></label>
                         </div>
                         <div class="form-group" >
+                            <label id="reference_document" for="reference_document">Upload Reference Document Image</label>
                             <input type="file" name="reference_document"  id="reference_document" class="form-control" />
                         </div>
                         <div class="form-group" >
+                            <label id="reference_document_2" for="reference_document_2">Upload Reference Document Image</label>
                             <input type="file" name="reference_document_2"  id="reference_document2" class="form-control" />
                         </div>
                     </div>
