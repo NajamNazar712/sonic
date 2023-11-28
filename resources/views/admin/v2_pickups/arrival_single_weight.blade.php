@@ -139,9 +139,9 @@
                     <form id="add_shipment_weight_form" class="form-inline mt-2 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
                         {{ csrf_field() }}
 
-                        <input type="text" name="shipment_ids" class="shipment_ids">
-                        <input type="text" name="rider_id" class="rider_id">
-                        <input type="text" name="pickup_request_ids" class="pickup_request_ids">
+                        <input type="hidden" name="shipment_ids" class="shipment_ids">
+                        <input type="hidden" name="rider_id" class="rider_id">
+                        <input type="hidden" name="pickup_request_ids" class="pickup_request_ids">
 
                         <div class="row align-items-center">
                             <div class="col">
@@ -872,7 +872,7 @@
                         $('#by_passed_msg').text('These shipments have been marked as arrived at origin: ' + shipments_to_be_bypassed_str);
                     }
                     if (shipments_to_be_bypassed.length > 0 && shipments_to_be_not_bypassed.length == 0) {
-                        toastr.success('Has Been Marked To Arrival Done', 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.success('Has Been Marked Arrived', 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     weight_bypass = [];
                     pickup_request_bypass = [];
