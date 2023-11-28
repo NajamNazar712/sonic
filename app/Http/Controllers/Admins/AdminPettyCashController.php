@@ -1150,9 +1150,18 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as a','a.id','petty_cash_statement_details.employee_id')
             ->leftjoin('admins as ad','ad.id','petty_cash_statement_details.edit_by')
             ->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at','a.trax_id as employee_trax_id','z.name as zone_name','c.name as city_name','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','petty_cash_statement_details.reference_document_2','op.name as op_name','op.trax_id as op_trax_id','petty_cash_statement_details.dncc_id','petty_cash_statement_details.delivered_shipments','petty_cash_statement_details.edit_by as edit_by_admin','ad.name as edit_by','petty_cash_statement_details.edit_at as edit_at')
+            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub', 'petty_cash_statement_details.hub_id', 
+            'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 
+            'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 
+            'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 
+            'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 
+            'petty_cash_statement_details.created_at','a.trax_id as employee_trax_id','z.name as zone_name','c.name as city_name','petty_cash_statement_details.employee_name',
+            'petty_cash_statement_details.employee_designation','petty_cash_statement_details.reference_document_2','op.name as op_name','op.trax_id as op_trax_id',
+            'petty_cash_statement_details.dncc_id','petty_cash_statement_details.delivered_shipments','petty_cash_statement_details.edit_by as edit_by_admin','ad.name as edit_by',
+            'petty_cash_statement_details.edit_at as edit_at', 'c.id as city_id', 'a.id as employee_id')
+
             ->where('petty_cash_statement_details.petty_cash_statement_id', $id);
-        return Datatables::of($petty_details)
+        return Datatables::of($petty_details)   
             ->setRowAttr([
                 'status' => function ($petty_details) {
                     return $petty_details->status;
@@ -1269,7 +1278,7 @@ class AdminPettyCashController extends Controller
                 ';
 
                 if ((session('role_id') == 1) || in_array(840, session('permissions'))) {
-                    $dropdown .= '<button data-account_title_id="'.$petty->account_title_id.'" data-account_head_id="'.$petty->account_head_id.'" data-id="'.$petty->statement_detail_id.'" data-target="#edit_petty_cash_fields" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                    $dropdown .= '<button data-account_title_id="'.$petty->account_title_id.'" data-account_remarks="'.$petty->remarks.'" data-account_reference_no="'.$petty->reference_no.'" data-account_employee_id="'.$petty->employee_id.'" data-account_city_id="'.$petty->city_id.'" data-account_expense_details="'.$petty->expense_details.'" data-account_head_id="'.$petty->account_head_id.'" data-id="'.$petty->statement_detail_id.'" data-target="#edit_petty_cash_fields" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
                 }
                 if ((session('role_id') == 1) || in_array(841, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item edit_amount" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit-3"></i></div>Edit Amount</button>';
@@ -2357,12 +2366,22 @@ class AdminPettyCashController extends Controller
             [
                 'head_id' => 'required|int|max:255',
                 'title_id' => 'required|int|max:255',
+                'city_id' => 'required|int|max:255',
+                'expense_details' => 'required|string',
+                'employee_id' => 'required|int',
+                'reference_no' => 'required|int',
+                'remarks' => 'required|string|max:255',
                 'reference_document' => 'image|mimes:jpeg,png,jpg,gif',
                 'reference_document2' => 'image|mimes:jpeg,png,jpg,gif',
             ],
             [
                 'head_id.required' => 'The head field is required.',
                 'title_id.required' => 'The title field is required.',
+                'city_id.required' => 'The City field is required.',
+                'expense_details.required' => 'The Expense Details field is required.',
+                'employee_id.required' => 'The Employee ID field is required.',
+                'reference_no.required' => 'The Reference No field is required.',
+                'remarks.required' => 'The Remarks field is required.',
                 'reference_document' => 'The email field must be a valid email address.',
                 'reference_document2' => 'The email address has already been taken.',
             ]);
@@ -2372,20 +2391,28 @@ class AdminPettyCashController extends Controller
             return redirect()->back()->with('error',$validator->errors()->first());
         }
 
+
+       
         $petty_cash_detail_id = $request->petty_cash_id;
         $head_id = $request->head_id;
         $title_id = $request->title_id;
+        $city_id = $request->city_id;
+        $expense_details = $request->expense_details;
+        $employee_id = $request->employee_id;
+        $reference_no = $request->reference_no;
+        $remarks = $request->remarks;
         $reference_document = $request->reference_document;
         $reference_document2 = $request->reference_document_2;
 
         $existing_petty_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
-            ->select('id','account_head_id','account_title_id', 'petty_cash_statement_id', 'reference_document', 'reference_document_2');
+        ->select('id','account_head_id','account_title_id', 'petty_cash_statement_id', 'reference_document', 'reference_document_2', 'city_id', 'expense_details', 'employee_id', 'reference_no', 'remarks');
 
         if ($existing_petty_detail->exists()) {
             $petty_detail = $existing_petty_detail->first();
 
             $update_petty_cash_detail = PettyCashStatementDetail::where('id', $petty_cash_detail_id)
-                ->update(['account_head_id' => $head_id, 'account_title_id' => $title_id,'edit_by'=>Auth::id(),'edit_at'=>Carbon::now()]);
+                ->update(['account_head_id' => $head_id, 'account_title_id' => $title_id, 'city_id' => $city_id, 'expense_details' => $expense_details, 'employee_id' => $employee_id
+                , 'reference_no' => $reference_no, 'remarks' => $remarks, 'edit_by'=>Auth::id(), 'edit_at'=>Carbon::now()]);
 
 
             if ($request->file('reference_document')) {

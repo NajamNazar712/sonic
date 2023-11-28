@@ -142,7 +142,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Petty Cash</h5>
-                        <button type="button" id="edit_fields_form_button_close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <button type="button" id="edit_fields_form_button_close_1" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group display-hidden">
@@ -161,6 +161,30 @@
                             </select>
                             <label id="title_id-error" class="error" for="title_id"></label>
                         </div>
+                        <div class="form-group" id="select_city">
+                            <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                                @foreach($cities as $city)
+                                    <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                                @endforeach
+                            </select>
+                            <label id="city_id-error" class="error" for="city_id"></label>
+                        </div>
+                        <div class="form-group" id="expense_details">
+                            <input type="text" name="expense_details" id="expense_details" value="expense_details" class="form-control" data-rule-required="true" data-msg-required="Expense Details is required" placeholder="Expense Details">
+                            <label id="expense_details-error" class="error" for="expense_details"></label>
+                        </div>
+                        <div class="form-group" id="employee_id">
+                            <input type="text" name="employee_id" id="employee_id" value="employee_id" class="form-control" data-rule-required="true" data-msg-required="Employee ID is required" placeholder="Employee ID">
+                            <label id="employee_id-error" class="error" for="employee_id"></label>
+                        </div>
+                        <div class="form-group" id="reference_no">
+                            <input type="text" name="reference_no" id="reference_no" value="reference_no" class="form-control" data-rule-required="true" data-msg-required="Reference No. is required" placeholder="Reference No">
+                            <label id="reference_no-error" class="error" for="reference_no"></label>
+                        </div>
+                        <div class="form-group" id="remarks">
+                            <input type="text" name="remarks" id="remarks" value="remarks" class="form-control" data-rule-required="true" data-msg-required="Remarks is required" placeholder="Remarks">
+                            <label id="remarks-error" class="error" for="remarks"></label>
+                        </div>
                         <div class="form-group" >
                             <input type="file" name="reference_document"  id="reference_document" class="form-control" />
                         </div>
@@ -169,7 +193,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="edit_fields_form_button_close" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" id="edit_fields_form_button_close_2" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" id="edit_fields_form_button" class="btn btn-primary">Save changes</button>
                     </div>
                 </Form>
@@ -383,12 +407,10 @@
                         _token: '{{ csrf_token() }}',
                     }
                 }).done(function (data) {
-                    console.log('data',data);
                     let html = '';
                     for (let i = 0; i < data.titles.length; i++) {
                         html += '<option value="' + data.titles[i].id + '" >' + data.titles[i].name + '</option>';
                     }
-                    console.log('html',html);
                     $('#title_id').html(html);
                 });
 
@@ -398,19 +420,37 @@
                     allowClear:true,
                     dropdownParent:$('#edit_fields_form'),
                 });
+                $('#city_id').prepend('<option selected></option>').select2({
+                    width:'100%',
+                    placeholder:"Select City",
+                    allowClear:true,
+                    dropdownParent:$('#edit_fields_form'),
+                });
             });
 
-            $('#edit_petty_cash_fields').on('show.bs.modal', function(e) {
 
+
+            // getting values from action button and setting those values in modal fields
+            $('#edit_petty_cash_fields').on('show.bs.modal', function(e) {
                 var id = $(e.relatedTarget).data('id');
                 var head_id = $(e.relatedTarget).data('account_head_id');
-                var account_title_id = $(e.relatedTarget).data('account_title_id');
+                var city_id = $(e.relatedTarget).data('account_city_id');
+                var expense_details = $(e.relatedTarget).data('account_expense_details');
+                var employee_id = $(e.relatedTarget).data('account_employee_id');
+                var reference_no = $(e.relatedTarget).data('account_reference_no');
+                var remarks = $(e.relatedTarget).data('account_remarks');
+                var title_id = $(e.relatedTarget).data('account_title_id');
                 let html = '';
                 html += '<input name="petty_cash_id" value="' + id + '" >';
                 $('#petty_cash_id').html(html);
                 $('#head_id').val(head_id).trigger('change');
+                $('#city_id').val(city_id).trigger('change');
+                $('#expense_details').find('input').val(expense_details);
+                $('#employee_id').find('input').val(employee_id);
+                $('#reference_no').find('input').val(reference_no);
+                $('#remarks').find('input').val(remarks);
                 setTimeout(function() {
-                    $('#title_id').val(account_title_id).trigger('change');
+                    $('#title_id').val(title_id).trigger('change');
                 }, 500);
             });
 
@@ -446,6 +486,16 @@
                 }
             });
 
+            //Reset validiton error on closing modal
+            $('#edit_fields_form_button_close_1').on('click', function (e) {
+                $('#edit_fields_form').validate().resetForm();
+            });
+
+            //Reset validiton error on closing modal
+            $('#edit_fields_form_button_close_2').on('click', function (e) {
+                $('#edit_fields_form').validate().resetForm();
+            });
+
             $('#amount').inputmask({
                 'alias': 'numeric',
                 'rightAlign': false,
@@ -464,7 +514,6 @@
 
             $('body').on('click', 'button.edit_amount', function () {
                 var id = $(this).parents('tr').attr('id');
-                console.log('Edit Amount button Clicked !', id);
                 let html = '';
                 html += '<input name="petty_cash_id" value="' + id + '" >';
                 $('#petty_cash_idd').html(html);
@@ -500,7 +549,6 @@
                             $('#edit_amount_form').submit();
                             {{--var formData = $('#edit_amount_form').serialize();--}}
                             {{--event.preventDefault();--}}
-                            {{--console.log('final Amount form', formData);--}}
                             {{--$.ajax({--}}
                             {{--    url: '{{route('admin.petty_cash.edit.edit_petty_cash_amount')}}', // the URL to submit the form data to--}}
                             {{--    method: 'POST',--}}
@@ -528,13 +576,11 @@
             });
 
             $('#edit_amount_form_button_close').on('click', function (e) {
-                console.log('lll');
                 $("#edit_amount_form").validate().resetForm();
                 $("#edit_amount_form")[0].reset();
                 document.getElementById("edit_amount_form").reset();
             });
             $('#edit_amount_form_button_close1').on('click', function (e) {
-                console.log('eee');
                 $("#edit_amount_form").validate().resetForm();
                 $("#edit_amount_form")[0].reset();
                 document.getElementById("edit_amount_form").reset();
