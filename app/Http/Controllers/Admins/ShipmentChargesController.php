@@ -747,7 +747,7 @@ class ShipmentChargesController extends Controller
     static public function weight($id) {
         $shipment = Shipment::find($id);
         if($shipment->business_category_id == 1){
-            $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight ?? $shipment->estimated_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+            $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
             $dhl_check = true;
@@ -755,13 +755,13 @@ class ShipmentChargesController extends Controller
             $zone_id = $shipment->consignee_city->zone_id;
             $international_economy_rate = InternationalEconomyRate::where('user_id',$shipment->user_id)
                 ->where('zone_id',$zone_id)
-                ->where('range_up', '<=', $shipment->actual_weight ?? $shipment->estimated_weight )
-                ->where('range_down', '>=', $shipment->actual_weight ?? $shipment->estimated_weight );
+                ->where('range_up', '<=', $shipment->actual_weight )
+                ->where('range_down', '>=', $shipment->actual_weight );
 
             if($international_economy_rate->exists())
             {
                 $international_economy_rate = $international_economy_rate->first();
-                $result = self::calculate_international_economic_weight($shipment->actual_weight ?? $shipment->estimated_weight ,$international_economy_rate);
+                $result = self::calculate_international_economic_weight($shipment->actual_weight ,$international_economy_rate);
                 $dhl_check = false;
 
                 if($result){
@@ -818,7 +818,7 @@ class ShipmentChargesController extends Controller
                                 $margin = 0;
                                 break;
                         }
-                        $result = self::calculate_international_weight($margin, $shipment->actual_weight ?? $shipment->estimated_weight , $international_zone->zone_name);
+                        $result = self::calculate_international_weight($margin, $shipment->actual_weight , $international_zone->zone_name);
 
                         if($result){
                             self::international_credit_usage($shipment->user_id, $result['weight_charges']);
@@ -837,7 +837,7 @@ class ShipmentChargesController extends Controller
            
             if($shipment->booking_type_id == 6){
                 $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$shipment->ftl->id)->sum('amount');
-                $calc_total = ((($shipment->ftl->freight_charges/$shipment->ftl->weight)*$shipment->actual_weight ?? $shipment->estimated_weight ));
+                $calc_total = ((($shipment->ftl->freight_charges/$shipment->ftl->weight)*$shipment->actual_weight ));
                 $shipment->weight_charges = $calc_total;
                 $shipment->chargeable_weight = $result['chargeable_weight'];
 
@@ -1685,7 +1685,7 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($account_type_id == 2) {
-                        $charges = $charges * ROUND($shipment->actual_weight ?? $shipment->estimated_weight , 0);
+                        $charges = $charges * ROUND($shipment->actual_weight , 0);
                     }
 
                     $charges = ($charges * $replacement_multiplier);
@@ -2110,7 +2110,7 @@ class ShipmentChargesController extends Controller
         }
 
         if ($rate_status->exists()) {
-            $weight = $shipment->actual_weight ?? $shipment->estimated_weight ;
+            $weight = $shipment->actual_weight ;
 
             if ($account_type_id == 1) {
                 $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
@@ -2507,7 +2507,7 @@ class ShipmentChargesController extends Controller
         $shipment = Shipment::find($shipment_id);
         if($shipment){
             $charges_per_kg = 0;
-            $actual_weight = $shipment->actual_weight ?? $shipment->estimated_weight ;
+            $actual_weight = $shipment->actual_weight ;
             $walkin_charges = WalkinShipmentWeightCharges::where('shipment_id', $shipment_id);
             if($walkin_charges->exists()){
                 $walkin_charges = $walkin_charges->first();

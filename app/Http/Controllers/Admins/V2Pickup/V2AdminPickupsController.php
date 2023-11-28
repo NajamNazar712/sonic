@@ -1453,9 +1453,8 @@ class V2AdminPickupsController extends Controller
                         }
                     }
 
-                    $shipment->estimated_weight = $actual_weight;
-
-
+                    
+                    
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                         $receiving_sheet_shipment->status = 1;
                         $receiving_sheet_shipment->save();
@@ -1488,8 +1487,10 @@ class V2AdminPickupsController extends Controller
                             $receiving_sheet_received->save();
                         }
                     }
-
                     
+                    
+                    $shipment->estimated_weight = $actual_weight;
+                    $shipment->actual_weight = $actual_weight;
                     $shipment->shipper_status_id = 2;
                     $shipment->consignee_status_id = 2;
                     
