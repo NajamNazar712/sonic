@@ -4672,7 +4672,7 @@ class AdminFinanceController extends Controller
                 
                 $keywordLower = strtolower($keyword);
                 
-                if (str_replace(['e', 'v', 'e', 'r', 'y','w','e','e','k','d','a','y'], '', $keywordLower) === '') {
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
                     $query->whereIn('pc.id', [2, 4, 5]);
                 } else {
                     $keywordFound = [];
