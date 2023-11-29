@@ -190,7 +190,7 @@
                                     </div>
                                     <div class="modal-body text-center">
                                         <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
-                                            class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                                            class="form-horizontal mb-1 justify-content-center">
                                             @csrf
                                             <input type="hidden" id="tracking_numbers" name="tracking_numbers">
                                             <div class="form-group ml-1">
@@ -476,7 +476,9 @@
             background-color: darkgrey;	
         }
 
-
+        .text-red {
+            color: red;
+        }
 
     </style>
 @endsection
@@ -485,7 +487,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+       <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
@@ -494,6 +496,7 @@
     <script type="text/javascript">
     
         $(document).ready(function () {
+            
             var table;
             var bag_table;
             var selection = true;
@@ -536,7 +539,8 @@
                     bag_table.destroy();
                     bag_table = undefined;
                 }
-}
+            }
+           
             function init() {
                 table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -1026,6 +1030,21 @@
                     $('#bag_single_div').hide();
                     $('#single_div').show();
                 }
+            });
+
+            $("#add_remarks_form").validate({
+                rules: {
+                    add_remark: {
+                        required: true
+                    }
+                },
+                messages: {
+                    add_remark: {
+                        required: "Remarks is required"
+                    }
+                },
+                errorClass: "text-red", // Add this line to set the error text color class
+                errorElement: "span"     // Add this line to wrap the error message in a <span> element
             });
         });
     </script>
