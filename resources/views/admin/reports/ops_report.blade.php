@@ -22,10 +22,10 @@
                             </div>
                             <input type="text" name="from_date"
                                 class="form-control bg-primary border-primary white rounded-right" id="from_date"
-                                placeholder="Date From" data-rule-required="true" data-msg-required="This field is required">
+                                placeholder="Select Date" data-rule-required="true" data-msg-required="This field is required">
                         </div>
                     </div>
-                    <div class="col-3 mb-1">
+                    {{-- <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span
@@ -37,7 +37,7 @@
                                 class="form-control bg-primary border-primary white rounded-right" id="to_date"
                                 placeholder="Date To" data-rule-required="true" data-msg-required="This field is required">
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="col-3 mb-1">
                         <div class="form-group">
@@ -153,7 +153,7 @@
                 format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top', '40px');
@@ -166,26 +166,26 @@
                 }
             });
 
-            var date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
-            var to_date = $('#to_date').pickadate({
-                firstDay: 1,
-                clear: 'Clear',
-                format: 'dd mmmm, yyyy',
-                max: new Date(date_limit),
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $(
-                            '#search_form #to_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
+            // var date_limit = '{{ Carbon\Carbon::now()->toDateString() }}';
+            // var to_date = $('#to_date').pickadate({
+            //     firstDay: 1,
+            //     clear: 'Clear',
+            //     format: 'dd mmmm, yyyy',
+            //     max: new Date(date_limit),
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onOpen: function() {
+            //         $('#to_date_root').css('top', '40px');
+            //     },
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             $('#search_form #from_date').pickadate('picker').set('max', $(
+            //                 '#search_form #to_date').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
 
             $('#search_form').validate({
 
@@ -200,13 +200,13 @@
                         method: 'GET',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'from_date': $('#search_form input[name="from_date_formatted"]').val(),
-                            'to_date': $('#search_form input[name="to_date_formatted"]').val(),
+                            'search_date': $('#search_form input[name="from_date_formatted"]').val(),
+                            // 'to_date': $('#search_form input[name="to_date_formatted"]').val(),
                         },
                         success: function(result) {
                             if(result.status == 200)
                             {
-                                
+                                $('#table tbody').html('');
                                 $.each(result.data, function(region_index, region) {
 
                                     var html = '';
@@ -238,6 +238,7 @@
                                         console.log(region_index,z);
                                     });
                                    
+
 
                                     $('#table tbody').append(html);
                                    

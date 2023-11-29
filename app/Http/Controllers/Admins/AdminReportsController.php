@@ -13136,40 +13136,156 @@ class AdminReportsController extends Controller
 
     public function ops_report_list(Request $request)
     {
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 709);
-        }
+        // if ($request->get('excel') && $request->get('excel') == true) {
+        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 709);
+        // }
 
-        $regions = Region::select('id','name')->get();
+        $from = '';
+        $to = '';
+
+        $from = Carbon::parse($request->search_date)->subDay(2)->setTime(21, 00, 00)->toDateTimeString();
+        $to = Carbon::parse($request->search_date)->setTime(8, 59, 59)->toDateTimeString();
+
+        $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
         $ops_data = [];
+
+        $shipment_journey_min_id =  DB::connection('reports')->table('shipments_journey')->where('created_at' , '>=' , $from)->orderBy('id','asc')->pluck('id')->first();
+        $shipments = DB::connection('reports_2')->table('shipments')
+            ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
+                    );
+            })
+            ->whereBetween('shipments.created_at', [$from, $to])->get();
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
+        $re_attempt_and_intercept_status = array(52,55);
+
+        $re_attempt_and_intercept_startDate = Carbon::parse($request->search_date)->subDay(2)->setTime(21, 00, 00);
+        $re_attempt_and_intercept_endDate = Carbon::parse($request->search_date)->subDay(1)->setTime(20, 59, 59);
+
+        $other_pending_status_startDate = Carbon::parse($request->search_date)->subDay(1)->setTime(9, 00, 00);
+        $other_pending_status_endDate = Carbon::parse($request->search_date)->setTime(8, 59, 59);
+
+        $other_statuses_startDate = Carbon::parse($request->search_date)->subDay(1)->startOfDay()->toDateTimeString();
+        $other_statuses_endDate = Carbon::parse($request->search_date)->subDay(1)->endOfDay()->toDateTimeString();
+
+        $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
+            ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
+            ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+            ->leftJoin('shipments_journey as ds', function ($join) {
+                $join->on('ds.shipment_id', '=', 's.id')
+                    ->where(
+                        'ds.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (14, 30, 36, 37) and verification = 1)')
+                    );
+            })
+            ->leftJoin('shipments_journey as cps', function ($join) {
+                $join->on('cps.shipment_id', '=', 's.id')
+                    ->where(
+                        'cps.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)')
+                    );
+            })
+            ->leftJoin('shipments_journey as us', function ($join) {
+                $join->on('us.shipment_id', '=', 's.id')
+                    ->where(
+                        'us.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1)')
+                    );
+            })
+            ->select(DB::raw('count(s.id) as ofd_shipments'), DB::raw('count(ds.id) as delivered_shipments'), 
+            DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'),
+            'delivery_notes.id as delivery_note','c.zone_id')
+            ->groupBy('c.zone_id')->whereBetween('delivery_notes.created_at', [$other_statuses_startDate, $other_statuses_endDate])->get();
 
         foreach ($regions as $region_key => $region) {
 
-            $zones = ZoneRegion::join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
+            $zones = DB::connection('reports_2')->table('zone_regions')->join('zones as z', 'z.id', 'zone_regions.zone_id')->where('zone_regions.region_id',$region->id)->where('z.status',1)->where('z.business_category_id',1)->select('z.id','z.name')->get();
 
             foreach ($zones as $key => $zone) {
                 
                 $data = [];
                 $data['zone'] = $zone->name;
-                $data['ready_for_delivery'] = "-";
-                $data['out_for_delivery'] = "-";
-                $data['out_for_delivery_percentage'] = "-";
-                $data['delivery_note'] = "-";
-                $data['pending_deliveries'] = "-";
-                $data['pending_deliveries_percentage'] = "-";
-                $data['delivered'] = "-";
-                $data['delivered_percentage'] = "-";
-                $data['delivered_cod_amount'] = "-";
-                $data['cod_submitted_via_konnect'] = "-";
-                $data['cod_submitted_via_fintech'] = "-";
-                $data['cod_submitted_via_cash'] = "-";
-                $data['cod_submitted_by_rider'] = "-";
-                $data['pending'] = "-";
-                $data['pending_percentage'] = "-";
-                $data['undelivered'] = "-";
-                $data['undelivered_percentage'] = "-";
-                $data['rcp'] = "-";
-                $data['rcp_percentage'] = "-";
+                $data['ready_for_delivery'] = 0;
+                $data['out_for_delivery'] = 0;
+                $data['out_for_delivery_percentage'] = 0;
+                $data['delivery_note'] = 0;
+                $data['pending_deliveries'] = 0;
+                $data['pending_deliveries_percentage'] = 0;
+                $data['delivered'] = 0;
+                $data['delivered_percentage'] = 0;
+                $data['delivered_cod_amount'] = 0;
+                $data['cod_submitted_via_konnect'] = 0;
+                $data['cod_submitted_via_fintech'] = 0;
+                $data['cod_submitted_via_cash'] = 0;
+                $data['cod_submitted_by_rider'] = 0;
+                $data['pending'] = 0;
+                $data['pending_percentage'] = 0;
+                $data['undelivered'] = 0;
+                $data['undelivered_percentage'] = 0;
+                $data['rcp'] = 0;
+                $data['rcp_percentage'] = 0;                
+
+                $zone_cities = DB::connection('reports_2')->table('cities')->where('zone_id',$zone->id)->pluck('id')->toArray();
+
+                foreach ($shipments as $shipment_key => $shipment_data) {
+                    
+                    if(in_array($shipment_data->consignee_city_id,$zone_cities))
+                    {
+                        $created_date = Carbon::parse($shipment_data->created_at);
+
+                        if(in_array($shipment_data->consignee_status_id,$re_attempt_and_intercept_status) && $created_date->between($re_attempt_and_intercept_startDate,$re_attempt_and_intercept_endDate))
+                        {
+                            $data['ready_for_delivery'] += 1;
+                        }
+                        else if(in_array($shipment_data->consignee_status_id,$pending_status) && $created_date->between($other_pending_status_startDate,$other_pending_status_endDate))
+                        {
+                            $data['ready_for_delivery'] += 1;
+                        }
+
+                    }
+                }
+
+                foreach ($route_distribution_summary as $rds_key => $rds_value) {
+                    if($rds_value->zone_id == $zone->id)
+                    {
+                        $dn_ids = explode(',', $rds_value->dn_ids);
+
+                        $total_cod_received_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+                        $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->pluck('shipment_id')->toArray();
+                        $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                        $hbl_connect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+                        $cod_collect_by_rider = DB::connection('reports')->table('delivery_cash_collections')->whereIn('delivery_note_id', $dn_ids)->sum('amount');
+                       
+
+                        $data['out_for_delivery'] = $rds_value->ofd_shipments;
+                        $data['out_for_delivery_percentage'] = $data['ready_for_delivery'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery']) * 100,2) : 0;
+                        $data['delivery_note'] = $rds_value->dn_no_count;
+                        $data['pending_deliveries'] = $data['ready_for_delivery'] - $rds_value->ofd_shipments;
+                        $data['pending_deliveries_percentage'] = $data['ready_for_delivery'] ?? round(($data['pending_deliveries'] / $data['ready_for_delivery']) * 100,2);
+                        $data['delivered'] = $rds_value->delivered_shipments;
+                        $data['delivered_percentage'] = round(($rds_value->delivered_shipments / $rds_value->ofd_shipments) * 100,2);
+                        $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
+                        $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
+                        $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
+                        $data['cod_submitted_via_cash'] = $total_cod_received_amount - ($hbl_connect_amount + $fintech_amount);
+                        $data['cod_submitted_by_rider'] = $cod_collect_by_rider ?? 0;
+                        $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
+                        $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
+                        $data['undelivered'] = $rds_value->undelivered_shipments;
+                        $data['undelivered_percentage'] = round(($rds_value->undelivered_shipments / $rds_value->ofd_shipments) * 100,2);
+                        $data['rcp'] = $rds_value->confirmation_pending_shipments;
+                        $data['rcp_percentage'] = round(($rds_value->confirmation_pending_shipments / $rds_value->ofd_shipments) * 100,2);
+
+                    }
+                }
 
                 $ops_data[$region->name][] = $data;
             }
