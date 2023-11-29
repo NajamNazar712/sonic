@@ -10,6 +10,7 @@ use App\Http\Models\V3Pickup\V3PickupRequest;
 use App\Http\Models\V3Pickup\V3PickupRequestAttempt;
 use App\Http\Models\V3Pickup\V3PickupRequestReason;
 use App\Http\Models\V3Pickup\V3PickupRequestShipment;
+use App\Http\Models\V3Pickup\V3PickupRequestsJourney;
 use App\Http\Models\V3Pickup\V3RiderPickup;
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
@@ -15373,11 +15374,9 @@ class RiderAPIController extends Controller
 
         $rider_id = $request->rider_id;
         
-        $pickup_note = V3PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
+        $pickup_note = V3PickupNote::where('rider_id', $rider_id)->orderBy('id', 'DESC');
         try{
         if ($pickup_note->exists()) {
-            $information['1'] = 'found';
-        
             $pickup_note = $pickup_note->first();
             $pickupAcknowledgRequest = $request->pickup_acknowledge_request;
             $pickupAcknowledgRequest = json_decode($pickupAcknowledgRequest, true);
@@ -15388,7 +15387,7 @@ class RiderAPIController extends Controller
                 $pickupRequestList = $pickupAcknowledgRequest['pickup_acknowledge_request'];
             } catch (Exception $e) {
                 $pickupRequestList = $pickupAcknowledgRequest;
-                $information['error_pickupRequestList'] = 'error';
+               // $information['error_pickupRequestList'] = 'error';
         
             }
             foreach ($pickupRequestList as $pickupAck) {
@@ -15427,20 +15426,28 @@ class RiderAPIController extends Controller
                         $mainResult[$rCount] = $result;
                         $pickup_request->save();
                         $rCount++;
-                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, $pickup_request->status_id, 2, $rider_id, $added_at);
-                        if($reason_id>0){
-                        $v3PickupRequestAttempt = new V2PickupRequestAttempt();
-                        $v3PickupRequestAttempt['pickup_request_id'] = $pickup_request_id;
-                        $v3PickupRequestAttempt['rider_id'] = $rider_id;
-                        $v3PickupRequestAttempt['reason_id'] = $reason_id;
-                        $v3PickupRequestAttempt['attempt_date'] = $added_at;
-                        $v3PickupRequestAttempt->save();
-                        }    
+                        $countResult = DB::select("SELECT count(id) as count FROM v3_pickup_requests_journeys WHERE pickup_request_id = ? AND status = ?", [$pickup_request_id, $pickup_request->status_id]);
+                        $countId = isset($countResult[0]->count) ? $countResult[0]->count : 0;
+                        if($countId<1){
+                            V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request_id, $pickup_request->status_id, 2, $rider_id, $added_at);
+                            if($reason_id>0){
+                            $v3PickupRequestAttempt = new V3PickupRequestAttempt();
+                            $v3PickupRequestAttempt['pickup_request_id'] = $pickup_request_id;
+                            $v3PickupRequestAttempt['rider_id'] = $rider_id;
+                            $v3PickupRequestAttempt['reason_id'] = $reason_id;
+                            $v3PickupRequestAttempt['attempt_date'] = $added_at;
+                            $v3PickupRequestAttempt->save();
+                            }
+                        }else {
+
+                        }
+                            
                     }else {
                         $information[$pickup_request_id] = 'not found';
                     }
                 }catch(\Exception $e){
-                    $mainResult['error_in_pms_id'] = $e->getMessage();; 
+                    return response()->json(['status' => 1, 'message' => 'Acknowledge Error!', 'information' => $e->getMessage()]);
+       
                 }
                     
                   
