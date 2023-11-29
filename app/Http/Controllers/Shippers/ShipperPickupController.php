@@ -201,7 +201,6 @@ class ShipperPickupController extends Controller
                     'v3_pickup_requests.generated_type',
                     'v3_pickup_requests.generated_by'
                 ]);
-                // dd($pickup_requests);
 
                  $datatables = Datatables::of($pickup_requests)
 
