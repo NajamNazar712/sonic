@@ -713,7 +713,6 @@
 
             function updateRemarks(tracking, byDefault) {
                 tracking_numbers_remarks = (!remarksChecked && byDefault === 'single') ? [tracking] : tracking_numbers_remarks.concat(!remarksChecked ? [tracking] : []);
-
                 if (tracking_numbers_remarks.length > 0) {
                     $('#remarks_btn').removeClass('d-none');
                     $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
@@ -1008,8 +1007,6 @@
                 }
             });
             
-      ;
-
             $('#scan_btn').change(function() {
                 var isChecked = $(this).is(':checked');
                 if (isChecked) {
