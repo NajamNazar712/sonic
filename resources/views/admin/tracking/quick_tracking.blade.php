@@ -192,7 +192,7 @@
                                         <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
                                             class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                                             @csrf
-                                            <input type="text" id="tracking_numbers" name="tracking_numbers">
+                                            <input type="hidden" id="tracking_numbers" name="tracking_numbers">
                                             <div class="form-group ml-1">
                                                 <textarea name="add_remark" id="add_remark" class="form-control" rows="4"
                                                 data-rule-required="true" data-msg-required="Remarks is required"
