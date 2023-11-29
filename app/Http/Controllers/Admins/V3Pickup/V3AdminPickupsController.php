@@ -92,7 +92,7 @@ class V3AdminPickupsController extends Controller
         $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
         $pickup_date = Carbon::parse($pickup_date)->toDateString();
-
+     
         $shipper_id = $request->shipper_id;
         $pickup_address_id = $request->pickup_address_id;
         $time_range_id = $request->preferred_time_range;

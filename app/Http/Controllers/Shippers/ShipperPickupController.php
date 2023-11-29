@@ -637,7 +637,7 @@ class ShipperPickupController extends Controller
         $shipper_id =  $user_id;
         $pickup_address_id = $request->pickup_address_id;
         $time_range_id = $request->preferred_time_range;
-        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('status_id', 1)->exists()){
+        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('pickup_date',$pickup_date)->where('status_id', 1)->exists()){
             return redirect()->back()->with('error', 'Pickup request already in-process!');
         }
 
