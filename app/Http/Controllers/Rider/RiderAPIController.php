@@ -15374,7 +15374,7 @@ class RiderAPIController extends Controller
 
         $rider_id = $request->rider_id;
         
-        $pickup_note = V3PickupNote::where('rider_id', $rider_id)->orderBy('id', 'DESC');
+        $pickup_note = V3PickupRequest::where('current_rider_id', $rider_id)->orderBy('id', 'DESC');
         try{
         if ($pickup_note->exists()) {
             $pickup_note = $pickup_note->first();
@@ -15401,30 +15401,50 @@ class RiderAPIController extends Controller
                     $reason_id = $pickups['reason_id'];
                     $added_at = Carbon::createFromTimestampMs($pickups['added_at'])->toDateTimeString();
                     $is_rejected_hide = $pickups['is_rejected_hide'];
-                    $pickup_requests = V3PickupRequest::where('id',$pickup_request_id);
-                    
+                    $pickup_request = V3PickupRequest::where('id',$pickup_request_id);
+                  
                     try{
-                    if($pickup_requests->exists()){
-                        $pickup_request=$pickup_requests->first();
+                    if($pickup_request->exists()){
+                        $pickup_request = $pickup_request->first();
                         $result['pickup_request_id'] = $pickup_request_id;
+
                         if($type=='cm'){
     
-                            $pickup_request->status_id = 3;
+                            if($pickup_request->status_id<3){
+                                $pickup_request->status_id = 3;
+                                $pickup_request->save();
+                                
+                            }
+                            
                         }else if($type=='ap'){
-                            $pickup_request->status_id = 4;
+                            if($pickup_request->status_id<4){
+                                $pickup_request->status_id = 4;
+                                $pickup_request->save();
+                            }
                         }else if($type=='rd'){
-                            $pickup_request->status_id = 5;
+                            if($pickup_request->status_id<5){
+                                $pickup_request->status_id = 5;
+                                $pickup_request->save();
+                            }
+
                         }else if($type=='pk'){
                             $pickup_request->status_id = 6;
+                            $pickup_request->save();
+                            
                         }else if($type=='rj'){
                             $pickup_request->status_id = 7;
-                      
+                            $pickup_request->save();
+                            
+                        }else if($type=='np'){
+                            $pickup_request->status_id = 9;
+                            $pickup_request->save();
+                          
+
                         }
                         $result['type'] = $type;
                         $result['status_id'] = $pickup_request->status_id;
                         $result['added_at'] = $added_at;
                         $mainResult[$rCount] = $result;
-                        $pickup_request->save();
                         $rCount++;
                         $countResult = DB::select("SELECT count(id) as count FROM v3_pickup_requests_journeys WHERE pickup_request_id = ? AND status = ?", [$pickup_request_id, $pickup_request->status_id]);
                         $countId = isset($countResult[0]->count) ? $countResult[0]->count : 0;
