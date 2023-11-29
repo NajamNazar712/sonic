@@ -11608,7 +11608,7 @@ class RiderAPIController extends Controller
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'remarks_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
+            'remarks_id' => ['nullable', 'integer', 'exists:sub_reasons,id'],
             'picture' => ['required', 'mimes:png,jpeg,jpg'],
             'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file'],
