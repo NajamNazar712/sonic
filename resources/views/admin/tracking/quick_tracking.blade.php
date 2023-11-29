@@ -1043,8 +1043,8 @@
                         required: "Remarks is required"
                     }
                 },
-                errorClass: "text-red", // Add this line to set the error text color class
-                errorElement: "span"     // Add this line to wrap the error message in a <span> element
+                errorClass: "text-red", 
+                errorElement: "span"  
             });
         });
     </script>
