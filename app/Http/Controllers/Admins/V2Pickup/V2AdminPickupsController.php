@@ -1489,8 +1489,7 @@ class V2AdminPickupsController extends Controller
                     }
                     
                     
-                    $shipment->estimated_weight = $actual_weight;
-                    $shipment->actual_weight = $actual_weight;
+                    $shipment->actual_weight = $actual_weight; //Actually Estimated Weight
                     $shipment->shipper_status_id = 2;
                     $shipment->consignee_status_id = 2;
                     
