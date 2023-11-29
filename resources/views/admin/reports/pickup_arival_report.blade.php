@@ -572,12 +572,18 @@ aria-hidden="true">
                 }
             }).done(function(data){
                if(data.status==1){
+               
                     $.each(data.rider_details ,function(key,value){
+                        var pickup_request_id='';
+                        if(value.pickup_request_id!=null){
+                            pickup_request_id=value.pickup_request_id.toString().padStart(6,'0');
+                        }
+                    
                         if(value.arrived_status!=2){
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
 
                         }else{
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_request_id!=null?value.pickup_request_id:'')+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
                         }
                     });
                     $("#RiderdetailModal").modal('show');
