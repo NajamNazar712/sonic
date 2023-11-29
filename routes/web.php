@@ -1201,6 +1201,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
                 });
                 Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
+                Route::post('weight_bypass', 'Admins\V2Pickup\V2AdminPickupsController@weight_bypass')->name('weight_bypass');
+
             });
 
             Route::prefix('individual')->name('individual.')->group(function () {
