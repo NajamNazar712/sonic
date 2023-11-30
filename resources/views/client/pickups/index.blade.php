@@ -1098,17 +1098,17 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                            $(td).appendTo($(search));
-                        } else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                        //     $(td).appendTo($(search));
+                        // } else {
+                        //     var current = $(input).appendTo($(search)).on('change', function () {
+                        //         column.search($(this).val(), false, false, true).draw();
+                        //     }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
+                        //     if (column.search()) {
+                        //         current.val(column.search());
+                        //     }
+                        // }
                     });
 
                     this.api().table().columns.adjust();
