@@ -114,6 +114,7 @@
                                     <label for="iban" class="font-weight-bold mr-2">IBAN</label>
                                     <div class="form-group">
                                         <input type="text" name="view_iban" id="view_iban" class="form-control" placeholder="IBAN" disabled>
+                                        <span id="view_iban_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -390,7 +391,7 @@
                 }
             });
 
-            $('#iban').inputmask({
+            $('#view_iban').inputmask({
                 mask: 'R',
                 repeat: 24,
                 greedy: false,
@@ -401,7 +402,7 @@
                 },
             });
 
-            $('#iban').on('input', function (e) {
+            $('#view_iban').on('input', function (e) {
                 var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
                 var defaultPrefix = 'PK';
 
@@ -416,9 +417,9 @@
                 }
 
                 if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
-                    $('#iban_no_error').show();
+                    $('#view_iban_error').show();
                 } else {
-                    $('#iban_no_error').hide();
+                    $('#view_iban_error').hide();
                 }
             });
 
