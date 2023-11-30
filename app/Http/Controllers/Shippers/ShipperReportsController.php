@@ -607,6 +607,12 @@ class ShipperReportsController extends Controller
             if ($sj_from_id->exists()) {
                 $sj_from_id = $sj_from_id->first()->id;
             }
+            else{
+                $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', Carbon::today()->startOfYear());
+                if($sj_from_id->exists()){
+                    $sj_from_id = $sj_from_id->first()->id;
+                }
+            }
 
         }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
