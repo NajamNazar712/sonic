@@ -590,8 +590,7 @@ class ShipperReportsController extends Controller
         $to = $request->get('search_date_to');
         $from_id = null;
         $to_id = null;
-        $sj_from_id = null;
-        $sj_to_id = null;
+        $sj_from_id = 168982787;
         if ($from != null && $to != null) {
 
             $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
@@ -607,12 +606,6 @@ class ShipperReportsController extends Controller
             $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($sj_from_id->exists()) {
                 $sj_from_id = $sj_from_id->first()->id;
-
-                $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-                if ($sj_to_id->exists()) {
-                    $sj_to_id = $sj_to_id->first()->id;
-                }
             }
 
         }
@@ -622,15 +615,15 @@ class ShipperReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
-            ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id, $sj_to_id) {
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)"));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
             })
-            ->leftJoin('shipments_journey as cj', function ($join) use ($connection , $sj_from_id, $sj_to_id) {
+            ->leftJoin('shipments_journey as cj', function ($join) use ($connection , $sj_from_id) {
                 $join->on('cj.shipment_id', '=', 'shipments.id')
                     ->where('cj.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)"));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
             ->leftjoin('shipment_items as si', function ($join) {
@@ -638,19 +631,19 @@ class ShipperReportsController extends Controller
                     ->where('si.type', '=', 0);
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
-            ->leftJoin('shipments_journey as sjrr', function ($join) use ($connection, $sj_from_id, $sj_to_id) {
+            ->leftJoin('shipments_journey as sjrr', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sjrr.shipment_id', '=', 'shipments.id')
                     ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
                     ->where('sjrr.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)"));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null and shipments_journey.id >= $sj_from_id)"));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
-            ->leftJoin('shipments_journey as sjrp', function ($join) use($connection, $sj_from_id, $sj_to_id) {
+            ->leftJoin('shipments_journey as sjrp', function ($join) use($connection, $sj_from_id) {
                 $join->on('sjrp.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sjrp.id',
                         '=',
-                        DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)")
+                        DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id)")
                     );
             })
             ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date','sjrp.created_at as rider_picked_status_date']);

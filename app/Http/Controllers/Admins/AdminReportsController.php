@@ -7052,8 +7052,8 @@ class AdminReportsController extends Controller
         $to = $request->get('search_date_to');
         $from_id = null;
         $to_id = null;
-        $sj_from_id = null;
-        $sj_to_id = null;
+        $sj_from_id = 168982787;
+        $sj_to_id = 908982787;
 
         if ($from != null && $to != null) {
 
@@ -7078,8 +7078,13 @@ class AdminReportsController extends Controller
                     $sj_to_id = $sj_to_id->first()->id;
                 }
             }
-
         }
+//        if(!is_int($sj_from_id)){
+//            dd($sj_from_id);
+//
+//            $shipments = DB::connection($connection)->table('shipments')->whereRaw('false');
+//            return $shipments;
+//        }
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
