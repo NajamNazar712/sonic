@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\AddV3PickupController;
+use App\Http\Controllers\Admins\V3Pickup\V3PickupRequestJourneysController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -678,7 +679,8 @@ class ShipperPickupController extends Controller
             V3PickupRequest::where('id', $pickup_request_id)
             ->update(['services_count' => $additonalservice_count]);
         }
-       
+        V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request_id, 1,0, $user_id);
+
 
         if($request->regular_pickup == 2 && $request->pickup_type_id==1){
             $days = [];
