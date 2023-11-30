@@ -740,8 +740,8 @@
                         var status_id = $(this).attr('rel');
                         $('.pickup_status_btn').removeClass('status_tab_active');
                         $(this).addClass('status_tab_active');
-                $('#status_filter_input').val(status_id);
-                    table.draw();
+                        $('#status_filter_input').val(status_id);
+                        table.draw();
                 });
                 $("body").on('change','#select_status',function(){
                         var status_id=$(this).val();
