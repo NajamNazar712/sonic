@@ -42,7 +42,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Shipper Details </h4>
+                    <h4 class="modal-title white">Shipper Detailssss </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -57,7 +57,7 @@
                                     <label for="iban" class="font-weight-bold mr-2">IBAN</label>
                                     <div class="form-group">
                                         <input type="text" name="iban" id="iban" class="form-control" placeholder="IBAN*" data-rule-required="true" data-msg-required="IBAN is required" >
-                                        <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
+                                        <span id="iban_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -391,7 +391,7 @@
                 }
             });
 
-            $('#view_iban').inputmask({
+            $('#iban').inputmask({
                 mask: 'R',
                 repeat: 24,
                 greedy: false,
@@ -402,7 +402,7 @@
                 },
             });
 
-            $('#view_iban').on('input', function (e) {
+            $('#iban').on('input', function (e) {
                 var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
                 var defaultPrefix = 'PK';
 
@@ -417,9 +417,9 @@
                 }
 
                 if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
-                    $('#view_iban_error').show();
+                    $('#iban_error').show();
                 } else {
-                    $('#view_iban_error').hide();
+                    $('#iban_error').hide();
                 }
             });
 
