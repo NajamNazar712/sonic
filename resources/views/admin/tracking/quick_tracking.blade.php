@@ -507,6 +507,7 @@
                 isSingleMode = single_multiple_switch.checked;
                 tracking_numbers_remarks = []
                 $('#remarks_btn').addClass('d-none');
+                $('#add_remark').val('');
 
                 if (isSingleMode === true) {
                    selection = true;
@@ -1013,6 +1014,8 @@
             
             $('#scan_btn').change(function() {
                 var isChecked = $(this).is(':checked');
+                $('#add_remark').val('');
+                $()
                 if (isChecked) {
                     // If the checkbox is checked
                     $('#scan_bag').show();
