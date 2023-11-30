@@ -15410,19 +15410,19 @@ class RiderAPIController extends Controller
 
                         if($type=='cm'){
     
-                            if($pickup_request->status_id<3){
+                            if($pickup_request->status_id!=3){
                                 $pickup_request->status_id = 3;
                                 $pickup_request->save();
                                 
                             }
                             
                         }else if($type=='ap'){
-                            if($pickup_request->status_id<4){
+                            if($pickup_request->status_id!=4){
                                 $pickup_request->status_id = 4;
                                 $pickup_request->save();
                             }
                         }else if($type=='rd'){
-                            if($pickup_request->status_id<5){
+                            if($pickup_request->status_id!=5){
                                 $pickup_request->status_id = 5;
                                 $pickup_request->save();
                             }
