@@ -945,28 +945,10 @@
                 });
             });
 
-
-            // $('#segment_id').prepend('<option value="" selected></option>').select2({
-            //     placeholder: "Select Segment",
-            //     width:'100%',
-            // });
-            
-            // @if($user->segment_id != null)
-            // var segment_id = {!! $user->segment_id !!};
-            // $('#segment_id').val(segment_id).trigger('change');
-            // @endif
-
-
             $('#sub_segment_id').select2({
                 placeholder: "Select Sub Segment",
                 width:'100%',
             });
-            // @if($user->sub_segment_id != null)
-            // var sub_segment_id = {!! $user->sub_segment_id !!};
-            
-            // $('#sub_segment_id').val(sub_segment_id).trigger('change');
-            // @endif
-
 
             
             $('#cancel-button-profile').click(function () {
