@@ -1294,6 +1294,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('fintech_shipment', 'Admins\DeliveryController@pending_cash_collection_fintech_shipment')->name('fintechshipment');
 
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
+                Route::post('collect_revert', 'Admins\DeliveryController@pending_cash_collect_revert')->name('collect_revert');
                 Route::post('all', 'Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments', 'Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('onelinkpayment', 'Admins\DeliveryController@one_link_payments')->name('onelinkpayment');
