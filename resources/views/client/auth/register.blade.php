@@ -774,7 +774,7 @@
                                                         <div class="form-group">
                                                             <label for="iban"> IBAN Number: <span class="danger">*</span> </label>
                                                             <input type="text" class="form-control required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{  old('iban_no.0') }}" name="iban_no[]" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
-                                                            <span id="iban_no_error" class="danger" style="display: none;">IBAN Number Must be of 24 Characters</span>
+                                                            <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 characters</span>
                                                         </div>
 
                                                         <div class="form-group">
@@ -1657,16 +1657,26 @@
                 },
             });
 
-        $('#iban_no').on('change', function () {
-            var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
-            $(this).val(iban);
-            if (iban.length !== 24) { // Check length
-                $('#iban_no_error').show();
-            }
-            else{
-                $('#iban_no_error').hide();
-            }
-        });
+            $('#iban_no').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                    $('#iban_no_error').show();
+                } else {
+                    $('#iban_no_error').hide();
+                }
+            });
 
     </script>
 </body>

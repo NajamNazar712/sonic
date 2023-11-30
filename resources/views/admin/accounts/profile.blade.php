@@ -606,7 +606,7 @@
                                         <label>IBAN Number</label>
                                         <span class="danger">*</span>
                                         
-                                        <input id="iban" class="form-control border-primary" type="text" value="PK{{$user_bank_default->iban}}" data-msg-required="IBAN Number is required" name="iban" required>
+                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user_bank_default->iban}}" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
                                         <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
                                     </div>
