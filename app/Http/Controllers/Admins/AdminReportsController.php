@@ -11521,7 +11521,8 @@ class AdminReportsController extends Controller
             $qurey->on('sq.id','=','s.id')->where('sq.shipper_status_id',2);
         })->leftJoin('user_shipping_infos as us','us.id','=','s.pickup_address_id')
         
-        ->whereBetween(DB::raw('sj.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
+        ->whereBetween(DB::raw('sj.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])
+        ->orWhereBetween(DB::raw('sjq.created_at'), [$from.' 00:00:01',$to.' 23:59:59'])->groupBy('u.id')
         ->select('u.id AS shipper_id','u.name AS shipper_name',DB::raw('COUNT(sj.shipment_id) AS rider_picked'),DB::raw('COUNT(sjq.shipment_id) AS global_rider_picked'),DB::raw('COUNT(sq.id) AS shipment_arrived'))->orderByDesc('s.id')->get();
    
         if($city_id){
@@ -11733,8 +11734,27 @@ class AdminReportsController extends Controller
         // dd($rider_detail);
         return response()->json(['status'=>1,'rider_details'=>$rider_detail]);
     }
+    public function get_global_rider_details(Request $request){
+        $shipper_id=$request->shipper_id;
+        $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
+        $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
+
+        $global_rider_detail=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+        ->leftJoin('global_settings as gs', 'gs.setting_value', '=', 'sj.global_rider_id')
+        ->where('sj.shipper_status_id', '=', 2)
+        ->where('shipments.user_id', '=', $shipper_id)
+        ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        ->select([
+            'gs.setting_value as picked_rider_id',
+            'gs.type as picked_rider_name',
+            'shipments.tracking_number',
+        ])
+        ->get();
+        return response()->json(['status'=>1,'global_rider_details'=>$global_rider_detail]);
+    }
 
     public function get_arrived_shipments(Request $request){
+
         $shipper_id=$request->shipper_id;
         $from_date=Carbon::parse($request->from_date)->format('Y-m-d');
         $to_date=Carbon::parse($request->to_date)->format('Y-m-d');
@@ -11752,10 +11772,33 @@ class AdminReportsController extends Controller
         // ->where('sj.shipper_status_id','=',2)
         // ->where('shipments.user_id','=',$shipper_id)
         // ->whereBetween(DB::raw('sj.created_at'),[$from_date.' 00:00:01',$to_date.' 23:59:59'])->get();
-        $arrived_shipments=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-        ->join('shipments_journey as sjq', 'sjq.shipment_id', '=', 'sj.shipment_id')
-        ->leftJoin('riders as r', 'sj.rider_id', '=', 'r.id')
-        ->leftJoin('global_settings as gs', 'gs.setting_value', '=', 'sj.global_rider_id')
+        // $arrived_shipments=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+        // ->join('shipments_journey as sjq', 'sjq.shipment_id', '=', 'sj.shipment_id')
+        // ->leftJoin('riders as r', 'sj.rider_id', '=', 'r.id')
+        // ->leftJoin('global_settings as gs', 'gs.setting_value', '=', 'sj.global_rider_id')
+        // ->select(
+        //     'r.id AS rider_id',
+        //     'r.name AS rider_name',
+        //     'gs.setting_value AS global_rider_id',
+        //     'gs.text AS global_rider_name',
+        //     'shipments.tracking_number'
+        // )
+        // ->where('sj.shipper_status_id', '=', 53)
+        // ->where('sjq.shipper_status_id', '=', 2)
+        // ->where('shipments.user_id', '=', $shipper_id)
+        // ->whereBetween('sj.created_at', [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        // ->orWhereBetween('sjq.created_at', [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        // ->get();
+        $arrived_shipments=Shipment::leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where('sj.shipper_status_id', '=', 53);
+        })
+        ->leftJoin('shipments_journey as sjq', function ($join) {
+            $join->on('sjq.shipment_id', '=', 'shipments.id')
+                ->where('sjq.shipper_status_id', '=', 2);
+        })
+        ->leftJoin('riders as r', 'r.id', '=', 'sj.rider_id')
+        ->leftJoin('global_settings as gs', 'gs.setting_value', '=', 'sjq.global_rider_id')
         ->select(
             'r.id AS rider_id',
             'r.name AS rider_name',
@@ -11763,12 +11806,10 @@ class AdminReportsController extends Controller
             'gs.text AS global_rider_name',
             'shipments.tracking_number'
         )
-        ->where('sj.shipper_status_id', '=', 53)
-        ->where('sjq.shipper_status_id', '=', 2)
         ->where('shipments.user_id', '=', $shipper_id)
-        ->whereBetween('sj.created_at', [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
+        ->orWhereBetween(DB::raw('sjq.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         ->get();
-
         return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
     }

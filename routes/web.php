@@ -2998,6 +2998,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@pickup_arival_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pickup_arival_list')->name('list');
             Route::post('rider_details','Admins\AdminReportsController@get_rider_details')->name('rider_details');
+            Route::post('global_rider_details','Admins\AdminReportsController@get_global_rider_details')->name('global_rider_details');
             Route::post('arrived_shipments','Admins\AdminReportsController@get_arrived_shipments')->name('arrived_shipments');
             Route::post('balance_Shipments','Admins\AdminReportsController@get_balance_Shipments')->name('balance_Shipments');
             Route::post('city_shippers','Admins\AdminReportsController@get_city_shippers')->name('city_shippers');

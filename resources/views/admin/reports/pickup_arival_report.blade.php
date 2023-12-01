@@ -229,6 +229,40 @@ aria-hidden="true">
 </div>
 <!----end of show Rider Detail modal --->
 
+<!---- start of show Global Rider Detail  modal---->
+<div class="modal fade text-left" id="GlobalriderdetailModal" data-backdrop="static" tabindex="-1" role="dialog"
+aria-labelledby="GlobalriderdetailModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Global Rider Pickups</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <table class="table table-bordered">
+                            <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Tracking No</th>
+                                        <th class="border-primary border-darken-1">Global Picked Rider</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!----end of show Global Detail modal --->
+
 <!---- start of show Shipment Arrived   modal---->
 <div class="modal fade text-left" id="ShipmentArrivedModal" data-backdrop="static" tabindex="-1" role="dialog"
 aria-labelledby="ShipmentArrivedModal"
@@ -590,6 +624,34 @@ aria-hidden="true">
                }
             });
         });
+
+        //global rider picked shipments
+        $("body").on('click','.global_picked_btn',function(){
+            var tracking_route='{{ route('admin.tracking.index') }}';
+            $("#GlobalriderdetailModal table tbody").empty();
+            var shipper_id=$(this).parent('td').parent('tr').attr('id');
+            var from_date=$("#from_date").val();
+            var to_date=$("#to_date").val();
+            $.ajax({
+                url:'{{ route('admin.reports.pickup_arival.global_rider_details') }}',
+                method:'POST',
+                data:{
+                    'shipper_id':shipper_id,
+                    'from_date':from_date,
+                    'to_date':to_date,
+                    '_token':'{{ csrf_token() }}'
+                }
+            }).done(function(data){
+               if(data.status==1){
+                    $.each(data.global_rider_details ,function(key,value){
+                        $("#GlobalriderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td></tr>');
+                    });
+                    $("#GlobalriderdetailModal").modal('show');
+               }
+            });
+        });
+
+
         $("body").on('click','.shipment_arrived_btn',function(){
             var tracking_route='{{ route('admin.tracking.index') }}';
             $("#ShipmentArrivedModal table tbody").empty();
