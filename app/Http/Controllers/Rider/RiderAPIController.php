@@ -11934,8 +11934,8 @@ class RiderAPIController extends Controller
                     }
         
                     return response()->json(['status' => 1, 'message' => 'Error', "Message"=>"error"]);
-                }catch(Exception $e){
-                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $e]);
+                }catch(\Exception $e){
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $e->getMessage()]);
             
                 }
             } else {
