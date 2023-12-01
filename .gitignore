@@ -24,3 +24,8 @@ composer.lock
 /public/.DT_Store
 /public/file/.DT_Store
 .DT_Store
+
+.config/*
+.product/*
+tmp/*
+docker-compose*
