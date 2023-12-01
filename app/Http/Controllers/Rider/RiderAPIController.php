@@ -580,6 +580,62 @@ class RiderAPIController extends Controller
             }
         }
     }
+    private function verify_pickup_address_location_v3($pickup_address_id)
+    {
+        $number_of_entries = 5;
+
+        $pickup_requests = V3PickupRequest::where('pickup_address_id', $pickup_address_id)->where('status_id', 2);
+
+        if ($pickup_requests->exists() && $pickup_requests->count() >= $number_of_entries) {
+            $pickup_request_ids = $pickup_requests->latest('id')->take($number_of_entries)->pluck('id')->toArray();
+
+            $rider_pickups = V3RiderPickup::whereIn('pickup_request_id', $pickup_request_ids);
+
+            $allowed_correct_instances = ROUND(($number_of_entries / 2), 0, PHP_ROUND_HALF_DOWN);
+
+            if ($rider_pickups->exists() && $rider_pickups->count() >= $number_of_entries) {
+                $rider_pickups = $rider_pickups->latest('id')->take($number_of_entries)->get()->toArray();
+
+                $location = array();
+
+                $correct_instances = 0;
+
+                $replace = FALSE;
+
+                for ($c1 = 0; $c1 < ($number_of_entries - $allowed_correct_instances); $c1++) {
+                    $origin = $rider_pickups[$c1]['actual_location_latitude'] . ',' . $rider_pickups[$c1]['actual_location_longitude'];
+
+                    for ($c2 = ($c1 + 1); $c2 < $number_of_entries; $c2++) {
+                        $destination = $rider_pickups[$c2]['actual_location_latitude'] . ',' . $rider_pickups[$c2]['actual_location_longitude'];
+
+                        $distance = $this->distance($origin, $destination);
+
+                        if ($distance <= 0.01) {
+                            $location['latitude'] = $rider_pickups[$c1]['actual_location_latitude'];
+                            $location['longitude'] = $rider_pickups[$c1]['actual_location_longitude'];
+
+                            $correct_instances++;
+                        }
+                    }
+
+                    if ($correct_instances >= $allowed_correct_instances) {
+                        $replace = TRUE;
+
+                        break;
+                    }
+                }
+
+                if ($replace) {
+                    $pickup_address = UserShippingInfo::find($pickup_address_id);
+
+                    $pickup_address->location_longitude = $location['latitude'];
+                    $pickup_address->location_longitude = $location['longitude'];
+
+                    $pickup_address->save();
+                }
+            }
+        }
+    }
 
     private function generateDateRange($start_date, $end_date)
     {
