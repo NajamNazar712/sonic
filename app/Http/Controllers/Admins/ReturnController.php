@@ -875,8 +875,9 @@ class ReturnController extends Controller
 
     public function return_reattempt_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
-
-        $shipment_ids = $request->shipment_ids;
+        // dd($request->all());
+        // $shipment_ids = $request->shipment_ids;
+        $shipment_ids = $request->shipment_id;
 
         if ($request->action == 'reattempt') {
             foreach ($shipment_ids as $shipment) {
