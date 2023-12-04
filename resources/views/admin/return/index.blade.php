@@ -412,8 +412,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="EditEstimateChargesModalNSAreattempt" role="dialog"
-            aria-labelledby="EditEstimateChargesModalNSAreattempt" aria-hidden="true">
+        <div class="modal fade" id="EditEstimateChargesModalNSAreattempt" role="dialog" aria-labelledby="EditEstimateChargesModalNSAreattempt" aria-hidden="true">
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1994,14 +1993,6 @@
                                 table.row(row).select();
                             }
                         }
-
-                        // if (data.RvShipmentAssignedAgent == 1) {
-                        //     $('td:eq(0)', row).removeClass('select-checkbox');
-
-                        //     if ($.inArray(data.shId, selected_rows) !== -1) {
-                        //         table.row(row).select();
-                        //     }
-                        // }
                     },
 
                     initComplete: function() {
@@ -2312,7 +2303,10 @@
                         $('#ReturnConfirmReasonSingleModal').modal('show');
                         $('#return_reason_shipment_id').val(row_id);
                         //$('#return_reason_shipment_remarks').val(remark);
-                    } else if (action === 'reattempt') {
+                    } 
+                    
+                    //reattempt for normal shipment (action button reattempt)
+                    else if (action === 'reattempt') {
                         atext = 'Select Yes to change shipment status to Re-Attempt!';
                     }
                     if (row_id != '' && action === 'reattempt' && id >= 1) {
@@ -2834,6 +2828,7 @@
                     }
 
                 });
+                
                 $('#update_charges_NSAreattempt_form').validate({
                     errorClass: 'danger',
                     successClass: 'success',
@@ -2872,7 +2867,8 @@
                                 var shipment_id = $('#eec_shipment_id_NSAreattempt').val();
                                 var shipment_remark = $('#eec_shipment_remark_NSAreattempt').val();
                                 $.ajax({
-                                    url: "{{ route('admin.return.marked.status.single') }}",
+                                    // url: "{{ route('admin.return.marked.status.single') }}",
+                                    url: "{{ route('admin.return.reattempt.status') }}",
                                     method: 'POST',
                                     data: {
                                         'charges': charges,
@@ -2902,8 +2898,7 @@
                                     }
                                     $('#estimated_charges_NSAreattempt_input').val('');
                                     $('#eec_shipment_id_NSAreattempt').val('');
-                                    $('#EditEstimateChargesModalNSAreattempt').modal(
-                                        'hide');
+                                    $('#EditEstimateChargesModalNSAreattempt').modal('hide');
                                 });
 
                             }
