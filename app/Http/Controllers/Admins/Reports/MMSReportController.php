@@ -52,9 +52,9 @@ class MMSReportController extends Controller
         }
 
         $from = $request->get('search_date_from');
-        // $from = Carbon::parse($from)->toDateTimeString();
+        $from = Carbon::parse($from)->toDateTimeString();
         $to = $request->get('search_date_to');
-        // $to = Carbon::parse($to)->toDateTimeString();
+        $to = Carbon::parse($to)->toDateTimeString();
 
         $from_id = null;
         $to_id = null;
@@ -64,6 +64,7 @@ class MMSReportController extends Controller
 
         if ($from != null && $to != null) {
             $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
+
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
                 
