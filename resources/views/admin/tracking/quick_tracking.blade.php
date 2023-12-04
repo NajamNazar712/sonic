@@ -487,7 +487,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-       <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
@@ -706,8 +706,7 @@
                 $(".alert-success").fadeOut(1000);
             }, 3000); 
 
-            var remarksChecked = null;
-            $('#scan_btn').change(function() {
+\            $('#scan_btn').change(function() {
                 remarksChecked = $(this).is(':checked');;
                 if (!remarksChecked && tracking_numbers_remarks.length > 0 ) {
                     $('#remarks_btn').removeClass('d-none');
