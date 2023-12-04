@@ -501,7 +501,9 @@
             var bag_table;
             var selection = true;
             var isSingleMode = true; 
-            
+            var tracking_numbers_remarks = [];
+            var remarksChecked = null;
+
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
                 isSingleMode = single_multiple_switch.checked;
@@ -714,7 +716,6 @@
                 }
             })
             
-            var tracking_numbers_remarks = [];
 
             function updateRemarks(tracking, byDefault) {
                 tracking_numbers_remarks = (!remarksChecked && byDefault === 'single') ? [tracking] : tracking_numbers_remarks.concat(!remarksChecked ? [tracking] : []);

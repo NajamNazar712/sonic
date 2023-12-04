@@ -763,9 +763,9 @@ class AdminTrackingController extends Controller
                     $query->take(1); 
                 }])->first();
                 
-                $shipment = $shipment->shipment_journey->first();
-                $shipment->remarks = $request->add_remark;
-                $shipment->save();
+                $shipment_journey = $shipment->shipment_journey->first();
+                $shipment_journey->remarks = $request->add_remark;
+                $shipment_journey->save();
             }            
         }
 
