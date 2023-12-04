@@ -706,7 +706,7 @@
                 $(".alert-success").fadeOut(1000);
             }, 3000); 
 
-\            $('#scan_btn').change(function() {
+            $('#scan_btn').change(function() {
                 remarksChecked = $(this).is(':checked');;
                 if (!remarksChecked && tracking_numbers_remarks.length > 0 ) {
                     $('#remarks_btn').removeClass('d-none');
