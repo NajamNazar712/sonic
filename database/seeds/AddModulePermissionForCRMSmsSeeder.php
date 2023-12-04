@@ -16,7 +16,7 @@ class AddModulePermissionForCRMSmsSeeder extends Seeder
         ModulePermission::where('id', 914)->delete();
         
         DB::table('module_permissions')->insert(array(
-            array('id' => 914, 'name' => 'CRM SMS - View', 'module_id' => 14),
+            array('id' => 914, 'name' => 'CRM SMS - View', 'module_id' => 18),
         
         ));
     }
