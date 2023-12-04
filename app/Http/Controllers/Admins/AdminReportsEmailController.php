@@ -3097,7 +3097,8 @@ class AdminReportsEmailController extends Controller
                 'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature',
                 'crcnt.type as crm_request_case_nature_type', 'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment',
                 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date'
-                ])->whereBetween('journey.created_at', $to)->get();
+                // ])->whereBetween('journey.created_at', $to)->get();
+                ])->where('journey.created_at','>=', $to)->get();
                 
                 
                 $deliveries = $deliveries->map(function ($delivery) {
@@ -3308,7 +3309,7 @@ class AdminReportsEmailController extends Controller
             )
             ->whereIn('shipments.shipper_status_id', $status)
             // ->whereBetween('shipments_journey.created_at', [$from, $to])->get();
-            ->whereBetween('shipments_journey.created_at', $to)->get();
+            ->whereBetween('shipments_journey.created_at','>=', $to)->get();
 
             $pending_deliveries_report_array[] = ['Pending Deliveries Report'];
             $pending_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
