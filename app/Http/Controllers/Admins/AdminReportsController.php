@@ -11746,7 +11746,7 @@ class AdminReportsController extends Controller
         ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         ->select([
             'gs.setting_value as picked_rider_id',
-            'gs.type as picked_rider_name',
+            'gs.text as picked_rider_name',
             'shipments.tracking_number',
         ])
         ->get();

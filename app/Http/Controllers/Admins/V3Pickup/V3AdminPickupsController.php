@@ -578,15 +578,16 @@ class V3AdminPickupsController extends Controller
 
     public function pending_request_status_update(Request $request){
        
-        $user_id=session('id');
+        $admin_id=session('id');
         $pickup_request_id = $request->pickup_request_id;
         $status_id = $request->status_id;
         if(V3PickupRequestStatus::where('id',$status_id)->exists()){
             $pickup_request = V3PickupRequest::find($pickup_request_id);
             if($pickup_request->current_rider_id){
                 $pickup_request->status_id = $status_id;
-                $pickup_request->last_updated_by = $user_id;
+                $pickup_request->last_updated_by = $admin_id;
                 if($pickup_request->save()){
+                    V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request_id,$status_id,1,$admin_id);
                     return redirect()->back()->with('success','Status update successfully');
                 }
                     return redirect()->back()->with('error','Something went wrong, please refresh and try again!');
