@@ -11,17 +11,18 @@ class UndeliveredReasonController extends Controller
     {
         $status = BoltUndeliveredReasonMap::where('reason_id', $reason_id)->first();
         $shipment = BoltUndeliveredReasonMapCount::where('shipment_id', $shipment_id);
+        $delivery_note = BoltUndeliveredReasonMapCount::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
         $journey_status = null;
         
         if ($shipment->exists()) {
             $shipment = $shipment->latest()->first();
             $count = $shipment->count;
-        } else {
+        }else if (!$shipment->exists() && $delivery_note->exists()){
+            $count = 1;
+        }else {
             $count = 0;
         }
         
-        $delivery_note = BoltUndeliveredReasonMapCount::where('delivery_note_id', $delivery_note_id);
-
         if (!$delivery_note->exists()) {
             $count++;
         }
@@ -39,6 +40,7 @@ class UndeliveredReasonController extends Controller
                     'count' => $count,
                 ]
             );
+
         }
         
         return $journey_status;
