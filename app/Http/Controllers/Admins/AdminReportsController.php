@@ -13152,12 +13152,24 @@ class AdminReportsController extends Controller
         $shipment_journey_min_id =  DB::connection('reports')->table('shipments_journey')->where('created_at' , '>=' , $from)->orderBy('id','asc')->pluck('id')->first();
         $shipments = DB::connection('reports_2')->table('shipments')
             ->leftJoin('shipments_journey as sj', function ($join) use ($shipment_journey_min_id) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
+                if($shipment_journey_min_id)
+                {
+                    $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sj.id',
                         '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55) and verification = 1 and  shipments_journey.id >= '.$shipment_journey_min_id.')')
                     );
+                }
+                else{
+                    $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59, 52,55) and verification = 1')')
+                    );
+                }
+                
             })
             ->whereBetween('shipments.created_at', [$from, $to])->get();
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
