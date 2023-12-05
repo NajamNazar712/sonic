@@ -74,17 +74,6 @@ class MMSReportController extends Controller
                     $to_id = $to_id->first()->id;
                 }
             }
-
-            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-            if ($sj_from_id->exists()) {
-                $sj_from_id = $sj_from_id->first()->id;
-
-                $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-                if ($sj_to_id->exists()) {
-                    $sj_to_id = $sj_to_id->first()->id;
-                }
-            }
         }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
@@ -129,18 +118,7 @@ class MMSReportController extends Controller
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to]);
    
-        // $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-        // if ($from_id->exists()) {
-        //     $from_id = $from_id->first()->id;
-        //     $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-        //     if ($to_id->exists()) {
-        //         $to_id = $to_id->latest()->first()->id;
-        //         $sales->where('sj.id', '>=', $from_id)
-        //         ->where('sj.id', '<=', $to_id);    
-        //     }
-        // }
-
+        
         if($from != null && $to != null) {
             $sales = $sales->whereBetween('sj.created_at', [$from, $to]);
             
