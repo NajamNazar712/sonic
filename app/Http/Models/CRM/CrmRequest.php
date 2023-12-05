@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CrmRequest extends Model
 {
+
+    protected $table = 'crm_requests';
     public function nature() {
         return $this->belongsTo('App\Http\Models\CRM\CrmRequestCaseNature','case_nature_id','id');
     }
@@ -20,6 +22,10 @@ class CrmRequest extends Model
     }
     public function agent() {
         return $this->belongsTo('App\Http\Models\Admin\Admin','agent_id','id');
+    }
+
+    public function rating() {
+        return $this->belongsTo('App\Http\Models\CRM\CrmRequestRating','rating_id','id');
     }
     public function launched_by_admin() {
         return $this->belongsTo('App\Http\Models\Admin\Admin','launched_by_id','id');

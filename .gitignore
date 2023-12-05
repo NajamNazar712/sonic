@@ -21,3 +21,11 @@ composer.lock
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+/public/.DT_Store
+/public/file/.DT_Store
+.DT_Store
+
+.config/*
+.product/*
+tmp/*
+docker-compose*

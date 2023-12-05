@@ -398,7 +398,6 @@ class DeliveryController extends Controller
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
                 $str_arr = null;
-                //                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
                 $str_arr = preg_split("/[ ,]+/", $shipments->consignee_address);
                 foreach ($check as $nsa) {
                     foreach ($str_arr as $arr_value) {
@@ -1409,9 +1408,9 @@ class DeliveryController extends Controller
 
 
                     if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-//                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
+                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
                             $dropdown .= $receive_button;
-//                        }
+                        }
                     }
                     $rider_check = true;
                     if ($result->operation_rider_id == 1) {
@@ -7271,7 +7270,6 @@ class DeliveryController extends Controller
     public function history_list(Request $request)
     {
 
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
@@ -7289,7 +7287,17 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type', 'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+            
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 
+            'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 
+            'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 
+            'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.status', 'delivery_notes.pending_status', 
+            'delivery_notes.cash_collection_status', 'delivery_notes.dncc_status', 'delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by', 
+            'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
+            'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type', 
+            'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 
+            'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
@@ -7301,11 +7309,9 @@ class DeliveryController extends Controller
             ->editColumn('fintech_shipments_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
                 $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
-
                 if($amount > 0)
                 {
                     return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
-
                 }
                 else
                 {
@@ -7313,8 +7319,36 @@ class DeliveryController extends Controller
 
                 }             
             })
-
-
+            ->editColumn('fintech_amount_percent', function ($deliveries) {
+                $dncc_amount = $deliveries->amount;
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
+                $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($fintech_amount > 0 && $dncc_amount > 0 )
+                {
+                    $fintech_amount_percent = $fintech_amount / $dncc_amount *100;
+                    return $fintech_amount_percent;
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
+            ->editColumn('hbl_konnect_amount_percent', function ($deliveries) {
+                $dncc_amount = $deliveries->amount;
+                $hbl_konnect_amount = $deliveries->transactions_amount;
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    $hbl_konnect_amount_percent = $hbl_konnect_amount / $dncc_amount *100;
+                    return $hbl_konnect_amount_percent;
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
+            
             ->editColumn('delivery_note', function ($deliveries) {
                 $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
                 if ($deliveries->pending_status == 1) {
@@ -7423,8 +7457,28 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('transactions_amount_link', function ($shipment) {
+                // if ($shipment->transactions_amount != null) {
+                //     $dncc_amount = $shipment->amount ?? 0; //3000
+                //     $hbl_connect_amount = $shipment->transactions_amount ?? 0; //2020
+                //     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $shipment->delivery_note)->pluck('shipment_id')->toArray();
+                //     $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')
+                //     ->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount') ?? 0; //3000
+                //     $one_link_amount = $shipment->one_link_amount ?? 0; //0
+                //     $total_amount = $dncc_amount - ($hbl_connect_amount + $amount + $one_link_amount);
+                //     return '<button class="btn btn-sm btn-outline-info align-middle">' . $total_amount . '</button>';
+                // } else {
+                //     return '-';
+                // }
                 if ($shipment->transactions_amount != null) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                    $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $shipment->delivery_note)
+                    ->selectRaw('SUM(amount) as total_amount')
+                    ->groupBy('delivery_note_id')
+                    ->first();
+                    if($hbl_konnect_transactions){
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $hbl_konnect_transactions->total_amount . '</button>';
+                    } else{
+                        return '-';
+                    }
                 } else {
                     return '-';
                 }
@@ -7435,11 +7489,6 @@ class DeliveryController extends Controller
                 $cash_amount = $dncc_amount - $hbl_connect_amount;
 
                 return number_format($cash_amount);
-                // if ($shipment->cash_amount != null) {
-                //     return number_format($shipment->cash_amount);
-                // } else {
-                //     return number_format($shipment->amount);
-                // }
             })
             ->editColumn('created_via', function ($delivery) {
                 if ($delivery->created_via == 0) {

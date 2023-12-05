@@ -100,7 +100,7 @@
                             </div>
                             <hr>
                             <div class="row justify-content-center">
-                                <div class="col-8">
+                                <div class="col-10">
                                     <fieldset class="form-group">
                                         <select name="case_nature_select" id="case_nature_select" class="form-control select2">
                                             @foreach($case_nature as $nature)
@@ -167,16 +167,52 @@
                                             </select>
                                         </fieldset>
                                     </div>
+                                    <div  class="col-10 d-none" id="cod_change">
+                                        <div class="row justify-content-center">
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Old COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="old_amount" id="old_amount" readonly class="form-control rounded-right">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">New COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-6 d-none" id="cod_parcel_value_change">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Enter Parcel Value</span>
+                                                    </div>
+        
+                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required" oninput="if(this.value=='0') this.value=''">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-12">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-6">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="feedback_channel_request" id="feedback_channel_request" class="form-control select2">
                                                 @foreach($case_nature_channels as $channel1)
@@ -185,7 +221,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
@@ -198,7 +234,7 @@
                                 <input type="hidden" name="complaint_id" id="complaint_id">
                                 <input type="hidden" name="channel_id" id="channel_id">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
                                                 @foreach($case_nature_type_claims as $claim)
@@ -207,7 +243,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="claim_channel" id="claim_channel" class="form-control select2">
                                                 @foreach($case_nature_channels as $channel1)
@@ -216,12 +252,12 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="claim_product_cost_div">
+                                    <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                    <div class="col-10 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
 {{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
                                             <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
@@ -229,20 +265,20 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left" id="claim_product_picture_div">
+                                    <div class="col-10 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left" id="claim_invoice_picture_div">
+                                    <div class="col-10 text-left" id="claim_invoice_picture_div">
                                         <fieldset class="form-group">
                                             <label for="invoice_picture"><b>Invoice Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
 
-{{--                                    <div class="col-8 text-left d-none" id="claim_shipment_damage_div">--}}
+{{--                                    <div class="col-10 text-left d-none" id="claim_shipment_damage_div">--}}
 {{--                                        <fieldset class="form-group">--}}
 {{--                                            <label for="damage_product_picture"><b>Damage Picture:</b></label>--}}
 {{--                                            <input class="form-control form-control-sm" type="file" name="damage_product_picture" id="damage_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
@@ -261,7 +297,7 @@
 
 {{--                                    </div>--}}
 
-{{--                                    <div class="col-8 text-left d-none" id="claim_content_short_div">--}}
+{{--                                    <div class="col-10 text-left d-none" id="claim_content_short_div">--}}
 {{--                                        <fieldset class="form-group">--}}
 {{--                                            <label for="missing_product_picture"><b>Missing Product Picture:</b></label>--}}
 {{--                                            <input class="form-control form-control-sm" type="file" name="missing_product_picture" id="missing_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">--}}
@@ -279,7 +315,7 @@
 {{--                                        </fieldset>--}}
 {{--                                    </div>--}}
 
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                         </fieldset>
@@ -535,6 +571,18 @@
 	<script>
 		$(document).ready(function() {
 
+            $('.new_amount').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+            $('.cod_parcel_value').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+            });
+
             $('#tracking').on('click', '.call_status', function () {
             var id = $(this).attr('id');
             var tracking = $(this).attr('data-tracking');
@@ -596,8 +644,8 @@
                 
             });
 
-        $('#update_call_status_modal').modal('show');
-    });
+            $('#update_call_status_modal').modal('show');
+        });
 
         $('#update_call_status_modal').on('shown.bs.modal', function () {
                 $('#call_to').val('').change();
@@ -1800,6 +1848,7 @@
 
 
                                 $('#tracking').append(shipment);
+                                $('#old_amount').val(details.order_information.amount);
                             });
                             scan_sound(1);
 
@@ -2320,14 +2369,17 @@
                 // $('#cod_amount_input').addClass('d-none');
 
             }
-            // else if($(this).val() == 12){
-            //     $('#cod_amount_input').removeClass('d-none');
-            //     $('#alternate_phone_input').addClass('d-none');
-
-            // }
             else{
                 // $('#cod_amount_input').addClass('d-none');
                 $('#alternate_phone_input').addClass('d-none');
+
+            }
+
+            if($(this).val() == 12){
+                $('#cod_change').removeClass('d-none');
+            }
+            else{
+                $('#cod_change').addClass('d-none');
 
             }
         });
@@ -2375,13 +2427,13 @@
                     if (nature_flag) {
                         $('#AddNewRequest').attr('disabled', true);
                         swal({
-                                        title: 'Please Wait!',
-                                        text: 'Launching Request.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
+                            title: 'Please Wait!',
+                            text: 'Launching Request.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
                         $.ajax({
                             url: '{!! route('admin.crm.request.add') !!}',
                             method: 'POST',
@@ -2505,20 +2557,152 @@
                     }
                     if (nature_flag) {
                         $('#AddNewRequest').attr('disabled', true);
-                        $.ajax({
-                            url: '{!! route('admin.crm.request.add') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'shipment_id': $('#requested_shipment_id').val(),
-                                'case_nature_id': case_nature_id,
-                                'complaint_id': case_nature_complaint_id,
-                                'channel_id': case_nature_channel_id,
-                                'description': service_description,
-                                'alternate_phone': alternate_phone,
-                                // 'cod_amount': cod_amount,
-                            }
-                        })
+
+                        var complaint_id = $('#case_nature_requests').val();
+                        
+                        if(complaint_id == 12)
+                        {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to change COD!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    swal.close();
+
+                                    var is_zero_cod = 0;
+                                    if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
+                                    {
+                                        is_zero_cod = 1;
+                                    }
+
+                                    $.ajax({
+                                        url: '{!! route('admin.crm.request.add') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'shipment_id': $('#requested_shipment_id').val(),
+                                            'case_nature_id': case_nature_id,
+                                            'complaint_id': case_nature_complaint_id,
+                                            'channel_id': case_nature_channel_id,
+                                            'description': service_description,
+                                            'alternate_phone': alternate_phone,
+                                            'cod_new_amount': $('#new_amount').val(),
+                                            'cod_remarks': $('#cod_remarks').val(),
+                                            'is_zero_cod': is_zero_cod,
+                                            'cod_parcel_value': $('#cod_parcel_value').val(),
+                                            'is_automated_cod_change': 1,
+                                        }
+                                    })
+                                    .done(function (data) {
+                                        if (data.status) {
+                                            if (data.flag) {
+                                                var html = '';
+
+                                                $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+
+                                                if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+
+                                                swal({
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            } else {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        } else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+
+
+                                        $('#AddRequestModal').modal('hide');
+                                        $('#AddNewRequest').attr('disabled', false);
+                                    });
+                                }
+                                else{
+                                    $('#AddNewRequest').attr('disabled',false);
+                                }
+                            });
+                        }
+                        else{
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            $.ajax({
+                                url: '{!! route('admin.crm.request.add') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'shipment_id': $('#requested_shipment_id').val(),
+                                    'case_nature_id': case_nature_id,
+                                    'complaint_id': case_nature_complaint_id,
+                                    'channel_id': case_nature_channel_id,
+                                    'description': service_description,
+                                    'alternate_phone': alternate_phone,
+                                    // 'cod_amount': cod_amount,
+                                }
+                            })
                             .done(function (data) {
                                 if (data.status) {
                                     if (data.flag) {
@@ -2572,6 +2756,7 @@
                                 $('#AddRequestModal').modal('hide');
                                 $('#AddNewRequest').attr('disabled', false);
                             });
+                        }
                     }
                 } else if (case_nature_id == 3) {
                     var feedback_flag = true;
@@ -2896,7 +3081,10 @@
             },
         });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
+            var old_amount = $('#old_amount').val();
             $('#add_request_form')[0].reset();
+            $('#old_amount').val(old_amount);
+            $('#cod_parcel_value_change').addClass('d-none');
             $('#case_nature_complaints').val('').trigger('change');
             $('#case_nature_select').val('').trigger('change');
             $('#case_nature_requests').val('').trigger('change');
@@ -2922,48 +3110,30 @@
         });
 
         $('#tracking').on('click', '.replacement_booked_image', function () {
-                window.open($(this).data('link'), '_blank');
+            window.open($(this).data('link'), '_blank');
 
-            });
+        });
 
-            $('#tracking').on('click', '.replacement_collected_image', function () {
-                window.open($(this).data('link'), '_blank');
+        $('#tracking').on('click', '.replacement_collected_image', function () {
+            window.open($(this).data('link'), '_blank');
 
-            });
+        });
 
-				{{--$.ajax({--}}
-				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}
-				{{--method: 'POST',--}}
-				{{--data: {--}}
-					{{--'_token': '{{ csrf_token() }}',--}}
-					{{--'id': id--}}
-				{{--}--}}
-				{{--})--}}
-				{{--.done(function(data) {--}}
-					{{--var details = '<table class="table table-sm table-bordered"><tbody>';--}}
+        $('#new_amount').on('keyup', function () {
+            
+            var new_amount = $(this).val();
 
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + data.junction_hub_1 + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((data.junction_hub_2) ? data.junction_hub_2 : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + data.expected_arrival_date + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + data.shipping_mode + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + data.transport_mode + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + data.transport_mode_vendor + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + data.seal_number + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((data.builty_number) ? data.builty_number : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + data.shipments_weight + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + data.actual_weight + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((data.vendor_weight) ? data.vendor_weight : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((data.weight_charges_per_kg) ? data.weight_charges_per_kg : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((data.extra_charges) ? data.extra_charges : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((data.total_weight_charges) ? data.total_weight_charges : '') + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + data.sender_name + '</td></tr>';--}}
-					{{--details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + data.receiver_name + '</td></tr>';--}}
+            if(new_amount == 0 && new_amount != '')
+            {
+                $('#cod_parcel_value_change').removeClass('d-none');
+            }
+            else{
+                $('#cod_parcel_value_change').addClass('d-none');
+            }
 
-					{{--details += '</tbody></table>';--}}
+        });
 
-					{{--$('#cargo_consignment_details .modal-body').html(details);--}}
+            
 
-					{{--$('#cargo_consignment_details').modal('show');--}}
-				{{--});--}}
 	</script>
 @endsection

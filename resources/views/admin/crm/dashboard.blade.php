@@ -112,7 +112,7 @@
                 
                                     <div class="col-4">
                                         <fieldset class="form-group">
-                                            <select name="search_case_nature" id="search_case_nature" class="form-control select2">
+                                            <select name="search_case_nature"  multiple="multiple" id="search_case_nature" class="form-control select2">
                                                 @foreach($case_natures as $case_nature)
                                                     <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
                                                 @endforeach
@@ -122,24 +122,22 @@
                 
                                     <div class="col-4">
                                         <fieldset class="form-group">
-                                            <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                            <select name="search_case_nature_type"  multiple="multiple" id="search_case_nature_type" class="form-control select2">
                                                 @foreach($case_nature_types as $case_nature_type)
                                                     <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
                                                 @endforeach
                                             </select>
                                         </fieldset>
                                     </div>
-                                    @if( session('role_id') == 1 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90]))
-                                        <div class="col-4">
-                                            <fieldset class="form-group">
-                                                <select name="search_agent" id="search_agent" class="form-control select2">
-                                                    @foreach($agents as $agent)
-                                                        <option value="{{$agent->id}}">{{$agent->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                    @endif
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_agent" id="search_agent" class="form-control select2">
+                                                @foreach($agents as $agent)
+                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-4">
                                         <fieldset class="form-group">
                                             <select name="shipment_status" id="search_shipment_status" class="form-control select2">
@@ -158,6 +156,15 @@
                                             </select>
                                         </fieldset>
                                     </div>
+                                    <div class="col-4">
+                                        <fieldset class="position-relative has-icon-left">
+                                            <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                                                   name="search_tracking" id="search_tracking">
+                                            <div class="form-control-position">
+                                                <i class="ft-search"></i>
+                                            </div>
+                                        </fieldset>
+                                    </div>
     {{--             
                                     <div class="col-4">
                                        
@@ -174,16 +181,16 @@
                                     </div>
                 --}}
                 
-                                    <div class="col-4">
-                                        {{-- <div class="form-group input-group">
+                                    {{-- <div class="col-4">
+                                        <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                             </div>
                                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
-                                        </div> --}}
-                                    </div>
+                                        </div>
+                                    </div> --}}
                 
                 
                                     <div class="col-4">
@@ -378,6 +385,86 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-re-open pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="re_open_rate_percentage">{{ $crm['re_open_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Re-open Ratio</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-launch-in-process pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="launch-in-process">{{ $crm['launch_in_process_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-In Process</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-launch-resolved pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="launch-resolved">{{ $crm['launch_resolved_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-Resolved</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="">
+                                    <div class="card bg-gradient-directional-launch-closed pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="launch-closed">{{ $crm['launch_closed_rate_percentage']}}</span>%
+                                                        </h3>
+                                                        <span>Launch-Closed</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             @include('admin.inc.messages')
 
@@ -418,45 +505,62 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Responsible Hub</th>
-                                    <th class="border-primary border-darken-1">Responsible Zone</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Last Status Date</th>
+                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last status by</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
-                                    <th class="border-primary border-darken-1">COD Value</th>
                                     <th class="border-primary border-darken-1">Description</th>
-                                    <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
-                                    <th class="border-primary border-darken-1">Sales Person</th>
-                                    <th class="border-primary border-darken-1">KAE</th>
-                                    <th class="border-primary border-darken-1">Segment</th>
-                                    <th class="border-primary border-darken-1">Key account category</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Launched By</th>
-                                    <th class="border-primary border-darken-1">Launched By Type</th>
-                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    {{-- <th class="border-primary border-darken-1">Manual Tagged To</th>
-                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
-                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
-                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
-                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1"><!-- Launched To Today (TAT) --> Aging</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Sub Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
+                                    <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
-                                    <th class="border-primary border-darken-1">Address</th>
-                                    {{-- <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
                                     <th class="border-primary border-darken-1">Valid Date</th>
-                                    <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
-                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
-                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">COD Value</th>
+                                    <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    <th class="border-primary border-darken-1">Segment</th>
+                                    <th class="border-primary border-darken-1">Weight</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Sales Person</th>
+                                    <th class="border-primary border-darken-1">Key account category</th>
+                                    <th class="border-primary border-darken-1">KAE</th>
+                                    <th class="border-primary border-darken-1">Launched By</th>
+                                    <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Channel</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
+                                    <th class="border-primary border-darken-1">Last Rider</th>
+                                    <th class="border-primary border-darken-1">Last Reason</th>
+
+                                    
+                                    
+                                    {{-- <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
+                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
+                                    
+                                   
+                                    
+                                    
+                                    {{-- <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
+                                    
+                                    
+                                    
+                                    
+                                    
                                     {{-- <th class="border-primary border-darken-1"></th> --}}
                                 </tr>
                                 </thead>
@@ -775,6 +879,23 @@
             background-repeat: repeat-x;
         }
 
+        .bg-gradient-directional-re-open {
+            background-image: linear-gradient(45deg, #3421c7, #7a77d7);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-in-process {
+            background-image: linear-gradient(45deg, #21abc7, #77bcd7);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-resolved {
+            background-image: linear-gradient(45deg, #029c07, #78d777);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-launch-closed {
+            background-image: linear-gradient(45deg, #ba0630, #de7575);
+            background-repeat: repeat-x;
+        }
+
         .bg-gradient-directional-out_for_delivery {
             background-image: linear-gradient(45deg, #ff9819, #fff824);
             background-repeat: repeat-x;
@@ -883,9 +1004,21 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#search_tracking').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function () {
+                if (this.value.length == 0 || this.value.length >= 6) {
+                    table.draw();
+                }
+            });
             //Dropdown
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Destination',
@@ -906,12 +1039,12 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_case_nature').select2({
                 placeholder:'Search Case Nature',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_case_nature_type').select2({
                 placeholder:'Search Case Nature Type',
                 width:'100%',
                 allowClear:true
@@ -996,7 +1129,6 @@
                     }
                 }).done(function (data) {
                     if(data.status){
-                        console.log(data.card_data);
                         $('#launched').text(data.card_data.launched);
                         $('#in_process').text(data.card_data.in_process);
                         $('#resolved').text(data.card_data.resolved);
@@ -1008,6 +1140,10 @@
                         $('#closed_rate_percentage').text(data.card_data.closed_rate_percentage);
                         $('#in_process_ratio').text(data.card_data.in_process_ratio);
                         $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);
+                        $('#re_open_rate_percentage').text(data.card_data.re_open_rate_percentage);
+                        $('#launch-in-process').text(data.card_data.launch_in_process_rate_percentage);
+                        $('#launch-resolved').text(data.card_data.launch_resolved_rate_percentage);
+                        $('#launch-closed').text(data.card_data.launch_closed_rate_percentage);
                     }else{
                         $('#launched').text(0);
                         $('#in_process').text(0);
@@ -1020,6 +1156,10 @@
                         $('#closed_rate_percentage').text(0);
                         $('#in_process_ratio').text(0);
                         $('#in_process_ratio_percentage').text(0);
+                        $('#re_open_rate_percentage').text(0);
+                        $('#launch-in-process').text(0);
+                        $('#launch-resolved').text(0);
+                        $('#launch-closed').text(0);
                     }
                 });
             }
@@ -1041,7 +1181,7 @@
                         success: function (result) {
                             head = [];
 
-                            head.push('S No.');
+                            head.push('S. No.');
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Shipper Name');
@@ -1049,45 +1189,45 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Zone');
-                            head.push('Responsible Hub');
-                            head.push('Responsible Zone');
+                            head.push('Arrival Date');
+                            head.push('Arrival to Today (TAT)');
                             head.push('Shipment Status');
                             head.push('Status');
-                            head.push('Arrival Date');
                             head.push('Last Status Date');
+                            head.push('Last status to Today (TAT)');
+                            head.push('Last status by');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
-                            head.push('COD Value');
                             head.push('Description');
-                            head.push('Channel');
-                            head.push('Shipping Mode');
-                            head.push('Sales Person');
-                            head.push('KAE');
-                            head.push('Segment');
-                            head.push('Key account category');
-                            head.push('Agent');
-                            head.push('Launched By');
-                            head.push('Launched By Type');
-                            head.push('Tagged (Admin/Department)');
-                            // head.push('Manual Tagged To');
-                            // head.push('Tagged At');
-                            head.push('Auto Tagged To KAE');
-                            head.push('Auto Tagged To Operation');
-                            
                             head.push('Launched Date');
+                            head.push('Launched To Today (TAT)');
                             head.push('Complaint Re-Open Date');
+                            head.push('Responsible Hub');
+                            head.push('Sub Hub');
+                            head.push('Responsible Zone');
+                            head.push('Agent');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
-                            head.push('Address');
-                            // head.push('Address Latitude');
-                            // head.push('Address Longitude');
                             head.push('Valid Date');
-                            head.push('Launched To Today (TAT)');
-                            head.push('Arrival to Today (TAT)');
-                            head.push('Last status to Today (TAT)');
+                            head.push('COD Value');
+                            head.push('Shipping Mode');
+                            head.push('Segment');
+                            head.push('Weight');
+                            head.push('Address');
+                            head.push('Sales Person');
+                            head.push('Key account category');
+                            head.push('KAE');
+                            head.push('Launched By');
+                            head.push('Launched By Type');
+                            head.push('Channel');
+                            head.push('Auto Tagged To KAE');
+                            head.push('Auto Tagged To Operation');
+                            head.push('Tagged (Admin/Department)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
                             head.push('Last Comment Date');
+                            head.push('Last Rider');
+                            head.push('Last Reason');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -1100,46 +1240,45 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.zone);
-                                row.push(values.responsible_hub);
-                                row.push(values.responsible_zone);
+                                row.push(values.arrival);
+                                row.push(values.arrival_today);
                                 row.push(values.status);
                                 row.push(values.crm_request_status);
-                                row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.last_status_today);
+                                row.push(values.last_status_updated_by);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
-                                row.push(values.cod_value);
                                 row.push(values.description);
-                                row.push(values.channel);
-                                row.push(values.shipping_mode);
-                                row.push(values.sale_person);
-                                row.push(values.kae);
-                                row.push(values.segment);
-                                row.push(values.shipper_category);
-                                row.push(values.agent);
-                                row.push(values.launched_by_name);
-                                row.push(values.added_by);
-                                row.push(values.tagged);
-                                // row.push(values.tagged_to_manual);
-                                // row.push(values.tagged_date);
-                                row.push(values.tagged_to_kae);
-                                row.push(values.tagged_to_operation);
-                                
                                 row.push(values.created_at);
+                                row.push(values.current_tat); 
                                 row.push(values.reopen_date);
+                                row.push(values.responsible_hub);
+                                row.push(values.sub_hub);
+                                row.push(values.responsible_zone);
+                                row.push(values.agent);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
-                                row.push(values.address);
-                                // row.push(values.address_latitude);
-                                // row.push(values.address_longitude);
                                 row.push(values.valid_date);
-                                row.push(values.current_tat);
-                                row.push(values.arrival_today);
-                                row.push(values.last_status_today);
+                                row.push(values.cod_value);
+                                row.push(values.shipping_mode);
+                                row.push(values.segment);
+                                row.push(values.actual_weight);
+                                row.push(values.address); 
+                                row.push(values.sale_person);
+                                row.push(values.shipper_category);
+                                row.push(values.kae);
+                                row.push(values.launched_by_name);
+                                row.push(values.tagged);
+                                row.push(values.channel);
+                                row.push(values.tagged_to_kae);
+                                row.push(values.tagged_to_operation);
+                                row.push(values.added_by);
                                 row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment);
                                 row.push(values.last_comment_date);
-
+                                row.push(values.last_updated_rider);
+                                row.push(values.last_rider_reason);
                                 body.push(row);
                             });
                         },
@@ -1395,7 +1534,7 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        // d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
@@ -1405,6 +1544,7 @@
                         d.search_agent = $('#search_agent').val();
                         d.search_shipment_status = $('#search_shipment_status').val();
                         d.avg_tat = $('#avg_tat').val();
+                        d.search_tracking = $('#search_tracking').val();
                         d.from_date = $('input[name="from_date_formatted"]').val();
                         d.to_date = $('input[name="to_date_formatted"]').val();
                         d.search_request = $('#search_request_div').val();
@@ -1422,42 +1562,45 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
-                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
-                    {data: 'crm_request_status', name: 'crs.name', class: 'align-middle crm_request_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
+                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
+                    {data: 'crm_request_status', name: 'crs.id', class: 'align-middle crm_request_status'},
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false},
+                    {data: 'last_status_updated_by', name: 'last_status_upd_by.name', class: 'align-middle last_status_updated_by', orderable: false, searchable: false}, // last status by
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
-                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
+                    {data: 'case_nature_type', name: 'crcnt.id', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
-                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
-                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
-                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
-                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'},
-                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
-                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
-                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
-                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
-                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false},
+                    {data: 'sub_hub', name: 'ca.name', class: 'align-middle sub_hub',orderable: false}, //sub hub
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false},
+                    {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
-                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
-                    {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
-                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
-                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false},
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'},
+                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
+                    {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
+                    {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
+                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
+                    {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
-                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
+                    {data: 'last_updated_rider', name: 'last_rider_status_upd_by.name', class: 'align-middle last_updated_rider'}, 
+                    {data: 'last_rider_reason', name: 'ssr.name', class: 'align-middle last_rider_reason'},
                 ],
                 rowCallback: function(row, data, index) {
                     if (data.crm_request_status_id != 4) 
@@ -1499,7 +1642,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub') || $(header).is('.responsible_zone') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
@@ -1581,33 +1724,33 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data2 = $.map({!! $case_nature !!}, function (obj) {
+                    var data22 = $.map({!! $case_natures !!}, function (obj) {
                         obj.id = obj.id;
 
                         return obj;
                     });
 
-                    var data2 = $.map({!! $case_nature !!}, function (obj) {
+                    var data22 = $.map({!! $case_natures !!}, function (obj) {
                         obj.text = obj.name;
 
                         return obj;
                     });
 
                     $('#case_nature').prepend('<option value="" selected></option>').select2({
-                        data:data2,
+                        data:data22,
                         placeholder: "Select Case Nature",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data3 = $.map({!! $case_nature_type !!}, function (obj) {
+                    var data3 = $.map({!! $case_nature_types !!}, function (obj) {
                         obj.id = obj.id;
 
                         return obj;
                     });
 
-                    var data3 = $.map({!! $case_nature_type !!}, function (obj) {
+                    var data3 = $.map({!! $case_nature_types !!}, function (obj) {
                         obj.text = obj.type;
 
                         return obj;
@@ -1956,34 +2099,34 @@
             });
 
             //Selectize
-            var select = $('#track_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
+            // var select = $('#track_form .tracking_numbers').selectize({
+            //     placeholder: 'Tracking Number(s)',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
 
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                },
-            });
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     },
+            // });
 
 
             $('#track_form').bind('submit',function (e) {

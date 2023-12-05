@@ -780,7 +780,10 @@ class V2AdminPickupsController extends Controller
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
             }
             $user = $shipment->user;
-            if ($user->sub_segment_id == 2) {
+            $by_passed_users_setting = GlobalSettings::where('type', 'bypass_weight_setting')->first();
+            $bypassed_users = $by_passed_users_setting ? explode(',', $by_passed_users_setting->text) : [];
+            
+            if ($user->sub_segment_id == 2 || (in_array($user->id, $bypassed_users))) {
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {

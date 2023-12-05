@@ -103,6 +103,9 @@ use App\Http\Models\Holiday;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\Notification;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
 use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
@@ -8552,7 +8555,7 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function sms_notification_return_delivered_to_shipper_index()
+    public function sms_notifications_limit_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 655);
 
@@ -8579,13 +8582,49 @@ class GlobalSettingsController extends Controller
             $bypass_excluded_shippers = $bypass_excluded_shippers->first();
             $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
         }
+        $notification_details = array();
+        $shipper_notification_ids = [11, 12, 132];
+        foreach ($shipper_notification_ids as $notification_id){
+            $details = array();
+            $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->where('notification_id', $notification_id);
+
+            if($notification_settings->exists()){
+                $notification_setting = $notification_settings->first();
+                $details['id'] = $notification_setting->notification_id;
+                $details['name'] = $notification_setting->notification_name;
+                $details['shipper_toggle'] = $notification_setting->shipper_toggle;
+                $notification_setting_shippers = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id);
+                if($notification_setting_shippers->exists()){
+                    $notification_setting_shippers = $notification_setting_shippers->pluck('shipper_id')->toArray();
+                    $details['shippers'] = $notification_setting_shippers;
+                }
+                else{
+                    $details['shippers'] = null;
+                }
+
+                $notification_details[] = $details;
+
+            }
+            else{
+                $notification_setting = Notification::find($notification_id);
+                if($notification_setting){
+                    $details['id'] = $notification_setting->id;
+                    $details['name'] = $notification_setting->name;
+                    $details['shipper_toggle'] = 1;
+                    $details['shippers'] = null;
+                    $notification_details[] = $details;
+                }
+            }
+        }
 
         $shippers = User::select('id', 'name')->where('status', 3)->get();
 
-        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers]);
+        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'notification_details' => $notification_details]);
     }
 
-    public function sms_notification_return_delivered_to_shipper_update(Request $request)
+    public function sms_notifications_limit_update(Request $request)
     {
         if ($request->has('all_shipper_toggle'))
         {
@@ -8634,6 +8673,55 @@ class GlobalSettingsController extends Controller
                 $settings->text = $users;
                 $settings->setting_value = 0;
                 $settings->save();
+            }
+        }
+
+        if(count($request->notifications) > 0){
+            NotificationSetting::truncate();
+            NotificationSettingShipper::truncate();
+            foreach ($request->notifications as $notification){
+                $notification_setting = new NotificationSetting();
+                $notification_setting->notification_id = $notification['id'];
+                $shippers = null;
+                $toggle = 0;
+
+                if(array_key_exists('all_shipper_toggle', $notification)) {
+                    if ($notification['all_shipper_toggle'] == 'on'){
+                        $toggle = 1;
+                    }
+                }
+
+                if($toggle == 1){
+                    $notification_setting->shipper_toggle = 1;
+
+                    if (array_key_exists('excluded_users', $notification)) {
+                        if (count($notification['excluded_users']) > 0) {
+                            $shippers = $notification['excluded_users'];
+                        }
+                    }
+                }
+                else{
+                    $notification_setting->shipper_toggle = 0;
+
+                    if(array_key_exists('only_users', $notification)){
+                        if(count($notification['only_users']) > 0){
+                            $shippers = $notification['only_users'];
+                        }
+                    }
+                }
+                $notification_setting->updated_by = Auth::id();
+                $notification_setting->save();
+
+                if($shippers != null){
+                    if(count($shippers) > 0){
+                        foreach ($shippers as $shipper_id){
+                            $notification_setting_shipper = new NotificationSettingShipper();
+                            $notification_setting_shipper->notification_setting_id = $notification_setting->id;
+                            $notification_setting_shipper->shipper_id = $shipper_id;
+                            $notification_setting_shipper->save();
+                        }
+                    }
+                }
             }
         }
 
@@ -8923,5 +9011,83 @@ class GlobalSettingsController extends Controller
         $hubs = City::whereIn('id',$hub_id)->select('name')->get()->pluck('name');
 
         return response(['hubs'=>$hubs]);
+    }
+
+    public function parcel_value_bypass_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 707);
+
+        $shippers = array();
+        $parcel_value_bypass_accounts = array();
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.settings.parcel_value_bypass_users')->with(['shippers' => $parcel_value_bypass_accounts, 'users' => $users]);
+    }
+
+    public function parcel_value_bypass_setting_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'parcel_value_bypass_users';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
+    public function bypass_weight_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 706);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+        $bypassed_shippers = array();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $bypassed_shippers = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.bypass_weight')->with(['shippers' => $shippers, 'bypassed_shippers'=> $bypassed_shippers]);
+    }
+
+    public function bypass_weight_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'bypass_weight_setting';
+                }
+                $settings->setting_value = 1;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
 }

@@ -76,7 +76,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         {{--<th class="border-primary border-darken-1">Consignee Contact</th>--}}
 {{--                        <th class="border-primary border-darken-1">Consignee Address</th>--}}
-{{--                        <th class="border-primary border-darken-1">Collection Amount</th>--}}
+                       <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1"></th>
@@ -111,7 +111,7 @@
                             </div>
                             <hr>
                             <div class="row justify-content-center">
-                                <div class="col-8">
+                                <div class="col-10">
                                     <fieldset class="form-group">
                                         <select name="case_nature_select" id="case_nature_select" class="form-control select2">
                                             @foreach($case_nature as $nature)
@@ -164,6 +164,8 @@
                                             <input type="text" name="alternate_phone" class="form-control" id="alternate_phone" placeholder="Enter Alternate Number" data-rule-required="true" data-msg-required="Alternate Number is required">
                                         </fieldset>
                                     </div>
+
+                                    
                                     {{-- <div class="col-6 d-none" id="cod_amount_input">
                                         <fieldset class="form-group">
                                             <input type="text" name="cod_amount" class="form-control" id="cod_amount" placeholder="Enter COD Amount" data-rule-required="true" data-msg-required="COD Amount is required">
@@ -178,16 +180,53 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-6">
+
+                                    <div  class="col-10 d-none" id="cod_change">
+                                        <div class="row justify-content-center">
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Old COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="old_amount" id="old_amount" readonly class="form-control rounded-right">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-6">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">New COD Amount</span>
+                                                    </div>
+        
+                                                    <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-6 d-none" id="cod_parcel_value_change">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Enter Parcel Value</span>
+                                                    </div>
+        
+                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-12">
+                                                <fieldset class="form-group">
+                                                    <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                                </fieldset>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-10">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                            <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description*"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
                             </div>
                             <div class="feedback d-none" id="request_feedback">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="feedback_channel_request" id="feedback_channel_request" class="form-control select2">
                                                 @foreach($case_nature_channels as $channel1)
@@ -196,7 +235,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
                                         </fieldset>
@@ -209,7 +248,7 @@
                                 <input type="hidden" name="complaint_id" id="complaint_id">
                                 <input type="hidden" name="channel_id" id="channel_id">
                                 <div class="row justify-content-center">
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="case_nature_tclaim" id="case_nature_claim" class="form-control select2">
                                                 @foreach($case_nature_type_claims as $claim)
@@ -218,7 +257,7 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <select name="claim_channel" id="claim_channel" class="form-control select2">
                                                 @foreach($case_nature_channels as $channel1)
@@ -227,12 +266,12 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8" id="claim_product_cost_div">
+                                    <div class="col-10" id="claim_product_cost_div">
                                         <fieldset class="form-group">
                                             <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 d-none" id="receiving_sheet_div">
+                                    <div class="col-10 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
 {{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
                                             <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
@@ -240,19 +279,19 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left" id="claim_product_picture_div">
+                                    <div class="col-10 text-left" id="claim_product_picture_div">
                                         <fieldset class="form-group">
                                             <label for="product_picture"><b>Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8 text-left" id="claim_invoice_picture_div">
+                                    <div class="col-10 text-left" id="claim_invoice_picture_div">
                                         <fieldset class="form-group">
                                             <label for="invoice_picture"><b>Invoice Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
                                     </div>
-                                    <div class="col-8">
+                                    <div class="col-10">
                                         <fieldset class="form-group">
                                             <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
                                         </fieldset>
@@ -423,6 +462,7 @@
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
+            
             // $('#cod_amount').inputmask({
             //     'alias': 'integer',
             //     'allowMinus': false,
@@ -437,6 +477,19 @@
             //         $('#datatable_filter_btn').attr('disabled', true);
             //     }
             // });
+
+            $('.new_amount').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+            $('.cod_parcel_value').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+            
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
 
 
@@ -999,7 +1052,7 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     // {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     // {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    // {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -1194,14 +1247,35 @@
                     // $('#cod_amount_input').addClass('d-none');
 
                 }
-                // else if($(this).val() == 12){
-                //     $('#cod_amount_input').removeClass('d-none');
-                //     $('#alternate_phone_input').addClass('d-none');
-
-                // }
                 else{
                     // $('#cod_amount_input').addClass('d-none');
                     $('#alternate_phone_input').addClass('d-none');
+
+                }
+
+                if($(this).val() == 12){
+                    if(selected_rows.length >1)
+                    {
+                        toastr.error('Multiple Shipment for COD Change Amount is not allowed', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        $(this).val('').trigger('change');
+                    }
+                    else{
+                        table.rows().nodes().each(function (index) {
+                            var row = table.row(index);
+                            if ($(row.node()).hasClass('selected')) {
+                                var old_amount = $(row.node()).find('td.amount').text();
+                                $('#old_amount').val(old_amount);
+                            }
+                        });
+                        $('#cod_change').removeClass('d-none');
+                    }
+                   
+                }
+                else{
+                    $('#cod_change').addClass('d-none');
 
                 }
             });
@@ -1459,19 +1533,162 @@
                         }
                         if (nature_flag) {
                             $('#AddNewRequest').attr('disabled', true);
-                            $.ajax({
-                                url: '{!! route('admin.crm.request.add') !!}',
-                                method: 'POST',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'shipment_ids': selected_rows,
-                                    'case_nature_id': case_nature_id,
-                                    'complaint_id': case_nature_complaint_id,
-                                    'channel_id': case_nature_channel_id,
-                                    'description': service_description
-                                }
-                            })
+                            var complaint_id = $('#case_nature_requests').val();
+                        
+                            if(complaint_id == 12)
+                            {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Launching Request.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change COD!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        swal.close();
+                                        
+                                        var is_zero_cod = 0;
+                                        console.log($('#new_amount').val());
+                                        if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
+                                        {
+                                            console.log('is_zero_cod = 1');
+                                            is_zero_cod = 1;
+                                        }
+
+                                        $.ajax({
+                                            url: '{!! route('admin.crm.request.add') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                '_token': '{{ csrf_token() }}',
+                                                'shipment_ids': selected_rows,
+                                                'case_nature_id': case_nature_id,
+                                                'complaint_id': case_nature_complaint_id,
+                                                'channel_id': case_nature_channel_id,
+                                                'description': service_description,
+                                                'cod_new_amount': $('#new_amount').val(),
+                                                'cod_remarks': $('#cod_remarks').val(),
+                                                'is_zero_cod': is_zero_cod,
+                                                'cod_parcel_value': $('#cod_parcel_value').val(),
+                                                'is_automated_cod_change': 1,
+                                            }
+                                        })
+                                        .done(function (data) { 
+                                            if (data.status) {
+                                                if (data.flag) {
+                                                    var html = '';
+
+                                                    $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                        html += tracking_number + '<br/>';
+                                                    });
+
+                                                    if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                    content = document.createElement('div');
+                                                    content.innerHTML = html;
+
+                                                    swal({
+                                                        title: 'Request / Complaint Cannot Be Lodged!',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'Close',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    });
+                                                } else {
+                                                    toastr.success(data.success, 'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                                }
+                                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+
+                                            table.button('.shipper_recall').disable();
+                                            table.button('.print').disable();
+
+                                            selected_rows = [];
+
+                                            table.rows().deselect();
+
+                                            table.draw('false');
+
+
+                                            $('#AddRequestModal').modal('hide');
+                                            $('#AddNewRequest').attr('disabled',false);
+                                        });
+                                    }
+                                    else{
+                                        $('#AddNewRequest').attr('disabled',false);
+                                    }
+                                });
+                            }
+                            else{
+
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Launching Request.',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+
+                                $.ajax({
+                                    url: '{!! route('admin.crm.request.add') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'shipment_ids': selected_rows,
+                                        'case_nature_id': case_nature_id,
+                                        'complaint_id': case_nature_complaint_id,
+                                        'channel_id': case_nature_channel_id,
+                                        'description': service_description
+                                    }
+                                })
                                 .done(function (data) {
+                                    swal.close();
                                     if (data.status) {
                                         if (data.flag) {
                                             var html = '';
@@ -1533,6 +1750,9 @@
                                     $('#AddRequestModal').modal('hide');
                                     $('#AddNewRequest').attr('disabled', false);
                                 });
+
+                            }
+                            
                         }
                     } else if (case_nature_id == 3) {
                         var feedback_flag = true;
@@ -1797,6 +2017,7 @@
             });
             $('#AddRequestModal').on('hide.bs.modal', function (e) {
                 $('#add_request_form')[0].reset();
+                $('#cod_parcel_value_change').addClass('d-none');
                 $('#case_nature_complaints').val('').trigger('change');
                 $('#case_nature_select').val('').trigger('change');
                 $('#case_nature_requests').val('').trigger('change');
@@ -2029,18 +2250,32 @@
            $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
        });
        function validateRemarks() {
-        var remarks = $('#cancel_remarks').val().trim();
+            var remarks = $('#cancel_remarks').val().trim();
 
-        if (remarks === '') {
-            $('#cancel_remarks').addClass('is-invalid');
-            $('#cancel_remarks_error').text('Remark is required').addClass('cancel-error-message');
-            return false;
-        } else {
-            $('#cancel_remarks').removeClass('is-invalid');
-            $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
-            return true;
+            if (remarks === '') {
+                $('#cancel_remarks').addClass('is-invalid');
+                $('#cancel_remarks_error').text('Remark is required').addClass('cancel-error-message');
+                return false;
+            } else {
+                $('#cancel_remarks').removeClass('is-invalid');
+                $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
+                return true;
+            }
         }
-    }
+
+        $('#new_amount').on('keyup', function () {
+            
+            var new_amount = $(this).val();
+
+            if(new_amount == 0 && new_amount != '')
+            {
+                $('#cod_parcel_value_change').removeClass('d-none');
+            }
+            else{
+                $('#cod_parcel_value_change').addClass('d-none');
+            }
+
+        });
 
     });
     </script>

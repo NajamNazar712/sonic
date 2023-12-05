@@ -85,6 +85,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
 use App\RouteLocations;
+use GuzzleHttp\Client;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -102,6 +103,7 @@ use App\Http\Models\UserDefaultBankDuration;
 use Auth;
 use App\Http\Models\Segment;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -141,7 +143,6 @@ class ShipperDashboardController extends Controller
 
             $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
             $special_shippers = explode(',', $shippers->text);
-       
 
             if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
@@ -235,13 +236,20 @@ class ShipperDashboardController extends Controller
                         $kam[] = $detail;
                     }
                 }
+                $route_ids = array();
+                $routes = array();
+                $riders = array();
                 $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-                $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
-                $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                if((count($pickup_address_ids) > 0) && (count($pickup_address_ids) < 100)){
+                    $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
+                    $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+                    $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
+                        ->wherein('riders.route_id',$routes)
+                        ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+                }
 
-                $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
-                ->wherein('riders.route_id',$routes)
-                ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+
+
 
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
@@ -1114,9 +1122,37 @@ class ShipperDashboardController extends Controller
 
     //User Profile
 
+    function user_payment_cycles_days($user){
+        $payment_cycle_days = explode(',', $user->payment_cycle_days);
+        $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
+        $fort_month = [3, 6]; // Monthly and Fortnight.
+        $days = [];
+    
+        if (isset($user->payment_cycle->id)) {
+            if (in_array($user->payment_cycle->id, $weekly)) {
+                foreach ($payment_cycle_days as $payment_cycle_day) {
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $dayName = $date->format('l');
+                    $days[] = $dayName;
+                }
+            } else if (in_array($user->payment_cycle->id, $fort_month)) {
+                $days[] = "Every " . implode(', ', $payment_cycle_days) . " of the month";
+            } else {//Daily
+                $days[] = 'Daily';
+            }
+        } else {
+            $days[] = 'Payment Cycle Not Defined'; 
+        }
+    
+        $days = implode(', ', $days);
+    
+        return $days;
+    }
+
     public function userProfile()
     {
         $user = User::find(session('user_id'));
+        $payment_cycle_days = $this->user_payment_cycles_days($user);
         $product = Product::find($user->product_id);
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
@@ -1126,7 +1162,7 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function verifyPincode(Request $request)
@@ -1196,7 +1232,7 @@ class ShipperDashboardController extends Controller
 
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name'])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -1212,22 +1248,45 @@ class ShipperDashboardController extends Controller
             $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
+            $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             if ($pickup->default_address == 1) {
-                $dropdown = 'Default Address';
+                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
+            }
+            else{
+                $dropdown .= $default_button;
+            }
+
+            if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
+                $dropdown .= $edit_button;
+            }
+            if ($pickup->status == 0) {
+                $dropdown .= $enable_button;
             }
             else {
-                if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
-                    $dropdown .= $edit_button;
+                if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
+                    $dropdown .= $disable_button;
                 }
-                if ($pickup->status == 0) {
-                    $dropdown .= $enable_button;
-                }
-                else {
-                    $dropdown .= $default_button;
+            }
 
-                    if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
-                        $dropdown .= $disable_button;
+
+            $omni_user = false;
+            $settings = GlobalSettings::where('type', 'omni_users');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if ($settings->text != NULL) {
+                    $omni_accounts = array_map('intval', explode(',', $settings->text));
+                    if (in_array($pickup->user_id, $omni_accounts)) {
+                        $omni_user = true;
                     }
+                }
+            }
+
+            if($omni_user){
+                if((!$pickup->default_return_address) && ($pickup->status == 1)){
+                    $dropdown .= $return_default_button;
+                }
+                elseif ($pickup->default_return_address){
+                    $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
                 }
             }
 
@@ -1286,6 +1345,20 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already default Pickup Address"]);
                 }
 
+            }
+            else if ($status == 'return_default')
+            {
+                if($shipping_info->default_return_address == 0)
+                {
+                    $shipping_info->default_return_address = 1;
+                    $shipping_info->save();
+                    UserShippingInfo::where('user_id', $shipping_info->user_id)->where('id', '!=', $pickup_id)->update(['default_return_address' => 0]);
+                    return response()->json(['status'=>1,'success'=>"This Address is now default Return Address"]);
+                }
+                else
+                {
+                    return response()->json(['status'=>0,'error'=>"This Address is already default Return Address"]);
+                }
             }
         }else{
             return response()->json(['status'=>0,'error'=>"Pickup Address doesn\'t exist!"]);
@@ -2136,6 +2209,77 @@ class ShipperDashboardController extends Controller
         $visit->save();
 
         return back()->with(['success'=>'Visit Rated Successfully']);
+    }
+
+    public function mentor_health_index()
+    {
+        $details = User::join('cities as c','c.id','users.city_id')
+        ->where('users.id',session('user_id'))
+        ->select('users.id as user_id','users.name as company_name','users.email as company_email',
+            'users.phone as company_phone','users.city_id as company_city_id','c.name as company_city');
+        if ($details->exists())
+        {
+            $details = $details->first();
+        }
+        return view('client.mentor_health.mentor_health')->with(['details' => $details]);
+    }
+
+    public function mentor_health_add_request(Request $request)
+    {
+        if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
+        {
+            if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
+                try
+                {
+                    $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
+
+                    $verify = true;
+                    if(App::environment() == 'local')
+                        $verify = false;
+
+                    $client = new Client([
+                        'verify' => $verify, // Disable SSL verification
+                    ]);
+
+                    $postData = [
+                        'full_name' => $request->company_name,
+                        'email' => $request->company_email,
+                        'phone' => $request->company_phone,
+                        'city_name' => $request->company_city,
+                    ];
+
+                    $response = $client->post($url, [
+                        'json' => $postData, // Send data as JSON
+                    ]);
+
+                    $statusCode = $response->getStatusCode();
+                    $responseBody = $response->getBody()->getContents();
+
+                    if ($statusCode === 200) {
+                        $responseData = json_decode($responseBody, true);
+                        if (stripos($responseBody, "This company already exists") !== false) {
+                            return back()->with(['info' => $responseData['Message']]);
+                        }
+                        else
+                        {
+                            return back()->with(['success' => $responseData['Message']]);
+                            //todo need to make a migration in which mentor health data will be store for journey
+                        }
+
+                    } else {
+                        return back()->with(['error' => 'API request failed']);
+                    }
+                }
+                catch (\Throwable  $e)
+                {
+                    return back()->with(['error' => $e->getMessage()]);
+                }
+            }
+        }
+        else
+        {
+            return back()->with(['error' => 'please provide the complete details !']);
+        }
     }
 
     

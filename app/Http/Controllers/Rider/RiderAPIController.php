@@ -165,10 +165,12 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\NotificationSetting;
 use App\ReturnDeliveredToShipperSms;
 use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\Http\Traits\LastMileAppReportTrait;
+use App\Jobs\LastMileAppReport;
 
 class RiderAPIController extends Controller
 {
@@ -9424,6 +9426,16 @@ class RiderAPIController extends Controller
             try {
                 //code...
                 DB::beginTransaction();
+
+                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
+                ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
+                ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
+                ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
+                ->first();
+
+                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
+                
                 $rider_id = $request->rider_id;
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
@@ -9559,8 +9571,10 @@ class RiderAPIController extends Controller
                                         $shipment->amount = round($request->total_cod_amount);
                                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                         ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                    
+                                        //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                        LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
 
-                                        $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 14, $added_at, $rider_delivery, 2);
                                     }
                                 } elseif ($shipment->booking_type_id == 2) {
                                     $shipment->shipper_status_id = 30;
@@ -9569,13 +9583,15 @@ class RiderAPIController extends Controller
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
 
-                                    $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 30, $added_at, $rider_delivery, 2);
-
                                     $details = ['tracking_number' => $shipment->tracking_number, 'shipper_number_1' => $shipment->user->phone, 'shipper_number_2' => $shipment->user->phone2, 'name' => $shipment->consignee_name, 'consignee_number_1' => $shipment->consignee_phone_number_1, 'consignee_number_2' => $shipment->consignee_phone_number_2, 'shipper_name' => $shipment->user->name];
                                     NotificationsController::send(183, $details);
                                     NotificationsController::send(184, $details);
                                     $rider_delivery->rider_status_id = 30;
-                                } else if ($shipment->booking_type_id == 3) {
+
+                                    //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
+                                    LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
+                                }
+                                else if ($shipment->booking_type_id == 3) {
                                     $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
                                     $item_ids = explode(',', $res);
                                     $total_cod = 0;
@@ -9594,20 +9610,20 @@ class RiderAPIController extends Controller
                                         ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                         $rider_delivery->rider_status_id = 36;
 
-                                        $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 36, $added_at, $rider_delivery, 2);
+                                        //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
+                                        LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
                                     } else {
                                         Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                         ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                         $rider_delivery->rider_status_id = 37;
 
-                                        $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 37, $added_at, $rider_delivery, 2);
+                                        //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,37,$added_at,$rider_delivery,2);
+                                        LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,37,$added_at,$rider_delivery,2);
                                     }
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
                                 } else if ($shipment->booking_type_id == 4) {
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-
-                                    $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 14, $added_at, $rider_delivery, 2);
-
+                                
                                     if ($shipment->charges_mode_id == 1) {
                                         $shipment->shipper_status_id = 14;
                                         $shipment->consignee_status_id = 14;
@@ -9619,7 +9635,11 @@ class RiderAPIController extends Controller
                                         $shipment->received_amount = $shipment->amount;
                                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                     }
-                                } else {
+
+                                    //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                    LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                }
+                                else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
@@ -9630,8 +9650,8 @@ class RiderAPIController extends Controller
                                         self::delivery_packaging_material_update($shipment->tracking_number);
                                     }*/
 
-                                    $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, 14, $added_at, $rider_delivery, 2);
-
+                                    //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                    LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
                                 }
                                 $shipment->delivery_in_route = 0;
                                 $shipment->save();
@@ -9675,7 +9695,7 @@ class RiderAPIController extends Controller
                     $delivery_note_data->save();
                 }
                 DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
             } catch (\Throwable $th) {
                 DB::rollback();
 
@@ -12067,9 +12087,9 @@ class RiderAPIController extends Controller
     }
 
 
+
     public function shipment_undelivered_v3(Request $request)
     {
-
         $rules = [
             'added_at' => ['required'],
             'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
@@ -12102,6 +12122,15 @@ class RiderAPIController extends Controller
 
                 $rc_flag = false;
                 $rider_id = $request->rider_id;
+
+                $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
+                ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
+                ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
+                ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
+                ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
+                ->first();
+
+                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
                 //$added_at = $request->added_at;
@@ -12256,8 +12285,8 @@ class RiderAPIController extends Controller
                                                 $rider_delivery_note_status->save();
                                             }
 
-                                            $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, $request->shipper_status_id, $added_at, $rider_delivery, 2);
-
+                                            //$this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, $request->shipper_status_id, $added_at, $rider_delivery, 2);
+                                            LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,$request->shipper_status_id,$added_at,$rider_delivery,2);
                                             if ($request->shipper_status_id != 7) {
                                                 NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                             }
@@ -12298,8 +12327,10 @@ class RiderAPIController extends Controller
                     $message = 'Shipment is not for Out for Delivery';
                 }
                 DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
-            } catch (\Throwable $th) {
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
+            }
+            catch (\Throwable $th)
+            {
                 DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
@@ -13087,13 +13118,18 @@ class RiderAPIController extends Controller
                 //                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
 //                    continue;
 //                }
+
+                
+
+                
+
+
                 $information = array();
 
                 $information['delivery_note_id'] = $delivery_note->id;
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
-
                 $information['pending_shipment_count'] = 0;
                 $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
                 if ($pending_shipments_count == 0) {
@@ -13194,6 +13230,36 @@ class RiderAPIController extends Controller
                         $status = 1;
                     }
 
+
+                    // if amount greater than 0 check in Notification ID : 12
+                    if($cod_amount > 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 12)->first();
+                    }
+
+                    // if amount is equal to 0 check in Notification ID: 132
+                    if($cod_amount == 0) {
+                        $notification_setting = NotificationSetting::where('notification_id', 132)->first();
+                    }
+                    $getSmsAndOtp = 1;
+                    if($notification_setting){
+                        // check shipper toggle is set to 0 then only shipper id exist getSms set to true
+                        if($notification_setting->shipper_toggle == 1)
+                            $getSmsAndOtp = 0;
+                        else if($notification_setting->shipper_toggle == 0)
+                            $getSmsAndOtp = 1;
+                        
+                        $shipperIdToCheck = $shipment_data->user_id;
+    
+                        $notification_setting_shippers = $notification_setting->notification_setting_shippers;
+                        $exists = $notification_setting_shippers->contains('shipper_id', $shipperIdToCheck);
+    
+                        if($notification_setting->shipper_toggle == 1 && $exists)
+                            $getSmsAndOtp = 1;
+    
+                        else if($notification_setting->shipper_toggle == 0 && $exists)
+                            $getSmsAndOtp = 0;
+                    }
+
                     $deliveries = array();
                     $deliveries['distribution'] = 0;
                     $shipment_status_count = ShipmentsJourney::where('shipment_id', $shipment_id)
@@ -13265,6 +13331,7 @@ class RiderAPIController extends Controller
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
+                    $deliveries['user_excluded_otp_shippers'] = $getSmsAndOtp;
                     if ($delivery_otp == 1) {
                         if ($all_shippers->setting_value == 1) {
                             if (count($excluded_shippers) > 0) {

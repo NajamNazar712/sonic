@@ -41,7 +41,7 @@ class ShipperTrackingController extends Controller
     }
 
     public function index() {
-//        dd(session()->all());
+        // dd(session()->all());
         $permission = session('permissions');
 
         $case_nature = CrmRequestCaseNature::get();
