@@ -11608,7 +11608,7 @@ class RiderAPIController extends Controller
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'remarks_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
+            'remarks_id' => ['nullable', 'integer', 'exists:sub_reasons,id'],
             'picture' => ['required', 'mimes:png,jpeg,jpg'],
             'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file'],
@@ -11828,30 +11828,42 @@ class RiderAPIController extends Controller
     
     public function undelivered_reason_map()
     {
-
-        $results = DB::table('shipment_status_reason as shr')
-        ->select(
-            DB::raw("JSON_ARRAY(
-                JSON_OBJECT('id', shr.id),
-                JSON_OBJECT('name', shr.name),
-                JSON_OBJECT('audio', shr.audio),
-                JSON_OBJECT('further_reason', (
-                    SELECT IFNULL(
-                        GROUP_CONCAT(
-                            JSON_OBJECT('id', ssfr.id),
-                            JSON_OBJECT('name', ssfr.name)
-                        ),
-                        '[]'
-                    )
-                    FROM sub_reasons as ssfr
-                    WHERE ssfr.reason_id = shr.id
-                ) 
-            )) as result")
-        )
+        $shipment_status_reason = BoltUndeliveredReasonMap::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_maps.reason_id')
+        ->leftjoin('sub_reasons as sr','sr.reason_id', 'ssr.id')
+        ->select('ssr.id', 'ssr.name', 'ssr.audio', 'sr.id as sub_id', 'sr.name as sub_name')
         ->get();
+        
+        // return response()->json(['status' => 0, 'message' => $shipment_status_reason]);
 
-     
-        return response()->json($results);
+        $reasons = [];
+
+        foreach ($shipment_status_reason as $reason) {
+            $reasonId = $reason->id;
+            $reasonName = $reason->name;
+            $reasonAudio = $reason->audio;
+            $subReasonId = $reason->sub_id;
+            $subReasonName = $reason->sub_name;
+        
+            if (!isset($reasons[$reasonId])) {
+                $reasons[$reasonId] = [
+                    'id' => $reasonId,
+                    'name' => $reasonName,
+                    'audio' => $reasonAudio,
+                    'sub_reasons' => [],
+                ];
+            }
+        
+            if ($subReasonId) {
+                $reasons[$reasonId]['sub_reasons'][] = [
+                    'id' => $subReasonId,
+                    'name' => $subReasonName,
+                ];
+            }
+        }
+        
+        $finalReasons = array_values($reasons); // Re-index the array
+
+        return response()->json(['status' => 0, 'message' => $finalReasons]);
 
     }
 

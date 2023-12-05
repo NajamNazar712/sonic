@@ -1883,10 +1883,6 @@
                                                    href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
                                     @endif
                                         @if (session('role_id') == 1 || in_array(861, session('permissions')))
-                                            {{-- <li><a class="menu-item" href="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.index') }}">
-                                                    SMS Notification Return Delivered to shipper
-                                                </a>
-                                            </li> --}}
                                             <li><a class="menu-item" href="{{ route('admin.settings.sms_notifications_limit.index') }}">
                                                     SMS Notification Return Delivered to shipper
                                                 </a>

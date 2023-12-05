@@ -875,11 +875,12 @@ class ReturnController extends Controller
 
     public function return_reattempt_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
-
-        $shipment_ids = $request->shipment_ids;
+        // dd($request->all());
+        // $shipment_ids = $request->shipment_ids;
+        $shipment = $request->shipment_id;
 
         if ($request->action == 'reattempt') {
-            foreach ($shipment_ids as $shipment) {
+            // foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
                 if (!in_array($parcel->shipper_status_id, [13, 20])) {
                     $remark_inp = "remark.$shipment";
@@ -988,7 +989,7 @@ class ReturnController extends Controller
                     $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
                     
                 }
-            }
+            // }
             return ['status' => 1, 'success' => "Shipment successfully updated as ( Re-Attempt )"];
         }
     }
