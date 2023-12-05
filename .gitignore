@@ -2,7 +2,7 @@
 /public/hot
 /public/storage
 /public/reports
-/public/qsr_pending_deliveries_reports
+# /public/qsr_pending_deliveries_reports
 /storage/*.key
 /vendor
 /.phpintel
