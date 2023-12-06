@@ -238,6 +238,8 @@ class ReturnController extends Controller
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         $sub_status_call_finding = SubStatusCallFinding::all();
         $unresponsive_sub_status_call_finding = RvAssignAgentSubStatus::where('rv_assign_agent_status_id',6)->get();
+        $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
+        $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / ($rv_tickets) * 100);
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
         if ($total_of_shipments === 0) {
             $percentage_reason_validation_required = 0; // or any default value you prefer
@@ -263,7 +265,7 @@ class ReturnController extends Controller
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
-        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count]);
+        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments

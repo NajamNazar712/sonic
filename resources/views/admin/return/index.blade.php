@@ -135,6 +135,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-3" id="number_of_pending_tickets_div">
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-clock text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p
+                                                    id="in_process_percentage" class="d-inline">
+                                                    {{ $number_of_pending_ticket_percentage }}</p>%)
+                                            </h3>
+                                            <span>Pending Tickets</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
                     <div class="col justify-content-end mb-5">
                         <div class="card">
                             <div class="card-header">
@@ -1928,6 +1952,7 @@
                             d.search_sar_value_div = $('#search_sar_value_div').val();
                             d.search_total_value_div = $('#search_total_value_div').val();
                             d.search_unresponsive_value_div = $('#search_unresponsive_value_div').val();
+                            d.number_of_pending_tickets_input = $('#number_of_pending_tickets_input').val();
 
                         },
 
