@@ -130,6 +130,7 @@
                                     <th class="border-primary border-darken-1">Incentive Amount</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
+                                    <th class="border-primary border-darken-1">Sub Department</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
@@ -1285,6 +1286,7 @@
                             head.push('Incentive Amount');
                             head.push('Designation');
                             head.push('Department Name');
+                            head.push('Sub Department Name');
                             head.push('Line Manager');
                             head.push('IBAN No.');
                             head.push('Zone Name');
@@ -1325,6 +1327,7 @@
                                 row.push(values.incentive_amount);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
+                                row.push(values.sub_department_name);
                                 row.push(values.line_manager);
                                 row.push(values.iban);
                                 row.push(values.zone_name);
@@ -1621,6 +1624,7 @@
                     {data: 'incentive_amount', name: 'r.incentive_amount', class: 'align-middle incentive_amount'},
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
+                    {data: 'sub_department_name', name: 'employees.sub_department', class: 'align-middle sub_department_name'},
                     {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
@@ -1715,13 +1719,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        // else if($(header).is('.department_name'))
-                        // {
-                        //     $(department_type).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -1921,9 +1918,6 @@
                             });
                     }
                 });
-                // var id = $(this).data('target-id');
-                // $('#employee_id').val(id);
-                // $('#approveRiderModal').modal('show');
             });
 
 
@@ -2115,16 +2109,12 @@
                 $('#area_list').val(area_id).trigger('change');
                 if(check_bit != null)
                 {
-                    // var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
-                    // $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
-                    // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     trax_id = table.row($(elm).parents('tr')).data().trax_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
-                    // var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
                     var ccd = false;
                     route_id = null;
                 }
@@ -2344,10 +2334,6 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center'
-                                    // });
                                     window.location.href = data.route + '?from=rider-incentive';
                                     
                                 } else {
@@ -2485,10 +2471,6 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center'
-                                    // });
                                     window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
@@ -2538,7 +2520,6 @@
                             closeOnEsc: false
                         });
 
-                        // let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', id);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.staff.activate') !!}',
                             method: 'POST',
@@ -2549,10 +2530,6 @@
                         })
                             .done(function (data) {
                                 if (data.status == 0) {
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center',
-                                    // });
                                     window.location.href = data.route + '?from=staff-profile';
                                 } else {
                                     toastr.error(data.error, 'Error!', {
