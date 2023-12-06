@@ -23,11 +23,21 @@
                                         @endforeach
                                     </select>
                                 </div></div>--}}
-                            <div class="col-4">
+
+                                <div class="col-4">
                                 <fieldset class="form-group pb-1">
-                                    <select name="search_shipper" id="search_shipper" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="search_shipper" id="search_shipper" class="form-control select2"  required>
                                         @foreach($shippers as $shipper)
                                             <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_sub_segment" id="search_sub_segment" class="form-control select2" required>
+                                        @foreach($sub_segments as $sub_segment)
+                                            <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -82,7 +92,7 @@
 
                             <div class="col-2 mt-2">
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button type="submit" id="search_btn" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
                         </form>
@@ -240,6 +250,7 @@
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Order ID</th>
                             <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Sub Segment</th>
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">First Attempt Date</th>
                             <th class="border-primary border-darken-1">Rider Picked Status Date</th>
@@ -298,6 +309,7 @@
         span.font-13{
             font-size: 13px;
         }
+        
     </style>
 
 @endsection
@@ -309,6 +321,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -334,9 +347,15 @@
                 placeholder: 'Select Shipper',
                 allowClear:true
             });
+         // Prepend an empty option to the select element
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: "Select Shipper",
+                allowClear: true
+            });
+            $('#search_sub_segment').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Select Sub Segment",
                 allowClear:true,
             });
             var thirtydays = '{{ $thirtyday }}';
@@ -384,17 +403,21 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    var shipperErrorExists = $('#search_shipper-error').length > 0;
+                    var subSegmentErrorExists = $('#search_sub_segment-error').length > 0;
+                    if ((shipperErrorExists && subSegmentErrorExists)) {
+                        error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    }
                 },
                 submitHandler: function(form) {
                     blockPagePermanently();
-
-
                     var from_date = $('#search_form input[name="from_date_formatted"]').val();
                     var to_date = $('#search_form input[name="to_date_formatted"]').val();
                     var origin = $('#origin').val();
                     var destination = $('#destination').val();
                     var shipper = $('#search_shipper').val();
+                    var sub_segment = $('#search_sub_segment').val();
+
                     $.ajax({
                         url: '{!! route('admin.reports.summary.data') !!}',
                         method: 'post',
@@ -405,6 +428,7 @@
                             'origin': origin,
                             'destination': destination,
                             'shipper': shipper,
+
                         }
                     }).done(function (data) {
                        if(data.status){
@@ -452,6 +476,7 @@
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper');
+                            head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
@@ -481,6 +506,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
@@ -538,6 +564,7 @@
                         d.search_destination = $('#destination').val();
                        /* d.search_shipper = $('#shipper').val();*/
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_sub_segment = $('#search_sub_segment').val();
                         d.cards_filter = $('#cards_filter_input').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
@@ -550,6 +577,7 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'sub_segment' ,name: 'u.sub_segment_id', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     { data:'rider_picked_status_date' ,name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
@@ -583,6 +611,7 @@
                 $("#report_data div").removeClass("show_active");
                 box.addClass('show_active');
             }
+
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
@@ -627,6 +656,32 @@
                 add_animation($(this));
                 $('#cards_filter_input').val('cancelled');
                 table.draw();
+            });
+
+            $('#search_shipper').on('change', function () {
+                var val = $(this).val();
+                if (val) {
+                    $('#search_sub_segment').removeAttr('required');
+                } else {
+                    $('#search_sub_segment').attr('required', 'required');
+                }
+            });
+            
+            $('#search_sub_segment').on('change', function(){
+                var val = $(this).val();
+                if (val) {
+                    $('#search_shipper').removeAttr('required');
+                } else {
+                    $('#search_shipper').attr('required', 'required');
+                }
+            });
+
+            $('#search_btn').on('click', function(){
+                var search_shipper = $('#search_shipper').val();
+                var search_sub_segment = $('#search_sub_segment').val();
+                if(!(search_sub_segment || search_shipper)){
+                    toastr.error('Select Shipper or Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
             });
 
         });
