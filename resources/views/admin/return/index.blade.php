@@ -214,7 +214,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">{{ $average_aging }}</p>
+                                                    <p id="dead_leads" class="d-inline">{{ round($average_aging, 2) }} hrs</p>
                                                     
                                                 </h3>
                                                 <span>Average Aging.</span>
@@ -235,7 +235,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">{{ $average_response_time }}</p>
+                                                    <p id="dead_leads" class="d-inline">{{ round($average_response_time, 2) }} hrs</p>
                                                     
                                                 </h3>
                                                 <span>Average Response Time.</span>
