@@ -6915,8 +6915,9 @@ class AdminReportsController extends Controller
         $shippers = DB::connection('reports')->table('users')->where('status', '>=', 3)->get();
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $sub_segments = DB::connection('reports')->table('sub_category_segments')->get(['id', 'name']);
 
-        return view('admin.reports.summary')->with(['hubs' => $hubs, 'shippers' => $shippers, 'today' => $today, 'thirtyday' => $thirtyDays, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.summary')->with(['hubs' => $hubs, 'shippers' => $shippers, 'today' => $today, 'thirtyday' => $thirtyDays, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
     }
 
     public function summary_data(Request $request)
@@ -7139,7 +7140,7 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)")
                     );
             })
-            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date']);
+            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment']);
         /*  if( $request->get('search_shipper')){
               $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
           }else{
@@ -7147,9 +7148,14 @@ class AdminReportsController extends Controller
           }*/
         if ($search_shipper = $request->get('search_shipper')) {
             $shipments = $shipments->where('shipments.user_id', $search_shipper);
-        } else {
-            $shipments->whereRaw('false');
-        }
+        } 
+
+        
+        if ($search_sub_segment = $request->get('search_sub_segment')) {
+            $shipments = $shipments->where('u.sub_segment_id', $search_sub_segment);
+        }            
+
+
 
         if($from != null && $to != null) {
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
@@ -7185,6 +7191,14 @@ class AdminReportsController extends Controller
             ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->editColumn('collection_amount', function ($shipments) {
                 return number_format($shipments->collection_amount);
+            })   
+            ->editColumn('sub_segment', function ($shipments) {
+                if($shipments->sub_segment){
+                    $sub_category = SubCategorySegment::where('id', $shipments->sub_segment)->first();
+                    return $sub_category['name'];
+                }else{
+                    return '-';
+                }
             });
         //        if($shipper = $request->get('search_shipper')){
         //            $datatable->where('shipments.user_id','=', $shipper);
