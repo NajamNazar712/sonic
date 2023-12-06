@@ -111,7 +111,6 @@ class AdminReportsController extends Controller
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        //        dd($shipment_status);
         return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments]);
     }
 
@@ -207,6 +206,8 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53)')
                     );
             })
+            ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
+            ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -224,6 +225,7 @@ class AdminReportsController extends Controller
                 'oc.name as origin',
                 'dc.name as destination',
                 'h.name as hub',
+                'ca.name as area',
                 'shipments.amount',
                 'journey.created_at as last_status_date',
                 'shipments.consignee_name as name',
