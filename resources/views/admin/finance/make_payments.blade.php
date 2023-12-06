@@ -1127,7 +1127,9 @@
                         placeholder: "Select Cycle",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
                     });
                     this.api().table().columns.adjust();
                 }
