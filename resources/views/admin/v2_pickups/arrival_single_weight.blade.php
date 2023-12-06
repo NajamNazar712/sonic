@@ -1185,6 +1185,7 @@
                                     else{
                                         all_shipment_piece_ids.concat(shipment_piece_ids);
                                     }
+                                    //error removed.
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
