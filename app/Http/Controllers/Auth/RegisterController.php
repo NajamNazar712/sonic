@@ -205,17 +205,8 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-//        return $request;
-//         return var_dump($request);exit();
-       // dd($request);
-//        $products = implode(',',$request->product_type);
-//
-//        return $request;
-
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
-
-        //$this->guard()->login($user);
         
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
