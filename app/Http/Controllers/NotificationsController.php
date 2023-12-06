@@ -3983,8 +3983,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
-
+                    $to = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk'];
