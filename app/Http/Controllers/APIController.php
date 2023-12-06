@@ -773,11 +773,36 @@ class APIController extends Controller
                 $amount = $request->input('amount');
                 $parcel_value = $request->input('parcel_value');
                 if ($amount == 0) {
-                    if ($parcel_value <= 0 || $parcel_value == null) {
-                        $flag = false;
-                    } else {
+                    if($request->has('parcel_value') && $request->input('parcel_value') != null){
                         $flag = true;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if ($settings->text != NULL) {
+                                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                                if (in_array($user_id, $parcel_value_bypass_accounts)) {
+                                    $flag = true;
+                                }
+                                else{
+                                    $flag = false;
+                                }
+                            }
+                            else{
+                                $flag = false;
+                            }
+                        }
+                        else{
+                            if ($parcel_value <= 0 || $parcel_value == null) {
+                                $flag = false;
+                            } else {
+                                $flag = true;
+                            }
+                        }
+                    }
+
+
                 } else {
                     $flag = true;
                 }
@@ -1718,7 +1743,7 @@ class APIController extends Controller
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
-            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1', 'max:5'],
             'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],

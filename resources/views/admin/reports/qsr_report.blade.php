@@ -495,14 +495,13 @@
                             head.push('Adjusted amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
+                                
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
-                                row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
