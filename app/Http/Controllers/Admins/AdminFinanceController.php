@@ -114,6 +114,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
+use App\Http\Controllers\Admins\AdminDashboardController;
 
 class AdminFinanceController extends Controller
 {
@@ -160,7 +161,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
+    static public function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
         $dayNames = [];
     
         foreach ($days as $day) {
@@ -181,7 +182,7 @@ class AdminFinanceController extends Controller
         }
     } 
 
-    static private function getDayOfMonthText($day) {
+    static public function getDayOfMonthText($day) {
         if ($day % 100 >= 11 && $day % 100 <= 13) {
             return $day . 'th';
         } else {
@@ -4660,6 +4661,31 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('u.payment_cycle_days', function ($query, $keyword) {
+                $keywordLower = strtolower($keyword);
+                $payment_cycle_days = AdminDashboardController::$paymentCycleDays;
+                
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($payment_cycle_days as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
+            })
             ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
@@ -4685,14 +4711,7 @@ class AdminFinanceController extends Controller
             ->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
-                $dayMap = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
+                $dayMap = AdminDashboardController::$paymentCycleDays;
             
                 if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
                     $payment_cycle_days = explode(',', $payment_cycle_days);
