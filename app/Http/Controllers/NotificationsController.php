@@ -3400,7 +3400,8 @@ class NotificationsController extends Controller
                                 }
                                 //                                dd($body);
 
-                                self::email($subject, $body, $to);
+                                $cc = ['return@trax.pk'];
+                                self::email($subject, $body, $to, $cc);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
