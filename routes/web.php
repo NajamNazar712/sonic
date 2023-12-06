@@ -3809,6 +3809,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@parcel_value_bypass_setting_update')->name('update');
         });
 
+        Route::prefix('product_type')->name('product_type.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_type_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@product_type_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@product_type_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@product_type_edit')->name('edit');
+            Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
+        });
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
