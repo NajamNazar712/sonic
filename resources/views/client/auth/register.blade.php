@@ -180,11 +180,8 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="cnic">CNIC Number:
-                                                                <span class="danger">*</span></label>
-                                                            <input type="text" class="form-control required"
-                                                                placeholder="XXXXX-1234567-X"
-                                                                value="{{ old('cnic') }}" name="cnic">
+                                                            <label for="cnic">CNIC Number: <span class="danger">*</span></label>
+                                                            <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ old('cnic') }}" name="cnic">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
@@ -775,15 +772,9 @@
                                                         </div>
 
                                                         <div class="form-group">
-                                                            <label for="iban">
-                                                                IBAN Number:
-                                                                <span class="danger">*</span>
-                                                            </label>
-                                                            <input type="text" class="form-control iban required"
-                                                                placeholder="(e.g: PK37MEZN0001220100004069)*"
-                                                                value="{{ old('iban_no.0') }}" name="iban_no[]"
-                                                                data-rule-maxlength="24"
-                                                                data-rule-maxlength-message="Max character length 24">
+                                                            <label for="iban"> IBAN Number: <span class="danger">*</span> </label>
+                                                            <input type="text" class="form-control required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{  old('iban_no.0') }}" name="iban_no[]" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                                            <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 characters</span>
                                                         </div>
 
                                                         <div class="form-group">
@@ -818,9 +809,7 @@
                                                                         <h3 class="card-title">New Bank</h3>
                                                                         <div class="heading-elements">
                                                                             <ul class="list-inline mb-0">
-                                                                                <li><a data-action="close"><i
-                                                                                            class="ft-x"></i></a>
-                                                                                </li>
+                                                                                <li><a data-action="close"><i class="ft-x"></i></a> </li>
                                                                             </ul>
                                                                         </div>
                                                                     </div>
@@ -828,16 +817,9 @@
                                                                         <div class="row">
                                                                             <div class="col-md-6">
                                                                                 <div class="form-group">
-                                                                                    <label for="bank_name">
-                                                                                        Bank Name:
-                                                                                        <span class="danger">*</span>
-                                                                                    </label>
-
+                                                                                    <label for="bank_name"> Bank Name: <span class="danger">*</span> </label>
                                                                                     <div>
-                                                                                        <select name="bank_name[]"
-                                                                                            class="select2 form-control required"
-                                                                                            style="width: 100%">
-
+                                                                                        <select name="bank_name[]" class="select2 form-control required" style="width: 100%">
                                                                                             @foreach ($banks as $bank)
                                                                                                 <option
                                                                                                     value="{{ $bank->id }}"
@@ -849,67 +831,29 @@
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group">
-                                                                                    <label for="bank_branch">
-                                                                                        Branch Name:
-                                                                                        <span class="danger">*</span>
-                                                                                    </label>
-                                                                                    <input type="text"
-                                                                                        class="form-control required"
-                                                                                        value="{{ old('bank_branch.' . $b) }}"
-                                                                                        name="bank_branch[]"
-                                                                                        placeholder="Branch Name*">
+                                                                                    <label for="bank_branch"> Branch Name: <span class="danger">*</span> </label>
+                                                                                    <input type="text" class="form-control required" value="{{ old('bank_branch.' . $b) }}" name="bank_branch[]" placeholder="Branch Name*">
                                                                                 </div>
                                                                                 <div class="form-group">
-                                                                                    <label for="account_name">Account
-                                                                                        Number:
-                                                                                        <span
-                                                                                            class="danger">*</span></label>
-                                                                                    <input type="text"
-                                                                                        class="form-control required"
-                                                                                        value="{{ old('account_no.' . $b) }}"
-                                                                                        name="account_no[]"
-                                                                                        placeholder="Account Number*">
+                                                                                    <label for="account_name">Account Number: <span class="danger">*</span></label>
+                                                                                    <input type="text" class="form-control required" value="{{ old('account_no.' . $b) }}" name="account_no[]" placeholder="Account Number*">
                                                                                 </div>
-
                                                                             </div>
                                                                             <div class="col-md-6">
                                                                                 <div class="form-group">
-                                                                                    <label for="account_title">
-                                                                                        Account Title:
-                                                                                        <span class="danger">*</span>
-                                                                                    </label>
-                                                                                    <input type='text'
-                                                                                        class="form-control required"
-                                                                                        value="{{ old('account_title.' . $b) }}"
-                                                                                        name="account_title[]"
-                                                                                        placeholder="Account Title*">
-
+                                                                                    <label for="account_title"> Account Title: <span class="danger">*</span> </label>
+                                                                                    <input type='text' class="form-control required" value="{{ old('account_title.' . $b) }}" name="account_title[]" placeholder="Account Title*">
                                                                                 </div>
 
                                                                                 <div class="form-group">
-                                                                                    <label for="iban">
-                                                                                        IBAN Number:
-                                                                                        <span class="danger">*</span>
-                                                                                    </label>
-                                                                                    <input type="text"
-                                                                                        class="form-control required"
-                                                                                        placeholder="(e.g: PK37MEZN0001220100004069)"
-                                                                                        value="{{ old('iban_no.' . $b) }}"
-                                                                                        name="iban_no[]"
-                                                                                        data-rule-maxlength="24"
-                                                                                        data-rule-maxlength-message="Max character length 24">
+                                                                                    <label for="iban"> IBAN Number: <span class="danger">*</span> </label>
+                                                                                    <input type="text" class="form-control required" placeholder="(e.g: PK37MEZN0001220100004069)" value="{{ old('iban_no.' . $b) }}" name="iban_no[]" id="iban_no">
                                                                                 </div>
 
                                                                                 <div class="form-group">
-
-                                                                                    <label for="bank_city">Bank City:
-                                                                                        <span class="danger">*</span>
-                                                                                    </label>
+                                                                                    <label for="bank_city">Bank City: <span class="danger">*</span> </label>
                                                                                     <div>
-                                                                                        <select name="bank_city[]"
-                                                                                            id="bank_city"
-                                                                                            class="select2 form-control required"
-                                                                                            style="width: 100%">
+                                                                                        <select name="bank_city[]" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                                             @foreach ($all_cities as $bank_city)
                                                                                                 <option
                                                                                                     value="{{ $bank_city->id }}"
@@ -920,11 +864,9 @@
                                                                                         </select>
                                                                                     </div>
                                                                                 </div>
-
                                                                             </div>
                                                                         </div>
                                                                     </div>
-
                                                                 </div>
                                                                 @php($b++)
                                                             @endwhile
@@ -1703,6 +1645,38 @@
             $('#msg_payment').addClass("d-none");
             $('#fortnite_val').val(value);
         });
+
+        $('#iban_no').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
+            });
+
+            $('#iban_no').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                    $('#iban_no_error').show();
+                } else {
+                    $('#iban_no_error').hide();
+                }
+            });
 
     </script>
 </body>
