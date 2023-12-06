@@ -4816,28 +4816,26 @@ class ReturnController extends Controller
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $files = File::glob("$path/2022_2*.*");
-        $now = Carbon::now();
-//        $counter = 0;
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                $created = date("F d Y H:i:s.",filemtime($file));
-                $file_name = pathinfo($file);
-                if($now->diffInDays($created) > 1){
-                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                    $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
-                    if($exists){
-                        File::delete($file);
+//        $paths = ['4', '5', '6', '7'];
+//        foreach ($paths as $p){
+            $files = File::glob("$path/2022*.*");
+            $now = Carbon::now();
+
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $created = date("F d Y H:i:s.",filemtime($file));
+                    $file_name = pathinfo($file);
+                    if($now->diffInDays($created) > 1){
+                        Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                        if($exists){
+                            File::delete($file);
+                        }
                     }
                 }
             }
-//            $counter++;
-
-//            if($counter > 1500){
-//                break;
-//            }
-        }
-    }
+//        }
+//    }
 
     public function cx_sales_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),310);
