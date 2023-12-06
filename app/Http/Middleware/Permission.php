@@ -991,6 +991,9 @@ class Permission
 
             'settings.shippers.bypass_weight.index'=> 909,
 
+            'settings.product_type.index'=> 912,
+            'settings.product_type.list'=> 912,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
