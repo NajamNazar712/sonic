@@ -43,6 +43,9 @@
                 <input type="hidden" name="search_sar_value_div" id="search_sar_value_div">
                 <input type="hidden" name="search_total_value_div" id="search_total_value_div">
                 <input type="hidden" name="search_unresponsive_value_div" id="search_unresponsive_value_div">
+                <input type="hidden" name="number_of_pending_tickets_value_div" id="number_of_pending_tickets_value_div">
+                <input type="hidden" name="number_of_inprocess_tickets_value_div" id="number_of_inprocess_tickets_value_div">
+                <input type="hidden" name="number_of_available_agents_value_div" id="number_of_available_agents_value_div">
 
                 {{-- <form id="search_rvr" class="card-body card-dashboard" novalidate="novalidate"> --}}
                 <div class="row justify-content-center" >
@@ -136,8 +139,8 @@
                         </div>
                     </div>
 
-                    <div class="col-3" id="number_of_pending_tickets_div">
-                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
                             <div class="card-content">
                                 <div class="card-body">
                                     <div class="media d-flex">
@@ -158,8 +161,93 @@
                         </div>
                     </div>
 
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (
+                                                <p id="in_process_for_activation_percentage" class="d-inline">
+                                                    {{ $number_of_inprocess_tickets_percentage }}</p>
+                                                %)
+                                            </h3>
+                                            <span>No. of Inprocess Ticket</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-flag text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
+                                                </h3>
+                                                <span>Online/ Available Agents </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <p id="dead_leads" class="d-inline">{{ $average_aging }}</p>
+                                                    
+                                                </h3>
+                                                <span>Average Aging.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <p id="dead_leads" class="d-inline">{{ $average_response_time }}</p>
+                                                    
+                                                </h3>
+                                                <span>Average Response Time.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     
-                    <div class="col justify-content-end mb-5">
+                    <div class="col justify-content-end mb-3">
                         <div class="card">
                             <div class="card-header">
                                 <div class="heading-elements">
@@ -845,7 +933,10 @@
             .btn-group .dropdown-menu .dropdown-item {
                 white-space: normal;
             }
-
+            .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #653800, #11f1ea);
+            background-repeat: repeat-x;
+        }
             .bg-gradient-directional-booked_shipments {
                 background-image: linear-gradient(45deg, #5e187b, #ed86ff);
                 background-repeat: repeat-x;
@@ -865,8 +956,19 @@
             background-image: linear-gradient(45deg, #027d8a, #01e4e4);
             background-repeat: repeat-x;
         }
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
+            background-repeat: repeat-x;
+        }
 
-
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
+        }
             #toast-bottom-center.toast-container {
                 text-align: center;
             }
@@ -1042,9 +1144,12 @@
                 });
                 $('#search_rvr_div').on('click', function() {
                     $('#search_rvr_value_div').val(1);
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_available_agents_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
 
 
                     // Assuming 'table' is defined elsewhere in your code
@@ -1053,9 +1158,12 @@
 
                 $('#search_sar_div').on('click', function() {
                     $('#search_sar_value_div').val(2);
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_available_agents_value_div').val('');
                     $('#search_rvr_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
 
                     // Assuming 'table' is defined elsewhere in your code
                     table.draw();
@@ -1063,9 +1171,12 @@
 
                 $('#search_total_div').on('click', function() {
                     $('#search_total_value_div').val(3);
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_available_agents_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_rvr_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
 
                     // Assuming 'table' is defined elsewhere in your code
                     table.draw();
@@ -1074,11 +1185,48 @@
 
                 $('#search_unresponsive_div').on('click', function() {
                     $('#search_unresponsive_value_div').val(4);
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_available_agents_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_rvr_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
+
 
                     // Assuming 'table' is defined elsewhere in your code
+                    table.draw();
+                });
+
+                $('#number_of_pending_tickets_div').on('click', function() {
+                    $('#number_of_pending_tickets_value_div').val(5);
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_available_agents_value_div').val('');
+                    $('#search_unresponsive_value_div').val('');
+                    $('#search_total_value_div').val('');
+                    $('#search_sar_value_div').val('');
+                    $('#search_rvr_value_div').val('');
+                    table.draw();
+                });
+
+                $('#number_of_inprocess_tickets_div').on('click', function() {
+                    $('#number_of_inprocess_tickets_value_div').val(6);
+                    $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
+                    $('#search_unresponsive_value_div').val('');
+                    $('#search_total_value_div').val('');
+                    $('#search_sar_value_div').val('');
+                    $('#search_rvr_value_div').val('');
+                    table.draw();
+                });
+
+                $('#number_of_available_agents_div').on('click', function() {
+                    $('#number_of_available_agents_value_div').val(7);
+                    $('#number_of_pending_tickets_value_div').val('');
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#search_unresponsive_value_div').val('');
+                    $('#search_total_value_div').val('');
+                    $('#search_sar_value_div').val('');
+                    $('#search_rvr_value_div').val('');
                     table.draw();
                 });
 
@@ -1952,7 +2100,9 @@
                             d.search_sar_value_div = $('#search_sar_value_div').val();
                             d.search_total_value_div = $('#search_total_value_div').val();
                             d.search_unresponsive_value_div = $('#search_unresponsive_value_div').val();
-                            d.number_of_pending_tickets_input = $('#number_of_pending_tickets_input').val();
+                            d.number_of_pending_tickets_value_div = $('#number_of_pending_tickets_value_div').val();
+                            d.number_of_inprocess_tickets_value_div = $('#number_of_inprocess_tickets_value_div').val();
+                            d.number_of_available_agents_value_div = $('#number_of_available_agents_value_div').val();
 
                         },
 
@@ -2127,6 +2277,8 @@
                 $('#EditEstimateChargesModalNSAreattempt').on('hide.bs.modal', function(e) {
                     $('#estimated_charges_NSAreattempt_input').val('');
                 });
+                
+        
 
                 var hub_ids = [];
 

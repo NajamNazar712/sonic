@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use DB;
+use DateTime;
 use Exception;
 use Carbon\Carbon;
 use function foo\func;
@@ -37,8 +38,8 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\ReturnDeliveredToShipperSms;
-use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\HR\StaffCategory;
@@ -114,6 +115,8 @@ class ReturnController extends Controller
     }
 
     private function shipments(){
+
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
         ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
         ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')
@@ -179,8 +182,10 @@ class ReturnController extends Controller
                  ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
         })
         
-        
-        
+        ->leftjoin('employee_attendances as ea', function ($join) {
+            $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
+                ->where('ea.id', '=', \Illuminate\Support\Facades\DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
+        })
 
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
@@ -198,7 +203,7 @@ class ReturnController extends Controller
        })
         ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
         
-        ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
+        ->select('ea.attendance_date as attendance_date','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
         'u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
         'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
         'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
@@ -233,6 +238,46 @@ class ReturnController extends Controller
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
+
+        //Average Aging
+        $aging = RvShipmentAssignAgent::select('created_at')->get();
+        $totalSeconds = 0;
+        $count = count($aging);
+        
+        foreach ($aging as $record) {
+            $totalSeconds += now()->diffInSeconds($record->created_at);
+        }
+        
+        $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
+        $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
+             
+        //Average Response Time
+        $rvShipments = RvShipmentAssignAgent::get();
+        $details = [];
+        $averageResponseTime = 0;
+        
+        foreach ($rvShipments as $key => $rvShipment) {
+            $details['rv_shipment_created_at'][] = $rvShipment->created_at;
+        
+            $latestJourney = $rvShipment->shipment->shipment_journey
+                ->where('shipper_status_id', 12)
+                ->sortByDesc('updated_at')
+                ->first();
+    
+                $details['shipment_journey_rcp_latest'][] = isset($latestJourney->updated_at) ? $latestJourney->updated_at : null;
+            }
+
+        for ($i = 0; $i < count($details['shipment_journey_rcp_latest']); $i++) {
+            if($details['shipment_journey_rcp_latest'][$i] != null){
+                $created_at = new DateTime($details['rv_shipment_created_at'][$i]);
+                $updated_at = new DateTime($details['shipment_journey_rcp_latest'][$i]);
+                $interval = $created_at->diff($updated_at);
+                $averageResponseTime += $interval->s + $interval->i * 60 + $interval->h * 3600;
+            }
+        }
+        $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
+        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
+
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
@@ -253,19 +298,32 @@ class ReturnController extends Controller
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
         $unresponsive_count = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
+
+        $number_of_inprocess_tickets = RvShipmentAssignAgent::where('rv_state_id', 1)->get();
+        $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
         // if ($rv_tickets === 0) {
         //     $percentage_unresponsive_count = 0; // or any default value you prefer
         // } else {
         //     $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
         // }
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
+        $empid = Admin::find(Auth::id())->employee_id;
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+            ->whereIn('id', function ($query) {
+                $query->select(DB::raw('MAX(id)'))
+                    ->from('employee_attendances')
+                    ->groupBy('employee_attendances.employee_id');
+            })
+            ->get();
 
     return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
         'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
-        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage]);
+        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage , 'number_of_inprocess_tickets'=> $number_of_inprocess_tickets, 'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'number_of_available_agents' => $Attendance, 'average_aging' => $averageHours,'average_response_time' => $averageResponseTimeInHours]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -692,6 +750,18 @@ class ReturnController extends Controller
 
         if ($request->get('search_unresponsive_value_div') === "4") {
             $datatable->where('rvsaa.rv_assign_agent_status_id', 6)->where('rvsaa.unresponsive_count', '>', 0);
+        }
+
+        if ($request->get('number_of_pending_tickets_value_div') === "5") {
+            $datatable->where('rvsaa.rv_state_id', 3);
+        }
+
+        if ($request->get('number_of_inprocess_ticket_value_div') === "6") {
+            $datatable->where('rvsaa.rv_state_id', 1);
+        }
+
+        if ($request->get('number_of_available_agents_value_div') == '7') {
+           $datatable->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
