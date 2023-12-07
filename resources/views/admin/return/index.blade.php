@@ -152,7 +152,7 @@
                                             <h3 class="text-white">
                                                 <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p
                                                     id="in_process_percentage" class="d-inline">
-                                                    {{ $number_of_pending_ticket_percentage }}</p>%)
+                                                    {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)
                                             </h3>
                                             <span>Pending Tickets</span>
                                         </div>
@@ -174,7 +174,7 @@
                                             <h3 class="text-white">
                                                 <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (
                                                 <p id="in_process_for_activation_percentage" class="d-inline">
-                                                    {{ $number_of_inprocess_tickets_percentage }}</p>
+                                                    {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>
                                                 %)
                                             </h3>
                                             <span>No. of Inprocess Ticket</span>
