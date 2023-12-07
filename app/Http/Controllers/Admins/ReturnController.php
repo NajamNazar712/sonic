@@ -238,7 +238,7 @@ class ReturnController extends Controller
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
-        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->get());
+        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', 12)->get());
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
         $totalSeconds = 0;
@@ -765,7 +765,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('number_of_oldest_shipments_value_div') == '8') {
-            $datatable->whereNull('rvsaa.shipment_id')->whereIn('shipments_journey.shipper_status_id', [12,65,66])->whereDate('shipments_journey.created_at', '<', Carbon::today());
+            $datatable->whereNull('rvsaa.shipment_id')->where('shipments_journey.shipper_status_id', 12)->whereDate('shipments_journey.created_at', '<', Carbon::today());
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
