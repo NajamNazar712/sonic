@@ -238,7 +238,7 @@ class ReturnController extends Controller
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
-        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', 12)->get());
+        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('sh.shipper_status_id', 12)->get());
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
         $totalSeconds = 0;
