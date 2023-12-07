@@ -13284,7 +13284,7 @@ class AdminReportsController extends Controller
                         $data['out_for_delivery_percentage'] = $data['ready_for_delivery'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery']) * 100,2) : 0;
                         $data['delivery_note'] = $rds_value->dn_no_count;
                         $data['pending_deliveries'] = $data['ready_for_delivery'] - $rds_value->ofd_shipments;
-                        $data['pending_deliveries_percentage'] = $data['ready_for_delivery'] ?? round(($data['pending_deliveries'] / $data['ready_for_delivery']) * 100,2);
+                        $data['pending_deliveries_percentage'] = $data['ready_for_delivery'] ? round(($data['pending_deliveries'] / $data['ready_for_delivery']) * 100,2) : 0;
                         $data['delivered'] = $rds_value->delivered_shipments;
                         $data['delivered_percentage'] = round(($rds_value->delivered_shipments / $rds_value->ofd_shipments) * 100,2);
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
