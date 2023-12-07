@@ -13136,15 +13136,18 @@ class AdminReportsController extends Controller
 
     public function ops_report_list(Request $request)
     {
-        // if ($request->get('excel') && $request->get('excel') == true) {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 709);
-        // }
+        $ops_data = $this->ops_report_data($request->search_date);
+        return response()->json(['status' => 200 , 'data' => $ops_data],200);
+    }
 
+    public function ops_report_data($search_date)
+    {
+       
         $from = '';
         $to = '';
 
-        $from = Carbon::parse($request->search_date)->subDay(2)->setTime(21, 00, 00)->toDateTimeString();
-        $to = Carbon::parse($request->search_date)->setTime(8, 59, 59)->toDateTimeString();
+        $from = Carbon::parse($search_date)->subDay(2)->setTime(21, 00, 00)->toDateTimeString();
+        $to = Carbon::parse($search_date)->setTime(8, 59, 59)->toDateTimeString();
 
         $regions = DB::connection('reports_2')->table('regions')->select('id','name')->get();
         $ops_data = [];
@@ -13175,14 +13178,14 @@ class AdminReportsController extends Controller
         $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 59);
         $re_attempt_and_intercept_status = array(52,55);
 
-        $re_attempt_and_intercept_startDate = Carbon::parse($request->search_date)->subDay(2)->setTime(21, 00, 00);
-        $re_attempt_and_intercept_endDate = Carbon::parse($request->search_date)->subDay(1)->setTime(20, 59, 59);
+        $re_attempt_and_intercept_startDate = Carbon::parse($search_date)->subDay(2)->setTime(21, 00, 00);
+        $re_attempt_and_intercept_endDate = Carbon::parse($search_date)->subDay(1)->setTime(20, 59, 59);
 
-        $other_pending_status_startDate = Carbon::parse($request->search_date)->subDay(1)->setTime(9, 00, 00);
-        $other_pending_status_endDate = Carbon::parse($request->search_date)->setTime(8, 59, 59);
+        $other_pending_status_startDate = Carbon::parse($search_date)->subDay(1)->setTime(9, 00, 00);
+        $other_pending_status_endDate = Carbon::parse($search_date)->setTime(8, 59, 59);
 
-        $other_statuses_startDate = Carbon::parse($request->search_date)->subDay(1)->startOfDay()->toDateTimeString();
-        $other_statuses_endDate = Carbon::parse($request->search_date)->subDay(1)->endOfDay()->toDateTimeString();
+        $other_statuses_startDate = Carbon::parse($search_date)->subDay(1)->startOfDay()->toDateTimeString();
+        $other_statuses_endDate = Carbon::parse($search_date)->subDay(1)->endOfDay()->toDateTimeString();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
@@ -13304,7 +13307,7 @@ class AdminReportsController extends Controller
         }
 
         
-        return response()->json(['status' => 200 , 'data' => $ops_data],200);
+        return $ops_data;
     }
 
 }
