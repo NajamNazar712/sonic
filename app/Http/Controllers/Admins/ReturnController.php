@@ -240,18 +240,16 @@ class ReturnController extends Controller
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
         $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
-        $oldest_shipments = $total_of_shipments - count(
-            RvShipmentAssignAgent::leftJoin('shipments', 'rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-                ->leftJoin('shipments_journey', function ($join) {
-                    $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                        ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-                })
-                ->WhereIn('rv_shipment_assign_agents.shipment_id', $this->total_of_shipments_exclude) 
-                ->where('shipments_journey.shipper_status_id', 12)
-                ->whereDate('shipments_journey.created_at', '<', Carbon::today())
-                ->get()
-        );
+        $oldest_shipment = RvShipmentAssignAgent::with('shipment.shipment_journey')
+        ->whereIn('shipment_id', $this->total_of_shipments_exclude) 
+        ->whereHas('shipment.shipment_journey', function ($query) {
+            $query->where('shipper_status_id', '=', 12);
+        })
+        ->orderBy('created_at', 'asc')
+        ->get();
         
+        $oldest_shipments = $total_of_shipments - count($oldest_shipment);
+
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
         $totalSeconds = 0;
