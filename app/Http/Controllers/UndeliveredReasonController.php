@@ -17,7 +17,7 @@ class UndeliveredReasonController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->latest()->first();
             $count = $shipment->count;
-        }else if (!$shipment->exists() && $delivery_note->exists()){
+        }else if ($delivery_note->exists()){
             $count = 1;
         }else {
             $count = 0;
