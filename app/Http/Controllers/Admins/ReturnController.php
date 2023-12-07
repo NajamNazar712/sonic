@@ -241,7 +241,7 @@ class ReturnController extends Controller
         $total_of_shipments = $this->shipments()->get()->count();
         $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
         $oldest_shipments = RvShipmentAssignAgent::with(['shipment.shipment_journey' => function ($query) {
-            $query->where('shipper_status_id', 12)->orderByDesc('created_at');
+            $query->whereDate('created_at', '<', Carbon::today())->where('shipper_status_id', 12)->orderByDesc('created_at');
         }])
         ->whereIn('shipment_id', $this->total_of_shipments_exclude)
         ->get();
@@ -253,7 +253,7 @@ class ReturnController extends Controller
                 $count+=1;
             }
         }
-    
+            
         $oldest_shipments = $total_of_shipments - $count;
 
         //Average Aging
