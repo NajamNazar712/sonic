@@ -765,7 +765,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('number_of_oldest_shipments_value_div') == '8') {
-            $datatable->whereNull('rvsaa.shipment_id')->where('shipments_journey.shipper_status_id', 12)->whereDate('shipments_journey.created_at', '<', Carbon::today());
+            $datatable->whereNull('rvsaa.shipment_id')->whereIn('shipments_journey.shipper_status_id', [12,65,66])->whereDate('shipments_journey.created_at', '<', Carbon::today());
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
