@@ -4816,9 +4816,9 @@ class ReturnController extends Controller
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $paths = ['4', '5', '6', '7'];
-        foreach ($paths as $p){
-            $files = File::glob("$path/2022_$p*.*");
+//        $paths = ['4', '5', '6', '7'];
+//        foreach ($paths as $p){
+            $files = File::glob("$path/2022*.*");
             $now = Carbon::now();
 
             foreach ($files as $file) {
@@ -4834,7 +4834,7 @@ class ReturnController extends Controller
                     }
                 }
             }
-        }
+//        }
     }
 
     public function cx_sales_index(){
