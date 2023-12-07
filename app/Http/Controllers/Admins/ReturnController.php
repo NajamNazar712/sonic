@@ -221,8 +221,8 @@ class ReturnController extends Controller
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
          'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id')
         // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
-        ->whereIn('shipments.shipper_status_id', [12,65,66])
-        ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
+        ->whereIn('shipments.shipper_status_id', [12])
+        // ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
         
 
@@ -241,7 +241,7 @@ class ReturnController extends Controller
         $total_of_shipments = $this->shipments()->get()->count();
         $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
         $oldest_shipments = RvShipmentAssignAgent::with(['shipment.shipment_journey' => function ($query) {
-            $query->whereDate('created_at', '<', Carbon::today())->where('shipper_status_id', 12)->orderByDesc('created_at');
+            $query->whereDate('created_at', '<', Carbon::today())->where('shipper_status_id', 12)->orderByDesc('updated_at');
         }])
         ->whereIn('shipment_id', $this->total_of_shipments_exclude)
         ->get();
@@ -253,7 +253,7 @@ class ReturnController extends Controller
                 $count+=1;
             }
         }
-            
+
         $oldest_shipments = $total_of_shipments - $count;
 
         //Average Aging
