@@ -816,7 +816,7 @@
                 var errros = 'Something went wrong, Refresh page and try again';
                 var actual_date = $('input[name="actual_date_formatted"]').val();
                 if(selected_rows.length > 0){
-                    if((select_all_status == '24') || (select_all_status != '' && select_all_reason != null)){
+                    if((select_all_status == '25') || (select_all_status != '' && select_all_reason != null)){
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to change the status of shipments!',
