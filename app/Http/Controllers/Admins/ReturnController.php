@@ -4835,7 +4835,7 @@ class ReturnController extends Controller
                 }
             }
 //        }
-//    }
+    }
 
     public function cx_sales_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),310);

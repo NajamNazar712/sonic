@@ -414,7 +414,16 @@ class RetailAdminUserManagementController extends Controller
             ->join('admins as au', 'au.id', '=', 'retail_users.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_users.city_id')
             ->join('cities as h', 'h.id', '=', 'retail_users.hub_id')
-            ->select('retail_users.id', 'retail_users.trax_id', 'retail_users.name', 'retail_users.phone_no', 'retail_users.cnic', 'retail_users.address', 'retail_users.category', 'retail_users.created_at', 'retail_users.updated_at', 'retail_users.status', 'c.name as city', 'h.name as hub', 'ac.name as created_by', 'au.name as updated_by');
+            ->Join('zones as z', 'z.id', '=', 'c.zone_id')
+            ->select('retail_users.id', 'retail_users.trax_id', 'retail_users.name',
+             'retail_users.phone_no', 'retail_users.cnic', 'retail_users.address',
+              'retail_users.category', 'retail_users.created_at', 'retail_users.updated_at',
+               'retail_users.status', 'c.name as city', 'c.id as city_id', 'h.name as hub', 'h.id as hub_id',
+               'z.name as zone',  
+               'ac.name as created_by', 
+               'au.name as updated_by');
+
+            //    dd($franchise->get()->toArray());
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
