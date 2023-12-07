@@ -239,18 +239,7 @@ class ReturnController extends Controller
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
         $total_of_shipments_exclude = $this->shipments()->get()->pluck('shId')->toArray();
-
-        $oldest_shipments = $total_of_shipments - count(
-            RvShipmentAssignAgent::leftJoin('shipments', 'rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
-                ->leftJoin('shipments_journey', function ($join) {
-                    $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                        ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-                })
-                ->WhereNotIn('rv_shipment_assign_agents.shipment_id', [$total_of_shipments_exclude]) 
-                ->where('shipments_journey.shipper_status_id', 12)
-                ->whereDate('shipments_journey.created_at', '<', Carbon::today())
-                ->get()
-        );
+        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::WhereIn('rv_shipment_assign_agents.shipment_id', $total_of_shipments_exclude)->get());
         
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
