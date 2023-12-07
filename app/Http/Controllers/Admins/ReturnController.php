@@ -242,7 +242,7 @@ class ReturnController extends Controller
             $join->on('shipments_journey.shipment_id', '=', 'sh.id')
             ->where('shipments_journey.id','=',
             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = sh.id)'));
-        })->whereIn('sh.shipper_status_id', [12,65,66])->whereDate('shipments_journey.created_at', '<', Carbon::today())->get());
+        })->whereIn('sh.shipper_status_id', [12])->whereDate('shipments_journey.created_at', '<', Carbon::today())->get());
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
         $totalSeconds = 0;
