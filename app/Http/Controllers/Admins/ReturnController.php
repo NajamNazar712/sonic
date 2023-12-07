@@ -238,7 +238,7 @@ class ReturnController extends Controller
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
-
+        $oldest_shipments = $total_of_shipments - count(RvShipmentAssignAgent::get());
         //Average Aging
         $aging = RvShipmentAssignAgent::select('created_at')->get();
         $totalSeconds = 0;
@@ -247,7 +247,7 @@ class ReturnController extends Controller
         foreach ($aging as $record) {
             $totalSeconds += now()->diffInSeconds($record->created_at);
         }
-        
+
         $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
         $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
              
@@ -281,9 +281,9 @@ class ReturnController extends Controller
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
-        $sub_status_call_finding = SubStatusCallFinding::all();
+        // $sub_status_call_finding = SubStatusCallFinding::all();
         $unresponsive_sub_status_call_finding = RvAssignAgentSubStatus::where('rv_assign_agent_status_id',6)->get();
-        $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
+        $number_of_pending_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 3)->whereIn('sh.shipper_status_id', [12,65,66])->get();
         $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / ($rv_tickets) * 100);
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
         if ($total_of_shipments === 0) {
@@ -299,7 +299,7 @@ class ReturnController extends Controller
         }
         $unresponsive_count = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
 
-        $number_of_inprocess_tickets = RvShipmentAssignAgent::where('rv_state_id', 1)->get();
+        $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66])->get();
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
         // if ($rv_tickets === 0) {
         //     $percentage_unresponsive_count = 0; // or any default value you prefer
@@ -323,7 +323,7 @@ class ReturnController extends Controller
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
-        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage , 'number_of_inprocess_tickets'=> $number_of_inprocess_tickets, 'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'number_of_available_agents' => $Attendance, 'average_aging' => $averageHours,'average_response_time' => $averageResponseTimeInHours]);
+        'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage , 'number_of_inprocess_tickets'=> $number_of_inprocess_tickets, 'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'number_of_available_agents' => $Attendance, 'average_aging' => $averageHours,'average_response_time' => $averageResponseTimeInHours, 'oldest_shipments' => $oldest_shipments]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -745,7 +745,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_total_value_div') === "3") {
-            $datatable->whereIn('shipments.shipper_status_id',[7,8,9,15,12,65,66]);
+            $datatable->whereIn('shipments.shipper_status_id',[12,65,66]);
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
@@ -756,12 +756,16 @@ class ReturnController extends Controller
             $datatable->where('rvsaa.rv_state_id', 3);
         }
 
-        if ($request->get('number_of_inprocess_ticket_value_div') === "6") {
+        if ($request->get('number_of_inprocess_tickets_value_div') === "6") {
             $datatable->where('rvsaa.rv_state_id', 1);
         }
 
         if ($request->get('number_of_available_agents_value_div') == '7') {
            $datatable->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
+        }
+
+        if ($request->get('number_of_oldest_shipments_value_div') == '8') {
+            $datatable->whereNull('rvsaa.shipment_id')->where('shipments_journey.shipper_status_id', 12)->whereDate('shipments_journey.created_at', '<', Carbon::today());
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {

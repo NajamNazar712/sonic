@@ -117,11 +117,7 @@ class ReturnV2Controller extends Controller
         if ($admin->exists()) {
             $admin = $admin->first();
 
-            if(session('latitude') != null){
-                $this->mark_attendance($admin);
-            }else{
-                return response()->json(['status' => 6]);
-            }
+           
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             $shipment = [];
@@ -140,9 +136,14 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
                         
-                    
+                        
                         if ($shipment) {
                             try {
+                                if(session('latitude') != null){
+                                    $this->mark_attendance($admin);
+                                }else {
+                                    return response()->json(['status' => 6]);
+                                }
                                 $shipment = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
                                 ->where('delivery_note_shipments.shipment_id', $shipment->id)
                                 ->where('dn.pending_status', 1)

@@ -46,6 +46,7 @@
                 <input type="hidden" name="number_of_pending_tickets_value_div" id="number_of_pending_tickets_value_div">
                 <input type="hidden" name="number_of_inprocess_tickets_value_div" id="number_of_inprocess_tickets_value_div">
                 <input type="hidden" name="number_of_available_agents_value_div" id="number_of_available_agents_value_div">
+                <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 {{-- <form id="search_rvr" class="card-body card-dashboard" novalidate="novalidate"> --}}
                 <div class="row justify-content-center" >
@@ -214,8 +215,9 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">{{ round($average_aging, 2) }} hrs</p>
-                                                    
+                                                    <p id="dead_leads" class="d-inline">
+                                                        {{ $average_aging > 24 ? (round($average_aging / 60, 2)) . ' days' : round($average_aging, 2) . ' hrs' }}
+                                                    </p>                                                    
                                                 </h3>
                                                 <span>Average Aging.</span>
                                             </div>
@@ -235,10 +237,33 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">{{ round($average_response_time, 2) }} hrs</p>
-                                                    
+                                                    <p id="dead_leads" class="d-inline">
+                                                        {{ $average_response_time > 24 ? (round($average_response_time / 60, 2)) . ' days' : round($average_response_time, 2) . ' hrs' }}
+                                                    </p>
+                                                                                                        
                                                 </h3>
                                                 <span>Average Response Time.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <p id="dead_leads" class="d-inline">{{ $oldest_shipments }} </p>
+                                                    
+                                                </h3>
+                                                <span>Oldest Shipment Count.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -969,6 +994,11 @@
             background-image: linear-gradient(45deg, #074077, #2FBEF5);
             background-repeat: repeat-x;
         }
+
+        .bg-gradient-directional-oldest_shipment {
+            background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
+            background-repeat: repeat-x;
+        }
             #toast-bottom-center.toast-container {
                 text-align: center;
             }
@@ -1146,6 +1176,7 @@
                     $('#search_rvr_value_div').val(1);
                     $('#number_of_inprocess_tickets_value_div').val('');
                     $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
@@ -1160,6 +1191,7 @@
                     $('#search_sar_value_div').val(2);
                     $('#number_of_inprocess_tickets_value_div').val('');
                     $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_rvr_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
@@ -1173,6 +1205,7 @@
                     $('#search_total_value_div').val(3);
                     $('#number_of_inprocess_tickets_value_div').val('');
                     $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_rvr_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
@@ -1187,6 +1220,7 @@
                     $('#search_unresponsive_value_div').val(4);
                     $('#number_of_inprocess_tickets_value_div').val('');
                     $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_rvr_value_div').val('');
@@ -1201,6 +1235,7 @@
                     $('#number_of_pending_tickets_value_div').val(5);
                     $('#number_of_inprocess_tickets_value_div').val('');
                     $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_sar_value_div').val('');
@@ -1212,6 +1247,7 @@
                     $('#number_of_inprocess_tickets_value_div').val(6);
                     $('#number_of_available_agents_value_div').val('');
                     $('#number_of_pending_tickets_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_sar_value_div').val('');
@@ -1223,12 +1259,27 @@
                     $('#number_of_available_agents_value_div').val(7);
                     $('#number_of_pending_tickets_value_div').val('');
                     $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#number_of_oldest_shipments_value_div').val('');
                     $('#search_unresponsive_value_div').val('');
                     $('#search_total_value_div').val('');
                     $('#search_sar_value_div').val('');
                     $('#search_rvr_value_div').val('');
                     table.draw();
                 });
+
+                $('#number_of_oldest_shipments_div').on('click', function() {
+                    $('#number_of_oldest_shipments_value_div').val(8);
+                    $('#number_of_available_agents_value_div').val('');
+                    $('#number_of_pending_tickets_value_div').val('');
+                    $('#number_of_inprocess_tickets_value_div').val('');
+                    $('#search_unresponsive_value_div').val('');
+                    $('#search_total_value_div').val('');
+                    $('#search_sar_value_div').val('');
+                    $('#search_rvr_value_div').val('');
+                    table.draw();
+                });
+
+             
 
 
                 // End call_history_modal datatable function
@@ -2103,6 +2154,7 @@
                             d.number_of_pending_tickets_value_div = $('#number_of_pending_tickets_value_div').val();
                             d.number_of_inprocess_tickets_value_div = $('#number_of_inprocess_tickets_value_div').val();
                             d.number_of_available_agents_value_div = $('#number_of_available_agents_value_div').val();
+                            d.number_of_oldest_shipments_value_div = $('#number_of_oldest_shipments_value_div').val();
 
                         },
 
