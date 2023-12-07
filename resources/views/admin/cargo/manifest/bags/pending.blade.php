@@ -95,6 +95,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Origin Hub</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Sub Station</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
@@ -178,6 +179,7 @@
                             head.push('Status');
                             head.push('Origin');
                             head.push('Origin Hub');
+                            head.push('Zone');
                             head.push('Destination');
                             head.push('Sub Station');
                             head.push('Shipper');
@@ -198,6 +200,7 @@
                                 row.push(values.status);
                                 row.push(values.origin);
                                 row.push(values.origin_hub);
+                                row.push(values.zone_name);
                                 row.push(values.destination);
                                 row.push(values.sub_station);
                                 row.push(values.shipper);
@@ -249,7 +252,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -258,6 +261,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'origin_hub', name: 'ohc.name', class: 'align-middle origin_hub'},
+                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -385,7 +389,7 @@
                 placeholder: 'Shipping Mode',
                 allowClear:true
             });
-
+            
             $('#star_shippers_filter').on('click',function () {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
