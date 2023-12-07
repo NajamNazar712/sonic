@@ -242,6 +242,7 @@ class ReturnController extends Controller
 
         $oldest_shipments = $total_of_shipments - count(
             RvShipmentAssignAgent::leftJoin('shipments', 'rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')   
+                ->whereIn('shipments.shipper_status_id', [12])
                 ->WhereNotIn('rv_shipment_assign_agents.shipment_id', [$total_of_shipments_exclude])
                 ->get()
         );
