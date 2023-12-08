@@ -63,8 +63,8 @@ class MMSReportController extends Controller
 
 
         if ($from != null && $to != null) {
-            $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
 
+            $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
                 
@@ -73,7 +73,15 @@ class MMSReportController extends Controller
                 if ($to_id->exists()) {
                     $to_id = $to_id->first()->id;
                 }
+                else{
+                    $to_id = null;
+                }
             }
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($sj_from_id->exists()) {
+                $sj_from_id = $sj_from_id->first()->id;
+            }
+
             else{
                 $from_id = null;
             }
