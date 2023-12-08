@@ -73,6 +73,9 @@ class MMSReportController extends Controller
                 if ($to_id->exists()) {
                     $to_id = $to_id->first()->id;
                 }
+                else{
+                    $to_id = null;
+                }
             }
             else{
                 $from_id = null;
