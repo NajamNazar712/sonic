@@ -1248,8 +1248,6 @@ class ShipperReportsController extends Controller
             $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-            // $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
-            // $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
             return view('client.reports.mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
         } else{
             return redirect()->back()->with('error', 'Not Found!');
@@ -1270,8 +1268,8 @@ class ShipperReportsController extends Controller
             $sj_from_id = 168982787;
 
             if ($from != null && $to != null) {
+
                 $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
-    
                 if ($from_id->exists()) {
                     $from_id = $from_id->first()->id;
                     
@@ -1280,6 +1278,10 @@ class ShipperReportsController extends Controller
                     if ($to_id->exists()) {
                         $to_id = $to_id->first()->id;
                     }
+                }
+                $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+                if ($sj_from_id->exists()) {
+                    $sj_from_id = $sj_from_id->first()->id;
                 }
             }
 
@@ -1337,14 +1339,14 @@ class ShipperReportsController extends Controller
                 //     }
                 // }
 
-            if($from != null && $to != null) {
-                $sales = $sales->whereBetween('sj.created_at', [$from, $to]);
-                
-                if ($from_id != null && $to_id != null) {
-                    $sales->where('sj.id', '>=', $from_id)
-                        ->where('sj.id', '<=', $to_id);
+                if($from != null && $to != null) {
+                    $sales = $sales->whereBetween('shipments.created_at', [$from, $to]);
+                    
+                    if ($from_id != null && $to_id != null) {
+                        $sales->where('shipments.id', '>=', $from_id)
+                            ->where('shipments.id', '<=', $to_id);
+                    }
                 }
-            }
 
             if ($tracking = $request->get('search_tracking')) {
                 $sales->where('shipments.tracking_number', '=', $tracking);
