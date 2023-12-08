@@ -49,10 +49,10 @@ class AgentChangeStatus extends Command
     public function handle()
     {
         try {
-            RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6) // when assign agent status is unresponsive
-            ->where('rv_state_id', 2) // when assign agent state is unassigned
-            ->where('unresponsive_attempt_time', '<', Carbon::now()->subHours(6)->toDateTimeString()) // when last state unassigned 3 hours has been passed
-            ->update(['rv_state_id' => 3]);// update state to open so any agent can get the ticket
+            RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)
+            ->where('rv_state_id', 2)
+            ->where('unresponsive_attempt_time', '<', Carbon::today()) // if current day has passed
+            ->update(['rv_state_id' => 3]);
         } catch (\Throwable $th) {
             $this->createRvCronLog($th->getMessage());
         }
