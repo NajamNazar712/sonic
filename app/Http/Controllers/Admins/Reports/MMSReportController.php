@@ -74,6 +74,9 @@ class MMSReportController extends Controller
                     $to_id = $to_id->first()->id;
                 }
             }
+            else{
+                $from_id = null;
+            }
         }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
