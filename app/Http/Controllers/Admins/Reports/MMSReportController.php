@@ -73,17 +73,10 @@ class MMSReportController extends Controller
                 if ($to_id->exists()) {
                     $to_id = $to_id->first()->id;
                 }
-                else{
-                    $to_id = null;
-                }
             }
             $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($sj_from_id->exists()) {
                 $sj_from_id = $sj_from_id->first()->id;
-            }
-
-            else{
-                $from_id = null;
             }
         }
 
@@ -131,11 +124,11 @@ class MMSReportController extends Controller
    
         
         if($from != null && $to != null) {
-            $sales = $sales->whereBetween('sj.created_at', [$from, $to]);
+            $sales = $sales->whereBetween('shipments.created_at', [$from, $to]);
             
             if ($from_id != null && $to_id != null) {
-                $sales->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
+                $sales->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
             }
         }
 
