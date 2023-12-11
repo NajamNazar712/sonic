@@ -322,7 +322,7 @@
                                /* 'bag_weight': bag_weight,*/
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 30000,
+                            // timeout: 30000,
                             // error: function (data) {
                             //     $('#add_bag_form button.add').prop('disabled', false);
                             //     UnblockPagePermanently();
