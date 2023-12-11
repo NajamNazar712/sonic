@@ -734,7 +734,7 @@ class ReturnController extends Controller
                     }
                 }
                 else{
-                    return '';
+                    return 'haha';
                 }
             });
         if ($tracking_numbers = $request->get('tracking_numbers')) {
