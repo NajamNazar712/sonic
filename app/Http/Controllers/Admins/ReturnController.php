@@ -1079,7 +1079,7 @@ class ReturnController extends Controller
         }
     }
 
-    //THIS FUNCTION IS CALLING ON Return CONFIRM BUTTON in Row ON Shipment - Reason Validation Required Screen
+    //THIS FUNCTION IS CALLING ON Return CONFIRM BUTTON and Reattempt with OSA Charges in Row ON Shipment - Reason Validation Required Screen
     public function return_marked_single_status(Request $request)
     {
         $remark = $request->remark;

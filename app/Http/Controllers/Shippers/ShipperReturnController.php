@@ -323,39 +323,39 @@ class ShipperReturnController extends Controller
 
     public function return_marked_single_status(Request $request){
 
-        // $this->return_marked_status($request);
-        $parcel = Shipment::find($request->shipment_id);
-        if($parcel){
-            if($parcel->shipper_status_id == 12){
+        $this->return_marked_status($request);
+        // $parcel = Shipment::find($request->shipment_id);
+        // if($parcel){
+        //     if($parcel->shipper_status_id == 12){
 
-                    Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+        //             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+        //             $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
 
-                    ShipmentChargesController::return($request->shipment_id);
+        //             ShipmentChargesController::return($request->shipment_id);
 
-                    AdminFinanceController::add_payment($request->shipment_id, 1);
-                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
+        //             AdminFinanceController::add_payment($request->shipment_id, 1);
+        //             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
                 
-                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                if($return_assign_shipment->exists()){
-                    $return_assign_shipment = $return_assign_shipment->latest()->first();
-                    $return_assign_shipment->status = 0;
-                    $return_assign_shipment->save();
+        //         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+        //         if($return_assign_shipment->exists()){
+        //             $return_assign_shipment = $return_assign_shipment->latest()->first();
+        //             $return_assign_shipment->status = 0;
+        //             $return_assign_shipment->save();
 
-                    $return_assign_log = new ReturnAssignedShipmentLogs();
-                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                            $return_assign_log->status = 2;
-                            $return_assign_log->assigned_by = Auth::id();
-                            $return_assign_log->save();
-                }
+        //             $return_assign_log = new ReturnAssignedShipmentLogs();
+        //                     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //                     $return_assign_log->status = 2;
+        //                     $return_assign_log->assigned_by = Auth::id();
+        //                     $return_assign_log->save();
+        //         }
 
-                return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+        //         return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
 
-            }
+        //     }
 
-            return ['status'=>0,'error'=>"Something went wrong, try again later!"];
-        }
-        return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+        //     return ['status'=>0,'error'=>"Something went wrong, try again later!"];
+        // }
+        // return ['status'=>0,'error'=>"Something went wrong, try again later!"];
     }
 
     public function return_marked_status(Request $request)
