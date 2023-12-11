@@ -6867,6 +6867,7 @@ class NotificationsController extends Controller
                         //$admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
                         $admins = Admin::whereIn('id', [36, 55, 288])->where('status', 1);
 
+                        $to = [];
                         if ($admins->exists()) {
                             $to = $admins->pluck('email')->toArray();
                         }
@@ -6876,7 +6877,9 @@ class NotificationsController extends Controller
                          if ($admins->exists()) {
                              $cc = $admins->pluck('email')->toArray();
                          }*/
-                        self::email($subject, $body, $to /*,$cc*/);
+                        if (count($to) > 0){
+                            self::email($subject, $body, $to);
+                        }
                     }
                 } else if ($id == 113) {
                     $subject = $notification->subject;
