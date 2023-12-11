@@ -13277,8 +13277,10 @@ class AdminReportsController extends Controller
                         $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->pluck('shipment_id')->toArray();
                         $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
                         $hbl_connect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
-                        $cod_collect_by_rider = DB::connection('reports')->table('delivery_cash_collections')->whereIn('delivery_note_id', $dn_ids)->sum('amount');
-                       
+                        // $cod_collect_by_rider = DB::connection('reports')->table('delivery_cash_collections')->whereIn('delivery_note_id', $dn_ids)->sum('amount');
+
+                        $cod_submitted_via_cash = DB::connection('reports')->table('delivery_notes')->where('cash_collection_status', 1)->whereIn('id', $dn_ids)->sum('received_cod_amount');
+                        $total_cod_received_amount_short_submitted = DB::connection('reports')->table('delivery_notes')->where('cash_collection_status', 0)->whereIn('id', $dn_ids)->sum('received_cod_amount');
 
                         $data['out_for_delivery'] = $rds_value->ofd_shipments;
                         $data['out_for_delivery_percentage'] = $data['ready_for_delivery'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery']) * 100,2) : 0;
@@ -13290,8 +13292,8 @@ class AdminReportsController extends Controller
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
-                        $data['cod_submitted_via_cash'] = $total_cod_received_amount - ($hbl_connect_amount + $fintech_amount);
-                        $data['cod_submitted_by_rider'] = $cod_collect_by_rider ?? 0;
+                        $data['cod_submitted_via_cash'] = ($cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $cod_submitted_via_cash;
+                        $data['cod_submitted_by_rider'] = ($total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount);
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
                         $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
                         $data['undelivered'] = $rds_value->undelivered_shipments;
