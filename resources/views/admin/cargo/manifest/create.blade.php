@@ -439,7 +439,7 @@
                         remarks,
                         '_token': '{{ csrf_token() }}'
                     },
-                    timeout: 30000,
+                    // timeout: 30000,
                     error: function (data) {
                         $('#cargo_details').modal('hide');
 
