@@ -9189,5 +9189,45 @@ class GlobalSettingsController extends Controller
         
         $product->delete();
         return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
+    }
+
+    public function shipper_ibft_charges_settings_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
+        $shippers = User::where('status', '>', 1)->select('id', 'name');
+        $all_shippers = GlobalSettings::where('id', 68)->where('text', Auth::id())->first();
+
+        //if admid_id is included in global settings 'text' column where global setting id = 68 i.e(sales_user_restriction_bypass) and department id is 7 (sales) then fetch all shippers
+        if (session('department_id') == 7 && $all_shippers) {
+            $shippers = $shippers->get();
         }
+
+        // else if departmnet id is 7 (sales) fetch only tagged shippers
+        else if(session('department_id') == 7){
+            // $shippers = $shippers->where(function ($query) {
+            //     $query->whereIn('users.id', session('tagged_shippers'));
+            // });
+
+            $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+            ->select('u.id', 'u.name') // Separate the column names inside an array
+            ->where('sale_person_tags.admin_id', Auth::id())
+            ->get();
+        }
+        // $shippers = $shippers->get();
+
+        $business_shipment = BusinessProjectionShipment::all();
+
+        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
+    }
+
+    public function shipper_ibft_charges_settings_list(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
+
+        return;
+    }
+
+    public function shipper_ibft_charges_settings_update(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 714);
+
+        return;
+    }
 }

@@ -1694,9 +1694,6 @@
                                                 href="{{ route('admin.settings.auto_account_disabled_days.auto_index') }}">Auto
                                                 Account Disabled Days</a></li>
                                     @endif
-                                    {{--                                    @if (session('role_id') == 1 || in_array(228, session('permissions'))) --}}
-                                    {{--                                        <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li> --}}
-                                    {{--                                    @endif --}}
                                     @if (session('role_id') == 1 || in_array(214, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.packaging.types.index') }}">Packaging Types</a>
@@ -2169,8 +2166,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 ||
-                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825,851,854], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825, 851, 854, 913], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Financials</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([157, 158, 462], session('permissions'))) !== 0)
@@ -2242,6 +2238,11 @@
                                     @if (session('role_id') == 1 || in_array(854, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
+                                    @endif  
+
+                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(913, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.shipper_ibft_charges_settings.index') }}">Shipper IBFT Charges Settings</a></li>
                                     @endif  
 
 
@@ -2671,19 +2672,16 @@
                             </li>
                         @endif
                         @if (session('role_id') == 1 || count(array_intersect([661, 664], session('permissions'))) !== 0)
-                            <li class=" nav-item"><a href="#"><span class="menu-title">Leads
-                                        Management</span></a>
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Leads Management</span></a>
                                 <ul class="menu-content">
 
                                     @if (session('role_id') == 1 || in_array(661, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.settings.lead_tagging.index') }}">Auto
-                                                Tagging</a></li>
+                                                href="{{ route('admin.settings.lead_tagging.index') }}">Auto Tagging</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(664, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.settings.lead_zones.index') }}">Zone
-                                                Tagging</a></li>
+                                                href="{{ route('admin.settings.lead_zones.index') }}">Zone Tagging</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(671, session('permissions')))
                                         <li><a class="menu-item"
