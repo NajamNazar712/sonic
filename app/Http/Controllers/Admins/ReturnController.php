@@ -961,7 +961,7 @@ class ReturnController extends Controller
 
     public function return_reattempt_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
-        // dd($request->all());
+        dd($request->all());
         // $shipment_ids = $request->shipment_ids;
         $shipment_ids = $request->shipment_ids;
 
@@ -1257,8 +1257,10 @@ class ReturnController extends Controller
             }
             return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
 
-
+            //Action
         }else if($request->action == 'reattempt'){
+
+            dd($request->all());
             $parcel = Shipment::find($request->shipment_id);
             if($request->has('charges'))
             {
