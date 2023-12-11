@@ -3096,8 +3096,8 @@
                                 var shipment_id = $('#eec_shipment_id_NSAreattempt').val();
                                 var shipment_remark = $('#eec_shipment_remark_NSAreattempt').val();
                                 $.ajax({
-                                    // url: "{{ route('admin.return.marked.status.single') }}",
-                                    url: "{{ route('admin.return.reattempt.status') }}",
+                                    url: "{{ route('admin.return.marked.status.single') }}",
+                                    // url: "{{ route('admin.return.reattempt.status') }}",
                                     method: 'POST',
                                     data: {
                                         'charges': charges,
