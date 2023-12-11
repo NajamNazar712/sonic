@@ -968,6 +968,7 @@ class ReturnController extends Controller
         if ($request->action == 'reattempt') {
             // foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
+                dd($parcel);
                 if (!in_array($parcel->shipper_status_id, [13, 20])) {
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null) ? $request->remark[$parcel->id] : null;
