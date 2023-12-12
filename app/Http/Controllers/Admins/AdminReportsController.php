@@ -13282,7 +13282,7 @@ class AdminReportsController extends Controller
 
                         $cod_submitted_via_cash = DB::connection('reports')->table('delivery_notes')->where('cash_collection_status', 1)->whereIn('id', $dn_ids)->sum('received_cod_amount');
                         $total_cod_received_amount_short_submitted = DB::connection('reports')->table('delivery_notes')->where('cash_collection_status', 0)->whereIn('id', $dn_ids)->sum('received_cod_amount');
-\
+
                         $data['out_for_delivery'] = $rds_value->ofd_shipments;
                         $data['out_for_delivery_percentage'] = $data['ready_for_delivery'] ? round(($data['out_for_delivery'] / $data['ready_for_delivery']) * 100,2) : 0;
                         $data['delivery_note'] = $rds_value->dn_no_count;
