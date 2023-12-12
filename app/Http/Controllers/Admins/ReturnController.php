@@ -1256,24 +1256,26 @@ class ReturnController extends Controller
             }
             return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
 
-            //Action
-        }else if($request->action == 'reattempt'){
+        //Action Button reattempt With Charges
+        }
+        // else if($request->action == 'reattempt'){
 
-            $parcel = Shipment::find($request->shipment_id);
-            if($request->has('charges'))
-            {
-                if($request->charges != null){
-                    $check= $this->update_estimatecharges($request->shipment_id, $request->charges);
-                    if($check != 0)
-                    {
-                        return ['status'=>0,'error'=>"Shipment not found on Estimation Charges"];
-                    }
-                }
+        //     $parcel = Shipment::find($request->shipment_id);
+        //     if($request->has('charges'))
+        //     {
+        //         if($request->charges != null){
+        //             $check= $this->update_estimatecharges($request->shipment_id, $request->charges);
+        //             if($check != 0)
+        //             {
+        //                 return ['status'=>0,'error'=>"Shipment not found on Estimation Charges"];
+        //             }
+        //         }
 
-                return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
-            }
-            return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
-        } else if ($request->action == 'reattempt') {
+        //         return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
+        //     }
+        //     return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
+        // }
+        else if ($request->action == 'reattempt') {
             $parcel = Shipment::find($request->shipment_id);
             if ($request->has('charges')) {
                 if ($request->charges != null) {
