@@ -13311,7 +13311,7 @@ class AdminReportsController extends Controller
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
                         $data['cod_submitted_via_cash'] = $cash_collection['cod_submitted_via_cash'][0] - ($hbl_connect_amount + $fintech_amount);
-                        $data['cod_submitted_by_rider'] = $cash_collection['cod_submitted_by_rider'][0] ?? 0;
+                        $data['cod_submitted_by_rider'] = $cash_collection['cod_submitted_by_rider'][0]v- ($hbl_connect_amount + $fintech_amount) ?? 0;
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
                         $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
                         $data['undelivered'] = $rds_value->undelivered_shipments;
