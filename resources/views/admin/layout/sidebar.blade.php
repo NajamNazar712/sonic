@@ -354,9 +354,15 @@
                                             @endif
 
                                             @if (session('role_id') == 1 || (in_array(546, session('permissions')) && Auth::user()->default_hub_id != null))
-                                                <li><a class="menu-item"
+                                                 <li><a class="menu-item"
                                                         href="{{ route('admin.cargo_manifest.bags.create.index') }}">Create
                                                         Bag</a></li>
+                                            @endif
+
+                                            @if (session('role_id') == 1 || in_array(547, session('permissions')))
+                                                <li><a class="menu-item"
+                                                        href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Sack Bag</a>
+                                                </li>
                                             @endif
 
                                             @if (session('role_id') == 1 || (in_array(559, session('permissions')) && Auth::user()->default_hub_id != null))
@@ -369,6 +375,7 @@
                                                      <li><a class="menu-item" href="{{ route('admin.master_cargo.bag.create.open_bag.index') }}">Create Open Bag</a></li>
                                                  @endif --}}
 
+                                                 
                                             @if (session('role_id') == 1 || in_array(547, session('permissions')))
                                                 <li><a class="menu-item"
                                                         href="{{ route('admin.cargo_manifest.bags.history.index') }}">History</a>

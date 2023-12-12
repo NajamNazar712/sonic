@@ -1952,6 +1952,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
                 Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
+
+            Route::prefix('sack_bag')->name('sack_bag.')->group(function(){
+                Route::get('', 'Admins\AdminCargoManifestController@sack_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
+            });
         });
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
         Route::get('/list', 'Admins\AdminCargoManifestController@manifest_list')->name('list');

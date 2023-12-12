@@ -3447,4 +3447,12 @@ class AdminCargoManifestController extends Controller
         }
     }
 
+    public function sack_bag_index(){
+        return view('admin.cargo.manifest.bags.sack_bag');
+    }
+
+    public function sack_bag_list(){
+        
+    }
+
 }
