@@ -13273,6 +13273,7 @@ class AdminReportsController extends Controller
                     {
                         $dn_ids = explode(',', $rds_value->dn_ids);
 
+                        
                         $total_cod_received_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
                         $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->pluck('shipment_id')->toArray();
                         $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
@@ -13293,7 +13294,7 @@ class AdminReportsController extends Controller
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
                         $data['cod_submitted_via_cash'] = ($cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount);
-                        $data['cod_submitted_by_rider'] = ($total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount);
+                        $data['cod_submitted_by_rider'] = ($total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $total_cod_received_amount_short_submitted;
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
                         $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
                         $data['undelivered'] = $rds_value->undelivered_shipments;
