@@ -13280,7 +13280,6 @@ class AdminReportsController extends Controller
                         
                         foreach ($dn_ids as $dn_id) {
                             $dn = DeliveryNote::find($dn_id);
-                        
                             if ($dn) {
                                 if ($dn->cash_collection_status == 1) {
                                     $cash_collection['cod_submitted_via_cash'][] = $dn->received_cod_amount;
@@ -13290,7 +13289,7 @@ class AdminReportsController extends Controller
                             }
                         }                        
 
-                        // dd($cash_collection);
+                        dd($cash_collection);
 
                         $total_cod_received_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
                         $delivery_note_shipment = DeliveryNoteShipment::whereIn('delivery_note_id', $dn_ids)->pluck('shipment_id')->toArray();
@@ -13309,8 +13308,8 @@ class AdminReportsController extends Controller
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
-                        $data['cod_submitted_via_cash'] = $cash_collection['cod_submitted_via_cash'][0];
-                        $data['cod_submitted_by_rider'] = $cash_collection['cod_submitted_by_rider'][0] - ($hbl_connect_amount + $fintech_amount) ?? 0;
+                        $data['cod_submitted_via_cash'] = $cash_collection['cod_submitted_via_cash'][0] - ($hbl_connect_amount + $fintech_amount);
+                        $data['cod_submitted_by_rider'] = $cash_collection['cod_submitted_by_rider'][0]  ?? 0;
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
                         $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
                         $data['undelivered'] = $rds_value->undelivered_shipments;
