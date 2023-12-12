@@ -13293,8 +13293,8 @@ class AdminReportsController extends Controller
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
-                        $data['cod_submitted_via_cash'] = ($cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $cod_submitted_via_cash;
-                        $data['cod_submitted_by_rider'] = ($total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $total_cod_received_amount_short_submitted;
+                        $data['cod_submitted_via_cash'] = ($cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $cod_submitted_via_cash - ($hbl_connect_amount + $fintech_amount);
+                        $data['cod_submitted_by_rider'] = ($total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount) < 0) ? 0 : $total_cod_received_amount_short_submitted - ($hbl_connect_amount + $fintech_amount);
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
                         $data['pending_percentage'] =  round(($data['pending'] / $rds_value->ofd_shipments) * 100,2);
                         $data['undelivered'] = $rds_value->undelivered_shipments;
