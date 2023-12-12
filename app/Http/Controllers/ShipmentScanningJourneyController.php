@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\BagScanningJourney;
-use App\Http\Models\ShipmentScanningJourney;
-use Illuminate\Http\Request;
-use Vectorface\Whip\Whip;
 use Session;
+use Vectorface\Whip\Whip;
+use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BagScanningJourney;
+use App\ShipmentScanningJourneyAreaLog;
+use App\Jobs\ShipmentReportingAreaStatus;
+use App\Http\Models\ShipmentScanningJourney;
 
 class ShipmentScanningJourneyController extends Controller
 {
@@ -37,8 +40,24 @@ class ShipmentScanningJourneyController extends Controller
             }
 
             $add_scanning_history->save();
+
+            $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
+            $add_scanning_history_area_log->shipment_id = $shipment_id;
+            $add_scanning_history_area_log->shipment_scanning_journey_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
+            $add_scanning_history_area_log->hub_id = Admin::find(session('id'))->default_hub_id;
+            $add_scanning_history_area_log->area_id = Admin::find(session('id'))->area_id;
+            $add_scanning_history_area_log->location_status = 0;
+            $add_scanning_history_area_log->status = 0;
+            $add_scanning_history_area_log->save();
+
+            $latest_area_log_id = ShipmentScanningJourneyAreaLog::latest('id')->first()->id ?? 1;
+            
+            self::shipment_reporting_area_status($latest_area_log_id);
         }
     }
+
+
+   
 
     static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
     {
@@ -62,6 +81,11 @@ class ShipmentScanningJourneyController extends Controller
 
             $add_scanning_history->save();
         }
-
     }
+
+    static public function shipment_reporting_area_status($latest_area_log_id)
+    {
+        dispatch(new ShipmentReportingAreaStatus($latest_area_log_id));
+    }
+
 }
