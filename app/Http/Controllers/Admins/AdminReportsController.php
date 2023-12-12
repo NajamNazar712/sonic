@@ -13289,6 +13289,8 @@ class AdminReportsController extends Controller
                                 }
                             }
                         }
+
+                        dd($cash_collection);
                         
 
                         // dd($cash_collection);
