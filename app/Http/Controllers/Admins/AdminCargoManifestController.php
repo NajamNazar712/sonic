@@ -46,6 +46,7 @@ use App\Http\Models\WarehouseStockRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -1064,116 +1065,130 @@ class AdminCargoManifestController extends Controller
     public function create_store(Request $request)
     {
 
-        $shipments = 0;
-        $quantity = 0;
-        $shipments_weight = 0;
+        $sack_bag_no=$request->input('sack_bag_mo');
+        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no);
+        // if($sack_bag->exists()){
+            $shipments = 0;
+            $quantity = 0;
+            $shipments_weight = 0;
 
-        $shipment_ids = explode(',', $request->input('shipment_ids'));
-        $open_box_ids = explode(',', $request->input('open_box_ids'));
-        foreach ($shipment_ids as $key => $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
-
-            if ($shipment->shipper_status_id == 20) {
-                $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
-                if ($lost_shipment) {
-                    $bag = CargoManifestBag::find($lost_shipment->bag_id);
-                    if ($bag->lost_shipments > 0) {
-                        $bag->lost_shipments--;
-                        $bag->save();
-                        $lost_shipment->delete();
-                    }
-                }
-            }
-
-
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
-                $shipments++;
-                $shipments_weight += $shipment->actual_weight;
-                $quantity = $quantity + count($shipment->items);
-            } else {
-                unset($shipment_ids[$key]);
-            }
-        }
-
-        if (!empty($shipment_ids)) {
-
-            $bag = new CargoManifestBag();
-            $bag->seal_number = $request->input('seal_number');
-            $bag->origin_hub_id = $request->input('origin_hub_id');
-            $bag->destination_hub_id = $request->input('destination_hub_id');
-            $bag->shipments = $shipments;
-            $bag->quantity = $quantity;
-            $bag->shipments_weight = $shipments_weight;
-            $bag->actual_weight = $request->input('actual_weight');
-            $bag->created_by = Auth::id();
-            $bag->type = $request->input('bag_type');
-            $bag->transport_mode_id = 2;
-            $bag->status_id = 1;
-            $bag->completed = 0;
-            $bag->current_hub_id = Auth::user()->default_hub_id;
-            $bag->save();
-
-            CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
-
-            $id = $bag->id;
-
-            foreach ($shipment_ids as $shipment_id) {
-
-                $bag_shipment = new CargoManifestBagShipments();
-
-                $bag_shipment->cargo_manifest_bag_id = $id;
-                $bag_shipment->shipment_id = $shipment_id;
-
-                $bag_shipment->save();
-
+            $shipment_ids = explode(',', $request->input('shipment_ids'));
+            $open_box_ids = explode(',', $request->input('open_box_ids'));
+            foreach ($shipment_ids as $key => $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
 
-                $shipper_status_id = NULL;
-                $consignee_status_id = NULL;
-
-                if ($request->input('bag_type') == 1) {
-                    $shipper_status_id = 3;
-                    $consignee_status_id = 3;
-                } else {
-                    $shipper_status_id = 21;
-                    $consignee_status_id = 21;
-
-                    if ($shipment->shipper_status_id != 20) {
-                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
-                            $shipper_status_id = 21;
-                            $consignee_status_id = 21;
-                        } else if ($shipment->booking_type_id == 2) {
-                            $shipper_status_id = 26;
-                            $consignee_status_id = 26;
-                        } else if ($shipment->booking_type_id == 3) {
-                            $shipper_status_id = 32;
-                            $consignee_status_id = 32;
-                        } else {
-                            $shipper_status_id = 21;
-                            $consignee_status_id = 21;
+                if ($shipment->shipper_status_id == 20) {
+                    $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
+                    if ($lost_shipment) {
+                        $bag = CargoManifestBag::find($lost_shipment->bag_id);
+                        if ($bag->lost_shipments > 0) {
+                            $bag->lost_shipments--;
+                            $bag->save();
+                            $lost_shipment->delete();
                         }
                     }
                 }
 
-                $shipment->shipper_status_id = $shipper_status_id;
-                $shipment->consignee_status_id = $consignee_status_id;
 
-                $shipment->save();
-
-
-                if (in_array($shipment_id, $open_box_ids)) {
-                    $shipment->open_box = 1;
-                    $shipment->save();
-                    ShipmentOpenBoxJourneyController::add($shipment_id, 1, Auth::id());
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                    $shipments++;
+                    $shipments_weight += $shipment->actual_weight;
+                    $quantity = $quantity + count($shipment->items);
+                } else {
+                    unset($shipment_ids[$key]);
                 }
-
-                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
             }
 
-            return redirect()->route('admin.cargo_manifest.bags.create.index')->with(['success' => 'Bag Created with Bag Number: ' . $bag->seal_number]);
-        } else {
-            return back()->withErrors('All Shipments have already been added to another Bag!');
-        }
+            if (!empty($shipment_ids)) {
+
+                $bag = new CargoManifestBag();
+                $bag->seal_number = $request->input('seal_number');
+                $bag->origin_hub_id = $request->input('origin_hub_id');
+                $bag->destination_hub_id = $request->input('destination_hub_id');
+                $bag->shipments = $shipments;
+                $bag->quantity = $quantity;
+                $bag->shipments_weight = $shipments_weight;
+                $bag->actual_weight = $request->input('actual_weight');
+                $bag->created_by = Auth::id();
+                $bag->type = $request->input('bag_type');
+                $bag->transport_mode_id = 2;
+                $bag->status_id = 1;
+                $bag->completed = 0;
+                $bag->current_hub_id = Auth::user()->default_hub_id;
+                if($sack_bag->exists()){
+                    $bag->sack_bag_no=$sack_bag_no;
+                }else{
+                    $bag->sack_bag_no='N/A';
+                }
+              
+                $bag->save();
+
+                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
+
+                $id = $bag->id;
+
+                foreach ($shipment_ids as $shipment_id) {
+
+                    $bag_shipment = new CargoManifestBagShipments();
+
+                    $bag_shipment->cargo_manifest_bag_id = $id;
+                    $bag_shipment->shipment_id = $shipment_id;
+
+                    $bag_shipment->save();
+
+                    $shipment = Shipment::find($shipment_id);
+
+                    $shipper_status_id = NULL;
+                    $consignee_status_id = NULL;
+
+                    if ($request->input('bag_type') == 1) {
+                        $shipper_status_id = 3;
+                        $consignee_status_id = 3;
+                    } else {
+                        $shipper_status_id = 21;
+                        $consignee_status_id = 21;
+
+                        if ($shipment->shipper_status_id != 20) {
+                            if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                                $shipper_status_id = 21;
+                                $consignee_status_id = 21;
+                            } else if ($shipment->booking_type_id == 2) {
+                                $shipper_status_id = 26;
+                                $consignee_status_id = 26;
+                            } else if ($shipment->booking_type_id == 3) {
+                                $shipper_status_id = 32;
+                                $consignee_status_id = 32;
+                            } else {
+                                $shipper_status_id = 21;
+                                $consignee_status_id = 21;
+                            }
+                        }
+                    }
+
+                    $shipment->shipper_status_id = $shipper_status_id;
+                    $shipment->consignee_status_id = $consignee_status_id;
+
+                    $shipment->save();
+
+
+                    if (in_array($shipment_id, $open_box_ids)) {
+                        $shipment->open_box = 1;
+                        $shipment->save();
+                        ShipmentOpenBoxJourneyController::add($shipment_id, 1, Auth::id());
+                    }
+
+                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
+                }
+
+                return redirect()->route('admin.cargo_manifest.bags.create.index')->with(['success' => 'Bag Created with Bag Number: ' . $bag->seal_number]);
+            } else {
+                return back()->withErrors('All Shipments have already been added to another Bag!');
+            }
+        // }else{
+        //     return back()->withErrors('No Sack Bag Available');
+        // }
+      
+       
     }
 
     public function create_open_bag_index()
@@ -3448,11 +3463,37 @@ class AdminCargoManifestController extends Controller
     }
 
     public function sack_bag_index(){
-        return view('admin.cargo.manifest.bags.sack_bag');
+        $origins=City::where('status','=',1)->get();
+        return view('admin.cargo.manifest.bags.sack_bag',compact('origins'));
     }
 
     public function sack_bag_list(){
-        
+            $issuebag =IssueSackBagOrigin::join('cities as c','c.id','=','issue_sack_bag_origins.origin')
+            ->join('admins as ad','ad.id','=','issue_sack_bag_origins.user_id')
+            ->select('issue_sack_bag_origins.sack_bag_no as sack_bag_no','c.name as origin','ad.name as user_id','issue_sack_bag_origins.remarks');
+            
+            // if (session('role_id') != 1) {
+            //     $cargo->where('cargo_manifest_draft_bags.origin_id', Auth::user()->default_hub_id);
+            // }
+
+            $datatables = Datatables::of($issuebag);
+
+            return $datatables->make(true);
+    }
+
+    public function add_sack_bag(Request $request){
+        $user_id=session('id');
+        $sack_bag=new IssueSackBagOrigin();
+        $sack_bag->sack_bag_no=$request->sack_bag_no;
+        $sack_bag->origin=$request->origin;
+        $sack_bag->user_id=$user_id;
+        $sack_bag->remarks=$request->remarks;
+        $sack_bag->type=1;
+        if($sack_bag->save()){
+            return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['success' => 'Sack Bag Added Successfully']);
+
+        }
+        return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Add']);
     }
 
 }

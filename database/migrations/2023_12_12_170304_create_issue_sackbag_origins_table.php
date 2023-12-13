@@ -13,12 +13,12 @@ class CreateIssueSackbagOriginsTable extends Migration
      */
     public function up()
     {
-        Schema::create('issue_sackbag_origins', function (Blueprint $table) {
+        Schema::create('issue_sack_bag_origins', function (Blueprint $table) {
             $table->increments('id');
             $table->string('sack_bag_no');
             $table->integer('origin');
             $table->integer('user_id');
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('action')->default(0);
             $table->tinyInteger('type')->nullable();

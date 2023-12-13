@@ -1956,6 +1956,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('sack_bag')->name('sack_bag.')->group(function(){
                 Route::get('', 'Admins\AdminCargoManifestController@sack_bag_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
+                Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
             });
         });
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
