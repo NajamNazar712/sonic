@@ -22,7 +22,14 @@
                             </div>
 
                             <form id="add_shipment_form" class="mb-1 justify-content-center" novalidate="novalidate">
-
+                                <div class = "row justify-content-center align-items-center">
+                                    <div class="col-auto">
+                                        <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                            <label class="mr-1">Manual Weight</label>
+                                            <input type="checkbox" name="manual_weight" class="switch hidden manual_weight" data-group-cls="btn-group-sm" >
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row text-center justify-content-center align-items-center">
                                     <div class="col-auto">
                                         <div class="form-group float-left">
@@ -37,7 +44,7 @@
                                     </div>
                                     <div class="col">
                                         <div class="form-group ">
-                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" readonly>
                                         </div>
                                     </div>
                                     <div class="col-auto">
@@ -119,8 +126,23 @@
                         <input type="hidden" name="try_and_buy_tracking_number" id="try_and_buy_tracking_number">
                         <input type="hidden" name="try_and_buy_shipment_items_count" id="try_and_buy_shipment_items_count">
                         <div class="row justify-content-center">
-                            <div class="form-group col-5">
+                            <div class="form-group col-4">
                                 <input type="text" name="scan_item" id="scan_item" class="form-control scan_item" placeholder="Scan Item">
+                            </div>
+                            <div class="form-group col-4">
+                                
+                                <input type="text" name="item_weight" id="item_weight" class="form-control item_weight" placeholder="Item Weight" readonly>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                    <label class="mr-1">Manual Weight</label>
+                                    <input type="checkbox" name="item_manual_weight" class="switch hidden item_manual_weight" data-group-cls="btn-group-sm" >
+                                </div>
+                            </div>
+                            <div class="col text-right">
+                                <div class="form-group ml-1">
+                                    <button type="button" name="item_add" class="btn btn-primary add" id="item_add" value="item_add">Add</button>
+                                </div>
                             </div>
                         </div>
                         <div class="row justify-content-center">
@@ -134,6 +156,7 @@
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Item ID</th>
                                 <th class="border-primary border-darken-1">Tracking Number</th>
+                                <th class="border-primary border-darken-1">Item Weight</th>
                                 <th class="border-primary border-darken-1"></th>
                             </tr>
                             </thead>
@@ -150,7 +173,7 @@
 
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
+                                <input type="text" name="try_and_buy_weight" id="try_and_buy_weight" class="form-control try_and_buy_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" readonly>
                             </div>
                         </div>
 
@@ -178,9 +201,25 @@
                         <input type="hidden" name="piece_tracking_number" id="piece_tracking_number">
                         <input type="hidden" name="piece_shipment_count" id="piece_shipment_count">
                         <div class="row justify-content-center">
-                            <div class="form-group col-5">
+                            <div class="form-group col-4">
                                 <input type="text" name="scan_piece" id="scan_piece" class="form-control scan_piece" placeholder="Scan Piece">
                             </div>
+                            <div class="form-group col-4">
+                                
+                                <input type="text" name="piece_weight" id="piece_weight" class="form-control piece_weight" placeholder="Piece Weight" readonly>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                    <label class="mr-1">Manual Weight</label>
+                                    <input type="checkbox" name="piece_manual_weight" class="switch hidden piece_manual_weight" data-group-cls="btn-group-sm" >
+                                </div>
+                            </div>
+                            <div class="col text-right">
+                                <div class="form-group ml-1">
+                                    <button type="button" name="piece_add" class="btn btn-primary add" id="piece_add" value="piece_add">Add</button>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="row justify-content-center">
                             <div class="row">
@@ -193,6 +232,7 @@
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Piece ID</th>
                                 <th class="border-primary border-darken-1">Tracking Number</th>
+                                <th class="border-primary border-darken-1">Piece Weight</th>
                                 <th class="border-primary border-darken-1"></th>
                             </tr>
                             </thead>
@@ -205,7 +245,7 @@
                         </div>
                         <div class="row justify-content-center">
                             <div class="form-group col-5">
-                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
+                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" readonly>
                             </div>
                         </div>
 
@@ -360,6 +400,27 @@
 
 
             $('#add_shipment_form input.tracking_number').focus();
+            $('#add_shipment_form input.tracking_number').on('change', function(){
+                if (!$('#add_shipment_form input.volumetric_weight').is(':checked') && !$('#add_shipment_form input.manual_weight').is(':checked') ) {
+                    var tracking_length = $('#add_shipment_form input.tracking_number').val().length;
+                        // $('.weight').val('22');
+                        // var dummy = $('.weight').val();
+                        // alert(dummy);
+                        $.ajax({
+                            url: 'http://localhost:1080/sonic',
+                            method: 'POST',
+                            timeout: 5000,
+                            error: function(data) {
+                                $('#add_shipment_form input.tracking_number').val('');
+                                toastr.error('Unable to fetch Weight. Please try after refresh', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            },
+                            success: function(data) {
+                                $('.weight').val(data);
+                            }
+                        });
+                }
+                
+            });
 
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -393,6 +454,21 @@
             });
 
             $('#add_try_and_buy_shipment_form input.scan_item').focus();
+            $('#add_try_and_buy_shipment_form input.scan_item').on('change',function(){
+                if(!$('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked')) {
+                    $.ajax({
+                        url: 'http://localhost:1080/sonic',
+                        method: 'POST',
+                        timeout: 5000,
+                        error: function(data) {
+                            toastr.error('Unable to fetch Weight. Please try after refresh', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        },
+                        success: function(data) {
+                            $('.item_weight').val(data);
+                        }
+                    });
+                }
+            });
 
             var try_and_buy_table = $('#try_and_buy_datatable').DataTable({
                 dom: 'ltipr',
@@ -402,6 +478,7 @@
                     {orderable: false, searchable: false, name: 'try_serial_number', class: 'align-middle serial_number'},
                     {name: 'try_item_id', class: 'align-middle item_id', orderable: false, searchable: false},
                     {name: 'try_tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'try_item_weight', class: 'align-middle item_weight', orderable: false, searchable: false},
                     {name: 'try_remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
                 ],
                 initComplete: function() {
@@ -409,17 +486,53 @@
                 }
             });
 
+            //for multi item screen switcher(try & buy)
+            $('#add_try_and_buy_shipment_form input.item_manual_weight').checkboxpicker().bind('change', function() {
+                if (this.checked) {
+                    $('.item_weight').val('').prop('readonly', false);
+                }
+                else {  
+                    $('.item_weight').val('').prop('readonly', true);
+                }
+            })
+            //for multi piece screen switcher   
+            $('#add_shipment_pieces_form input.piece_manual_weight').checkboxpicker().bind('change', function() {
+
+                if (this.checked) {
+                    $('.piece_weight').val('').prop('readonly', false);
+                }
+                else {  
+                    $('.piece_weight').val('').prop('readonly', true);
+                }
+            });
+            //master piece manual weight
+            $('#add_shipment_form input.manual_weight').checkboxpicker().bind('change', function() {
+
+                if (this.checked) {
+                    //$('.weight').val('');
+                    $('.weight').val('').prop('readonly', false);
+                }
+                else {  
+                    $('.weight').val('').prop('readonly', true);
+                }
+            });
             $('#add_shipment_form input.volumetric_weight').checkboxpicker().bind('change', function() {
                 var parent = $(this).parent('.form-group').prev('.form-group');
 
                 if (this.checked) {
+                    $('#add_shipment_form input.weight').val('').prop('readonly', false);
                     $('#add_shipment_form input.weight').val('').prop('disabled', true);
 
                     $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', false);
                 }
-                else {
-                    $('#add_shipment_form input.weight').val('').prop('disabled', false);
+                else {  
+                    if ($('#add_shipment_form input.manual_weight').is(':checked')) {
 
+                        $('#add_shipment_form input.weight').val('').prop('disabled', false);
+                    }else{
+                        $('#add_shipment_form input.weight').val('').prop('readonly', true);
+                        $('#add_shipment_form input.weight').val('').prop('disabled', false);
+                    }
                     $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', true);
                 }
             });
@@ -552,7 +665,7 @@
                     var height = $(form).find('input.height').val();
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.shipment_details') !!}',
+                            url: '{!! route('admin.v2_pickups.arrival.individual.shipment_details') !!}', //it is for piece details
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
@@ -616,7 +729,7 @@
                                 }
                                 else if(data.status == 2){
                                     $('#scan_try_and_buy_tracking_number').prop('disabled', true);
-                                    $('#try_and_buy_weight').prop('disabled', true);
+                                    //$('#try_and_buy_weight').prop('disabled', true);
                                     $('#try_and_buy_confirm').prop('disabled', true);
                                     if(data.details.scanned_shipment_item){
                                         var item_index = $.inArray(parseInt(data.details.scanned_shipment_item), all_shipment_item_ids);
@@ -650,6 +763,7 @@
                                         $('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
                                         $('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
                                         $('#tryAndbuyModal').modal('show');
+                                        $('#try_and_buy_weight').val(weight);
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
@@ -658,7 +772,7 @@
                                 }
                                 else if(data.status == 3){
                                     $('#scan_piece_tracking_number').prop('disabled', true);
-                                    $('#pieces_weight').prop('disabled', true);
+                                    //$('#pieces_weight').prop('disabled', true);
                                     $('#piece_confirm').prop('disabled', true);
                                     if(data.details.scanned_shipment_piece){
                                         var piece_index = $.inArray(parseInt(data.details.scanned_shipment_piece), all_shipment_piece_ids);
@@ -678,7 +792,7 @@
                                             var check = parseInt(piece_rowNo) + 1;
                                             if(parseInt(data.details.piece) === parseInt(check)){
                                                 $('#scan_piece_tracking_number').prop('disabled', false);
-                                                $('#pieces_weight').prop('disabled', false);
+                                                //$('#pieces_weight').prop('disabled', false);
                                                 $('#piece_confirm').prop('disabled', false);
                                             }
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -694,6 +808,7 @@
                                         $('#piece_shipment_count').val(data.details.pieces_count);
                                         $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
                                         $('#ShipmentPiecesModal').modal('show');
+                                        $('#pieces_weight').val(weight);
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
@@ -718,9 +833,11 @@
                 }
             });
 
-            $('#scan_item').on('change', function () {
-                var item = parseInt($(this).val());
+            $('#item_add').on('click', function () {
+                var item = parseInt($(this).closest('form').find('input[name="scan_item"]').val());
+                var item_weight =  $(this).closest('form').find('input[name="item_weight"]').val();
                 $('#scan_item').val('').focus();
+                $('#item_weight').val('');
                 if(item){
                     var new_item_index = $.inArray(item, shipment_item_ids);
                     if (new_item_index === -1) {
@@ -743,12 +860,13 @@
                                 if(data.status == 0){
                                     var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
                                     var try_rowNo = try_and_buy_table.rows().count();
-                                    try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, try_remove_button]).node().id = data.scanned_shipment_item;
+                                    try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, item_weight, try_remove_button]).node().id = data.scanned_shipment_item;
                                     try_and_buy_table.draw(false);
                                     try_and_buy_table.columns.adjust().draw();
                                     scan_sound(1);
                                     shipment_item_ids.push(data.scanned_shipment_item);
                                     var check = parseInt(try_rowNo) + 1;
+                                    $('#try_and_buy_weight').val(parseFloat($('#try_and_buy_weight').val()) + parseFloat(item_weight));
                                     if(parseInt(shipment_items_count) === parseInt(check)){
                                         $('#try_and_buy_airwaybill').prop('disabled', false);
                                     }
@@ -770,9 +888,11 @@
             $('#try_and_buy_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
+                var current_item_weight = parent.find('td').eq(-2).text();
                 var index = $.inArray(id, shipment_item_ids);
                 if (index !== -1) {
                     try_and_buy_table.row(parent).remove();
+                    $('#try_and_buy_weight').val(parseFloat($('#try_and_buy_weight').val()) - parseFloat(current_item_weight));
                     try_and_buy_table.draw(false);
                     var try_rowNo = try_and_buy_table.rows().count();
                     shipment_item_ids.splice(index, 1);
@@ -781,7 +901,7 @@
                     if(parseInt(shipment_items_count) !== parseInt(check)){
                         $('#try_and_buy_airwaybill').prop('disabled', true);
                         $('#scan_try_and_buy_tracking_number').prop('disabled', true);
-                        $('#try_and_buy_weight').prop('disabled', true);
+                        //$('#try_and_buy_weight').prop('disabled', true);
                         $('#try_and_buy_confirm').prop('disabled', true);
                     }
                 }
@@ -1089,7 +1209,21 @@
             });
 
             $('#add_shipment_pieces_form input.scan_piece').focus();
-
+            $('#add_shipment_pieces_form input.scan_piece').on('change',function(){
+                if(!$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked')) {
+                    $.ajax({
+                        url: 'http://localhost:1080/sonic',
+                        method: 'POST',
+                        timeout: 5000,
+                        error: function(data) {
+                            toastr.error('Unable to fetch Weight. Please try after refresh', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        },
+                        success: function(data) {
+                            $('.piece_weight').val(data);
+                        }
+                    });
+                }
+            });
             var piece_table = $('#piece_datatable').DataTable({
                 dom: 'ltipr',
                 paging:false,
@@ -1098,15 +1232,19 @@
                     {orderable: false, searchable: false, name: 'piece_serial_number', class: 'align-middle serial_number'},
                     {name: 'piece_id', class: 'align-middle piece_id', orderable: false, searchable: false},
                     {name: 'piece_tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'piece_weight', class: 'align-middle piece_weight', orderable: false, searchable: false},
                     {name: 'piece_remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
                 ],
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
             });
-            $('#scan_piece').on('change', function () {
-                var item = parseInt($(this).val());
+            $('#piece_add').on('click', function () {
+                //var item = parseInt($(this).val());
+                var item = parseInt($(this).closest('form').find('input[name="scan_piece"]').val());
+                var piece_weight =  $(this).closest('form').find('input[name="piece_weight"]').val();
                 $('#scan_piece').val('').focus();
+                $('#piece_weight').val('');
                 if(item){
                     var new_item_index = $.inArray(item, shipment_piece_ids);
                     if (new_item_index === -1) {
@@ -1114,7 +1252,7 @@
                         var shipment_tracking_number = $('#piece_tracking_number').val();
                         var shipment_piece_count = $('#piece_shipment_count').val();
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}',
+                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}', //it is for the other pieces modal
                             method: 'POST',
                             data: {
                                 'shipment_id': shipment_id,
@@ -1129,15 +1267,16 @@
                                 if(data.status == 0){
                                     var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
                                     var piece_rowNo = piece_table.rows().count();
-                                    piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_remove_button]).node().id = data.scanned_shipment_piece;
+                                    piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_weight, piece_remove_button]).node().id = data.scanned_shipment_piece;
                                     piece_table.draw(false);
                                     piece_table.columns.adjust().draw();
                                     scan_sound(1);
                                     shipment_piece_ids.push(data.scanned_shipment_piece);
                                     var check = parseInt(piece_rowNo) + 1;
+                                    $('#pieces_weight').val(parseFloat($('#pieces_weight').val()) + parseFloat(piece_weight));
                                     if(parseInt(shipment_piece_count) === parseInt(check)){
                                         $('#scan_piece_tracking_number').prop('disabled', false);
-                                        $('#pieces_weight').prop('disabled', false);
+                                        //$('#pieces_weight').prop('disabled', false);
                                         $('#piece_confirm').prop('disabled', false);
                                     }
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -1156,9 +1295,11 @@
             $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
+                var current_piece_weight = parent.find('td').eq(-2).text();
                 var index = $.inArray(id, shipment_piece_ids);
                 if (index !== -1) {
                     piece_table.row(parent).remove();
+                    $('#pieces_weight').val(parseFloat($('#pieces_weight').val()) - parseFloat(current_piece_weight));
                     piece_table.draw(false);
                     var piece_rowNo = piece_table.rows().count();
                     shipment_piece_ids.splice(index, 1);
@@ -1166,7 +1307,7 @@
                     var check = parseInt(piece_rowNo);
                     if(parseInt(shipment_piece_count) !== parseInt(check)){
                         $('#scan_piece_tracking_number').prop('disabled', true);
-                        $('#pieces_weight').prop('disabled', true);
+                       // $('#pieces_weight').prop('disabled', true);
                         $('#piece_confirm').prop('disabled', true);
                     }
                 }
