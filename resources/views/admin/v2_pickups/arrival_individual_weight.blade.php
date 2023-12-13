@@ -1194,6 +1194,7 @@
                                     scan_sound(1);
                                     shipment_piece_ids.push(data.scanned_shipment_piece);
                                     var check = parseInt(piece_rowNo) + 1;
+                                    $('#pieces_weight').val(parseInt($('#pieces_weight').val()) + parseInt(piece_weight));
                                     if(parseInt(shipment_piece_count) === parseInt(check)){
                                         $('#scan_piece_tracking_number').prop('disabled', false);
                                         //$('#pieces_weight').prop('disabled', false);
@@ -1215,9 +1216,11 @@
             $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');
                 var id = parseInt(parent.attr('id'));
+                var current_piece_weight = parent.find('td').eq(-2).text();
                 var index = $.inArray(id, shipment_piece_ids);
                 if (index !== -1) {
                     piece_table.row(parent).remove();
+                    $('#pieces_weight').val(parseInt($('#pieces_weight').val()) - parseInt(current_piece_weight));
                     piece_table.draw(false);
                     var piece_rowNo = piece_table.rows().count();
                     shipment_piece_ids.splice(index, 1);
