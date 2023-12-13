@@ -19,7 +19,7 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-5">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sales.projection.shipments.store') }}" novalidate="novalidate">
+                                    <form id="update_ibft_charges_form" class="form-horizontal text-center" method="POST" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="form-group">
@@ -42,10 +42,11 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Ibft Charges</span>
                                                 </div>
-                                                <input type="text" name="Ibft_charges" class="form-control class" placeholder="Ibft Charges*" data-rule-required="true" data-msg-required="Ibft Charges is required" value="">
-
+                                                <input type="text" name="Ibft_charges" id="Ibft_charges" class="form-control " placeholder="Ibft Charges*" data-rule-required="true" data-msg-required="Ibft Charges is required" required="required" value="" >
                                             </div>
-                                        </div>
+                                            
+                                            <div id="ibft_error" class="text text-danger d-none">
+                                                </div>                                            </div>
 
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -61,13 +62,14 @@
                             <div class="card-body">
 
                                 <div class="row justify-content-center">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                    <table class="table table-bordered datatable w-100" id="datatable" style="z-index: 3;">
                                         <thead>
                                         <tr role="row" class="bg-primary white">
                                             <th class="border-primary border-darken-1">S. No.</th>
                                             <th class="border-primary border-darken-1">Shipper</th>
                                             <th class="border-primary border-darken-1">Ibft Charges</th>
-
+                                            <th class="border-primary border-darken-1">Updated By</th>
+                                            <th class="border-primary border-darken-1">Updated At</th>
                                         </tr>
                                         </thead>
                                     </table>
@@ -84,6 +86,7 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
@@ -91,6 +94,14 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+
+    
+    <script src="{{ asset('app-assets/vendors/js/forms/validation/additional-methods.min.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
+
+
     <script>
         $(document).ready(function() {
             $('#shipper_select').select2({
@@ -108,17 +119,91 @@
             });
 
 
-            $('#settings_form .class').inputmask({
+            $('#update_ibft_charges_form .class').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
 
-            $('#settings_form').validate({
+            // $('#update_ibft_charges_form').validate({
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
+            //     }
+            // });
+
+
+            $('#update_ibft_charges_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    $('#ibft_error').removeClass('d-none')
+
+                    $('#ibft_error').text('Charges Required')
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            var charges = $('#update_ibft_charges_form #Ibft_charges').val();
+                            var shipper = $('#update_ibft_charges_form #shipper_select').val();
+                            $.ajax({
+                                url: '{!! route('admin.settings.shipper_ibft_charges_settings.update') !!}',
+                                method: 'POST',
+                                data: {
+                                    'Ibft_charges': charges,
+                                    'shippers': shipper,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function(data) {
+                                UnblockPagePermanently();
+
+                                if (data.status = 1) {
+                                    table.draw();
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {                             
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                $('#update_ibft_charges_form #Ibft_charges').val('');
+                                $("#shipper_select").val(null).trigger("change");
+                                $('#ibft_error').addClass('d-none')
+
+                            });
+
+                        }
+                    });
                 }
             });
 
@@ -131,7 +216,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.sales.projection.shipments.list') }}',
+                        url: '{{ route('admin.settings.shipper_ibft_charges_settings.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -139,14 +224,18 @@
                             head.push('S.No');
                             head.push('Shipper Name');
                             head.push('Ibft Charges');
+                            head.push('Updated By');
+                            head.push('Updated At');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.name);
-                                row.push(values.shipment);
+                                row.push(values.shipper);
+                                row.push(values.current_charges);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
 
                                 body.push(row);
                             });
@@ -163,7 +252,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Business Projected Shipments',
+                        title: 'User Ibft Charges',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset',
@@ -177,12 +266,14 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.settings.sales.projection.shipments.list') }}',
+                ajax: '{{ route('admin.settings.shipper_ibft_charges_settings.list') }}',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'shipper', name:'u.name', class: 'align-middle shipper'},
-                    {data: 'shipment', name: 'business_projection_shipments.shipment', class: 'align-middle shipment'},
+                    {data: 'current_charges', name: 'user_ibft_charges.current_charges', class: 'align-middle current_charges'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'user_ibft_charges.updated_at', class: 'align-middle updated_at'},
 
                 ],
                 rowCallback: function(row, data, index) {

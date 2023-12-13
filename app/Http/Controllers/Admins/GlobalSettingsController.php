@@ -166,6 +166,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
+use App\Http\Models\UserIbftCharge;
+use App\Http\Models\UserIbftChargeDetail;
 
 class GlobalSettingsController extends Controller
 {
@@ -9194,25 +9196,25 @@ class GlobalSettingsController extends Controller
     public function shipper_ibft_charges_settings_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
         $shippers = User::where('status', '>', 1)->select('id', 'name');
-        $all_shippers = GlobalSettings::where('id', 68)->where('text', Auth::id())->first();
+        
+        // $all_shippers = GlobalSettings::where('id', 68)->where('text', Auth::id())->first();
+        $all_shippers = GlobalSettings::where('id', 68)->select('text')->first()->toArray();
+        $authorized = in_array(auth::id(), explode(',', $all_shippers['text']));
 
         //if admid_id is included in global settings 'text' column where global setting id = 68 i.e(sales_user_restriction_bypass) and department id is 7 (sales) then fetch all shippers
-        if (session('department_id') == 7 && $all_shippers) {
+        if (session('department_id') == 7 && $authorized) {
             $shippers = $shippers->get();
         }
-
+        
         // else if departmnet id is 7 (sales) fetch only tagged shippers
         else if(session('department_id') == 7){
-            // $shippers = $shippers->where(function ($query) {
-            //     $query->whereIn('users.id', session('tagged_shippers'));
-            // });
 
             $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
             ->select('u.id', 'u.name') // Separate the column names inside an array
             ->where('sale_person_tags.admin_id', Auth::id())
             ->get();
         }
-        // $shippers = $shippers->get();
+        $shippers = $shippers->get();
 
         $business_shipment = BusinessProjectionShipment::all();
 
@@ -9220,14 +9222,37 @@ class GlobalSettingsController extends Controller
     }
 
     public function shipper_ibft_charges_settings_list(Request $request){
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
+        }
 
-        return;
+        $useribftcharges = UserIbftCharge::join('users as u','u.id','user_ibft_charges.user_id')
+        ->leftjoin('admins as a', 'a.id','user_ibft_charges.updated_by')
+        ->select('u.name as shipper','user_ibft_charges.current_charges as current_charges', 'a.name as updated_by', 'user_ibft_charges.updated_at as updated_at')->orderby('updated_at','desc');
+
+        $datatable = Datatables::of($useribftcharges);
+        return $datatable->make(true);
     }
 
     public function shipper_ibft_charges_settings_update(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 714);
 
-        return;
+        $shippers = $request->shippers;
+        $Ibft_charges = $request->Ibft_charges;
+        $updated_by = Auth::id();
+            foreach ($shippers as $shipper){
+                UserIbftCharge::updateOrCreate(
+                    ['user_id' => $shipper],
+                    ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
+                );
+                $ibft_charges_log = new UserIbftChargeDetail();
+                $ibft_charges_log->charges = $Ibft_charges;
+                $ibft_charges_log->user_id = $shipper;
+                $ibft_charges_log->updated_by = $updated_by;
+                $ibft_charges_log->save();
+            }
+            
+         return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
+        }
     }
-}

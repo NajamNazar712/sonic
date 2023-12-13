@@ -115,6 +115,7 @@ use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
+use App\Http\Models\UserIbftCharge;
 
 class AdminFinanceController extends Controller
 {
@@ -5510,12 +5511,18 @@ class AdminFinanceController extends Controller
                     $done_payment->company_bank_id = $company_bank;
 
 
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                    }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
                     }
 
                     $done_payment->save();
@@ -5593,13 +5600,21 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->user_bank_info_id = $user_bank_id;
                     $done_payment->company_bank_id = $company_bank;
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
+                    }
+
 
                     $done_payment->save();
 
@@ -13380,13 +13395,20 @@ class AdminFinanceController extends Controller
                     $done_payment->user_bank_info_id = $user_bank_id;
 
 
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
+                    }
+
 
                     $done_payment->save();
 
@@ -13451,13 +13473,21 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
                     $done_payment->user_bank_info_id = $user_bank_id;
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
 
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
+                    }
+
 
                     $done_payment->save();
 

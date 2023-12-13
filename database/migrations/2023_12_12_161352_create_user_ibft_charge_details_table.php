@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIbftChargeDetailsTable extends Migration
+class CreateUserIbftChargeDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class CreateIbftChargeDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ibft_charge_details', function (Blueprint $table) {
+        Schema::create('user_ibft_charge_details', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('charges');
+            $table->integer('user_id')->index();
+            $table->integer('updated_by')->index();
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ class CreateIbftChargeDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ibft_charge_details');
+        Schema::dropIfExists('user_ibft_charge_details');
     }
 }
