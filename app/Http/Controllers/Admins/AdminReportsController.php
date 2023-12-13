@@ -83,8 +83,10 @@ use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 
 class AdminReportsController extends Controller
@@ -13163,6 +13165,45 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
+    public function sack_bag_utilization_index() {
+
+        $origins=City::where('status','=',1)->get();
+        return view('admin.reports.sack_bag_utilization_report',compact('origins'));
+    }
+
+    public function sack_bag_utilization_list(Request $request) {
+
+        $origin=$request->origin_id;
+      
+        $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.origin_hub_id')    
+     
+        ->select('c.id AS origin_id','c.name AS origin_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS issue_sack_bag'), DB::raw('COUNT(cargo_manifest_bags.sack_bag_no) AS total_sack_bag'))
+        ->whereNotNull('cargo_manifest_bags.sack_bag_no')
+        ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
+        ->where('cargo_manifest_bags.origin_hub_id','=',$origin)
+        ->groupBy('cargo_manifest_bags.origin_hub_id');
+
+        $datatable = Datatables::of($sack_bag_utilization);
+        // ->editColumn('rating_id', function($result){
+        //     if(isset($result->rating))
+        //     {
+        //         $ratingValue = $result->rating->id;
+        //         $stars = str_repeat('⭐', $ratingValue); 
+        //         return $stars;
+        //     }else{
+        //         return '-';
+        //     }
+        // });
+
+        // if ($request->get('search_from') && $request->get('search_to')) {
+        //     $from = $request->get('search_from');
+        //     $to = $request->get('search_to');
+        //     $datatable->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
+        // }
+
+        return $datatable->make(true);
+        
+    }
 
 
 }

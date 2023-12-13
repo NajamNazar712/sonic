@@ -2954,6 +2954,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
             Route::post('submit_tracking', 'Admins\AdminReportsController@submit_tracking')->name('submit_tracking');
         });
+
+        Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function(){
+            Route::get('','Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
+        });
     });
 
     //Reports end
