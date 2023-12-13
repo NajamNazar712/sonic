@@ -49,9 +49,7 @@ class ShipmentScanningJourneyController extends Controller
             $add_scanning_history_area_log->location_status = 0;
             $add_scanning_history_area_log->status = 0;
             $add_scanning_history_area_log->save();
-
             $latest_area_log_id = ShipmentScanningJourneyAreaLog::latest('id')->first()->id ?? 1;
-            
             self::shipment_reporting_area_status($latest_area_log_id);
         }
     }
@@ -85,7 +83,40 @@ class ShipmentScanningJourneyController extends Controller
 
     static public function shipment_reporting_area_status($latest_area_log_id)
     {
-        dispatch(new ShipmentReportingAreaStatus($latest_area_log_id));
+        $shipmentAreaLog = ShipmentScanningJourneyAreaLog::find($latest_area_log_id);
+
+        if (!$shipmentAreaLog) {
+            return;
+        }
+
+        $journey = $shipmentAreaLog->shipment_scanning_journey ?? null;
+        $cityArea = $shipmentAreaLog->city_area->reporting_location ?? null;
+
+        if (isset($journey, $cityArea)) {
+            if (isset($journey->latitude, $journey->longitude, $cityArea->lat, $cityArea->long)) {
+                $journeyLatitude = deg2rad($journey->latitude);
+                $journeyLongitude = deg2rad($journey->longitude);
+                $cityLatitude = deg2rad($cityArea->lat);
+                $cityLongitude = deg2rad($cityArea->long);
+
+                $earthRadius = 6371; 
+                $longitudeDelta = $journeyLongitude - $cityLongitude;
+
+                $distance = round($earthRadius * acos(
+                    sin($cityLatitude) * sin($journeyLatitude) +
+                    cos($cityLatitude) * cos($journeyLatitude) * cos($longitudeDelta)
+                ), 2);
+
+                $shipmentAreaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
+            } else {
+                $shipmentAreaLog->location_status = 0;
+            }
+        } else {
+            $shipmentAreaLog->location_status = 0;
+        }
+
+        $shipmentAreaLog->status = 1;
+        $shipmentAreaLog->save();
     }
 
 }
