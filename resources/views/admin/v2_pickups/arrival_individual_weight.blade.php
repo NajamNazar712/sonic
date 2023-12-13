@@ -139,7 +139,7 @@
                                     <input type="checkbox" name="item_manual_weight" class="switch hidden item_manual_weight" data-group-cls="btn-group-sm" >
                                 </div>
                             </div>
-                            <div class="col text-right">
+                            <div class="col text-center">
                                 <div class="form-group ml-1">
                                     <button type="button" name="item_add" class="btn btn-primary add" id="item_add" value="item_add">Add</button>
                                 </div>
@@ -214,7 +214,7 @@
                                     <input type="checkbox" name="piece_manual_weight" class="switch hidden piece_manual_weight" data-group-cls="btn-group-sm" >
                                 </div>
                             </div>
-                            <div class="col text-right">
+                            <div class="col text-center">
                                 <div class="form-group ml-1">
                                     <button type="button" name="piece_add" class="btn btn-primary add" id="piece_add" value="piece_add">Add</button>
                                 </div>
@@ -570,7 +570,18 @@
                 'allowPlus': false,
                 'digits': 2
             });
-
+            $('#piece_weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
+            $('#item_weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'digits': 2
+            });
             $('#add_shipment_form input.weight').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
