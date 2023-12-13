@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 */
 
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+Route::get('/test_weight', 'TestController@index')->name('test_weight');
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
