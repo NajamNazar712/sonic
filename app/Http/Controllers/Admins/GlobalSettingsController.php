@@ -9197,9 +9197,8 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
         $shippers = User::where('status', '>', 1)->select('id', 'name');
         
-        // $all_shippers = GlobalSettings::where('id', 68)->where('text', Auth::id())->first();
         $all_shippers = GlobalSettings::where('id', 68)->select('text')->first()->toArray();
-        $authorized = in_array(auth::id(), explode(',', $all_shippers['text']));
+        $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
 
         //if admid_id is included in global settings 'text' column where global setting id = 68 i.e(sales_user_restriction_bypass) and department id is 7 (sales) then fetch all shippers
         if (session('department_id') == 7 && $authorized) {
@@ -9214,7 +9213,9 @@ class GlobalSettingsController extends Controller
             ->where('sale_person_tags.admin_id', Auth::id())
             ->get();
         }
-        $shippers = $shippers->get();
+        else{
+            $shippers = $shippers->get();
+        }
 
         $business_shipment = BusinessProjectionShipment::all();
 
