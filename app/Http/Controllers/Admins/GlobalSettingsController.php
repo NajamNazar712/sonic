@@ -9217,9 +9217,7 @@ class GlobalSettingsController extends Controller
             $shippers = $shippers->get();
         }
 
-        $business_shipment = BusinessProjectionShipment::all();
-
-        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
+        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers]);
     }
 
     public function shipper_ibft_charges_settings_list(Request $request){

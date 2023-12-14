@@ -56,7 +56,6 @@
                     </div>
                 </div>
 
-                @if(count($shipments) > 0)
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
@@ -77,7 +76,6 @@
                             </div>
                         </div>
                     </div>
-                @endif
 
             </div>
         </div>
@@ -207,7 +205,6 @@
                 }
             });
 
-            @if(count($shipments) > 0)
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -308,9 +305,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-            @endif
-
         });
 
 
