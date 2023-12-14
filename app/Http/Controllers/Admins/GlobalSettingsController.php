@@ -9204,12 +9204,13 @@ class GlobalSettingsController extends Controller
             if (session('department_id') == 7 && $authorized == true) {
                 $shippers = $shippers->get();
             }
-            else if(session('department_id') == 7){
-                $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
-                ->select('u.id', 'u.name') // Separate the column names inside an array
-                ->where('sale_person_tags.admin_id', Auth::id())
-                ->get();
-            }
+        }
+        
+        if(session('department_id') == 7){
+            $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+            ->select('u.id', 'u.name') // Separate the column names inside an array
+            ->where('sale_person_tags.admin_id', Auth::id())
+            ->get();
         }
         else{
             $shippers = $shippers->get();
