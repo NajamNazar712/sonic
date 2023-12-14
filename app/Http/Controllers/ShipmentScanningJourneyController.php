@@ -41,17 +41,17 @@ class ShipmentScanningJourneyController extends Controller
 
             $add_scanning_history->save();
 
+            $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
             $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
             $add_scanning_history_area_log->shipment_id = $shipment_id;
-            $add_scanning_history_area_log->shipment_scanning_journey_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
+            $add_scanning_history_area_log->shipment_scanning_journey_id = $latest_shipment_scanning_id;
             $add_scanning_history_area_log->hub_id = Admin::find(session('id'))->default_hub_id;
             $add_scanning_history_area_log->area_id = Admin::find(session('id'))->area_id;
             $add_scanning_history_area_log->admin_id = Admin::find(session('id'))->id;
             $add_scanning_history_area_log->location_status = 0;
             $add_scanning_history_area_log->status = 0;
             $add_scanning_history_area_log->save();
-            $latest_area_log_id = ShipmentScanningJourneyAreaLog::latest('id')->first()->id ?? 1;
-            self::shipment_reporting_area_status($latest_area_log_id);
+            self::shipment_reporting_area_status($latest_shipment_scanning_id);
         }
     }
 
@@ -82,9 +82,9 @@ class ShipmentScanningJourneyController extends Controller
         }
     }
 
-    static public function shipment_reporting_area_status($latest_area_log_id)
+    static public function shipment_reporting_area_status($latest_shipment_scanning_id)
     {
-        $shipmentAreaLog = ShipmentScanningJourneyAreaLog::find($latest_area_log_id);
+        $shipmentAreaLog = ShipmentScanningJourneyAreaLog::find($latest_shipment_scanning_id);
 
         if (!$shipmentAreaLog) {
             return;
