@@ -46,6 +46,7 @@ class ShipmentScanningJourneyController extends Controller
             $add_scanning_history_area_log->shipment_scanning_journey_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
             $add_scanning_history_area_log->hub_id = Admin::find(session('id'))->default_hub_id;
             $add_scanning_history_area_log->area_id = Admin::find(session('id'))->area_id;
+            $add_scanning_history_area_log->admin_id = Admin::find(session('id'))->id;
             $add_scanning_history_area_log->location_status = 0;
             $add_scanning_history_area_log->status = 0;
             $add_scanning_history_area_log->save();
