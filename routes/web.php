@@ -2958,6 +2958,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function(){
             Route::get('','Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
             Route::get('list','Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
+            Route::post('sack_bag_list','Admins\AdminReportsController@get_sack_bag_list')->name('sack_bag_list');
+            // Route::post('reused_sack_bag_list','Admins\AdminReportsController@get_reused_sack_bag_list')->name('reused_sack_bag_list');
+        });
+        Route::prefix('reused_sack_bag')->name('reused_sack_bag.')->group(function(){
+            Route::get('','Admins\AdminReportsController@reused_sack_bag_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@reused_sack_bag_list')->name('list');
         });
     });
 

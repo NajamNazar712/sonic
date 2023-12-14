@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Utilization of Sack Bag')
+@section('title', 'Reused Sack Bags')
 
 
 @section('content')
     <h1 class="mb-1">
-        Utilization of Sack Bag 
+        Reused Sack Bags
     </h1>
 
     <div class="card">
@@ -18,8 +18,8 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
-                                @foreach ($origins as $origin)
-                                    <option value="{{ $origin->id }}"> {{ $origin->name }}</option>
+                                @foreach ($destinations as $destination)
+                                    <option value="{{ $destination->id }}"> {{ $destination->name }}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -55,9 +55,10 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
-                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Sack Bag No#</th>
                             {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
+                            <th class="border-primary border-darken-1">Reused Count</th>
+                            <th class="border-primary border-darken-1">Sack Bag Status</th>
                             {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
@@ -72,38 +73,7 @@
         </div>
     </div>
 
-<!---- start of show Address modal---->
-    <div class="modal fade text-left" id="StockSackBagModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="StockSackBagModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Stock Sack Bag List</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <table class="table table-bordered " id="stock_sack_bag_datatable">
-                            <thead>
-                                    <tr role="row" class="bg-primary white">
-                                        <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Sack Bag No#</th>
-                                    </tr>
-                            </thead>
-                            <tbody>
 
-                            </tbody>
-
-                        </table>
-                </div>
-            </div>
-        </div>
-        </div>
-    </div>
-<!----end of show Address modal --->
 
     <div class="modal fade text-left" id="ReusedsackBagModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="ReusedsackBagModal"
@@ -281,7 +251,7 @@
                     },
                     serverSide: true,
                     ajax:{
-                        url: '{{ route('admin.reports.sack_bag_utilization.list') }}',
+                        url: '{{ route('admin.reports.reused_sack_bag.list') }}',
                         data: function (d) {
                             d.destination_id = $('#search_origin').val();
                             d.search_from = $('input[name="from_date_formatted"]').val();
@@ -294,8 +264,10 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         
-                        { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
-                        { data:'stock_sack_bag_btn',class: 'align-middle text-center stock_sack_bag', orderable: false, searchable: false},
+                        { data:'sack_bag_no',class: 'align-middle text-center sack_bag_no', orderable: false, searchable: false},
+                        { data:'sack_bag_count',class: 'align-middle text-center sack_bag_count', orderable: false, searchable: false},
+                        { data:'sack_bag_status',class: 'align-middle text-center sack_bag_status', orderable: false, searchable: false},
+
                         // { data:'re_used_sack_bag_btn',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
                         // { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
         
@@ -347,7 +319,6 @@
             });
         });
 
-   
 
 
 
