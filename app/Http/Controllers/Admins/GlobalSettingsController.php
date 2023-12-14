@@ -9196,29 +9196,22 @@ class GlobalSettingsController extends Controller
     public function shipper_ibft_charges_settings_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
         $shippers = User::where('status', '>', 1)->select('id', 'name');
-        
         $all_shippers = GlobalSettings::where('id', 68)->select('text')->first();
-
-        // $all_shippers = GlobalSettings::where('id', 68)->select('text')->first()->toArray();
-        if($all_shippers && array_key_exists('text', $all_shippers)){
+        if($all_shippers){
+            $all_shippers = $all_shippers->toArray();
             $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
-    
             //if admid_id is included in global settings 'text' column where global setting id = 68 i.e(sales_user_restriction_bypass) and department id is 7 (sales) then fetch all shippers
-            if (session('department_id') == 7 && $authorized) {
+            if (session('department_id') == 7 && $authorized == true) {
                 $shippers = $shippers->get();
             }
-        }
-        
-        // else if departmnet id is 7 (sales) fetch only tagged shippers
-        else if(session('department_id') == 7){
-
-            $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
-            ->select('u.id', 'u.name') // Separate the column names inside an array
-            ->where('sale_person_tags.admin_id', Auth::id())
-            ->get();
+            else if(session('department_id') == 7){
+                $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+                ->select('u.id', 'u.name') // Separate the column names inside an array
+                ->where('sale_person_tags.admin_id', Auth::id())
+                ->get();
+            }
         }
         else{
-
             $shippers = $shippers->get();
         }
 
