@@ -9214,10 +9214,13 @@ class GlobalSettingsController extends Controller
             ->get();
         }
         else{
+
             $shippers = $shippers->get();
         }
 
-        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers]);
+        $business_shipment = BusinessProjectionShipment::all();
+
+        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
     }
 
     public function shipper_ibft_charges_settings_list(Request $request){

@@ -56,6 +56,7 @@
                     </div>
                 </div>
 
+                @if(count($shipments) > 0)
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
@@ -76,6 +77,7 @@
                             </div>
                         </div>
                     </div>
+                @endif
 
             </div>
         </div>
@@ -117,19 +119,11 @@
             });
 
 
-            $('#update_ibft_charges_form .class').inputmask({
+            $('#Ibft_charges').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-
-            // $('#update_ibft_charges_form').validate({
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     }
-            // });
 
 
             $('#update_ibft_charges_form').validate({
@@ -205,6 +199,7 @@
                 }
             });
 
+            @if(count($shipments) > 0)
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -305,6 +300,9 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            @endif
+
         });
 
 
