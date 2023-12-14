@@ -14,7 +14,8 @@ class UpdateCargoManifestBagsTable extends Migration
     public function up()
     {
         Schema::table('cargo_manifest_bags', function (Blueprint $table) {
-            $table->string('sack_bag_no')->nullable(); 
+            $table->integer('sack_bag_id')->nullable(); 
+            $table->integer('is_sack_bag')->default(0); 
             $table->string('cmb_1')->nullable(); 
             $table->string('cmb_2')->nullable(); 
         });

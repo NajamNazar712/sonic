@@ -5,7 +5,7 @@
 
 @section('content')
     <h1 class="mb-1">
-       Utitlization of Sack Bag 
+        Utilization of Sack Bag 
     </h1>
 
     <div class="card">
@@ -14,7 +14,7 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
-                    <div class="col-4"></div>
+                    {{-- <div class="col-4"></div> --}}
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -24,8 +24,8 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4"></div>
-                    <div class="col-4">
+                    {{-- <div class="col-4"></div> --}}
+                    {{-- <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -44,7 +44,7 @@
                             </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -55,10 +55,10 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
-                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
                             {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Issue Sack Bags</th>
-                            <th class="border-primary border-darken-1">Total Sack Bags</th>
+                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
+                            <th class="border-primary border-darken-1">Re-used Sack Bag</th>
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Balance Shipments</th> --}}
@@ -183,7 +183,7 @@
 
             
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Origin',
+                placeholder:'Select Destination',
                 width:'100%',
                 allowClear:true
             });
@@ -254,20 +254,21 @@
                     ajax:{
                         url: '{{ route('admin.reports.sack_bag_utilization.list') }}',
                         data: function (d) {
-                            d.origin_id = $('#search_origin').val();
+                            d.destination_id = $('#search_origin').val();
                             d.search_from = $('input[name="from_date_formatted"]').val();
                             d.search_to = $('input[name="to_date_formatted"]').val();
                         }
                     },
-                    rowId: 'origin_id',
+                    rowId: 'destination_id',
                     order: [[1, 'desc']],
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         
-                        { data:'origin_city',class: 'align-middle text-center origin_city', orderable: false, searchable: false},
-                        { data:'issue_sack_bag',class: 'align-middle text-center issue_sack_bag', orderable: false, searchable: false},
-                        { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
+                        { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
+                        { data:'stock_sack_bag',class: 'align-middle text-center stock_sack_bag', orderable: false, searchable: false},
+                        { data:'re_used_sack_bag',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
+                        // { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
         
                     ],
                     rowCallback: function(row, data, index) {
@@ -316,7 +317,7 @@
             $('#search_filter_btn').on('click',function () {
                 var city_id=$("#search_origin").val();
                 if(city_id==''){
-                    toastr.error('Please Select Origin', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    toastr.error('Please Select Destination', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }else{
                     $('#datatable_wrapper').show();
                     table.draw();

@@ -13173,15 +13173,29 @@ class AdminReportsController extends Controller
 
     public function sack_bag_utilization_list(Request $request) {
 
-        $origin=$request->origin_id;
+        $destination_id=$request->destination_id;
       
-        $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.origin_hub_id')    
-     
-        ->select('c.id AS origin_id','c.name AS origin_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS issue_sack_bag'), DB::raw('COUNT(cargo_manifest_bags.sack_bag_no) AS total_sack_bag'))
-        ->whereNotNull('cargo_manifest_bags.sack_bag_no')
-        ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
-        ->where('cargo_manifest_bags.origin_hub_id','=',$origin)
-        ->groupBy('cargo_manifest_bags.origin_hub_id');
+        // $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.destination_hub_id')    
+        // ->select('c.id AS destination_id','c.name AS destination_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS stock_sack_bag'))
+        // ->whereNotNull('cargo_manifest_bags.sack_bag_no')
+        // ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
+        // ->where('cargo_manifest_bags.destination_hub_id','=',$destination)
+        // ->groupBy('cargo_manifest_bags.destination_hub_id');
+        $sack_bag_utilization = CargoManifestBag::join('cities as c', function ($join) {
+            $join->on('c.id', '=', 'cargo_manifest_bags.destination_hub_id')
+                 ->where('c.status', '=', 1);
+        })
+        ->whereNotNull('cargo_manifest_bags.sack_bag_id')
+        ->where('cargo_manifest_bags.is_sack_bag', '=', 1)
+        ->where('cargo_manifest_bags.destination_hub_id', '=', $destination_id)
+        ->groupBy('cargo_manifest_bags.destination_hub_id')
+        ->select([
+            'c.id as destination_id',
+            'c.name as destination_name',
+            DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as stock_sack_bag'),
+            DB::raw('COUNT(cargo_manifest_bags.sack_bag_id) - COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as re_used_sack_bag'),
+        ])
+        ->get();
 
         $datatable = Datatables::of($sack_bag_utilization);
         // ->editColumn('rating_id', function($result){

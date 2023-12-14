@@ -1065,8 +1065,9 @@ class AdminCargoManifestController extends Controller
     public function create_store(Request $request)
     {
 
-        $sack_bag_no=$request->input('sack_bag_mo');
-        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no);
+        $sack_bag_no=$request->input('sack_bag_no');
+        $origin_hub_id=$request->input('origin_hub_id');
+        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no)->where('origin',$origin_hub_id)->where('status',1);
         // if($sack_bag->exists()){
             $shipments = 0;
             $quantity = 0;
@@ -1116,9 +1117,11 @@ class AdminCargoManifestController extends Controller
                 $bag->completed = 0;
                 $bag->current_hub_id = Auth::user()->default_hub_id;
                 if($sack_bag->exists()){
-                    $bag->sack_bag_no=$sack_bag_no;
+                    $sack_bag=$sack_bag->first();
+                    $bag->sack_bag_id=$sack_bag->id;
+                    $bag->is_sack_bag=1;
                 }else{
-                    $bag->sack_bag_no='N/A';
+                    $bag->is_sack_bag=0;
                 }
               
                 $bag->save();

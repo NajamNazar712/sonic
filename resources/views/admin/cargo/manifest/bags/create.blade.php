@@ -120,7 +120,7 @@
                                                     <div class="col-6">
                                                         <div class="form-group">
                                                             <label for="origin">Sack Bag</label>
-                                                            <input type="text" name="sack_bag_mo" class="form-control rounded-right sack_bag_mo" placeholder="Sack Bag No#" data-rule-required="true" data-msg-required="Sack Bag No is required" id="sack_bag_mo">
+                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no">
                                                         </div>
                                                     </div>
                                                 </div>
