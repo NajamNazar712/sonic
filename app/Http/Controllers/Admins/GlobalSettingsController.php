@@ -9234,11 +9234,26 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
         }
 
-        $useribftcharges = UserIbftCharge::join('users as u','u.id','user_ibft_charges.user_id')
-        ->leftjoin('admins as a', 'a.id','user_ibft_charges.updated_by')
-        ->select('u.name as shipper','user_ibft_charges.current_charges as current_charges', 'a.name as updated_by', 'user_ibft_charges.updated_at as updated_at')->orderby('updated_at','desc');
+        $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
+        ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+        ->leftJoin('sale_person_tags as spt', function ($join) {
+            $join->on('spt.user_id', '=', 'u.id')
+                ->where('spt.admin_id', '=', Auth::id())
+                ->where('spt.status', 0);
+        });
 
-        $datatable = Datatables::of($useribftcharges);
+        if (session('department_id') == 7) {
+            $query->where('spt.admin_id', '=', Auth::id());
+        }
+        $query = $query->select(
+            'u.name as shipper', 
+            'user_ibft_charges.current_charges as current_charges',
+            'a.name as updated_by', 
+            'user_ibft_charges.updated_at as updated_at'
+        )
+        ->orderBy('updated_at', 'desc')->get();
+
+        $datatable = Datatables::of($query);
         return $datatable->make(true);
     }
 

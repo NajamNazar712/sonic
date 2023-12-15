@@ -5937,9 +5937,7 @@ class AdminFinanceController extends Controller
 
         $count = $count->count();
 
-        $done_payments = DonePayment::
-//        with('VisionSoftCodPaymentClear','shipment_payment_journey_last_status_two')
-        join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('admins as ad', function ($join) {
@@ -5963,7 +5961,16 @@ class AdminFinanceController extends Controller
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 'done_payments.updated_at as updated_at','sts.status as star_status');
+            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
+            'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
+            'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
+            'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 
+            'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 
+            'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 
+            'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
+            'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
+            'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
+            'done_payments.updated_at as updated_at','sts.status as star_status');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
