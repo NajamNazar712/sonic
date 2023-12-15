@@ -10,6 +10,7 @@ use App\Http\Models\BagScanningJourney;
 use App\ShipmentScanningJourneyAreaLog;
 use App\Jobs\ShipmentReportingAreaStatus;
 use App\Http\Models\ShipmentScanningJourney;
+use Illuminate\Support\Facades\Auth;
 
 class ShipmentScanningJourneyController extends Controller
 {
@@ -41,13 +42,14 @@ class ShipmentScanningJourneyController extends Controller
 
             $add_scanning_history->save();
 
+            $employee = Admin::find(Auth::id())->employee;
             $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
             $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
             $add_scanning_history_area_log->shipment_id = $shipment_id;
             $add_scanning_history_area_log->shipment_scanning_journey_id = $latest_shipment_scanning_id;
-            $add_scanning_history_area_log->hub_id = Admin::find(session('id'))->default_hub_id ?? null;
-            $add_scanning_history_area_log->area_id = Admin::find(session('id'))->area_id ?? null;
-            $add_scanning_history_area_log->admin_id = Admin::find(session('id'))->id ?? null;
+            $add_scanning_history_area_log->hub_id = Admin::find(Auth::id())->default_hub_id ?? null;
+            $add_scanning_history_area_log->area_id = $employee->area_id ?? null;
+            $add_scanning_history_area_log->admin_id = Admin::find(Auth::id())->id ?? null;
             $add_scanning_history_area_log->location_status = 0;
             $add_scanning_history_area_log->status = 0;
             $add_scanning_history_area_log->save();
@@ -84,19 +86,20 @@ class ShipmentScanningJourneyController extends Controller
 
     static public function shipment_reporting_area_status($latest_shipment_scanning_id)
     {
-        $shipmentAreaLog = ShipmentScanningJourneyAreaLog::find($latest_shipment_scanning_id);
+        $shipmentScanning = ShipmentScanningJourney::find($latest_shipment_scanning_id);
+        $areaLog = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
+        $areaLog = ShipmentScanningJourneyAreaLog::find($areaLog);
 
-        if (!$shipmentAreaLog) {
+        if (!$shipmentScanning) {
             return;
         }
 
-        $journey = $shipmentAreaLog->shipment_scanning_journey ?? null;
-        $cityArea = $shipmentAreaLog->city_area->reporting_location ?? null;
+        $cityArea = $areaLog->city_area->reporting_location ?? null;
 
-        if (isset($journey, $cityArea)) {
-            if (isset($journey->latitude, $journey->longitude, $cityArea->lat, $cityArea->long)) {
-                $journeyLatitude = deg2rad($journey->latitude);
-                $journeyLongitude = deg2rad($journey->longitude);
+        if (isset($shipmentScanning, $cityArea)) {
+            if (isset($shipmentScanning->latitude, $shipmentScanning->longitude, $cityArea->lat, $cityArea->long)) {
+                $journeyLatitude = deg2rad($shipmentScanning->latitude);
+                $journeyLongitude = deg2rad($shipmentScanning->longitude);
                 $cityLatitude = deg2rad($cityArea->lat);
                 $cityLongitude = deg2rad($cityArea->long);
 
@@ -108,16 +111,17 @@ class ShipmentScanningJourneyController extends Controller
                     cos($cityLatitude) * cos($journeyLatitude) * cos($longitudeDelta)
                 ), 2);
 
-                $shipmentAreaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
+                $areaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
+                
             } else {
-                $shipmentAreaLog->location_status = 0;
+                $areaLog->location_status = 0;
             }
         } else {
-            $shipmentAreaLog->location_status = 0;
+            $areaLog->location_status = 0;
         }
 
-        $shipmentAreaLog->status = 1;
-        $shipmentAreaLog->save();
+        $areaLog->status = 1;
+        $areaLog->save();
     }
 
 }
