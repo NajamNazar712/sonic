@@ -42,7 +42,7 @@ class ShipmentScanningJourneyController extends Controller
 
             $add_scanning_history->save();
 
-            $employee = Admin::find(Auth::id())->employee;
+            $employee = Admin::find(Auth::id())->employee ?? null;
             $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
             $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
             $add_scanning_history_area_log->shipment_id = $shipment_id;
@@ -112,7 +112,7 @@ class ShipmentScanningJourneyController extends Controller
                 ), 2);
 
                 $areaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
-                
+
             } else {
                 $areaLog->location_status = 0;
             }
