@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use Session;
 use Vectorface\Whip\Whip;
-use Illuminate\Http\Request;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\BagScanningJourney;
 use App\ShipmentScanningJourneyAreaLog;
-use App\Jobs\ShipmentReportingAreaStatus;
 use App\Http\Models\ShipmentScanningJourney;
 use Illuminate\Support\Facades\Auth;
 
@@ -41,20 +39,26 @@ class ShipmentScanningJourneyController extends Controller
             }
 
             $add_scanning_history->save();
+            self::shipment_scanning_area_logs($shipment_id);
 
-            $employee = Admin::find(Auth::id())->employee ?? null;
-            $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id ?? 1;
-            $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
-            $add_scanning_history_area_log->shipment_id = $shipment_id;
-            $add_scanning_history_area_log->shipment_scanning_journey_id = $latest_shipment_scanning_id;
-            $add_scanning_history_area_log->hub_id = Admin::find(Auth::id())->default_hub_id ?? null;
-            $add_scanning_history_area_log->area_id = $employee->area_id ?? null;
-            $add_scanning_history_area_log->admin_id = Admin::find(Auth::id())->id ?? null;
-            $add_scanning_history_area_log->location_status = 0;
-            $add_scanning_history_area_log->status = 0;
-            $add_scanning_history_area_log->save();
-            self::shipment_reporting_area_status($latest_shipment_scanning_id);
+         
         }
+    }
+
+    static public function shipment_scanning_area_logs($shipment_id)
+    {
+        $employee = Admin::find(Auth::id())->employee ?? null;
+        $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id;
+        $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
+        $add_scanning_history_area_log->shipment_id = $shipment_id;
+        $add_scanning_history_area_log->shipment_scanning_journey_id = $latest_shipment_scanning_id;
+        $add_scanning_history_area_log->hub_id = Admin::find(Auth::id())->default_hub_id ?? null;
+        $add_scanning_history_area_log->area_id = $employee->area_id ?? null;
+        $add_scanning_history_area_log->admin_id = Admin::find(Auth::id())->id ?? null;
+        $add_scanning_history_area_log->location_status = 0;
+        $add_scanning_history_area_log->status = 0;
+        $add_scanning_history_area_log->save();
+        self::shipment_reporting_area_status($latest_shipment_scanning_id);
     }
 
 
@@ -87,8 +91,8 @@ class ShipmentScanningJourneyController extends Controller
     static public function shipment_reporting_area_status($latest_shipment_scanning_id)
     {
         $shipmentScanning = ShipmentScanningJourney::find($latest_shipment_scanning_id);
-        $areaLog = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
-        $areaLog = ShipmentScanningJourneyAreaLog::find($areaLog);
+        $areaLogId = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
+        $areaLog = ShipmentScanningJourneyAreaLog::find($areaLogId);
 
         if (!$shipmentScanning) {
             return;
