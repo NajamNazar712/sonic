@@ -400,9 +400,10 @@
 
 
             $('#add_shipment_form input.tracking_number').focus();
-            $('#add_shipment_form input.tracking_number').on('change', function(){
-                if (!$('#add_shipment_form input.volumetric_weight').is(':checked') && !$('#add_shipment_form input.manual_weight').is(':checked') ) {
+            $('#add_shipment_form input.tracking_number').on('blur', function(){
+                if (!$('#add_shipment_form input.volumetric_weight').is(':checked') && !$('#add_shipment_form input.manual_weight').is(':checked') && $('#add_shipment_form input.tracking_number').val().length ) {
                     var tracking_length = $('#add_shipment_form input.tracking_number').val().length;
+                    
                         // $('.weight').val('22');
                         // var dummy = $('.weight').val();
                         // alert(dummy);
@@ -412,10 +413,13 @@
                             timeout: 5000,
                             error: function(data) {
                                 $('#add_shipment_form input.tracking_number').val('');
-                                toastr.error('Unable to fetch Weight. Please try after refresh', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                $('#add_shipment_form input.weight').val('');
+                                toastr.error('Unable to fetch Weight. Please check connection with the machine', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
                             success: function(data) {
                                 $('.weight').val(data);
+                                $('#add').click();
+
                             }
                         });
                 }
@@ -454,8 +458,9 @@
             });
 
             $('#add_try_and_buy_shipment_form input.scan_item').focus();
-            $('#add_try_and_buy_shipment_form input.scan_item').on('change',function(){
-                if(!$('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked')) {
+            $('#add_try_and_buy_shipment_form input.scan_item').on('blur',function(){
+                if(!$('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') && 
+                $('#add_try_and_buy_shipment_form input.scan_item').val().length ) {
                     $.ajax({
                         url: 'http://localhost:1080/sonic',
                         method: 'POST',
@@ -465,6 +470,7 @@
                         },
                         success: function(data) {
                             $('.item_weight').val(data);
+                            $('#item_add').click();
                         }
                     });
                 }
@@ -689,16 +695,14 @@
                             timeout: 5000,
                             error: function (data) {
                                 form.reset();
-
-                                $('#add_shipment_form input.tracking_number').val('').focus();
-
                                 $('#add_shipment_form button.add').prop('disabled', false);
                                 scan_sound(2);
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
                             success: function(data) {
-                                form.reset();
-
+                                //form.reset();
+                                $('#add_shipment_form :input').val('');
+                                $('#add_shipment_form input.volumetric_weight').prop('checked',false);
                                 $('#add_shipment_form input.tracking_number').val('').focus();
 
                                 remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
@@ -774,7 +778,13 @@
                                         $('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
                                         $('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
                                         $('#tryAndbuyModal').modal('show');
-                                        $('#try_and_buy_weight').val(weight);
+                                        if(!weight){
+                                            volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
+                                            $('#try_and_buy_weight').val(volumetric_weight_calculation);
+
+                                        }else{
+                                            $('#try_and_buy_weight').val(weight);
+                                        }
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
@@ -819,7 +829,12 @@
                                         $('#piece_shipment_count').val(data.details.pieces_count);
                                         $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
                                         $('#ShipmentPiecesModal').modal('show');
-                                        $('#pieces_weight').val(weight);
+                                        if(!weight){
+                                            volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
+                                            $('#pieces_weight').val(volumetric_weight_calculation);
+                                        }else{
+                                            $('#pieces_weight').val(weight);
+                                        }
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
@@ -1016,6 +1031,7 @@
             $('#tryAndbuyModal').on('hide.bs.modal', function (e) {
                 $('#scan_try_and_buy_tracking_number').val('');
                 $('#try_and_buy_weight').val('');
+                $('.item_manual_weight').prop('checked', false);
                 shipment_item_ids = [];
                 try_and_buy_table.clear().draw();
             });
@@ -1220,8 +1236,9 @@
             });
 
             $('#add_shipment_pieces_form input.scan_piece').focus();
-            $('#add_shipment_pieces_form input.scan_piece').on('change',function(){
-                if(!$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked')) {
+            $('#add_shipment_pieces_form input.scan_piece').on('blur',function(){
+                if(!$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') &&
+                    $('#add_shipment_pieces_form input.scan_piece').val().length) {
                     $.ajax({
                         url: 'http://localhost:1080/sonic',
                         method: 'POST',
@@ -1231,6 +1248,7 @@
                         },
                         success: function(data) {
                             $('.piece_weight').val(data);
+                            $('#piece_add').click();
                         }
                     });
                 }
@@ -1405,6 +1423,7 @@
             $('#ShipmentPiecesModal').on('hide.bs.modal', function (e) {
                 $('#scan_piece_tracking_number').val('');
                 $('#pieces_weight').val('');
+                $('.piece_manual_weight').prop('checked', false);
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
             });
@@ -1420,7 +1439,11 @@
                 $('#add_shipment_form input.length').focus();
             }
         }
-
+        function volumetric_weight_calculation(length, breadth, height) {
+            
+            $actual_weight = ((length * breadth * height) / 5000);
+            return $actual_weight;
+        }
 
 
     </script>
