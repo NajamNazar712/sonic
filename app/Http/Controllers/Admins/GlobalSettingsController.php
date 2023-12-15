@@ -9234,26 +9234,51 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
         }
 
+        // $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
+        // ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+        // ->leftJoin('sale_person_tags as spt', function ($join) {
+        //     $join->on('spt.user_id', '=', 'u.id')
+        //         ->where('spt.admin_id', '=', Auth::id())
+        //         ->where('spt.status', 0);
+        // });
+
+        // if (session('department_id') == 7) {
+        //     $query->where('spt.admin_id', '=', Auth::id());
+        // }
+        $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
+
         $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
-        ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
-        ->leftJoin('sale_person_tags as spt', function ($join) {
-            $join->on('spt.user_id', '=', 'u.id')
-                ->where('spt.admin_id', '=', Auth::id())
-                ->where('spt.status', 0);
-        });
+            ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+            ->leftJoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.admin_id', '=', Auth::id())
+                    ->where('spt.status', 0);
+            })
+            ->select(
+                'u.name as shipper', 
+                'user_ibft_charges.current_charges as current_charges',
+                'a.name as updated_by', 
+                'user_ibft_charges.updated_at as updated_at'
+            )
+            ->orderBy('updated_at', 'desc');
 
-        if (session('department_id') == 7) {
-            $query->where('spt.admin_id', '=', Auth::id());
+        if ($all_shippers) {
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+
+            if (session('department_id') == 7 && !$authorized) {
+                $query->where('spt.admin_id', Auth::id());
+                // Do nothing, keep the query as it is view all shipper just like dropdown
+            }
         }
-        $query = $query->select(
-            'u.name as shipper', 
-            'user_ibft_charges.current_charges as current_charges',
-            'a.name as updated_by', 
-            'user_ibft_charges.updated_at as updated_at'
-        )
-        ->orderBy('updated_at', 'desc')->get();
 
-        $datatable = Datatables::of($query);
+        if (session('department_id') == 7 && !$all_shippers) {
+            $query->where('spt.admin_id', Auth::id());
+        }
+        $queryResult = $query->get();
+
+
+        $datatable = Datatables::of($queryResult);
         return $datatable->make(true);
     }
 

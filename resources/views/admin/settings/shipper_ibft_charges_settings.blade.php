@@ -105,7 +105,7 @@
     <script>
         $(document).ready(function() {
             $('#shipper_select').select2({
-                placeholder:'Shipper Select',
+                placeholder:'Shipper Select*',
                 width:'100%'
             });
             $("#customCheck1").click(function(){
