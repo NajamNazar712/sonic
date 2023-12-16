@@ -47,22 +47,24 @@ class ShipmentScanningJourneyController extends Controller
 
     static public function shipment_scanning_area_logs($shipment_id)
     {
-        $employee = Admin::find(Auth::id())->employee ?? null;
-        $latest_shipment_scanning_id = ShipmentScanningJourney::latest('id')->first()->id;
-        $add_scanning_history_area_log = new ShipmentScanningJourneyAreaLog();
-        $add_scanning_history_area_log->shipment_id = $shipment_id;
-        $add_scanning_history_area_log->shipment_scanning_journey_id = $latest_shipment_scanning_id;
-        $add_scanning_history_area_log->hub_id = Admin::find(Auth::id())->default_hub_id ?? null;
-        $add_scanning_history_area_log->area_id = $employee->area_id ?? null;
-        $add_scanning_history_area_log->admin_id = Admin::find(Auth::id())->id ?? null;
-        $add_scanning_history_area_log->location_status = 0;
-        $add_scanning_history_area_log->status = 0;
-        $add_scanning_history_area_log->save();
-        self::shipment_reporting_area_status($latest_shipment_scanning_id);
+        $adminId = Auth::id();
+        $employee = Admin::find($adminId)->employee ?? null;
+
+        $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
+
+        $addScanningHistoryAreaLog = new ShipmentScanningJourneyAreaLog([
+            'shipment_id' => $shipment_id,
+            'shipment_scanning_journey_id' => $latestShipmentScanningId,
+            'hub_id' => Admin::find($adminId)->default_hub_id ?? null,
+            'area_id' => optional($employee)->area_id,
+            'admin_id' => $adminId,
+            'location_status' => 0,
+            'status' => 0,
+        ]);
+
+        $addScanningHistoryAreaLog->save();
+        self::shipment_reporting_area_status($latestShipmentScanningId);
     }
-
-
-   
 
     static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
     {
