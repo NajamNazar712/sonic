@@ -64,10 +64,8 @@ class ActivityTrailController extends Controller
             ->leftjoin('city_areas as ca' ,'ca.id' ,'=','a.area_id')
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'a.designation_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
-            ->leftjoin('shipment_scanning_journey_area_logs as location_status','location_status.admin_id','=','a.id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-            ->select('a.name as name','ed.name as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address', 'activity_trail_logs.latitude', 'activity_trail_logs.longitude','ca.name as city_area','location_status.admin_id as admin_id')
-            ->groupBy('activity_trail_logs.id');
+            ->select('a.name as name','ed.name as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address', 'activity_trail_logs.latitude', 'activity_trail_logs.longitude','ca.name as city_area');
 
         if($request->get('search_from') && $request->get('search_to'))
         {
@@ -81,16 +79,6 @@ class ActivityTrailController extends Controller
         }
 
         return Datatables::of($data)
-        ->editColumn('admin_id', function($data){
-            $areaLog = ShipmentScanningJourneyAreaLog::where('admin_id', $data->admin_id)->first();
-            
-            if ($areaLog && isset($areaLog->location_status)) {
-                 return $areaLog->location_status == 1 ? 'On-site' : 'Off-site';
-            } else {
-                return '-';
-            }
-        })
-        
         ->make(true);
 
     }

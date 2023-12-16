@@ -57,7 +57,7 @@
                                         <th class="border-primary border-darken-1">Screen Name</th>
                                         <th class="border-primary border-darken-1">Action Performed</th>
                                         <th class="border-primary border-darken-1">Action Performed Time</th>
-                                        <th class="border-primary border-darken-1">Location Status</th>
+                                        {{-- <th class="border-primary border-darken-1">Location Status</th> --}}
                                         <th class="border-primary border-darken-1">IP Address</th>
                                         <th class="border-primary border-darken-1">Latitude</th>
                                         <th class="border-primary border-darken-1">Longitude</th>
@@ -149,7 +149,7 @@
                             head.push('Screen Name');
                             head.push('Action Performed');
                             head.push('Action Performed Time');
-                            head.push('Lcoation Status');
+                            // head.push('Lcoation Status');
                             head.push('IP Address');
                             head.push('Latitude');
                             head.push('Longitude');
@@ -162,7 +162,7 @@
                                 row.push(values.screen_name);
                                 row.push(values.action);
                                 row.push(values.created_at);
-                                row.push(values.location_status);
+                                // row.push(values.location_status);
                                 row.push(values.ip_address);
                                 row.push(values.latitude);
                                 row.push(values.longitude);
@@ -218,7 +218,7 @@
                     {data: 'screen_name', name: 'ata.screen_name', class: 'align-middle screen'},
                     {data: 'action', name: 'ata.action', class: 'align-middle action'},
                     {data: 'created_at', name: 'activity_trail_logs.created_at', class: 'align-middle created_at'},
-                    {data: 'admin_id', name: 'location_status.admin_id', class: 'align-middle location_status'},
+                    // {data: 'admin_id', name: 'location_status.admin_id', class: 'align-middle location_status'},
                     {data: 'ip_address', name: 'activity_trail_logs.ip_address', class: 'align-middle ip_address'},
                     {data: 'latitude', name: 'activity_trail_logs.latitude', class: 'align-middle latitude'},
                     {data: 'longitude', name: 'activity_trail_logs.longitude', class: 'align-middle longitude'},
