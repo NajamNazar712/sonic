@@ -681,7 +681,7 @@
                     var breadth = $(form).find('input.breadth').val();
                     var height = $(form).find('input.height').val();
                     shipment_weight_types = [];
-                    shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 'Manual' : 'Automatic';
+                    shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 'Automatic' : 'Manual';
                     //console.log(shipment_weight_types);
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
@@ -924,6 +924,7 @@
                 if (index !== -1) {
                     try_and_buy_table.row(parent).remove();
                     $('#try_and_buy_weight').val(parseFloat($('#try_and_buy_weight').val()) - parseFloat(current_item_weight));
+                    delete shipment_weight_types[id];
                     try_and_buy_table.draw(false);
                     var try_rowNo = try_and_buy_table.rows().count();
                     shipment_item_ids.splice(index, 1);
@@ -1337,6 +1338,8 @@
                 if (index !== -1) {
                     piece_table.row(parent).remove();
                     $('#pieces_weight').val(parseFloat($('#pieces_weight').val()) - parseFloat(current_piece_weight));
+                    delete shipment_weight_types[id];
+                    console.log(shipment_weight_types)
                     piece_table.draw(false);
                     var piece_rowNo = piece_table.rows().count();
                     shipment_piece_ids.splice(index, 1);
