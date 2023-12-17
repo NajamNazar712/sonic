@@ -388,6 +388,7 @@
             var all_shipment_item_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
+            var shipment_weight_types = [];
 
             $('#rider_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Rider Select',
@@ -674,12 +675,14 @@
                 },
                 submitHandler: function(form) {
                     $('#add_shipment_form button.add').prop('disabled', true);
-
                     var tracking_number = $(form).find('input.tracking_number').val();
                     var weight = $(form).find('input.weight').val();
                     var length = $(form).find('input.length').val();
                     var breadth = $(form).find('input.breadth').val();
                     var height = $(form).find('input.height').val();
+                    shipment_weight_types = [];
+                    shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 'Manual' : 'Automatic';
+                    //console.log(shipment_weight_types);
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         $.ajax({
                             url: '{!! route('admin.v2_pickups.arrival.individual.shipment_details') !!}', //it is for piece details
@@ -690,6 +693,7 @@
                                 'length': length,
                                 'breadth': breadth,
                                 'height': height,
+                                'weight_type' : shipment_weight_types[tracking_number],
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,
@@ -864,6 +868,7 @@
                 var item_weight =  $(this).closest('form').find('input[name="item_weight"]').val();
                 $('#scan_item').val('').focus();
                 $('#item_weight').val('');
+                shipment_weight_types[item] = $('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') ? 'Manual' : 'Automatic';
                 if(item){
                     var new_item_index = $.inArray(item, shipment_item_ids);
                     if (new_item_index === -1) {
@@ -954,12 +959,14 @@
                     var shipment_id = $('#try_and_buy_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_try_and_buy_tracking_number').val();
                     var weight = $(form).find('input.try_and_buy_weight').val();
+                    var type = check_weight_type(shipment_weight_types);
                     $.ajax({
                         url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
                             'weight': weight,
+                            'weight_type': type,
                             '_token': '{{ csrf_token() }}'
                         },
                         timeout: 5000,
@@ -1274,6 +1281,7 @@
                 var piece_weight =  $(this).closest('form').find('input[name="piece_weight"]').val();
                 $('#scan_piece').val('').focus();
                 $('#piece_weight').val('');
+                shipment_weight_types[item] =$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') ?'Manual' : 'Automatic';
                 if(item){
                     var new_item_index = $.inArray(item, shipment_piece_ids);
                     if (new_item_index === -1) {
@@ -1352,12 +1360,14 @@
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     var weight = $(form).find('input.pieces_weight').val();
+                    var type = check_weight_type(shipment_weight_types);
                     $.ajax({
                         url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
                             'weight':weight,
+                            'weight_type': type,
                             '_token': '{{ csrf_token() }}'
                         },
                         timeout: 5000,
@@ -1445,6 +1455,16 @@
             return $actual_weight;
         }
 
+        function check_weight_type(shipment_weight_types) {
+            const valuesArray = Object.values(shipment_weight_types);
+            if(valuesArray.includes('Automatic') && valuesArray.includes('Manual')) {
+                return 'Partially Manual';
+            }else if(valuesArray.includes('Manual')) {
+                return 'Manual';
+            }else {
+                return 'Automatic';
+            }
+        }
 
     </script>
 @endsection

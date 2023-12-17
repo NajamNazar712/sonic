@@ -113,6 +113,8 @@
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
                             <th class="border-primary border-darken-1">Difference (B-A)</th>
                             <th class="border-primary border-darken-1">Weighted As</th>
+                            <th class="border-primary border-darken-1">Weight Type</th>
+
                         </tr>
                         </thead>
                     </table>
@@ -274,6 +276,7 @@
                             head.push('Arrival Weight (B)');
                             head.push('Difference (B-A)');
                             head.push('Weighted As');
+                            head.push('Weight Type');
 
 
                             $.each(result.data, function(index, values) {
@@ -292,6 +295,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
                                 row.push(values.weighted_as);
+                                row.push(values.weight_type)
                                 body.push(row);
                             });
                         },
@@ -351,6 +355,8 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
+                    { data:'weight_type' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

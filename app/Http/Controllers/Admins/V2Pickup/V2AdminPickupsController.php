@@ -62,6 +62,7 @@ use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Models\ShipmentsWeightType;
 
 class V2AdminPickupsController extends Controller
 {
@@ -2095,6 +2096,16 @@ class V2AdminPickupsController extends Controller
                     // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
+                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                    if($shipment_weight){
+                        $shipments_weight_type = $shipment_weight;
+                    }else{
+                        $shipments_weight_type = new ShipmentsWeightType;
+                    }
+                    
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->save();
 
                     $rider_picked = false;
                     if(!$rider_assigned_flag){
@@ -2251,7 +2262,15 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
-
+                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                    if($shipment_weight){
+                        $shipments_weight_type = $shipment_weight;
+                    }else{
+                        $shipments_weight_type = new ShipmentsWeightType;
+                    }
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->save();
                     $details = array();
 
                     $details['id'] = $shipment->id;
@@ -3191,7 +3210,15 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
-
+                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                    if($shipment_weight){
+                        $shipments_weight_type = $shipment_weight;
+                    }else{
+                        $shipments_weight_type = new ShipmentsWeightType;
+                    }
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->save();
                     $details = array();
 
                     $details['id'] = $shipment->id;
