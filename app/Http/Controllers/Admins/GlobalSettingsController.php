@@ -9233,18 +9233,7 @@ class GlobalSettingsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
         }
-
-        // $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
-        // ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
-        // ->leftJoin('sale_person_tags as spt', function ($join) {
-        //     $join->on('spt.user_id', '=', 'u.id')
-        //         ->where('spt.admin_id', '=', Auth::id())
-        //         ->where('spt.status', 0);
-        // });
-
-        // if (session('department_id') == 7) {
-        //     $query->where('spt.admin_id', '=', Auth::id());
-        // }
+        
         $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
 
         $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
@@ -9268,17 +9257,26 @@ class GlobalSettingsController extends Controller
 
             if (session('department_id') == 7 && !$authorized) {
                 $query->where('spt.admin_id', Auth::id());
-                // Do nothing, keep the query as it is view all shipper just like dropdown
             }
         }
 
         if (session('department_id') == 7 && !$all_shippers) {
             $query->where('spt.admin_id', Auth::id());
         }
-        $queryResult = $query->get();
 
-
-        $datatable = Datatables::of($queryResult);
+        $datatable = Datatables::of($query)
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where('u.name', 'like', '%' . $keyword . '%');
+        })
+        ->filterColumn('user_ibft_charges.current_charges', function ($query, $keyword) {
+            $query->where('user_ibft_charges.current_charges', '=', $keyword);
+        })
+        ->filterColumn('a.name', function ($query, $keyword) {
+            $query->where('a.name', 'like', '%' . $keyword . '%');
+        })
+        ->filterColumn('user_ibft_charges.updated_at', function ($query, $keyword) {
+            $query->whereDate('user_ibft_charges.updated_at', '=', $keyword);
+        });
         return $datatable->make(true);
     }
 
