@@ -43,13 +43,13 @@ class ShipmentScanningJourneyController extends Controller
     
     static public function shipment_scanning_area_logs($shipment_id, $auth_id, $via)
     {
-        $employee = ($via == 'app') ? Rider::find($auth_id)->employee : Admin::find($auth_id)->employee;
+        $employee = ($via == 'app') ? Rider::find($auth_id) : Admin::find($auth_id);
         $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
 
         $addScanningHistoryAreaLog = new ShipmentScanningJourneyAreaLog([
             'shipment_id' => $shipment_id,
             'shipment_scanning_journey_id' => $latestShipmentScanningId,
-            'hub_id' => ($via == 'app') ? Rider::find($auth_id)->city_id : Admin::find($auth_id)->default_hub_id,
+            'hub_id' => ($via == 'app') ? $employee->city_id : $employee->default_hub_id,
             'area_id' => optional($employee)->area_id,
             'admin_id' => ($via == 'app') ? null : $auth_id, 
             'rider_id' => ($via == 'app') ? $auth_id : null, 
