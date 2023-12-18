@@ -63,6 +63,8 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Models\ShipmentsWeightType;
+use App\Http\Models\WeightType;
+
 
 class V2AdminPickupsController extends Controller
 {
@@ -2102,9 +2104,9 @@ class V2AdminPickupsController extends Controller
                     }else{
                         $shipments_weight_type = new ShipmentsWeightType;
                     }
-                    
+                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
                     $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->weight_type = $weight_type[0];
                     $shipments_weight_type->save();
 
                     $rider_picked = false;
@@ -2268,8 +2270,9 @@ class V2AdminPickupsController extends Controller
                     }else{
                         $shipments_weight_type = new ShipmentsWeightType;
                     }
+                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
                     $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->weight_type = $weight_type[0];
                     $shipments_weight_type->save();
                     $details = array();
 
@@ -3216,8 +3219,9 @@ class V2AdminPickupsController extends Controller
                     }else{
                         $shipments_weight_type = new ShipmentsWeightType;
                     }
+                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
                     $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $request->weight_type;
+                    $shipments_weight_type->weight_type = $weight_type[0];
                     $shipments_weight_type->save();
                     $details = array();
 

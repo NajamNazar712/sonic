@@ -61,6 +61,16 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
+                            <select name="weight_type_select" id="weight_type_select" class="select2">
+                                @foreach($weight_types as $weight_type)
+                                    <option value="{{$weight_type->id}}">{{$weight_type->name}}</option>
+                                @endforeach
+
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
                             <select name="sub_segment_select" id="sub_segment_select" class="select2">
                                 @foreach($sub_segments as $sub_segment)
                                     <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
@@ -200,7 +210,10 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
-
+            $('#search_form #weight_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Weight Type*'
+            });
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -295,7 +308,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
                                 row.push(values.weighted_as);
-                                row.push(values.weight_type)
+                                row.push(values.weight_type_name)
                                 body.push(row);
                             });
                         },
@@ -338,6 +351,7 @@
                         d.sub_segment = $('#search_form #sub_segment_select').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
+                        d.weight_type = $('#search_form #weight_type_select').val();
                     }
                 },
                 order: [[8, 'desc']],
@@ -355,7 +369,7 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
-                    { data:'weight_type' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
+                    { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
 
                 ],
                 rowCallback: function(row, data, index) {
