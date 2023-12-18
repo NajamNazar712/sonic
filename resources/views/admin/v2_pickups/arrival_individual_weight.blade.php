@@ -866,52 +866,56 @@
             $('#item_add').on('click', function () {
                 var item = parseInt($(this).closest('form').find('input[name="scan_item"]').val());
                 var item_weight =  $(this).closest('form').find('input[name="item_weight"]').val();
-                $('#scan_item').val('').focus();
-                $('#item_weight').val('');
-                shipment_weight_types[item] = $('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') ? 'Manual' : 'Automatic';
-                if(item){
-                    var new_item_index = $.inArray(item, shipment_item_ids);
-                    if (new_item_index === -1) {
-                        var shipment_id = $('#try_and_buy_shipment_id').val();
-                        var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
-                        var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
-                        $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.item_details') !!}',
-                            method: 'POST',
-                            data: {
-                                'shipment_id': shipment_id,
-                                'item_id': item,
-                                '_token': '{{ csrf_token() }}'
-                            },
-                            timeout: 5000,
-                            error: function (data) {
-                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            },
-                            success: function (data) {
-                                if(data.status == 0){
-                                    var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-                                    var try_rowNo = try_and_buy_table.rows().count();
-                                    try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, item_weight, try_remove_button]).node().id = data.scanned_shipment_item;
-                                    try_and_buy_table.draw(false);
-                                    try_and_buy_table.columns.adjust().draw();
-                                    scan_sound(1);
-                                    shipment_item_ids.push(data.scanned_shipment_item);
-                                    var check = parseInt(try_rowNo) + 1;
-                                    $('#try_and_buy_weight').val(parseFloat($('#try_and_buy_weight').val()) + parseFloat(item_weight));
-                                    if(parseInt(shipment_items_count) === parseInt(check)){
-                                        $('#try_and_buy_airwaybill').prop('disabled', false);
+                if(item_weight) {
+                    $('#scan_item').val('').focus();
+                    $('#item_weight').val('');
+                    shipment_weight_types[item] = $('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') ? 'Manual' : 'Automatic';
+                    if(item){
+                        var new_item_index = $.inArray(item, shipment_item_ids);
+                        if (new_item_index === -1) {
+                            var shipment_id = $('#try_and_buy_shipment_id').val();
+                            var shipment_tracking_number = $('#try_and_buy_tracking_number').val();
+                            var shipment_items_count = $('#try_and_buy_shipment_items_count').val();
+                            $.ajax({
+                                url: '{!! route('admin.v2_pickups.arrival.individual.try_and_buy.item_details') !!}',
+                                method: 'POST',
+                                data: {
+                                    'shipment_id': shipment_id,
+                                    'item_id': item,
+                                    '_token': '{{ csrf_token() }}'
+                                },
+                                timeout: 5000,
+                                error: function (data) {
+                                    toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                },
+                                success: function (data) {
+                                    if(data.status == 0){
+                                        var try_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                        var try_rowNo = try_and_buy_table.rows().count();
+                                        try_and_buy_table.row.add([try_rowNo + 1, data.scanned_shipment_item, shipment_tracking_number, item_weight, try_remove_button]).node().id = data.scanned_shipment_item;
+                                        try_and_buy_table.draw(false);
+                                        try_and_buy_table.columns.adjust().draw();
+                                        scan_sound(1);
+                                        shipment_item_ids.push(data.scanned_shipment_item);
+                                        var check = parseInt(try_rowNo) + 1;
+                                        $('#try_and_buy_weight').val(parseFloat($('#try_and_buy_weight').val()) + parseFloat(item_weight));
+                                        if(parseInt(shipment_items_count) === parseInt(check)){
+                                            $('#try_and_buy_airwaybill').prop('disabled', false);
+                                        }
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
                                 }
-                                else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
-                        });
+                            });
+                        }
+                        else{
+                            toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
-                    else{
-                        toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
+                }else {
+                    toastr.error('Weight can not be empty!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
 
@@ -1280,55 +1284,61 @@
                 //var item = parseInt($(this).val());
                 var item = parseInt($(this).closest('form').find('input[name="scan_piece"]').val());
                 var piece_weight =  $(this).closest('form').find('input[name="piece_weight"]').val();
-                $('#scan_piece').val('').focus();
-                $('#piece_weight').val('');
-                shipment_weight_types[item] =$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') ?'Manual' : 'Automatic';
-                if(item){
-                    var new_item_index = $.inArray(item, shipment_piece_ids);
-                    if (new_item_index === -1) {
-                        var shipment_id = $('#piece_shipment_id').val();
-                        var shipment_tracking_number = $('#piece_tracking_number').val();
-                        var shipment_piece_count = $('#piece_shipment_count').val();
-                        $.ajax({
-                            url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}', //it is for the other pieces modal
-                            method: 'POST',
-                            data: {
-                                'shipment_id': shipment_id,
-                                'piece_id': item,
-                                '_token': '{{ csrf_token() }}'
-                            },
-                            timeout: 5000,
-                            error: function (data) {
-                                toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            },
-                            success: function (data) {
-                                if(data.status == 0){
-                                    var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
-                                    var piece_rowNo = piece_table.rows().count();
-                                    piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_weight, piece_remove_button]).node().id = data.scanned_shipment_piece;
-                                    piece_table.draw(false);
-                                    piece_table.columns.adjust().draw();
-                                    scan_sound(1);
-                                    shipment_piece_ids.push(data.scanned_shipment_piece);
-                                    var check = parseInt(piece_rowNo) + 1;
-                                    $('#pieces_weight').val(parseFloat($('#pieces_weight').val()) + parseFloat(piece_weight));
-                                    if(parseInt(shipment_piece_count) === parseInt(check)){
-                                        $('#scan_piece_tracking_number').prop('disabled', false);
-                                        //$('#pieces_weight').prop('disabled', false);
-                                        $('#piece_confirm').prop('disabled', false);
+                if(piece_weight) {
+                    $('#scan_piece').val('').focus();
+                    $('#piece_weight').val('');
+                    shipment_weight_types[item] =$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') ?'Manual' : 'Automatic';
+                    if(item){
+                        var new_item_index = $.inArray(item, shipment_piece_ids);
+                        if (new_item_index === -1) {
+                            var shipment_id = $('#piece_shipment_id').val();
+                            var shipment_tracking_number = $('#piece_tracking_number').val();
+                            var shipment_piece_count = $('#piece_shipment_count').val();
+                            $.ajax({
+                                url: '{!! route('admin.v2_pickups.arrival.bulk.piece.piece_details') !!}', //it is for the other pieces modal
+                                method: 'POST',
+                                data: {
+                                    'shipment_id': shipment_id,
+                                    'piece_id': item,
+                                    '_token': '{{ csrf_token() }}'
+                                },
+                                timeout: 5000,
+                                error: function (data) {
+                                    toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                },
+                                success: function (data) {
+                                    if(data.status == 0){
+                                        var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+                                        var piece_rowNo = piece_table.rows().count();
+                                        piece_table.row.add([piece_rowNo + 1, data.scanned_shipment_piece, shipment_tracking_number, piece_weight, piece_remove_button]).node().id = data.scanned_shipment_piece;
+                                        piece_table.draw(false);
+                                        piece_table.columns.adjust().draw();
+                                        scan_sound(1);
+                                        shipment_piece_ids.push(data.scanned_shipment_piece);
+                                        var check = parseInt(piece_rowNo) + 1;
+                                        $('#pieces_weight').val(parseFloat($('#pieces_weight').val()) + parseFloat(piece_weight));
+                                        if(parseInt(shipment_piece_count) === parseInt(check)){
+                                            $('#scan_piece_tracking_number').prop('disabled', false);
+                                            //$('#pieces_weight').prop('disabled', false);
+                                            $('#piece_confirm').prop('disabled', false);
+                                        }
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
                                 }
-                                else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
-                        });
+                            });
+                        }
+                        else{
+                            toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
-                    else{
-                        toastr.error('Shipment Item has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
+                    
+                }else{
+                    toastr.error('Weight can not be empty!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+                
             });
             $('#piece_datatable tbody').on('click', 'tr td.remove button', function() {
                 var parent = $(this).parents('tr');

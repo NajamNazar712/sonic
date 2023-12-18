@@ -123,7 +123,7 @@
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
                             <th class="border-primary border-darken-1">Difference (B-A)</th>
                             <th class="border-primary border-darken-1">Weighted As</th>
-                            <th class="border-primary border-darken-1">Weight Type</th>
+                            <th class="border-primary border-darken-1">Weight Recorded As</th>
 
                         </tr>
                         </thead>
@@ -212,7 +212,7 @@
             });
             $('#search_form #weight_type_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Weight Type*'
+                placeholder: 'Select Weight Recorded As*'
             });
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -289,7 +289,7 @@
                             head.push('Arrival Weight (B)');
                             head.push('Difference (B-A)');
                             head.push('Weighted As');
-                            head.push('Weight Type');
+                            head.push('Weight Recorded As');
 
 
                             $.each(result.data, function(index, values) {
