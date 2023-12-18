@@ -9233,7 +9233,7 @@ class GlobalSettingsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
         }
-        
+
         $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
 
         $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
@@ -9264,19 +9264,7 @@ class GlobalSettingsController extends Controller
             $query->where('spt.admin_id', Auth::id());
         }
 
-        $datatable = Datatables::of($query)
-        ->filterColumn('u.name', function ($query, $keyword) {
-            $query->where('u.name', 'like', '%' . $keyword . '%');
-        })
-        ->filterColumn('user_ibft_charges.current_charges', function ($query, $keyword) {
-            $query->where('user_ibft_charges.current_charges', '=', $keyword);
-        })
-        ->filterColumn('a.name', function ($query, $keyword) {
-            $query->where('a.name', 'like', '%' . $keyword . '%');
-        })
-        ->filterColumn('user_ibft_charges.updated_at', function ($query, $keyword) {
-            $query->whereDate('user_ibft_charges.updated_at', '=', $keyword);
-        });
+        $datatable = Datatables::of($query);
         return $datatable->make(true);
     }
 
