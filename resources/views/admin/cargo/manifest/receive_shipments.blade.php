@@ -21,6 +21,11 @@
                                     {!! session('received_html') !!}
                                 </div>
                             @endif
+                            @if(session('misrouted_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('misrouted_html') !!}
+                                </div>
+                            @endif
                             @if(session('sr_html'))
                                 <div class="alert alert-danger">
                                     {!! session('sr_html') !!}
