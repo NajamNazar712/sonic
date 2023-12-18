@@ -4816,7 +4816,7 @@ class ReturnController extends Controller
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $paths = ['1', '24', '25', '26'];
+        $paths = ['1', '27', '28', '29', '2','31', '32'];
         foreach ($paths as $p){
             $files = File::glob("$path/2023_$p*.*");
             $now = Carbon::now();
