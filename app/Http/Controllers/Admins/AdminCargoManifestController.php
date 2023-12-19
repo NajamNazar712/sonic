@@ -1043,7 +1043,7 @@ class AdminCargoManifestController extends Controller
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
                                      }*/
                             } else {
-                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub']; // ye destin
+                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub']; // ye destination check karrahahe shipment ki is ko nahi remove krna h
                             }
                         } else {
                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
@@ -3036,7 +3036,7 @@ class AdminCargoManifestController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-//                    dd($bag);
+
                     if ($bag) {
 
                         if ($bag->type != $request->bag_type) {
@@ -3045,7 +3045,7 @@ class AdminCargoManifestController extends Controller
 
                         $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
                         if (!$cargo_manifest_bag) {
-                            return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
+//                            return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
                         }
                     }
 
@@ -3352,6 +3352,11 @@ class AdminCargoManifestController extends Controller
 //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
+//        dd(1,$request->all());
+        try{
+            DB::beginTransaction();
+
+
         $shipment_status_array = [3, 21, 26, 32, 49];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
@@ -3507,7 +3512,7 @@ class AdminCargoManifestController extends Controller
             }
         }
 
-
+        // received and short received
         foreach ($bag_ids as $bag_id) {
             $bag = CargoManifestBag::find($bag_id);
             $bag->received_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 1)->count();
@@ -3528,7 +3533,15 @@ class AdminCargoManifestController extends Controller
             $bag->current_hub_id = Auth::user()->default_hub_id;
             $bag->save();
 
-            ManifestBag::where('cargo_manifest_bag_id', $bag->id)->update(['status' => 1]);
+            // shipment in bag but bag not in manifest
+            $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
+            if ($manifest_bag->exists())
+            {
+                $manifest_bag = $manifest_bag->latest()->first();
+                $manifest_bag->status = 1;
+                $manifest_bag->save();
+            }
+            // shipment in bag but bag not in manifest end
 
             //dispute for short received
             if ($bag->status_id == 8) {
@@ -3539,7 +3552,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-//        end dispute short received
+            //end dispute short received
             /* if($all_bag_ids == ''){
                  $all_bag_ids = $all_bag_ids . $bag->seal_number;
              }
@@ -3549,21 +3562,26 @@ class AdminCargoManifestController extends Controller
         }
 
         foreach ($bag_ids as $bag_id) {
-            $bag = CargoManifestBag::find($bag_id);
-            $manifest_id = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first()->cargo_manifest_id;
-            $manifest = CargoManifest::find($manifest_id);
-            $manifest->received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 1)->count();
-            $short_received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 0)->count();
+            $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id); // if shipment in bag but bag not in manifest
+            if ($manifest_bag->exists())
+            {
+                $bag = CargoManifestBag::find($bag_id);
+                $manifest_id = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first()->cargo_manifest_id; //
+                $manifest = CargoManifest::find($manifest_id); //
+                $manifest->received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 1)->count();//
+                $short_received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 0)->count();//
 
-            if ($short_received_bags > 0) {
-                $manifest->short_received_bags = $short_received_bags;
-            } else {
-                $manifest->short_received_bags = 0;
-                $manifest->status_id = 2;
+                if ($short_received_bags > 0) {
+                    $manifest->short_received_bags = $short_received_bags;
+                } else {
+                    $manifest->short_received_bags = 0;
+                    $manifest->status_id = 2;
+                }
+
+                $manifest->update();
             }
-
-            $manifest->update();
         }
+        // received and short received end
 
         $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
         if ($bag_shipments->exists()) {
@@ -3614,8 +3632,14 @@ class AdminCargoManifestController extends Controller
             $misrouted_html .= "</ul>";
         }
 
+        DB::commit();
         //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
         return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html,'misrouted_html' => $misrouted_html]);
+        }
+        catch (\Throwable $th){
+            DB::rollBack();
+            return back()->with(['went_wrong' => 'Something Went Wrong']);
+        };
     }
 
     public function manifest_bags(Request $request)

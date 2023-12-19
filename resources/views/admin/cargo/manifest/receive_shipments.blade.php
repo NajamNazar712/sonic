@@ -31,6 +31,11 @@
                                     {!! session('sr_html') !!}
                                 </div>
                             @endif
+                            @if(session('went_wrong'))
+                                <div class="alert alert-danger">
+                                    {!! session('went_wrong') !!}
+                                </div>
+                            @endif
                             @if(session('already_received_shipments_html'))
                                 <div class="alert alert-info">
                                     {!! session('already_received_shipments_html') !!}
