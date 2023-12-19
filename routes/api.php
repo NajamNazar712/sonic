@@ -110,11 +110,8 @@ Route::name('api.')->group(function () {
         });
     });
     
-  
- 
 
-
-
+    Route::post('api/shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
         Route::get('track/consignee/public', 'APIController@shipment_track_consignee_public')->name('track.consignee.public');
@@ -125,9 +122,6 @@ Route::name('api.')->group(function () {
         Route::post('shipment-details', 'APIController@get_shipment_details')->name('shipment-details');
         Route::post('payment-details', 'APIController@fintech_payment_detials')->name('payment-details');
     });
-
-
-
 
     Route::prefix('rider')->name('rider.')->group(function () {
         //Obsoleted

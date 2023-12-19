@@ -27,7 +27,6 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
 
-Route::post('api/shipment/track/public', 'TrackingController@add_request')->name('track.public.crm.add');
 
 Auth::routes();
 
