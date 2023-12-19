@@ -2857,40 +2857,57 @@ class APIController extends Controller
 
     public function add_request(Request $request){
 
-        $case_nature = 1;
-        $case_nature_type = $request->complaint_id;
-        $request_channel = 2;
-        $discription = $request->description;
+        $rules = [
+            'complaint_id' => ['required', 'integer'], 
+            'description' => ['required', 'string'], 
+            'shipment_id' => ['required', 'integer', 'exists:shipments,id'], 
+            'complaint_name' => ['required', 'string'], 
+            'complaint_phone' => ['required', 'string'], 
+        ];
         
-        $shipment_id = $request->shipment_id;
-        $launched_by = 4;
-        $name = $request->complaint_name;
-        $phoneno = $request->complaint_phone;
-        if(!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()){
-            $data = new CrmRequest();
-            $data->case_nature_id = $case_nature;
-            $data->case_nature_type_id =$case_nature_type;
-            $data->description = 'Consignee :('.$name.') | Phone Number : ('.$phoneno.') | Complain : '. $discription;
-            $data->channel_id =$request_channel;
-            $data->status_id = 1;
-            $data->launched_by = $launched_by;
-            $data->shipment_id = $shipment_id;
-
-            $data->save();
-
-            $crm_request_status_history = new CrmRequestStatusHistory();
-            $crm_request_status_history->crm_request_id =$data->id;
-            $crm_request_status_history->status_id = 1;
-            $crm_request_status_history->save();
-
-            $id = str_pad($data->id, 6, 0, STR_PAD_LEFT);
-
-            return response()->json(['status' => 1, 'success' => 'Request ('. $id .') successfully added']);
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Complain already laucnched against your shipment!']);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        
+        $validate->setAttributeNames($this->names);
+        
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $case_nature = 1;
+            $case_nature_type = $request->complaint_id;
+            $request_channel = 2;
+            $description = $request->description;
+            
+            $shipment_id = $request->shipment_id;
+            $launched_by = 4;
+            $name = $request->complaint_name;
+            $phoneno = $request->complaint_phone;
+            
+            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+                $data = new CrmRequest();
+                $data->case_nature_id = $case_nature;
+                $data->case_nature_type_id = $case_nature_type;
+                $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
+                $data->channel_id = $request_channel;
+                $data->status_id = 1;
+                $data->launched_by = $launched_by;
+                $data->shipment_id = $shipment_id;
+        
+                $data->save();
+        
+                $crm_request_status_history = new CrmRequestStatusHistory();
+                $crm_request_status_history->crm_request_id = $data->id;
+                $crm_request_status_history->status_id = 1;
+                $crm_request_status_history->save();
+        
+                $id = str_pad($data->id, 6, 0, STR_PAD_LEFT);
+        
+                return response()->json(['status' => 1, 'success' => 'Request (' . $id . ') successfully added']);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Complaint already launched against your shipment!']);
+            }
         }
     }
+        
 
     public function return_confirmation_pending(Request $request)
     {

@@ -13,7 +13,10 @@ use Illuminate\Http\Request;
 |
 */
 
+
 Route::name('api.')->group(function () {
+    
+    Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
     Route::post('user_login', 'APIController@bolt_login')->name('user_login');
     Route::post('forget_pin', 'APIController@bolt_forget_pin')->name('forget_pin');
@@ -111,7 +114,6 @@ Route::name('api.')->group(function () {
     });
     
 
-    Route::post('api/shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
         Route::get('track/consignee/public', 'APIController@shipment_track_consignee_public')->name('track.consignee.public');
