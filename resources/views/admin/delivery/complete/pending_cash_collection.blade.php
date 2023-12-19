@@ -45,6 +45,7 @@
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Trax ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
@@ -386,6 +387,7 @@
                             head.push('Delivery Note No.');
                             head.push('Hub');
                             head.push('Zone');
+                            head.push('Trax ID');
                             head.push('Rider');
                             head.push('Area');
                             head.push('Rider Type');
@@ -410,6 +412,7 @@
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
+                                row.push(values.trax_id);
                                 row.push(values.rider);
                                 row.push(values.area);
                                 row.push(values.rider_type);
@@ -629,6 +632,7 @@
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone'},
+                    { data:'trax_id' ,name: 'riders.trax_id', class: 'align-middle trax_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
