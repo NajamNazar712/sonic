@@ -129,6 +129,7 @@
                             shipment += '<th><strong>Scanned By</strong></th>';
                             shipment += '<th><strong>City</strong></th>';
                             shipment += '<th><strong>Area</strong></th>';
+                            shipment += '<th><strong>Rider Pick Status</strong></th>';
                             shipment += '<th><strong>Location</strong></th>';
                             shipment += '<th><strong>Scanned Via</strong></th>';
                             shipment += '<th><strong>Scanned At</strong></th>';
@@ -146,6 +147,7 @@
                                 shipment += '<td>' + history.scanned_by + '</td>';
                                 shipment += '<td>' + history.city + '</td>';
                                 shipment += '<td>' + history.area + '</td>';
+                                shipment += '<td>' + history.rider_picked + '</td>';
                                 shipment += '<td>' + (history.area === '-' ? '-' : (history.area_log.location_status == 1 ? 'On-site' : 'Off-site')) + '</td>';
                                 shipment += '<td>' + history.updated_via + '</td>';
                                 shipment += '<td>' + history.scanned_at + '</td>';
