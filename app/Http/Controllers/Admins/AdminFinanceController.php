@@ -13380,7 +13380,8 @@ class AdminFinanceController extends Controller
                     $done_payment->user_bank_info_id = $user_bank_id;
 
 
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
 
                     if ($settings->exists()) {
                         $settings = $settings->first();
@@ -13451,7 +13452,8 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
                     $done_payment->user_bank_info_id = $user_bank_id;
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
 
                     if ($settings->exists()) {
                         $settings = $settings->first();

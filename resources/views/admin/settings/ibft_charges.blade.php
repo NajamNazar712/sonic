@@ -28,13 +28,13 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">IBFT Charges (Shipper)</span>
                                                 </div>
-                                                <input type="text" name="ibft_charges" class="form-control ibft_charges" placeholder="IBFT Charges*" data-rule-required="true" data-msg-required="IBFT Charges is required" value="{{ $ibft_charges }}" data-rule-min="0" data-msg-min="IBFT Charges can not be less than 0">
+                                                <input type="text" name="ibft_charges_shipper" class="form-control ibft_charges_shipper" placeholder="Shipper IBFT Charges*" data-rule-required="true" data-msg-required="Shipper IBFT Charges is required" value="{{ $ibft_charges }}" data-rule-min="0" data-msg-min="Shipper IBFT Charges can not be less than 0">
                                             </div>
-                                            <div class="input-group" style="padding-top: 10px">
+                                            <div class="input-group mt-1">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">IBFT Charges (Retail)</span>
                                                 </div>
-                                                <input type="text" name="ibft_charges" class="form-control ibft_charges" placeholder="IBFT Charges*" data-rule-required="true" data-msg-required="IBFT Charges is required" value="{{ $ibft_charges }}" data-rule-min="0" data-msg-min="IBFT Charges can not be less than 0">
+                                                <input type="text" name="ibft_charges_retail" class="form-control ibft_charges_retail" placeholder="Retail IBFT Charges*" data-rule-required="true" data-msg-required="Retail IBFT Charges is required" value="{{ $ibft_charges_retail }}" data-rule-min="0" data-msg-min="Retail IBFT Charges can not be less than 0">
                                             </div>
                                         </div>
 
