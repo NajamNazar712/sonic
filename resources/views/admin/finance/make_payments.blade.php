@@ -2073,7 +2073,7 @@
 				select.add(placeholderOption);
 
 				if (id == 2 || id == 4 || id == 5) {
-					var daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+					var daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 					for (var i = 0; i < daysOfWeek.length; i++) {
 					var option = document.createElement("option");
 					option.text = daysOfWeek[i];
