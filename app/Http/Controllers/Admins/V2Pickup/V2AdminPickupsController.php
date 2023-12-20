@@ -1871,6 +1871,18 @@ class V2AdminPickupsController extends Controller
         $riders = Rider::where('status', 1)->select('id', 'name', 'trax_id')->get();
         return view('admin.v2_pickups.arrival_individual_weight')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
     }
+    public function arrival_individual_index_old(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        } else {
+            $global_rider_id = 0;
+        }
+        $riders = Rider::where('status', 1)->select('id', 'name', 'trax_id')->get();
+        return view('admin.v2_pickups.arrival_individual_weight_old')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
+    }
 
     public function arrival_individual_shipment_details(Request $request)
     {
@@ -2098,17 +2110,19 @@ class V2AdminPickupsController extends Controller
                     // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
-                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
-                    if($shipment_weight){
-                        $shipments_weight_type = $shipment_weight;
-                    }else{
-                        $shipments_weight_type = new ShipmentsWeightType;
+                    if($request->has('weight_type')) {
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                        if($shipment_weight){
+                            $shipments_weight_type = $shipment_weight;
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
+                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type[0];
+                        $shipments_weight_type->save();
                     }
-                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
-                    $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $weight_type[0];
-                    $shipments_weight_type->save();
-
+                    
                     $rider_picked = false;
                     if(!$rider_assigned_flag){
                         $v2_pickup_note_request = V2PickupNoteRequest::where('pickup_request_id',$pickup_request_id)->latest()->first();
@@ -2264,16 +2278,19 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
-                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
-                    if($shipment_weight){
-                        $shipments_weight_type = $shipment_weight;
-                    }else{
-                        $shipments_weight_type = new ShipmentsWeightType;
+                    if($request->has('weight_type')){
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                        if($shipment_weight){
+                            $shipments_weight_type = $shipment_weight;
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
+                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type[0];
+                        $shipments_weight_type->save();
                     }
-                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
-                    $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $weight_type[0];
-                    $shipments_weight_type->save();
+                    
                     $details = array();
 
                     $details['id'] = $shipment->id;
@@ -3213,16 +3230,19 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
-                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
-                    if($shipment_weight){
-                        $shipments_weight_type = $shipment_weight;
-                    }else{
-                        $shipments_weight_type = new ShipmentsWeightType;
+                    if($request->has('weight_type')) {
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id)->first();
+                        if($shipment_weight){
+                            $shipments_weight_type = $shipment_weight;
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
+                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type[0];
+                        $shipments_weight_type->save();
                     }
-                    $weight_type = WeightType::where('name', $request->weight_type)->pluck('id');
-                    $shipments_weight_type->shipment_id = $shipment->id;
-                    $shipments_weight_type->weight_type = $weight_type[0];
-                    $shipments_weight_type->save();
+                    
                     $details = array();
 
                     $details['id'] = $shipment->id;

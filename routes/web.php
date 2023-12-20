@@ -1207,6 +1207,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('individual')->name('individual.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
+                Route::get('old', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index_old')->name('index_old');
+
                 Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
                 Route::post('shipment_remove', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_remove')->name('shipment_remove');
                 Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
