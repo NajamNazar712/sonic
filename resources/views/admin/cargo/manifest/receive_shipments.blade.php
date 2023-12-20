@@ -89,6 +89,7 @@
                             <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo_manifest.receive.bag.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
+                                <input id="bag_type_for_receive" type="hidden" name="bag_type" class="bag_type">
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <input type="hidden" name="open_box_ids" class="open_box_ids" id="open_box_ids">
 
@@ -234,13 +235,27 @@
 
                     var tracking_number = $(form).find('input.tracking_number').val();
                     var shipment_bag_type = $(form).find('input#shipment_bag_type').val();
+                    var shipment_bag_type_route = null;
+
+                    $('#bag_type_for_receive').val(shipment_bag_type);
+                    console.log($('#bag_type_for_receive'));
+
+                    if(shipment_bag_type == 1)
+                    {
+                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details') !!}';
+                    }
+                    else
+                    {
+                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details.return') !!}';
+                    }
 
                     form.reset();
-
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
+
                         $.ajax({
-                            url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',
+                            {{--url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',--}}
+                            url: shipment_bag_type_route,
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
