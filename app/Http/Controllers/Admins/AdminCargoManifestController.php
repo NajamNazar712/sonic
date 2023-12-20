@@ -1092,14 +1092,14 @@ class AdminCargoManifestController extends Controller
                 }
 
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 66])) {
-                $shipments++;
-                $shipments_weight += $shipment->actual_weight;
-                $quantity = $quantity + count($shipment->items);
-            } else {
-                unset($shipment_ids[$key]);
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 66])) {
+                    $shipments++;
+                    $shipments_weight += $shipment->actual_weight;
+                    $quantity = $quantity + count($shipment->items);
+                } else {
+                    unset($shipment_ids[$key]);
+                }
             }
-
             if (!empty($shipment_ids)) {
 
                 $bag = new CargoManifestBag();
@@ -1123,7 +1123,7 @@ class AdminCargoManifestController extends Controller
                 }else{
                     $bag->is_sack_bag=0;
                 }
-              
+
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
@@ -1190,9 +1190,10 @@ class AdminCargoManifestController extends Controller
         // }else{
         //     return back()->withErrors('No Sack Bag Available');
         // }
-      
-       
+
+
     }
+
 
     public function create_open_bag_index()
     {
