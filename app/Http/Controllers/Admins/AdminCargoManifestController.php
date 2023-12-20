@@ -1071,9 +1071,7 @@ class AdminCargoManifestController extends Controller
 
         $shipment_ids = explode(',', $request->input('shipment_ids'));
         $open_box_ids = explode(',', $request->input('open_box_ids'));
-//        dd($shipment_ids);
         foreach ($shipment_ids as $key => $shipment_id) {
-//            dd($shipment_id);
             $shipment = Shipment::find($shipment_id);
 
             if ($shipment->shipper_status_id == 20) {
@@ -1097,7 +1095,7 @@ class AdminCargoManifestController extends Controller
                 unset($shipment_ids[$key]);
             }
         }
-//dd($shipment_ids);
+
         if (!empty($shipment_ids)) {
 
             $bag = new CargoManifestBag();
