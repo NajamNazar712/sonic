@@ -396,8 +396,85 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(41, session('permissions')))
-                    buttons: [{
+                @if (session('role_id') == 1 || count(array_intersect([41, 913], session('permissions'))) !== 0)
+                    buttons: [
+                        @if (session('role_id') == 1 || in_array(913, session('permissions')))
+                        {
+                            text: '<i class="la la-creative-commons"></i> Cash Collect Revert',
+                            className: 'btn btn-primary cash_collect_revert_bulk',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                                    swal({
+                                        title: 'Are You Sure?',
+                                        text: 'Select Yes to revert collect cash!',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if (confirm) {
+                                            $('#delivery_note_ids').val(selected_rows);
+                                            var delivery_note_ids = $('#delivery_note_ids').val();
+                                            // console.log(delivery_note_ids)
+                                            if(delivery_note_ids != ''){
+                                                $.ajax({
+                                                    url:'{!! route('admin.delivery.cash_collection.pending.collect_revert') !!}',
+                                                    method:'POST',
+                                                    data:{
+                                                        'delivery_note_ids':delivery_note_ids,
+                                                        '_token':'{{csrf_token()}}'
+                                                    }
+                                                }).done(function (data) {
+                                                    table.button('.cash_collect_revert_bulk').disable();
+                                                    if(data.status == 1){
+                                                        table.draw();
+                                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                                    }else{
+                                                        table.draw();
+                                                        $msg = data.error;
+                                                        if(data.notes != null){
+                                                            $.each(data.notes,function (index,id) {
+                                                                $msg += '<br>';
+                                                                $msg += 'Delivery Note # '+id;
+                                                            });
+                                                        }
+                                                        toastr.error($msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                                    }
+                                                    $('#delivery_note_ids').val('');
+                                                    selected_rows = [];
+                                                });
+                                            }
+
+                                        }
+                                    });
+
+                                }else{
+                                    var error = "Something went wrong please refresh page and try again!";
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+                            }
+                        },
+                        @endif
+                    @if (session('role_id') == 1 || in_array(41, session('permissions')))
+                        {
                         text: 'Deposit DNCC',
                         className: 'btn btn-primary delivered',
                         enabled: false,
@@ -442,7 +519,9 @@
 
                             }
                         }
-                    },{
+                    },
+                   @endif
+                    {
                         extend: 'excel',
                         title: 'Completed Deliveries',
                         className: 'btn btn-primary',
@@ -483,6 +562,7 @@
                                     }
 
                                     table.button('.delivered').enable();
+                                    table.button('.cash_collect_revert_bulk').enable();
                                 }
                             }
                         });
@@ -510,6 +590,7 @@
 
                             if (selected_rows.length == 0) {
                                 table.button('.delivered').disable();
+                                table.button('.cash_collect_revert_bulk').disable();
 
                                 hub_ids.splice(index, 1);
                             }
@@ -519,12 +600,13 @@
                 },
                     'reset'],
                 @else
-                    buttons:[{
-                    extend: 'excel',
-                    title: 'Completed Deliveries',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
+                    buttons:[
+                        {
+                            extend: 'excel',
+                            title: 'Completed Deliveries',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        },
                 'reset'],
                 @endif
                 select: {
@@ -654,9 +736,11 @@
 
                     if (selected_rows.length > 0) {
                         table.button('.delivered').enable();
+                        table.button('.cash_collect_revert_bulk').enable();
                     }
                     else {
                         table.button('.delivered').disable();
+                        table.button('.cash_collect_revert_bulk').disable();
                         hub_ids.splice(index, 1);
                     }
                 }else{
@@ -672,10 +756,12 @@
 
                         if (selected_rows.length > 0) {
                             table.button('.delivered').enable();
+                            table.button('.cash_collect_revert_bulk').enable();
                         }
                         else {
                             hub_ids.splice(index, 1);
                             table.button('.delivered').disable();
+                            table.button('.cash_collect_revert_bulk').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";

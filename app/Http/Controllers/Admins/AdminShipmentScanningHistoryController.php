@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\BagScanningScreenLocation;
+use DB;
+use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentScanningJourney;
-use App\Http\Models\BagScanningJourney;
-use App\Http\Models\ShipmentScanningScreenLocation;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\BagScanningJourney;
+use App\ShipmentScanningJourneyAreaLog;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\BagScanningScreenLocation;
+use App\Http\Models\ShipmentScanningScreenLocation;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use DB;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 
 class AdminShipmentScanningHistoryController extends Controller
 {
@@ -117,11 +118,11 @@ class AdminShipmentScanningHistoryController extends Controller
                         $details[$index]['updated_via'] = DB::table('shipment_scanning_journey_vias')->whereId($scanning_history->updated_via)->pluck('name')->first() ?? '-';
                         $details[$index]['area'] = $area;
                         $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
-
                         $details[$index]['ip_address'] = $scanning_history->ip_address;
-
                         $details[$index]['latitude'] = $scanning_history->latitude ?? '-';
                         $details[$index]['longitude'] = $scanning_history->longitude ?? '-';
+                        $details[$index]['area_log'] = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_history->id)->first();
+
                     }
                     $data['tracking_number'] = $request->tracking_number;
                     $data['history'] = $details;

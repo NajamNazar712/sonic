@@ -271,11 +271,11 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(24, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual
+                                                href="{{ route('admin.v2_pickups.arrival.individual.index_old') }}">Individual
                                                 Arrival</a></li>
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.v2_pickups.arrival.individual.index_old') }}">Individual
-                                                Arrival Old</a></li>
+                                                href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Weight Scale Individual
+                                                Arrival</a></li>
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk
                                                 Arrival</a></li>
@@ -2351,7 +2351,7 @@
                             </li>
                         @endif
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([81, 85, 100, 417, 418, 152, 279, 358, 394, 447, 466, 601], session('permissions'))) !==
+                                count(array_intersect([81, 85, 100, 417, 418, 152, 279, 358, 394, 447, 466, 601, 912], session('permissions'))) !==
                                     0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Support</span></a>
                                 <ul class="menu-content">
@@ -2445,6 +2445,10 @@
                                                     @endif
                                                 </ul>
                                             </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(912, session('permissions')))
+                                            <li><a class="menu-item"
+                                                    href="{{ route('admin.settings.product_type.index') }}">Product Types</a></li>
                                         @endif
                                     @endif
                                 </ul>

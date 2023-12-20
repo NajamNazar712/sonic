@@ -1206,8 +1206,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
             Route::prefix('individual')->name('individual.')->group(function () {
-                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
-                Route::get('old', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index_old')->name('index_old');
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index_old')->name('index_old');
+                Route::get('new', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_index')->name('index');
 
                 Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
                 Route::post('shipment_remove', 'Admins\V2Pickup\V2AdminPickupsController@arrival_individual_shipment_remove')->name('shipment_remove');
@@ -1298,6 +1298,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('fintech_shipment', 'Admins\DeliveryController@pending_cash_collection_fintech_shipment')->name('fintechshipment');
 
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
+                Route::post('collect_revert', 'Admins\DeliveryController@pending_cash_collect_revert')->name('collect_revert');
                 Route::post('all', 'Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments', 'Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('onelinkpayment', 'Admins\DeliveryController@one_link_payments')->name('onelinkpayment');
@@ -3809,6 +3810,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('parcel_value_bypass')->name('parcel_value_bypass.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@parcel_value_bypass_setting_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@parcel_value_bypass_setting_update')->name('update');
+        });
+
+        Route::prefix('product_type')->name('product_type.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@product_type_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@product_type_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@product_type_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@product_type_edit')->name('edit');
+            Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
         });
 
     });
