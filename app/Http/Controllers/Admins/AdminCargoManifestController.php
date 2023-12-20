@@ -3099,6 +3099,26 @@ class AdminCargoManifestController extends Controller
                 }
             }
             else {
+
+                $bag_type = $request->bag_type;
+                $shipment_status = $shipment->shipper_status_id;
+
+                if ($bag_type == 1)
+                {
+                    if (in_array($shipment_status,[20,21,22,23,24,25,44,47,48]))
+                    {
+                        return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
+                    }
+                }
+                else
+                {
+                    if (!in_array($shipment_status,[20,21,22,23,24,25,44,47,48]))
+                    {
+                        return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
+                    }
+                }
+
+
                 //return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
                 if (!$request->has('pieces_confirm')) {
                     if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
