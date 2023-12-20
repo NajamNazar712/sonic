@@ -1952,6 +1952,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
                 Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
+
+            Route::prefix('sack_bag')->name('sack_bag.')->group(function(){
+                Route::get('', 'Admins\AdminCargoManifestController@sack_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
+                Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
+            });
         });
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
         Route::get('/list', 'Admins\AdminCargoManifestController@manifest_list')->name('list');
@@ -2948,6 +2954,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
             Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
             Route::post('submit_tracking', 'Admins\AdminReportsController@submit_tracking')->name('submit_tracking');
+        });
+
+        Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function(){
+            Route::get('','Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
+            Route::post('sack_bag_list','Admins\AdminReportsController@get_sack_bag_list')->name('sack_bag_list');
+            // Route::post('reused_sack_bag_list','Admins\AdminReportsController@get_reused_sack_bag_list')->name('reused_sack_bag_list');
+        });
+        Route::prefix('reused_sack_bag')->name('reused_sack_bag.')->group(function(){
+            Route::get('','Admins\AdminReportsController@reused_sack_bag_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@reused_sack_bag_list')->name('list');
         });
     });
 

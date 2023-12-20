@@ -116,6 +116,14 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label for="origin">Sack Bag</label>
+                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="modal-footer text-center justify-content-around">
                                                 <button type="submit" name="submit_form" class="btn btn-primary btn-block" value="submit_form">Submit</button>
