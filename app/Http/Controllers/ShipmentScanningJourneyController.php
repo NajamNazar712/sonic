@@ -1,18 +1,20 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Http\Models\BagScanningJourney;
-use App\Http\Models\ShipmentScanningJourney;
-use Illuminate\Http\Request;
-use Vectorface\Whip\Whip;
 use Session;
+use Vectorface\Whip\Whip;
+use App\Http\Models\Rider;
+use App\Http\Models\Admin\Admin;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\BagScanningJourney;
+use App\ShipmentScanningJourneyAreaLog;
+use App\Http\Models\ShipmentScanningJourney;
 
 class ShipmentScanningJourneyController extends Controller
 {
     //User Types 4 -> Retail User
     // via 1 -> Web and via 2 -> App
-    static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL, $piece_id = NULL, $updated_via = NULL ) {
+    static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL, $piece_id = NULL, $updated_via = NULL, $latitude = NULL, $longitude = NULL, $via = NULL) {
         if(session('role_id') != 1){
             $add_scanning_history = new ShipmentScanningJourney();
             $add_scanning_history->shipment_id = $shipment_id;
@@ -31,13 +33,33 @@ class ShipmentScanningJourneyController extends Controller
                 $add_scanning_history->ip_address = $client_address;
             }
 
-            if (Session::has('latitude') && Session::has('longitude')) {
-                $add_scanning_history->latitude = session('latitude');
-                $add_scanning_history->longitude = session('longitude');
-            }
-
+            $add_scanning_history->latitude = Session::get('latitude') ?? $latitude;
+            $add_scanning_history->longitude = Session::get('longitude') ?? $longitude;
+            
             $add_scanning_history->save();
+            self::shipment_scanning_area_logs($shipment_id, $admin_id, $via);
         }
+    }
+    
+    static public function shipment_scanning_area_logs($shipment_id, $auth_id, $via)
+    {
+        $employee = ($via == 'app') ? Rider::find($auth_id) : Admin::find($auth_id);
+        $latestShipmentScanningId = ShipmentScanningJourney::latest('id')->first()->id;
+
+        $addScanningHistoryAreaLog = new ShipmentScanningJourneyAreaLog([
+            'shipment_id' => $shipment_id,
+            'shipment_scanning_journey_id' => $latestShipmentScanningId,
+            'hub_id' => ($via == 'app') ? $employee->city_id : $employee->default_hub_id,
+            'area_id' => optional($employee)->area_id,
+            'admin_id' => ($via == 'app') ? null : $auth_id, 
+            'rider_id' => ($via == 'app') ? $auth_id : null, 
+            'location_status' => 0,
+            'status' => 0,
+        ]);
+        
+
+        $addScanningHistoryAreaLog->save();
+        self::shipment_reporting_area_status($latestShipmentScanningId);
     }
 
     static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
@@ -62,6 +84,46 @@ class ShipmentScanningJourneyController extends Controller
 
             $add_scanning_history->save();
         }
-
     }
+
+    static public function shipment_reporting_area_status($latest_shipment_scanning_id)
+    {
+        $shipmentScanning = ShipmentScanningJourney::find($latest_shipment_scanning_id);
+        $areaLogId = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
+        $areaLog = ShipmentScanningJourneyAreaLog::find($areaLogId);
+
+        if (!$shipmentScanning) {
+            return;
+        }
+
+        $cityArea = $areaLog->city_area->reporting_location ?? null;
+
+        if (isset($shipmentScanning, $cityArea)) {
+            if (isset($shipmentScanning->latitude, $shipmentScanning->longitude, $cityArea->lat, $cityArea->long)) {
+                $journeyLatitude = deg2rad($shipmentScanning->latitude);
+                $journeyLongitude = deg2rad($shipmentScanning->longitude);
+                $cityLatitude = deg2rad($cityArea->lat);
+                $cityLongitude = deg2rad($cityArea->long);
+
+                $earthRadius = 6371; 
+                $longitudeDelta = $journeyLongitude - $cityLongitude;
+
+                $distance = round($earthRadius * acos(
+                    sin($cityLatitude) * sin($journeyLatitude) +
+                    cos($cityLatitude) * cos($journeyLatitude) * cos($longitudeDelta)
+                ), 2);
+
+                $areaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
+
+            } else {
+                $areaLog->location_status = 0;
+            }
+        } else {
+            $areaLog->location_status = 0;
+        }
+
+        $areaLog->status = 1;
+        $areaLog->save();
+    }
+
 }

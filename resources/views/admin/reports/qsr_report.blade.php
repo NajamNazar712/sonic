@@ -190,6 +190,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -478,6 +479,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Area');
                             head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
@@ -493,14 +495,13 @@
                             head.push('Adjusted amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
+                                
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
-                                row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
@@ -520,6 +521,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.area);
                                 row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -587,8 +589,6 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
-                        // d.requested_from_date = $('#from_date1').val();
-                        // d.requested_to_date = $('#to_date1').val();
                         d.search_types = $('#search_types').val();
                         d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
@@ -621,6 +621,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
