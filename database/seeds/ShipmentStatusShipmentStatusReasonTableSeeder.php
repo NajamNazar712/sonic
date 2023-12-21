@@ -67,7 +67,12 @@ class ShipmentStatusShipmentStatusReasonTableSeeder extends Seeder
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 34),
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 35),
             array('shipment_status_id' => 12, 'shipment_status_reason_id' => 60),
-            array('shipment_status_id' => 12, 'shipment_status_reason_id' => 63)
+            array('shipment_status_id' => 12, 'shipment_status_reason_id' => 63),
+			array('shipment_status_id' => 56, 'shipment_status_reason_id' => 31),
+			array('shipment_status_id' => 56, 'shipment_status_reason_id' => 32),
+			array('shipment_status_id' => 56, 'shipment_status_reason_id' => 33),
+			array('shipment_status_id' => 56, 'shipment_status_reason_id' => 77),
+
         ));
     }
 }
