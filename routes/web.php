@@ -3818,6 +3818,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
         });
 
+        Route::prefix('logistic_report_setting')->name('logistic_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@logistic_report_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@logistic_report_store')->name('store');
+        });
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
