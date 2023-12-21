@@ -15,8 +15,8 @@ class CreateShipmentsWeightTypesTable extends Migration
     {
         Schema::create('shipments_weight_types', function (Blueprint $table) {
             $table->increments('id');
-            $table->index('shipment_id');
-            $table->index('weight_type');
+            $table->integer('shipment_id')->index();
+            $table->tinyInteger('weight_type')->index();
             $table->timestamps();
         });
     }
