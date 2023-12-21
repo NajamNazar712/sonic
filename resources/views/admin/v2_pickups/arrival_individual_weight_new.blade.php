@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Individual Arrival of Shipments')
+@section('title', 'Weight Scale Individual Arrival of Shipments')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                 Individual Arrival of Shipments
+                 Weight Scale Individual Arrival of Shipments
                 </h1>
 
                 <div class="card">
