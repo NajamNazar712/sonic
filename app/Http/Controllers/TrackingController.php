@@ -110,7 +110,7 @@ class TrackingController extends Controller
             return response()->json(['status' => 1, 'success' => 'Request ('. $id .') successfully added']);
         }
         else{
-            return response()->json(['status' => 0, 'error' => 'Complain already laucnched against your shipment!']);
+            return response()->json(['status' => 0, 'error' => 'Complain already launched against your shipment!']);
         }
     }
 
