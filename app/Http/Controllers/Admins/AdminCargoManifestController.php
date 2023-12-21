@@ -39,6 +39,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\TransportMode;
@@ -3739,7 +3740,6 @@ class AdminCargoManifestController extends Controller
                     }
                     else
                     {
-                        $shipment = Shipment::find($shipment_id);
                         if($shipment->consignee_city_id == $default_hub_id)
                         {
                             $shipment->shipper_status_id = 4;
@@ -3755,7 +3755,17 @@ class AdminCargoManifestController extends Controller
                             $shipment->shipper_status_id = 66;
                             $shipment->consignee_status_id = 66;
                             $shipment->save();
-                            $remarks = 'Misrouted from '.$shipment->pickup_address->city->name.' to '.$default_hub_name.'.';
+                            $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
+                            if ($last_scanned->exists())
+                            {
+                                $last_scanned = $last_scanned->latest()->take(1)->first();
+                                $remarks = 'Misrouted from '.$last_scanned->city->name.' to '.$default_hub_name.'.';
+                            }
+                            else
+                            {
+                                $remarks = '--';
+                            }
+
                             ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
                             ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
@@ -4042,7 +4052,7 @@ class AdminCargoManifestController extends Controller
         catch (\Throwable $th){
             DB::rollBack();
             return back()->with(['went_wrong' => 'Something Went Wrong']);
-        };
+        }
     }
 
     public function manifest_bags(Request $request)
