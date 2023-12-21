@@ -678,7 +678,7 @@
                     var breadth = $(form).find('input.breadth').val();
                     var height = $(form).find('input.height').val();
                     shipment_weight_types = [];
-                    shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 'Automatic' : 'Manual';
+                    shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 3 : 2;
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         if(parseInt(weight) >= 50){
                             swal({
@@ -1068,7 +1068,7 @@
                 if(item_weight) {
                     $('#scan_item').val('').focus();
                     $('#item_weight').val('');
-                    shipment_weight_types[item] = $('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') ? 'Manual' : 'Automatic';
+                    shipment_weight_types[item] = $('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') ? 2 : 3;
                     if(item){
                         var new_item_index = $.inArray(item, shipment_item_ids);
                         if (new_item_index === -1) {
@@ -1488,7 +1488,7 @@
                 if(piece_weight) {
                     $('#scan_piece').val('').focus();
                     $('#piece_weight').val('');
-                    shipment_weight_types[item] =$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') ?'Manual' : 'Automatic';
+                    shipment_weight_types[item] =$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') ? 2 : 3;
                     if(item){
                         var new_item_index = $.inArray(item, shipment_piece_ids);
                         if (new_item_index === -1) {
@@ -1671,12 +1671,12 @@
         }
         function check_weight_type(shipment_weight_types) {
             const valuesArray = Object.values(shipment_weight_types);
-            if(valuesArray.includes('Automatic') && valuesArray.includes('Manual')) {
-                return 'Partially Manual';
-            }else if(valuesArray.includes('Manual')) {
-                return 'Manual';
+            if(valuesArray.includes(2) && valuesArray.includes(3)) {
+                return 1;
+            }else if(valuesArray.includes(2)) {
+                return 2;
             }else {
-                return 'Automatic';
+                return 3;
             }
         }
 

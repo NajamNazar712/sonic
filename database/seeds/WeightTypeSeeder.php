@@ -14,9 +14,9 @@ class WeightTypeSeeder extends Seeder
         DB::table('weight_types')->truncate();
 
         DB::table('weight_types')->insert(array(
-            array('name' => 'Partially Manual'),
-            array('name' => 'Manual'),
-            array('name' => 'Automatic'),
+            array('id' => 1,'name' => 'Partially Manual'),
+            array('id' => 2,'name' => 'Manual'),
+            array('id' => 3,'name' => 'Automatic'),
         ));
 
     }
