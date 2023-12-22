@@ -14384,12 +14384,6 @@ RiderAPIController extends Controller
                     'tracking_number' => $tracking_number,
                     'call_from' => $request->call_from
                 ];
-
-                $shipment = Shipment::where('tracking_number', $tracking_number)->first();
-                $V2PickUpRequestShipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->first();
-                if($V2PickUpRequestShipment){
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 5, $request->rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'app');
-                } 
                 
                 switch ($shipper_status_id) {
                     case 1 : //Booked...
