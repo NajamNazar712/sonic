@@ -19,6 +19,11 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_done_payment_id" id="search_done_payment_id" placeholder="Search Done Payment ID">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -26,11 +31,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_done_payment_id" id="search_done_payment_id" placeholder="Search Done Payment ID">
-                        </fieldset>
                     </div>
                     <div class="col-3 ">
                         <div class="form-group input-group ">
@@ -147,6 +147,11 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+            $('#search_done_payment_id').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
