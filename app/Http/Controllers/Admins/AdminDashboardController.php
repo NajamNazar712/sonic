@@ -11984,43 +11984,52 @@ class AdminDashboardController extends Controller
 
     public function payment_cycle_submit(Request $request)
     {
-        try{
-            $payment_cycles = $request->payment_cycles;
-            $selected_days = $request->selected_days;
-            $fortnite = $request->fortnite;
-            $monthly = $request->monthly;
-    
-            switch ($payment_cycles) {
-                case '2':
-                case '4':
-                case '5':
-                    $payment_cycle_days = $selected_days;
-                    break;
-                case '6':
-                    $payment_cycle_days = $fortnite;
-                    break;
-                case '3':
-                    $payment_cycle_days = $monthly;
-                    break;
-                default:
-                    $payment_cycle_days = 0;
+        $shipper_ids = explode(',', $request->shipper_id);
+        $error_messages = [];
+        
+        foreach ($shipper_ids as $shipper_id) {
+            try {
+                $payment_cycles = $request->payment_cycles;
+                $selected_days = $request->selected_days;
+                $fortnite = $request->fortnite;
+                $monthly = $request->monthly;
+        
+                switch ($payment_cycles) {
+                    case '2':
+                    case '4':
+                    case '5':
+                        $payment_cycle_days = $selected_days;
+                        break;
+                    case '6':
+                        $payment_cycle_days = $fortnite;
+                        break;
+                    case '3':
+                        $payment_cycle_days = $monthly;
+                        break;
+                    default:
+                        $payment_cycle_days = 0;
+                }
+        
+                $shipper = User::find($shipper_id);
+                if ($shipper) {
+                    $shipper->update([
+                        'payment_cycle_id' => $payment_cycles,
+                        'payment_cycle_days' => $payment_cycle_days
+                    ]);
+                } else {
+                    $error_messages[] = $shipper_id;
+                }
+            } catch (Exception $th) {
+                $error_messages[] = $th->getMessage();
             }
-
-            $shipper_id =  $request->shipper_id;
-            $shipper = User::find($shipper_id);
-            if($shipper){
-                $shipper->update([
-                    'payment_cycle_id' => $payment_cycles, 
-                    'payment_cycle_days' => $payment_cycle_days
-                ]);
-                return redirect()->back()->with(['success' => 'Payment Cycle updated successfully']);
-            }else{
-                return redirect()->back()->with(['error' => 'Shipper not found']);
-            }
-        }catch(Exception $th){
-            return redirect()->back()->with(['error' => $th->getMessage()]);
         }
-
+        
+        if (!empty($error_messages)) {
+            $error_message = implode(', ', $error_messages);
+            return redirect()->back()->with(['error' => "Shipper with IDS : $error_message Not Found"]);
+        } else {
+            return redirect()->back()->with(['success' => 'Payment Cycle Updated Successfully']);
+        }        
     }
     public function getInternationalCityForm()
     {
