@@ -129,6 +129,7 @@
                             shipment += '<th><strong>Scanned By</strong></th>';
                             shipment += '<th><strong>City</strong></th>';
                             shipment += '<th><strong>Area</strong></th>';
+                            shipment += '<th><strong>Rider Pick Status</strong></th>';
                             shipment += '<th><strong>Location</strong></th>';
                             shipment += '<th><strong>Scanned Via</strong></th>';
                             shipment += '<th><strong>Scanned At</strong></th>';
