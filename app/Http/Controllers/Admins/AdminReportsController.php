@@ -9879,7 +9879,7 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 141);
         $shipping_modes = ShippingMode::all();
         $users = User::where('status', 3)->get(['id', 'name']);
-        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        $hubs = City::where('status', 1)->where('hub', 1)->select('id', 'name')->get();
         $zones = Zone::where('status', 1)->get(['id', 'name']);
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
         $weight_types = WeightType::select('id','name')->get();
@@ -9966,7 +9966,10 @@ class AdminReportsController extends Controller
         if ($user = $request->get('search_user')) {
             $datatable->where('shipments.user_id', $user);
         }
-        if ($hub = $request->get('search_hub')) {
+        if ($hub = $request->get('search_origin_hub')) {
+            $datatable->where('oc.hub_id', $hub);
+        }
+        if ($hub = $request->get('search_destination_hub')) {
             $datatable->where('dc.hub_id', $hub);
         }
         if ($zone = $request->get('search_zone')) {

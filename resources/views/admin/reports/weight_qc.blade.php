@@ -35,7 +35,16 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_destination_hub" id="search_destination_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -192,9 +201,13 @@
                 width: '100%',
                 placeholder: 'Select Shipper',
             });
-            $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Hub',
+                placeholder: 'Origin Hub',
+            });
+            $('#search_form #search_destination_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Destination Hub',
             });
             $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -344,7 +357,8 @@
                         d.tracking_numbers = $('#search_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_user = $('#search_user').val();
-                        d.search_hub = $('#search_hub').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_destination_hub = $('#search_destination_hub').val();
                         d.search_zone = $('#search_zone').val();
                         d.weighted_as = $('#weighted_as').val();
                         d.sub_segment = $('#search_form #sub_segment_select').val();
