@@ -147,8 +147,14 @@
                                 shipment += '<td>' + history.scanned_by + '</td>';
                                 shipment += '<td>' + history.city + '</td>';
                                 shipment += '<td>' + history.area + '</td>';
-                                shipment += '<td>' + history.rider_picked + '</td>';
-                                shipment += '<td>' + (history.area === '-' ? '-' : (history.area_log.location_status == 1 ? 'On-site' : 'Off-site')) + '</td>';
+                                shipment += '<td>' + (
+                                history && 
+                                history.area &&
+                                history.area_log &&
+                                history.area_log.location_status != null
+                                    ? (history.area_log.location_status === 1 ? 'On-site' : 'Off-site')
+                                    : '-'
+                                ) + '</td>';
                                 shipment += '<td>' + history.updated_via + '</td>';
                                 shipment += '<td>' + history.scanned_at + '</td>';
                                 shipment += '<td>' + history.ip_address + '</td>';
