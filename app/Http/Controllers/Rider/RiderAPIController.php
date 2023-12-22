@@ -14361,7 +14361,6 @@ RiderAPIController extends Controller
 
     public function scan_rider_picked_shipment(Request $request)
     {
-        dd($request->all());
         $rules = [
             'tracking_number' => 'required',
             'call_from' => 'required',
