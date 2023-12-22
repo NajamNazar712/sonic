@@ -457,7 +457,7 @@
             });
 
             $('#add_try_and_buy_shipment_form input.scan_item').focus();
-            $('#add_try_and_buy_shipment_form input.scan_item').on('blur',function(){
+            $('#add_try_and_buy_shipment_form input.scan_item').on('change',function(){
                 if(!$('#add_try_and_buy_shipment_form input.item_manual_weight').is(':checked') && 
                 $('#add_try_and_buy_shipment_form input.scan_item').val().length ) {
                     $.ajax({
@@ -805,6 +805,9 @@
                                                     $('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
                                                     $('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
                                                     $('#tryAndbuyModal').modal('show');
+                                                    $('#tryAndbuyModal').on('shown.bs.modal', function () {
+                                                        $('#scan_item').val('').focus();
+                                                    });
                                                     if(!weight){
                                                         volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
                                                         $('#try_and_buy_weight').val(volumetric_weight_calculation);
@@ -854,6 +857,9 @@
                                                     $('#piece_shipment_count').val(data.details.pieces_count);
                                                     $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
                                                     $('#ShipmentPiecesModal').modal('show');
+                                                    $('#ShipmentPiecesModal').on('shown.bs.modal', function () {
+                                                        $('#scan_piece').val('').focus();
+                                                    });
                                                     if(!weight){
                                                         volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
                                                         $('#pieces_weight').val(volumetric_weight_calculation);
@@ -980,6 +986,9 @@
                                             $('#try_and_buy_shipment_items_count').val(data.details.shipment_items_count);
                                             $('#total_item_count').html('Total Shipment Items: ' + data.details.shipment_items_count);
                                             $('#tryAndbuyModal').modal('show');
+                                            $('#tryAndbuyModal').on('shown.bs.modal', function () {
+                                                $('#scan_item').val('').focus();
+                                            });
                                             if(!weight){
                                                 volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
                                                 $('#try_and_buy_weight').val(volumetric_weight_calculation);
@@ -1031,6 +1040,9 @@
                                             $('#piece_shipment_count').val(data.details.pieces_count);
                                             $('#total_piece_count').html('Total Shipment Pieces: ' + data.details.pieces_count);
                                             $('#ShipmentPiecesModal').modal('show');
+                                            $('#ShipmentPiecesModal').on('shown.bs.modal', function () {
+                                                $('#scan_piece').val('').focus();
+                                            });
                                             if(!weight){
                                                 volumetric_weight_calculation = volumetric_weight_calculation(length,breadth,height);
                                                 $('#pieces_weight').val(volumetric_weight_calculation);
@@ -1448,7 +1460,7 @@
             });
 
             $('#add_shipment_pieces_form input.scan_piece').focus();
-            $('#add_shipment_pieces_form input.scan_piece').on('blur',function(){
+            $('#add_shipment_pieces_form input.scan_piece').on('change',function(){
                 if(!$('#add_shipment_pieces_form input.piece_manual_weight').is(':checked') &&
                     $('#add_shipment_pieces_form input.scan_piece').val().length) {
                     $.ajax({
