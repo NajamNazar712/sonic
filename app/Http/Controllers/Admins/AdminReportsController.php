@@ -13163,6 +13163,55 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
+    public function ibft_report_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 715);
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        return view('admin.reports.ibft_report')->with('shippers', $shippers);
+    }
 
+    public function ibft_report_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 716);
+        }
+        $ibft_report = DB::connection('reports')->table('done_payment_calculations')->join('done_payments as dp', 'dp.id', '=', 'done_payment_calculations.done_payment_id')
+            ->join('users as u', 'u.id', '=', 'dp.user_id')
+            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'dp.id')
+            ->leftjoin('shipments','shipments.id','dps.shipment_id')
+            ->select('dp.id as done_payment_id', 'u.name as shipper', 'done_payment_calculations.amount','done_payment_calculations.charges','done_payment_calculations.gst','done_payment_calculations.ibft_charges', 
+            'done_payment_calculations.payable','done_payment_calculations.created_at','done_payment_calculations.updated_at', 'dp.status as status','shipments.tracking_number');
+
+        $ibft_report = Datatables::of($ibft_report)
+            ->editColumn('status', function ($status) {
+                if ($status->status == 0) {
+                    return "Processed";
+                } else if($status->status == 1){
+                    return "Paid";
+                }
+                else if($status->status == 2){
+                    return "Reverted";
+                }
+            });
+
+        if ($done_payment_id = $request->get('done_payment_id')) {
+            $ibft_report->where('dp.id', '=', $done_payment_id);
+        }
+        if ($shipper = $request->get('shipper')) {
+            $ibft_report->where('u.id', '=', $shipper);
+        }
+        if ($request->get('date_from') && $request->get('date_to')) {
+            $from = $request->get('date_from');
+            $to = $request->get('date_to');
+            $ibft_report->whereBetween('done_payment_calculations.created_at', [$from, $to]);
+        }
+
+        if ($tracking_no = $request->get('tracking_no')) {
+            $ibft_report->where('shipments.tracking_number', '=', $tracking_no);
+        }
+
+
+        return $ibft_report->make(true);
+    }
 
 }
