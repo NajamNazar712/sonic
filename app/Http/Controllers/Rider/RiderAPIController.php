@@ -11336,7 +11336,6 @@ RiderAPIController extends Controller
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
                                 if ($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)) {
-                                    dd(1);
                                     $shipment->shipper_status_id = 53;
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
@@ -14385,7 +14384,7 @@ RiderAPIController extends Controller
                     'tracking_number' => $tracking_number,
                     'call_from' => $request->call_from
                 ];
-                
+
                 $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                 $V2PickUpRequestShipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->first();
                 if($V2PickUpRequestShipment){
