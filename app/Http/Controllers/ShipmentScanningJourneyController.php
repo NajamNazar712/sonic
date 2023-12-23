@@ -113,6 +113,8 @@ class ShipmentScanningJourneyController extends Controller
                     cos($cityLatitude) * cos($journeyLatitude) * cos($longitudeDelta)
                 ), 2);
 
+                $distance = $distance * 1000;  //To Metre
+                
                 $areaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
 
             } else {
