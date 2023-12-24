@@ -633,7 +633,7 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->join('shipments_journey', function ($join) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
@@ -671,7 +671,7 @@ class ShipperDashboardController extends Controller
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
-            $shipments = $shipments->where('shipments.created_at', '>=', Carbon::parse($from)->toDateString())->where('shipments.created_at', '<', Carbon::parse($to)->addDay(1)->toDateString());
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
