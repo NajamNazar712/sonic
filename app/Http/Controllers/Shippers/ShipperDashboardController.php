@@ -671,7 +671,7 @@ class ShipperDashboardController extends Controller
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $from = $request->get('booking_from_date');
             $to = $request->get('booking_to_date');
-            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
+            $shipments = $shipments->where('shipments.created_at', '>=', Carbon::parse($from)->toDateString())->where('shipments.created_at', '<', Carbon::parse($to)->addDay(1)->toDateString());
         }
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
@@ -805,11 +805,6 @@ class ShipperDashboardController extends Controller
 
             if ($phone_number = $request->get('phone_number')) {
                 $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-            }
-            if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
-                $from = $request->get('booking_from_date');
-                $to = $request->get('booking_to_date');
-                $datatable->whereBetween('shipments.created_at', [$from,$to]);
             }
 
             return $datatable->make(true);
