@@ -9167,7 +9167,8 @@ class AdminDashboardController extends Controller
     }
 
     public function activeAccountListAjax(Request $request)
-    {
+    {        
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
@@ -9392,6 +9393,11 @@ class AdminDashboardController extends Controller
                 } else {
                     return "-";
                 }
+                
+            })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
             })
             ->editColumn('international_rejected_reason', function ($users) {
                 if ($users->international_rejected_reason != null && $users->international_rate_status == 3) {
@@ -9724,6 +9730,11 @@ class AdminDashboardController extends Controller
             ->editColumn('status', function ($users) {
                 return $users->status == 0 ? 'Request Received' : ($users->status == 1 ? 'Rates Added' : ($users->status == 2 ? 'Pending for Activation' : ($users->status == 5 ? 'Rates Rejected' : '')));
             })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
+
+            })
             ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -10048,6 +10059,11 @@ class AdminDashboardController extends Controller
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
+            })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
+
             })
             ->addColumn("action", function ($result) {
                 $dropdown = '
