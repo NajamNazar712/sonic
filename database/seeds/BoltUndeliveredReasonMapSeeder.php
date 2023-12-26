@@ -37,10 +37,10 @@ class BoltUndeliveredReasonMapSeeder extends Seeder
             ['reason_id' => 35, 'status_attempt_count_1' => 12, 'status_attempt_count_2' => 12],
             ['reason_id' => 40, 'status_attempt_count_1' =>8, 'status_attempt_count_2' =>8],
             ['reason_id' => 45, 'status_attempt_count_1' =>8, 'status_attempt_count_2' => 12],
-            ['reason_id' => 31, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 56],
-            ['reason_id' => 32, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 56],
-            ['reason_id' => 33, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 56],
-            ['reason_id' => 77, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 56],
+            ['reason_id' => 31, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 12],
+            ['reason_id' => 32, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 12],
+            ['reason_id' => 33, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 12],
+            ['reason_id' => 77, 'status_attempt_count_1' => 56, 'status_attempt_count_2' => 12],
         ];
         
         DB::table('bolt_undelivered_reason_maps')->insert($data);
