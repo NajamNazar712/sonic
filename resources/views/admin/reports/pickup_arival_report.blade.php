@@ -65,7 +65,7 @@
                             {{-- <th class="border-primary border-darken-1">Created Shipments</th>
                             <th class="border-primary border-darken-1">Not Picked Shipments</th> --}}
                             <th class="border-primary border-darken-1">Rider Picked</th>
-                            <th class="border-primary border-darken-1">Global Rider Picked</th>
+                            {{-- <th class="border-primary border-darken-1">Global Rider Picked</th> --}}
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Balance Shipments</th>
                               {{-- <th class="border-primary border-darken-1">Rider</th> --}}
@@ -212,6 +212,7 @@ aria-hidden="true">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking No</th>
                                         <th class="border-primary border-darken-1">Picked Rider</th>
+                                        <th class="border-primary border-darken-1">Global Rider</th>
                                         <th class="border-primary border-darken-1">Pickup Request Id</th>
                                         <th class="border-primary border-darken-1">Assigned Rider</th>
                                         <th class="border-primary border-darken-1">Pickup Request Date</th>
@@ -525,7 +526,7 @@ aria-hidden="true">
                         }},
                         // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         { data:'rider_picked_btn',class: 'align-middle text-center rider_picked', orderable: false, searchable: false},
-                        { data:'global_picked_btn',class: 'align-middle text-center global_rider_picked', orderable: false, searchable: false},
+                        // { data:'global_picked_btn',class: 'align-middle text-center global_rider_picked', orderable: false, searchable: false},
 
                         { data:'shipment_arrived_btn', class: 'align-middle text-center shipment_arrived', orderable: false, searchable: false},
                         { data:'shipment_balance_btn', class: 'align-middle text-center shipment_balance', orderable: false, searchable: false},
@@ -614,10 +615,10 @@ aria-hidden="true">
                         }
                     
                         if(value.arrived_status!=2){
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+(value.picked_rider_id!=null?value.picked_rider_id+'-'+value.picked_rider_name:'')+'</td><td class=" align-middle global_rider_name">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
 
                         }else{
-                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+value.picked_rider_id+'-'+value.picked_rider_name+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
+                            $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+(value.picked_rider_id!=null?value.picked_rider_id+'-'+value.picked_rider_name:'')+'</td><td class=" align-middle global_rider_name">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
                         }
                     });
                     $("#RiderdetailModal").modal('show');

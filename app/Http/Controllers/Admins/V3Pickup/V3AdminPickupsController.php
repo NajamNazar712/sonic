@@ -2993,9 +2993,8 @@ class V3AdminPickupsController extends Controller
                     ->select('shipments_journey.rider_id')->where('spj.status_id',6)->where('shipper_status_id',53)->where('shipments_journey.shipment_id',$shipment_id)->first();
                     if($picked_rider){
                         $rider_id = $picked_rider->rider_id;
-                        $global_rider_id=null;
                     }else{
-                        $rider_id=null;
+                        $rider_id=$global_rider_id;
                     }
                     //by pass this stage
                     // if ($pickup_request->current_rider_id == null) {
@@ -3041,7 +3040,7 @@ class V3AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id,$global_rider_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
