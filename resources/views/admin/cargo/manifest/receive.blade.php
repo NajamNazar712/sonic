@@ -46,6 +46,11 @@
                                     {!! session('bag_not_exist_error') !!}
                                 </div>
                             @endif
+                            @if(session('went_wrong_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('went_wrong_html') !!}
+                                </div>
+                            @endif
                             <form id="add_bag_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div id="camera_scan" class="d-none">
                                     <div id="camera_view" class="camera_view"></div>
