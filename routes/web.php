@@ -1932,7 +1932,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminCargoManifestController@pending_bag_list')->name('list');
             });
 
-            Route::prefix('create')->name('create.')->group(function () {
+            Route::prefix('create')->name('create.')->group(function () { //bag creation
                 Route::get('', 'Admins\AdminCargoManifestController@create_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details')->name('shipment_details');
                 Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
@@ -1962,9 +1962,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
         Route::get('/list', 'Admins\AdminCargoManifestController@manifest_list')->name('list');
         Route::get('/create', 'Admins\AdminCargoManifestController@create_manifest')->name('create');
-        Route::post('bag/details', 'Admins\AdminCargoManifestController@bag_details')->name('bag_details');
-        Route::post('cargo/details', 'Admins\AdminCargoManifestController@cargo_details')->name('cargo_details');
-        Route::post('/store', 'Admins\AdminCargoManifestController@store_manifest')->name('store');
+        Route::post('bag/details', 'Admins\AdminCargoManifestController@bag_details')->name('bag_details'); // create manifest -> fetch bag details
+        Route::post('cargo/details', 'Admins\AdminCargoManifestController@cargo_details')->name('cargo_details'); // create manifest -> on popup fetch cargo details
+        Route::post('/store', 'Admins\AdminCargoManifestController@store_manifest')->name('store'); //create manifest -> store
         Route::post('/update/seal_number', 'Admins\AdminCargoManifestController@update_seal_number')->name('update.seal_number');
         Route::post('/junctions', 'Admins\AdminCargoManifestController@junctions_info')->name('junctions_info');
         Route::post('/vehicle', 'Admins\AdminCargoManifestController@vehicle_info')->name('vehicle_info');
@@ -1974,14 +1974,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'Admins\AdminCargoManifestController@receive_bag_index')->name('index');
-            Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
-            Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_store')->name('store');
+            Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details'); // receive bag -> scanne bag no
+            Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_store')->name('store'); // receive bag -> store
 
-            Route::prefix('bag')->name('bag.')->group(function () {
+            Route::prefix('bag')->name('bag.')->group(function () { // receive bag shipments
                 Route::get('', 'Admins\AdminCargoManifestController@receive_bag_shipments_index')->name('index');
-                Route::post('details', 'Admins\AdminCargoManifestController@receive_bag_shipments_details')->name('details');
-                Route::post('details/return', 'Admins\AdminCargoManifestController@receive_bag_shipments_details_return')->name('details.return');
-                Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');
+                Route::post('details', 'Admins\AdminCargoManifestController@receive_bag_shipments_details')->name('details'); // receive normal bag
+                Route::post('details/return', 'Admins\AdminCargoManifestController@receive_bag_shipments_details_return')->name('details.return'); // receive return bag
+                Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');// receive store
             });
         });
 
