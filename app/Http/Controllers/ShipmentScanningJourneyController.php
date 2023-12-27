@@ -37,7 +37,7 @@ class ShipmentScanningJourneyController extends Controller
             $add_scanning_history->longitude = Session::get('longitude') ?? $longitude;
             
             $add_scanning_history->save();
-            self::shipment_scanning_area_logs($shipment_id, $admin_id, $via);
+//            self::shipment_scanning_area_logs($shipment_id, $admin_id, $via);
         }
     }
     
