@@ -4815,17 +4815,23 @@ class ReturnController extends Controller
             }
         }
 
-        $files = File::glob(asset('storage/uploads/return_notes/*.*'));
-        $now = Carbon::now();
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                $created = date("F d Y H:i:s.",filemtime($file));
-                $file_name = pathinfo($file);
-                if($now->diffInDays($created) > 1){
-                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                    $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
-                    if($exists){
-                        File::delete($file);
+        $path = storage_path('app/public/uploads/return_notes');
+        $paths = ['11', '12', '13', '14', '15', '16', '17', '18', '19', '20'];
+        foreach ($paths as $p){
+            $files = File::glob("$path/2023_$p*.*");
+            $now = Carbon::now();
+            if(count($files) > 0){
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        $created = date("F d Y H:i:s.",filemtime($file));
+                        $file_name = pathinfo($file);
+                        if($now->diffInDays($created) > 1){
+                            Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                            if($exists){
+                                File::delete($file);
+                            }
+                        }
                     }
                 }
             }

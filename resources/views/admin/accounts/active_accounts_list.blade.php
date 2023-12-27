@@ -102,6 +102,8 @@
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Referral Code</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -959,6 +961,8 @@ function checkboxStatus() {
                         head.push('Segment');
                         head.push('Sub Category Segment');
                         head.push('Referral Code');
+                        head.push('Payment Cycle');
+                        head.push('Payment Cycle Days');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -1007,7 +1011,8 @@ function checkboxStatus() {
                             row.push(values.segment);
                             row.push(values.sub_segment);
                             row.push(values.referral_name);
-
+                            row.push(values.payment_cycle);
+                            row.push(values.payment_cycle_days);
                             body.push(row);
                         });
                     },
@@ -1117,6 +1122,26 @@ function checkboxStatus() {
                         //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         //     }
                         }
+                    },
+                    @endif
+
+
+                    @if (session('role_id') == 1 || in_array(365, session('permissions')))
+                    {
+                            text: 'Payment Cycle',
+                            className: 'btn btn-primary payment_cycle',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('#payment_cycle_form [name="shipper_id"]').val(selected_rows);
+                           $('#PaymentCycleModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+        
+                    }
                     },
                     @endif
                    @if (session('role_id') == 1 || in_array(427, session('permissions')))
@@ -1544,6 +1569,8 @@ function checkboxStatus() {
                                         table.button('.tag').enable();
                                         table.button('.territory_tag').enable();
                                         table.button('.territory_retag').enable();
+                                        table.button('.payment_cycle').enable();
+
                                     }
                                 }
                             });
@@ -1669,7 +1696,8 @@ function checkboxStatus() {
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
-                
+                {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
+                {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -1704,7 +1732,16 @@ function checkboxStatus() {
                     '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
 
+                        '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1731,7 +1768,12 @@ function checkboxStatus() {
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }
+                    } else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1741,6 +1783,15 @@ function checkboxStatus() {
                             current.val(column.search());
                         }
                     }
+                });
+                $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
@@ -2392,17 +2443,19 @@ function checkboxStatus() {
                     table.button('.approve_commission').enable();
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
+                    table.button('.payment_cycle').enable();
 
                 }
                 else {
                     table.button('.bulk_tagging').disable();
                     table.button('.bulk_segment_tagging').disable();
-                    
+                    table.button('.territory_retag').disable();
+
                     table.button('.tag').disable();
                     table.button('.set_commission').disable();
                     table.button('.approve_commission').disable();
                     table.button('.territory_tag').disable();
-                    table.button('.territory_retag').disable();
+                    table.button('.payment_cycle').disable();
                 }
         });
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
@@ -2902,7 +2955,7 @@ function checkboxStatus() {
     });
 }
 
-var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         var selectedValues = []; // Create an array to store selected values
         for (var i = 0; i < days.length; i++) {
             var day = days[i];

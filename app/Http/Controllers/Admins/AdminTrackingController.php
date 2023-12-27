@@ -709,14 +709,11 @@ class AdminTrackingController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
-        }
-        elseif($request->bag && $bag_no != null)
-        {
+        } elseif ($request->bag && $bag_no != null) {
 
             $bag = CargoManifestBag::where('seal_number', $bag_no);
 
-            if($bag->exists())
-            {
+            if ($bag->exists()) {
                 $bag = $bag->first();
                 $details = array();
                 $details['bag_number'] = $bag->seal_number;
@@ -727,15 +724,13 @@ class AdminTrackingController extends Controller
                 $details['pieces'] = $bag->quantity;
                 $details['number_of_shipments'] = $bag->shipments;
                 $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
-                if ($manifest !== null)
-                {
-                    if($manifest->exists())
-                    {
-                        $manifest =  $manifest->latest()->first()->id;
-                    }else{
+                if ($manifest !== null) {
+                    if ($manifest->exists()) {
+                        $manifest = $manifest->latest()->first()->id;
+                    } else {
                         $manifest = '-';
                     }
-                }else{
+                } else {
                     $manifest = '-';
 
                 }
@@ -751,15 +746,32 @@ class AdminTrackingController extends Controller
                 }
                 $details['bag_status_hub'] = $bag;
                 return response()->json(['status' => 1, 'details' => $details]);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'error' => 'Bag Number not found']);
             }
-            
-
         }
     }
+    public function quick_tracking_shipment_remark_update(Request $request)
+    {
+        $tracking_numbers = explode(',' , $request->tracking_numbers);
+        foreach($tracking_numbers as $tracking_number)
+        {
+            $shipment = Shipment::where('tracking_number', $tracking_number);
+            if($shipment->exists()){
+                //take latest shipment
+                $shipment = $shipment->with(['shipment_journey' => function ($query) {
+                    $query->take(1); 
+                }])->first();
+                
+                $shipment_journey = $shipment->shipment_journey->first();
+                $shipment_journey->remarks = $request->add_remark;
+                $shipment_journey->save();
+            }            
+        }
 
+        return redirect()->back()->with('success', 'Shipment Remark updated successfully!');
+
+    }
     public function cx_quick_tracking_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 272);
@@ -2196,7 +2208,7 @@ class AdminTrackingController extends Controller
                                 $shipment_position->tracking_number = $shipment->tracking_number;
                                 $shipment_position->origin = $shipment->pickup_address->city->name;
                                 $shipment_position->destination = $shipment->consignee_city->name;
-                                $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name;
+                                $shipment_position->status = $last_shipment_journey->shipment_status_shipper->name ?? '-';
                                 $shipment_position->status_at = $last_shipment_journey->created_at ? Carbon::parse($last_shipment_journey->created_at)->format('Y-m-d H:i:s') : '-';
                                 $shipment_position->status_by = $shipment_journey_status_by;
                                 $shipment_position->screen_location = $screen_location;
@@ -2249,9 +2261,9 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
 
-        $shipment_positions = ShipmentPosition::join('shipments as s','s.id','=','shipment_positions.shipment_id')->join('users as u','u.id','=','s.user_id')
-        ->join('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
-        ->join('admins as a','a.id','=','sj.admin_id')
+        $shipment_positions = ShipmentPosition::leftJoin('shipments as s','s.id','=','shipment_positions.shipment_id')->leftJoin('users as u','u.id','=','s.user_id')
+        ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+        ->leftJoin('admins as a','a.id','=','sj.admin_id')
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id'])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
 

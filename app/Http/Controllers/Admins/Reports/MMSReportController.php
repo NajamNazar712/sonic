@@ -44,54 +44,75 @@ class MMSReportController extends Controller
     {
         $connection = 'reports';
 
-
         $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
         $special_shippers = explode(',', $shippers->text);
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 567);
         }
-        // $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-        // $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->toDateTimeString();
         $to = $request->get('search_date_to');
         $to = Carbon::parse($to)->toDateTimeString();
 
-        // $from = str_replace('00:00:00', $arrival_from, $from);
-        // $to = str_replace('00:00:00', $arrival_to, $to);
+        $from_id = null;
+        $to_id = null;
+        $sj_from_id = 168982787;
 
+
+
+        if ($from != null && $to != null) {
+            
+            $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+                
+                $to_id = DB::connection($connection)->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+                }
+            }
+            $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($sj_from_id->exists()) {
+                $sj_from_id = $sj_from_id->first()->id;
+            }
+            else{
+                // $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $current_date)->first()->id;
+                $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->latest()->first()->id;
+            }
+        }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->leftjoin('zone_class_cities as zcc', function($join) use ($connection) {
-                $join->on('z.id', '=', 'zcc.zone_id')
-                    ->on('dc.id', '=', 'zcc.city_id')
-                    ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
-            })
-            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
+        ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+        ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+        ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+        ->leftjoin('zone_class_cities as zcc', function($join) use ($connection) {
+            $join->on('z.id', '=', 'zcc.zone_id')
+            ->on('dc.id', '=', 'zcc.city_id')
+            ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
+        })
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.shipper_status_id', 2)
-                    ->where('sj.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                    ->where('sj.id', '=',
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id)"));
             })
-            ->leftJoin('shipments_journey as sjr', function ($join) use ($connection) {
+            ->leftJoin('shipments_journey as sjr', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sjr.shipment_id', '=', 'shipments.id')
                     ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
                     ->where('sjr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null and shipments_journey.id >= $sj_from_id)"));
             })
-            ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+            ->leftJoin('shipments_journey as dr', function ($join) use ($connection, $sj_from_id) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37,38) and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37,38) and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
             })
             ->leftJoin('riders as riders','riders.id','=','dr.rider_id')
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
@@ -104,32 +125,16 @@ class MMSReportController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to]);
-
+   
+        
+        if($from != null && $to != null) {
+            $sales = $sales->whereBetween('shipments.created_at', [$from, $to]);
             
-            
-        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-        if ($from_id->exists()) {
-            $from_id = $from_id->first()->id;
-
-            
-
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
-            
-            if ($to_id->exists()) {
-                $to_id = $to_id->latest()->first()->id;
-
-                $sales->where('sj.id', '>=', $from_id)
-                ->where('sj.id', '<=', $to_id);    
+            if ($from_id != null && $to_id != null) {
+                $sales->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
             }
         }
-
-        
-//        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
-//            $now = Carbon::now();
-//            $yesterday = Carbon::now()->subDays(3);
-//            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
-//        }
 
         if (session('role_id') != 1) {
             if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -221,9 +226,21 @@ class MMSReportController extends Controller
             $datatable->where('shipments.tracking_number', '=', $tracking);
         }
 
-        if ($search_shipper = $request->get('search_shipper')) {
-            $datatable->where('shipments.user_id', '=', $search_shipper);
+        $search_shipper = $request->get('search_shipper');
+        if ($search_shipper) {
+            $whereInArray = [];
+
+            if (is_array($search_shipper)) {
+                foreach ($search_shipper as $shipper) {
+                    $whereInArray[] = $shipper;
+                }
+            } else {
+                $whereInArray[] = $search_shipper;
+            }
+
+            $datatable->whereIn('shipments.user_id', $whereInArray);
         }
+        
         if ($destination = $request->get('search_destination')) {
             $datatable->where('dc.id', '=', $destination);
         }

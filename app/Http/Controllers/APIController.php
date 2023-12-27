@@ -2,121 +2,122 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
-use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
-use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
-use App\Http\Models\Admin\RcpAssignedAgent;
-use App\Http\Models\Admin\RcpAssignedShipment;
-use App\Http\Models\Admin\RcpAssignedShipmentLog;
-use App\Http\Models\Admin\Retail\RetailCashDeposit;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\ReceivingSheetPrintStatus;
-use App\GuestApiToken;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\AdminWalkInBookShipmentController;
-use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
-use App\Http\Controllers\Admins\FTLController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\CRM\CRMController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
-use App\Http\Controllers\Shippers\ShipperShipmentBookController;
-use App\Http\Models\Admin\BookingDestinationMappingKeyword;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\FtlRequest;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
-use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\OneLink\OneLink;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\Admin\Retail\RetailFranchise;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\TelenorOtherCouriers;
-use App\Http\Models\Blacklist\BlacklistedConsignee;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\Blacklist\ConsigneeInformation;
-use App\Http\Models\City;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CorporateDeliveryTypeStatus;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentCalculation;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\GulAhmedCities;
-use App\Http\Models\GulAhmedPickupAddress;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\InterceptReBookRequest;
-use App\Http\Models\Invoice;
-use App\Http\Models\InvoiceShipment;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Models\Rider;
-use App\Http\Models\SelfCollectionShipment;
-use App\Http\Models\Shipment;
-use App\Http\Models\Shipper\ReturnSheet;
-use App\Http\Models\ShipmentOrderDate;
-use App\Http\Models\ShipmentPrebook;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use App\Http\Models\ShipmentShipperReference;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\ReturnSheetShipments;
-use App\Http\Models\Shopify\ShopifyInvoiceSetting;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\SubstituteUserShipment;
-use App\Http\Models\TelenorShipmentStatusEstimatedTime;
-use App\Http\Models\ZoneClassCity;
-use App\ReturnConfirmationPendingSmsAttempt;
-use Carbon\Carbon;
 use DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
-use phpDocumentor\Reflection\DocBlock\Tags\Uses;
-use phpDocumentor\Reflection\PseudoTypes\False_;
-use phpDocumentor\Reflection\Types\Null_;
-use SnappyImage;
 use SnappyPDF;
 use Validator;
-use App\Http\Models\ReceivingSheet;
-use App\Http\Models\ReceivingSheetShipment;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\FintechCompany;
-use App\Http\Models\Admin\FintechCompanyCharges;
-use App\Http\Models\Admin\standard_fintech_charges;
-use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\Http\Models\Admin\UserFintectCharges;
-use App\Http\Models\Admin\WalkinShipmentWeightCharges;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\PackagingMaterialTypeSizes;
-use App\Http\Models\WalkInShipmentPackagingMaterialHistory;
-use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\Http\Models\WarehouseStock;
+use SnappyImage;
+use Carbon\Carbon;
+use App\GuestApiToken;
+use App\Http\Models\City;
 use App\Http\Models\Zone;
-use App\Jobs\ProcessGulAhmedShipmentConfirmation;
-use Illuminate\Support\Facades\Auth;
 use Vectorface\Whip\Whip;
+use App\Http\Models\Rider;
+use App\Http\Models\Invoice;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\DonePayment;
+use App\Http\Models\HR\Employee;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Consolidation;
+use App\Http\Models\ZoneClassCity;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\GulAhmedCities;
+use App\Http\Models\ReceivingSheet;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WarehouseStock;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\ShipmentPrebook;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Models\Admin\FtlRequest;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\ShipmentOrderDate;
+use App\Http\Models\Admin\DeliveryNote;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\Shipper\ReturnSheet;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\ShipmentStatusReason;
+use phpDocumentor\Reflection\Types\Null_;
+use App\Http\Models\Admin\OneLink\OneLink;
+use App\Http\Models\GulAhmedPickupAddress;
+use App\Http\Models\InternationalShipment;
+use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DonePaymentCalculation;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\SelfCollectionShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\ReturnAssignedShipments;
+use App\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Admin\UserFintectCharges;
+use App\Http\Models\ShipmentShipperReference;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Controllers\Admins\FTLController;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\ReceivingSheetPrintStatus;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\TelenorOtherCouriers;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\CorporateDeliveryTypeStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use phpDocumentor\Reflection\DocBlock\Tags\Uses;
+use phpDocumentor\Reflection\PseudoTypes\False_;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\ReturnSheetShipments;
+use App\Jobs\ProcessGulAhmedShipmentConfirmation;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Blacklist\BlacklistedConsignee;
+use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\WalkinShipmentWeightCharges;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\WalkInShipmentPackagingMaterialHistory;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\OneLink\OneLinkPaymentChargesRange;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
+use App\Http\Controllers\Admins\AdminWalkInBookShipmentController;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 
 class APIController extends Controller
 {
@@ -773,11 +774,36 @@ class APIController extends Controller
                 $amount = $request->input('amount');
                 $parcel_value = $request->input('parcel_value');
                 if ($amount == 0) {
-                    if ($parcel_value <= 0 || $parcel_value == null) {
-                        $flag = false;
-                    } else {
+                    if($request->has('parcel_value') && $request->input('parcel_value') != null){
                         $flag = true;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if ($settings->text != NULL) {
+                                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                                if (in_array($user_id, $parcel_value_bypass_accounts)) {
+                                    $flag = true;
+                                }
+                                else{
+                                    $flag = false;
+                                }
+                            }
+                            else{
+                                $flag = false;
+                            }
+                        }
+                        else{
+                            if ($parcel_value <= 0 || $parcel_value == null) {
+                                $flag = false;
+                            } else {
+                                $flag = true;
+                            }
+                        }
+                    }
+
+
                 } else {
                     $flag = true;
                 }
@@ -1718,7 +1744,7 @@ class APIController extends Controller
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
-            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1'],
+            'tracking_numbers' => ['required_without:tracking_number', 'array', 'min:1', 'max:5'],
             'tracking_numbers.*' => ['required_without:tracking_number', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
@@ -2828,6 +2854,60 @@ class APIController extends Controller
             }
         }
     }
+
+    public function add_request(Request $request){
+
+        $rules = [
+            'complaint_id' => ['required', 'integer'], 
+            'description' => ['required', 'string'], 
+            'shipment_id' => ['required', 'integer', 'exists:shipments,id'], 
+            'complaint_name' => ['required', 'string'], 
+            'complaint_phone' => ['required', 'string'], 
+        ];
+        
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        
+        $validate->setAttributeNames($this->names);
+        
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $case_nature = 1;
+            $case_nature_type = $request->complaint_id;
+            $request_channel = 2;
+            $description = $request->description;
+            
+            $shipment_id = $request->shipment_id;
+            $launched_by = 4;
+            $name = $request->complaint_name;
+            $phoneno = $request->complaint_phone;
+            
+            if (!CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $case_nature)->exists()) {
+                $data = new CrmRequest();
+                $data->case_nature_id = $case_nature;
+                $data->case_nature_type_id = $case_nature_type;
+                $data->description = 'Consignee: (' . $name . ') | Phone Number: (' . $phoneno . ') | Complain: ' . $description;
+                $data->channel_id = $request_channel;
+                $data->status_id = 1;
+                $data->launched_by = $launched_by;
+                $data->shipment_id = $shipment_id;
+        
+                $data->save();
+        
+                $crm_request_status_history = new CrmRequestStatusHistory();
+                $crm_request_status_history->crm_request_id = $data->id;
+                $crm_request_status_history->status_id = 1;
+                $crm_request_status_history->save();
+        
+                $id = str_pad($data->id, 6, 0, STR_PAD_LEFT);
+        
+                return response()->json(['status' => 1, 'success' => 'Request (' . $id . ') successfully added']);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Complaint already launched against your shipment!']);
+            }
+        }
+    }
+        
 
     public function return_confirmation_pending(Request $request)
     {

@@ -1127,7 +1127,9 @@
                         placeholder: "Select Cycle",
                         width: '100%',
                         containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
                     });
                     this.api().table().columns.adjust();
                 }
@@ -2071,7 +2073,7 @@
 				select.add(placeholderOption);
 
 				if (id == 2 || id == 4 || id == 5) {
-					var daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+					var daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 					for (var i = 0; i < daysOfWeek.length; i++) {
 					var option = document.createElement("option");
 					option.text = daysOfWeek[i];

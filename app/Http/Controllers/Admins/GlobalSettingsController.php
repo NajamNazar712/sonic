@@ -162,7 +162,10 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\BookingType;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Product;
 
 class GlobalSettingsController extends Controller
 {
@@ -8609,11 +8612,13 @@ class GlobalSettingsController extends Controller
             }
             else{
                 $notification_setting = Notification::find($notification_id);
-                $details['id'] = $notification_setting->id;
-                $details['name'] = $notification_setting->name;
-                $details['shipper_toggle'] = 1;
-                $details['shippers'] = null;
-                $notification_details[] = $details;
+                if($notification_setting){
+                    $details['id'] = $notification_setting->id;
+                    $details['name'] = $notification_setting->name;
+                    $details['shipper_toggle'] = 1;
+                    $details['shippers'] = null;
+                    $notification_details[] = $details;
+                }
             }
         }
 
@@ -9011,6 +9016,47 @@ class GlobalSettingsController extends Controller
         return response(['hubs'=>$hubs]);
     }
 
+    public function parcel_value_bypass_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 707);
+
+        $shippers = array();
+        $parcel_value_bypass_accounts = array();
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.settings.parcel_value_bypass_users')->with(['shippers' => $parcel_value_bypass_accounts, 'users' => $users]);
+    }
+
+    public function parcel_value_bypass_setting_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'parcel_value_bypass_users';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
     public function bypass_weight_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 706);
@@ -9048,4 +9094,100 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function product_type_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),27);
+        
+        return view('admin.settings.product_type');
+    }
+
+    public function product_type_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),87);
+        }
+
+        $products = Product::select('id as product_type_id','product_name')->orderby('product_type_id','desc');
+    
+        $datatables = Datatables::of($products)
+            ->addColumn('action', function($product_type) {
+                    $edit_product_type = '<button data-id="'.$product_type->product_type_id.'" data-product_type_name="'.$product_type->product_name.'" data-target="#edit_product_name_modal" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                    $delete_product_type = '<button data-id="'.$product_type->product_type_id.'" type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    $dropdown = '
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                        $dropdown .= $edit_product_type;
+                        $dropdown .= $delete_product_type;
+                    $dropdown .= '
+                        </div>
+                        </div>
+                    ';
+                        return $dropdown;
+            });
+        return $datatables->make(true);
+    }
+
+    public function product_type_add(Request $request){
+        
+        if($request->has('product_name')){
+            $product_type_name = $request->get('product_name');
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
+
+            if(!$existing_product_type_name){
+
+            $products = new Product();
+            $products->product_name = $product_type_name;
+            $products->save();
+
+            return response()->json(['status' => 0, 'message' => 'Product Type Added Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Product Type Already Exist!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'No Product Type Name found!']);
+        }
+
+    }
+    public function product_type_edit(Request $request){
+        if($request->has('product_type_name')){
+            $product_type_id = $request->get('product_type_id');
+            $product_type_name = $request->get('product_type_name');
+
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
+
+            if(!$existing_product_type_name){
+                $update_product_type_name = Product::where('id', $product_type_id)->update(['product_name' => $product_type_name]);
+                if($update_product_type_name){
+                    return redirect()->back()->with('success', 'Product Type Updated Successfully!');
+                }
+                else{
+                    return redirect()->back()->with('error', 'Something went wrong!');
+                }
+            }
+            else{
+                return redirect()->back()->with('error', 'Product Type Already Exist!');
+            }
+            
+        }
+        else{
+            return redirect()->back()->with('error', 'No Product Name Found!');
+        }
+
+    }
+
+    public function product_type_delete(Request $request){
+
+        $product = Product::find($request->id);
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product Type Not Found']);
+        }
+        
+        $product->delete();
+        return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
+        }
 }
