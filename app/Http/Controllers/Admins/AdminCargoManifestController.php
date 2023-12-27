@@ -2662,8 +2662,8 @@ class AdminCargoManifestController extends Controller
                         $details['bag_id'] = $bag->id;
                         $details['bag_number'] = $request->bag_number;
                         $details['manifest_id'] = 'Without Manifest';
-                        $details['origin'] = 'Without Manifest ('.$bag_origin.')';
-                        $details['destination'] = 'Without Manifest ('.$bag_dest.')';
+                        $details['origin'] = $bag_origin.' (Without Manifest)';
+                        $details['destination'] = $bag_dest.' (Without Manifest)';
                         $details['last_junction'] = $last_junction;
                         $details['actual_weight'] = $bag->actual_weight;
                         $details['shipping_mode'] = 'Without Manifest';
