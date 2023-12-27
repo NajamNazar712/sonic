@@ -35,7 +35,16 @@
                     </div>
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_destination_hub" id="search_destination_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -56,6 +65,15 @@
                             <select name="weighted_as" id="weighted_as" class="form-control select2">
                                 <option value="1">Dense</option>
                                 <option value="2">Volumetric</option>
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="weight_type_select" id="weight_type_select" class="select2">
+                                @foreach($weight_types as $weight_type)
+                                    <option value="{{$weight_type->id}}">{{$weight_type->name}}</option>
+                                @endforeach
                             </select>
                         </fieldset>
                     </div>
@@ -113,6 +131,7 @@
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
                             <th class="border-primary border-darken-1">Difference (B-A)</th>
                             <th class="border-primary border-darken-1">Weighted As</th>
+                            <th class="border-primary border-darken-1">Weight Recorded As</th>
                         </tr>
                         </thead>
                     </table>
@@ -182,9 +201,13 @@
                 width: '100%',
                 placeholder: 'Select Shipper',
             });
-            $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Hub',
+                placeholder: 'Origin Hub',
+            });
+            $('#search_form #search_destination_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Destination Hub',
             });
             $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -197,6 +220,10 @@
             $('#search_form #sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Sub Segment*'
+            });
+            $('#search_form #weight_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Weight Recorded As*'
             });
 
             var from_date = $('#from_date').pickadate({
@@ -274,6 +301,7 @@
                             head.push('Arrival Weight (B)');
                             head.push('Difference (B-A)');
                             head.push('Weighted As');
+                            head.push('Weight Recorded As');
 
 
                             $.each(result.data, function(index, values) {
@@ -292,6 +320,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
                                 row.push(values.weighted_as);
+                                row.push(values.weight_type_name)
                                 body.push(row);
                             });
                         },
@@ -328,12 +357,14 @@
                         d.tracking_numbers = $('#search_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_user = $('#search_user').val();
-                        d.search_hub = $('#search_hub').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_destination_hub = $('#search_destination_hub').val();
                         d.search_zone = $('#search_zone').val();
                         d.weighted_as = $('#weighted_as').val();
                         d.sub_segment = $('#search_form #sub_segment_select').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
+                        d.weight_type = $('#search_form #weight_type_select').val();
                     }
                 },
                 order: [[8, 'desc']],
@@ -351,6 +382,7 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
+                    { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
