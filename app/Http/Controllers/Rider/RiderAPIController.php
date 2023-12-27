@@ -1644,6 +1644,7 @@ RiderAPIController extends Controller
                                 $shipment->consignee_status_id = 53;
                                 $shipment->save();
                                 ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
+
                             }
                         }
                     }
@@ -11252,7 +11253,7 @@ RiderAPIController extends Controller
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-
+            
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
                 if (V2PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V2PickupRequest::find($request->pickup_request_id);
@@ -11339,6 +11340,8 @@ RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
+                                    ShipmentScanningJourneyController::add($shipment->id, 1, 5, $rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'app');
+
                                     $shipment_count += 1;
                                     $notification_shipments[] = $shipment->id;
                                 } else {
@@ -12763,6 +12766,8 @@ RiderAPIController extends Controller
     {
         $rules = [
             'tracking' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -12998,7 +13003,7 @@ RiderAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'app');
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -13077,7 +13082,7 @@ RiderAPIController extends Controller
                                     if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $complaint_row = 1;
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 4, 5, $rider_id, null, null);
+                                    ShipmentScanningJourneyController::add($shipment->id, 4, 5, $rider_id, null, null ,null,2, $request->latitude, $request->longitude ,'app');
                                     $consolidation_details = DeliveryController::check_consolidation($shipment->id);
 
                                     $consolidation_flag = FALSE;
@@ -13472,7 +13477,9 @@ RiderAPIController extends Controller
     public function get_shipment_details(Request $request)
     {
         $rules = [
-            'tracking' => ['required']
+            'tracking' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
@@ -13496,7 +13503,7 @@ RiderAPIController extends Controller
                 if (!$dispute_check) {
                     return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 5, $rider_id, null, null);
+                ShipmentScanningJourneyController::add($shipment->id, 7, 5, $rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'app');
                 if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -14369,6 +14376,7 @@ RiderAPIController extends Controller
         else {
             $tracking_number = $request->tracking_number;
             $shipper_status_id = Shipment::where('tracking_number', $tracking_number)->first()->shipper_status_id ?? NULL;
+            
             if(!$shipper_status_id){
                 return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
             } else {
@@ -14376,7 +14384,7 @@ RiderAPIController extends Controller
                     'tracking_number' => $tracking_number,
                     'call_from' => $request->call_from
                 ];
-
+                
                 switch ($shipper_status_id) {
                     case 1 : //Booked...
                         return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);

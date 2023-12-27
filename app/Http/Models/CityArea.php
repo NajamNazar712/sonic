@@ -10,4 +10,9 @@ class CityArea extends Model
     {
         return $this->belongsTo('App\Http\Models\City','city_id','id');
     }
+
+    public function reporting_location()
+    {
+        return $this->belongsTo('App\Http\Models\ReportingLocation','report_location_id','id');
+    }
 }
