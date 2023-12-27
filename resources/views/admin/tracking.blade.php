@@ -1445,6 +1445,9 @@
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Location Status</strong></th>';
+                                shipment += '<th><strong>latitude</strong></th>';
+                                shipment += '<th><strong>longitude</strong></th>';
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
                                 shipment += '<th><strong>Rider</strong></th>';
@@ -1463,6 +1466,10 @@
                                         shipment += '<td>' + history.remarks + '</td>';
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '<td>' + history.city + '</td>';
+                                        shipment += '<td>' + history.area_log.location_status + '</td>';
+                                        shipment += '<td>' + history.area_log.latitude + '</td>';
+                                        shipment += '<td>' + history.area_log.longitude + '</td>';
+
                                         shipment += '<td>' + history.received_or_refused_by + '</td>';
                                         shipment += '<td>' + history.ip + '</td>';
                                         shipment += '<td>' + history.rider + '</td>';

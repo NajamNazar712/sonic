@@ -897,6 +897,21 @@ class AdminTrackingController extends Controller
         }
     }
 
+    function setJourneyDetails($scanning_data) {
+        if (isset($scanning_data)) {
+            return [
+                'latitude' => $scanning_data->latitude,
+                'longitude' => $scanning_data->longitude,
+                'location_status' => ($scanning_data->scanning_area_logs['location_status'] == 1) ? 'On-Site' : 'Off-site',
+            ];
+        } else {
+            return [
+                'latitude' => null,
+                'longitude' => null,
+                'location_status' => 'Not available',
+            ];
+        }
+    }
     public function track_v2(Request $request)
     {
         $tracking_numbers = explode(',', $request->tracking_numbers);
@@ -1389,6 +1404,27 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
+
+                            $shipment_scanning_query = ShipmentScanningJourney::where('shipment_id', $shipment->id)
+                            ->with('scanning_area_logs')
+                            ->latest();
+                            
+                            if ($journey->shipper_status_id == 2 || $journey->shipper_status_id == 53) {
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->first();
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+                            } elseif ($journey->shipper_status_id == 4) {
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->first();
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+                            } elseif ($journey->shipper_status_id == 11) {
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->first();
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+                            } else {
+                                $journey_details['area_log'] = $this->setJourneyDetails(null);
+                            }
+
+
+                     
+
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
@@ -1409,6 +1445,7 @@ class AdminTrackingController extends Controller
 
                             $details['tracking_history'][] = $journey_details;
                         }
+
 
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
 
