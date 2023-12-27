@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\BagScanningJourney;
 use App\ShipmentScanningJourneyAreaLog;
 use App\Http\Models\ShipmentScanningJourney;
+use App\Jobs\ShipmentReportingAreaStatusJob;
 
 class ShipmentScanningJourneyController extends Controller
 {
@@ -61,7 +62,7 @@ class ShipmentScanningJourneyController extends Controller
         
 
         $addScanningHistoryAreaLog->save();
-        self::shipment_reporting_area_status($latestShipmentScanningId);
+        ShipmentReportingAreaStatusJob::dispatch($latestShipmentScanningId);
     }
 
     static public function seal_number_add($bag_id, $screen_location_id, $admin_id)
@@ -88,46 +89,5 @@ class ShipmentScanningJourneyController extends Controller
         }
     }
 
-    static public function shipment_reporting_area_status($latest_shipment_scanning_id)
-    {
-        $shipmentScanning = ShipmentScanningJourney::find($latest_shipment_scanning_id);
-        $areaLogId = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
-        $areaLog = ShipmentScanningJourneyAreaLog::find($areaLogId);
-
-        if (!$shipmentScanning) {
-            return;
-        }
-
-        $cityArea = $areaLog->city_area->reporting_location ?? null;
-
-        if (isset($shipmentScanning, $cityArea)) {
-            if (isset($shipmentScanning->latitude, $shipmentScanning->longitude, $cityArea->lat, $cityArea->long)) {
-                $journeyLatitude = deg2rad($shipmentScanning->latitude);
-                $journeyLongitude = deg2rad($shipmentScanning->longitude);
-                $cityLatitude = deg2rad($cityArea->lat);
-                $cityLongitude = deg2rad($cityArea->long);
-
-                $earthRadius = 6371; 
-                $longitudeDelta = $journeyLongitude - $cityLongitude;
-
-                $distance = round($earthRadius * acos(
-                    sin($cityLatitude) * sin($journeyLatitude) +
-                    cos($cityLatitude) * cos($journeyLatitude) * cos($longitudeDelta)
-                ), 2);
-
-                $distance = $distance * 1000;  //To Metre
-                
-                $areaLog->location_status = ($distance <= $cityArea->radius) ? 1 : 0;
-
-            } else {
-                $areaLog->location_status = 0;
-            }
-        } else {
-            $areaLog->location_status = 0;
-        }
-
-        $areaLog->status = 1;
-        $areaLog->save();
-    }
-
+    
 }
