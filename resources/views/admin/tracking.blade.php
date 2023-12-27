@@ -1464,7 +1464,9 @@
                                         shipment += '<td>' + history.remarks + '</td>';
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '<td>' + history.city + '</td>';
-                                        var googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+/**
+ * oogle Map 
+ */                                        var googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
                                         shipment += '<td>' + history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="fa fa-map-marker"></i></a></td>';
                                         shipment += '<td>' + history.received_or_refused_by + '</td>';
                                         shipment += '<td>' + history.ip + '</td>';
