@@ -779,7 +779,6 @@ class Permission
             'settings.shippers.status_webhook.list' => 646,
             'settings.shippers.status_webhook.edit' => 646,
             'settings.shippers.status_webhook.update' => 646,
-
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 
@@ -989,6 +988,11 @@ class Permission
             'settings.background_image.store' => 891,
 
             'settings.rider_assigned_hub.index' => 893,
+
+            'settings.shippers.bypass_weight.index'=> 909,
+
+            'settings.product_type.index'=> 912,
+            'settings.product_type.list'=> 912,
 
 
             'dashboard.userwise' => 333,
@@ -1408,6 +1412,7 @@ class Permission
 
             'reports.operations_performance.index' => 892,
             'reports.operations_performance.export_to_excel' => 892,
+            'settings.parcel_value_bypass.index' => 910,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

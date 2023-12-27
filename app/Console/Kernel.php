@@ -184,6 +184,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('reports:operations_performance_monthly')->monthlyOn(11, '23:00')->runInBackground();
         //EveryTuesday
         $schedule->command('reports:operations_performance_weekly')->weeklyOn(2, '10:00')->runInBackground();
+        // $schedule->command('reports:operations_performance_weekly test')->weeklyOn(1, '15:00')->runInBackground();
 
         $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
         if($shifts){
@@ -297,7 +298,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
         $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
 
-        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
+        $schedule->command('archive:returnnoteimage')->dailyAt('02:00')->runInBackground();
 
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
@@ -497,6 +498,9 @@ class Kernel extends ConsoleKernel
 		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
 		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
+		$schedule->command('email:qsrreport')->dailyAt('10:01')->runInBackground();
+		$schedule->command('email:pendingdeliveriesreport')->dailyAt('09:01')->runInBackground();
+		$schedule->command('clean:7DaysQrsPDReportStorage')->dailyAt('06:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

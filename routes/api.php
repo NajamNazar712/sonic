@@ -13,7 +13,10 @@ use Illuminate\Http\Request;
 |
 */
 
+
 Route::name('api.')->group(function () {
+    
+    Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
     Route::post('user_login', 'APIController@bolt_login')->name('user_login');
     Route::post('forget_pin', 'APIController@bolt_forget_pin')->name('forget_pin');
@@ -32,6 +35,7 @@ Route::name('api.')->group(function () {
 
         Route::prefix('shipment')->name('shipment.')->group(function () {
             Route::post('book', 'APIController@shipment_book')->name('book');
+            Route::post('book/intl', 'APIController@shipment_book_international')->name('book.intl');
             Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
             Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
 
@@ -109,10 +113,6 @@ Route::name('api.')->group(function () {
         });
     });
     
-  
- 
-
-
 
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
@@ -124,9 +124,6 @@ Route::name('api.')->group(function () {
         Route::post('shipment-details', 'APIController@get_shipment_details')->name('shipment-details');
         Route::post('payment-details', 'APIController@fintech_payment_detials')->name('payment-details');
     });
-
-
-
 
     Route::prefix('rider')->name('rider.')->group(function () {
         //Obsoleted

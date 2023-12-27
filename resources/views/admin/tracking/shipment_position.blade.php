@@ -64,6 +64,8 @@
                                     <th class="border-primary border-darken-1">Handover Received By</th>
                                     <th class="border-primary border-darken-1">Handover Received At</th>
                                     <th class="border-primary border-darken-1">Last Action Performed</th>
+            
+
                                 </tr>
                                 </thead>
                             </table>
@@ -203,6 +205,8 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
+                    
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -228,8 +232,7 @@
                                 row.push(values.handover_to);
                                 row.push(values.handover_received_by);
                                 row.push(values.handover_received_at);
-                                row.push(values.last_action);
-
+                                row.push(values.last_action);                 
                                 body.push(row);
                             });
                         },
@@ -289,6 +292,7 @@
                     {data: 'handover_received_by', name: 'shipment_positions.handover_received_by', class: 'align-middle handover_received_by'},
                     {data: 'handover_received_at', name: 'shipment_positions.handover_received_at', class: 'align-middle handover_received_at'},
                     {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
+
                 ],
                 rowCallback: function(row, data, index) {
 
