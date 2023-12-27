@@ -2602,6 +2602,7 @@ class AdminCargoManifestController extends Controller
                     }
                     else
                     {
+                        $last_junction = "-";
                         if ($bag->destination_hub_id == $admin_default_hub_id)
                             $misroute = 0;
                         else
