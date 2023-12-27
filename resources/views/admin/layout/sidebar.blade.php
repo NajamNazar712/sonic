@@ -1677,6 +1677,9 @@
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.csat_report.index') }}">Csat Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.logistic.index') }}">Logistic Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
