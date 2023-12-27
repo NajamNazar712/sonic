@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use DB;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -22,6 +23,7 @@ use App\Http\Models\BagScanningScreenLocation;
 use App\Http\Models\ShipmentScanningScreenLocation;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\ShipmentsJourney;
 
 class AdminShipmentScanningHistoryController extends Controller
 {
@@ -122,6 +124,14 @@ class AdminShipmentScanningHistoryController extends Controller
                         $details[$index]['latitude'] = $scanning_history->latitude ?? '-';
                         $details[$index]['longitude'] = $scanning_history->longitude ?? '-';
                         $details[$index]['area_log'] = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_history->id)->first();
+                        $details[$index]['rider_picked'] = ($scanning_history->screen_location_id == 1)
+                        ? (
+                            optional(ShipmentsJourney::where('shipment_id', $scanning_history->shipment_id)->latest()->first())->shipper_status_id == 53
+                                ? 'Picked'
+                                : 'Not-Picked'
+                        )
+                        : '-';
+                    
 
                     }
                     $data['tracking_number'] = $request->tracking_number;

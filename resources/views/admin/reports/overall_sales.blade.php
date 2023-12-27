@@ -146,7 +146,7 @@
                                   <span class="">Arrival Time From</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="From">
+                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from"  id="arrival_time_from" placeholder="From">
                         </div>
                     </div>
                     <div class="col-3">
@@ -156,7 +156,7 @@
                                   <span class="">Arrival Time To</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
+                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to"  id="arrival_time_to" placeholder="To">
                         </div>
                     </div>
                     <div class="col-2">
@@ -339,7 +339,7 @@
                 allowClear:true
             });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
+                placeholder:'Select Destination Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -421,8 +421,8 @@
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
                         // $('#arrival_time_from').pickatime('picker').clear();
                         // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                        // $('input[name="arrival_time_from"]').val('12:00 AM');
+                        // $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
@@ -439,8 +439,8 @@
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                         // $('#arrival_time_from').pickatime('picker').clear();
                         // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                        // $('input[name="arrival_time_from"]').val('12:00 AM');
+                        // $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
