@@ -31,6 +31,7 @@ use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -898,17 +899,21 @@ class AdminTrackingController extends Controller
     }
 
     function setJourneyDetails($scanning_data) {
-        if (isset($scanning_data)) {
+       if (isset($scanning_data)) {
             return [
-                'latitude' => $scanning_data->latitude,
-                'longitude' => $scanning_data->longitude,
-                'location_status' => ($scanning_data->scanning_area_logs['location_status'] == 1) ? 'On-Site' : 'Off-site',
+                'latitude' => $scanning_data['latitude'],
+                'longitude' => $scanning_data['longitude'],
+                'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
+                'area' => CityArea::find($scanning_data['area_id'])->name ?? null ,
+
             ];
         } else {
             return [
                 'latitude' => null,
                 'longitude' => null,
-                'location_status' => 'Not available',
+                'location_status' => null,
+                'area' => null,
+
             ];
         }
     }
@@ -1405,35 +1410,66 @@ class AdminTrackingController extends Controller
                                 }
                             }
 
-                            $shipment_scanning_query = ShipmentScanningJourney::where('shipment_id', $shipment->id)
-                            ->with('scanning_area_logs')
-                            ->latest();
+                            $shipment_scanning_query = ShipmentScanningJourney::join('shipments_journey as sj', function ($join) use ($journey) {
+                                $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                     ->where('sj.id', '=', $journey->id);
+                            })
+
+                            ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                            
+                            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
+
+                            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id');     
+
                             
                             if ($journey->shipper_status_id == 2 ) {
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            } elseif ($journey->shipper_status_id == 3) {
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            } elseif ($journey->shipper_status_id == 4) {
-                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            }elseif ($journey->shipper_status_id == 5) {
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            }elseif ($journey->shipper_status_id == 11) {
-                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            }elseif ($journey->shipper_status_id == 23) {
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            }elseif ($journey->shipper_status_id == 53) {
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->first();
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                            }else {
-                                $journey_details['area_log'] = $this->setJourneyDetails(null);
-                            }
 
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            } elseif ($journey->shipper_status_id == 3) {
+
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            } elseif ($journey->shipper_status_id == 4) {
+
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            }elseif ($journey->shipper_status_id == 5) {
+
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            }elseif ($journey->shipper_status_id == 11) {
+
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            }elseif ($journey->shipper_status_id == 23) {
+
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            }elseif ($journey->shipper_status_id == 53) {
+
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->first();
+
+                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
+
+                            }else {
+
+                                $journey_details['area_log'] = $this->setJourneyDetails(null);
+
+                            }                                                 
+                            
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
@@ -1451,9 +1487,13 @@ class AdminTrackingController extends Controller
                             $journey_details['received_or_refused_by'] = $received_or_refused_by;
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
-
+                            
                             $details['tracking_history'][] = $journey_details;
                         }
+                        
+                    
+
+
 
 
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
