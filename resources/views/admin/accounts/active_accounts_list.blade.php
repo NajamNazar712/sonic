@@ -102,6 +102,8 @@
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Referral Code</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -272,17 +274,60 @@
                 <div class="modal-body">
                     <input type="hidden" name="shipper_id" id="shipper_id">
                     <div class="form-group">
-                        <select name="payment_cycle_select" id="payment_cycle_select" class="form-control select2" data-rule-required="true" data-msg-required="Payment Cycle is required">
+                        <select name="payment_cycles" id="payment_cycles" class="form-control select2" data-rule-required="true" data-msg-required="Payment Cycle is required">
                             @foreach($payment_cycles as $pc)
                                 <option value="{{ $pc->id }}" > {{ $pc->name }} </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group" id="payment_day_div">
-                        <label for="payment_day">1 for Monday, 5 for Friday or For Monthly select date between (1 - 29)</label>
-                        <input type="text" name="payment_day" id="payment_day" class="form-control" data-rule-required="true" data-msg-required="Payment Day is required">
+                    <div id="checkboxContainer" class="d-none">
                     </div>
+                
+                    <span class="text-danger d-none" id="payment_cycle_msg"></span>
+                    <span class="text-danger d-none" id="msg_payment">Maximum Selected</span>
+
+                    <div>
+                        <input type="hidden" id="fortnite_val" name="fortnite" value="">
+                        <label class="d-none" id="label">Day 1</label>
+                        <select name="fornite" id="fornite"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+
+                            <option value="none">Please Select Day</option>
+                            @for ($i = 1; $i < 14; $i++)
+                                <option value="{{ $i }}">
+                                    {{ $i . ' day' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                   
+
+                    <div class="mt-2">
+                        <label class="d-none" id="label_2">Day 2</label>
+                        <select name="fornite_2" id="fornite_2"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+                        </select>
+                    </div>
+
+                    <div>
+                        <select name="monthly" id="monthly"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+                            <option value="nonem">Please Select Day</option>
+
+                            @for ($i = 1; $i < 29; $i++)
+                                <option value="{{ $i }}">
+                                    {{ $i . ' day' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div id="msg_limit_days" class="d-none text-danger">
+                    </div>
+                    <input type="hidden" name="selected_days" value="" id="selected_days">
+
                 </div>
+           
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
@@ -646,7 +691,26 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 
+<style>
+     #checkboxContainer label {
+            display: inline-block;
+            padding: 10px;
+            margin: 5px;
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
+        /* Style the checkbox to be hidden */
+        #checkboxContainer input[type="checkbox"] {
+            display: none;
+        }
+
+        /* Style the label when the checkbox is checked */
+        #checkboxContainer input[type="checkbox"]:checked+label {
+            background-color: #56e73c; }
+</style>
 @endsection
 
 @section('js')
@@ -897,6 +961,8 @@ function checkboxStatus() {
                         head.push('Segment');
                         head.push('Sub Category Segment');
                         head.push('Referral Code');
+                        head.push('Payment Cycle');
+                        head.push('Payment Cycle Days');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -945,7 +1011,8 @@ function checkboxStatus() {
                             row.push(values.segment);
                             row.push(values.sub_segment);
                             row.push(values.referral_name);
-
+                            row.push(values.payment_cycle);
+                            row.push(values.payment_cycle_days);
                             body.push(row);
                         });
                     },
@@ -1055,6 +1122,26 @@ function checkboxStatus() {
                         //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         //     }
                         }
+                    },
+                    @endif
+
+
+                    @if (session('role_id') == 1 || in_array(365, session('permissions')))
+                    {
+                            text: 'Payment Cycle',
+                            className: 'btn btn-primary payment_cycle',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('#payment_cycle_form [name="shipper_id"]').val(selected_rows);
+                           $('#PaymentCycleModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+        
+                    }
                     },
                     @endif
                    @if (session('role_id') == 1 || in_array(427, session('permissions')))
@@ -1482,6 +1569,8 @@ function checkboxStatus() {
                                         table.button('.tag').enable();
                                         table.button('.territory_tag').enable();
                                         table.button('.territory_retag').enable();
+                                        table.button('.payment_cycle').enable();
+
                                     }
                                 }
                             });
@@ -1607,7 +1696,8 @@ function checkboxStatus() {
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
-                
+                {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
+                {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -1642,7 +1732,16 @@ function checkboxStatus() {
                     '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
 
+                        '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1669,7 +1768,12 @@ function checkboxStatus() {
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }
+                    } else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1679,6 +1783,15 @@ function checkboxStatus() {
                             current.val(column.search());
                         }
                     }
+                });
+                $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    
                 });
                 $("#documents_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
@@ -2330,47 +2443,26 @@ function checkboxStatus() {
                     table.button('.approve_commission').enable();
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
+                    table.button('.payment_cycle').enable();
 
                 }
                 else {
                     table.button('.bulk_tagging').disable();
                     table.button('.bulk_segment_tagging').disable();
-                    
+                    table.button('.territory_retag').disable();
+
                     table.button('.tag').disable();
                     table.button('.set_commission').disable();
                     table.button('.approve_commission').disable();
                     table.button('.territory_tag').disable();
-                    table.button('.territory_retag').disable();
+                    table.button('.payment_cycle').disable();
                 }
         });
-        $('#payment_cycle_select').prepend('<option value="" selected="selected"></option>').select2({
+        $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Payment Cycle'
-        }).bind('change', function() {
-            var id = parseInt($(this).val());
-            if(id == 1){
-                $('#payment_day_div').addClass('d-none');
-            }else if(id == 2){
-                $('#payment_day_div').removeClass('d-none');
-                $('#payment_day').inputmask({
-                    'alias': 'integer',
-                    'allowMinus': false,
-                    'allowPlus': false,
-                    'rightAlign': false,
-                    'min': 1,
-                    'max': 5
-                });
-            }else if(id == 3){
-                $('#payment_day_div').removeClass('d-none');
-                $('#payment_day').inputmask({
-                    'alias': 'integer',
-                    'allowMinus': false,
-                    'allowPlus': false,
-                    'rightAlign': false,
-                    'min': 1,
-                    'max': 29
-                });
-            }
+        }).on('change', function () {
+            $('#msg_limit_days').addClass('d-none')
         });
 
         $( "#set_territory" ).validate({
@@ -2402,7 +2494,60 @@ function checkboxStatus() {
             }
         });
 
-        
+        var len = null;
+
+        function updateCheckboxValues(limit, data) {
+            var paymentDayString = data;
+            var paymentDayArray = paymentDayString.split(',');
+            $('#selected_days').val(paymentDayArray);            
+            var selectedCount = 0;
+            var selectedValues = [];
+
+            $('#checkboxContainer input[type="checkbox"]').each(function() {
+                var checkboxValue = $(this).val();
+                if (paymentDayArray.includes(checkboxValue)) {
+                    if (selectedCount < limit) {
+                        $(this).prop('checked', true);
+                        selectedValues.push(checkboxValue); 
+                        selectedCount++;
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+
+            $('#checkboxContainer input[type="checkbox"]').on('click', function() {
+                var checkboxValue = $(this).val();
+
+                if ($(this).prop('checked')) {
+                    if (selectedCount >= limit) {
+                        $(this).prop('checked', false);
+                    } else {
+                        selectedCount++;
+                        selectedValues.push(checkboxValue);
+                    }
+                } else {
+                    selectedCount--;
+                    selectedValues = selectedValues.filter(function(value) {
+                        return value !== checkboxValue;
+                    });
+                }
+
+                selectedValues = selectedValues.sort(function(a, b) {
+                    return a - b;
+                });
+                if(selectedValues.length != 0){
+                    $('#selected_days').val(selectedValues);
+                }else if (paymentDayArray.length == selectedValues.length){
+                    $('#selected_days').val(paymentDayArray);
+                }else{
+                    $('#selected_days').val('');
+                }
+            });
+        }
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
             var id = $(this).parents('tr').attr('id');
             if($(this).hasClass('payment_cycle')){
@@ -2415,10 +2560,29 @@ function checkboxStatus() {
                     }).done(function(data){
                         if(data.status == 0){
                             $('#payment_cycle_form #shipper_id').val(id);
-                            $('#payment_cycle_select').val(data.details.payment_cycle_id).trigger('change');
-                            if(data.details.payment_cycle_id != 1){
+                            $('#payment_cycles').val(data.details.payment_cycle_id).trigger('change');
+                            if(data.details.payment_cycle_id == 6){//Fortnight
+                                var paymentDayString = data.details.payment_day;
+                                var paymentDayArray = paymentDayString.split(',');
+                                var option = $('<option></option>').attr('value', paymentDayArray[1]).text(paymentDayArray[1] + " Days");
+                                var value = paymentDayArray[0] + ',' + paymentDayArray[1];
+                                $('#fornite').val(paymentDayArray[0]);
+                                $("#fornite_2").empty().append(option);
+                                $('#fortnite_val').val(value);
+                                $('#fornite_2').removeClass('d-none');
+                                $('#label_2').removeClass('d-none');
+                            }else if(data.details.payment_cycle_id == 3){// Monthly
+                                $('#monthly').removeClass('d-none');
+                                $('#monthly').val(data.details.payment_day);
+                            }else if (data.details.payment_cycle_id == 4) { // Twice a week
+                                updateCheckboxValues(2, data.details.payment_day);
+                            }else if(data.details.payment_cycle_id == 5){//Thrice a week
+                                updateCheckboxValues(3, data.details.payment_day);
+                            }else if(data.details.payment_cycle_id == 2){//weekly
+                                updateCheckboxValues(1, data.details.payment_day);
+                            }else if(data.details.payment_cycle_id != 1){//Daily
                                 $('#payment_day').val(data.details.payment_day);
-                            }else{
+                            } else{
                                 $('#payment_day_div').addClass('d-none');
                             }
                             $('#PaymentCycleModal').modal('show');
@@ -2431,7 +2595,7 @@ function checkboxStatus() {
         });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-            var id = $(this).parents('tr').attr('id');
+            var id = $(this).parents('tr').attr('id');  
             if($(this).hasClass('restrict_order_id')){
                 if(id){
                     $.ajax({
@@ -2576,24 +2740,69 @@ function checkboxStatus() {
         $('#payment_cycle_form').validate({
             errorClass: 'danger',
             successClass: 'success',
-            normalizer: function(value) {
+            normalizer: function (value) {
                 return $.trim(value);
             },
-            errorPlacement: function(error, element) {
+            errorPlacement: function (error, element) {
                 error.addClass('w-100').appendTo(element.parent('.form-group'));
             },
-            submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Payment Cycle is being Updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+            submitHandler: function (form) {
+                var formData = $(form).serializeArray();
+                var fortnite = formData[3]['value'].split(',');
+                var monthly = formData[5]['value'];
+                var selected_days = [];
+
+                if (formData[6] && formData[6]['value']) {
+                    var splitValues = formData[6]['value'].split(',');
+                    if (splitValues.length > 0) {
+                        selected_days = splitValues;
+                    }
+                }                
+
+                var swalConfig = {
+                    title: 'Please Wait!',
+                    text: 'Payment Cycle is being Updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                };
+                fortnite = fortnite.length;
+                selected_days = selected_days.length;
+                if ((formData[2]['value'] == '4' && selected_days === 2) ||
+                    (formData[2]['value'] == '5' && selected_days === 3) ||
+                    (formData[2]['value'] == '2' && selected_days === 1) || 
+                    (formData[2]['value'] == '6' && fortnite > 1) || 
+                    (formData[2]['value'] == '1') ||
+                    (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
+                        swal(swalConfig);
+                        form.submit();
+                } 
+                else {
+                    if(formData[2]['value'] == '4'){
+                        days = 2;
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '5'){
+                        days = 3
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '2'){
+                        days = 1;
+                        $('#msg_limit_days').text('Select ' + days + ' day only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '6'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '3'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+
+                    }
+                }
             }
         });
+
         $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
             $('#SalesTierTypeTagModal #poc').val('').trigger('change');
             $('#SalesTierTypeTagModal #kam').val('').trigger('change');
@@ -2746,6 +2955,122 @@ function checkboxStatus() {
     });
 }
 
+var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        var selectedValues = []; // Create an array to store selected values
+        for (var i = 0; i < days.length; i++) {
+            var day = days[i];
+            var checkboxId = day;
+            var labelId = "label_" + day;
+            var value = parseInt([i], 10) + 1;
+
+            var checkbox = $("<input>", {
+                type: "checkbox",
+                id: checkboxId,
+                value: value,
+            });
+
+            var label = $("<label>", {
+                for: checkboxId,
+                text: day
+            });
+
+            $("#checkboxContainer").append(checkbox);
+            $("#checkboxContainer").append(label);
+        }
+
+
+        var numSelected = 1;
+        var maxSelections_1 = 1; //Weekly
+        var maxSelections_2 = 2; //Twice A Week
+        var maxSelections_3 = 3; //Thrice A Week
+
+        function handleCheckboxSelection(numSelectedVar, maxSelectionsVar) {
+            return function() {
+                var checkbox = $(this);
+                var value = checkbox.val()
+                if (checkbox.is(':checked')) {
+                    if (numSelectedVar <= maxSelectionsVar) {
+                        numSelectedVar++;
+                        selectedValues.push(value);
+                        $('#selected_days').val(selectedValues);
+
+                    } else {
+                        checkbox.prop('checked', false);
+                        $('#msg_payment').removeClass("d-none");
+                    }
+                } else {
+                    numSelectedVar--;
+                    $('#msg_payment').addClass("d-none");
+                    var index = selectedValues.indexOf(value);
+                    if (index !== -1) {
+                        selectedValues.splice(index, 1);
+                        $('#selected_days').val(selectedValues);
+
+                    }
+                }
+            }
+        }
+
+        $('#payment_cycles').on('change', function() {
+            $("#checkboxContainer input[type='checkbox']").prop('checked', false);
+            $('#msg_payment').addClass("d-none");
+            selectedValues = [];
+            $('#payment_cycle_msg').text('')
+            var id = $(this).val();
+            if (id == 4 || id == 5 || id == 2) {
+                $("#checkboxContainer").removeClass("d-none");
+                $('#fornite').addClass('d-none')
+                $('#fornite_2').addClass('d-none');
+                $('#monthly').addClass('d-none');
+                $('#label').addClass('d-none');
+                $('#label_2').addClass('d-none');
+              
+
+                if (id == 4) {//Twice A Week
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_2));
+                } else if (id == 5) {//Thrice A Week
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_3));
+                } else if (id == 2) {//Weekly
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_1));
+                }
+            } else if (id == 6) {
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').removeClass('d-none')
+                $('#label').removeClass('d-none')
+                $('#monthly').addClass('d-none');
+
+            } else if (id == 3) {
+                $('#monthly').removeClass('d-none')
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').addClass('d-none');
+                $('#label').addClass('d-none');
+                $('#fornite_2').addClass('d-none')
+                $('#label_2').addClass('d-none');
+
+            } else {
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').addClass('d-none');
+                $('#fornite_2').addClass('d-none');
+                $('#monthly').addClass('d-none');
+                $('#label_2').addClass('d-none');
+                $('#label').addClass('d-none')
+
+            }
+        });
+        $('#fornite').on('change', function() {
+            var fornite = parseInt($(this).val(), 10);
+            var fornite_2 = fornite + 15;
+            var value = $(this).val() + ',' + fornite_2;
+            var option = $('<option></option>').attr('value', fornite_2).text(fornite_2 + " Days");
+            $("#fornite_2").empty().append(option);
+            $('#fornite_2').removeClass('d-none');
+            $('#label_2').removeClass('d-none');
+            $('#msg_payment').addClass("d-none");
+            $('#fortnite_val').val(value);
+        });
 
 
 </script>

@@ -2,218 +2,226 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\CityArea;
-use App\Http\Controllers\Admins\DwsWeightChargesController;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\CorporateRateType;
-use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
-use App\Http\Models\CorporateDefaultHistoryRateStatus;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\Survey\DisableAccountIntimationQuestion;
-use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\HistoryShipperBankAccount;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\Lead\LeadLog;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\Segment;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\Admin\WalkInStandardWeightCharge;
-use App\Http\Models\AdminLogs;
-use App\Http\Models\AverageShipmentCycle;
-use App\Http\Models\BusinessCategory;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\BanksList;
-use App\Http\Models\CityHistory;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Commission\SalesCommissionExternalUser;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\Commission\SalesTier;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\DeliveryType;
-use App\Http\Models\DiscountWeightCharge;
-use App\Http\Models\DuplicateUser;
-use App\Http\Models\DwsWeightCharges;
-use App\Http\Models\EmployeeShift;
-use App\Http\Models\HistoryDiscountWeightCharge;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeBloodGroup;
-use App\Http\Models\HR\EmployeeDomicile;
-use App\Http\Models\HR\EmployeeGender;
-use App\Http\Models\HR\EmployeeMaritalStatus;
-use App\Http\Models\HR\EmployeeReligion;
-use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\InternationalUsersInformation;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\Operataions\OperationForecast;
-use App\Http\Models\PaymentCycle;
-use App\Http\Models\PendingCorporateDefaultRateStatus;
-use App\Http\Models\PendingDiscountWeightCharge;
-use App\Http\Models\RateRemark;
-use App\Http\Models\PendingPayment;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\Rates\HistoryCorporateRateStatus;
-use App\Http\Models\Rates\HistoryRateDestinationHub;
-use App\Http\Models\Rates\HistoryRateOriginHub;
-use App\Http\Models\Rates\InternationalEconomyRate;
-use App\Http\Models\Rates\InternationalEconomyRateStatus;
-use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Models\Rates\PendingCorporateRateStatus;
-use App\Http\Models\Rates\PendingRateDestinationHub;
-use App\Http\Models\Rates\PendingRateOriginHub;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
-use App\Http\Models\Reference;
-use App\Http\Models\Operataions\OperationForecastShipments;
-use App\Http\Models\Operataions\OperationForecastWeightRange;
-use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
-use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
-use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
-use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
-use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
-use App\Http\Models\PackagingMaterialTypeSizes;
-use App\Http\Models\Rates\HistoryBookingTypeCharges;
-use App\Http\Models\Rates\HistoryCashHandlingCharge;
-use App\Http\Models\Rates\HistoryDiscountCharge;
-use App\Http\Models\Rates\HistoryFuelSurcharge;
-use App\Http\Models\Rates\HistoryInsuranceCharge;
-use App\Http\Models\Rates\HistoryPackagingCharge;
-use App\Http\Models\Rates\HistoryRateStatus;
-use App\Http\Models\Rates\HistoryReturnCharge;
-use App\Http\Models\Rates\HistoryWeightCharge;
-use App\Http\Models\Rates\PendingRateStatus;
-use App\Http\Models\Rates\RateHistory;
-use App\Http\Models\SalesTierTypeTag;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\SaleTierTagHistory;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\SubstituteUserModulePermission;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\SubstituteUserPermission;
-use App\Http\Models\ShipperContact;
-use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\Sister_account\MergedAccountHead;
-use App\Http\Models\Sister_account\MergedSisterAccount;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\UserDocumentAttachment;
-use App\Http\Models\WalkInCities;
-use App\Http\Models\ZoneClassCity;
+use Exception;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
 use App\RouteLocations;
-use App\Http\Models\RouteType;
-use App\TerritoryTagHistory;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Models\Admin\StandardWeightCharge;
-use App\Http\Models\Admin\StandardCashHandlingCharge;
-use App\Http\Models\Admin\StandardInsuranceCharge;
-use App\Http\Models\Admin\StandardReturnCharge;
-use App\Http\Models\Admin\StandardPackagingCharge;
-use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\Http\Models\Admin\StandardBookingTypeCharge;
-use App\Http\Models\Admin\UserCheckStatus;
-use App\Http\Models\BookingType;
-use App\Http\Models\Rates\PendingCashHandlingCharge;
-use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use App\Http\Models\Route;
+use App\Http\Models\Product;
+use App\TerritoryTagHistory;
+use CreateCityOsaRatesTable;
+use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
+use App\Http\Models\AdminLogs;
+use App\Http\Models\BanksList;
+use App\Http\Models\Reference;
+use App\Http\Models\RouteType;
+use App\Http\Models\PickupType;
+use App\Http\Models\RateRemark;
+use App\Http\Models\RateStatus;
+use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\CityHistory;
+use App\Http\Models\CityOsaRate;
+use App\Http\Models\HR\Employee;
+use App\Http\Models\SaleTierTag;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\DeliveryType;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\ReturnCharge;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\WalkInCities;
+use App\Http\Models\WeightCharge;
+use App\Jobs\CountFintechCharges;
+use App\Http\Models\Admin\Segment;
+use App\Http\Models\DuplicateUser;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\RiderCategory;
+use App\Http\Models\ZoneClassCity;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipperContact;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
-use App\Http\Models\Rates\PendingFuelSurcharge;
-use App\Http\Models\Rates\PendingInsuranceCharge;
-use App\Http\Models\Rates\PendingPackagingCharge;
-use App\Http\Models\Product;
-use App\Http\Models\Rider;
-use App\Http\Models\RiderCategory;
-use App\Http\Models\Route;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentPaymentStatus;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsPendingUserInformation;
-use App\Http\Models\WMS\WmsPendingPerProductCharge;
-use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
-use App\Http\Models\WMS\WmsPendingLabellingCharge;
-use App\Http\Models\WMS\WmsPendingPackingCharge;
-use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
-use App\Http\Models\WMS\WmsHistoryUserInformation;
-use App\Http\Models\WMS\WmsHistoryPerProductCharge;
-use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
-use App\Http\Models\WMS\WmsHistoryLabellingCharge;
-use App\Http\Models\WMS\WmsHistoryPackingCharge;
-use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\PickupType;
-use App\Http\Models\WeightCharge;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\DwsWeightCharges;
+use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\SalesTierTypeTag;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\BookingTypeCharges;
-use App\Http\Models\CityOsaRate;
-use App\Http\Models\ReturnCharge;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\DwsWeightChargesHistory;
-use App\Http\Models\PendingDwsWeightCharges;
-use App\Http\Models\Rates\PendingWeightCharge;
-use App\Http\Models\Rates\PendingBookingTypeCharges;
-use App\Http\Models\Rates\PendingReturnCharge;
-use App\Http\Models\Rates\PendingDiscountCharge;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ShippingMode;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\SaleTierTagHistory;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Yajra\Datatables\Datatables;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Models\HR\EmployeeDesignation;
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\Commission\SalesTier;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\WMS\WmsPackingCharge;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Http\Models\Admin\ShipementReceiveDetails;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Jobs\CountFintechCharges;
-use App\Http\Models\Admin\standard_fintech_charges;
-use GuzzleHttp\Client;
+use App\Http\Models\Admin\UserCheckStatus;
+use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\Admin\CorporateRateType;
+use App\Http\Models\DwsWeightChargesHistory;
+use App\Http\Models\PendingDwsWeightCharges;
+use App\Http\Models\Rates\HistoryRateStatus;
+use App\Http\Models\Rates\PendingRateStatus;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use Illuminate\Database\Eloquent\Collection;
 use App\Http\Models\Admin\UserFintectCharges;
-use CreateCityOsaRatesTable;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\Rates\HistoryReturnCharge;
+use App\Http\Models\Rates\HistoryWeightCharge;
+use App\Http\Models\Rates\PendingReturnCharge;
+use App\Http\Models\Rates\PendingWeightCharge;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\Rates\HistoryFuelSurcharge;
+use App\Http\Models\Rates\HistoryRateOriginHub;
+use App\Http\Models\Rates\PendingFuelSurcharge;
+use App\Http\Models\Rates\PendingRateOriginHub;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\HistoryDiscountWeightCharge;
+use App\Http\Models\PendingDiscountWeightCharge;
+use App\Http\Models\Rates\HistoryDiscountCharge;
+use App\Http\Models\Rates\PendingDiscountCharge;
+use App\Http\Models\WMS\WmsHistoryPackingCharge;
+use App\Http\Models\WMS\WmsPendingPackingCharge;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Rates\HistoryInsuranceCharge;
+use App\Http\Models\Rates\HistoryPackagingCharge;
+use App\Http\Models\Rates\PendingInsuranceCharge;
+use App\Http\Models\Rates\PendingPackagingCharge;
+use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\Operataions\OperationForecast;
+use App\Http\Models\WMS\WmsHistoryLabellingCharge;
+use App\Http\Models\WMS\WmsHistoryUserInformation;
+use App\Http\Models\WMS\WmsPendingLabellingCharge;
+use App\Http\Models\WMS\WmsPendingUserInformation;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\WMS\WmsHistoryPerProductCharge;
+use App\Http\Models\WMS\WmsPendingPerProductCharge;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\HistoryShipperBankAccount;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\Rates\HistoryBookingTypeCharges;
+use App\Http\Models\Rates\HistoryCashHandlingCharge;
+use App\Http\Models\Rates\HistoryRateDestinationHub;
+use App\Http\Models\Rates\PendingBookingTypeCharges;
+use App\Http\Models\Rates\PendingCashHandlingCharge;
+use App\Http\Models\Rates\PendingRateDestinationHub;
+use App\Http\Models\WMS\WmsHistoryStorageTypeCharge;
+use App\Http\Models\WMS\WmsPendingStorageTypeCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\PendingCorporateRateStatus;
+use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\Sister_account\MergedAccountHead;
+use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\PendingCorporateDefaultRateStatus;
+use App\Http\Models\WMS\WmsHistoryPerSquareFootCharge;
+use App\Http\Models\WMS\WmsPendingPerSquareFootCharge;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\Commission\SalesCommissionExternalUser;
+use App\Http\Models\Operataions\OperationForecastShipments;
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
+
+use App\Http\Models\Survey\DisableAccountIntimationQuestion;
+use App\Http\Models\Operataions\OperationForecastWeightRange;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Operataions\OperationsOutgoingTopCustomers;
+use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
+use App\Http\Models\Operataions\OperationsOutgoingPickupRequests;
+use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
+use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
+use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 class AdminDashboardController extends Controller
 {
 
     public function __construct()
-    {   $this->middleware('auth:admin')->except('payfast_payment');
-        $this->middleware('Permission')->except('payfast_payment');
+    {   $this->middleware('auth:admin');
+        $this->middleware('Permission');
     }
-
+    
+    static $paymentCycleDays = [
+        1 => 'Monday',
+        2 => 'Tuesday',
+        3 => 'Wednesday',
+        4 => 'Thursday',
+        5 => 'Friday',
+        6 => 'Saturday',
+    ];
 
     public function payfast_payment_details(){
         return view('payfast-payment-view');
     }
     public function index()
     {
-
         /*$stats = array();
         $graph = array();
         $sales=array();
@@ -514,11 +522,6 @@ class AdminDashboardController extends Controller
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
         return view('admin.simple_dashboard');
     }
-
-public function payfast_payment(Request $request){
-    dd($request->all());
-}
-
 
     public function user_fintech_charges(Request $req){
         $UserFintectCharges = new UserFintectCharges();
@@ -9196,7 +9199,8 @@ public function payfast_payment(Request $request){
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
-            ->select(['users.blacklist', 'users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone'])
+            ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
+            ->select(['users.blacklist', 'users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0);
         if (session('role_id') != 1) {
@@ -9303,6 +9307,31 @@ public function payfast_payment(Request $request){
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('users.payment_cycle_days', function ($query, $keyword) {                
+                $keywordLower = strtolower($keyword);
+                
+                $paymentCycleDays = self::$paymentCycleDays;
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($paymentCycleDays as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
+            })
             ->editColumn('product_type', function ($user) {
                 if ($user->product_type == 'Other') {
                     return $user->other_product_name;
@@ -9362,6 +9391,43 @@ public function payfast_payment(Request $request){
                     return $users->international_rejected_reason;
                 } else {
                     return "-";
+                }
+            })
+            ->editColumn('international_rejected_reason', function ($users) {
+                if ($users->international_rejected_reason != null && $users->international_rate_status == 3) {
+                    return $users->international_rejected_reason;
+                } else {
+                    return "-";
+                }
+            })->editColumn('payment_cycle_days', function ($pending_payment) {
+                $payment_cycle = $pending_payment->payment_cycle_id;
+                $payment_cycle_days = $pending_payment->payment_cycle_days;
+               
+            
+                if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $dayMap = self::$paymentCycleDays;
+                    $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $dayMap);
+                
+                    return $cycleText;
+                }
+            
+                if (($payment_cycle == 3 || $payment_cycle == 6) && $payment_cycle_days != '0') {//Monthly And Fortnightly
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    if (count($payment_cycle_days) == 1) {
+                        $day = (int)$payment_cycle_days[0];
+                        return AdminFinanceController::getDayOfMonthText($day);
+                    } elseif (count($payment_cycle_days) == 2) {
+                        $day1 = (int)$payment_cycle_days[0];
+                        $day2 = (int)$payment_cycle_days[1];
+                        return AdminFinanceController::getDayOfMonthText($day1) . " And " . AdminFinanceController::getDayOfMonthText($day2);
+                    }
+                }else{
+                    return '-';
+                }
+            
+                if ($payment_cycle == 1) {// Daily
+                    return '-';
                 }
             })
             ->addColumn("action", function ($result) {
@@ -9494,6 +9560,7 @@ public function payfast_payment(Request $request){
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                     }
                     if (session('role_id') == 1 || in_array(365, session('permissions'))) {
+                        // hide this because change in payment cycle scenario when register shipper, now this should be change similarly while edit
                         $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
                     if ((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))) {
@@ -9559,7 +9626,6 @@ public function payfast_payment(Request $request){
 
     public function pendingAccountListAjax(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
@@ -9586,8 +9652,9 @@ public function payfast_payment(Request $request){
             ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
+            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9665,6 +9732,32 @@ public function payfast_payment(Request $request){
                 } else {
                     $query->whereRaw('false');
                 }
+            })->filterColumn('users.payment_cycle_days', function ($query, $keyword) {
+                
+                $paymentCycleDays = self::$paymentCycleDays;
+                $keywordLower = strtolower($keyword);
+            
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($paymentCycleDays as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, users.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
+                
             })
             ->editColumn('product_type', function ($user) {
                 if ($user->product_type == 'Other') {
@@ -9723,6 +9816,34 @@ public function payfast_payment(Request $request){
                     return $users->international_rejected_reason;
                 } else {
                     return "-";
+                }
+            })->editColumn('payment_cycle_days', function ($pending_payment) {
+                $payment_cycle = $pending_payment->payment_cycle_id;
+                $payment_cycle_days = $pending_payment->payment_cycle_days;
+                $daysMap = self::$paymentCycleDays;;
+            
+                if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $cycleText = AdminFinanceController::getCycleText($payment_cycle_days, $daysMap);
+                    return $cycleText;
+                }
+            
+                if (($payment_cycle == 3 || $payment_cycle == 6) && $payment_cycle_days != '0') {//Monthly And Fortnightly
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    if (count($payment_cycle_days) == 1) {
+                        $day = (int)$payment_cycle_days[0];
+                        return AdminFinanceController::getDayOfMonthText($day);
+                    } elseif (count($payment_cycle_days) == 2) {
+                        $day1 = (int)$payment_cycle_days[0];
+                        $day2 = (int)$payment_cycle_days[1];
+                        return AdminFinanceController::getDayOfMonthText($day1) . " And " . AdminFinanceController::getDayOfMonthText($day2);
+                    }
+                }else{
+                    return '-';
+                }
+            
+                if ($payment_cycle == 1) {// Daily
+                    return '-';
                 }
             })
             ->addColumn("action", function ($result) {
@@ -9963,13 +10084,40 @@ public function payfast_payment(Request $request){
 
     }
 
+    function user_payment_cycles_days($user){
+        $payment_cycle_days = explode(',', $user->payment_cycle_days);
+        $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
+        $fort_month = [3, 6]; // Monthly and Fortnight.
+        $days = [];
+    
+        if (isset($user->payment_cycle->id)) {
+            if (in_array($user->payment_cycle->id, $weekly)) {
+                foreach ($payment_cycle_days as $payment_cycle_day) {
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $dayName = $date->format('l');
+                    $days[] = $dayName;
+                }
+            } else if (in_array($user->payment_cycle->id, $fort_month)) {
+                $days[] = "Every " . implode(', ', $payment_cycle_days) . " of the month";
+            } else {//Daily
+                $days[] = 'Daily';
+            }
+        } else {
+            $days[] = 'Payment Cycle Not Defined'; 
+        }
+    
+        $days = implode(', ', $days);
+    
+        return $days;
+    }
+    
     //User Profile Methods
 
     public function userProfile($id)
     {
         $user = User::find($id);
-
         $product = Product::find($user->product_id);
+        $payment_cycle_days = $this->user_payment_cycles_days($user);
         $products = Product::all();
         $banks = BanksList::all();
         $invoicing_cycle = InvoicingCycle::all();
@@ -9984,7 +10132,7 @@ public function payfast_payment(Request $request){
         $average_shipment_durations_cycle = AverageShipmentCycle::all();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id', 'name')->get();
-        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'average_shipment_durations_cycle' =>$average_shipment_durations_cycle, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories,'days'=>$payment_cycle_days]);
     }
 
     public function updateProfile(Request $request)
@@ -11825,9 +11973,9 @@ public function payfast_payment(Request $request){
         if ($user_id) {
             $user = User::find($user_id);
             if ($user) {
-                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
+                $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_cycle_days];
                 return response()->json(['status' => 0, 'details' => $details]);
-
+                
             } else {
                 return response()->json(['status' => 1, 'error' => 'User not found!']);
             }
@@ -11836,56 +11984,59 @@ public function payfast_payment(Request $request){
 
     public function payment_cycle_submit(Request $request)
     {
-        $payment_cycle_id = $request->payment_cycle_select;
-        if ($payment_cycle_id) {
-            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                $payment_day = $request->payment_day;
-            }
-            if ($request->has('shipper_ids')) {
-                $shipper_ids = explode(',', $request->shipper_ids);
-                if (count($shipper_ids) > 0) {
-                    foreach ($shipper_ids as $shipper_id) {
-                        $shipper = User::find($shipper_id);
-                        if ($shipper) {
-                            $shipper->payment_cycle_id = $payment_cycle_id;
-                            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                                $shipper->payment_day = $payment_day;
-                            } else {
-                                $shipper->payment_day = NULL;
-                            }
-                            $shipper->save();
-                        }
-                    }
-                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+        $shipper_ids = explode(',', $request->shipper_id);
+        $error_messages = [];
+        
+        foreach ($shipper_ids as $shipper_id) {
+            try {
+                $payment_cycles = $request->payment_cycles;
+                $selected_days = $request->selected_days;
+                $fortnite = $request->fortnite;
+                $monthly = $request->monthly;
+        
+                switch ($payment_cycles) {
+                    case '2':
+                    case '4':
+                    case '5':
+                        $payment_cycle_days = $selected_days;
+                        break;
+                    case '6':
+                        $payment_cycle_days = $fortnite;
+                        break;
+                    case '3':
+                        $payment_cycle_days = $monthly;
+                        break;
+                    default:
+                        $payment_cycle_days = 0;
                 }
-            } else {
-                $shipper_id = $request->shipper_id;
+        
                 $shipper = User::find($shipper_id);
                 if ($shipper) {
-                    $shipper->payment_cycle_id = $payment_cycle_id;
-                    if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
-                        $shipper->payment_day = $payment_day;
-                    } else {
-                        $shipper->payment_day = NULL;
-                    }
-                    $shipper->save();
-                    return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
+                    $shipper->update([
+                        'payment_cycle_id' => $payment_cycles,
+                        'payment_cycle_days' => $payment_cycle_days
+                    ]);
+                } else {
+                    $error_messages[] = $shipper_id;
                 }
+            } catch (Exception $th) {
+                $error_messages[] = $th->getMessage();
             }
-
-            return redirect()->back()->with('error', 'Shipper not found!');
         }
-        return redirect()->back()->with('error', 'Payment Cycle not selected!');
+        
+        if (!empty($error_messages)) {
+            $error_message = implode(', ', $error_messages);
+            return redirect()->back()->with(['error' => "Shipper with IDS : $error_message Not Found"]);
+        } else {
+            return redirect()->back()->with(['success' => 'Payment Cycle Updated Successfully']);
+        }        
     }
-
-
     public function getInternationalCityForm()
     {
         $hubs = City::where('hub', 1)->where('business_category_id', 2)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 2)->get();
         return view('admin.management.add_international_city_form')->with(['hubs' => $hubs, 'zones' => $zones]);
     }
-
     public function getEditInternationalCityForm($id)
     {
         $city = City::find($id);

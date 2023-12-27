@@ -128,6 +128,15 @@
                                                     <input type="text" name="new_amount" id="new_amount" class="form-control rounded-right new_amount" placeholder="Enter Amount" data-rule-required="true" data-msg-required="New COD Amount is required">
                                                 </fieldset>
                                             </div>
+                                            <div class="col-6 d-none" id="cod_parcel_value_change">
+                                                <fieldset class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Enter Parcel Value</span>
+                                                    </div>
+        
+                                                    <input type="text" name="cod_parcel_value" id="cod_parcel_value" class="form-control rounded-right cod_parcel_value" placeholder="Parcel Value" data-rule-required="true" data-msg-required="Parcel Value is required"  oninput="if(this.value=='0') this.value=''">
+                                                </fieldset>
+                                            </div>
                                             <div class="col-12">
                                                 <fieldset class="form-group">
                                                     <textarea class="form-control" name="cod_remarks" id="cod_remarks" rows="3" placeholder="Enter Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
@@ -370,6 +379,12 @@
             // });
 
             $('.new_amount').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+            $('.cod_parcel_value').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
@@ -1221,7 +1236,13 @@
                                 closeOnEsc: false
                             });
 
-                            var complaint_id = $('#case_nature_requests').val();
+                            /*********
+                            // Commented this because in Complain type = 1, the value set in different variable
+                            // i.e: $('#case_nature_complaints').val();
+                            // so this should be manage according to case nature except here, which seems like it already handled in first two, 
+                            // if required for three four, then adjust this on top like case nature
+                            *********/
+                            // var complaint_id = $('#case_nature_requests').val();
                         
                             if(complaint_id == 12)
                             {
@@ -1248,6 +1269,13 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
+                                        
+                                        var is_zero_cod = 0;
+                                        if($('#new_amount').val() == 0 && $('#new_amount').val() != '')
+                                        {
+                                            is_zero_cod = 1;
+                                        }
+
                                         $.ajax({
                                             url: '{!! route('cod.crm.request.add') !!}',
                                             method: 'POST',
@@ -1259,6 +1287,8 @@
                                                 'description': description,
                                                 'cod_new_amount': $('#new_amount').val(),
                                                 'cod_remarks': $('#cod_remarks').val(),
+                                                'is_zero_cod': is_zero_cod,
+                                                'cod_parcel_value': $('#cod_parcel_value').val(),
                                                 'is_automated_cod_change': 1,
                                             }
                                         })
@@ -1404,6 +1434,7 @@
                 var old_amount = $('#old_amount').val();
                 $('#add_request_form')[0].reset();
                 $('#old_amount').val(old_amount);
+                $('#cod_parcel_value_change').addClass('d-none');
                 $('#case_nature_complaints').val('').trigger('change');
                 $('#case_nature_select').val('').trigger('change');
                 $('#case_nature_requests').val('').trigger('change');
@@ -1521,6 +1552,20 @@
                     words = words.slice(0, wordLimit); // Keep only the first 10 words
                     textarea.val(words.join(' ')); // Update the textarea value
                 }
+            });
+
+            $('#new_amount').on('keyup', function () {
+            
+                var new_amount = $(this).val();
+
+                if(new_amount == 0 && new_amount != '')
+                {
+                    $('#cod_parcel_value_change').removeClass('d-none');
+                }
+                else{
+                    $('#cod_parcel_value_change').addClass('d-none');
+                }
+
             });
             
 		});

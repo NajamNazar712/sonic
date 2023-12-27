@@ -14,7 +14,7 @@ class OperationsPerfomanceReportWeekly extends Command
      *
      * @var string
      */
-    protected $signature = 'reports:operations_performance_weekly';
+    protected $signature = 'reports:operations_performance_weekly {mode?}';
 
     /**
      * The console command description.
@@ -41,10 +41,11 @@ class OperationsPerfomanceReportWeekly extends Command
     public function handle()
     {
         $id = 224;
+        $mode = $this->argument('mode'); // Access the 'mode' argument
         $currentDate = Carbon::now();
         $from = $currentDate->copy()->previous(Carbon::FRIDAY)->previous(Carbon::FRIDAY);
         $to = $from->copy()->next(Carbon::THURSDAY)->toDateString();
         $from = $from->toDateString();
-        $this->operations_performance_export_to_excel_automated($from, $to, $id);
+        $this->operations_performance_export_to_excel_automated($from, $to, $id, $mode);
     }
 }

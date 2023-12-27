@@ -398,7 +398,6 @@ class DeliveryController extends Controller
                 $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
                 $msg_string = null;
                 $str_arr = null;
-                //                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
                 $str_arr = preg_split("/[ ,]+/", $shipments->consignee_address);
                 foreach ($check as $nsa) {
                     foreach ($str_arr as $arr_value) {
@@ -10257,6 +10256,27 @@ class DeliveryController extends Controller
         } else {
 
             return response()->json(['status' => false, 'message' => 'Selected rider data not found']);
+        }
+    }
+
+    public function pending_cash_collect_revert(Request $request){
+        $note_ids = explode(',', $request->delivery_note_ids);
+        $notes = array();
+        foreach ($note_ids as $note_id) {
+            $note_details = DeliveryNote::where('id', $note_id)->where('cash_collection_status', 1)->where('dncc_status', 0)->first();
+            if ($note_details) {
+                $note_details->cash_collection_status = 0;
+                $note_details->cash_collected_by = NULL;
+                $note_details->cash_collected_at = NULL;
+                $note_details->save();
+            } else {
+                $notes[] = $note_id;
+            }
+        }
+        if (empty($notes)) {
+            return response()->json(['status' => 1, 'success' => 'Cash collection reverted successfully!']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'These delivery notes could not be updated!', 'notes' => $notes]);
         }
     }
 }

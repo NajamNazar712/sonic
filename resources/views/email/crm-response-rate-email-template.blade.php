@@ -1,4 +1,4 @@
-<div>
+{{-- <div>
     <span style="margin-bottom: 10px;">Dated: {{ $date }}</span>
     <div style="display: flex; flex-direction: column; border: 1px solid #ddd; margin-top: 0;">
         <div style="display: flex; background-color: #f2f2f2; padding: 8px; text-align: center; font-weight: bold;">
@@ -22,10 +22,10 @@
         @endphp
         @endforeach
     </div>
-</div>
+</div> --}}
 
 
-{{-- <div>
+<div>
     <span style="margin-bottom: 10px;">Dated: {{ $date }}</span>
     <table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd; margin-top: 0;">
         <thead>
@@ -53,4 +53,4 @@
             @endforeach
         </tbody>
     </table>
-</div> --}}
+</div>
