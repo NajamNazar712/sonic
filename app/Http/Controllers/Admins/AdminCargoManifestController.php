@@ -3416,7 +3416,7 @@ class AdminCargoManifestController extends Controller
         return view('admin.cargo.manifest.receive_shipments');
     }
 
-    public function receive_bag_shipments_details(Request $request)// receive normal bag
+    public function receive_bag_shipments_details(Request $request)// receive normal bag shipment
     {
 
         //        $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -3511,6 +3511,9 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            if($shipment->shipper_status_id == 1)
+                return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if (!$dispute_check) {
@@ -3647,6 +3650,7 @@ class AdminCargoManifestController extends Controller
                     }
                 }
                 $details = array();
+                $misroute = 1;
 
                 $details['id'] = $shipment->id;
                 $details['tracking_number'] = $shipment->tracking_number;
@@ -3666,12 +3670,16 @@ class AdminCargoManifestController extends Controller
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
+
+                    if (Auth::user()->default_hub_id == $details['destination'])
+                        $misroute = 0;
                 }
 
                 $details['consignee'] = $shipment->consignee_name;
                 $details['shipping_mode'] = $shipment->shipping_mode->mode;
                 $details['amount'] = number_format($shipment->amount);
                 $details['service_type'] = $shipment->booking_type->booking_type;
+                $details['misroute'] = $misroute;
                 ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
                 return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
             }
@@ -3680,7 +3688,7 @@ class AdminCargoManifestController extends Controller
         }
     }
 
-    public  function receive_bag_shipments_details_return(Request $request)// receive return bag
+    public  function receive_bag_shipments_details_return(Request $request)// receive return bag shipment
     {
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 

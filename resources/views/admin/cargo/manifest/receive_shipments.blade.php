@@ -212,6 +212,12 @@
                     // var info = table.page.info();
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    var misroute = data[11]; // misroute veriable
+                    console.log('row',row.childNodes[7].innerText);
+                    if(misroute == 1)
+                    {
+                        $(row).addClass('alert-danger');
+                    }
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
@@ -282,7 +288,7 @@
                                         var rowNo = table.rows().count();
 
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type
-                                            ,open_box
+                                            ,open_box,data.details.misroute
                                         ])
                                             .node().id = data.details.id;
                                         // var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';

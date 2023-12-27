@@ -148,6 +148,7 @@
                     {name: 'misroute', class: 'misroute', orderable: false,searchable: false, visible: false}
                 ],
                 rowCallback: function(row, data, index) {
+
                     if(data[misroute_id] == 1)
                     {
                         $(row).addClass('alert-danger');
