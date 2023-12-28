@@ -1597,7 +1597,7 @@ class AdminTrackingController extends Controller
                                 ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
                                 ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id');    
 
-                                $journey_details['user'] = Admin::find($shipment_scanning_query->first()->admin_id ?? $shipment_scanning_query->first()->rider_id)->name;
+                                $journey_details['user'] = Admin::find($shipment_scanning_query->first()->admin_id) ?? Rider::find($shipment_scanning_query->first()->rider_id)->name;
                                 if ($journey->status == 1) {
                                     $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->first();
                                     $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
