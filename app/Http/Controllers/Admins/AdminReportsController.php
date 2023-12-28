@@ -7168,7 +7168,7 @@ class AdminReportsController extends Controller
          
 
         if ($search_shippers = $request->get('search_shipper')) {
-            $shipments = $shipments->where('shipments.user_id', $search_shippers);
+            $shipments = $shipments->whereIn('shipments.user_id', $search_shippers);
         } 
 
         
@@ -7178,7 +7178,7 @@ class AdminReportsController extends Controller
 
         
         if( $sales_persons=$request->get('search_sales_person')) {
-            $shippers=SalePersonTag::whereIn('admin_id',$sales_persons)->pluck('user_id');
+            $shippers=SalePersonTag::whereIn('admin_id',$sales_persons)->where('status',1)->pluck('user_id');
             $shipments = $shipments->whereIn('shipments.user_id', $shippers);
 
         }
