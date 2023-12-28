@@ -699,8 +699,12 @@
                 var val = $(this).val();
                 if (val) {
                     $('#search_sub_segment').removeAttr('required');
+                    $('#search_sales_person').removeAttr('required');
+
                 } else {
                     $('#search_sub_segment').attr('required', 'required');
+                    $('#search_sales_person').attr('required', 'required');
+
                 }
             });
             
@@ -708,8 +712,21 @@
                 var val = $(this).val();
                 if (val) {
                     $('#search_shipper').removeAttr('required');
+                    $('#search_sales_person').removeAttr('required');
                 } else {
                     $('#search_shipper').attr('required', 'required');
+                    $('#search_sales_person').attr('required', 'required');
+                }
+            });
+
+            $('#search_sales_person').on('change', function(){
+                var val = $(this).val();
+                if (val) {
+                    $('#search_shipper').removeAttr('required');
+                    $('#search_sub_segment').removeAttr('required');
+                } else {
+                    $('#search_shipper').attr('required', 'required');
+                    $('#search_sub_segment').attr('required', 'required');
                 }
             });
 
@@ -718,7 +735,7 @@
                 var search_sub_segment = $('#search_sub_segment').val();
                 var search_sales_person=$('#search_sales_person').val();
                 if(!(search_sub_segment || search_shipper.length > 0 || search_sales_person.length >0)){
-                    toastr.error('Select Shipper or Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    toastr.error('Select Shipper or Sales Person or Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
 

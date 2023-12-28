@@ -7057,6 +7057,7 @@ class AdminReportsController extends Controller
 
     public function summary_list(Request $request)
     {
+        
         $connection = 'reports';
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 176);
@@ -7067,6 +7068,7 @@ class AdminReportsController extends Controller
         $to_id = null;
         $sj_from_id = 168982787;
         $sj_to_id = 908982787;
+        
 
         if ($from != null && $to != null) {
 
@@ -7082,8 +7084,11 @@ class AdminReportsController extends Controller
             }
 
             $sj_from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+          
+
             if ($sj_from_id->exists()) {
                 $sj_from_id = $sj_from_id->first()->id;
+               
 
                 $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
 
@@ -7091,6 +7096,7 @@ class AdminReportsController extends Controller
                     $sj_to_id = $sj_to_id->first()->id;
                 }
             }
+            
         }
 //        if(!is_int($sj_from_id)){
 //            dd($sj_from_id);
@@ -7098,6 +7104,8 @@ class AdminReportsController extends Controller
 //            $shipments = DB::connection($connection)->table('shipments')->whereRaw('false');
 //            return $shipments;
 //        }
+        
+
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -7157,14 +7165,23 @@ class AdminReportsController extends Controller
           }else{
               $shipments->where('shipments.user_id', '=', null);
           }*/
-        if ($search_shipper = $request->get('search_shipper')) {
-            $shipments = $shipments->where('shipments.user_id', $search_shipper);
+         
+
+        if ($search_shippers = $request->get('search_shipper')) {
+            $shipments = $shipments->where('shipments.user_id', $search_shippers);
         } 
 
         
         if ($search_sub_segment = $request->get('search_sub_segment')) {
             $shipments = $shipments->where('u.sub_segment_id', $search_sub_segment);
-        }            
+        }        
+
+        
+        if( $sales_persons=$request->get('search_sales_person')) {
+            $shippers=SalePersonTag::whereIn('admin_id',$sales_persons)->pluck('user_id');
+            $shipments = $shipments->whereIn('shipments.user_id', $shippers);
+
+        }
 
 
 
