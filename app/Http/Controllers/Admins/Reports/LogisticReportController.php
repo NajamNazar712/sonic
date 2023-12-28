@@ -15,8 +15,13 @@ use Illuminate\Support\Facades\Auth;
 
 class LogisticReportController extends Controller
 {
-    public function index() {
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
 
+        $this->middleware('Permission');
+    }
+    public function index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 718); //trail ID
         $shippers_ids = array();
         $setting = GlobalSettings::where('type', 'logistic_setting')->select('text')->first();
