@@ -3615,6 +3615,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             else {
+                //return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
 
                 $bag_type = $request->bag_type;
                 $shipment_status = $shipment->shipper_status_id;
@@ -3636,8 +3637,6 @@ class AdminCargoManifestController extends Controller
                 }
                 // validate bag n shipment type end
 
-
-                //return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
                 if (!$request->has('pieces_confirm')) {
                     if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                         $details = array();
@@ -3662,18 +3661,24 @@ class AdminCargoManifestController extends Controller
                     $details['origin'] = $shipment->consignee_city->name;
                     if ($shipment->return_address_id != NULL) {
                         $details['destination'] = $shipment->return_address->city->name;
+                        $details['destination_id'] = $shipment->return_address->city->id;
                         $details['hub'] = $shipment->return_address->city->hub_city->name;
                     } else {
                         $details['destination'] = $shipment->pickup_address->city->name;
+                        $details['destination_id'] = $shipment->pickup_address->city->id;
                         $details['hub'] = $shipment->pickup_address->city->hub_city->name;
                     }
+
+                    if (Auth::user()->default_hub_id == $details['destination_id'])
+                        $misroute = 0;
                 }
                 else {
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
+                    $details['destination_id'] = $shipment->consignee_city->id;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    if (Auth::user()->default_hub_id == $details['destination'])
+                    if (Auth::user()->default_hub_id == $details['destination_id'])
                         $misroute = 0;
                 }
 
