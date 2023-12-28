@@ -3517,6 +3517,9 @@ class AdminCargoManifestController extends Controller
             if($shipment->shipper_status_id == 1)
                 return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
 
+            //if(($shipment->shipper_status_id == 5) && ($request->bag_type == 2))
+            //    return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
+
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if (!$dispute_check) {
                 return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -4096,7 +4099,7 @@ class AdminCargoManifestController extends Controller
             DB::beginTransaction();
 
 
-        $shipment_status_array = [3, 21, 26, 32, 49];
+        $shipment_status_array = [3, 11,21, 26, 32, 49];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
@@ -4149,7 +4152,7 @@ class AdminCargoManifestController extends Controller
 
                             $bag = $bag_shipment->bag;
 
-                            array_push($shipment_ids_array, $shipment->tracking_number);
+//                            array_push($shipment_ids_array, $shipment->tracking_number);
 
                             $shipper_status_id = NULL;
                             $consignee_status_id = NULL;
@@ -4166,11 +4169,13 @@ class AdminCargoManifestController extends Controller
                                     {
                                         $shipper_status_id = 4;
                                         $consignee_status_id = 4;
+                                        array_push($shipment_ids_array, $shipment->tracking_number);
                                     }
                                     else
                                     {
                                         $shipper_status_id = 66;
                                         $consignee_status_id = 66;
+                                        array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                                     }
 
                                     $self_collection = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
