@@ -3660,7 +3660,7 @@ class AdminCargoManifestController extends Controller
                 $details['tracking_number'] = $shipment->tracking_number;
                 $details['bag_number'] = 'N/A';
 
-                if ($shipment->shipper_status_id == 21) {
+                if (in_array($shipment->shipper_status_id,[20,21])) {
                     $details['origin'] = $shipment->consignee_city->name;
                     if ($shipment->return_address_id != NULL) {
                         $details['destination'] = $shipment->return_address->city->name;
@@ -3858,30 +3858,40 @@ class AdminCargoManifestController extends Controller
                     }
                 }
                 $details = array();
+                $misroute = 1;
 
                 $details['id'] = $shipment->id;
                 $details['tracking_number'] = $shipment->tracking_number;
                 $details['bag_number'] = 'N/A';
 
-                if ($shipment->shipper_status_id == 21) {
+                if (in_array($shipment->shipper_status_id,[20,21])) {
                     $details['origin'] = $shipment->consignee_city->name;
                     if ($shipment->return_address_id != NULL) {
                         $details['destination'] = $shipment->return_address->city->name;
+                        $details['destination_id'] = $shipment->return_address->city->id;
                         $details['hub'] = $shipment->return_address->city->hub_city->name;
-                    } else {
+                    }
+                    else {
                         $details['destination'] = $shipment->pickup_address->city->name;
+                        $details['destination_id'] = $shipment->pickup_address->city->id;
                         $details['hub'] = $shipment->pickup_address->city->hub_city->name;
                     }
+                    if (Auth::user()->default_hub_id == $details['destination_id'])
+                        $misroute = 0;
                 } else {
                     $details['origin'] = $shipment->pickup_address->city->name;
                     $details['destination'] = $shipment->consignee_city->name;
+                    $details['destination_id'] = $shipment->consignee_city->id;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    if (Auth::user()->default_hub_id == $details['destination_id'])
+                        $misroute = 0;
                 }
 
                 $details['consignee'] = $shipment->consignee_name;
                 $details['shipping_mode'] = $shipment->shipping_mode->mode;
                 $details['amount'] = number_format($shipment->amount);
                 $details['service_type'] = $shipment->booking_type->booking_type;
+                $details['misroute'] = $misroute;
                 ShipmentScanningJourneyController::add($shipment->id, 20, 1, Auth::id(), null, null);
                 return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
             }
