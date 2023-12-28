@@ -17,7 +17,7 @@ class LogisticReportController extends Controller
 {
     public function index() {
 
-        //ActivityTrailController::createActivityTrailLog(Auth::id(), 566); //module id
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 718); //trail ID
         $shippers_ids = array();
         $setting = GlobalSettings::where('type', 'logistic_setting')->select('text')->first();
         if ($setting) {
@@ -43,7 +43,7 @@ class LogisticReportController extends Controller
         $special_shippers = explode(',', $shippers->text);
 
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 567); //module
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 719); //trail ID
         }
 
         $from = $request->get('search_date_from');
