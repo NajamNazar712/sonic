@@ -2551,7 +2551,7 @@ class AdminCargoManifestController extends Controller
         //            return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
         //        }
         $bag_manifest_exists = 1;
-        $admin_default_hub_id = Admin::where('id',\auth()->id())->select('default_hub_id')->first()->default_hub_id;
+        $admin_default_hub_id = Auth::user()->default_hub_id;
 
         $bag = CargoManifestBag::where('seal_number', $request->bag_number);
 
@@ -2619,6 +2619,7 @@ class AdminCargoManifestController extends Controller
                         $details['last_junction'] = $last_junction;
                         $details['actual_weight'] = $bag->actual_weight;
                         $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+                        $details['without_manifest'] = 0;
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
@@ -2651,7 +2652,7 @@ class AdminCargoManifestController extends Controller
                         }
                     }
                     else {
-                        if (($bag->destination_hub_id == $admin_default_hub_id) || (in_array(Auth::user()->default_hub_id, session('hubs'))))
+                        if (($bag->destination_hub_id == $admin_default_hub_id))
                             $misroute = 0;
                         else
                             $misroute = 1;
@@ -2668,6 +2669,7 @@ class AdminCargoManifestController extends Controller
                         $details['last_junction'] = $last_junction;
                         $details['actual_weight'] = $bag->actual_weight;
                         $details['shipping_mode'] = 'Without Manifest';
+                        $details['without_manifest'] = 1;
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
 
@@ -3060,7 +3062,7 @@ class AdminCargoManifestController extends Controller
                             //array_push($bag_not_exists_in_mapping, $bag_id);
 
                             $misroute = 1;
-                            if (in_array(Auth::user()->default_hub_id, session('hubs'))) {
+                            if ($bag->destination_hub_id == Auth::user()->default_hub_id) {
                                 $misroute = 0;
                                 $bag->status_id = 7;
                                 $bag->short_received_shipments = 0;

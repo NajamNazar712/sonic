@@ -153,6 +153,11 @@
                     {
                         $(row).addClass('alert-danger');
                     }
+
+                    if(data[10] == 1) // if bag without manifest
+                    {
+                        $(row).addClass('alert-danger');
+                    }
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
@@ -196,7 +201,7 @@
                                     if (index === -1) {
                                         $action = "<button class='btn btn-danger btn-icon btn-sm remove_bag'><i class='la la-close'></i></button>";
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute]).node().id = data.details.bag_id;
+                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute,data.details.without_manifest]).node().id = data.details.bag_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
