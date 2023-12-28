@@ -23,7 +23,7 @@
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="users[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
+                                                <select name="users[]" id="shippers_select" class="form-control select2" multiple="multiple">
                                                     @foreach($users as $user)
                                                         <option value="{{$user->id}}">{{$user->name}}</option>
                                                     @endforeach
@@ -68,11 +68,11 @@
                 }
             });
 
-            $('#shippers_select').on('select2:unselect', function () {
-                if($(this).val().length == 0){
-                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
-                }
-            });
+            // $('#shippers_select').on('select2:unselect', function () {
+            //     if($(this).val().length == 0){
+            //         $('#settings_form').find('button[type=submit]').prop('disabled', true);
+            //     }
+            // });
 
                     @if(count($logistic_setting_tags) > 0)
             var ids = @json($logistic_setting_tags);

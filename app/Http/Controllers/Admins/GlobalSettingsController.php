@@ -9206,27 +9206,24 @@ class GlobalSettingsController extends Controller
 
     public function logistic_report_store(Request $request)
     {
-        if ($request->has('users')) {
-
-            if (count($request->users) > 0) {
+            if ($request->has('users') && count($request->users) > 0) {
                 $users = implode(',', $request->users);
-
-                $settings = GlobalSettings::where('type', 'logistic_setting');
-
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                } else {
-                    $settings = new GlobalSettings();
-
-                    $settings->type = 'logistic_setting';
-                    $settings->setting_value = 0;
-                }
-                $settings->text = $users;
-                $settings->save();
+            } else{
+                $users = null;
             }
-            return redirect()->back()->with('success', 'Settings Updated!');
-        } else {
-            return redirect()->back()->with('error', 'No shippers selected!');
-        }
+            $settings = GlobalSettings::where('type', 'logistic_setting');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'logistic_setting';
+                $settings->setting_value = 0;
+            }
+            $settings->text = $users;
+            $settings->save();
+        
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }
