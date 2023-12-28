@@ -1981,7 +1981,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@receive_bag_shipments_index')->name('index');
                 Route::post('details', 'Admins\AdminCargoManifestController@receive_bag_shipments_details')->name('details'); // receive normal bag shipment
                 Route::post('details/return', 'Admins\AdminCargoManifestController@receive_bag_shipments_details_return')->name('details.return'); // receive return bag shipment
-                Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');// receive shipment store
+                Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');// receive bag shipment store
             });
         });
 

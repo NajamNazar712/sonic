@@ -3922,7 +3922,7 @@ class AdminCargoManifestController extends Controller
         }
     }
 
-    public function receive_bag_shipments_store(Request $request)// receive store
+    public function receive_bag_shipments_store(Request $request)// receive bag shipment store
     {
         //        $shipment_status_array = [3, 21, 26, 32, 49];
         //        $shipment_ids = array_unique(explode(',', $request->shipment_ids));
@@ -4305,7 +4305,16 @@ class AdminCargoManifestController extends Controller
                                 $shipment->shipper_status_id = 11;
                                 $shipment->consignee_status_id = 11;
                                 $shipment->save();
-                                $remarks = 'Misrouted from '.$shipment->pickup_address->city->name.' to '.$default_hub_name.'.';
+                                $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
+                                if ($last_scanned->exists())
+                                {
+                                    $last_scanned = $last_scanned->latest()->take(1)->first();
+                                    $remarks = 'Misrouted from '.$last_scanned->city->name.' to '.$default_hub_name.'.';
+                                }
+                                else
+                                {
+                                    $remarks = '--';
+                                }
                                 ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
                                 ShipmentsJourneyController::add($shipment_id, 11, 11, NULL, $remarks, NULL, Auth::id());// new misrouted
                                 array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
@@ -4420,7 +4429,17 @@ class AdminCargoManifestController extends Controller
                             $shipment->shipper_status_id = 66;
                             $shipment->consignee_status_id = 66;
                             $shipment->save();
-                            $remarks = 'Misrouted from '.$shipment->pickup_address->city->name.' to '.$default_hub_name.'.';
+
+                            $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
+                            if ($last_scanned->exists())
+                            {
+                                $last_scanned = $last_scanned->latest()->take(1)->first();
+                                $remarks = 'Misrouted from '.$last_scanned->city->name.' to '.$default_hub_name.'.';
+                            }
+                            else
+                            {
+                                $remarks = '--';
+                            }
                             ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
                             ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
