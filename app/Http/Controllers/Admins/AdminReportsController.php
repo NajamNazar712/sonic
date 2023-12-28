@@ -3267,8 +3267,11 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
         }
-        $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-        $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
+
+        $arrival_from = Carbon::parse($request->arrival_time_from ?? '00:00:01')->format('H:i:s');
+        $arrival_to = Carbon::parse($request->arrival_time_to ?? '23:59:59')->format('H:i:s');
+      
+       
 
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->toDateTimeString();
@@ -3277,7 +3280,8 @@ class AdminReportsController extends Controller
 
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
-
+     
+   
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -3403,20 +3407,23 @@ class AdminReportsController extends Controller
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
 
+           
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+      
         if ($from_id->exists()) {
+          
             $from_id = $from_id->first()->id;
 
             $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-
             if ($to_id->exists()) {
                 $to_id = $to_id->first()->id;
+                // $sales->where('sj.id', '>=', $from_id)
+                //     ->where('sj.id', '<=', $to_id);
+                $sales->whereBetween('sj.id', [$from_id, $to_id]);
 
-                $sales->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
             }
         }
-
+     
         //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
         //            $now = Carbon::now();
         //            $yesterday = Carbon::now()->subDays(3);
