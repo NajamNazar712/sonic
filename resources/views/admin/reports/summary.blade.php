@@ -25,14 +25,24 @@
                                 </div></div>--}}
 
                                 <div class="col-4">
-                                <fieldset class="form-group pb-1">
-                                    <select name="search_shipper" id="search_shipper" class="form-control select2"  required>
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
+                                    <fieldset class="form-group pb-1">
+                                        <select name="search_shipper[]" id="search_shipper" class="form-control select2" required multiple>
+                                            @foreach($shippers as $shipper)
+                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group pb-1">
+                                        <select name="search_sales_person[]" id="search_sales_person" class="form-control select2" required multiple>
+                                            @foreach($sales_persons as $sales_person)
+                                                <option value="{{$sales_person->id}}">{{$sales_person->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                
                             <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_sub_segment" id="search_sub_segment" class="form-control select2" required>
@@ -352,10 +362,17 @@
                 allowClear:true
             });
          // Prepend an empty option to the select element
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipper').select2({
                 width: '100%',
                 placeholder: "Select Shipper",
-                allowClear: true
+                allowClear: true,
+                multiple: true
+            });
+            $('#search_sales_person').select2({
+                width: '100%',
+                placeholder: "Select Sales Person",
+                allowClear: true,
+                multiple: true
             });
             $('#search_sub_segment').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -409,6 +426,7 @@
                 errorPlacement: function(error, element) {
                     var shipperErrorExists = $('#search_shipper-error').length > 0;
                     var subSegmentErrorExists = $('#search_sub_segment-error').length > 0;
+                    // var subSegmentErrorExists = $('#search_sub_segment-error').length > 0;
                     if ((shipperErrorExists && subSegmentErrorExists)) {
                         error.addClass('w-100').appendTo(element.parents('.form-group'));
                     }
@@ -421,7 +439,8 @@
                     var destination = $('#destination').val();
                     var shipper = $('#search_shipper').val();
                     var sub_segment = $('#search_sub_segment').val();
-
+                    var search_sales_person = $('#search_sales_person').val();
+                    
                     $.ajax({
                         url: '{!! route('admin.reports.summary.data') !!}',
                         method: 'post',
@@ -432,6 +451,7 @@
                             'origin': origin,
                             'destination': destination,
                             'shipper': shipper,
+                            'search_sales_person':search_sales_person
 
                         }
                     }).done(function (data) {
@@ -577,6 +597,7 @@
                        /* d.search_shipper = $('#shipper').val();*/
                         d.search_shipper = $('#search_shipper').val();
                         d.search_sub_segment = $('#search_sub_segment').val();
+                        d.search_sales_person = $('#search_sales_person').val();
                         d.cards_filter = $('#cards_filter_input').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
@@ -695,7 +716,8 @@
             $('#search_btn').on('click', function(){
                 var search_shipper = $('#search_shipper').val();
                 var search_sub_segment = $('#search_sub_segment').val();
-                if(!(search_sub_segment || search_shipper)){
+                var search_sales_person=$('#search_sales_person').val();
+                if(!(search_sub_segment || search_shipper.length > 0 || search_sales_person.length >0)){
                     toastr.error('Select Shipper or Sub Segment', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
