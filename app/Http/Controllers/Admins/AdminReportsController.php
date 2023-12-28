@@ -86,6 +86,8 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\WeightType;
+
 
 class AdminReportsController extends Controller
 {
@@ -9885,10 +9887,11 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 141);
         $shipping_modes = ShippingMode::all();
         $users = User::where('status', 3)->get(['id', 'name']);
-        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        $hubs = City::where('status', 1)->where('hub', 1)->select('id', 'name')->get();
         $zones = Zone::where('status', 1)->get(['id', 'name']);
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes, 'users' => $users, 'hubs' => $hubs, 'zones' => $zones, 'sub_segments' => $sub_segments]);
+        $weight_types = WeightType::select('id','name')->get();
+        return view('admin.reports.weight_qc')->with(['shipping_modes' => $shipping_modes, 'users' => $users, 'hubs' => $hubs, 'zones' => $zones, 'sub_segments' => $sub_segments, 'weight_types' => $weight_types]);
     }
 
     public function weight_qc_list(Request $request)
@@ -9917,14 +9920,15 @@ class AdminReportsController extends Controller
 //            }
 //        }
 
-        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+        $shipments = DB::connection($connection)->table('shipments')->leftJoin('shipments_weight_types as sw', 'shipments.id', '=', 'sw.shipment_id')
+        ->leftJoin('weight_types as wt', 'sw.weight_type', '=', 'wt.id')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment'])
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name'])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -9970,7 +9974,10 @@ class AdminReportsController extends Controller
         if ($user = $request->get('search_user')) {
             $datatable->where('shipments.user_id', $user);
         }
-        if ($hub = $request->get('search_hub')) {
+        if ($hub = $request->get('search_origin_hub')) {
+            $datatable->where('oc.hub_id', $hub);
+        }
+        if ($hub = $request->get('search_destination_hub')) {
             $datatable->where('dc.hub_id', $hub);
         }
         if ($zone = $request->get('search_zone')) {
@@ -9978,6 +9985,9 @@ class AdminReportsController extends Controller
         }
         if ($sub_segment = $request->get('sub_segment')) {
             $datatable->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($weight_type = $request->get('weight_type')) {
+            $datatable->where('sw.weight_type', $weight_type);
         }
         if ($weighted_as = $request->get('weighted_as')) {
             if ($weighted_as == 1) {
