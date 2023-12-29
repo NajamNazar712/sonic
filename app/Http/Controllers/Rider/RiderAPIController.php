@@ -11340,7 +11340,7 @@ RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
-                                    ShipmentScanningJourneyController::add($shipment->id, 1, 5, $rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'app');
+                                    ShipmentScanningJourneyController::add($shipment->id, 31, 5, $rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'app');
 
                                     $shipment_count += 1;
                                     $notification_shipments[] = $shipment->id;
@@ -12766,8 +12766,8 @@ RiderAPIController extends Controller
     {
         $rules = [
             'tracking' => ['required'],
-            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'latitude' => ['nullable', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['nullable', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
 
         $validate = Validator::make($request->all(), $rules);
@@ -13478,8 +13478,8 @@ RiderAPIController extends Controller
     {
         $rules = [
             'tracking' => ['required'],
-            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'latitude' => ['nullable', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['nullable', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);

@@ -249,11 +249,15 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Order ID</th>
+                            <th class="border-primary border-darken-1">Account ID</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Sub Segment</th>
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">First Attempt Date</th>
                             <th class="border-primary border-darken-1">Rider Picked Status Date</th>
+                            <th class="border-primary border-darken-1">Pieces</th>
+                            <th class="border-primary border-darken-1">Actual Weight</th>
+                            <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remark</th>
@@ -475,11 +479,15 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Order ID');
+                            head.push('Account ID');
                             head.push('Shipper');
                             head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
+                            head.push('Pieces');
+                            head.push('Actual Weight');
+                            head.push('Shipping Mode');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
@@ -505,11 +513,15 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.shipper_id);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
+                                row.push(values.pieces);
+                                row.push(values.actual_weight);
+                                row.push(values.shipping_mode);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
@@ -576,11 +588,15 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle shipper'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'sub_segment' ,name: 'u.sub_segment_id', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     { data:'rider_picked_status_date' ,name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
+                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
+                    { data:'actual_weight' ,name: 'actual_weight', class: 'align-middle actual_weight'},
+                    { data:'shipping_mode' ,name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'reason' ,name: 'reason', class: 'align-middle reason'},
                     { data:'remark' ,name: 'remark', class: 'align-middle remark'},
