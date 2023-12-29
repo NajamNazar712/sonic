@@ -261,6 +261,7 @@
                             <th class="border-primary border-darken-1">Order ID</th>
                             <th class="border-primary border-darken-1">Account ID</th>
                             <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Sales Person</th>
                             <th class="border-primary border-darken-1">Sub Segment</th>
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">First Attempt Date</th>
@@ -501,6 +502,7 @@
                             head.push('Order ID');
                             head.push('Account ID');
                             head.push('Shipper');
+                            head.push('Sale Person');
                             head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('First Attempt Date');
@@ -535,6 +537,7 @@
                                 row.push(values.order_id);
                                 row.push(values.shipper_id);
                                 row.push(values.shipper);
+                                row.push(values.sales_person_name); 
                                 row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.first_attempt_date);
@@ -611,6 +614,7 @@
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'shipper_id' ,name: 'shipper_id', class: 'align-middle shipper'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'sales_person_name' ,name: 'st.sales_person_name', class: 'align-middle sales_person_name'},
                     { data:'sub_segment' ,name: 'u.sub_segment_id', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
