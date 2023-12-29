@@ -136,7 +136,6 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
                         
-                        dd($shipment);
                         
                         if ($shipment) {
                             try {
@@ -157,7 +156,6 @@ class ReturnV2Controller extends Controller
                                     //if pending status is not 1 dont show return confirm status in the dropdown
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
                                 }
-
 
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
