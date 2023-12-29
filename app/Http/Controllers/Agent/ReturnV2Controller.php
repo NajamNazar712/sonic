@@ -157,10 +157,10 @@ class ReturnV2Controller extends Controller
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
                                 }
 
-                                $shipper_city = $shipment->pickup_address->city;
+                                $shipper_city = $shipment->pickup_address->city ?? null;
                                 $shipper_info = $shipment->user;
                                 $service_type = $shipment->booking_type;
-                                $consignee_city = $shipment->consignee_city;
+                                $consignee_city = $shipment->consignee_city ?? null;
                                 $product_infos = $shipment->items;
                                 $shipping_mode = $shipment->shipping_mode;
                                 $business_category = $shipment->business_category;
