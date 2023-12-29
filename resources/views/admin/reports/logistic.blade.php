@@ -292,6 +292,7 @@
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -310,6 +311,7 @@
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
