@@ -135,7 +135,8 @@ class ReturnV2Controller extends Controller
                         $agent_id = Auth::id();
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
-                        
+                        dd($shipment);
+
                         
                         if ($shipment) {
                             try {

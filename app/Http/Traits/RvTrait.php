@@ -1459,7 +1459,6 @@ trait RvTrait
                 if($shipments->isEmpty()){
                     continue;
                 }  
-                dd($shipments);
             }
 
             
