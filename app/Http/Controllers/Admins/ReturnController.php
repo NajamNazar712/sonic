@@ -268,11 +268,11 @@ class ReturnController extends Controller
             $details['rv_shipment_created_at'][] = $rvShipment->created_at;
         
             $latestJourney = $rvShipment->shipment->shipment_journey
-                ->where('shipper_status_id', 12)
-                ->sortByDesc('updated_at')
-                ->first();
+            ->where('shipper_status_id', 12)
+            ->sortByDesc('updated_at')
+            ->first();
     
-                $details['shipment_journey_rcp_latest'][] = isset($latestJourney->updated_at) ? $latestJourney->updated_at : null;
+            $details['shipment_journey_rcp_latest'][] = isset($latestJourney->updated_at) ? $latestJourney->updated_at : '-';
         }
             
         dd($details['shipment_journey_rcp_latest']);
