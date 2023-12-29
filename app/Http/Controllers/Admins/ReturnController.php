@@ -287,7 +287,7 @@ class ReturnController extends Controller
             $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
             $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
         }else{
-            $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
+            $averageResponseTimeInSeconds = $averageResponseTime / 1;
             $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
         }
 
