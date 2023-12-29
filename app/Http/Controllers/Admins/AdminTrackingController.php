@@ -1416,29 +1416,29 @@ class AdminTrackingController extends Controller
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id');     
+                            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at');     
                             
                             switch ($journey->shipper_status_id) {
                                 case 2:
-                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->first();
+                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
                                     break;
                                 case 3:
-                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->first();
+                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
                                     break;
                                 case 4:
-                                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->first();
+                                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
                                     break;
                                 case 5:
-                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->first();
+                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
                                     break;
                                 case 11:
-                                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->first();
+                                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
                                     break;
                                 case 23:
-                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->first();
+                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
                                     break;
                                 case 53:
-                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->first();
+                                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
                                     break;
                                 default:
                                     $scanning_data = null;
@@ -1592,15 +1592,15 @@ class AdminTrackingController extends Controller
                                 })
                                 ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                                 ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                                ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id');    
+                                ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id','shipment_scanning_journeys.created_at');    
 
                                 $journey_details['user'] = Admin::find($shipment_scanning_query->first()->admin_id)->name ?? Rider::find($shipment_scanning_query->first()->rider_id)->name;
                                 switch ($journey->status) {
                                     case 1:
-                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->first();
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
                                         break;
                                     case 2:
-                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->first();
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
                                         break;
                                     default:
                                         $scanning_data = null;
