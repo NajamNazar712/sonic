@@ -1,0 +1,44 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class BoltUndeliveredReasonAgainstServiceTypeSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        
+        DB::table('bolt_undelivered_reason_against_service_types')->truncate();
+
+        $reason_ids = [
+            1,3,4,6,28,60,63,5,7,8,12,19,27,34,35,45,32,33,31,77
+        ];
+
+        $booking_types = 
+        [
+            1,2,3,5
+        ];
+        foreach ($booking_types as $booking_type) {
+            foreach ($reason_ids as $reason_id) {
+                if ($booking_type == 1 || $booking_type == 3 || $booking_type == 5) {
+                    if (!in_array($reason_id, [32, 33, 31, 77])) {
+                        DB::table('bolt_undelivered_reason_against_service_types')->insert([
+                            'booking_type_id' => $booking_type,
+                            'reason_id' => $reason_id,
+                        ]);
+                    } 
+                }else {
+                    DB::table('bolt_undelivered_reason_against_service_types')->insert([
+                        'booking_type_id' => $booking_type,
+                        'reason_id' => $reason_id,
+                    ]);
+                }
+            }
+        }
+    }
+}

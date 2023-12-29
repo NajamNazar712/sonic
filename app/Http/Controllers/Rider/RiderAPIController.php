@@ -11863,8 +11863,9 @@ class RiderAPIController extends Controller
         }
         
         $finalReasons = array_values($reasons); // Re-index the array
+        $reasons_against_booking_types = DB::table('bolt_undelivered_reason_against_service_types')->get();
 
-        return response()->json(['status' => 0, 'message' => $finalReasons]);
+        return response()->json(['status' => 0, 'message' => $finalReasons, 'message_2'=>$reasons_against_booking_types]);
 
     }
 
