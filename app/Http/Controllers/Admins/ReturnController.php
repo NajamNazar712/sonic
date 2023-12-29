@@ -284,9 +284,12 @@ class ReturnController extends Controller
                     $averageResponseTime += $interval->s + $interval->i * 60 + $interval->h * 3600;
                 }
             }
+            $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
+            $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
+        }else{
+            $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
+            $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
         }
-        $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
-        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
 
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
