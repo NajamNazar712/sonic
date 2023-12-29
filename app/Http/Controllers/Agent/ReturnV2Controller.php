@@ -164,16 +164,14 @@ class ReturnV2Controller extends Controller
                                 $shipper_info = $shipment->user ?? '-';
                                 $service_type = $shipment->booking_type ?? '-';
                                 $consignee_city = $shipment->consignee_city?? '-';
-                                $product_infos = $shipment->items ?? '-';
+                                $product_infos = $shipment->items ?? null;
                                 $shipping_mode = $shipment->shipping_mode ?? '-';
                                 $business_category = $shipment->business_category ?? '-';
                                 $detail_product_infos = [];
                                 $rider_details = [];
 
-                                if($product_infos){
-
+                                if(isset($product_infos)){
                                     foreach ($product_infos as $product_info) {
-    
                                         $detail_product = [
                                             'product_name' => $product_info->product->product_name,
                                             'description' => $product_info->description,
@@ -184,7 +182,7 @@ class ReturnV2Controller extends Controller
                                         $detail_product_infos[] = $detail_product;
                                     }
                                 }else{
-                                    $detail_product_infos = [];
+                                    $detail_product_infos = null;
                                 }
 
 
