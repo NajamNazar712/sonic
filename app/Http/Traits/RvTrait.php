@@ -1522,6 +1522,8 @@ trait RvTrait
             
             // check if shipments exist
             if (count($shipments) || $agent_shipment_id) {
+
+                dd($shipments);
                 
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
