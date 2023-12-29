@@ -144,21 +144,21 @@ class ReturnV2Controller extends Controller
                                 }else {
                                     return response()->json(['status' => 6]);
                                 }
-                                $shipment = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
-                                ->join('shipments as shipment', 'shipment.id', '=', 'delivery_note_shipments.shipment_id')
-                                ->where('delivery_note_shipments.shipment_id', $shipment->id)
-                                ->where('dn.pending_status', 1)
-                                ->select('delivery_note_shipments.*', 'dn.*','shipment.*') // Select all columns from both tables
-                                ->first();
+                                // $shipment = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+                                // ->join('shipments as shipment', 'shipment.id', '=', 'delivery_note_shipments.shipment_id')
+                                // ->where('delivery_note_shipments.shipment_id', $shipment->id)
+                                // ->where('dn.pending_status', 1)
+                                // ->select('delivery_note_shipments.*', 'dn.*','shipment.*') // Select all columns from both tables
+                                // ->first();
                             
                                 
-                                if($shipment){
-                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
-                                }
-                                else{
-                                    //if pending status is not 1 dont show return confirm status in the dropdown
-                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
-                                }
+                                // if($shipment){
+                                //     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
+                                // }
+                                // else{
+                                //     //if pending status is not 1 dont show return confirm status in the dropdown
+                                //     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
+                                // }
                                 
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
