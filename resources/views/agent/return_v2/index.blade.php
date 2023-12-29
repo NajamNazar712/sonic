@@ -796,13 +796,12 @@
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
                                 shipment += '<option hidden value="">Select Action *</option>';
 
-                                @if($shipment_statuses)
-                                @foreach ($shipment_statuses as $status)
-                                
-                                shipment +=
-                                '<option value="{{ $status->id }}" id="status_value">{{ $status->name }}</option>';
-                                @endforeach
-                                @endif
+                                                                    
+                                $.each(data.shipment_statuses, function(index, status) {
+                                    shipment +=
+                                        '<option value="' + status.id + '" id="status_value">' + status.name + '</option>';
+                                });
+
                                 shipment += '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
 
                                 shipment += '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
