@@ -275,7 +275,7 @@ class ReturnController extends Controller
                 $details['shipment_journey_rcp_latest'][] = isset($latestJourney->updated_at) ? $latestJourney->updated_at : null;
             }
             
-            dd($details['shipment_journey_rcp_latest');
+            dd($details['shipment_journey_rcp_latest']);
         for ($i = 0; $i < count($details['shipment_journey_rcp_latest']); $i++) {
             if($details['shipment_journey_rcp_latest'][$i] != null){
                 $created_at = new DateTime($details['rv_shipment_created_at'][$i]);
