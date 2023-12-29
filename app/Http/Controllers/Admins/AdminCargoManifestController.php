@@ -3754,15 +3754,21 @@ class AdminCargoManifestController extends Controller
 
             $bag_type = $request->bag_type;
             $shipment_status = $shipment->shipper_status_id;
-            if ($bag_type == 1) {
-                if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
-                    return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
+
+            if ($shipment_status != 11) // agr status 11 h to masla h q k forwarding and return dono p same 11 lagta h ispe sochna h
+            {
+                if ($bag_type == 1) {
+                    if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                        return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
+                    }
                 }
-            } else {
-                if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
-                    return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
+                else {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                        return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
+                    }
                 }
             }
+
 
             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
             if (!$dispute_check) {
@@ -4413,8 +4419,6 @@ class AdminCargoManifestController extends Controller
 
                                 $bag = $bag_shipment->bag;
 
-                                array_push($shipment_ids_array, $shipment->tracking_number);
-
                                 $shipper_status_id = NULL;
                                 $consignee_status_id = NULL;
 
@@ -4456,31 +4460,83 @@ class AdminCargoManifestController extends Controller
                                 }
                                 else {
                                     if ($shipment->booking_type_id == 1) {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
-                                    } else if ($shipment->booking_type_id == 2) {
-                                        if ($shipment->shipper_status_id == 21) {
+                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id)
+                                        {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
-                                        } else {
-                                            $shipper_status_id = 27;
-                                            $consignee_status_id = 27;
                                         }
-
+                                        else
+                                        {
+                                            $shipper_status_id = 11;
+                                            $consignee_status_id = 11;
+                                        }
+                                    } else if ($shipment->booking_type_id == 2) {
+                                        if ($shipment->shipper_status_id == 21) {
+                                            if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id)
+                                            {
+                                                $shipper_status_id = 22;
+                                                $consignee_status_id = 22;
+                                            }
+                                            else
+                                            {
+                                                $shipper_status_id = 11;
+                                                $consignee_status_id = 11;
+                                            }
+                                        }
+                                        else {
+                                            if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id)
+                                            {
+                                                $shipper_status_id = 27;
+                                                $consignee_status_id = 27;
+                                            }
+                                            else
+                                            {
+                                                $shipper_status_id = 11;
+                                                $consignee_status_id = 11;
+                                            }
+                                        }
                                     } else if ($shipment->booking_type_id == 3) {
-                                        $shipper_status_id = 33;
-                                        $consignee_status_id = 33;
+                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                            $shipper_status_id = 33;
+                                            $consignee_status_id = 33;
+                                        }
+                                        else
+                                        {
+                                            $shipper_status_id = 11;
+                                            $consignee_status_id = 11;
+                                        }
                                     } else if ($shipment->booking_type_id == 4) {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
+                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                            $shipper_status_id = 22;
+                                            $consignee_status_id = 22;
+                                        }
+                                        else
+                                        {
+                                            $shipper_status_id = 11;
+                                            $consignee_status_id = 11;
+                                        }
                                     } else {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
+                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                            $shipper_status_id = 22;
+                                            $consignee_status_id = 22;
+                                        }
+                                        else
+                                        {
+                                            $shipper_status_id = 11;
+                                            $consignee_status_id = 11;
+                                        }
                                     }
                                 }
                                 $shipment->shipper_status_id = $shipper_status_id;
                                 $shipment->consignee_status_id = $consignee_status_id;
+
                                 $shipment->save();
+
+                                if ($shipper_status_id != 11)
+                                array_push($shipment_ids_array, $shipment->tracking_number);
+
+                                if ($shipper_status_id == 11)
+                                    array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
@@ -4529,6 +4585,7 @@ class AdminCargoManifestController extends Controller
                     }
                 }
             }
+
 
         // received and short received
         foreach ($bag_ids as $bag_id) {
