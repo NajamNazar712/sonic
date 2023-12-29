@@ -159,15 +159,14 @@ class ReturnV2Controller extends Controller
                                     //if pending status is not 1 dont show return confirm status in the dropdown
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
                                 }
-                                dd($shipment->pickup_address->city ?? '-');
                                 
-                                $shipper_city = $shipment->pickup_address->city;
-                                $shipper_info = $shipment->user;
-                                $service_type = $shipment->booking_type;
-                                $consignee_city = $shipment->consignee_city;
-                                $product_infos = $shipment->items;
-                                $shipping_mode = $shipment->shipping_mode;
-                                $business_category = $shipment->business_category;
+                                $shipper_city = $shipment->pickup_address->city ?? '-';
+                                $shipper_info = $shipment->user ?? '-';
+                                $service_type = $shipment->booking_type ?? '-';
+                                $consignee_city = $shipment->consignee_city?? '-';
+                                $product_infos = $shipment->items ?? '-';
+                                $shipping_mode = $shipment->shipping_mode ?? '-';
+                                $business_category = $shipment->business_category ?? '-';
                                 $detail_product_infos = [];
                                 $rider_details = [];
 
