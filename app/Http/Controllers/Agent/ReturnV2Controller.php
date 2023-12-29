@@ -144,6 +144,7 @@ class ReturnV2Controller extends Controller
                                 }else {
                                     return response()->json(['status' => 6]);
                                 }
+                                dd($shipment);
                                 // $shipment = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
                                 // ->where('delivery_note_shipments.shipment_id', $shipment->id)
                                 // ->where('dn.pending_status', 1)
