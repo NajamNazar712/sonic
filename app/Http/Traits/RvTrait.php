@@ -1460,6 +1460,8 @@ trait RvTrait
                     continue;
                 }  
             }
+
+            dd($shipments);
             
             // Check if only_shippers exists (1 && 0)
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
