@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBoltUndeliveredReasonAgainstServiceTypesTable extends Migration
+class CreateBoltUndeliveredReasonAgainstBookingTypesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateBoltUndeliveredReasonAgainstServiceTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('bolt_undelivered_reason_against_service_types', function (Blueprint $table) {
+        Schema::create('bolt_undelivered_reason_against_booking_types', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('reason_id')->index('idx_reason_id'); // Specify index name
             $table->integer('booking_type_id')->index('idx_booking_type_id'); // Specify index name
             $table->timestamps();
         });
-        
     }
 
     /**
@@ -29,6 +28,6 @@ class CreateBoltUndeliveredReasonAgainstServiceTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bolt_undelivered_reason_against_service_types');
+        Schema::dropIfExists('bolt_undelivered_reason_against_booking_types');
     }
 }
