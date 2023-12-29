@@ -147,7 +147,7 @@ class ReturnV2Controller extends Controller
                                 $shipment = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
                                 ->leftJoin('shipments as shipment', 'shipment.id', '=', 'delivery_note_shipments.shipment_id')
                                 ->where('delivery_note_shipments.shipment_id', $shipment->id)
-                                ->where('dn.pending_status', 1)
+                                // ->where('dn.pending_status', 1)
                                 ->select('delivery_note_shipments.*', 'dn.*','shipment.*') // Select all columns from both tables
                                 ->first();
                             
