@@ -143,6 +143,9 @@ class Shipment extends Model
     public function pod_image() {
 		return $this->hasOne('App\Http\Models\Admin\PODImage');
 	}
+    public function delivery_note_shipment() {
+		return $this->hasOne('App\Http\Models\Admin\DeliveryNoteShipment');
+	}
 
     public function packaging_material() {
         return $this->belongsTo('App\Http\Models\PackagingMaterialRequest', 'id', 'shipment_id');
