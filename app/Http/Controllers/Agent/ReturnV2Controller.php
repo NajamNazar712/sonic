@@ -135,7 +135,7 @@ class ReturnV2Controller extends Controller
                         $agent_id = Auth::id();
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
-                        
+
                         
                         if ($shipment) {
                             try {
@@ -144,13 +144,10 @@ class ReturnV2Controller extends Controller
                                 }else {
                                     return response()->json(['status' => 6]);
                                 }
-                                // $shipment = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
-                                // ->leftJoin('shipments as shipment', 'shipment.id', '=', 'delivery_note_shipments.shipment_id')
+                                // $shipment = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
                                 // ->where('delivery_note_shipments.shipment_id', $shipment->id)
-                                // // ->where('dn.pending_status', 1)
-                                // ->select('delivery_note_shipments.*', 'dn.*','shipment.*') // Select all columns from both tables
+                                // ->where('dn.pending_status', 1)
                                 // ->first();
-                            
                                 
                                 // if($shipment){
                                 //     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
@@ -159,33 +156,28 @@ class ReturnV2Controller extends Controller
                                 //     //if pending status is not 1 dont show return confirm status in the dropdown
                                 //     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
                                 // }
-                                // dd($shipment->pickup_address->city ?? '-',  $shipment->user ?? '-', $shipment->booking_type ?? '-' ,$shipment->consignee_city?? '-', $shipment->items ?? null, $shipment->shipping_mode ?? '-',$shipment->business_category ?? '-');
-                                
-                                $shipper_city = $shipment->pickup_address->city ?? '-';
-                                $shipper_info = $shipment->user ?? '-';
-                                $service_type = $shipment->booking_type ?? '-';
-                                $consignee_city = $shipment->consignee_city?? '-';
-                                $product_infos = $shipment->items ?? null;
-                                $shipping_mode = $shipment->shipping_mode ?? '-';
-                                $business_category = $shipment->business_category ?? '-';
+
+                                $shipper_city = $shipment->pickup_address->city;
+                                $shipper_info = $shipment->user;
+                                $service_type = $shipment->booking_type;
+                                $consignee_city = $shipment->consignee_city;
+                                $product_infos = $shipment->items;
+                                $shipping_mode = $shipment->shipping_mode;
+                                $business_category = $shipment->business_category;
                                 $detail_product_infos = [];
                                 $rider_details = [];
 
-                                if(isset($product_infos)){
-                                    foreach ($product_infos as $product_info) {
-                                        $detail_product = [
-                                            'product_name' => $product_info->product->product_name,
-                                            'description' => $product_info->description,
-                                            'quantity' => $product_info->quantity,
-                                            'order_id' => $product_info->shipment->order_id
-                                        ];
-    
-                                        $detail_product_infos[] = $detail_product;
-                                    }
-                                }else{
-                                    $detail_product_infos = null;
-                                }
+                                foreach ($product_infos as $product_info) {
 
+                                    $detail_product = [
+                                        'product_name' => $product_info->product->product_name,
+                                        'description' => $product_info->description,
+                                        'quantity' => $product_info->quantity,
+                                        'order_id' => $product_info->shipment->order_id
+                                    ];
+
+                                    $detail_product_infos[] = $detail_product;
+                                }
 
                                 $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
 
