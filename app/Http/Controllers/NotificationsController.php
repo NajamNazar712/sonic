@@ -3400,7 +3400,8 @@ class NotificationsController extends Controller
                                 }
                                 //                                dd($body);
 
-                                self::email($subject, $body, $to);
+                                $cc = ['return@trax.pk'];
+                                self::email($subject, $body, $to, $cc);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
@@ -3982,8 +3983,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
-
+                    $to = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk'];
@@ -6867,6 +6867,7 @@ class NotificationsController extends Controller
                         //$admins = Admin::whereIn('id', [10, 288, 423,426,481,58])->where('status',1);
                         $admins = Admin::whereIn('id', [36, 55, 288])->where('status', 1);
 
+                        $to = [];
                         if ($admins->exists()) {
                             $to = $admins->pluck('email')->toArray();
                         }
@@ -6876,7 +6877,9 @@ class NotificationsController extends Controller
                          if ($admins->exists()) {
                              $cc = $admins->pluck('email')->toArray();
                          }*/
-                        self::email($subject, $body, $to /*,$cc*/);
+                        if (count($to) > 0){
+                            self::email($subject, $body, $to);
+                        }
                     }
                 } else if ($id == 113) {
                     $subject = $notification->subject;

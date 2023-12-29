@@ -31,10 +31,6 @@
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="active" aria-labelledby="active-tab" aria-expanded="true">
-                        {{--<p>Macaroon candy canes tootsie roll wafer lemon drops liquorice--}}
-                        {{--jelly-o tootsie roll cake. Marzipan liquorice soufflé cotton--}}
-                        {{--candy jelly cake jelly-o sugar plum marshmallow. Dessert--}}
-                        {{--cotton candy macaroon chocolate sugar plum cake donut.</p>--}}
                         <div class="table-responsive">
                             <br>
                             <table class="table" style="font-size: 14px">
@@ -173,8 +169,6 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
-
-{{--                                    <th class="border-primary border-darken-1"></th>--}}
                                     <th class="border-primary border-darken-1">S.No</th>
                                     <th class="border-primary border-darken-1">Pickup Address ID</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
@@ -197,8 +191,6 @@
                             <table class="table" style="font-size: 14px">
                                 <thead>
                                 <tr>
-                                    {{--<th>Firstname</th>--}}
-                                    {{--<th>Lastname</th>--}}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -309,12 +301,6 @@
                         </div>
                     </div>
                 </div>
-                {{--<div class="row justify-content-center">--}}
-                {{--<div class="col-3">--}}
-                {{--<button type="button" class="btn btn-success btn-block">Edit</button>--}}
-                {{--</div>--}}
-                {{--</div>--}}
-
             </div>
 
 
@@ -619,9 +605,10 @@
                                     <div class="form-group col-md-9">
                                         <label>IBAN Number</label>
                                         <span class="danger">*</span>
-                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user_bank_default->iban}}" data-rule-maxlength="190" data-msg-maxlength="IBAN Number can be maximum 190 characters" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
+                                        
+                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user_bank_default->iban}}" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
-                                        {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
+                                        <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -958,28 +945,10 @@
                 });
             });
 
-
-            // $('#segment_id').prepend('<option value="" selected></option>').select2({
-            //     placeholder: "Select Segment",
-            //     width:'100%',
-            // });
-            
-            // @if($user->segment_id != null)
-            // var segment_id = {!! $user->segment_id !!};
-            // $('#segment_id').val(segment_id).trigger('change');
-            // @endif
-
-
             $('#sub_segment_id').select2({
                 placeholder: "Select Sub Segment",
                 width:'100%',
             });
-            // @if($user->sub_segment_id != null)
-            // var sub_segment_id = {!! $user->sub_segment_id !!};
-            
-            // $('#sub_segment_id').val(sub_segment_id).trigger('change');
-            // @endif
-
 
             
             $('#cancel-button-profile').click(function () {
@@ -1204,6 +1173,38 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             })
+
+            $('#iban').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
+            });
+
+            $('#iban').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                    $('#iban_no_error').show();
+                } else {
+                    $('#iban_no_error').hide();
+                }
+            });
 
         });
     </script>
