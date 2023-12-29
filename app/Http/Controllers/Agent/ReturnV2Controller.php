@@ -144,16 +144,12 @@ class ReturnV2Controller extends Controller
                                 }else {
                                     return response()->json(['status' => 6]);
                                 }
-
-                                $shipment =  $shipment->with('delivery_note_shipment')->get();
-                                dd($shipment);
-                                // dd($shipment);
-                                // $shipment = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
-                                // ->where('delivery_note_shipments.shipment_id', $shipment->id)
-                                // ->where('dn.pending_status', 1)
-                                // ->first();
+                                $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
+                                ->where('delivery_note_shipments.shipment_id', $shipment->id)
+                                ->where('dn.pending_status', 1)
+                                ->first();
                                 
-                                if($shipment){
+                                if($shipment_status){
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
                                 }
                                 else{
