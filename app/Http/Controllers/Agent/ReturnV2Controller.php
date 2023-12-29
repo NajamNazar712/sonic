@@ -170,17 +170,23 @@ class ReturnV2Controller extends Controller
                                 $detail_product_infos = [];
                                 $rider_details = [];
 
-                                foreach ($product_infos as $product_info) {
+                                if($product_infos){
 
-                                    $detail_product = [
-                                        'product_name' => $product_info->product->product_name,
-                                        'description' => $product_info->description,
-                                        'quantity' => $product_info->quantity,
-                                        'order_id' => $product_info->shipment->order_id
-                                    ];
-
-                                    $detail_product_infos[] = $detail_product;
+                                    foreach ($product_infos as $product_info) {
+    
+                                        $detail_product = [
+                                            'product_name' => $product_info->product->product_name,
+                                            'description' => $product_info->description,
+                                            'quantity' => $product_info->quantity,
+                                            'order_id' => $product_info->shipment->order_id
+                                        ];
+    
+                                        $detail_product_infos[] = $detail_product;
+                                    }
+                                }else{
+                                    $detail_product_infos = [];
                                 }
+
 
                                 $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
 
