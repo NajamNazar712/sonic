@@ -9190,4 +9190,40 @@ class GlobalSettingsController extends Controller
         $product->delete();
         return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
         }
+
+    public function logistic_report_index()
+    {
+        $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+        $settings = GlobalSettings::where('type', 'logistic_setting');
+        $logistic_setting_tags = array();
+        if ($settings->exists())
+        {
+            $settings = $settings->first();
+            $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
+        }
+        return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
+    }
+
+    public function logistic_report_store(Request $request)
+    {
+            if ($request->has('users') && count($request->users) > 0) {
+                $users = implode(',', $request->users);
+            } else{
+                $users = null;
+            }
+            $settings = GlobalSettings::where('type', 'logistic_setting');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'logistic_setting';
+                $settings->setting_value = 0;
+            }
+            $settings->text = $users;
+            $settings->save();
+        
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

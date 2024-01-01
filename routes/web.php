@@ -2865,6 +2865,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Reports\MMSReportController@index')->name('index');
             Route::post('list', 'Admins\Reports\MMSReportController@list')->name('list');
         });
+        Route::prefix('logistic')->name('logistic.')->group(function () {
+            Route::get('', 'Admins\Reports\LogisticReportController@index')->name('index');
+            Route::post('list', 'Admins\Reports\LogisticReportController@list')->name('list');
+        });
         Route::prefix('employee_confirmation')->name('employee_confirmation.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@employee_confirmation_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@employee_confirmation_list')->name('list');
@@ -3818,6 +3822,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@product_type_add')->name('add');
             Route::post('edit', 'Admins\GlobalSettingsController@product_type_edit')->name('edit');
             Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
+        });
+
+        Route::prefix('logistic_report_setting')->name('logistic_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@logistic_report_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@logistic_report_store')->name('store');
         });
 
     });

@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'MMS Report')
+@section('title', 'Logistic Report')
 
 @section('content')
     <h1 class="mb-1">
-        MMS Report
+        Logistic Report
     </h1>
 
     <div class="card">
@@ -110,25 +110,24 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Pickup Address</th>
+                        <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Rider ID</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
+                        <th class="border-primary border-darken-1">Quantity</th>
+                        <th class="border-primary border-darken-1">Pieces</th>
+                        <th class="border-primary border-darken-1">Weight</th>
+                        <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
-                        <th class="border-primary border-darken-1">Received/Refused By</th>
-                        <th class="border-primary border-darken-1">Relation</th>
-                        <th class="border-primary border-darken-1">CNIC</th>
                         <th class="border-primary border-darken-1">Aging (Days)</th>
+                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
+                        <th class="border-primary border-darken-1">Shipment Status</th>
+                       
                     </tr>
                     </thead>
                 </table>
@@ -293,6 +292,7 @@
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -311,6 +311,7 @@
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -334,7 +335,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.mms.list') }}',
+                        url: '{{ route('admin.reports.logistic.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -344,49 +345,45 @@
                             head = [];
 
                             head.push('S. No.');
+                            head.push('Booking Date');
+                            head.push('Pickup Address');
+                            head.push('Description');
+                            head.push('Order ID');
                             head.push('Tracking No.');
                             head.push('Shipper');
-                            head.push('Order ID');
-                            head.push('Rider ID');
-                            head.push('Rider Name');
                             head.push('Consignee Name');
-                            head.push('Consignee Phone');
                             head.push('Consignee Address');
-                            head.push('Status');
-                            head.push('Reason');
-                            head.push('Booking Date');
+                            head.push('Consignee Phone');
+                            head.push('Quantity');
+                            head.push('Pieces');
+                            head.push('Weight');
+                            head.push('Origin');
                             head.push('Destination');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Delivered/Returned Date');
-                            head.push('Received/Refused By');
-                            head.push('Relation');
-                            head.push('CNIC');
                             head.push('Aging (Days)');
+                            head.push('Delivered/Returned Date');
+                            head.push('Shipment Status');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.booking_date);
+                                row.push(values.shipper_address);
+                                row.push(values.description);
+                                row.push(values.order_id);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
-                                row.push(values.order_id);
-                                row.push(values.rider_id);
-                                row.push(values.rider_name);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone_excel);
                                 row.push(values.consignee_address);
-                                row.push(values.current_status);
-                                row.push(values.reason);
-                                row.push(values.booking_date);
+                                row.push(values.consignee_phone_excel);
+                                row.push(values.quantity);
+                                row.push(values.pieces);
+                                row.push(values.estimated_weight);
+                                row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.delivered_or_returned);
-                                row.push(values.received_or_refused_by);
-                                row.push(values.relation);
-                                row.push(values.cnic);
                                 row.push(values.aging);
-
+                                row.push(values.delivered_or_returned);
+                                row.push(values.current_status);
                                 body.push(row);
                             });
                         },
@@ -403,7 +400,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'MMS Report',
+                        title: 'Logistic Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -417,7 +414,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url: '{{ route('admin.reports.mms.list') }}',
+                    url: '{{ route('admin.reports.logistic.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -434,28 +431,26 @@
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
-                order: [[11, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    { data:'shipper_address' ,name:'shipments.shipper_address', class: 'align-middle shipper_address'},
+                    { data:'description' ,name:'sj.description', class: 'align-middle description'},
+                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
-                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
-                    { data:'rider_id' ,name: 'riders.trax_id', class: 'align-middle rider_id'},
-                    { data:'rider_name' ,name: 'riders.name', class: 'align-middle rider_name'},
                     { data:'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    { data:'consignee_phone' ,name:'consignee_phone', class: 'align-middle consignee_phone'},
                     { data:'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
-                    { data:'reason' ,name: 'ssr.name', class: 'align-middle reason'},
-                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    { data:'consignee_phone' ,name:'consignee_phone', class: 'align-middle consignee_phone'},
+                    { data:'quantity' ,name: 'si.quantity', class: 'align-middle quantity'},
+                    { data:'pieces' ,name: 'shipments.pieces', class: 'align-middle pieces'},
+                    { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle estimated_weight'},
+                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'}, //
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
-                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
-                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
-                    { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
-                    { data: 'relation' ,name: 'dr.relation', class: 'align-middle relation'},
-                    { data: 'cnic' ,name: 'dr.cnic', class: 'align-middle cnic'},
                     { data: 'aging' ,name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
+                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
