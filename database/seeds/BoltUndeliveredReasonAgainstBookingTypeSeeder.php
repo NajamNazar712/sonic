@@ -14,7 +14,7 @@ class BoltUndeliveredReasonAgainstBookingTypeSeeder extends Seeder
         DB::table('bolt_undelivered_reason_against_booking_types')->truncate();
 
         $reason_ids = [
-            1,3,4,6,28,60,63,5,7,8,12,19,27,34,35,45,32,33,31,77
+            1,3,4,5,6,7,8,12,14,17,18,19,23,25,27,28,31,32,33,34,35,40,45,60,63,77
         ];
 
         $booking_types = 
