@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use DB;
 use Validator;
+use App\SubReason;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use App\Http\Models\City;
@@ -29,8 +30,8 @@ use App\BoltUndeliveredReasonMap;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\HR\LeaveType;
 use App\Http\Models\ShipmentItem;
-use App\Http\Models\EmployeeShift;
 //use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
@@ -159,9 +160,9 @@ use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\BoltUndeliveredReasonAgainstBookingType;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\SubReason;
 
 class RiderAPIController extends Controller
 {
@@ -11835,6 +11836,16 @@ class RiderAPIController extends Controller
         ->get();
         
         // return response()->json(['status' => 0, 'message' => $shipment_status_reason]);
+        $results = DB::table('bolt_undelivered_reason_against_booking_types as btbk')
+        ->join('shipment_status_reason as ssr', 'ssr.id', '=', 'btbk.reason_id')
+        ->select('btbk.reason_id','btbk.booking_type_id', 'ssr.name as reason_name')
+        ->get();
+        // $reasons_against_booking_types = BoltUndeliveredReasonAgainstBookingType::join('shipment_status_reason as ssr','ssr.id','bolt_undelivered_reason_against_booking_types.reason_id')
+        // ->select(['ssr.name','ssr.id','bolt_undelivered_reason_against_booking_types.booking_type_id'])
+        // ->get()
+        // ;
+
+        // dd($shipment_status_reason);
 
         $reasons = [];
 
@@ -11863,9 +11874,9 @@ class RiderAPIController extends Controller
         }
         
         $finalReasons = array_values($reasons); // Re-index the array
-        $reasons_against_booking_types = DB::table('bolt_undelivered_reason_against_booking_types')->get();
+     
 
-        return response()->json(['status' => 0, 'message' => $finalReasons, 'message_2'=>$reasons_against_booking_types]);
+        return response()->json(['status' => 0, 'message' => $finalReasons, 'message_2'=>$results]);
 
     }
 
