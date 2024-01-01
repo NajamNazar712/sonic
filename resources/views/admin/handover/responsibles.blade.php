@@ -83,6 +83,12 @@
 
                                         </select>
                                     </fieldset>
+
+                                    <fieldset class="form-group">
+                                        <select  name="city_responsible_hubs_admins" id="city_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
                                 </div>
                             </div>
                             <br>
@@ -142,7 +148,7 @@
 
                                 <div class="col-6 form-group">
                                     <fieldset class="form-group">
-                                        <select  name="edit_responsible_hubs_admins" id="edit_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
+                                        <select  name="city_responsible_hubs_admins" id="edit_city_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
 
                                         </select>
                                     </fieldset>
@@ -195,11 +201,18 @@
             dropdownParent:$('#edit_responsible_form')
         });
 
-        $('#edit_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
+        $('#city_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Admin',
+            dropdownParent:$('#add_responsible_form')
+        });
+
+        $('#edit_city_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Admin',
             dropdownParent:$('#edit_responsible_form')
         });
+
 
 
         $( "#add_responsible_form" ).validate({
@@ -428,7 +441,6 @@
 
         $('#hub').change(function(){
             var city_id = $(this).val();
-            console.log(city_id);
             get_area(city_id,false);
         });
 
@@ -442,6 +454,7 @@
                     data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
                     success: function (result) {
                         let data = [];
+                        let responsible_data = [];
                         $.each(result.city_area, function (index, value) {
                             data += `<option value="${value.id}">${value.name}</option>`
                         });
@@ -452,27 +465,25 @@
                             dropdownParent: $('#add_responsible_form')
                         });
 
-                        let responsible_data = [];
                         $.each(result.city_area, function (index, cityArea) {
-                            $.each(cityArea.hubs, function (hubIndex, hub) {
-                                $.each(hub.responsible_admins, function (adminIndex, admin) {
-                                    responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
-                                });
+                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                                responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
                             });
                         });
+                        console.log(responsible_data);
 
-
-                        $('#edit_responsible_hubs_admins').prepend(responsible_data).select2({
+                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
                             width: '100%',
                             placeholder: 'Select Admin',
                             dropdownParent: $('#add_responsible_form')
                         });
-
                     }
                 })
             }else{
 
                 $('#edit_city_area_id').empty();
+                $('#edit_city_responsible_hubs_admins').empty();
+
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
@@ -494,20 +505,18 @@
                         
                         let responsible_data = `<option value="">Select Admin</option>`;
                         $.each(result.city_area, function (index, cityArea) {
-                            $.each(cityArea.hubs, function (hubIndex, hub) {
-                                console.log(hub);
-                                $.each(hub.responsible_admins, function (adminIndex, admin) {
-                                    responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
-                                });
+                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                                responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
+
                             });
                         });
 
-                        $('#edit_responsible_hubs_admins').prepend(responsible_data).select2({
+                        $('#edit_city_responsible_hubs_admins').prepend(responsible_data).select2({
                             width: '100%',
                             placeholder: 'Select Concern Admin',
                             dropdownParent: $('#edit_responsible_form')
                         });
-                        $('#edit_responsible_hubs_admins').val(val).trigger('change');
+                        $('#edit_city_responsible_hubs_admins').val(val).trigger('change');
                     }
                 })
             }
