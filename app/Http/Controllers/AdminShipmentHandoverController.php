@@ -647,7 +647,7 @@ class AdminShipmentHandoverController extends Controller
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
         ->leftjoin('city_areas as ca', 'ca.id', '=', 'handover_responsibilities.city_area_id')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
-        ->select('ca.name as area','handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
+        ->select('ca.name as area','handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status','handover_responsibilities.admin_id as admin_id');
 
         $datatable = Datatables::of($responsibles_list)
         ->setRowAttr([
@@ -661,6 +661,14 @@ class AdminShipmentHandoverController extends Controller
                 }else{
                     return 'Enable';
                 }
+            })
+
+            ->editColumn('name', function($data){
+              if(isset($data->name)){
+                return $data->name;
+              }else{
+                return Admin::where('id',$data->admin_id)->first()->name ?? '-';
+              }
             })
             ->addColumn('action', function ($data){
 
@@ -687,16 +695,27 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function responsibles_add(Request $request){
-        $responsibles = new HandoverResponsibilities();
-        $responsibles->name = $request->name;
-        $responsibles->hub_id = $request->hub;
-        $responsibles->created_by = Auth::id();
-        $responsibles->updated_by = Auth::id();
-        $responsibles->status = 1;
-        $responsibles->city_area_id = $request->city_area_id;
-        $responsibles->save();
-        return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Added successfully!"]);
-    }
+      $responsible = new HandoverResponsibilities();
+  
+      $responsible->hub_id = $request->hub;
+      $responsible->created_by = Auth::id();
+      $responsible->status = 1;
+      $responsible->city_area_id = $request->city_area_id;
+  
+      if (isset($request->name)) {
+          $responsible->name = $request->name;
+          $responsible->admin_id = NULL;
+      } else {
+          $responsible->name = NULL;
+          $responsible->admin_id = $request->edit_city_responsible_hubs_admins;
+      }
+  
+      $responsible->updated_by = Auth::id();
+      $responsible->save();
+  
+      return redirect()->back()->with(['status' => 1, 'success' => "Responsible has been Added successfully!"]);
+  }
+  
 
     public function responsibles_status(Request $request){
         $id = $request->id;
@@ -723,17 +742,22 @@ class AdminShipmentHandoverController extends Controller
         return response()->json(['status' => 1, 'responsible' => $responsible_id]);
     }
     public function responsibles_edit(Request $request){
-        $responsible = HandoverResponsibilities::find($request->id);
-         if($responsible){
-             $responsible->name = $request->name;
-             $responsible->hub_id = $request->hub;
-             $responsible->updated_by = Auth::id();
-             $responsible->city_area_id = $request->city_area_id;
-             $responsible->save();
-             return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Edited successfully!"]);
-         }
-         return redirect()->back()->with(['status'=>0,'error'=>"Responsible not found!"]);
-    }
+      $responsible = HandoverResponsibilities::find($request->id);
+  
+      if ($responsible) {
+          $responsible->name = isset($request->name) ? $request->name : null;
+          $responsible->hub_id = $request->hub;
+          $responsible->updated_by = Auth::id();
+          $responsible->city_area_id = $request->city_area_id;
+          $responsible->admin_id = isset($request->name) ? null : $request->edit_city_responsible_hubs_admins;
+          $responsible->save();
+  
+          return redirect()->back()->with(['status' => 1, 'success' => "Responsible has been Edited successfully!"]);
+      }
+  
+      return redirect()->back()->with(['status' => 0, 'error' => "Responsible not found!"]);
+  }
+  
 
     public function handover_shipments_remaining(Request $request){
         $handover_id = $request->input('id');
@@ -788,9 +812,12 @@ class AdminShipmentHandoverController extends Controller
 
     public function get_sub_area(Request  $request){
         if(isset($request->city_id)){
-            $city_area = CityArea::where('city_id',$request->city_id)->with(['hubs.responsible_admins', function($query){
-              $query->('default_hub_id', $request->city_id);
-            }])->where('status',1)
+        $city_area = CityArea::where('city_id', $request->city_id)
+        ->with(['hubs.responsible_admins' => function($query) use ($request) {
+            $query->where('default_hub_id', $request->city_id);
+        }])
+        ->where('status', 1);
+
             if($city_area->exists()){
                 return response()->json(['status' => 1,'city_area'=>$city_area->get()]);
             }
