@@ -788,7 +788,7 @@ class AdminShipmentHandoverController extends Controller
 
     public function get_sub_area(Request  $request){
         if(isset($request->city_id)){
-            $city_area = CityArea::where('city_id',$request->city_id)->where('status',1);
+            $city_area = CityArea::where('city_id',$request->city_id)->with(['hubs.responsible_admins'])->where('status',1);
             if($city_area->exists()){
                 return response()->json(['status' => 1,'city_area'=>$city_area->get()]);
             }

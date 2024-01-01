@@ -58,6 +58,12 @@
                                     <input  class="form-control" id="name" name="name" type="text" placeholder="Enter Name"
                                     data-rule-required="true" data-msg-required="" />
                                 </div>
+                                <div class="col-6 btn_scn">
+                                    <label class="mr-10 font-medium-3"><b>User</b></label>
+                                    <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
+                                    <label class="mr-10 font-medium-3"><b>Depart</b></label>
+
+                                  </div>
                             </div>
                             <br>
                             <div class="row justify-content-center">
@@ -133,6 +139,14 @@
                                         </select>
                                     </fieldset>
                                 </div>
+
+                                <div class="col-6 form-group">
+                                    <fieldset class="form-group">
+                                        <select  name="edit_responsible_hubs_admins" id="edit_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                             <br><br>
                             <div class="row justify-content-center">
@@ -178,6 +192,12 @@
         $('#edit_city_area_id').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Area',
+            dropdownParent:$('#edit_responsible_form')
+        });
+
+        $('#edit_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Admin',
             dropdownParent:$('#edit_responsible_form')
         });
 
@@ -408,6 +428,7 @@
 
         $('#hub').change(function(){
             var city_id = $(this).val();
+            console.log(city_id);
             get_area(city_id,false);
         });
 
@@ -428,6 +449,22 @@
                         $('#city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
+                            dropdownParent: $('#add_responsible_form')
+                        });
+
+                        let responsible_data = [];
+                        $.each(result.city_area, function (index, cityArea) {
+                            $.each(cityArea.hubs, function (hubIndex, hub) {
+                                $.each(hub.responsible_admins, function (adminIndex, admin) {
+                                    responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
+                                });
+                            });
+                        });
+
+
+                        $('#edit_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Admin',
                             dropdownParent: $('#add_responsible_form')
                         });
 
@@ -453,10 +490,37 @@
                         });
 
                         $('#edit_city_area_id').val(val).trigger('change');
+
+                        
+                        let responsible_data = `<option value="">Select Admin</option>`;
+                        $.each(result.city_area, function (index, cityArea) {
+                            $.each(cityArea.hubs, function (hubIndex, hub) {
+                                console.log(hub);
+                                $.each(hub.responsible_admins, function (adminIndex, admin) {
+                                    responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
+                                });
+                            });
+                        });
+
+                        $('#edit_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Concern Admin',
+                            dropdownParent: $('#edit_responsible_form')
+                        });
+                        $('#edit_responsible_hubs_admins').val(val).trigger('change');
                     }
                 })
             }
         }
+
+        $('#AddResponsibleModal #responsibles_switch').change(function() {
+            var isChecked = $(this).is(':checked');
+            if (isChecked) {
+                $('#name').addClass('d-none')
+            } else {
+                $('#name').removeClass('d-none')
+            }
+        });
     });
 
 
