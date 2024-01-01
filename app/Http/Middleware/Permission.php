@@ -1257,13 +1257,14 @@ class Permission
 
 
             
-            'admin.reports.pay_fast_report.index' => 894,
-            'admin.reports.pay_fast_report.list' => 894,
-            'admin.reports.csat_report.index' => 899,
+            'reports.pay_fast_report.index' => 894,
+            'reports.pay_fast_report.list' => 894,
+            'reports.csat_report.index' => 899,
+            'reports.logistic.index' => 916,
 
 
-            'admin.reports.hbl_konnect.index' => 895,
-            'admin.reports.hbl_konnect.list' => 895,
+            'reports.hbl_konnect.index' => 895,
+            'reports.hbl_konnect.list' => 895,
             
             'incidence_monitoring.index' => 535,
             'incidence_monitoring.list' => 535,
