@@ -274,6 +274,9 @@
                                                 href="{{ route('admin.v2_pickups.arrival.individual.index') }}">Individual
                                                 Arrival</a></li>
                                         <li><a class="menu-item"
+                                                href="{{ route('admin.v2_pickups.arrival.individual.index_weight_scale') }}">Weight Scale Individual
+                                                Arrival</a></li>
+                                        <li><a class="menu-item"
                                                 href="{{ route('admin.v2_pickups.arrival.bulk.index') }}">Bulk
                                                 Arrival</a></li>
                                     @endif
