@@ -14,10 +14,8 @@ class BoltUndeliveredReasonAgainstBookingTypesSeeder extends Seeder
     public function run()
     {
         DB::table('bolt_undelivered_reason_against_booking_types')->truncate();
-
-        if (Schema::hasTable('bolt_undelivered_reason_against_service_types')) {
-            DB::table('bolt_undelivered_reason_against_service_types')->drop();
-        }
+        Schema::dropIfExists('bolt_undelivered_reason_against_service_types');
+        
 
         $reason_ids = [
             1,3,4,6,28,60,63,5,7,8,12,19,27,34,35,45,32,33,31,77
