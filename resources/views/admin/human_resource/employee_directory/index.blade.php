@@ -1299,6 +1299,7 @@
                             head.push('Date of Birth');
                             head.push('Emergency Contact Person');
                             head.push('Emergency Contact Number');
+                            head.push('Mother Name');
                             head.push('Religion');
                             head.push('Marital Status');
                             head.push('Shift Timing');
@@ -1340,6 +1341,7 @@
                                 row.push(values.date_of_birth);
                                 row.push(values.emergency_contact_person);
                                 row.push(values.emergency_contact);
+                                row.push(values.mother_name);
                                 row.push(values.religion);
                                 row.push(values.martial_status);
                                 row.push(values.shift);
