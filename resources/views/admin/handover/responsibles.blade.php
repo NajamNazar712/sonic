@@ -260,15 +260,17 @@
                     form.submit();
                 }
         });
-
+        var hub_id;
+        var admin_id;
+        var city_area_id;
 
         $('body').on('click','button.edit',function () {
             var id = $(this).parents('tr').attr('id');
             var hub = $(this).parents('tr').attr('hub'); 
-            var name = table.row($(this).parents('tr')).data().name;
+            var rowData = table.row($(this).parents('tr')).data();
             $('#EditResponsibleModal #responsibles_switch').change(function() {
                 var isChecked = $(this).is(':checked');
-                handleResponsiblesSwitchChange(isChecked,'#edit_name','#edit_city_responsible_hubs_admins_div',name);
+                handleResponsiblesSwitchChange(isChecked, '#edit_name', '#edit_city_responsible_hubs_admins_div', rowData.admin_id == null ? rowData.name : '');
             });
 
             // var hub = $(this).find(':selected');
@@ -287,19 +289,17 @@
                     if(data.status === 1){
                         $('#responsible_id').val(data.responsible.id);
                         $('#edit_name').val(data.responsible.name);
-                       
+                        $('#edit_city_responsible_hubs_admins_div #edit_city_responsible_hubs_admins').prop('value', data.responsible.admin_id);
                         $("#edit_hub").select2({
                             width:'100%',
                             class:'form-control',
                             dropdownParent:$('#edit_responsible_form')
                         });
-
-                        $('#edit_hub').val(hub).trigger('change');
-
-                        get_area(data.responsible.hub_id,true,data.responsible.city_area_id, data.responsible.admin_id);
-                
+                         hub_id = data.responsible.hub_id
+                         admin_id = data.responsible.admin_id
+                         city_area_id = data.responsible.city_area_id
+                        $('#edit_hub').val(data.responsible.hub_id).trigger('change');
                         $('#EditResponsibleModal').modal('show');
-
                     }
                     else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -445,21 +445,23 @@
             $('#responsible_id').val('');
             $('#edit_name').val('');
         });
+        
+        $('#hub').change(function(){
+            var city_id = $(this).val();
+            get_area(city_id,false);
+        });
 
-        function handleHubChange(selector, isEdit) {
-            $(selector).change(function () {
-                var city_id = $(this).val();
-                get_area(city_id, isEdit);
-            });
-        }
+         
+        $('#edit_hub').change(function(){
+            var city_id = $(this).val();
+            get_area(city_id, true, city_area_id ,admin_id);
+        });
 
-        handleHubChange('#hub', false);
-        handleHubChange('#edit_hub', true);
-
+        
         function get_area(city_id,edit = false,val = null, val_2 = null){
-
+            $('#city_area_id').empty();
+            $('#city_responsible_hubs_admins').empty();
             if(!edit) {
-                
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
@@ -470,9 +472,7 @@
                         $.each(result.city_area, function (index, value) {
                             data += `<option value="${value.id}">${value.name}</option>`
                         });
-
-                        $('#city_area_id').empty();
-                        $('#city_responsible_hubs_admins').empty();
+                        
                         $('#city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
@@ -493,31 +493,36 @@
                     }
                 })
             }else{
+                $('#edit_city_area_id').empty();
+                $('#edit_city_responsible_hubs_admins').empty();
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
-                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    data: { city_id: city_id, '_token': '{{ csrf_token() }}' },
                     success: function (result) {
                         let data = `<option value="">Select Area</option>`;
                         $.each(result.city_area, function (index, value) {
-                            data += `<option value="${value.id}">${value.name}</option>`
+                            const isSelected = (value.id == val) ? 'selected' : '';
+                            data += `<option value="${value.id}" ${isSelected}>${value.name}</option>`;
+                            
                         });
-
-                        $('#edit_city_area_id').empty();
-                        $('#edit_city_responsible_hubs_admins').empty();
+                        console.log(data);
                         $('#edit_city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
                             dropdownParent: $('#edit_responsible_form')
                         });
-
+                        
                         $('#edit_city_area_id').val(val).trigger('change');
+          
                         let responsible_data = `<option value="">Select Admin</option>`;
                         $.each(result.city_area, function (index, cityArea) {
                             $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
-                                responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
+                                const isSelected = (admin.id == val_2) ? 'selected' : '';
+                                responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
                             });
                         });
+
                         $('#edit_city_responsible_hubs_admins').prepend(responsible_data).select2({
                             width: '100%',
                             placeholder: 'Select Concern Admin',
@@ -536,10 +541,11 @@
                 $(nameClass).addClass('d-none');
                 $(cityResponsibleClass).removeClass('d-none');
                 $(nameClass).val('');
+
             } else {
                 $(nameClass).removeClass('d-none');
-                $(nameClass).val(old_value);
                 $(cityResponsibleClass).addClass('d-none');
+                $(nameClass).val(old_value);
             }
         }
 

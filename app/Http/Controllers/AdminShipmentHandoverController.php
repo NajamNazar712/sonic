@@ -701,6 +701,7 @@ class AdminShipmentHandoverController extends Controller
       $responsible->created_by = Auth::id();
       $responsible->status = 1;
       $responsible->city_area_id = $request->city_area_id;
+
   
       if (isset($request->name)) {
           $responsible->name = $request->name;
@@ -743,7 +744,7 @@ class AdminShipmentHandoverController extends Controller
     }
     public function responsibles_edit(Request $request){
       $responsible = HandoverResponsibilities::find($request->id);
-  
+
       if ($responsible) {
           $responsible->name = isset($request->name) ? $request->name : null;
           $responsible->hub_id = $request->hub;
