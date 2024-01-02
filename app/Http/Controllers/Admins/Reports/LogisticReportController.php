@@ -33,7 +33,7 @@ class LogisticReportController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->where('id', '!=', 17)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
 
