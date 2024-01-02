@@ -289,7 +289,6 @@
                     if(data.status === 1){
                         $('#responsible_id').val(data.responsible.id);
                         $('#edit_name').val(data.responsible.name);
-                        $('#edit_city_responsible_hubs_admins_div #edit_city_responsible_hubs_admins').prop('value', data.responsible.admin_id);
                         $("#edit_hub").select2({
                             width:'100%',
                             class:'form-control',
@@ -468,7 +467,6 @@
                     data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
                     success: function (result) {
                         let data = [];
-                        let responsible_data = [];
                         $.each(result.city_area, function (index, value) {
                             data += `<option value="${value.id}">${value.name}</option>`
                         });
@@ -478,13 +476,20 @@
                             placeholder: 'Select Area',
                             dropdownParent: $('#add_responsible_form')
                         });
-
+                        
+                        const uniqueAdminIds = new Set();
+                        let responsible_data = `<option value="">Select Admin</option>`;
                         $.each(result.city_area, function (index, cityArea) {
                             $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
-                                responsible_data += `<option value="${admin.id}">${admin.name}</option>`;
+                                // Check if admin.id is already added to the Set
+                                if (!uniqueAdminIds.has(admin.id)) {
+                                    const isSelected = (admin.id == val_2) ? 'selected' : '';
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    // Add admin.id to the Set to track uniqueness
+                                    uniqueAdminIds.add(admin.id);
+                                }
                             });
                         });
-
                         $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
                             width: '100%',
                             placeholder: 'Select Admin',
@@ -506,7 +511,6 @@
                             data += `<option value="${value.id}" ${isSelected}>${value.name}</option>`;
                             
                         });
-                        console.log(data);
                         $('#edit_city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
@@ -514,12 +518,17 @@
                         });
                         
                         $('#edit_city_area_id').val(val).trigger('change');
-          
+                        const uniqueAdminIds = new Set();
                         let responsible_data = `<option value="">Select Admin</option>`;
                         $.each(result.city_area, function (index, cityArea) {
                             $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
-                                const isSelected = (admin.id == val_2) ? 'selected' : '';
-                                responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                // Check if admin.id is already added to the Set
+                                if (!uniqueAdminIds.has(admin.id)) {
+                                    const isSelected = (admin.id == val_2) ? 'selected' : '';
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    // Add admin.id to the Set to track uniqueness
+                                    uniqueAdminIds.add(admin.id);
+                                }
                             });
                         });
 
