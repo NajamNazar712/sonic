@@ -2052,7 +2052,7 @@ class DeliveryController extends Controller
                 $total = $delivered_count / $total_count;
                 $total_percentage = $total * 100;
                 $percentage = number_format((float) $total_percentage, 2, '.', '');
-                $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
+                $where = array(7, 8, 9, 10, 12, 14, 15, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
                 //dd($statuses);
@@ -2225,9 +2225,9 @@ class DeliveryController extends Controller
                     }
                     if ($flag == true) {
                         if ($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == '') {
-                            $where = array(7, 8, 9, 15, 18);
+                            $where = array(7, 8, 9, 15);
                         } else {
-                            $where = array(7, 8, 9, 12, 15, 18);
+                            $where = array(7, 8, 9, 12, 15);
                         }
                     } else {
                         $where = array(12);
@@ -2236,7 +2236,7 @@ class DeliveryController extends Controller
                         array_push($where, 56);
                     }
                 } else {
-                    $where = array(7, 8, 9, 15, 18);
+                    $where = array(7, 8, 9, 15);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -3508,18 +3508,18 @@ class DeliveryController extends Controller
                 }
                 if ($flag == true) {
                     if ($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == '') {
-                        $where = array(7, 8, 9, 15, 18, 56);
+                        $where = array(7, 8, 9, 15, 56);
                     } else {
                         if ($deliveries->booking_type_id == 5) {
-                            $where = array(7, 8, 9, 15, 18);
+                            $where = array(7, 8, 9, 15);
                         } else {
                             if ($not_rcp === true) {
-                                $where = array(7, 8, 9, 15, 18);
+                                $where = array(7, 8, 9, 15);
                                 if ($deliveries->booking_type_id == 2) {
                                     array_push($where, 56);
                                 }
                             } else {
-                                $where = array(7, 8, 9, 12, 15, 18);
+                                $where = array(7, 8, 9, 12, 15);
                                 if ($deliveries->booking_type_id == 2) {
                                     array_push($where, 56);
                                 }
