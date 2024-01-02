@@ -7095,6 +7095,9 @@ class AdminReportsController extends Controller
                 if ($sj_to_id->exists()) {
                     $sj_to_id = $sj_to_id->first()->id;
                 }
+            }else{
+                $sj_from_id=0;
+                $sj_to_id=0; 
             }
             
         }
