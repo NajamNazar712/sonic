@@ -7159,9 +7159,7 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)")
                     );
             })->join('sale_person_tags as st',function($join){
-                $join->on('st.user_id','=','shipments.user_id')->where('st.status',1)
-                // ->latest('st.updated_at');
-                ->whereRaw('st.updated_at = (select max(updated_at) from sale_person_tags where user_id = shipments.user_id)');
+                $join->on('st.user_id','=','shipments.user_id')->where('st.status',0);
 
             })->join('admins as sd','sd.id','=','st.admin_id')
 
