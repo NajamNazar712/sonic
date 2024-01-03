@@ -60,6 +60,7 @@
                         <th class="border-primary border-darken-1">From Area</th>
                         <th class="border-primary border-darken-1">From Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">To</th>
+                        <th class="border-primary border-darken-1">User Type</th>
                         <th class="border-primary border-darken-1">To Area</th>
                         <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -290,8 +291,9 @@
                             head.push('From');
                             head.push('From Area');
                             head.push('From Person Dept/Area/DES');
-                            head.push('To');
                             head.push('To Area');
+                            head.push('To');
+                            head.push('User Type');
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
@@ -310,6 +312,7 @@
                                 row.push(values.from_area);
                                 row.push(values.from_dept_area_desg);
                                 row.push(values.to);
+                                row.push(values.user_type);
                                 row.push(values.to_area);
                                 row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
@@ -473,10 +476,11 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
-                    {data: 'from', name: 'hr.name', class: 'align-middle from'},
+                    {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
                     {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
                     {data: 'from_dept_area_desg', name: 'handovers.from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
-                    {data: 'to', name: 'hor.name', class: 'align-middle to'},
+                    {data: 'to', name: 'hor.admin_id', class: 'align-middle to'},
+                    {data: 'user_type', name: 'user_type', class: 'align-middle user_type'},
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
                     {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},

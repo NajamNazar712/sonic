@@ -25,7 +25,16 @@
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
+
+                        
                     </form>
+                    <div class="row mb-2 justify-content-center">
+                        <label class="mr-10 font-medium-3"><b>Depart</b></label>
+                        <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
+                        <label class="mr-10 font-medium-3"><b>User</b></label>
+                    </div>
+
+                    
                     <div class="row mb-2 justify-content-center">
                         <div class="col-3">
                             <fieldset class="form-group">
@@ -53,12 +62,12 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-3">
+                        {{-- <div class="col-3">
                             <fieldset class="form-group">
                                 <input type="text" name="from_dept_area_desg" id="from_dept_area_desg" class="form-control from_dept_area_desg width-215" placeholder="From Person Dept/Area/DES*">
                                 <div class="danger" id="from_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
-                        </div>
+                        </div> --}}
 
                         <div class="col-3">
                             <fieldset class="form-group">
@@ -74,12 +83,12 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-3">
+                        {{-- <div class="col-3">
                             <fieldset class="form-group">
                                 <input type="text" name="to_dept_area_desg" id="to_dept_area_desg" class="form-control to_dept_area_desg" placeholder=" To Person Dept/Area/DES*">
                                 <div class="danger" id="to_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
-                        </div>
+                        </div> --}}
                         {{ csrf_field() }}
                     </div>
 
@@ -191,31 +200,58 @@
                 placeholder:'Select To Person*',
             });
 
-            let global_responsibility_id = null;
-            $('.dynamic').change(function(){
-                if($(this).val() != '')
-                {
-                    var value = $(this).val();
-                    var dependent = $(this).data('dependent');
-                    var _token = $('input[name="_token"]').val();
-                    $.ajax({
-                        url: '{!! route('admin.handover.create.fetch') !!}',
-                        method:"POST",
-                        data:{value:value, _token:_token,dependent:dependent},
-                        success:function(result){
-                            $('#'+dependent).html(result);
-                            $('#to').empty();
-                            $('#from option').clone().appendTo('#to');  
-                            $('#to').find('option').get(0).remove();
-                            $("#to").prepend("<option value='' selected='selected'>Select To Person</option>");
-                            // $('#to').find('option').get(0).remove();
-                        }
-                    })
+            var user_val = 0;
+            function handleResponsiblesSwitchChange(isChecked) {
+                if (isChecked) {
+                    user_val = 1;
+                } else {
+                    user_val = 0;
                 }
-                
+            }
+
+            $('#responsibles_switch').change(function () {
+                var isChecked = $(this).is(':checked');
+                handleResponsiblesSwitchChange(isChecked);
             });
 
+            let global_responsibility_id = null;
+            function fetchDataAndPopulate() {
+                    var hub = $('#hub').find(":selected").val();
+                    if (hub != '') {
+                        var value = hub;
+                        var _token = $('input[name="_token"]').val();
+                        $.ajax({
+                            url: '{!! route('admin.handover.create.fetch') !!}',
+                            method: "POST",
+                            data: {
+                                value: value,
+                                _token: _token,
+                                type: user_val, 
+                            },
+                            success: function (result) {
+                                $('#from').html(result);
+                                $('#to').empty();
+                                $('#from option').clone().appendTo('#to');
+                                $('#to').find('option').first().remove();
+                                $("#to").prepend("<option value='' selected='selected'>Select To Person</option>");
+                            },
+                            error: function () {
+                                toastr.error('Error fetching data', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    } else {
+                        toastr.error('Please Select Hub', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                };
 
+            $('#responsibles_switch').change(fetchDataAndPopulate);
+            $('.dynamic').change(fetchDataAndPopulate);
            
             $("#from").change(function() {
                 $('#to').empty();
@@ -746,6 +782,7 @@
                 }
             });  
         });
+
 
     </script>
 @endsection
