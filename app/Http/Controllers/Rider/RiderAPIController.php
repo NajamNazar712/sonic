@@ -11784,15 +11784,18 @@ class RiderAPIController extends Controller
                                         if ($rc_flag == true) {
                                             $otp_bypass = $this->otp_bypass($shipment->user_id);
                                             if ($otp_bypass) {
+                                                dd(1);
                                                 $this->auto_return_confirm($shipment->id);
                                                 ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             } else {
+                                                dd(2);
                                                 $arr['shipment_id'] = $request->shipment_id;
                                                 $arr['delivery_note_id'] = $request->delivery_note_id;
                                                 dispatch(new ProcessAgentCallMonitoring($arr));
                                             }
                                         }
                                         if ($rc_flag == false) {
+                                                dd(3);
                                             $arr['shipment_id'] = $request->shipment_id;
                                             $arr['delivery_note_id'] = $request->delivery_note_id;
                                             dispatch(new ProcessAgentCallMonitoring($arr));
