@@ -11698,7 +11698,10 @@ class RiderAPIController extends Controller
                                             // if ($request->otp_entered == 1) {
                                             //     $rc_flag = true;
                                             // }
-                                            $rc_flag = true;
+                                            if ($request->otp_entered != null) {
+                                                    $rc_flag = true;
+                                                }
+                                            // $rc_flag = true;
                                         }
                                         $rider_delivery->save();
 
