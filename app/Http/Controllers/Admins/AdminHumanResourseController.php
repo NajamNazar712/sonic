@@ -467,7 +467,7 @@ class AdminHumanResourseController extends Controller
             'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name',
             'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth',
             'employees.emergency_contact_person as emergency_contact_person','employees.emergency_contact as emergency_contact','er.name as religion', 'ems.name as martial_status', 
-            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'lm.mother_name'])
+            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
