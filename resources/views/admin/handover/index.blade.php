@@ -242,11 +242,6 @@
                                 });
                             }
                         });
-                    } else {
-                        toastr.error('Please Select Hub', 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
                     }
                 };
 
