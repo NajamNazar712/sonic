@@ -95,7 +95,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="cnic_issue_date" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->cnic_issue_date != null ? $employee->cnic_issue_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
+                                                <input type="text" name="cnic_issue_date" data-rule-required="true" data-msg-required="CNIC Issue Date is required" data-value="{{$employee->cnic_issue_date != null ? $employee->cnic_issue_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -106,7 +106,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="cnic_expiry_date" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->cnic_expiry_date != null ? $employee->cnic_expiry_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
+                                                <input type="text" name="cnic_expiry_date" data-rule-required="true" data-msg-required="CNIC Expiry Date is required" data-value="{{$employee->cnic_expiry_date != null ? $employee->cnic_expiry_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
