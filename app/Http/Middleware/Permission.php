@@ -639,6 +639,8 @@ class Permission
             'reports.fintech_report.list' => 896,
             'reports.ordinary_discrepancy_report.index' => 901,
             'reports.ordinary_discrepancy_report.list' => 901,
+            'reports.ibft_report.index' => 915,
+            'reports.ibft_report.list' => 915,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
