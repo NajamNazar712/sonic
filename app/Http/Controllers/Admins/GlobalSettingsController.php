@@ -1286,24 +1286,51 @@ class GlobalSettingsController extends Controller
             $ibft_charges = 0;
         }
 
-        return view('admin.settings.ibft_charges')->with('ibft_charges', $ibft_charges);
+        $settings = GlobalSettings::where('type', 'ibft_charges_retail');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $ibft_charges_retail = $settings->setting_value;
+        } else {
+            $ibft_charges_retail = 0;
+        }
+
+        return view('admin.settings.ibft_charges')->with(['ibft_charges' => $ibft_charges, 'ibft_charges_retail' => $ibft_charges_retail]);
     }
 
     public function ibft_charges_store(Request $request)
     {
-        $settings = GlobalSettings::where('type', 'ibft_charges');
+        $ibft_charges_shipper = $request->ibft_charges_shipper;
+        $ibft_charges_retail = $request->ibft_charges_retail;
 
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        } else {
-            $settings = new GlobalSettings();
-
-            $settings->type = 'ibft_charges';
+        if($ibft_charges_shipper){
+            $shipperSettings = GlobalSettings::where('type', 'ibft_charges');
+    
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
+            } else {
+                $shipperSettings = new GlobalSettings();
+    
+                $shipperSettings->type = 'ibft_charges';
+            }
+            $shipperSettings->setting_value = $ibft_charges_shipper;
+            $shipperSettings->save();
+        }
+        if($ibft_charges_retail){
+            $retailSettings = GlobalSettings::where('type', 'ibft_charges_retail');
+    
+            if ($retailSettings->exists()) {
+                $retailSettings = $retailSettings->first();
+            } else {
+                $retailSettings = new GlobalSettings();
+    
+                $retailSettings->type = 'ibft_charges_retail';
+            }
+            $retailSettings->setting_value = $ibft_charges_retail;
+            $retailSettings->save();
         }
 
-        $settings->setting_value = $request->ibft_charges;
-
-        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }

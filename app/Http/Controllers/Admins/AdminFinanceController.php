@@ -13402,18 +13402,13 @@ class AdminFinanceController extends Controller
                     $done_payment->user_bank_info_id = $user_bank_id;
 
 
-                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                    if($user_ibft_charge){
-                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                    }
-                    else{
-                        $settings = GlobalSettings::where('type', 'ibft_charges');
-    
-                        if ($settings->exists()) {
-                            $settings = $settings->first();
-    
-                            $done_payment->ibft_charges = $settings->setting_value;
-                        }
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
+
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+
+                        $done_payment->ibft_charges = $settings->setting_value;
                     }
 
 
@@ -13480,19 +13475,13 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
                     $done_payment->user_bank_info_id = $user_bank_id;
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
 
-                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
-                    if($user_ibft_charge){
-                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
-                    }
-                    else{
-                        $settings = GlobalSettings::where('type', 'ibft_charges');
-    
-                        if ($settings->exists()) {
-                            $settings = $settings->first();
-    
-                            $done_payment->ibft_charges = $settings->setting_value;
-                        }
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+
+                        $done_payment->ibft_charges = $settings->setting_value;
                     }
 
 
