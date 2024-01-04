@@ -36,7 +36,7 @@ class BoltUndeliveredReasonAgainstBookingTypesSeeder extends Seeder
                     }
                 }
                 else if($booking_type == 5){
-                    if (!in_array($reason_id, [3,7,8,12,19,27,34,35])) {
+                    if (!in_array($reason_id, [3,7,8,12,19,27,31,32,33,34,35,77])) {
                         DB::table('bolt_undelivered_reason_against_booking_types')->insert([
                             'booking_type_id' => $booking_type,
                             'reason_id' => $reason_id,
