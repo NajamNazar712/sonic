@@ -1743,6 +1743,7 @@
                 payable_list = [];
                 selected_rows_shipments = [];
                 shipperTotal = {};
+                selected_shippers_id = [];
 
                 
             });
