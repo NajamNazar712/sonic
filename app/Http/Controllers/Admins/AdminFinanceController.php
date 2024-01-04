@@ -5204,11 +5204,11 @@ class AdminFinanceController extends Controller
             
             if ($fetch_ibft_charges && $fetch_ibft_charges->current_charges > 0) {
                 $ibft_charges = $fetch_ibft_charges->current_charges;
-                $total_ibft_charges += $ibft_charges;
+                $total_ibft_charges = $ibft_charges;
             } else {
                 $user_ibft_charges = GlobalSettings::where('type', 'ibft_charges')->select('setting_value')->first();
                 $ibft_charges = $user_ibft_charges->setting_value ?? 0;
-                $total_ibft_charges += $ibft_charges;
+                $total_ibft_charges = $ibft_charges;
             }
         }
         return $total_ibft_charges;

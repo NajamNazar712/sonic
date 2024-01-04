@@ -1743,6 +1743,8 @@
                 payable_list = [];
                 selected_rows_shipments = [];
                 shipperTotal = {};
+
+                
             });
 
             var payable_list = [];
