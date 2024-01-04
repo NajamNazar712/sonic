@@ -2220,6 +2220,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
             Route::get('stats_calculate', 'Admins\AdminFinanceController@make_payments_stats_calculate')->name('stats_calculate');
+            Route::post('fetch_shipper_ibft_charges', 'Admins\AdminFinanceController@fetch_shipper_ibft_charges')->name('fetch_shipper_ibft_charges');
         });
 
         Route::prefix('make_payments_pickup_wise')->name('make_payments_pickup_wise.')->group(function () {
