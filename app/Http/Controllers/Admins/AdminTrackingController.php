@@ -115,7 +115,7 @@ class AdminTrackingController extends Controller
                         }
                     }
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id ,9,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
                     $details = array();
 
@@ -701,7 +701,7 @@ class AdminTrackingController extends Controller
                         $details['complaint'] = $crm->id;
                     }
 
-                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null, null, 1);
+                    ShipmentScanningJourneyController::add($shipment->id ,8,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return response()->json(['status' => 1, 'details' => $details]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);
@@ -935,7 +935,7 @@ class AdminTrackingController extends Controller
                             }
                         }
                     }
-                    ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,9,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                     if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
 

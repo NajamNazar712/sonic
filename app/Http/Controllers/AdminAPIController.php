@@ -8995,7 +8995,7 @@ class AdminAPIController extends Controller
                 if (!$dispute_check) {
                     return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, $admin_id, null, null);
+                ShipmentScanningJourneyController::add($shipment->id,7,1,$admin_id,NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -9370,7 +9370,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment_id, 7, 1, $admin_id, null, null, $shipment_piece->id);
+                        ShipmentScanningJourneyController::add($shipment->id,7,1,$admin_id,NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
@@ -10610,7 +10610,7 @@ class AdminAPIController extends Controller
                                             if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                                 $complaint_row = 1;
                                             }
-                                            ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                            ShipmentScanningJourneyController::add($shipment->id,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                             $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                             $consolidation_flag = FALSE;
 
@@ -10693,7 +10693,7 @@ class AdminAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
 
                                         $consolidation_flag = FALSE;
@@ -10782,7 +10782,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment_id, 4, 1, $admin_id, null, null, $shipment_piece->id);
+                        ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
@@ -12031,7 +12031,7 @@ class AdminAPIController extends Controller
 
                                         $details['total'] = $shipments->count;
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 2, 1, $request->adminid, null, null);
+                                    ShipmentScanningJourneyController::add($shipment->id,2,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                                     return response()->json(['status' => 0, 'message' => 'Shipment has been added', 'details' => $details]);
                                     /*}
@@ -12085,7 +12085,7 @@ class AdminAPIController extends Controller
                 $shipment_piece = $shipment_piece->first();
                 if ($shipment_piece->shipment_id == $shipment_id) {
                     $scanned_shipment_piece = $shipment_piece->tracking_number;
-                    ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, $admin_id, null, null, $shipment_piece->id);
+                    ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, $admin_id, null, null, null, null, session('latitude'), session('longitude'), NULL);
                     return ['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
                 } else {
                     return ['status' => 1, 'message' => 'Given Item ID does not belong here'];
@@ -12853,8 +12853,7 @@ class AdminAPIController extends Controller
             if(isset($crm) && $crm->status_id != 4){
                 $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
-
-           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
+            ShipmentScanningJourneyController::add($shipment->id,8,$user_type,$admin_or_rider_id,NULL,NULL,NULL,2 , session('latitude'), session('longitude'), NULL);
 
             $shipment_scanned[] = $details;
         }

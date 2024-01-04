@@ -596,7 +596,7 @@ class AdminNsaAccountShipmentController extends Controller
             $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number')->first();
             $data['id'] = $shipment->id;
             $data['tracking_number'] = $shipment->tracking_number;
-            ShipmentScanningJourneyController::add($shipment->id,24,1,Auth::id(),null,null);
+            ShipmentScanningJourneyController::add($shipment->id ,24,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
             return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Shipment can\'t be updated']);
