@@ -5199,16 +5199,16 @@ class AdminFinanceController extends Controller
     public function fetch_shipper_ibft_charges(Request $request){
         $shipper_ids = $request->selected_shippers_id;
         $total_ibft_charges = 0;
+
         foreach ($shipper_ids as $shipper_id) {
             $fetch_ibft_charges = UserIbftCharge::where('user_id', $shipper_id)->first();
-            
             if ($fetch_ibft_charges && $fetch_ibft_charges->current_charges > 0) {
                 $ibft_charges = $fetch_ibft_charges->current_charges;
-                $total_ibft_charges = $ibft_charges;
+                $total_ibft_charges += $ibft_charges;
             } else {
                 $user_ibft_charges = GlobalSettings::where('type', 'ibft_charges')->select('setting_value')->first();
                 $ibft_charges = $user_ibft_charges->setting_value ?? 0;
-                $total_ibft_charges = $ibft_charges;
+                $total_ibft_charges += $ibft_charges;
             }
         }
         return $total_ibft_charges;
