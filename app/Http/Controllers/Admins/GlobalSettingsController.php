@@ -1303,31 +1303,32 @@ class GlobalSettingsController extends Controller
         $ibft_charges_retail = $request->ibft_charges_retail;
 
         if($ibft_charges_shipper){
-            $settings = GlobalSettings::where('type', 'ibft_charges');
+            $shipperSettings = GlobalSettings::where('type', 'ibft_charges');
     
-            if ($settings->exists()) {
-                $settings = $settings->first();
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
             } else {
-                $settings = new GlobalSettings();
+                $shipperSettings = new GlobalSettings();
     
-                $settings->type = 'ibft_charges';
+                $shipperSettings->type = 'ibft_charges';
             }
-            $settings->setting_value = $request->ibft_charges;
+            $shipperSettings->setting_value = $ibft_charges_shipper;
+            $shipperSettings->save();
         }
         if($ibft_charges_retail){
-            $settings = GlobalSettings::where('type', 'ibft_charges_retail');
+            $retailSettings = GlobalSettings::where('type', 'ibft_charges_retail');
     
-            if ($settings->exists()) {
-                $settings = $settings->first();
+            if ($retailSettings->exists()) {
+                $retailSettings = $retailSettings->first();
             } else {
-                $settings = new GlobalSettings();
+                $retailSettings = new GlobalSettings();
     
-                $settings->type = 'ibft_charges_retail';
+                $retailSettings->type = 'ibft_charges_retail';
             }
-            $settings->setting_value = $request->ibft_charges_retail;
+            $retailSettings->setting_value = $ibft_charges_retail;
+            $retailSettings->save();
         }
 
-        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
