@@ -10482,6 +10482,8 @@ RiderAPIController extends Controller
                 'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
                 'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'cnic_issue_date' => ['required'],
+                'cnic_expiry_date' => ['required'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'guardian_name' => ['required'],
                 'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
@@ -10561,6 +10563,8 @@ RiderAPIController extends Controller
                             $employee_request->employee_gender_id = $request->employee_gender_id;
                             $employee_request->city_id = $request->city_id;
                             $employee_request->cnic = $request->cnic_no;
+                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
                             //                            $employee_request->rider_request_id = $rider_request->id;
