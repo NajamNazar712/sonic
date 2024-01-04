@@ -125,9 +125,12 @@
                             <div class="row justify-content-center">
                                 <div class="col-6">
                                     <input type="hidden" id="responsible_id" name="id">
-                                    <label class="mr-10 font-medium-3"><b>Depart</b></label>
-                                    <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
-                                    <label class="mr-10 font-medium-3"><b>User</b></label>
+                                    <label class="font-medium-3"><b class="mb-3">Depart</b></label>
+                                    <label class="switch">
+                                        <input type="checkbox" class="checked_edit">
+                                        <span class="slider round"></span>
+                                      </label>
+                                    <label class="font-medium-3"><b>User</b></label>
                                     <input  class="form-control" id="edit_name" name="name" type="text" placeholder="Enter Tier Name"
                                         data-rule-required="true" data-msg-required="" />
                                 </div>
@@ -178,7 +181,67 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 55px;
+        height: 28px;
+    }
 
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: -4px;
+        left: 1px;
+        right: 0;
+        bottom: 4px;
+        background-color: #9b9b9b;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #9b9b9b;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #9b9b9b;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+    .slider.round:before {
+        border-radius: 50%;
+    }
+</style>
 @endsection
 
 @section('js')
@@ -263,15 +326,13 @@
         var hub_id;
         var admin_id;
         var city_area_id;
+        var user_name;
 
         $('body').on('click','button.edit',function () {
             var id = $(this).parents('tr').attr('id');
             var hub = $(this).parents('tr').attr('hub'); 
             var rowData = table.row($(this).parents('tr')).data();
-            $('#EditResponsibleModal #responsibles_switch').change(function() {
-                var isChecked = $(this).is(':checked');
-                handleResponsiblesSwitchChange(isChecked, '#edit_name', '#edit_city_responsible_hubs_admins_div', rowData.admin_id == null ? rowData.name : '');
-            });
+        
 
             // var hub = $(this).find(':selected');
             // var hub_id =  $('#edit_hub :selected').val();
@@ -297,6 +358,7 @@
                          hub_id = data.responsible.hub_id
                          admin_id = data.responsible.admin_id
                          city_area_id = data.responsible.city_area_id
+                         user_name = data.responsible.name
                         $('#edit_hub').val(data.responsible.hub_id).trigger('change');
                         $('#EditResponsibleModal').modal('show');
                     }
@@ -450,11 +512,15 @@
             get_area(city_id,false);
         });
 
-         
-        $('#edit_hub').change(function(){
+   
+        $('#edit_hub').change(function () {
             var city_id = $(this).val();
-            get_area(city_id, true, city_area_id ,admin_id);
+            get_area(city_id, true, city_area_id, admin_id);
+            var isChecked = admin_id ? true : false;
+            $(".checked_edit").prop('checked', isChecked).prop('disabled', true);
+            handleResponsiblesSwitchChange(isChecked, null, null, admin_id ? null : user_name);
         });
+
 
         
         function get_area(city_id,edit = false,val = null, val_2 = null){
@@ -545,23 +611,25 @@
 
     });
     
-    function handleResponsiblesSwitchChange(isChecked, nameClass, cityResponsibleClass, old_value = null) {
-            if (isChecked) {
-                $(nameClass).addClass('d-none');
-                $(cityResponsibleClass).removeClass('d-none');
-                $(nameClass).val('');
+    function handleResponsiblesSwitchChange(isChecked, nameClass = null, cityResponsibleClass = null, old_value = null) {
+        if (isChecked) {
+            $(nameClass ? nameClass : '#edit_name').addClass('d-none');
+            $(cityResponsibleClass ? cityResponsibleClass : '#edit_city_responsible_hubs_admins_div').removeClass('d-none');
+            $('#edit_name').val('');
+            $('#name-error').addClass('d-none')
+        } else {
+            $(nameClass ? nameClass : '#edit_name').removeClass('d-none');
+            $(cityResponsibleClass ? cityResponsibleClass : '#edit_city_responsible_hubs_admins_div').addClass('d-none');
+            $("#edit_name").val(old_value);
+            $('#name-error').addClass('d-none')
 
-            } else {
-                $(nameClass).removeClass('d-none');
-                $(cityResponsibleClass).addClass('d-none');
-                $(nameClass).val(old_value);
-            }
         }
+    }
 
-        $('#AddResponsibleModal #responsibles_switch').change(function() {
-            var isChecked = $(this).is(':checked');
-            handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
-        });
+    $('#AddResponsibleModal #responsibles_switch').change(function() {
+        var isChecked = $(this).is(':checked');
+        handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
+    });
 
 
 
