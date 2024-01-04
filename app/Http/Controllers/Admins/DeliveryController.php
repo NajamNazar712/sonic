@@ -795,7 +795,7 @@ class DeliveryController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $class = 'complaint_row';
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                         $consolidation_details = self::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -875,8 +875,7 @@ class DeliveryController extends Controller
                                     if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $class = 'complaint_row';
                                     }
-
-                                    ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
+                                    ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                     $consolidation_details = self::check_consolidation($shipment->id);
 
                                     $consolidation_flag = FALSE;
@@ -948,7 +947,7 @@ class DeliveryController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 4, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -7700,7 +7699,7 @@ class DeliveryController extends Controller
                     $data['amount'] = number_format($shipment->amount);
 
 
-                    ShipmentScanningJourneyController::add($shipment->id, 10, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,10,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                     return response()->json(['status' => 1, 'details' => $data, 'overland_cities' => $consignee_cities]);
                 } else {
@@ -8220,7 +8219,7 @@ class DeliveryController extends Controller
                     'fake_status_updated_at' => Carbon::now()
                 ]);
             }
-            ShipmentScanningJourneyController::add($shipment['id'], 5, 1, Auth::id(), null, null);
+            ShipmentScanningJourneyController::add($shipment['id'] ,5,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
             return ['status' => 1, 'success' => 'Fake Status has been removed'];
         }
         return ['status' => 0, 'error' => 'Something went wrong'];
@@ -8419,7 +8418,7 @@ class DeliveryController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,12,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                         return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
                     } else {
@@ -8671,7 +8670,7 @@ class DeliveryController extends Controller
                 $delivery_note_shipment->save();
 
 
-                ShipmentScanningJourneyController::add($shipment->id, 6, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id ,6,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return redirect()->back()->with(['success' => 'Shipment successfully marked as Fake Status!']);
             } else {
                 return redirect()->back()->with(['error' => 'Shipment with given Tracking Number not found in Delivery Note!']);
@@ -9092,7 +9091,7 @@ class DeliveryController extends Controller
             $class = '';
         }
 
-        ShipmentScanningJourneyController::add($shipment->id, 21, 1, Auth::id(), null . null);
+        ShipmentScanningJourneyController::add($shipment->id ,21,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
         return response()->json(['status' => 0, 'details' => ['row_id' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'status' => $journey->shipment_status_shipper->name, 'reason' => $journey->shipment_status_reason->name ?? null, 'remarks' => $journey->remarks, 'status_date' => date('Y-m-d H:i:s', strtotime($journey->created_at)), 'origin' => $shipment->pickup_address->city->name, 'destination' => $shipment->consignee_city->name, 'amount' => $shipment->amount, 'shipper_name' => $shipment->user->name, 'class' => $class]]);
     }
 

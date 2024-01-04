@@ -32,6 +32,10 @@ class City extends Model
     public function admins(){
         return $this->hasMany('App\Http\Models\Admin\Admin');
     }
+
+    public function responsible_admins(){
+        return $this->hasMany('App\Http\Models\Admin\Admin','default_hub_id','id');
+    }
     public function disputes(){
         return $this->hasMany('App\Http\Models\Dispute');
     }

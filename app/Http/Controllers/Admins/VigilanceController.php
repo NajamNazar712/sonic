@@ -124,7 +124,7 @@ class VigilanceController extends Controller
                     $last_status_date = Carbon::parse($last_status->created_at)->toDateTimeString();
                     $data['status_date'] = $last_status_date;
                     
-                    ShipmentScanningJourneyController::add($shipment->id,30,1,Auth::id(),NULL,NULL);
+                    ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                     return response()->json(['status' => 1, 'details' => $data]);
 
@@ -554,7 +554,7 @@ class VigilanceController extends Controller
                 $last_status_date = Carbon::parse($last_status->created_at)->toDateTimeString();
                 $data['status_date'] = $last_status_date;
 
-                ShipmentScanningJourneyController::add($shipment->id,30,1,Auth::id(),NULL,NULL);
+                ShipmentScanningJourneyController::add($shipment->id ,30,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                 return response()->json(['status' => 1, 'details' => $data]);
             }
