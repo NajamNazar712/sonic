@@ -166,6 +166,8 @@ use App\Http\Models\BookingType;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
+use App\Http\Models\UserIbftCharge;
+use App\Http\Models\UserIbftChargeDetail;
 
 class GlobalSettingsController extends Controller
 {
@@ -9189,5 +9191,101 @@ class GlobalSettingsController extends Controller
         
         $product->delete();
         return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
+    }
+
+    public function shipper_ibft_charges_settings_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
+        $shippers = User::where('status', '>', 1)->select('id', 'name');
+        $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
+        if($all_shippers){
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+            if (session('department_id') == 7 && $authorized == true) {
+                $shippers = $shippers->get();
+            }
+            else if(session('department_id') == 7){
+                $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+                ->select('u.id', 'u.name')
+                ->where('sale_person_tags.admin_id', Auth::id())
+                ->get();
+            }
+            else{
+                $shippers = $shippers->get();
+            }
         }
-}
+        else if(session('department_id') == 7){
+            $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+            ->select('u.id', 'u.name')
+            ->where('sale_person_tags.admin_id', Auth::id())
+            ->get();
+        }
+        else{
+            $shippers = $shippers->get();
+        }
+
+        $business_shipment = BusinessProjectionShipment::all();
+
+        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
+    }
+
+    public function shipper_ibft_charges_settings_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
+        }
+
+        $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
+
+        $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
+            ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+            ->leftJoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.admin_id', '=', Auth::id())
+                    ->where('spt.status', 0);
+            })
+            ->select(
+                'u.name as shipper', 
+                'user_ibft_charges.current_charges as current_charges',
+                'a.name as updated_by', 
+                'user_ibft_charges.updated_at as updated_at'
+            )
+            ->orderBy('updated_at', 'desc');
+
+        if ($all_shippers) {
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+
+            if (session('department_id') == 7 && !$authorized) {
+                $query->where('spt.admin_id', Auth::id());
+            }
+        }
+
+        if (session('department_id') == 7 && !$all_shippers) {
+            $query->where('spt.admin_id', Auth::id());
+        }
+
+        $datatable = Datatables::of($query);
+        return $datatable->make(true);
+    }
+
+    public function shipper_ibft_charges_settings_update(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 714);
+
+        $shippers = $request->shippers;
+        $Ibft_charges = $request->Ibft_charges;
+        $updated_by = Auth::id();
+            foreach ($shippers as $shipper){
+                UserIbftCharge::updateOrCreate(
+                    ['user_id' => $shipper],
+                    ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
+                );
+                $ibft_charges_log = new UserIbftChargeDetail();
+                $ibft_charges_log->charges = $Ibft_charges;
+                $ibft_charges_log->user_id = $shipper;
+                $ibft_charges_log->updated_by = $updated_by;
+                $ibft_charges_log->save();
+            }
+            
+         return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
+        }
+    }
