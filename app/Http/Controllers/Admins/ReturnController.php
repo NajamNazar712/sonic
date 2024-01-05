@@ -5287,7 +5287,8 @@ class ReturnController extends Controller
             $assigned_to_now_new_user = [];
 
             $agent_id = $request->admin_id;
-            $admin = Admin::where('employee_id', $agent_id)->first();
+            // $admin = Admin::where('employee_id', $agent_id)->first();
+            $admin = Admin::where('id', $agent_id)->first();
             $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
             $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
 
