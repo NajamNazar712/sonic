@@ -5319,8 +5319,7 @@ class ReturnController extends Controller
             // $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
             $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
             $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
-            dd($already_assigned);
-
+            
             if(!empty($sorted_agents_zones)){
             foreach($shipment_ids as $shipment_id){
                 $shipment = Shipment::where('id', $shipment_id)->first();
@@ -5337,6 +5336,7 @@ class ReturnController extends Controller
                     return abs($item->created_at->diffInSeconds($currentDateTime));
                 })->first();
                 if($shipment->exists()){
+                    dd($already_assigned_state, $sorted_agents_zones, $shipment_journey->status_reason_id);
                     if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
                     $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                         DB::commit();
