@@ -341,7 +341,6 @@
                                                     <tr role="row" class="bg-primary white">
                                                         <th class="border-primary border-darken-1"></th>
                                                         <th class="border-primary border-darken-1">S. No.</th>
-                                                        <th class="d-none">Shipper</th>
                                                         <th class="border-primary border-darken-1">Shipper</th>
                                                         <th class="border-primary border-darken-1">Shipment</th>
                                                         <th class="border-primary border-darken-1">Origin</th>
@@ -359,6 +358,7 @@
                                                         <th class="border-primary border-darken-1">Deductable</th>
                                                         <th class="border-primary border-darken-1">Payable</th>
                                                         <th class="border-primary border-darken-1">Arrival Date</th>
+                                                        <th class="d-none">Shipper</th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -1207,6 +1207,8 @@
                 }
             });
 
+    
+
             //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
@@ -1308,7 +1310,6 @@
                             return '';
                         }
                     },
-                    {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none'},
                     {
                         data: 'shipper',
                         name: 'u.name',
@@ -1390,6 +1391,7 @@
                         name: 'sj.created_at',
                         class: 'align-middle arrival_date'
                     },
+                    {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false,},
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(1)', row).html(index + 1);
