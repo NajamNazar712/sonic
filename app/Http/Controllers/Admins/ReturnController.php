@@ -5363,7 +5363,6 @@ class ReturnController extends Controller
 
                 // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));\
                 // if ($already_assigned == '') {
-                    dd($no_zone_shipment, $already_assigned);
                  if ($already_assigned == '') {
                     return response()->json([
                         'status' => 1,
