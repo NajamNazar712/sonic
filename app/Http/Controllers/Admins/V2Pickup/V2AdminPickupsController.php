@@ -62,6 +62,8 @@ use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Models\ShipmentsWeightType;
+use App\Http\Models\WeightType;
 
 class V2AdminPickupsController extends Controller
 {
@@ -1869,6 +1871,19 @@ class V2AdminPickupsController extends Controller
         return view('admin.v2_pickups.arrival_individual_weight')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
     }
 
+    public function arrival_individual_index_weight_scale(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        } else {
+            $global_rider_id = 0;
+        }
+        $riders = Rider::where('status', 1)->select('id', 'name', 'trax_id')->get();
+        return view('admin.v2_pickups.arrival_individual_weight_new')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
+    }
+    
     public function arrival_individual_shipment_details(Request $request)
     {
          $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -2095,6 +2110,18 @@ class V2AdminPickupsController extends Controller
                     // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
+                    if($request->has('weight_type')){
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                        if($shipment_weight->exists()){
+                            $shipments_weight_type = $shipment_weight->first();
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::find($request->weight_type);
+                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type->id;
+                        $shipments_weight_type->save();
+                    }
 
                     $rider_picked = false;
                     if(!$rider_assigned_flag){
@@ -2251,6 +2278,17 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
+                    if($request->has('weight_type')){
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                        if($shipment_weight->exists()){
+                            $shipments_weight_type = $shipment_weight->first();
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::find($request->weight_type);                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type->id;
+                        $shipments_weight_type->save();
+                    }
 
                     $details = array();
 
@@ -3191,6 +3229,18 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     $shipment->save();
+                    if($request->has('weight_type')) {
+                        $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                        if($shipment_weight->exists()){
+                            $shipments_weight_type = $shipment_weight->first();
+                        }else{
+                            $shipments_weight_type = new ShipmentsWeightType;
+                        }
+                        $weight_type = WeightType::find($request->weight_type);
+                        $shipments_weight_type->shipment_id = $shipment->id;
+                        $shipments_weight_type->weight_type = $weight_type->id;
+                        $shipments_weight_type->save();
+                    }
 
                     $details = array();
 

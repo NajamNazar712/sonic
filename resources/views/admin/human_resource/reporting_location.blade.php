@@ -165,14 +165,14 @@
                 'allowMinus': true,
                 'allowPlus': false,
                 'rightAlign': false,
-                'digits': 6,
+                'digits': 20,
             });
             $('.long').inputmask({
                 'alias': 'decimal',
                 'allowMinus': true,
                 'allowPlus': false,
                 'rightAlign': false,
-                'digits': 6,
+                'digits': 20,
             });
 
             $(this).find('.radius').TouchSpin({

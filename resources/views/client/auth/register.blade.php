@@ -424,7 +424,7 @@
 
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="payment_cycles">payment_cycles:
+                                                            <label for="payment_cycles">Payment Cycles:
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
@@ -432,9 +432,13 @@
                                                                     class="select2 form-control"
                                                                     style="width: 100%">
                                                                     @foreach ($payment_cycles as $payment_cycle)
-                                                                        <option value="{{ $payment_cycle->id }}">
-                                                                            {{ $payment_cycle->name }}</option>
+                                                                        @if ($payment_cycle->id != 1)
+                                                                            <option value="{{ $payment_cycle->id }}">
+                                                                                {{ $payment_cycle->name }}
+                                                                            </option>
+                                                                        @endif
                                                                     @endforeach
+
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -1524,7 +1528,7 @@
 
 
 
-        var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         var selectedValues = []; // Create an array to store selected values
         for (var i = 0; i < days.length; i++) {
             var day = days[i];
