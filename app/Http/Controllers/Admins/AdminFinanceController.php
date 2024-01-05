@@ -5107,7 +5107,6 @@ class AdminFinanceController extends Controller
                     ->where('sj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->leftjoin('user_ibft_charges as uic','uic.user_id','=', 'u.id')
             ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id');
 
         if ($request->has('ids')) {
