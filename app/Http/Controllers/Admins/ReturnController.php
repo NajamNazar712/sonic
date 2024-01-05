@@ -318,7 +318,7 @@ class ReturnController extends Controller
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
         
         // $agents = Employee::where('trax_id','like','%Trax-C%')->get();
-        $agents = Admin::Join('employees as e','e.id', 'admins.employee_id')->where('e.trax_id','like','%Trax-C%')->get();
+        $agents = Admin::where('trax_id','like','%Trax-C%')->get();
         $empid = Admin::find(Auth::id())->employee_id;
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
