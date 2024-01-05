@@ -316,12 +316,9 @@ class ReturnController extends Controller
 
         $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66])->get();
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
-        // if ($rv_tickets === 0) {
-        //     $percentage_unresponsive_count = 0; // or any default value you prefer
-        // } else {
-        //     $percentage_unresponsive_count = (count($unresponsive_count) / $rv_tickets) * 100;
-        // }
-        $agents = Employee::where('trax_id','like','%Trax-C%')->get();
+        
+        // $agents = Employee::where('trax_id','like','%Trax-C%')->get();
+        $agents = Admin::Join('employees as e','e.id', 'admin.id')->where('e.trax_id','like','%Trax-C%')->get();
         $empid = Admin::find(Auth::id())->employee_id;
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
@@ -5543,7 +5540,8 @@ class ReturnController extends Controller
                         }
     
                         else{
-                            return redirect()->back()->with('error', 'Zone is not assigned to the agent');
+                            return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+                            // return redirect()->back()->with('error', 'Zone is not assigned to the agent');
                         }
                     }
                 }
