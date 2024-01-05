@@ -5366,7 +5366,7 @@ class ReturnController extends Controller
                  if ($already_assigned == '') {
                     return response()->json([
                         'status' => 1,
-                        'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . 'because zone is not assigned'
+                        'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . ' because zone is not assigned ' .
                                 (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                     ]);
                 } else {
