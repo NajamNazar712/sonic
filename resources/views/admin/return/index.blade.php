@@ -2220,6 +2220,15 @@
                                 table.row(row).select();
                             }
                         }
+                        // if (data.verify_shipment == 0) {
+                        //     // console.log(data.verify_shipment);
+
+                        //     $('td:eq(0)', row).addClass('select-checkbox');
+
+                        //     if ($.inArray(data.shId, selected_rows) !== -1) {
+                        //         table.button('.confirm').enable();
+                        //     }
+                        // }
                     },
 
                     initComplete: function() {

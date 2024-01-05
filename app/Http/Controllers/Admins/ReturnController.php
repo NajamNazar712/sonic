@@ -638,6 +638,14 @@ class ReturnController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('verify_shipment', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+               if(!$shipments->consolidation_id && $shipments->delivery_note_pending_status == 1){
+                    return 1;
+                }
+                else{
+                    return 0;
+                }
+            })
             ->addColumn('RvShipmentAssignedAgent', function ($shipments){//using for checking the rv-assign-shipment-agent to not add checkbox in the datatable
                 $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $shipments->shId)->where('rv_state_id', 1)->first();
                 if($rv_shipment_assign_agents)
