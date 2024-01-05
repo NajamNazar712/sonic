@@ -5510,10 +5510,10 @@ class ReturnController extends Controller
                         $agent_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
                         // $admin_id = Admin::where('employee_id', $agent_id->id)->first();
                         $employee = Employee::where('id', $agent_id->employee_id)->first();
-                        dd($employee);
                         $sorted_agents = RvAgentAssignHub::where('agent_id', $employee->id)->orderBy('priority', 'ASC')->get();
-
+                        
                         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $employee->id)->pluck('zone_id')->toArray();
+                        dd($sorted_agents_zones);
     
                         $no_zone_shipment = [];
                         if(!empty($sorted_agents_zones))
