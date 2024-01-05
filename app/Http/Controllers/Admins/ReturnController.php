@@ -5363,17 +5363,7 @@ class ReturnController extends Controller
 
                 // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));\
                 // if ($already_assigned == '') {
-                if ($already_assigned <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Document</title>
-                </head>
-                <body>
-                    
-                </body>
-                </html>= '') {
+                 if ($already_assigned != '') {
                     return response()->json([
                         'status' => 1,
                         'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . 
