@@ -5318,8 +5318,8 @@ class ReturnController extends Controller
 
             // $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
             $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
-            dd($already_assign);
             $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
+            dd($already_assigned);
 
             if(!empty($sorted_agents_zones)){
             foreach($shipment_ids as $shipment_id){
