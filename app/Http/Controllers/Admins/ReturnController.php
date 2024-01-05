@@ -5318,6 +5318,7 @@ class ReturnController extends Controller
 
             // $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
             $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
+            dd($already_assign);
             $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
 
             if(!empty($sorted_agents_zones)){
@@ -5363,7 +5364,7 @@ class ReturnController extends Controller
 
                 // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));\
                 // if ($already_assigned == '') {
-                 if ($already_assigned != '') {
+                 if ($already_assigned == '') {
                     return response()->json([
                         'status' => 1,
                         'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . 
