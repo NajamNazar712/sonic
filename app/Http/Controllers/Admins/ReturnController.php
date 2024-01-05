@@ -5507,13 +5507,11 @@ class ReturnController extends Controller
                     }
                     else{
                         // $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
-                        $agent_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
+                        // $agent_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
+                        $admin_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
                         // $admin_id = Admin::where('employee_id', $agent_id->id)->first();
-                        $employee = Employee::where('id', $agent_id->employee_id)->first();
-                        $sorted_agents = RvAgentAssignHub::where('agent_id', $employee->id)->orderBy('priority', 'ASC')->get();
-                        
-                        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $employee->id)->pluck('zone_id')->toArray();
-                        dd($sorted_agents_zones);
+                        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
+                        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
     
                         $no_zone_shipment = [];
                         if(!empty($sorted_agents_zones))
@@ -5523,7 +5521,7 @@ class ReturnController extends Controller
                             {
                                 
                                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
-                                    $include_shippers = $this->included_shippers($sorted_agents, $employee->id, $shipment_id); 
+                                    $include_shippers = $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
                                     if($include_shippers == true){
                                         $tracking_numbers['Row #' . $row_id] = $tracking_number;
                                     }
