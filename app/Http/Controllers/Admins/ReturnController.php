@@ -125,6 +125,7 @@ class ReturnController extends Controller
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
         ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+        ->join('zones as z' ,'dc.zone_id', '=' , 'z.id')
         ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
         ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
         
@@ -219,7 +220,8 @@ class ReturnController extends Controller
          'tat_options.value as tat_value',
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id')
+         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id',
+         'z.name as zone')
         // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
         ->whereIn('shipments.shipper_status_id', [12,65,66])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5

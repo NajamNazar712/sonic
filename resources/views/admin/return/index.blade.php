@@ -354,6 +354,7 @@
                                 <th class="border-primary border-darken-1">Origin</th>
                                 <th class="border-primary border-darken-1">Destination</th>
                                 <th class="border-primary border-darken-1">Hub</th>
+                                <th class="border-primary border-darken-1">Zone</th>
                                 <th class="border-primary border-darken-1">Consignee Name</th>
                                 <th class="border-primary border-darken-1">Consignee Phone</th>
                                 <th class="border-primary border-darken-1">Address</th>
@@ -1541,6 +1542,7 @@
                                 head.push('Origin');
                                 head.push('Destination');
                                 head.push('Hub');
+                                head.push('Zone');
                                 head.push('Consignee Name');
                                 head.push('Consignee Phone');
                                 head.push('Address');
@@ -1581,6 +1583,7 @@
                                     row.push(values.origin);
                                     row.push(values.destination);
                                     row.push(values.hub);
+                                    row.push(values.zone);
                                     row.push(values.consignee_name);
                                     row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                     row.push(values.consignee_address);
@@ -2178,6 +2181,7 @@
                         {data: 'origin',name: 'oc.name',class: 'align-middle origin'},
                         {data: 'destination',name: 'dc.name', class: 'align-middle destination'},
                         {data: 'hub',name: 'h.name',class: 'align-middle hub'},
+                        {data: 'zone',name: 'z.name',class: 'align-middle zone'},
                         {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                         {data: 'consignee_phone',name: 'consignee_phone',class: 'align-middle consignee_phone'},
                         {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
