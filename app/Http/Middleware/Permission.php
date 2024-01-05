@@ -996,8 +996,8 @@ class Permission
             'settings.product_type.index'=> 912,
             'settings.product_type.list'=> 912,
 
-            'settings.shipper_ibft_charges_settings.index'=> 913,
-            'settings.shipper_ibft_charges_settings.list'=> 913,
+            'settings.shipper_ibft_charges_settings.index'=> 917,
+            'settings.shipper_ibft_charges_settings.list'=> 917,
 
 
             'dashboard.userwise' => 333,

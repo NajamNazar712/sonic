@@ -2174,7 +2174,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825, 851, 854, 913], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825, 851, 854, 917], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Financials</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([157, 158, 462], session('permissions'))) !== 0)
@@ -2248,7 +2248,7 @@
                                                 href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
                                     @endif  
 
-                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(913, session('permissions')))
+                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(917, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.shipper_ibft_charges_settings.index') }}">Shipper IBFT Charges Settings</a></li>
                                     @endif  

@@ -14,8 +14,8 @@ class ShipperIbftChargesSettingsSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 913, 'name' => 'Shipper IBFT Charges Settings - View', 'module_id' => 14),
-            array('id' => 914, 'name' => 'Shipper IBFT Charges Settings - Update', 'module_id' => 14),
+            array('id' => 917, 'name' => 'Shipper IBFT Charges Settings - View', 'module_id' => 14),
+            array('id' => 918, 'name' => 'Shipper IBFT Charges Settings - Update', 'module_id' => 14),
         ));
 
 
@@ -27,7 +27,7 @@ class ShipperIbftChargesSettingsSeeder extends Seeder
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Financials > Shipper IBFT Charges Settings', 'url' => 'admin.settings.shipper_ibft_charges_settings.index', 'permission_id' => 913),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Financials > Shipper IBFT Charges Settings', 'url' => 'admin.settings.shipper_ibft_charges_settings.index', 'permission_id' => 917),
         ));
     }
 }
