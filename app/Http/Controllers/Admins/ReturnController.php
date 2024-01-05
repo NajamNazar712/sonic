@@ -5508,7 +5508,8 @@ class ReturnController extends Controller
                     else{
                         // $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
                         $agent_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
-                        $admin_id = Admin::where('employee_id', $agent_id->id)->first();
+                        // $admin_id = Admin::where('employee_id', $agent_id->id)->first();
+                        $admin_id = Employee::where('id', $agent_id->employee_id)->first();
                         $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
                         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
     
