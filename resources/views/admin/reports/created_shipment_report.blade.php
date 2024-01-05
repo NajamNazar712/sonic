@@ -416,10 +416,10 @@ aria-hidden="true">
                 firstDay: 1,
                 clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
@@ -434,10 +434,10 @@ aria-hidden="true">
                 firstDay: 1,
                 clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');

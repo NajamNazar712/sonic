@@ -11993,32 +11993,27 @@ class AdminReportsController extends Controller
         // ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         // ->orWhereBetween(DB::raw('sjq.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         // ->get();
+     
         $arrived_shipments= Shipment::leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                 ->where('shipments.shipper_status_id', '=', 2);
         })
-            ->leftJoin('riders as r', 'r.id', '=', 'sj.rider_id')
-            ->leftJoin('global_settings as gs', function ($join) {
-                $join->on('gs.setting_value', '=', 'sj.rider_id')
-                    ->where('gs.type', '=', 'global_rider_id');
-            })
-            ->select(
-                'r.id AS rider_id',
-                'r.name AS rider_name',
-                'gs.setting_value AS global_rider_id',
-                'gs.text AS global_rider_name',
-                'shipments.tracking_number'
-            )
-            ->where('shipments.user_id', '=', $shipper_id)
-            ->where(function ($query) {
-                $query->where('sj.shipper_status_id', '=', 53)
-                    ->orWhere('sj.rider_id', '=', 151)
-                    ->orWhere('sj.rider_id', '=', 346);
-            })
-            ->whereBetween(DB::raw('sj.created_at'),  [$from_date.' 00:00:01',$to_date.' 23:59:59'])
-            ->get();
-        
-        return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
+        ->leftJoin('riders', 'riders.id', '=', DB::raw('sj.rider_id'))
+        ->leftJoin('global_settings', function ($join) {
+            $join->on('global_settings.setting_value', '=', DB::raw('sj.rider_id'))
+                ->where('global_settings.type', '=', "global_rider_id");
+        })
+        ->where('shipments.user_id', '=', $shipper_id)
+        ->where(function ($query) {
+            $query->where(DB::raw('sj.shipper_status_id'), '=', 53)
+                ->orWhere(DB::raw('sj.rider_id'), '=', 151)
+                ->orWhere(DB::raw('sj.rider_id'), '=', 346);
+        })
+        ->whereBetween('sj.created_at', [$from_date.' 00:00:01', $to_date.' 23:59:59'])
+        ->select('riders.id as rider_id', 'riders.name as rider_name', 'global_settings.setting_value as global_rider_id', 'global_settings.text as global_rider_name', 'shipments.tracking_number')
+        ->get();
+    
+            return response()->json(['status'=>1,'arrived_shipments'=>$arrived_shipments]);
 
     }
     public function get_balance_Shipments(Request $request){
