@@ -5482,7 +5482,8 @@ class ReturnController extends Controller
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
                     if (!empty($row['agent_id'])) {
-                        $agent = Employee::where('trax_id', $row['agent_id'])->first();
+                        // $agent = Employee::where('trax_id', $row['agent_id'])->first();
+                        $agent = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
                         if (!$agent) {
                             $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
                         }
@@ -5540,8 +5541,8 @@ class ReturnController extends Controller
                         }
     
                         else{
-                            return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
-                            // return redirect()->back()->with('error', 'Zone is not assigned to the agent');
+                            // return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+                            return redirect()->back()->with('error', 'No Zone Assigned To Agent');
                         }
                     }
                 }
