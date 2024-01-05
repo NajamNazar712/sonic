@@ -5398,11 +5398,12 @@ class ReturnController extends Controller
             'integer' => ':attribute must be an Integer.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
             'unique' => ':attribute is already Present.',
-            'regex' => ':attribute must start with "Trax-C-" and be followed by digits.',
+            // 'regex' => ':attribute must start with "Trax-C-" and be followed by digits.',
         ];
         $rules_with_agent = [
             'tracking_number' => ['required', 'integer'],
-            'agent_id' => ['required', 'regex:/^Trax-C-\d+$/']
+            // 'agent_id' => ['required', 'regex:/^Trax-C-\d+$/']
+            'agent_id' => ['required']
         ];
 
         $rules_without_agent = [
@@ -5485,7 +5486,7 @@ class ReturnController extends Controller
                         // $agent = Employee::where('trax_id', $row['agent_id'])->first();
                         $agent = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
                         if (!$agent) {
-                            $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
+                            $errors['Row #' . $row_id][] = 'Agent ID is not valid or Agent is Not Contractual #' . $row['agent_id'];
                         }
                     }
                 }
