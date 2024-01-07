@@ -4422,10 +4422,6 @@ class AdminDashboardController extends Controller
                                         if(isset($rider_ids[$row_id - 1])){
                                             $sales_commission_user->rider_id = $rider_ids[$row_id - 1];
                                         }
-                                    }else{
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
                                     }
                                     if(isset($array[$row_id])){
                                         $sales_commission_user->user_id = $array[$row_id];
@@ -7098,10 +7094,6 @@ class AdminDashboardController extends Controller
                                         if(isset($rider_ids[$row_id - 1])){
                                             $sales_commission_user->rider_id = $rider_ids[$row_id - 1];
                                         }
-                                    }else{
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
                                     }
                                     if(isset($array[$row_id])){
                                         $sales_commission_user->user_id = $array[$row_id];
@@ -7191,10 +7183,6 @@ class AdminDashboardController extends Controller
                                     if(isset($rider_ids[$row_id - 1])){
                                         $sales_commission_user->rider_id = $rider_ids[$row_id - 1];
                                     }
-                                }else{
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
                                 }
                                 if(isset($array[$row_id])){
                                     $sales_commission_user->user_id = $array[$row_id];
@@ -7217,9 +7205,19 @@ class AdminDashboardController extends Controller
                 } else {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                        SalesCommission::where('shipper_id', $id)->delete();
+                            $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
+                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
+                            $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
+                            $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
+                            if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
+                                SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
+                                ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
+                                ->delete();
+                            }
+                            if (!isset($request->user_id)) {
+                                SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                                SalesCommission::where('shipper_id', $id)->delete();
+                            }
                     }
                 }
             }
