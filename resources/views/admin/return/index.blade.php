@@ -2451,7 +2451,7 @@
                                 selected_rows.splice(index, 1);
                             }
 
-                            if (verify_shipment === 0 {
+                            if (verify_shipment === 0) {
                                 table.button('.confirm').enable();
                             }else{
                                 table.button('.confirm').disable();
