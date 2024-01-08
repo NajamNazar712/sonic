@@ -637,15 +637,16 @@ class ReturnController extends Controller
                     return '-';
                 }
             })
-            ->addColumn('OsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+            ->addColumn('OsaStatus', function ($shipments){//using for checking the osa shipment to not add checkbox in the datatable
                if($shipments->reason_id == 12){
-                    return 1;
-                }
-                else{
+                    // return 1;
                     return 0;
                 }
+                // else{
+                //     return 0;
+                // }
             })
-            ->addColumn('verify_shipment', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+            ->addColumn('verify_shipment', function ($shipments){ //using for checking the shipmentis verified or not
                if(!$shipments->consolidation_id && $shipments->delivery_note_pending_status == 1){
                     return 1;
                 }
@@ -5282,6 +5283,7 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
+        // dd($request->all());
         try{
             DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
@@ -5329,7 +5331,15 @@ class ReturnController extends Controller
             
             if(!empty($sorted_agents_zones)){
             foreach($shipment_ids as $shipment_id){
+                $agent_id = $request->admin_id;
+                $contractual_agent = Admin::find($agent_id)->where('trax_id','like','%Trax-C%')->first();
                 $shipment = Shipment::where('id', $shipment_id)->first();
+                if($shipment->shipper_status_id == 12 && $contractual_agent){
+                    return response()->json([
+                        'status' => 1,
+                        'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
+                    ]);
+                };
                 $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                 if($already_assigned_state->exists()){
                     $already_assigned_state =  $already_assigned_state->first();

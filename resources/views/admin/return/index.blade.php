@@ -491,7 +491,7 @@
                             <table class="table table-bordered" id="agenttable">
                                 <thead>
                                     <tr role="row" class="bg-primary white text-center">
-                                        <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                                        <th colspan="3" class="border-primary border-darken-1 ">Agents</th>
                                     </tr>
                                     <tr role="row" class="bg-primary bg-lighten-1 white">
                                         <th class="text-center border-primary border-lighten-2">ID</th>
@@ -709,7 +709,7 @@
                         <h4 class="modal-title" id="">Assign Agent</h4>
                     </div>
                     <div class="modal-body">
-                        <select name="Sale_person" id="assign_agent" class="form-control select2">
+                        <select name="assign_agent" id="assign_agent" class="form-control select2">
                             @foreach ($agents as $agent)
                                 <option value="{{ $agent->id }}"> {{ $agent->name }} - {{ $agent->trax_id }} - {{ $agent->city_name }} </option>
                             @endforeach
@@ -1670,6 +1670,7 @@
                                                     if (confirm) {
                                                         if (assign) {
                                                             $.ajax({
+                                                                            //Admins\ReturnController@assign_agent
                                                                     url: '{!! route('admin.return.assign.agent') !!}',
                                                                     method: 'POST',
                                                                     data: {
