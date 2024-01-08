@@ -2385,7 +2385,7 @@
                     }
                  
                 
-                    if (verify_shipment === 1) {
+                    if (verify_shipment === 0) {
                         table.button('.confirm').enable();
                     }else{
                         table.button('.confirm').disable();
@@ -2401,8 +2401,8 @@
                             });
                             return false;
                         }
-                        if (verify_shipment === 1) {
-                        table.button('.confirm').enable();
+                        if (verify_shipment === 0) {
+                            table.button('.confirm').enable();
                         }else{
                             table.button('.confirm').disable();
                         }
@@ -2451,7 +2451,7 @@
                                 selected_rows.splice(index, 1);
                             }
 
-                            if (verify_shipment === 1) {
+                            if (verify_shipment === 0 {
                                 table.button('.confirm').enable();
                             }else{
                                 table.button('.confirm').disable();
