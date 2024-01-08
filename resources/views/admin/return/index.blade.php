@@ -2218,6 +2218,7 @@
                     ],
                     rowCallback: function(row, data, index) {
                         var info = table.page.info();
+                        console.log(data);
                         $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
                         if (data.OsaStatus == 0) {
@@ -2227,6 +2228,12 @@
                                 table.row(row).select();
                             }
                         }
+
+                        // if (data.verify_shipment == 1) {
+                        //     table.button('.confirm').enable();
+                        // }else{
+                        //     table.button('.confirm').disable();
+                        // }
                         // if (data.verify_shipment == 0) {
                         //     // console.log(data.verify_shipment);
 
@@ -2356,6 +2363,7 @@
 
                     var id = parseInt($(this).parent('tr').attr('id'));
                     var hub_id = $(this).parents('tr').data('hub');
+                    var verify_shipment = table.row($(this).parents('tr')).data().verify_shipment
                     var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
                     var agent_assigned = table.row($(this).parents('tr')).data().RvShipmentAssignedAgent
                     var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
@@ -2375,8 +2383,13 @@
                     }else{
                         table.button('.call_history').disable();
                     }
-
-                    
+                 
+                
+                    if (verify_shipment === 1) {
+                        table.button('.confirm').enable();
+                    }else{
+                        table.button('.confirm').disable();
+                    }
                     if (con_id) {
                         if (hub_ids.length == 0) {
                             hub_ids.push(hub_id);
@@ -2387,6 +2400,11 @@
                                 containerId: 'toast-top-center'
                             });
                             return false;
+                        }
+                        if (verify_shipment === 1) {
+                        table.button('.confirm').enable();
+                        }else{
+                            table.button('.confirm').disable();
                         }
                         table.rows().nodes().each(function(index) {
                             var row = table.row(index);
@@ -2431,6 +2449,12 @@
                                 selected_rows.push(id);
                             } else {
                                 selected_rows.splice(index, 1);
+                            }
+
+                            if (verify_shipment === 1) {
+                                table.button('.confirm').enable();
+                            }else{
+                                table.button('.confirm').disable();
                             }
 
                             var restricted_index = $.inArray(id, restricted_rows);
