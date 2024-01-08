@@ -495,6 +495,7 @@
                                     </tr>
                                     <tr role="row" class="bg-primary bg-lighten-1 white">
                                         <th class="text-center border-primary border-lighten-2">ID</th>
+                                        <th class="border-primary border-lighten-2">Trax ID</th>
                                         <th class="border-primary border-lighten-2">Name</th>
                                     </tr>
                                 </thead>
@@ -502,6 +503,7 @@
                                     @foreach ($agents as $agent)
                                         <tr role="row">
                                             <td class="text-center">{{ $agent->id }}</td>
+                                            <td>{{ $agent->trax_id }}</td>
                                             <td>{{ $agent->name }}</td>
                                         </tr>
                                     @endforeach
@@ -709,7 +711,7 @@
                     <div class="modal-body">
                         <select name="Sale_person" id="assign_agent" class="form-control select2">
                             @foreach ($agents as $agent)
-                                <option value="{{ $agent->id }}"> {{ $agent->name }} </option>
+                                <option value="{{ $agent->id }}"> {{ $agent->name }} - {{ $agent->trax_id }} - {{ $agent->city_name }} </option>
                             @endforeach
                         </select>
                     </div>
