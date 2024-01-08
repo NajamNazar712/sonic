@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Shipment;
 use App\BoltUndeliveredReasonMap;
 use App\BoltUndeliveredReasonMapCount;
 
@@ -16,6 +17,8 @@ class UndeliveredReasonController extends Controller
         
         if ($shipment->exists()) {
             $shipment = $shipment->latest()->first();
+            $shipment_object = Shipment::find($shipment_id);
+            $booking_type = $shipment_object ? $shipment->booking_type_id : null;
             $count = $shipment->count;
         }else {
             $count = 0;
@@ -25,7 +28,12 @@ class UndeliveredReasonController extends Controller
             $count++;
         }
 
-        $journey_status = ($count <= 1) ? $status->status_attempt_count_1 : $status->status_attempt_count_2;
+        if($booking_type == 5){
+            $journey_status = $status->status_attempt_count_1;
+        }else{
+            $journey_status = ($count <= 1) ? $status->status_attempt_count_1 : $status->status_attempt_count_2;
+        }
+
         
         if (!in_array($reason_id, [14, 23, 25])) { 
             BoltUndeliveredReasonMapCount::updateOrCreate(

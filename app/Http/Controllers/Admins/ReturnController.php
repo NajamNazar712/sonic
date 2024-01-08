@@ -646,12 +646,12 @@ class ReturnController extends Controller
                 //     return 0;
                 // }
             })
-            ->addColumn('verify_shipment', function ($shipments){ //using for checking the shipmentis verified or not
-               if(!$shipments->consolidation_id && $shipments->delivery_note_pending_status == 1){
-                    return 1;
+            ->addColumn('verify_shipment', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+               if($shipments->consolidation_id && $shipments->delivery_note_pending_status == 0){
+                    return 0;
                 }
                 else{
-                    return 0;
+                    return 1;
                 }
             })
             ->addColumn('RvShipmentAssignedAgent', function ($shipments){//using for checking the rv-assign-shipment-agent to not add checkbox in the datatable
