@@ -54,7 +54,7 @@
                         @csrf
                         <div class="container">
                             <div class="row justify-content-center">
-                                <div class="col-6 m-1">
+                                <div class="col-6 m-1 d-none">
                                     <label class="mr-10 font-medium-3"><b>Depart</b></label>
                                     <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
                                     <label class="mr-10 font-medium-3"><b>User</b></label>
@@ -612,7 +612,7 @@
     });
     
     function handleResponsiblesSwitchChange(isChecked, nameClass = null, cityResponsibleClass = null, old_value = null) {
-        if (isChecked) {
+        if (!isChecked) {
             $(nameClass ? nameClass : '#edit_name').addClass('d-none');
             $(cityResponsibleClass ? cityResponsibleClass : '#edit_city_responsible_hubs_admins_div').removeClass('d-none');
             $('#edit_name').val('');
@@ -626,10 +626,13 @@
         }
     }
 
-    $('#AddResponsibleModal #responsibles_switch').change(function() {
-        var isChecked = $(this).is(':checked');
-        handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
-    });
+    var isChecked = $(this).is(':checked');
+    handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
+
+    // $('#AddResponsibleModal #responsibles_switch').change(function() {
+    //     var isChecked = $(this).is(':checked');
+    //     handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
+    // });
 
 
 
