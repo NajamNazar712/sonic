@@ -320,9 +320,11 @@ class ReturnController extends Controller
         // $agents = Employee::where('trax_id','like','%Trax-C%')->get();
         // $agents = Admin::where('trax_id','like','%Trax-C%')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->leftjoin('cities as c','c.id','a.default_hub_id')
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)
             ->orWhere('a.trax_id','like','%Trax-C%')
+            ->select('a.id as id','a.name as name','a.trax_id as trax_id','c.name as city_name')
             ->get();
 
         $empid = Admin::find(Auth::id())->employee_id;
