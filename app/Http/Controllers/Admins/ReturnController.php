@@ -119,8 +119,9 @@ class ReturnController extends Controller
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
         ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
-        ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')
-        ->leftJoin('delivery_notes','delivery_notes.id','=','burmc.delivery_note_id')
+        // ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')
+        ->leftJoin('delivery_note_shipments','delivery_note_shipments.shipment_id','=','shipments.id')
+        ->leftJoin('delivery_notes','delivery_notes.id','=','delivery_note_shipments.delivery_note_id')
         ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -642,13 +643,13 @@ class ReturnController extends Controller
                     // return 1;
                     return 0;
                 }
-                // else{
-                //     return 0;
-                // }
+                else{
+                    return 1;
+                }
             })
             ->addColumn('verify_shipment', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
-               if($shipments->consolidation_id && $shipments->delivery_note_pending_status == 0){
-                    return 0;
+               if(!$shipments->consolidation_id && $shipments->delivery_note_pending_status == 0){
+                    return 0; //enable return confirm button
                 }
                 else{
                     return 1;

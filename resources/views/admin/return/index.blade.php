@@ -588,8 +588,8 @@
             </div>
         </div>
 
-        <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog"
-            aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+        {{-- Return COnfirm Modal on header confirm button click --}}
+        <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -2219,7 +2219,6 @@
                     ],
                     rowCallback: function(row, data, index) {
                         var info = table.page.info();
-                        console.log(data);
                         $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
                         if (data.OsaStatus == 0) {
@@ -2386,11 +2385,7 @@
                     }
                  
                 
-                    if (verify_shipment === 1) {
-                        table.button('.confirm').enable();
-                    }else{
-                        table.button('.confirm').disable();
-                    }
+                    
                     if (con_id) {
                         if (hub_ids.length == 0) {
                             hub_ids.push(hub_id);
@@ -2402,11 +2397,11 @@
                             });
                             return false;
                         }
-                        if (verify_shipment === 1) {
-                            table.button('.confirm').enable();
-                        }else{
-                            table.button('.confirm').disable();
-                        }
+                        // if (verify_shipment === 1) {
+                        //     table.button('.confirm').enable();
+                        // }else{
+                        //     table.button('.confirm').disable();
+                        // }
                         table.rows().nodes().each(function(index) {
                             var row = table.row(index);
                             if ($(row.node()).attr('consolidation_id') == con_id) {
@@ -2452,11 +2447,11 @@
                                 selected_rows.splice(index, 1);
                             }
 
-                            if (verify_shipment === 1) {
-                                table.button('.confirm').enable();
-                            }else{
-                                table.button('.confirm').disable();
-                            }
+                            // if (verify_shipment === 1) {
+                            //     table.button('.confirm').enable();
+                            // }else{
+                            //     table.button('.confirm').disable();
+                            // }
 
                             var restricted_index = $.inArray(id, restricted_rows);
                             if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
@@ -2560,6 +2555,14 @@
                             }
 
                         }
+                    }
+                    if (verify_shipment === 1) {
+                        // console.log('button should be enable');
+                        table.button('.confirm').enable();
+                    }
+                    else{
+                        // console.log('button should be disabled');
+                        table.button('.confirm').disable();
                     }
 
                 });
