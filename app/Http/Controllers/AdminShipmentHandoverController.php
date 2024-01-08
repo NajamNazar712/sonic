@@ -738,7 +738,7 @@ class AdminShipmentHandoverController extends Controller
           $responsible->admin_id = NULL;
       } else {
           $responsible->name = NULL;
-          $responsible->admin_id = $request->edit_city_responsible_hubs_admins;
+          $responsible->admin_id = $request->city_responsible_hubs_admins;
       }
   
       $responsible->updated_by = Auth::id();
