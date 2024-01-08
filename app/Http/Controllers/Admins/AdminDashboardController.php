@@ -7138,21 +7138,23 @@ class AdminDashboardController extends Controller
                     $rider_ids = [];
                     if ($existing_sale_commission) {
                         $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $existing_rider_id){
-                            $rider_ids[] = $existing_rider_id->rider_id;
+                        foreach($existing_rider_ids as $key => $existing_rider_id){
+                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
                         }
-                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                        SalesCommission::where('shipper_id', $id)->delete();
+                        // SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        // SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        // SalesCommission::where('shipper_id', $id)->delete();
                     }
 
+                    
                     $new_ids = array_diff($request->user_id, $rider_ids);
                     $array = array_fill_keys($request->user_id, null);                    
                     foreach ($new_ids as $edit_id) {
                         $array[$edit_id] = $edit_id;
                     }
-                   
+                    
                     $array = array_combine(range(1, count($array)), array_values($array));
+                    dd($request->user_id, $array,$rider_ids,$new_ids);
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -7180,8 +7182,8 @@ class AdminDashboardController extends Controller
                                 }
                             } else {
                                 if(count($rider_ids) > 0){
-                                    if(isset($rider_ids[$row_id - 1])){
-                                        $sales_commission_user->rider_id = $rider_ids[$row_id - 1];
+                                    if(isset($rider_ids[$row_id])){
+                                        $sales_commission_user->rider_id = $rider_ids[$row_id];
                                     }
                                 }
                                 if(isset($array[$row_id])){
