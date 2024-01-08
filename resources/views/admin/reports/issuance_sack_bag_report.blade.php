@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Utilization of Sack Bag')
+@section('title', 'Issuance of Sack Bag')
 
 
 @section('content')
     <h1 class="mb-1">
-        Utilization of Sack Bag 
+        Issuance of Sack Bag 
     </h1>
 
     <div class="card">
@@ -55,9 +55,9 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
-                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Origin</th>
                             {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
+                            <th class="border-primary border-darken-1">Issuance Sack Bag</th>
                             {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
@@ -79,7 +79,7 @@
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Stock Sack Bag List</h4>
+                <h4 class="modal-title white">Sack Bag List</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -105,36 +105,6 @@
     </div>
 <!----end of show Address modal --->
 
-    <div class="modal fade text-left" id="ReusedsackBagModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="ReusedsackBagModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Stock Sack Bag List</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <table class="table table-bordered " id="stock_sack_bag_datatable">
-                            <thead>
-                                    <tr role="row" class="bg-primary white">
-                                        <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Sack Bag No#</th>
-                                    </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-
-                        </table>
-                </div>
-            </div>
-        </div>
-        </div>
-    </div>
 
 @endsection
 
@@ -212,7 +182,7 @@
 
             
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination',
+                placeholder:'Select Origin',
                 width:'100%',
                 allowClear:true
             });
@@ -281,20 +251,20 @@
                     },
                     serverSide: true,
                     ajax:{
-                        url: '{{ route('admin.reports.sack_bag_utilization.list') }}',
+                        url: '{{ route('admin.reports.issuance_sack_bag.list') }}',
                         data: function (d) {
-                            d.destination_id = $('#search_origin').val();
+                            d.origin_id = $('#search_origin').val();
                             d.search_from = $('input[name="from_date_formatted"]').val();
                             d.search_to = $('input[name="to_date_formatted"]').val();
                         }
                     },
-                    rowId: 'destination_id',
+                    rowId: 'origin_id',
                     order: [[1, 'desc']],
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         
-                        { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
+                        { data:'origin_name',class: 'align-middle text-center origin_name', orderable: false, searchable: false},
                         // { data:'stock_sack_bag_btn',class: 'align-middle text-center stock_sack_bag', orderable: false, searchable: false},
                         { data:'sack_bag_count_btn',class: 'align-middle text-center sack_bag_count', orderable: false, searchable: false},
                         // { data:'re_used_sack_bag_btn',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
@@ -326,14 +296,14 @@
         // $("body").on('click','.stock_sack_bag_btn',function()
         $("body").on('click','.sack_bag_count_btn',function(){
             $("#StockSackBagModal table tbody").empty();
-            var destination_id=$(this).parent('td').parent('tr').attr('id');
+            var origin_id=$(this).parent('td').parent('tr').attr('id');
             var from_date=$("#from_date").val();
             var to_date=$("#to_date").val();
             $.ajax({
-                url:'{{ route('admin.reports.sack_bag_utilization.sack_bag_list') }}',
+                url:'{{ route('admin.reports.issuance_sack_bag.sack_bag_list') }}',
                 method:'POST',
                 data:{
-                    'destination_id':destination_id,
+                    'origin_id':origin_id,
                     // 'from_date':from_date,
                     // 'to_date':to_date,
                     '_token':'{{ csrf_token() }}'

@@ -2966,6 +2966,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminReportsController@reused_sack_bag_index')->name('index');
             Route::get('list','Admins\AdminReportsController@reused_sack_bag_list')->name('list');
         });
+        Route::prefix('issuance_sack_bag')->name('issuance_sack_bag.')->group(function(){
+            Route::get('','Admins\AdminReportsController@issuance_sack_bag_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@issuance_sack_bag_list')->name('list');
+            Route::post('sack_bag_list','Admins\AdminReportsController@get_issuance_sack_bag_list')->name('sack_bag_list');
+
+            
+
+        });
     });
 
     //Reports end
