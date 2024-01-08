@@ -49,8 +49,8 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name)){
-            $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name ? Admin::where('id' ,$row->admin_id)->first()->name : '-'  . '</option> ';
+          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
+            $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
 
           }
         }
