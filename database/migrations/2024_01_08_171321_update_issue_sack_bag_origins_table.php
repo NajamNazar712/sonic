@@ -25,6 +25,9 @@ class UpdateIssueSackBagOriginsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('issue_sack_bag_origins', function (Blueprint $table) {
+            $table->dropColumn('sack_destination_id');
+
+        });
     }
 }
