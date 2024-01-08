@@ -941,7 +941,6 @@
                                 call_history.forEach(function(item, index) {
                                 date = item.data.created_at.split(' ')
 
-                                console.log(call_history);
                                 shipment += '<tr>';
                                 shipment += '<td>' + (index + 1) + '</td>'; // S.no
                                 shipment += '<td>' + date[0] + '</td>';

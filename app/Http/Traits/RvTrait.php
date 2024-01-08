@@ -549,7 +549,7 @@ trait RvTrait
             $amount = intval($s_amount);
             $shipment = Shipment::find($request->shipment_id);
             $user_id = $shipment->user_id;
-            $intercept_type = $request->consignee;
+            $intercept_type = $request->intercept_type;
 
             $shipment_status = $shipment->status_shipper->name;
             $crm = false;
@@ -597,7 +597,11 @@ trait RvTrait
                             $shipment->intercepted = 1;
                             $shipment->save();
 
-                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
+                            $shipper_status_id = 54; //intercept requested
+                            $consignee_status_id = 54; //intercept requested
+                            $status_reason_id = Null;
+                            $remarks = $request->remarks;
+                            ShipmentsJourneyController::add($request->shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, Auth::id());
                         }
 
                         //Same Consignee
@@ -630,7 +634,15 @@ trait RvTrait
                             $shipment->intercepted = 1;
                             $shipment->save();
 
-                            ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
+
+
+                            $shipper_status_id = 55; //intercept approved
+                            $consignee_status_id = 55; //intercept approved
+                            $status_reason_id = Null;
+                            $remarks = $request->remarks;
+                            ShipmentsJourneyController::add($request->shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, Auth::id());
+
+                            // ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
                             if ($request->hasFile('replacement_parcel_image')) {
                                 $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);

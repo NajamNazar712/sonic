@@ -125,7 +125,7 @@ class ReturnController extends Controller
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
         ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-        ->join('zones as z' ,'dc.zone_id', '=' , 'z.id')
+        ->leftJoin('zones as z' ,'dc.zone_id', '=' , 'z.id')
         ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
         ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
         
