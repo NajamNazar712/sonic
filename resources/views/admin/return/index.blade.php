@@ -2401,11 +2401,7 @@
                             });
                             return false;
                         }
-                        if (verify_shipment === 1) {
-                            table.button('.confirm').enable();
-                        }else{
-                            table.button('.confirm').disable();
-                        }
+                        
                         table.rows().nodes().each(function(index) {
                             var row = table.row(index);
                             if ($(row.node()).attr('consolidation_id') == con_id) {
