@@ -13240,7 +13240,6 @@ class AdminReportsController extends Controller
 
     public function sack_bag_utilization_list(Request $request) {
 
-        $destination_id=$request->destination_id;
       
         // $sack_bag_utilization = CargoManifestBag::JOIN('cities AS c','c.id','=','cargo_manifest_bags.destination_hub_id')    
         // ->select('c.id AS destination_id','c.name AS destination_city', DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_no) AS stock_sack_bag'))
@@ -13248,25 +13247,41 @@ class AdminReportsController extends Controller
         // ->where('cargo_manifest_bags.sack_bag_no', '!=', 'N/A')
         // ->where('cargo_manifest_bags.destination_hub_id','=',$destination)
         // ->groupBy('cargo_manifest_bags.destination_hub_id');
-        $sack_bag_utilization = CargoManifestBag::join('cities as c', function ($join) {
-            $join->on('c.id', '=', 'cargo_manifest_bags.destination_hub_id')
-                 ->where('c.status', '=', 1);
-        })
-        ->where('cargo_manifest_bags.is_sack_bag', '=', 1)
-        ->where('cargo_manifest_bags.destination_hub_id', '=', $destination_id)
-        ->groupBy('cargo_manifest_bags.destination_hub_id')
-        ->select([
-            'c.id as destination_id',
-            'c.name as destination_name',
-            DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as stock_sack_bag'),
-            // DB::raw('COUNT(cargo_manifest_bags.sack_bag_id) - COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as re_used_sack_bag'),
-        ])
-        ->get();
 
+        //old qurey
+        // $sack_bag_utilization = CargoManifestBag::join('cities as c', function ($join) {
+        //     $join->on('c.id', '=', 'cargo_manifest_bags.destination_hub_id')
+        //          ->where('c.status', '=', 1);
+        // })
+        // ->where('cargo_manifest_bags.is_sack_bag', '=', 1)
+        // ->where('cargo_manifest_bags.destination_hub_id', '=', $destination_id)
+        // ->groupBy('cargo_manifest_bags.destination_hub_id')
+        // ->select([
+        //     'c.id as destination_id',
+        //     'c.name as destination_name',
+        //     DB::raw('COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as stock_sack_bag'),
+        //     // DB::raw('COUNT(cargo_manifest_bags.sack_bag_id) - COUNT(DISTINCT cargo_manifest_bags.sack_bag_id) as re_used_sack_bag'),
+        // ])
+        // ->get();
+
+        $sack_bag_utilization=IssueSackBagOrigin::join('cities as c','c.id','=','issue_sack_bag_origins.sack_destination_id')->whereNotNull('issue_sack_bag_origins.sack_destination_id')
+        ->select('c.name as destination_name','c.id as destination_id',DB::raw('COUNT(issue_sack_bag_origins.id) AS sack_bag_count'))->groupBy('issue_sack_bag_origins.sack_destination_id');
+
+        if($destination_id=$request->get('destination_id'))
+        {
+            $sack_bag_utilization->where('issue_sack_bag_origins.sack_destination_id',$destination_id);
+        }
         $datatable = Datatables::of($sack_bag_utilization)
-        ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
-            if ($sack_bag_utilization->stock_sack_bag > 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
+        // ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
+        //     if ($sack_bag_utilization->stock_sack_bag > 0) {
+        //         return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
+        //     } else {
+        //         return 0;
+        //     }
+        // });
+        ->addColumn('sack_bag_count_btn', function ($sack_bag_utilization) {
+            if ($sack_bag_utilization->sack_bag_count > 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">'.$sack_bag_utilization->sack_bag_count.'</button>';
             } else {
                 return 0;
             }
@@ -13289,11 +13304,49 @@ class AdminReportsController extends Controller
         
     }
 
+    public function issuance_sack_bag_index()
+    {
+        $origins=City::where('status','=',1)->get();
+        return view('admin.reports.issuance_sack_bag_report',compact('origins'));
+    }
+    public function issuance_sack_bag_list(Request $request)
+    {
+        $issuance_sack_bag=IssueSackBagOrigin::join('cities as c','c.id','=','issue_sack_bag_origins.origin')->where('issue_sack_bag_origins.status',1)->whereNotNull('issue_sack_bag_origins.origin')
+        ->select('c.name as origin_name','c.id as origin_id',DB::raw('COUNT(issue_sack_bag_origins.id) AS sack_bag_count'))->groupBy('issue_sack_bag_origins.origin');
+
+        if($origin_id=$request->get('origin_id'))
+        {
+            $issuance_sack_bag->where('issue_sack_bag_origins.origin',$origin_id);
+        }
+
+        $datatable = Datatables::of($issuance_sack_bag)
+        ->addColumn('sack_bag_count_btn', function ($issuance_sack_bag) {
+            if ($issuance_sack_bag->sack_bag_count > 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">'.$issuance_sack_bag->sack_bag_count.'</button>';
+            } else {
+                return 0;
+            }
+        });
+        return $datatable->make(true);
+
+    }
+
     public function get_sack_bag_list(Request $request){
         $destination_id=$request->destination_id;
-        $sack_bag_list=CargoManifestBag::join('issue_sack_bag_origins as is','is.id','=','cargo_manifest_bags.sack_bag_id')
-        ->select('is.sack_bag_no as sack_bag_no','cargo_manifest_bags.sack_bag_id as sack_bag_id')
-        ->where('destination_hub_id',$destination_id)->where('is_sack_bag',1)->groupBy('cargo_manifest_bags.sack_bag_id');
+        // $sack_bag_list=CargoManifestBag::join('issue_sack_bag_origins as is','is.id','=','cargo_manifest_bags.sack_bag_id')
+        // ->select('is.sack_bag_no as sack_bag_no','cargo_manifest_bags.sack_bag_id as sack_bag_id')
+        // ->where('destination_hub_id',$destination_id)->where('is_sack_bag',1)->groupBy('cargo_manifest_bags.sack_bag_id');
+        $sack_bag_list=IssueSackBagOrigin::where('sack_destination_id',$destination_id)->where('status',1)->select('sack_bag_no','id as sack_bag_id');
+        if($sack_bag_list->exists()){
+            $sack_bag_list=$sack_bag_list->get();
+            return response()->json(['status'=>1,'sack_bag_list'=>$sack_bag_list]);
+            // $datatable = Datatables::of($sack_bag_list);
+            // return $datatable->make(true);
+        }
+    }
+    public function get_issuance_sack_bag_list(Request $request){
+        $origin_id=$request->origin_id;
+        $sack_bag_list=IssueSackBagOrigin::where('origin',$origin_id)->where('status',1)->select('issue_sack_bag_origins.sack_bag_no','issue_sack_bag_origins.id as sack_bag_id');
         if($sack_bag_list->exists()){
             $sack_bag_list=$sack_bag_list->get();
             return response()->json(['status'=>1,'sack_bag_list'=>$sack_bag_list]);
