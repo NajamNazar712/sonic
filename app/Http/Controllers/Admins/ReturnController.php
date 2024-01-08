@@ -644,7 +644,7 @@ class ReturnController extends Controller
                     return 0;
                 }
                 else{
-                    return 0;
+                    return 1;
                 }
             })
             ->addColumn('verify_shipment', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
