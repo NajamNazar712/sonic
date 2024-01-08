@@ -4740,12 +4740,12 @@
                 $('#user_commission').val('');
                 $('#user_commission').attr('disabled', false)
             }
-            var index = $.inArray(id, selected_users);
-            if (index !== -1) {
-                var error = 'User previously selected!';
-                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                $('#user_select').val(null).trigger('change');
-            }
+            // var index = $.inArray(id, selected_users);
+            // if (index !== -1) {
+            //     var error = 'User previously selected!';
+            //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //     $('#user_select').val(null).trigger('change');
+            // }
         });
 
         var riders_permanents_data = {!! json_encode($riders_permanents) !!};
