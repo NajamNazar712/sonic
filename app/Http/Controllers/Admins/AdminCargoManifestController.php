@@ -1068,8 +1068,9 @@ class AdminCargoManifestController extends Controller
     {
 
         $sack_bag_no=$request->input('sack_bag_no');
-        $origin_hub_id=$request->input('origin_hub_id');
-        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no)->where('origin',$origin_hub_id)->where('status',1);
+        // $origin_hub_id=$request->input('origin_hub_id');
+        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no)->where('status',1);
+        // ->where('origin',$origin_hub_id)
         // if($sack_bag->exists()){
             $shipments = 0;
             $quantity = 0;
