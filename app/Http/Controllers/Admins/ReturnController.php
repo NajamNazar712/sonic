@@ -5316,7 +5316,6 @@ class ReturnController extends Controller
                 });
             }
 
-            // $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
             $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
             $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
             
@@ -5356,13 +5355,7 @@ class ReturnController extends Controller
                 $already_assigned = implode(',', $already_assigned);
                 $assigned_shipment = implode(',', $assigned_shipment);
                 $assigned_to_new_user = implode(',', $assigned_to_new_user);
-                // $assigned_shipment_count = explode(',', $assigned_shipment);
-                // $assigned_shipment_count = array_filter($assigned_shipment_count, function($value) {
-                //     return $value !== "";
-                // });
-
-                // $assigned_shipment_count = count(array_chunk($assigned_shipment_count, 1));\
-                // if ($already_assigned == '') {
+                
                  if ($already_assigned == '') {
                     return response()->json([
                         'status' => 1,
@@ -7600,6 +7593,7 @@ class ReturnController extends Controller
         if ($request->get('from_date') && $request->get('to_date')) {
         $from = $request->get('from_date');
         $to = $request->get('to_date');
+        $agent_productivity = $agent_productivity->whereBetween('new_ras.created_at',[$from,$to]);
         $agent_productivity = $agent_productivity->whereBetween('ras.created_at',[$from,$to]);
         
         }
