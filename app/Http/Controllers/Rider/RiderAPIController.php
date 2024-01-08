@@ -59,7 +59,7 @@ use App\http\Models\HR\EmployeeNature;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRemark;
-use Barryvdh\Snappy\Facades\SnappyPdf;
+use Barryvdh\Snridery\Facades\SnrideryPdf;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\Rider\RiderRequest;
@@ -3595,7 +3595,7 @@ RiderAPIController extends Controller
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
-                            $environment = config('app.env');
+                            $environment = config('rider.env');
 
                             if ($request->has('audio')) {
                                 $time = Carbon::now()->toDateString();
@@ -3760,7 +3760,7 @@ RiderAPIController extends Controller
 
                     $rider_pickup->save();
 
-                    $environment = config('app.env');
+                    $environment = config('rider.env');
 
                     if ($request->has('audio')) {
                         if ($environment == 'production') {
@@ -3886,7 +3886,7 @@ RiderAPIController extends Controller
                             $rider_return_delivery->picture_path = $picture_path;
                             $rider_return_delivery->save();
 
-                            $environment = config('app.env');
+                            $environment = config('rider.env');
                             if ($request->has('audio')) {
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
@@ -5060,7 +5060,7 @@ RiderAPIController extends Controller
                                 $rider_return_delivery->save();
                             }
 
-                            $environment = config('app.env');
+                            $environment = config('rider.env');
                             if ($request->has('audio')) {
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
@@ -8271,7 +8271,7 @@ RiderAPIController extends Controller
                                 $rider_return_delivery->save();
                             }
 
-                            $environment = config('app.env');
+                            $environment = config('rider.env');
                             if ($request->has('audio')) {
                                 $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
@@ -9951,7 +9951,7 @@ RiderAPIController extends Controller
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                    <link rel="stylesheet" type="text/css" href="' . asset('rider-assets/css/bootstrap.min.css') . '">
 
                     <title>Payslip</title>
 
@@ -10229,7 +10229,7 @@ RiderAPIController extends Controller
                       </body>
                       </html>';
 
-                    $pdf = SnappyPDF::loadHTML($html);
+                    $pdf = SnrideryPDF::loadHTML($html);
                     $filename = 'payslip_' . $payslip->id .  Carbon::now()->format('Uu')  . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
                     $result = $pdf->download($filename);
@@ -10747,15 +10747,15 @@ RiderAPIController extends Controller
             $data['name'] = $employee->name;
             $data['designation'] = "Rider";
             $data['department'] = "Operations";
-            $data['approver_email'] = $employee->line_manager->email;
-            $data['approver_name'] = $employee->line_manager->name;
+            $data['riderrover_email'] = $employee->line_manager->email;
+            $data['riderrover_name'] = $employee->line_manager->name;
             $data['user_type'] = 0;
             return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "Rider not found"]);
     }
 
-    public function leave_apply(Request $request)
+    public function leave_riderly(Request $request)
     {
         return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rules = [
@@ -10781,7 +10781,7 @@ RiderAPIController extends Controller
                         $leave_request = $leave_request->first();
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
-                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->riderlied_reason = $request->reason;
                         $leave_request->save();
                         $message = "Leave Request edited successfully";
                     } else {
@@ -10798,15 +10798,15 @@ RiderAPIController extends Controller
                     $leave_request->reporter_id = $employee->line_manager_id;
                     $leave_request->from = $request->from;
                     $leave_request->to = $request->to;
-                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->riderlied_reason = $request->reason;
                     $leave_request->save();
 
                     $user = Admin::where('employee_id', $leave_request->reporter_id)->first();
-                    NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
-                    NotificationsController::app_notification(12, $user->id, 1, $leave_request->id);
+                    NotificationsController::rider_notification(11, $rider_id, 2, $leave_request->id);
+                    NotificationsController::rider_notification(12, $user->id, 1, $leave_request->id);
                     $message = "Leave Request submitted successfully";
                 }
-                return response()->json(['status' => 0, 'apply_message' => $message]);
+                return response()->json(['status' => 0, 'riderly_message' => $message]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
             }
@@ -10819,7 +10819,7 @@ RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.riderlied_reason as riderlied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
@@ -10830,7 +10830,7 @@ RiderAPIController extends Controller
                 $datum['id'] = $employee_leave->id;
                 $datum['from'] = $employee_leave->from;
                 $datum['to'] = $employee_leave->to;
-                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['riderlied_reason'] = $employee_leave->riderlied_reason;
                 $datum['rejected_reason'] = $employee_leave->rejected_reason;
                 $datum['status_id'] = $employee_leave->status_id;
                 $datum['status'] = $employee_leave->status;
@@ -10929,9 +10929,9 @@ RiderAPIController extends Controller
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if ($attendance->leave_status == 2) {
-                        $datum["status"] = 4; //adjustment apply
+                        $datum["status"] = 4; //adjustment riderly
                     } else if ($attendance->leave_status == 1) {
-                        $datum["status"] = 5; //leave apply
+                        $datum["status"] = 5; //leave riderly
                     } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
@@ -11226,9 +11226,9 @@ RiderAPIController extends Controller
         $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
         if ($global_settings->exists()) {
             $global_settings = $global_settings->first();
-            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+            return response()->json(['status' => 0, 'rider_version' => $global_settings->setting_value]);
         } else {
-            return response()->json(['status' => 0, 'app_version' => 24]);
+            return response()->json(['status' => 0, 'rider_version' => 24]);
         }
     }
 
@@ -11344,7 +11344,7 @@ RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
-                                    ShipmentScanningJourneyController::add($shipment->id, 31, 5, $rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'app');
+                                    ShipmentScanningJourneyController::add($shipment->id, 31, 5, $rider_id, null, null ,null,null, $request->actual_location_latitude, $request->actual_location_longitude ,'rider');
 
                                     $shipment_count += 1;
                                     $notification_shipments[] = $shipment->id;
@@ -11496,7 +11496,7 @@ RiderAPIController extends Controller
                                         Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                         $rider_delivery->picture_path = $picture_path;
                                         $rider_delivery->save();
-                                        $environment = config('app.env');
+                                        $environment = config('rider.env');
 
                                         if ($request->has('audio')) {
                                             $time = Carbon::now()->toDateString();
@@ -11633,7 +11633,7 @@ RiderAPIController extends Controller
                 $employee_device_token->device_token = $request->get('device_token');
                 $employee_device_token->save();
             }
-            $rider->current_app_version = $request->app_version;
+            $rider->current_rider_version = $request->rider_version;
             $rider->save();
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
@@ -11758,7 +11758,7 @@ RiderAPIController extends Controller
                 $rider = $rider->first();
                 if ($rider->status) {
                     if (Hash::check($request->input('pin'), $rider->pin)) {
-                        $environment = config('app.env');
+                        $environment = config('rider.env');
                         $settings = GlobalSettings::where('type', 'rider_otp');
                         if ($settings->exists()) {
                             $settings = $settings->first();
@@ -11820,7 +11820,7 @@ RiderAPIController extends Controller
                     }
                 } else {
                     if ($rider->first_login == 0) {
-                        return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for approval from HR."]);
+                        return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for riderroval from HR."]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                     }
@@ -11829,7 +11829,7 @@ RiderAPIController extends Controller
                 $employee = Employee::whereIn('request_status_id', [1, 2])->where('employee_type_id', 2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
                 if ($employee->exists()) {
                     $employee = $employee->first();
-                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
+                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for riderroval from HR."]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
@@ -11914,15 +11914,15 @@ RiderAPIController extends Controller
             $data['name'] = $rider->name;
             $data['designation'] = "Rider";
             $data['department'] = "Operations";
-            $data['approver_email'] = $rider->line_manager->email;
-            $data['approver_name'] = $rider->line_manager->name;
+            $data['riderrover_email'] = $rider->line_manager->email;
+            $data['riderrover_name'] = $rider->line_manager->name;
             $data['user_type'] = 0;
             return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "Rider not found"]);
     }
 
-    public function adjustment_apply(Request $request)
+    public function adjustment_riderly(Request $request)
     {
         $rules = [
             'date' => ['required'],
@@ -11950,7 +11950,7 @@ RiderAPIController extends Controller
                     $leave_request->employee_type_id = 2;
                     $leave_request->reporter_id = $rider->line_manager_id;
                     $leave_request->date = $request->date;
-                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->riderlied_reason = $request->reason;
                     $leave_request->save();
                     $notify = false;
                     $user = Admin::find($rider->line_manager->admin->id);
@@ -11958,12 +11958,12 @@ RiderAPIController extends Controller
                         $user_id = $user->id;
                         $notify = true;
                     }
-                    NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
+                    NotificationsController::rider_notification(17, $rider_id, 2, $leave_request->id);
                     if ($notify) {
-                        NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
+                        NotificationsController::rider_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
                     }
                     $message = "Adjustment Request submitted successfully";
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
+                    return response()->json(['status' => 0, 'riderly_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Department Head Not Found']);
                 }
@@ -11978,7 +11978,7 @@ RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $employee_id = $request->rider_employee;
         $employee_leaves = EmployeeAttendanceAdjustment::join('leave_statuses as ls', 'employee_attendance_adjustments.status', '=', 'ls.id')
-            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.applied_reason as applied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
+            ->select('employee_attendance_adjustments.id as id', 'employee_attendance_adjustments.date as date', 'employee_attendance_adjustments.riderlied_reason as riderlied_reason', 'employee_attendance_adjustments.rejected_reason as rejected_reason', 'employee_attendance_adjustments.status as status_id', 'ls.name as status')
             ->where('employee_id', $employee_id)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
@@ -11988,7 +11988,7 @@ RiderAPIController extends Controller
                 $datum = array();
                 $datum['id'] = $employee_leave->id;
                 $datum['date'] = $employee_leave->date;
-                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['riderlied_reason'] = $employee_leave->riderlied_reason;
                 $datum['rejected_reason'] = $employee_leave->rejected_reason;
                 $datum['status_id'] = $employee_leave->status_id;
                 $datum['status'] = $employee_leave->status;
@@ -12099,8 +12099,8 @@ RiderAPIController extends Controller
                 $data['name'] = $employee->name;
                 $data['designation'] = "Rider";
                 $data['department'] = "Operations";
-                $data['approver_email'] = $employee->line_manager->email;
-                $data['approver_name'] = $employee->line_manager->name;
+                $data['riderrover_email'] = $employee->line_manager->email;
+                $data['riderrover_name'] = $employee->line_manager->name;
                 $data['user_type'] = 0;
                 $data['total_leaves'] = $employee->leave_count;
                 $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
@@ -12113,7 +12113,7 @@ RiderAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "Employee not found!"]);
     }
 
-    public function leave_apply_v2(Request $request)
+    public function leave_riderly_v2(Request $request)
     {
         $rules = [
             'from' => ['required'],
@@ -12144,7 +12144,7 @@ RiderAPIController extends Controller
                         $start_year = $start_year->subYear(1);
                     }
                     if (!($from_date >= $start_year && $to_date <= $end_year)) {
-                        return response()->json(['status' => 1, 'message' => 'Leave Request Can\'t be approve']);
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Can\'t be riderrove']);
                     }
                     //checking for fiscal year end
                 }
@@ -12157,14 +12157,14 @@ RiderAPIController extends Controller
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
                         if ($employee->leave_count < $diffDays) {
-                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for riderlying leaves is greater than your available Annual Quota.']);
                         } else {
                             $employee->leave_count = $employee->leave_count - $diffDays;
                         }
                     }
                     if ($request->leave_type == 2) {
                         if ($employee->employee_gender_id == 1) {
-                            return response()->json(['status' => 1, 'message' => 'Maternity for males : Your gender doesn\'t allow to apply this leave category.']);
+                            return response()->json(['status' => 1, 'message' => 'Maternity for males : Your gender doesn\'t allow to riderly this leave category.']);
                         }
                         if ($diffDays > $leave_type->count) {
                             return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from ' . $leave_type->count . ' days']);
@@ -12172,7 +12172,7 @@ RiderAPIController extends Controller
                     }
                     if ($request->leave_type == 3) {
                         if ($employee->employee_gender_id == 2) {
-                            return response()->json(['status' => 1, 'message' => 'Your gender doesn\'t allow to apply this leave category.']);
+                            return response()->json(['status' => 1, 'message' => 'Your gender doesn\'t allow to riderly this leave category.']);
                         }
                         if ($diffDays > $leave_type->count) {
                             return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from ' . $leave_type->count . ' days']);
@@ -12180,7 +12180,7 @@ RiderAPIController extends Controller
                     }
                     if ($request->leave_type == 4) {
                         if ($employee->religion_id != 1) {
-                            return response()->json(['status' => 1, 'message' => 'Your are not allow to apply this leave category.']);
+                            return response()->json(['status' => 1, 'message' => 'Your are not allow to riderly this leave category.']);
                         }
                         if ($diffDays > $leave_type->count) {
                             return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from ' . $leave_type->count . ' days']);
@@ -12202,7 +12202,7 @@ RiderAPIController extends Controller
                             $leave_request = $leave_request->first();
                             $leave_request->from = $request->from;
                             $leave_request->to = $request->to;
-                            $leave_request->applied_reason = $request->reason;
+                            $leave_request->riderlied_reason = $request->reason;
                             $leave_request->leave_type = $request->leave_type;
                             $leave_request->save();
                             $message = "Leave Request edited successfully";
@@ -12220,15 +12220,15 @@ RiderAPIController extends Controller
                         $leave_request->reporter_id = $employee->line_manager->admin->id;
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
-                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->riderlied_reason = $request->reason;
                         $leave_request->leave_type = $request->leave_type;
                         $leave_request->save();
                         $message = "Leave Request submitted successfully";
                     }
                     $employee->save();
-                    NotificationsController::app_notification(11, $request->rider_id, 2, $leave_request->id);
-                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
+                    NotificationsController::rider_notification(11, $request->rider_id, 2, $leave_request->id);
+                    NotificationsController::rider_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                    return response()->json(['status' => 0, 'riderly_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit can\'t be exceed from 56 days.']);
                 }
@@ -12245,7 +12245,7 @@ RiderAPIController extends Controller
         $rider_employee = $request->rider_employee;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
-            ->select('employee_leaves.employee_id as employee_id', 'employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            ->select('employee_leaves.employee_id as employee_id', 'employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.riderlied_reason as riderlied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'lt.name as leave_type', 'lt.id as leave_type_id')
             ->where('employee_id', $rider_employee)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
@@ -12256,7 +12256,7 @@ RiderAPIController extends Controller
                 $datum['id'] = $employee_leave->id;
                 $datum['from'] = $employee_leave->from;
                 $datum['to'] = $employee_leave->to;
-                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['riderlied_reason'] = $employee_leave->riderlied_reason;
                 $datum['rejected_reason'] = $employee_leave->rejected_reason;
                 $datum['status_id'] = $employee_leave->status_id;
                 $datum['status'] = $employee_leave->status;
@@ -13007,7 +13007,7 @@ RiderAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'app');
+                                        ShipmentScanningJourneyController::add($shipment->id, 4, 5, $request->rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'rider');
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -13086,7 +13086,7 @@ RiderAPIController extends Controller
                                     if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $complaint_row = 1;
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 4, 5, $rider_id, null, null ,null,2, $request->latitude, $request->longitude ,'app');
+                                    ShipmentScanningJourneyController::add($shipment->id, 4, 5, $rider_id, null, null ,null,2, $request->latitude, $request->longitude ,'rider');
                                     $consolidation_details = DeliveryController::check_consolidation($shipment->id);
 
                                     $consolidation_flag = FALSE;
@@ -13186,7 +13186,7 @@ RiderAPIController extends Controller
     public function delivery_note_otp_generation(Request $request)
     {
         $settings = GlobalSettings::where('type', 'rider_otp');
-        $environment = config('app.env');
+        $environment = config('rider.env');
 
         if ($settings->exists()) {
             $settings = $settings->first();
@@ -13199,7 +13199,7 @@ RiderAPIController extends Controller
                         $rider->delivery_note_otp = $otp;
                         $rider->otp_date = Carbon::now();
                         $rider->save();
-                        NotificationsController::app_notification(9, $rider->id, 2, $otp);
+                        NotificationsController::rider_notification(9, $rider->id, 2, $otp);
                         NotificationsController::send(144, $rider, $otp);
                         return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
                     } else {
@@ -13218,7 +13218,7 @@ RiderAPIController extends Controller
 
     public function delivery_note_otp_verification(Request $request)
     {
-        $environment = config('app.env');
+        $environment = config('rider.env');
         if ($environment == 'production' || $environment == 'staging') {
             $rider = Rider::find($request->rider_id);
             if ($rider) {
@@ -13299,7 +13299,7 @@ RiderAPIController extends Controller
                         $serial++;
                     }
                 }
-                return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for approval']);
+                return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for riderroval']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
             }
@@ -13507,7 +13507,7 @@ RiderAPIController extends Controller
                 if (!$dispute_check) {
                     return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 5, $rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'app');
+                ShipmentScanningJourneyController::add($shipment->id, 7, 5, $rider_id, null, null, null, 2, $request->latitude, $request->longitude, 'rider');
                 if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -13945,7 +13945,7 @@ RiderAPIController extends Controller
                         $serial++;
                     }
                 }
-                return response()->json(['status' => 0, 'create_message' => 'Return note Request has been created successfully & Pending for approval']);
+                return response()->json(['status' => 0, 'create_message' => 'Return note Request has been created successfully & Pending for riderroval']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for return yet or already in another return note, please check tracking!']);
             }
