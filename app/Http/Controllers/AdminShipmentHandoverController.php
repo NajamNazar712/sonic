@@ -50,7 +50,7 @@ class AdminShipmentHandoverController extends Controller
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
           }else if ($type == 1 && !isset($row->name)){
-            $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
+            $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name  ?? '-'  . '</option> ';
 
           }
         }
