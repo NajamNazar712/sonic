@@ -318,7 +318,13 @@ class ReturnController extends Controller
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
         
         // $agents = Employee::where('trax_id','like','%Trax-C%')->get();
-        $agents = Admin::where('trax_id','like','%Trax-C%')->get();
+        // $agents = Admin::where('trax_id','like','%Trax-C%')->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)
+            ->where('a.status',1)
+            ->orWhere('a.trax_id','like','%Trax-C%')
+            ->get();
+
         $empid = Admin::find(Auth::id())->employee_id;
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
@@ -5503,46 +5509,57 @@ class ReturnController extends Controller
                     }
                     else{
                         // $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
-                        // $agent_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
-                        $admin_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
-                        // $admin_id = Admin::where('employee_id', $agent_id->id)->first();
-                        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
-                        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
-    
-                        $no_zone_shipment = [];
-                        if(!empty($sorted_agents_zones))
-                        {
-                            $shipment = Shipment::where('id',$shipment_id)->first();
-                            if($shipment->exists())
+                        // $admin_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
+                        $admin_id = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        ->where('admin_roles.department_id',3)
+                        ->where('a.id', $row['agent_id'])
+                        ->where('a.status',1)
+                        ->orWhere('a.trax_id','like','%Trax-C%')
+                        ->first();
+                        if($admin_id){
+                            
+                            $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
+                            $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
+        
+                            $no_zone_shipment = [];
+                            if(!empty($sorted_agents_zones))
                             {
-                                
-                                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
-                                    $include_shippers = $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
-                                    if($include_shippers == true){
-                                        $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                                $shipment = Shipment::where('id',$shipment_id)->first();
+                                if($shipment->exists())
+                                {
+                                    
+                                    if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
+                                        $include_shippers = $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
+                                        if($include_shippers == true){
+                                            $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                                        }
+                                        else{
+                                            return redirect()->back()->with('error', 'Shipper is disabled');
+                                        }
                                     }
                                     else{
-                                        return redirect()->back()->with('error', 'Shipper is disabled');
+                                        $no_zone_shipment[] = $shipment->id;
+                                    }
+        
+                                    if(!empty($no_zone_shipment)){
+                                        $no_zone_shipment = implode(',', $no_zone_shipment);
+                                        return redirect()->back()->with('error', 'No Shipment Of These Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned');
+                                    }
+                                    else{
+                                        return redirect()->back()->with('success', 'Shipments Assigned Successfully');
                                     }
                                 }
-                                else{
-                                    $no_zone_shipment[] = $shipment->id;
-                                }
-    
-                                if(!empty($no_zone_shipment)){
-                                    $no_zone_shipment = implode(',', $no_zone_shipment);
-                                    return redirect()->back()->with('error', 'No Shipment Of These Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned');
-                                }
-                                else{
-                                    return redirect()->back()->with('success', 'Shipments Assigned Successfully');
-                                }
+                            }
+        
+                            else{
+                                // return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+                                return redirect()->back()->with('error', 'No Zone Assigned To Agent');
                             }
                         }
-    
                         else{
-                            // return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
-                            return redirect()->back()->with('error', 'No Zone Assigned To Agent');
+                            return redirect()->back()->with('error', 'Invalid Agent');
                         }
+
                     }
                 }
 
