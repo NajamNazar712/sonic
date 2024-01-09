@@ -15,7 +15,7 @@ class UndeliveredReasonController extends Controller
         $delivery_note = BoltUndeliveredReasonMapCount::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
         $journey_status = null;
         $shipment_object = Shipment::find($shipment_id);
-        $booking_type = $shipment_object ? $shipment->booking_type_id : null;
+        $booking_type = $shipment_object ? $shipment_object->booking_type_id : null;
         
         if ($shipment->exists()) {
             $shipment = $shipment->latest()->first();
