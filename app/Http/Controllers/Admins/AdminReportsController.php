@@ -13279,7 +13279,7 @@ class AdminReportsController extends Controller
                         $total_cod_received_amount = Shipment::whereIn('id', $delivery_note_shipment)->whereIn('shipper_status_id',[14,30,36,37])->sum('amount');
                         $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
                         $hbl_connect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
-                        $total_cash_submitted = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[1,2,3])->sum('received_cod_amount');
+                        $total_cash_submitted = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[1,2,3])->sum('received_cod_amount') - ($fintech_amount + $hbl_connect_amount);
                         $remaining_cash_after_lost = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->whereIn('cash_collection_status',[2,3])->sum('received_cod_amount');
 
                         $data['out_for_delivery'] = $rds_value->ofd_shipments;
@@ -13292,7 +13292,7 @@ class AdminReportsController extends Controller
                         $data['delivered_cod_amount'] = $total_cod_received_amount ?? 0;
                         $data['cod_submitted_via_konnect'] = $hbl_connect_amount;
                         $data['cod_submitted_via_fintech'] = $fintech_amount ?? 0;
-                        $data['cod_submitted_via_cash'] = $total_cash_submitted ?? 0; 
+                        $data['cod_submitted_via_cash'] = $total_cash_submitted  ?? 0; 
                         $data['cod_submitted_by_rider'] = $total_cod_received_amount - ($hbl_connect_amount + $fintech_amount + $total_cash_submitted ) ?? 0;
                         $data['lost_cod_amount'] = $remaining_cash_after_lost != 0 ? $total_cod_received_amount - ($remaining_cash_after_lost + $hbl_connect_amount + $fintech_amount ) : 0;
                         $data['pending'] =  $rds_value->ofd_shipments - ($rds_value->delivered_shipments + $rds_value->undelivered_shipments + $rds_value->confirmation_pending_shipments);
