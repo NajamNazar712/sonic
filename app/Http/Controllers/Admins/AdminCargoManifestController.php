@@ -776,6 +776,11 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
+            if($shipment->pickup_address->city->id == $shipment->destination_city->id )
+            {
+                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
+            }
+
             /*  if($shipment->shipper_status_id == 49){
                   return ['status' => 1, 'error' => 'Misroute-Forwarded Shipments not allowed'];
               }*/
@@ -3520,7 +3525,14 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if($shipment->shipper_status_id == 1)
+            if($shipment->pickup_address->city->id == $shipment->destination_city->id )
+                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
+
+
+            if( in_array($shipment->shipper_status_id,[5,14,25,31,36,38])) // all delivered statuses
+                return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
+
+            if($shipment->shipper_status_id == 1) // shipment not arrived at center
                 return ['status' => 1, 'error' => 'Shipment not arrived at center yet !'];
 
             //if(($shipment->shipper_status_id == 5) && ($request->bag_type == 2))
@@ -3757,6 +3769,9 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            if( in_array($shipment->shipper_status_id,[5,14,25,31,36,38])) // all delivered statuses
+                return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
 
             $bag_type = $request->bag_type;
             $shipment_status = $shipment->shipper_status_id;
