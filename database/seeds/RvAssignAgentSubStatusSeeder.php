@@ -52,13 +52,11 @@ class RvAssignAgentSubStatusSeeder extends Seeder
             array('name' => 'Consignee Unresponsive','shipment_status_reason_id'=> 55,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Delay in Dispatch from Shipper','shipment_status_reason_id'=> 59,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'A OPEN','shipment_status_reason_id'=> 62,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
-
-            //Return Confirm Reasons Not Found in Shipment Status Reason Table
-            array('name' => 'Consignee is not interested','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Consignee wants to open the shipment','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Duplicate Order','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Number Not Pertain to Consignee','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Refused after opening the shipment','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Consignee is not interested','shipment_status_reason_id'=> 22,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Consignee wants to open the shipment','shipment_status_reason_id'=> 11,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Duplicate Order','shipment_status_reason_id'=> 87,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Number Not Pertain to Consignee','shipment_status_reason_id'=> 88,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Refused after opening the shipment','shipment_status_reason_id'=> 42,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
 
 
             array('name' => 'Mark for self collection','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 5,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
