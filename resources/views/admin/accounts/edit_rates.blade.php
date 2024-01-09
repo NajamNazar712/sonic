@@ -4724,8 +4724,12 @@
         }).bind('change', function () {
             var th = $(this);
             var id = $(this).val();
+
+            if (id.indexOf('riders') !== -1) {
+                 id = id.replace(/\D/g, '');
+            }
+
             var group = $(this).find(':selected').closest('optgroup').attr('label');
-            console.log(group);
             if(group == 'Admins'){
                 if(tier_sales == 1){
                     th.val(null).trigger('change');
@@ -4733,19 +4737,20 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             }
-            if (group != 'Admins' && group != 'Sales'){
+            
+            if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
                 $('#user_commission').val(1.8)
                 $('#user_commission').attr('disabled', true)
             } else {
                 $('#user_commission').val('');
                 $('#user_commission').attr('disabled', false)
             }
-            // var index = $.inArray(id, selected_users);
-            // if (index !== -1) {
-            //     var error = 'User previously selected!';
-            //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //     $('#user_select').val(null).trigger('change');
-            // }
+            var index = $.inArray(id, selected_users);
+            if (index !== -1) {
+                var error = 'User previously selected!';
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                $('#user_select').val(null).trigger('change');
+            }
         });
 
         var riders_permanents_data = {!! json_encode($riders_permanents) !!};
