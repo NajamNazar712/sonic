@@ -45,7 +45,7 @@ class EmailTest extends Command
 
         $invoice = Invoice::find(4122);
 
-        $filename = 'sonic_invoice_details_' . $request->id . '.xlsx';
+//        $filename = 'sonic_invoice_details_' . $->id . '.xlsx';
 
         $details = array();
 
@@ -88,12 +88,12 @@ class EmailTest extends Command
             $serial_number++;
         }
         print_r($details);
-        die('here');
 
 
 
 
-        Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
+
+//        Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
         echo "Noman bhai ka log!";
 //        $ref = 'nothing';
 //        NotificationsController::send(219, $ref);
