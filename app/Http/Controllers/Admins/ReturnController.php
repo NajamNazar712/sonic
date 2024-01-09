@@ -126,7 +126,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
         }
 
-        $shipments = DB::connection('reports_2')->table('shipments')
+        $shipments = DB::connection('reports')->table('shipments')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

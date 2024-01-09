@@ -4594,7 +4594,7 @@ class AdminFinanceController extends Controller
         }
 
 //        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-        $pending_payments = DB::connection('reports_2')->table('pending_payments')
+        $pending_payments = DB::connection('reports')->table('pending_payments')
             ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
