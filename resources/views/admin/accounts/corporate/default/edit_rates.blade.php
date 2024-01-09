@@ -4648,12 +4648,18 @@
             obj.id = obj.id || obj.text;
             return obj;
         });
-        $('#user_select').prepend('<option value="" selected></option>').select2({
+       $('#user_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select User",
-            width:'100%'
+            width:'100%',
+            data: users_data,
         }).bind('change', function () {
             var th = $(this);
             var id = $(this).val();
+
+            if (id.indexOf('riders') !== -1) {
+                 id = id.replace(/\D/g, '');
+            }
+
             var group = $(this).find(':selected').closest('optgroup').attr('label');
             if(group == 'Admins'){
                 if(tier_sales == 1){
@@ -4662,6 +4668,14 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             }
+            
+            if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
+                $('#user_commission').val(1.8)
+                $('#user_commission').attr('disabled', true)
+            } else {
+                $('#user_commission').val('');
+                $('#user_commission').attr('disabled', false)
+            }
             var index = $.inArray(id, selected_users);
             if (index !== -1) {
                 var error = 'User previously selected!';
@@ -4669,7 +4683,13 @@
                 $('#user_select').val(null).trigger('change');
             }
         });
-        $('#user_select').select2({data:users_data,placeholder:'Select User'});
+
+        var riders_permanents_data = {!! json_encode($riders_permanents) !!};
+        var selectHtml = '';
+        for (var i = 0; i < riders_permanents_data.length; i++) {
+            selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '</option>';
+        }
+        $('#user_select').append(selectHtml);
 
         $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Tier",
