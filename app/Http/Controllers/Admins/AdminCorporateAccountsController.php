@@ -23764,7 +23764,16 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
                         if($sales_tier->tier_type == 1){
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
+                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
+                                $rider_id = isset($matches[0]) ? $matches[0] : null;
+                                if (!empty($matches)) {
+                                    $rider_id = $matches[0];
+                                    $sales_commission_user->rider_id = $rider_id;
+                                }
+                            } else {
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }                        
                         }else if($sales_tier->tier_type == 2){
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
@@ -23797,7 +23806,16 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
                         if($sales_tier->tier_type == 1){
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
+                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
+                                $rider_id = isset($matches[0]) ? $matches[0] : null;
+                                if (!empty($matches)) {
+                                    $rider_id = $matches[0];
+                                    $sales_commission_user->rider_id = $rider_id;
+                                }
+                            } else {
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }    
                         }else if($sales_tier->tier_type == 2){
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
@@ -36440,7 +36458,16 @@ class AdminCorporateAccountsController extends Controller
                           $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                           $sales_commission_user->tier_id = $tier;
                           if($sales_tier->tier_type == 1){
-                              $sales_commission_user->user_id = $request->user_id[$row_id];
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
+                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
+                                $rider_id = isset($matches[0]) ? $matches[0] : null;
+                                if (!empty($matches)) {
+                                    $rider_id = $matches[0];
+                                    $sales_commission_user->rider_id = $rider_id;
+                                }
+                            } else {
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }    
                           }else if($sales_tier->tier_type == 2){
                               $external_user = new SalesCommissionExternalUser();
                               $external_user->name = $request->user_id[$row_id];
@@ -36473,7 +36500,16 @@ class AdminCorporateAccountsController extends Controller
                           $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                           $sales_commission_user->tier_id = $tier;
                           if($sales_tier->tier_type == 1){
-                              $sales_commission_user->user_id = $request->user_id[$row_id];
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
+                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
+                                $rider_id = isset($matches[0]) ? $matches[0] : null;
+                                if (!empty($matches)) {
+                                    $rider_id = $matches[0];
+                                    $sales_commission_user->rider_id = $rider_id;
+                                }
+                            } else {
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }    
                           }else if($sales_tier->tier_type == 2){
                               $external_user = new SalesCommissionExternalUser();
                               $external_user->name = $request->user_id[$row_id];

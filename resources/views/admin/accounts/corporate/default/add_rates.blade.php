@@ -2374,7 +2374,7 @@
                         });
                     }
                 }
-                if (group != 'Admins' && group != 'Sales'){
+                if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
                     $('#user_commission').val(1.8)
                     $('#user_commission').attr('disabled', true)
                 } else {
