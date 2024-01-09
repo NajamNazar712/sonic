@@ -345,21 +345,38 @@ trait RvTrait
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
             $shipment_status_id = $rv_assign_agent_status->shipment_status_id; //replicate values from shipment_status table
             $call_finding_id = $rv_assign_agent_status->call_finding_id; // this is for unresponsive
-            if ($rv_assign_agent_status && ($shipment_status_id || $call_finding_id)) {
-                switch ($shipment_status_id) {
-                    case '13': //Shipment - Re-Attempt
-                        return $this->reattempt($request);
-                    case '15': // Shipment - On Hold for Self Collection
-                        return $this->on_hold_for_self_collection($request);
-                    case '20': // Return - Confirm
-                        return $this->return_confirm($request);
-                    case '54': // Intercept Requested
-                        return $this->intercept($request);
-                    case null: // Unresponsive
-                        return $this->unresponsive($request);
+            // if ($rv_assign_agent_status && ($shipment_status_id || $call_finding_id)) {
+            //     switch ($shipment_status_id) {
+            //         case '13': //Shipment - Re-Attempt
+            //             return $this->reattempt($request);
+            //         case '15': // Shipment - On Hold for Self Collection
+            //             return $this->on_hold_for_self_collection($request);
+            //         case '20': // Return - Confirm
+            //             return $this->return_confirm($request);
+            //         case '54': // Intercept Requested
+            //             return $this->intercept($request);
+            //         case null: // Unresponsive
+            //             return $this->unresponsive($request);
+            //         case null and call_finding_id in rv_assign_agent_statuses table is also null: // Refusal On Call 
+            //             return $this->refusal_on_call($request);
 
-                    default:
-                        break;
+            //         default:
+            //             break;
+            //     }
+            // }
+            if ($rv_assign_agent_status && ($shipment_status_id !== null || $call_finding_id !== null)) {
+                if ($shipment_status_id === '13') {
+                    return $this->reattempt($request);
+                } elseif ($shipment_status_id === '15') {
+                    return $this->on_hold_for_self_collection($request);
+                } elseif ($shipment_status_id === '20') {
+                    return $this->return_confirm($request);
+                } elseif ($shipment_status_id === '54') {
+                    return $this->intercept($request);
+                } elseif ($shipment_status_id === null && $call_finding_id === null) {
+                    return $this->refusal_on_call($request);
+                } elseif ($shipment_status_id === null) {
+                    return $this->unresponsive($request);
                 }
             }
         } 
@@ -730,6 +747,62 @@ trait RvTrait
             // return redirect()->back()->with('error', 'Shipment not found');
             return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
         }
+    }
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: 
+    protected function refusal_on_call(Request $request)
+    {
+        // $shipment = Shipment::find($request->shipment_id);
+        // $user_id = $shipment->user_id;
+        // $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
+
+        // if($rv_shipment_assign_agent)
+        // {
+        //     try {
+        //         $status = new RvAgentCallHistory();
+        //         $status->shipment_id= $request->shipment_id;
+        //         $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
+        //         $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
+        //         $status->call_to_id = $request->call_to_id; //Shipper or Consignee
+        //         $status->remarks = $request->remarks;
+        //         $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
+        //         $status->updated_by_id = Auth::id();
+        //         $status->save();
+
+        //         $rv_shipment_assign_agent->increment('unresponsive_count');
+        //         $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+        //         $rv_shipment_assign_agent->save();
+
+        //         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
+        //         if ($rv_shipment_assign_agent->unresponsive_count == 2) {
+        //             //updating the shipment status to Shipper Advise Requested(65) in shipments table
+        //             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+                    
+        //             //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
+        //             ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
+        //             return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+
+        //         }
+
+        //         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
+        //         else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
+        //             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+        //             ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
+        //         }
+        //         return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+
+        //     } 
+        //     catch (\Throwable $th) {
+        //             $th->getMessage();
+        //             return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
+        //     }
+        // }
+        // else{
+        //     // return redirect()->back()->with('error', 'Shipment not found');
+        //     return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
+        // }
     }
 
 
