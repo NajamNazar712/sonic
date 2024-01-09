@@ -373,11 +373,12 @@ trait RvTrait
                     return $this->return_confirm($request);
                 } elseif ($shipment_status_id === '54') {
                     return $this->intercept($request);
-                } elseif ($shipment_status_id === null && $call_finding_id === null) {
-                    return $this->refusal_on_call($request);
-                } elseif ($shipment_status_id === null) {
+                }  elseif ($shipment_status_id === null) {
                     return $this->unresponsive($request);
                 }
+            }
+            elseif ($shipment_status_id === null && $call_finding_id === null) {
+                return $this->refusal_on_call($request);
             }
         } 
         else {
@@ -771,8 +772,6 @@ trait RvTrait
         //         $status->updated_by_id = Auth::id();
         //         $status->save();
 
-        //         $rv_shipment_assign_agent->increment('unresponsive_count');
-        //         $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
         //         $rv_shipment_assign_agent->save();
 
         //         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 

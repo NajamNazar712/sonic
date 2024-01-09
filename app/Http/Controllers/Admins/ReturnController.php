@@ -5284,7 +5284,6 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
-        // dd($request->all());
         try{
             DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
@@ -5342,6 +5341,7 @@ class ReturnController extends Controller
                         'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
                     ]);
                 };
+                $shipment = Shipment::where('id', $shipment_id)->first();
                 $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                 if($already_assigned_state->exists()){
                     $already_assigned_state =  $already_assigned_state->first();

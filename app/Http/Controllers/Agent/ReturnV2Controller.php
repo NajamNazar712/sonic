@@ -218,12 +218,22 @@ class ReturnV2Controller extends Controller
                                 ->where('dn.pending_status', 1)
                                 ->first();
                                 
+                                //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
                                 if($shipment_status){
-                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
+                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)
+                                    ->where(function ($query) {
+                                        $query->whereNull('shipment_status_id')
+                                            ->whereNotNull('call_finding_id');
+                                    })
+                                    ->orWhere(function ($query) {
+                                        $query->whereNotNull('shipment_status_id')
+                                        ->where('is_visible', 1);
+                                    })
+                                    ->get();
                                 }
+                                //agar pending status 0 mila to refusal on call dekha return confirm na dekhae
                                 else{
-                                    //if pending status is not 1 dont show return confirm status in the dropdown
-                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->whereNotIn('shipment_status_id', [20])->get();
+                                    $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->where('shipment_status_id','!=', 20)->Orwhere('shipment_status_id',null)->get();
                                 }
 
 
@@ -275,7 +285,7 @@ class ReturnV2Controller extends Controller
     //2  reattempt, 3 intercept, 5 on hold
     public function submit_ticket(Request $request)
     {
-
+        
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5, 8',
