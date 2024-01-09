@@ -58,7 +58,7 @@
                                 <th class="border-primary border-darken-1"></th>
                                 <th class="border-primary border-darken-1" colspan="6">On Route Summary</th>
                                 <th class="border-primary border-darken-1" colspan="2">Delivered</th>
-                                <th class="border-primary border-darken-1" colspan="5">COD Amount Summary</th>
+                                <th class="border-primary border-darken-1" colspan="6">COD Amount Summary</th>
                                 <th class="border-primary border-darken-1" colspan="2">Status Not Updated</th>
                                 <th class="border-primary border-darken-1" colspan="4">Undelivered Summary</th>
                             </tr>
@@ -79,6 +79,7 @@
                                 <th class="border-primary border-darken-1">COD Submitted Via Konnect</th>
                                 <th class="border-primary border-darken-1">COD Submitted Via Fintech</th>
                                 <th class="border-primary border-darken-1">COD Submitted Via Cash</th>
+                                <th class="border-primary border-darken-1">Lost/Snatch COD Amount</th>
                                 <th class="border-primary border-darken-1">COD Short Submitted By Rider</th>
 
                                 <th class="border-primary border-darken-1">Pending</th>
@@ -227,6 +228,7 @@
                                             html += '<td> ' + z.cod_submitted_via_konnect + ' </td>';
                                             html += '<td> ' + z.cod_submitted_via_fintech + ' </td>';
                                             html += '<td> ' + z.cod_submitted_via_cash + ' </td>';
+                                            html += '<td> ' + z.lost_cod_amount + ' </td>';
                                             html += '<td> ' + z.cod_submitted_by_rider + ' </td>';
                                             html += '<td> ' + z.pending + ' </td>';
                                             html += '<td> ' + z.pending_percentage + ' </td>';
