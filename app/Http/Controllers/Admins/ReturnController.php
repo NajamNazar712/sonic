@@ -5334,8 +5334,9 @@ class ReturnController extends Controller
             foreach($shipment_ids as $shipment_id){
                 $agent_id = $request->admin_id;
                 $contractual_agent = Admin::find($agent_id)->where('trax_id','like','%Trax-C%')->first();
-                $shipment = Shipment::where('id', $shipment_id)->first();
-                if($shipment->shipper_status_id == 12 && $contractual_agent){
+                $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                // status_reason_id == 12 (osa shipment)
+                if($osa_reason->status_reason_id == 12 && $contractual_agent){
                     return response()->json([
                         'status' => 1,
                         'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
