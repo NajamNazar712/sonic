@@ -475,45 +475,62 @@
 
                     blockPagePermanently();
 
-                    swal({
-                        text: 'Are you sure you want to submit?',
-                        icon: 'info',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                    }).then(function(confirm) {
-                        if(confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Your Bag is being created!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            $('#cargo_consignment form .transport_mode').prop("disabled", false);
-                            $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
-                            form.submit();
-                        }
-                        else {
-                            $(form).find('button[type=submit]').prop('disabled', false);
+                    if($("#sack_bag_no").val()!='')
+                    {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your Bag is being created!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                                $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                form.submit();
 
-                            UnblockPagePermanently();
-                        }
-                    });
+                    }else{
+                         swal({
+                            text: 'Are you sure you want to submit without SackBag No#?',
+                            icon: 'info',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            }).then(function(confirm) {
+                            if(confirm) {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your Bag is being created!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                                $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                form.submit();
+                            }
+                            else {
+                                $(form).find('button[type=submit]').prop('disabled', false);
+
+                                UnblockPagePermanently();
+                            }
+                        });
+                    }
+                    
                 }
             });
 
