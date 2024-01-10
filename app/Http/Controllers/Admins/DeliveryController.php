@@ -4929,7 +4929,13 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
 
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'rt.name as rider_type', 'zn.name as zone_name', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'delivery_notes.one_link_payment_count', 'oc.id as hub_id', 
+            'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 
+            'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 
+            'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 
+            'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 
+            'hktdn.cash_amount as cash_amount', 'rt.name as rider_type', 'zn.name as zone_name', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount', 'riders.trax_id'])
+
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
