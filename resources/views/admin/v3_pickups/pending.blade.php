@@ -1338,7 +1338,6 @@
                             $.each(products,function(key,value){
                                 if(value.id==data.product_id){
                                     var product = new Option(value.name, value.id, false, false);
-                                    // console.log(product);
                                      $('#product_select').append(product).trigger('change');
                                     //  .prop('selected', true);
                                 }
@@ -1782,11 +1781,11 @@
                     },
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
-                    {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
+                    {data: 'time_range', name: 'ptr.name', class: 'align-middle ask_time'},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
+                    {data: 'status', name:'prs.name', class: 'align-middle text-center status', orderable: false},
                     {data: 'product', name: 'seg.name', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
                     {data: 'shippment_type', name: 'pst.name', class: 'align-middle text-center shippment_type'},
@@ -1860,14 +1859,23 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
+                    var pickup_status_select = '<select name="pickup_status_select" id="pickup_status_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         
-                        if ($(header).is('.action') || $(header).is('.select') ||  $(header).is('.pickup_date') || $(header).is('.ask_time') || $(header).is('.services_count') || $(header).is('.service') || $(header).is('.address') || $(header).is('.shipments_picked') || $(header).is('.special_request') || $(header).is('.rider_phone') || $(header).is('.current_rider_phone') || $(header).is('.assigned_by') || $(header).is('.adminname') || $(header).is('.username') ||  $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                        if ($(header).is('.action') || $(header).is('.select') ||  $(header).is('.pickup_request_id') ||  $(header).is('.pickup_date')  || $(header).is('.services_count') || $(header).is('.service') || $(header).is('.address') || $(header).is('.shipments_picked') || $(header).is('.special_request') || $(header).is('.rider_phone') || $(header).is('.current_rider_phone') || $(header).is('.assigned_by') || $(header).is('.adminname') || $(header).is('.username') ||  $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
                             $(td).appendTo($(search));
-                        } else {
+                        }else if($(header).is('.status')){
+                            $(pickup_status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                        } 
+                        
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1878,11 +1886,37 @@
                         }
                     });
 
-                    this.api().table().columns.adjust();
-                }
+                
+                    var statuses = @json($statuses)
+                   
+                    var status_data = $.map(statuses, function (obj,key) {
+                        obj.id = obj.name;
+                        obj.text = obj.name;
+                        return obj;
+                    });
 
+                    $("#pickup_status_select").prepend('<option value="" selected></option>').select2({
+                                data: status_data,
+                                placeholder: "Select Status",
+                                width: '100%',
+                                containerCssClass: 'select-xs',
+                                dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    this.api().table().columns.adjust();
+                    
+
+                   
+                }
+           
+               
+            
             });
 
+              
+            
+           
+          
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function () {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
@@ -2390,7 +2424,6 @@
                 }
             }).done(function(data){
                 if (data.status == 0) {
-                    // console.log(data);
                     // var pickup_request_services=data.additional_services[0].pickup_request_services;
                             $.each(data.pickup_request_services,function(key,value) {
                             //   $(".additionalservices").append('<div class="d-flex align-items-center service-item mt-md-1"><div class="col-md-6"><p class="mb-0 text-dark">'+value.service_name+' </p></div> <div class="col-md-6"><div class="form-group input-group mb-0"><input type="text" value='+value.count+' class="form-control text-center" readonly></div></div> </div>')

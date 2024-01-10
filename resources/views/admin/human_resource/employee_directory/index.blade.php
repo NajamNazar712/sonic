@@ -1744,7 +1744,7 @@
                         obj.text = obj.name;
                         return obj;
                     });
-
+                    console.log(status_data);
                     $("#employee_status_search").prepend('<option value="" selected></option>').select2({
                         data: status_data,
                         placeholder: "Select Status",
