@@ -1638,7 +1638,7 @@
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'sub_department_name', name: 'employees.sub_department', class: 'align-middle sub_department_name'},
-                    {data: 'education_name', name: 'education_name', class: 'align-middle education_name'},
+                    {data: 'education_name', name: 'el.name', class: 'align-middle education_name'},
                     {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
