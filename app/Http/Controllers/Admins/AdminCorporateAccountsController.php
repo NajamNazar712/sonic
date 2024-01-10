@@ -236,7 +236,7 @@ class AdminCorporateAccountsController extends Controller
                     $commission_percentage = $settings->text;
                 }
                 $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-                $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+                $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
                 $riders_permanent = Rider::where('rider_type_id', 1)->get();
                 $users = array();
                 $riders = array();
@@ -245,15 +245,12 @@ class AdminCorporateAccountsController extends Controller
                 foreach ($admin_users as $admin_user){
 
                     if($admin_user->department_id != 7){
-                        $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                        $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name .'-' . $admin_user->trax_id);
                     }else{
-                        $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                        $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name. '-' . $admin_user->trax_id);
                     }
                 }
 
-                foreach($riders_permanent as $rider){
-                    $riders[] = array('id' => $rider->id, 'text' => $rider->name . " ({$rider->trax_id})");
-                }
                 $all_users['results'][0]['text'] = 'Sales';
                 $all_users['results'][0]['children'] = $sales;
                 $all_users['results'][1]['text'] = 'Admins';
@@ -1777,7 +1774,7 @@ class AdminCorporateAccountsController extends Controller
             $commission_percentage = $settings->text;
         }
         $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
         $riders_permanent = Rider::where('rider_type_id', 1)->get();
 
         $users = array();
@@ -1787,15 +1784,13 @@ class AdminCorporateAccountsController extends Controller
         foreach ($admin_users as $admin_user){
 
             if($admin_user->department_id != 7){
-                $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name. '-' . $admin_user->trax_id);
             }else{
-                $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name. '-' . $admin_user->trax_id);
             }
         }
 
-          foreach($riders_permanent as $rider){
-            $riders[] = array('id' => $rider->id, 'text' => $rider->name . " ({$rider->trax_id})");
-        }
+          
         $all_users['results'][0]['text'] = 'Sales';
         $all_users['results'][0]['children'] = $sales;
         $all_users['results'][1]['text'] = 'Admins';
@@ -23912,7 +23907,7 @@ class AdminCorporateAccountsController extends Controller
             $commission_percentage = $settings->text;
         }
         $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
         $riders_permanent = Rider::where('rider_type_id', 1)->get();
         $users = array();
         $riders = array();
@@ -23921,15 +23916,13 @@ class AdminCorporateAccountsController extends Controller
         foreach ($admin_users as $admin_user){
 
             if($admin_user->department_id != 7){
-                $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name. '-' . $admin_user->trax_id);
             }else{
-                $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
+                $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name. '-' . $admin_user->trax_id);
             }
         }
 
-          foreach($riders_permanent as $rider){
-            $riders[] = array('id' => $rider->id, 'text' => $rider->name . " ({$rider->trax_id})");
-        }
+          
         $all_users['results'][0]['text'] = 'Sales';
         $all_users['results'][0]['children'] = $sales;
         $all_users['results'][1]['text'] = 'Admins';

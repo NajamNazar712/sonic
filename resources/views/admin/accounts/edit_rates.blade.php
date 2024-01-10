@@ -4756,7 +4756,7 @@
         var riders_permanents_data = {!! json_encode($riders_permanents) !!};
         var selectHtml = '';
         for (var i = 0; i < riders_permanents_data.length; i++) {
-            selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '</option>';
+            selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
         }
         $('#user_select').append(selectHtml);
 
