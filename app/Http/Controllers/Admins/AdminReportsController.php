@@ -9928,7 +9928,7 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name'])
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight'])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -13181,6 +13181,55 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
     }
 
+    public function ibft_report_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 715);
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        return view('admin.reports.ibft_report')->with('shippers', $shippers);
+    }
 
+    public function ibft_report_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 716);
+        }
+        $ibft_report = DB::connection('reports')->table('done_payment_calculations')->join('done_payments as dp', 'dp.id', '=', 'done_payment_calculations.done_payment_id')
+            ->join('users as u', 'u.id', '=', 'dp.user_id')
+            ->leftjoin('done_payment_shipments as dps','dps.done_payment_id', '=', 'dp.id')
+            ->leftjoin('shipments','shipments.id','dps.shipment_id')
+            ->select('dp.id as done_payment_id', 'u.name as shipper', 'done_payment_calculations.amount','done_payment_calculations.charges','done_payment_calculations.gst','done_payment_calculations.ibft_charges', 
+            'done_payment_calculations.payable','done_payment_calculations.created_at','done_payment_calculations.updated_at', 'dp.status as status','shipments.tracking_number');
+
+        $ibft_report = Datatables::of($ibft_report)
+            ->editColumn('status', function ($status) {
+                if ($status->status == 0) {
+                    return "Processed";
+                } else if($status->status == 1){
+                    return "Paid";
+                }
+                else if($status->status == 2){
+                    return "Reverted";
+                }
+            });
+
+        if ($done_payment_id = $request->get('done_payment_id')) {
+            $ibft_report->where('dp.id', '=', $done_payment_id);
+        }
+        if ($shipper = $request->get('shipper')) {
+            $ibft_report->where('u.id', '=', $shipper);
+        }
+        if ($request->get('date_from') && $request->get('date_to')) {
+            $from = $request->get('date_from');
+            $to = $request->get('date_to');
+            $ibft_report->whereBetween('done_payment_calculations.created_at', [$from, $to]);
+        }
+
+        if ($tracking_no = $request->get('tracking_no')) {
+            $ibft_report->where('shipments.tracking_number', '=', $tracking_no);
+        }
+
+
+        return $ibft_report->make(true);
+    }
 
 }

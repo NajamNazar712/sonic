@@ -279,6 +279,7 @@
                                 </div>
                             </div>
 
+                            {{-- Make Payments Modal --}}
                             <div class="modal fade" id="make_payments" role="dialog"
                                 aria-labelledby="make_payments_title" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-full-length" role="document">
@@ -357,6 +358,7 @@
                                                         <th class="border-primary border-darken-1">Deductable</th>
                                                         <th class="border-primary border-darken-1">Payable</th>
                                                         <th class="border-primary border-darken-1">Arrival Date</th>
+                                                        <th class="d-none">Shipper</th>
                                                     </tr>
                                                 </thead>
                                             </table>
@@ -394,6 +396,14 @@
                                                         <input type="text" name="total_gst"
                                                             class="form-control text-center total_gst"
                                                             placeholder="Total GST" readonly="readonly">
+                                                    </div>
+                                                </div>
+                                                <div class="col-2">
+                                                    <div class="form-group">
+                                                        <label class="mx-auto">Total IBFT Charges</label>
+                                                        <input type="text" name="total_ibft"
+                                                            class="form-control text-center total_ibft"
+                                                            placeholder="Total IBFT" readonly="readonly">
                                                     </div>
                                                 </div>
                                                 <div class="col-2 mt-2">
@@ -555,6 +565,7 @@
             var selected_rows_shipments = [];
 
             var initial_total_hold = 0;
+            var initial_ibft_charges = 0;
 
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Shipper',
@@ -709,6 +720,7 @@
                     };
                 }
             });
+            var selected_shippers_id = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(60, session('permissions')))
@@ -732,10 +744,26 @@
                                 $('#make_payments #make_payments_form button.export_bank_order')
                                     .prop('disabled', true);
 
-                                $('#make_payments #make_payments_form .pending_payment_shipment_ids')
-                                    .val('');
+                                $('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
-                                selected_rows_shipments = [];
+                                // Define an array to store IDs of selected rows with empty values
+                                    table.rows({ selected: true }).every(function(index, element) {
+                                    var rowData = this.data();
+                                    var emptyRow = true;
+
+                                    // selected_rows_shipments = [];
+                                    // Check if all values in the row are empty
+                                    for (var i = 0; i < rowData.length; i++) {
+                                        if (rowData[i] !== null && rowData[i] !== "") {
+                                            emptyRow = false;
+                                            break;
+                                        }
+                                    }
+                                    // If the row is selected and all values are empty, add its ID to the array
+                                    if (emptyRow) {
+                                        selected_shippers_id.push(parseInt(rowData.user_id));
+                                    }
+                                });
 
                                 make_payments_table.clear().draw();
 
@@ -1135,6 +1163,30 @@
                 }
             });
 
+            $('#make_payments').on('shown.bs.modal', function() {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                $.ajax({
+                    url: '{!! route('admin.finance.make_payments.fetch_shipper_ibft_charges') !!}',
+                    method: 'POST',
+                    data: {
+                        selected_shippers_id: selected_shippers_id
+                    },
+                    success: function(response) {
+                        // Assuming the response contains the charges data
+                        var charges = response;
+                        // Update the total_ibft input field value with the received charges
+                        $('#make_payments #make_payments_form .total_ibft').val(charges);
+                    },
+                    error: function(error) {
+                        console.error('Error fetching charges:', error);
+                    }
+                });
+            });
+
             $('#tracking_number_search_form').bind('submit', function(e) {
                 e.preventDefault();
 
@@ -1155,6 +1207,9 @@
                 }
             });
 
+    
+
+            //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
                 buttons: [{
@@ -1336,6 +1391,7 @@
                         name: 'sj.created_at',
                         class: 'align-middle arrival_date'
                     },
+                    {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id d-none', searchable: false,},
                 ],
                 rowCallback: function(row, data, index) {
                     $('td:eq(1)', row).html(index + 1);
@@ -1403,9 +1459,11 @@
 
                         $('#make_payments #make_payments_form .total_hold').val(parseFloat(
                             initial_total_hold).toFixed(2));
+                            
                     }
                 }
             });
+            //End Make Payment Modal Datatable
 
             $('#search_filter_btn').on('click', function() {
                 make_payments_table.draw(true);
@@ -1684,10 +1742,22 @@
                 selected_rows = [];
                 table.rows().deselect();
                 table.button('.make_payment').disable();
+                payable_list = [];
+                selected_rows_shipments = [];
+                shipperTotal = {};
+                selected_shippers_id = [];
+
+                
             });
 
+            var payable_list = [];
+            let shipperTotal = {};
+
+            // Make Payments Modal Calculation
             function calculation(parent) {
                 var id = parseInt(parent.attr('id'));
+                var payable = parent.children('td.payable').html();
+                var shipper_id = parent.children('td.shipper_id').html();
 
                 var index = $.inArray(id, selected_rows_shipments);
 
@@ -1699,8 +1769,13 @@
                 var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
                 var total_wht_selector = $('#make_payments #make_payments_form .wht');
 
+                // Row Selected
                 if (index === -1) {
                     selected_rows_shipments.push(id);
+                    // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list 
+                    payable_list.push({ payable, shipper_id }); //adding payable in to array payable_list 
+                    // console.log(payable_list);
+                    calculateShipperTotal();
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
                     .val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children(
@@ -1723,8 +1798,48 @@
                     var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) :
                         0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
                             'td.payable').html().replace(/,/g, '')) : 0);
-                } else {
+
+                    // if selected row oayblae is less then 0 dipslay error
+                        // var payable = $(this).closest('tr').find('td.payable').text();
+                        if(payable < 0){
+                            var html = 'Negative payable detected for the shipper(s).<br/>';
+                                content = document.createElement('div');
+                                content.innerHTML = html;
+                                swal({
+                                    content: content,
+                                    icon: 'error',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'Close',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                });
+                        }        
+                } 
+
+                //Row UnSelected
+                else {
                     selected_rows_shipments.splice(index, 1);
+
+                    // console.log("when unselect", shipperTotal);
+                    const removedEntry = payable_list[index]; // Get the entry being removed
+                    // console.log(removedEntry);
+                    const shipperId = removedEntry.shipper_id;
+                    const payable = parseFloat(removedEntry.payable.replace(/,/g, ''));
+                    // console.log(removedEntry);
+                    // console.log("when unselect and before calculate shipper total", shipperTotal);
+                    // Remove the unselected entry from payable_list using splice
+                    payable_list.splice(index, 1);
+                    // Recalculate shipperTotal after removing the entry
+                    shipperTotal = {}; // Reset shipperTotal object
+                    calculateShipperTotal();
+                    // console.log("when unselect and after calculate shipper total", shipperTotal);
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
                     .val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children(
@@ -1757,6 +1872,24 @@
 
                     $('#make_payments #make_payments_form button.make').prop('disabled', false);
                     $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
+
+                    //if total payable is grate than 0 it enable make and export bank order button
+                    if($('#make_payments #make_payments_form .total_payable').val() > 0){
+                            const isAnyNegative = Object.values(shipperTotal).some(total => total < 0);
+                            // Disable make and export bank order button if any shipper's total payable is negative
+                            if (isAnyNegative) {
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                            } else {
+                                $('#make_payments #make_payments_form button.make').prop('disabled', false);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
+                            }
+                    }
+                    else{
+                        $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                        $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                    }
+
                 } else {
                     total_amount_selector.val(0);
                     total_charges_selector.val(0);
@@ -1771,6 +1904,20 @@
                 }
 
                 $('#make_payments #make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
+            }
+
+            // Function to calculate shipper totals and disable buttons if any shipper's total payable is negative
+            function calculateShipperTotal() {
+                shipperTotal = {}; // Reset shipperTotal object
+                payable_list.forEach(entry => {
+                    const shipperId = entry.shipper_id;
+                    const payable = parseFloat(entry.payable.replace(/,/g, ''));
+                    if (shipperTotal[shipperId]) {
+                        shipperTotal[shipperId] += payable;
+                    } else {
+                        shipperTotal[shipperId] = payable;
+                    }
+                });
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
