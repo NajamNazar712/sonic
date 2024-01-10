@@ -306,7 +306,6 @@ class AdminRevenueReportsController extends Controller
         if($report_type == 1){
             $from = Carbon::today()->firstOfMonth()->toDateTimeString();
             $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
-
         }
         if($report_type == 2){
             $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
