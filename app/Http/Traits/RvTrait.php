@@ -258,7 +258,8 @@ trait RvTrait
         ];
     }
 
-    protected function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
+    // protected function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
+    protected function update_unresponsive_shipments_status($request, $assigned_agent)
     {
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
@@ -288,14 +289,17 @@ trait RvTrait
     // Description: this function is updating table rows of rv_shipment_assign_agents
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
-        $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
+        // $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
+        $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $assigned_agent);
         if($admin_agent->employee){
 
+            // if $admin_agent is agent
             if ($admin_agent->employee->staff_category_id == 3) {
                 $assigned_agent->increment('total_shipments');
                 $assigned_agent->increment('actual_productivity');
                 $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
             } else {
+                // if $admin_agent is admin
                 $assigned_agent->increment('already_updated');
                 $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
             }
@@ -314,7 +318,7 @@ trait RvTrait
     protected function add_shipment_agent($request, $shipment_assign_agent)
     {
         try {
-            //updating columns in shipmen assign agent table 
+            //updating columns in shipment assign agent table 
 
             $add_agent = new RvShipmentAgent();
             $add_agent->agent_id = $shipment_assign_agent->agent_id;
@@ -755,53 +759,38 @@ trait RvTrait
     // Description: 
     protected function refusal_on_call(Request $request)
     {
-        // $shipment = Shipment::find($request->shipment_id);
-        // $user_id = $shipment->user_id;
-        // $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
+        $shipment = Shipment::find($request->shipment_id);
+        $user_id = $shipment->user_id;
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
+        
+        if($rv_shipment_assign_agent)
+        {
+            try {
+                
+                //update shipment to sar when agent set the status to refusal on call
+                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
+                $shipment_assign_agent->rv_assign_agent_status_id = 8;
+                $shipment_assign_agent->rv_state_id = 2;
+                $shipment_assign_agent->remarks = $request->remarks;
+                $shipment_assign_agent->call_to_id  = $request->call_to_id;
+                $shipment_assign_agent->save();
 
-        // if($rv_shipment_assign_agent)
-        // {
-        //     try {
-        //         $status = new RvAgentCallHistory();
-        //         $status->shipment_id= $request->shipment_id;
-        //         $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
-        //         $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
-        //         $status->call_to_id = $request->call_to_id; //Shipper or Consignee
-        //         $status->remarks = $request->remarks;
-        //         $status->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
-        //         $status->updated_by_id = Auth::id();
-        //         $status->save();
+                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
-        //         $rv_shipment_assign_agent->save();
+                //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
+                ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
 
-        //         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
-        //         if ($rv_shipment_assign_agent->unresponsive_count == 2) {
-        //             //updating the shipment status to Shipper Advise Requested(65) in shipments table
-        //             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-                    
-        //             //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-        //             ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
-        //             return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
+                return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
 
-        //         }
-
-        //         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
-        //         else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-        //             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-        //             ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
-        //         }
-        //         return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
-
-        //     } 
-        //     catch (\Throwable $th) {
-        //             $th->getMessage();
-        //             return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
-        //     }
-        // }
-        // else{
-        //     // return redirect()->back()->with('error', 'Shipment not found');
-        //     return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
-        // }
+            }
+            catch (\Throwable $th) {
+                    $th->getMessage();
+                    return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
+            }
+        }
+        else{
+            return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
+        }
     }
 
 

@@ -142,7 +142,7 @@ class ReturnV2Controller extends Controller
                                 if(session('latitude') != null){
                                     $this->mark_attendance($admin);
                                 }else {
-                                    return response()->json(['status' => 6]);
+                                    // return response()->json(['status' => 6]);
                                 }
                                 
 
@@ -335,11 +335,22 @@ class ReturnV2Controller extends Controller
                                     DB::rollBack();
                                     return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                                 } else{
+                                    
+                                    
+                                    $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
+                                    if($shipment_assign_agents){
+                                        $shipment_assign_agent = $shipment_assign_agents;
+                                    }
+
+                                    //adding logs in rv_shipment_assign_agent_details table
                                     $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                     if($rv_shipment_assign_agent_details != true){
                                         DB::rollBack();
                                         return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
-                                    } else{
+                                    } 
+
+                                    else{
+                                        // this function is updating table rows of rv_shipment_assign_agents increment total_shipments, actual_productivity, already_updated, updated_type_id
                                         $add_shipment_agent = $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
                                         if($add_shipment_agent != true){
                                             DB::rollBack();
@@ -354,13 +365,21 @@ class ReturnV2Controller extends Controller
                                 DB::rollBack();
                                 return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                             }
-                        } 
+                        }
+                        //when there is no row of agent in rv_shipment_agents table
                         else {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
                                 DB::rollBack();
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                             } else {
+
+
+                                $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
+                                    if($shipment_assign_agents){
+                                        $shipment_assign_agent = $shipment_assign_agents;
+                                    }
+
                                 $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                 if($rv_shipment_assign_agent_details != true){
                                     DB::rollBack();
