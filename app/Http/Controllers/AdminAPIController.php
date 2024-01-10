@@ -12806,7 +12806,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id)
+    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id, $lat = NULL, $long = NULL)
     {
         $shipment_scanned = array();
                 
@@ -12858,7 +12858,7 @@ class AdminAPIController extends Controller
                 $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
 
-           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2, null,null, 'rider');
+           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2, $lat,$long, 'rider');
 
             $shipment_scanned[] = $details;
         }
