@@ -3526,7 +3526,7 @@ class AdminCargoManifestController extends Controller
             $shipment = $shipment->first();
 
             if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
-                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
+                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same ! '];
 
 
             if( in_array($shipment->shipper_status_id,[5,14,25,31,36,38])) // all delivered statuses
