@@ -5284,6 +5284,7 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
+        dd($request->all());
         try{
             DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
@@ -5379,9 +5380,7 @@ class ReturnController extends Controller
                  if ($already_assigned == '') {
                     return response()->json([
                         'status' => 1,
-                        // 'error' => 'No Shipment Of These Tracking Numbers Are Assigned: ' . $no_zone_shipment . ' because zone is not assigned ' .
-                        //         (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                        'error' => 'Shipment Of These Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' because zone is not assigned to an Agent' .
+                        'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' because Zone is not Assigned' .
                                 (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                     ]);
                 } else {
