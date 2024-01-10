@@ -1685,6 +1685,9 @@
                         @if (session('role_id') == 1 || in_array(915, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.ibft_report.index') }}">Ibft Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(916, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.logistic.index') }}">Logistic Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -1841,6 +1844,11 @@
                                         @if (session('role_id') == 1 || in_array(909, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.settings.shippers.bypass_weight.index') }}">Bypassing of weight entry</a> </li>
+                                        @endif
+                                        @if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.logistic_report.index') }}">Logistic Report
+                                                    Setting</a> </li>
                                         @endif
                                 </ul>
 
