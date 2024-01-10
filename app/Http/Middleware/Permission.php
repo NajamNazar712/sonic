@@ -1265,6 +1265,8 @@ class Permission
             'admin.reports.pay_fast_report.index' => 894,
             'admin.reports.pay_fast_report.list' => 894,
             'admin.reports.csat_report.index' => 899,
+            'reports.logistic.index' => 916,
+
 
 
             'admin.reports.hbl_konnect.index' => 895,
