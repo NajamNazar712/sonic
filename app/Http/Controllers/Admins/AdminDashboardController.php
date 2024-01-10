@@ -7198,7 +7198,7 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
-                        }
+                        
                     }
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
@@ -7217,7 +7217,7 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success', 'All Rates are updated');
         }
         
-
+    }
     /**
      * @param Request $request
      * @param $id
