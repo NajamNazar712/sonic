@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -39,6 +38,7 @@ class EmailTest extends Command
      */
     public function handle()
     {
+
         Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
         echo "Noman bhai ka log!";
 //        $ref = 'nothing';

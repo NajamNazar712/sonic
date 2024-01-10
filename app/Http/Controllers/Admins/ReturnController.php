@@ -126,7 +126,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
         }
 
-        $shipments = DB::connection('reports_2')->table('shipments')
+        $shipments = DB::connection('reports')->table('shipments')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -4816,7 +4816,7 @@ class ReturnController extends Controller
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $paths = ['510', '511', '512', '513', '514', '515', '51', '521'];
+        $paths = ['522', '523', '524', '52', '531'];
         foreach ($paths as $p){
             $files = File::glob("$path/2023_$p*.*", GLOB_NOSORT);
             $now = Carbon::now();
