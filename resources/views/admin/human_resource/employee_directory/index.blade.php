@@ -122,6 +122,8 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
+                                    <th class="border-primary border-darken-1">CNIC Issue Date</th>
+                                    <th class="border-primary border-darken-1">CNIC Expiry Date</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Email</th>
@@ -1278,6 +1280,8 @@
                             head.push('City');
                             head.push('Area');
                             head.push('CNIC');
+                            head.push('CNIC Issue Date');
+                            head.push('CNIC Expiry Date');
                             head.push('Phone No.');
                             head.push('Official Phone Number');
                             head.push('Official Email');
@@ -1320,6 +1324,8 @@
                                 row.push(values.city);
                                 row.push(values.area);
                                 row.push(values.cnic);
+                                row.push(values.cnic_issue_date);
+                                row.push(values.cnic_expiry_date);
                                 row.push(values.phone_number);
                                 row.push(values.official_phone_number);
                                 row.push(values.official_email);
@@ -1618,6 +1624,8 @@
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
+                    {data: 'cnic_issue_date', name: 'employees.cnic_issue_date', class: 'align-middle cnic_issue_date'},
+                    {data: 'cnic_expiry_date', name: 'employees.cnic_expiry_date', class: 'align-middle cnic_expiry_date'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'official_phone_number', name: 'employees.official_phone_number', class: 'align-middle official_phone_number'},
                     {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},

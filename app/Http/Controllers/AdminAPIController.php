@@ -6196,6 +6196,8 @@ class AdminAPIController extends Controller
                 'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
                 'staff_category_id' => ['required', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
                 'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'cnic_issue_date' => ['required'],
+                'cnic_expiry_date' => ['required'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'guardian_name' => ['required'],
                 'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
@@ -6285,6 +6287,8 @@ class AdminAPIController extends Controller
                         $employee_request->employee_gender_id = $request->employee_gender_id;
                         $employee_request->city_id = $request->city_id;
                         $employee_request->cnic = $request->cnic_no;
+                        $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                        $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
                         $employee_request->phone_number = $request->phone_number;
                         $employee_request->employee_type_id = 1;
                         $employee_request->status_id = 2;
@@ -12854,7 +12858,7 @@ class AdminAPIController extends Controller
                 $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
 
-           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
+           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2, null,null, 'rider');
 
             $shipment_scanned[] = $details;
         }
