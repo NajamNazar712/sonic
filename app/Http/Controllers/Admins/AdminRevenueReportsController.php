@@ -26,15 +26,15 @@ class AdminRevenueReportsController extends Controller
     public static function revenue_report_by_delivery_date($report_type)
     {
         if($report_type == 1){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
@@ -99,13 +99,13 @@ class AdminRevenueReportsController extends Controller
 
 
         if($report_type == 1){
-            $filename = 'revenue_report_by_delivery_first_to_last.xlsx';
+            $filename = 'revenue_report_by_delivery_first_ten_days.xlsx';
         }
         if($report_type == 2){
-            $filename = 'revenue_report_by_delivery_first_to_25.xlsx';
+            $filename = 'revenue_report_by_delivery_second_ten_days.xlsx';
         }
         if($report_type == 3){
-            $filename = 'revenue_report_by_delivery_26_to_last.xlsx';
+            $filename = 'revenue_report_by_delivery_last_ten_days.xlsx';
         }
 
 
@@ -116,30 +116,30 @@ class AdminRevenueReportsController extends Controller
         $serial_number = 1;
         foreach ($sales as $sale) {
             if ($sale->dr_status_id == 20) {
-                $cash_handling_charges = "-";
-                $return_charges = number_format($sale->return_charges, 2);
-                $replacement_charges = "-";
-                $try_and_buy_charges = "-";
+                $cash_handling_charges = 0;
+                $return_charges = $sale->return_charges;
+                $replacement_charges = 0;
+                $try_and_buy_charges = 0;
             } else {
                 if ($sale->cash_handling_charges != null) {
-                    $cash_handling_charges = number_format($sale->cash_handling_charges, 2);
+                    $cash_handling_charges = $sale->cash_handling_charges;
                 } else {
-                    $cash_handling_charges = "-";
+                    $cash_handling_charges = 0;
                 }
-                $return_charges = "-";
-                $replacement_charges = number_format($sale->replacement_charges, 2);
-                $try_and_buy_charges = number_format($sale->try_and_buy_charges, 2);
+                $return_charges = 0;
+                $replacement_charges = $sale->replacement_charges;
+                $try_and_buy_charges = $sale->try_and_buy_charges;
             }
 
-            $insurance_charges = number_format($sale->insurance_charges, 2);
+            $insurance_charges = $sale->insurance_charges;
             $account_number = str_pad($sale->account_no, 6, '0', STR_PAD_LEFT);
-            $intercept_charges = number_format($sale->intercept_charges, 2);
-            $weight_charges = number_format($sale->weight_charges, 2);
-            $fuel_surcharge = number_format($sale->fuel_surcharge, 2);
-            $nsa_osa_charges = number_format($sale->nsa_osa_charges, 2);
-            $packaging_material_charges = number_format($sale->packaging_material_charges, 2);
+            $intercept_charges = $sale->intercept_charges;
+            $weight_charges = $sale->weight_charges;
+            $fuel_surcharge = $sale->fuel_surcharge;
+            $nsa_osa_charges = $sale->nsa_osa_charges;
+            $packaging_material_charges = $sale->packaging_material_charges;
 
-            $packaging_charges = number_format($sale->packaging_charges, 2);
+            $packaging_charges = $sale->packaging_charges;
 
             if ($sale->booking_type_id == 4) {
                 $shipper = $sale->shipper . ' (' . $sale->poc . ')';
@@ -154,7 +154,7 @@ class AdminRevenueReportsController extends Controller
             } else {
                 $amount = $sale->s_collection_amount;
             }
-            $collection_amount = number_format($amount);
+            $collection_amount = $amount;
             $gst = '';
             if ($sale->account_type_id == 1) {
                 if ($sale->p_gst != null) {
@@ -169,24 +169,24 @@ class AdminRevenueReportsController extends Controller
                     $gst = $sale->is_gst;
                 }
             }
-            $gst = number_format((float)$gst, 2);
+            $gst = (float)$gst;
             $total = 0;
             if ($sale->p_total_charges != null) {
                 $total = $sale->p_total_charges;
             } else if ($sale->d_total_charges != null) {
                 $total = $sale->d_total_charges;
             }
-            $total_charges = number_format((float)$total, 2);
+            $total_charges = (float)$total;
             $estimated = 0;
             $estimated = (($sale->weight_charges != null) ? $sale->weight_charges : 0) + (($sale->cash_handling_charges != null) ? $sale->cash_handling_charges : 0) + (($sale->insurance_charges != null) ? $sale->insurance_charges : 0) + (($sale->insurance_charges != null) ? $sale->insurance_charges : 0) + (($sale->return_charges != null) ? $sale->return_charges : 0) + (($sale->replacement_charges != null) ? $sale->replacement_charges : 0) + (($sale->fuel_surcharge != null) ? $sale->fuel_surcharge : 0) + (($sale->try_and_buy_charges != null) ? $sale->try_and_buy_charges : 0) + (($sale->packaging_material_charges != null) ? $sale->packaging_material_charges : 0) + (($sale->intercept_charges != null) ? $sale->intercept_charges : 0);
-            $estimated_charges = number_format((float)$estimated, 2);
+            $estimated_charges = (float)$estimated;
             $payable = '';
             if ($sale->p_net_payable != null) {
                 $payable = $sale->p_net_payable;
             } else if ($sale->d_net_payable != null) {
                 $payable = $sale->d_net_payable;
             }
-            $net_payable = number_format((float)$payable, 2);
+            $net_payable = (float)$payable;
             $class = '';
             if ($sale->origin_city_id != $sale->destination_city_id) {
                 switch ($sale->class) {
@@ -304,15 +304,16 @@ class AdminRevenueReportsController extends Controller
     public static function revenue_report($report_type)
     {
         if($report_type == 1){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
+
         }
         if($report_type == 2){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
         if($report_type == 4){
@@ -386,13 +387,13 @@ class AdminRevenueReportsController extends Controller
 
 
         if($report_type == 1){
-            $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
+            $filename = 'revenue_report_by_arrival_first_ten_days.xlsx';
         }
         if($report_type == 2){
-            $filename = 'revenue_report_by_arrival_first_to_25.xlsx';
+            $filename = 'revenue_report_by_arrival_second_ten_days.xlsx';
         }
         if($report_type == 3){
-            $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
+            $filename = 'revenue_report_by_arrival_last_ten_days.xlsx';
         }
         if($report_type == 4 ){
             $filename = 'revenue_report_by_arrival_on_daily_basis.xlsx';
@@ -405,30 +406,30 @@ class AdminRevenueReportsController extends Controller
         $serial_number = 1;
         foreach ($sales as $sale) {
             if ($sale->dr_status_id == 20) {
-                $cash_handling_charges = "-";
-                $return_charges = number_format($sale->return_charges, 2);
-                $replacement_charges = "-";
-                $try_and_buy_charges = "-";
+                $cash_handling_charges = 0;
+                $return_charges = $sale->return_charges;
+                $replacement_charges = 0;
+                $try_and_buy_charges = 0;
             } else {
                 if ($sale->cash_handling_charges != null) {
-                    $cash_handling_charges = number_format($sale->cash_handling_charges, 2);
+                    $cash_handling_charges = $sale->cash_handling_charges;
                 } else {
-                    $cash_handling_charges = "-";
+                    $cash_handling_charges = 0;
                 }
-                $return_charges = "-";
-                $replacement_charges = number_format($sale->replacement_charges, 2);
-                $try_and_buy_charges = number_format($sale->try_and_buy_charges, 2);
+                $return_charges = 0;
+                $replacement_charges = $sale->replacement_charges;
+                $try_and_buy_charges = $sale->try_and_buy_charges;
             }
 
-            $insurance_charges = number_format($sale->insurance_charges, 2);
+            $insurance_charges = $sale->insurance_charges;
             $account_number = str_pad($sale->account_no, 6, '0', STR_PAD_LEFT);
-            $intercept_charges = number_format($sale->intercept_charges, 2);
-            $weight_charges = number_format($sale->weight_charges, 2);
-            $fuel_surcharge = number_format($sale->fuel_surcharge, 2);
-            $nsa_osa_charges = number_format($sale->nsa_osa_charges, 2);
-            $packaging_material_charges = number_format($sale->packaging_material_charges, 2);
+            $intercept_charges = $sale->intercept_charges;
+            $weight_charges = $sale->weight_charges;
+            $fuel_surcharge = $sale->fuel_surcharge;
+            $nsa_osa_charges = $sale->nsa_osa_charges;
+            $packaging_material_charges = $sale->packaging_material_charges;
 
-            $packaging_charges = number_format($sale->packaging_charges, 2);
+            $packaging_charges = $sale->packaging_charges;
 
             if ($sale->booking_type_id == 4) {
                 $shipper = $sale->shipper . ' (' . $sale->poc . ')';
@@ -443,7 +444,7 @@ class AdminRevenueReportsController extends Controller
             } else {
                 $amount = $sale->s_collection_amount;
             }
-            $collection_amount = number_format($amount);
+            $collection_amount = $amount;
             $gst = 0;
             if ($sale->account_type_id == 1) {
                 if ($sale->p_gst != null) {
@@ -458,24 +459,24 @@ class AdminRevenueReportsController extends Controller
                     $gst = $sale->is_gst;
                 }
             }
-            $gst = number_format((float)$gst, 2);
+            $gst = (float)$gst;
             $total = 0;
             if ($sale->p_total_charges != null) {
                 $total = $sale->p_total_charges;
             } else if ($sale->d_total_charges != null) {
                 $total = $sale->d_total_charges;
             }
-            $total_charges = number_format((float)$total, 2);
+            $total_charges = (float)$total;
             $estimated = 0;
             $estimated = (($sale->weight_charges != null) ? $sale->weight_charges : 0) + (($sale->cash_handling_charges != null) ? $sale->cash_handling_charges : 0) + (($sale->insurance_charges != null) ? $sale->insurance_charges : 0) + (($sale->insurance_charges != null) ? $sale->insurance_charges : 0) + (($sale->return_charges != null) ? $sale->return_charges : 0) + (($sale->replacement_charges != null) ? $sale->replacement_charges : 0) + (($sale->fuel_surcharge != null) ? $sale->fuel_surcharge : 0) + (($sale->try_and_buy_charges != null) ? $sale->try_and_buy_charges : 0) + (($sale->packaging_material_charges != null) ? $sale->packaging_material_charges : 0) + (($sale->intercept_charges != null) ? $sale->intercept_charges : 0);
-            $estimated_charges = number_format((float)$estimated, 2);
+            $estimated_charges = (float)$estimated;
             $payable = '';
             if ($sale->p_net_payable != null) {
                 $payable = $sale->p_net_payable;
             } else if ($sale->d_net_payable != null) {
                 $payable = $sale->d_net_payable;
             }
-            $net_payable = number_format((float)$payable, 2);
+            $net_payable = (float)$payable;
             $class = '';
             if ($sale->origin_city_id != $sale->destination_city_id) {
                 switch ($sale->class) {
