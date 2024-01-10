@@ -73,6 +73,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
+                                        <th class="border-primary border-darken-1">ESO Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Added At</th>
@@ -139,10 +140,18 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div class="mb-2">
                         <select name="ref" id="ref" class="form-control select2">
                             @foreach($sale_tier_types as $ref)
                                 <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="eso" id="eso" class="form-control select2">
+                            @foreach($sale_tier_types as $eso)
+                                <option value="{{ $eso->id }}" > {{ $eso->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -931,6 +940,7 @@ function checkboxStatus() {
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
+                        head.push('ESO Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Added At');
@@ -982,6 +992,7 @@ function checkboxStatus() {
                             row.push(values.tagged_poc);
                             row.push(values.kam);
                             row.push(values.ref);
+                            row.push(values.eso);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.rates_added_at);
@@ -1418,6 +1429,8 @@ function checkboxStatus() {
                                var poc = $('#poc').val();
                                var kam = $('#kam').val();
                                var ref = $('#ref').val();
+                               var eso = $('#eso').val();
+
                                swal({
                                    text: 'Are you sure, you want to Tag?',
                                    icon: 'info',
@@ -1448,6 +1461,7 @@ function checkboxStatus() {
                                                'poc': poc,
                                                'kam': kam,
                                                'ref': ref,
+                                               'eso':eso,
                                                'shipper_ids[]': selected_rows,
                                                '_token': '{{ csrf_token() }}'
                                            }
@@ -1667,6 +1681,7 @@ function checkboxStatus() {
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'rates_added_at', name: 'users.rates_added_at', class: 'align-middle rates_added_at'},
@@ -1967,6 +1982,11 @@ function checkboxStatus() {
         });
         $("#ref").prepend('<option value="" selected></option>').select2({
             placeholder: "Select REFERRAL",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+        $("#eso").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select ESO",
             width:'100%',
             dropdownParent:$('#SalesTierTypeTagModal')
         });

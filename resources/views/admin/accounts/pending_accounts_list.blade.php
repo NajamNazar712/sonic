@@ -69,6 +69,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
+                                        <th class="border-primary border-darken-1">ESO Tagged</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -158,10 +159,18 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div class="mb-2">
                         <select name="ref" id="ref" class="form-control select2">
                             @foreach($sale_tier_types as $ref)
                                 <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <select name="eso" id="eso" class="form-control select2">
+                            @foreach($sale_tier_types as $eso)
+                                <option value="{{ $eso->id }}" > {{ $eso->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -646,6 +655,7 @@
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
+                        head.push('ESO Tagged');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -689,6 +699,7 @@
                             row.push(values.tagged_poc);
                             row.push(values.kam);
                             row.push(values.ref);
+                            row.push(values.eso);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -966,6 +977,8 @@
                                     var poc = $('#poc').val();
                                     var kam = $('#kam').val();
                                     var ref = $('#ref').val();
+                                    var eso = $('#eso').val();
+
                                     swal({
                                         text: 'Are you sure, you want to Tag?',
                                         icon: 'info',
@@ -996,6 +1009,8 @@
                                                     'poc': poc,
                                                     'kam': kam,
                                                     'ref': ref,
+                                                    'eso': eso,
+
                                                     'shipper_ids[]': selected_rows,
                                                     '_token': '{{ csrf_token() }}'
                                                 }
@@ -1209,6 +1224,7 @@
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -1630,6 +1646,12 @@
             dropdownParent:$('#SalesTierTypeTagModal')
         });
 
+        $("#eso").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select ESO",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
+
         
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
@@ -1769,6 +1791,8 @@
             $('#SalesTierTypeTagModal #poc').val('').trigger('change');
             $('#SalesTierTypeTagModal #kam').val('').trigger('change');
             $('#SalesTierTypeTagModal #ref').val('').trigger('change');
+            $('#SalesTierTypeTagModal #eso').val('').trigger('change');
+
         });
 
         $( "#set_territory" ).validate({

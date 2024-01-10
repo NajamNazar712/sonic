@@ -9349,11 +9349,12 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as poc', 'poc.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->select(['users.blacklist', 'users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days'])
+            ->select(['users.blacklist', 'users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0);
         if (session('role_id') != 1) {
@@ -9784,6 +9785,7 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(Request $request)
     {
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
@@ -9810,9 +9812,10 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
+            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -12442,11 +12445,12 @@ class AdminDashboardController extends Controller
         $poc = $request->poc;
         $kam = $request->kam;
         $ref = $request->ref;
+        $eso = $request->eso;
 
-        $send_to_emails = [$poc, $kam, $ref];
+        $send_to_emails = [$poc, $kam, $ref, $eso];
         
         $shipper_ids = $request->shipper_ids;
-        if ($kam == null && $poc == null && $ref == null) {
+        if ($kam == null && $poc == null && $ref == null && $eso == null) {
             return response()->json(['status' => 0, 'error' => "One field is mandatory!"]);
         } else {
             if ($shipper_ids) {
@@ -12458,10 +12462,12 @@ class AdminDashboardController extends Controller
                 $notification_data['new_poc_person'] = Admin::find($poc) ?  Admin::find($poc)->name : '-';
                 $notification_data['new_kam_person'] =  Admin::find($kam) ?  Admin::find($kam)->name : '-';
                 $notification_data['new_ref_person'] =  Admin::find($ref) ?  Admin::find($ref)->name : '-';
+                $notification_data['new_eso_person'] =  Admin::find($eso) ?  Admin::find($eso)->name : '-';
 
                 $notification_data['old_poc_person'] = '-';
                 $notification_data['old_kam_person'] = '-';
                 $notification_data['old_ref_person'] = '-';
+                $notification_data['old_eso_person'] = '-';
                 $notification_data['old_person_date'] = '-';
                 $notification_data['old_person_email'] = null;
                 
@@ -12481,7 +12487,9 @@ class AdminDashboardController extends Controller
 
                         $notification_data['old_poc_person'] = Admin::find($sale_tier->poc) ? Admin::find($sale_tier->poc)->name : '-';
                         $notification_data['old_kam_person'] = Admin::find($sale_tier->kam) ? Admin::find($sale_tier->kam)->name : '-';
+                        $notification_data['old_eso_person'] = Admin::find($sale_tier->eso) ? Admin::find($sale_tier->eso)->name : '-';
                         $notification_data['old_ref_person'] = Admin::find($sale_tier->ref) ? Admin::find($sale_tier->ref)->name : '-';
+
                         $notification_data['old_person_date'] = $sale_tier->created_at;
 
                         $sale_tier_history = new SaleTierTagHistory();
@@ -12490,12 +12498,14 @@ class AdminDashboardController extends Controller
                         $sale_tier_history->poc = $sale_tier->poc;
                         $sale_tier_history->kam = $sale_tier->kam;
                         $sale_tier_history->ref = $sale_tier->ref;
+                        $sale_tier_history->eso = $sale_tier->eso;
                         $sale_tier_history->save();
 
                         $sale_tier->user_id = $shipper_id;
                         $sale_tier->poc = $poc;
                         $sale_tier->kam = $kam;
                         $sale_tier->ref = $ref;
+                        $sale_tier->eso = $eso;
                         $sale_tier->save();
                         // return response()->json(['status'=>1,'success'=>"Updated!"]);
                     } else {
@@ -12503,6 +12513,7 @@ class AdminDashboardController extends Controller
                         $sale_tier->user_id = $shipper_id;
                         $sale_tier->poc = $poc;
                         $sale_tier->kam = $kam;
+                        $sale_tier->eso = $eso;
                         $sale_tier->ref = $ref;
                         $sale_tier->save();
                     }
