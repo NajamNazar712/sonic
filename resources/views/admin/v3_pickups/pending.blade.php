@@ -1787,19 +1787,19 @@
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
-                    {data: 'product', name: 'product', class: 'align-middle product'},
+                    {data: 'product', name: 'seg.name', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
-                    {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
+                    {data: 'shippment_type', name: 'pst.name', class: 'align-middle text-center shippment_type'},
                     {data: 'shipments_picked_btn',name:'shipments_picked_btn',class: 'align-middle shipments_picked'},
-                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
                     
                     {data: 'address', name: 'address', class: 'align-middle address'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
-                    {data: 'hub', name: 'hub', class: 'align-middle station'},
-                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
+                    {data: 'hub', name: 'h.name', class: 'align-middle station'},
+                    {data: 'route_code', name: 'rt.route_code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rd.name', class: 'align-middle rider_id',
                     render: function (data, type, row) {
                             if (row.rider_id !== null) {
                                 return row.rider_id + ' - ' + row.rider_name;
@@ -1809,7 +1809,7 @@
                         }
                     },
                     {data: 'rider_phone', name: 'rider_phone', class: 'align-middle rider_phone'},
-                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider',
+                    {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider',
                       render:function(data,type,row){
                         if(row.current_rider_id!==null){
                             return row.current_rider_id + ' - ' + row.current_rider;
