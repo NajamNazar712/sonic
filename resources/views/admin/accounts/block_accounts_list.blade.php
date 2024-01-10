@@ -215,7 +215,7 @@
 
 
                             row.push(index + 1);
-                            row.push(values.id_padded);
+                            row.push(values.id);
                             row.push(values.name);
                             row.push(values.poc);
                             row.push(values.city);

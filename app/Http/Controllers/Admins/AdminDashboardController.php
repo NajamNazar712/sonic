@@ -9692,7 +9692,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
-            ->addColumn('id_padded', function ($user) {
+            ->addColumn('id', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -10054,7 +10054,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
-            ->addColumn('id_padded', function ($user) {
+            ->addColumn('id', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
