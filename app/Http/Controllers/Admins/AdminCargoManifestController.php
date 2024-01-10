@@ -776,7 +776,7 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if($shipment->pickup_address->city->id == $shipment->destination_city->id )
+            if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
             {
                 return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
             }
@@ -3525,7 +3525,7 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if($shipment->pickup_address->city->id == $shipment->destination_city->id )
+            if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
                 return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
 
 
