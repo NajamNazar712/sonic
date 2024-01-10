@@ -9350,4 +9350,4 @@ class GlobalSettingsController extends Controller
         
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    }
+}

@@ -3828,16 +3828,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delete', 'Admins\GlobalSettingsController@product_type_delete')->name('delete');
         });
 
-<<<<<<< HEAD
         Route::prefix('logistic_report_setting')->name('logistic_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@logistic_report_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@logistic_report_store')->name('store');
-=======
+        
+        });
         Route::prefix('shipper_ibft_charges_settings')->name('shipper_ibft_charges_settings.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_list')->name('list');
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
->>>>>>> origin/master
         });
 
     });
