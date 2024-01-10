@@ -2933,6 +2933,10 @@ RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $tracking_no = $request->tracking_no;
+        $lat = $request->latitude;
+        $long = $request->longitude;
+
+        $shipment_id = Shipment::where('tracking_number',  $tracking_no)->first()->id;
         $pickup_requests = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
             ->join('shipments as s', 'prs.shipment_id', '=', 's.id')
             ->where('s.tracking_number', $tracking_no)
@@ -2942,6 +2946,8 @@ RiderAPIController extends Controller
         if ($pickup_requests->exists()) {
             $pickup_requests = $pickup_requests->first();
             $shipment_status = $pickup_requests->shipper_status_id;
+            ShipmentScanningJourneyController::add($shipment_id, 8, 5, $rider_id, null, null ,null,null, $lat, $long ,'rider');
+
             if ($pickup_requests->current_rider_id == $rider_id) {
                 return response()->json(['status' => 1, 'message' => 'Pickup Already Assigned to You']);
             } elseif ($shipment_status != 1 && $shipment_status != 17) {
@@ -14337,8 +14343,8 @@ RiderAPIController extends Controller
     {
         $rules = [
             'tracking_number' => 'required',
-            'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -14354,7 +14360,7 @@ RiderAPIController extends Controller
 
             if(count($tracking_number) == count($shipments))
             {   
-                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id);
+                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id, $request->latitude, $request->longitude);
 
                 return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
             }
