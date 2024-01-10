@@ -365,15 +365,15 @@ trait RvTrait
             //     }
             // }
             if ($rv_assign_agent_status && ($shipment_status_id !== null || $call_finding_id !== null)) {
-                if ($shipment_status_id === '13') {
+                if ($shipment_status_id == 13) {
                     return $this->reattempt($request);
-                } elseif ($shipment_status_id === '15') {
+                } elseif ($shipment_status_id == 15) {
                     return $this->on_hold_for_self_collection($request);
-                } elseif ($shipment_status_id === '20') {
+                } elseif ($shipment_status_id == 20) {
                     return $this->return_confirm($request);
-                } elseif ($shipment_status_id === '54') {
+                } elseif ($shipment_status_id == 54) {
                     return $this->intercept($request);
-                }  elseif ($shipment_status_id === null) {
+                }  elseif ($shipment_status_id == null) {
                     return $this->unresponsive($request);
                 }
             }
