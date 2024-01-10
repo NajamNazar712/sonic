@@ -4503,21 +4503,11 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->save();
                 }
                 else{
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -7536,21 +7526,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -11683,21 +11663,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -22244,21 +22214,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -26358,21 +26318,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -29140,21 +29090,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
@@ -29243,21 +29183,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 else{
                     
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
@@ -32035,21 +31965,11 @@ class AdminCorporateAccountsController extends Controller
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
                 }else{   
-                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                   $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $existing_user_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_id')->toArray();
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('rider_id')->toArray();                        
-                        $ids_to_be_deleted = array_diff($existing_user_ids, $request->user_id ?? []);
-                        $rider_ids_to_be_deleted = array_diff($existing_rider_ids, $request->user_id ?? []); 
-                        if (!empty($ids_to_be_deleted) || !empty($rider_ids_to_be_deleted)) {
-                            SalesCommissionUser::whereIn('user_id', $ids_to_be_deleted)
-                            ->orWhereIn('rider_id', $rider_ids_to_be_deleted)
-                            ->delete();
-                        }
-                        if (!isset($request->user_id)) {
-                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                            SalesCommission::where('shipper_id', $id)->delete();
-                        }
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                        SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
