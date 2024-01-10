@@ -133,6 +133,7 @@
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Sub Department</th>
+                                    <th class="border-primary border-darken-1">Employee Education</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
@@ -1291,6 +1292,7 @@
                             head.push('Designation');
                             head.push('Department Name');
                             head.push('Sub Department Name');
+                            head.push('Employee Education');
                             head.push('Line Manager');
                             head.push('IBAN No.');
                             head.push('Zone Name');
@@ -1334,7 +1336,8 @@
                                 row.push(values.incentive_amount);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
-                                row.push(values.sub_department_name);
+                                row.push(values.sub_department_name);                            
+                                row.push(values.education_name); 
                                 row.push(values.line_manager);
                                 row.push(values.iban);
                                 row.push(values.zone_name);
@@ -1635,6 +1638,7 @@
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'sub_department_name', name: 'employees.sub_department', class: 'align-middle sub_department_name'},
+                    {data: 'education_name', name: 'education_name', class: 'align-middle education_name'},
                     {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},

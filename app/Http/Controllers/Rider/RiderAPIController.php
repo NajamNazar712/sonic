@@ -154,6 +154,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 use App\ReturnDeliveredToShipperSms;
 use App\RiderWiseDeliveryNote;
@@ -4500,6 +4501,7 @@ RiderAPIController extends Controller
         $main_category = RiderMainCategory::all();
         $employee_nature = EmployeeNature::select('id', 'name')->get();
         $replacement_employees = Employee::select('id', 'trax_id', 'name')->where('employee_type_id', 2)->whereNotNull('trax_id')->get();
+        $education_list=EducationList::select('id','name')->where('status',1)->get();
         $shift_data = array();
         foreach ($shifts as $shift) {
             $datum = array();
@@ -4515,7 +4517,7 @@ RiderAPIController extends Controller
             $datum['name'] = $replacement_employee->trax_id . ' | ' . $replacement_employee->name;
             $replacement_employee_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data,'education_list'=>$education_list]);
     }
 
     public function rider_signup_v2(Request $request)
@@ -10512,6 +10514,7 @@ RiderAPIController extends Controller
                 //replacementInfo
                 'replacement_employee_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employees,id'],
                 'replacement_last_working_day' => ['nullable'],
+                'education_id'=> ['required','integer', 'digits_between:1,10', 'exists:education_lists,id']
 
 
             ];
@@ -10593,6 +10596,7 @@ RiderAPIController extends Controller
                             $employee_request->employee_nature_id = $request->employee_nature_id;
                             $employee_request->sub_department = $request->sub_department;
                             $employee_request->line_manager_id = $request->line_manager_id;
+                            $employee_request->education_id=$request->education_id;
                             $employee_request->save();
 
                             if ($request->has("bank_id") && $request->has("account_title") && $request->has("iban")) {

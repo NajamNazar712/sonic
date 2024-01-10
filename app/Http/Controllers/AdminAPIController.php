@@ -83,6 +83,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\HR\EducationList;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeAttendanceAdjustment;
@@ -6222,6 +6223,8 @@ class AdminAPIController extends Controller
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
                 'iban' => ['nullable'],
+                'education_id'=> ['required','integer', 'digits_between:1,10', 'exists:education_lists,id']
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -6311,6 +6314,8 @@ class AdminAPIController extends Controller
                         $employee_request->shift_id = $request->shift_id;
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->line_manager_id = $request->line_manager_id;
+                        $employee_request->education_id=$request->education_id;
+
                         $employee_request->save();
 
                         if ($request->has("bank_id") && $request->has("account_title") && $request->has("iban")) {
@@ -7502,6 +7507,8 @@ class AdminAPIController extends Controller
         $shifts = EmployeeShift::where('id', '!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
+        $education_list=EducationList::select('id','name')->where('status',1)->get();
+
         $shift_data = array();
         foreach ($shifts as $shift) {
             $datum = array();
@@ -7509,7 +7516,7 @@ class AdminAPIController extends Controller
             $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
             $shift_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category,'education_list'=>$education_list]);
     }
 
     public function mark_attendance_v3(Request $request)

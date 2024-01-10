@@ -327,7 +327,7 @@
                                                 <input type="text" id="sub_department" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div  class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
                                                 <div class="form-group position-relative">
@@ -336,6 +336,20 @@
 {{--                                                        <i class="la la-eye success"></i>--}}
 {{--                                                    </div>--}}
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Education<span class="text-danger">*</span></label>
+                                                <select name="education_id" id="education_list" data-rule-required="true"  data-msg-required="Shift is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($education_list as $education)
+                                                        @if ($employee->education_id==$education->id)
+                                                            <option value="{{$education->id}}" selected>{{$education->name}}</option>
+                                                        @else
+                                                            <option value="{{$education->id}}">{{$education->name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -2609,6 +2623,13 @@
                 placeholder: "Select Working Shift",
                 width:'100%',
             });
+            $("#education_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Education",
+                width:'100%',
+            })
+            $("#education_list").val("{{ $employee->education_id }}").trigger("change");
+
+            
             $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
             
             $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({
