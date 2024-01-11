@@ -167,13 +167,13 @@
                         </select>
                     </div>
 
-                    <div class="mb-2">
+                    {{-- <div class="mb-2">
                         <select name="eso" id="eso" class="form-control select2">
                             @foreach($sale_tier_types as $eso)
                                 <option value="{{ $eso->id }}" > {{ $eso->name }} </option>
                             @endforeach
                         </select>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
