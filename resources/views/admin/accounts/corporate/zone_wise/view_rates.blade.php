@@ -3726,7 +3726,11 @@
                                             <tr>
                                                 <td>{{++$index}}</td>
                                                 @if($sales_user->tier_type_id == 1)
-                                                    <td>{{$sales_user->sales_person->name ?? $sales_user->rider_person->name}}</td>
+                                                    @if ($sales_user->user_type == 1)
+                                                        <td>{{$sales_user->sales_person->name }}</td>
+                                                    @else
+                                                        <td>{{$sales_user->rider_person->name }}</td>
+                                                    @endif
                                                 @else
                                                     <td>{{$sales_user->sales_person_external->name}}</td>
                                                 @endif
