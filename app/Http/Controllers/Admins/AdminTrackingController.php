@@ -1417,7 +1417,7 @@ class AdminTrackingController extends Controller
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
                             ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at');     
-                            
+                            //check for cases
                             switch ($journey->shipper_status_id) {
                                 case 2:
                                     $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
