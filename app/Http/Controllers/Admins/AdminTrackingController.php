@@ -904,15 +904,15 @@ class AdminTrackingController extends Controller
                 'latitude' => $scanning_data['latitude'],
                 'longitude' => $scanning_data['longitude'],
                 'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
-                'area' => CityArea::find($scanning_data['area_id'])->name ?? null ,
+                'area' => CityArea::find($scanning_data['area_id'])->name ?? '-', 
 
             ];
         } else {
             return [
-                'latitude' => null,
-                'longitude' => null,
-                'location_status' => null,
-                'area' => null,
+                'latitude' => '-',
+                'longitude' => '-',
+                'location_status' => '-',
+                'area' => '-',
 
             ];
         }
