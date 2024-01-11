@@ -968,7 +968,7 @@ function checkboxStatus() {
 
 
                             row.push(index + 1);
-                            row.push(values.id_padded);
+                            row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);

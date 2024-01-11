@@ -21,7 +21,7 @@
                     @if(!empty($shippers))
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                            <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple>
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
@@ -217,10 +217,9 @@
                 'allowPlus': false
             });
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipper').select2({
                 placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
+                width:'100%'
             });
 
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
