@@ -15,8 +15,7 @@ class UpdateRemoveColumnRiderAndAddUserTypeSaleCommissionUsers extends Migration
     {
         Schema::table('sales_commission_users', function (Blueprint $table) {
             $table->dropColumn('rider_id');
-            $table->integer('user_type')->after('user_id')->nullable();
-
+            $table->integer('user_type')->after('user_id')->default(1);
         });   
     }
 
