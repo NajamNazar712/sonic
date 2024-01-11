@@ -1812,7 +1812,11 @@ class AdminCorporateAccountsController extends Controller
                         $existing_commission_array[$index]['tier_id'] = $sale_commission_user->tier_id;
                         $existing_commission_array[$index]['tier_name'] = $sales_tier->tier_name;
                         if($sales_tier->tier_type == 1){
-                            $com_admin = Admin::find($sale_commission_user->user_id) ?? Rider::find($sale_commission_user->rider_id);                            
+                            if($sale_commission_user->user_type == "1"){
+                                $com_admin = Admin::find($sale_commission_user->user_id);
+                            }else{
+                                $com_admin = Rider::find($sale_commission_user->user_id);                            
+                            }                              
                             $existing_commission_array[$index]['user_name'] = $com_admin->name;
                             $existing_commission_array[$index]['user_id'] = $com_admin->id;
                         }else if($sales_tier->tier_type == 2){
@@ -23643,7 +23647,11 @@ class AdminCorporateAccountsController extends Controller
                         $existing_commission_array[$index]['tier_id'] = $sale_commission_user->tier_id;
                         $existing_commission_array[$index]['tier_name'] = $sales_tier->tier_name;
                         if($sales_tier->tier_type == 1){
-                            $com_admin = Admin::find($sale_commission_user->user_id) ?? Rider::find($sale_commission_user->rider_id);                            
+                            if($sale_commission_user->user_type == "1"){
+                                $com_admin = Admin::find($sale_commission_user->user_id);
+                            }else{
+                                $com_admin = Rider::find($sale_commission_user->user_id);                            
+                            }                              
                             $existing_commission_array[$index]['user_name'] = $com_admin->name;
                             $existing_commission_array[$index]['user_id'] = $com_admin->id;
                         }else if($sales_tier->tier_type == 2){
