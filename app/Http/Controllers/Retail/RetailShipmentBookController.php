@@ -825,7 +825,6 @@ class RetailShipmentBookController extends Controller
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
 //            }
-
             if($shipment->shipment_type == 1){
 
                $shipping_mode = $shipment->shipping_mode->mode;
@@ -834,6 +833,7 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                 if($retail_shipment){
                     $shipping_mode = $retail_shipment->shipping_modes->name;
+                    $retail_user_name = $retail_shipment->retail_user->store->name;
                 }
             }
 
@@ -1286,7 +1286,7 @@ class RetailShipmentBookController extends Controller
                       <td colspan="1" style="font-size:13px;" class=""><strong>Shipping Mode</strong></td>
                      '.$shiping_mode.'
                       <td colspan="1" style="font-size:13px;" class=""><strong>Service - '. $service_type .'</strong></td>
-                      <td colspan="4"  class="prominent"><strong>Centre Name - ' .$service_type. '</strong></td>
+                      <td colspan="4"  class="prominent"><strong>Centre Name - ' .$retail_user_name. '</strong></td>
                     </tr> ';
 
                     $table_end .= '
