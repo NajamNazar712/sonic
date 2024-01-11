@@ -4954,7 +4954,7 @@ class DeliveryController extends Controller
 
                 if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else

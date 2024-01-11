@@ -674,7 +674,7 @@
                         value = 0;
                     }                    
                     
-                    $('td:eq(18)', row).html(value);
+                    $('td:eq(19)', row).html(value);
 
                 },
                 initComplete: function() {
