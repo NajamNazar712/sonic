@@ -4429,28 +4429,18 @@ class AdminCorporateAccountsController extends Controller
             }
 
             if($request->has('edit_commission') && $request->edit_commission == 1){
-                
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -4470,23 +4460,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                            
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                       
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -7361,25 +7341,16 @@ class AdminCorporateAccountsController extends Controller
                     
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                        $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-    
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -7399,23 +7370,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                
+                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                        $sales_commission_user->user_type = "2";
+                                    }  
+                                    if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                        $sales_commission_user->user_type = "2";
+                                    } 
+                                    $sales_commission_user->user_id = $request->user_id[$row_id];                              
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -7454,25 +7415,16 @@ class AdminCorporateAccountsController extends Controller
                 
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -7492,23 +7444,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                            
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                       
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -11497,25 +11439,16 @@ class AdminCorporateAccountsController extends Controller
                 if($request->has('edit_commission') && $request->edit_commission == 1){
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                    $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-    
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -11535,23 +11468,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                 
+                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -11591,25 +11514,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -11629,23 +11543,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -15380,25 +15284,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                    $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-    
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -15418,23 +15313,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                 
+                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -18164,25 +18049,16 @@ class AdminCorporateAccountsController extends Controller
                 if($request->has('edit_commission') && $request->edit_commission == 1){
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                        $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -18202,23 +18078,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                 
+                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -18258,25 +18124,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                        $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -18296,23 +18153,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                   if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                 
+                                   if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -22048,25 +21895,16 @@ class AdminCorporateAccountsController extends Controller
                 if($request->has('edit_commission') && $request->edit_commission == 1){
                     if($request->total_commission > 0){
                         $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                        $rider_ids = [];
+                        $user_type = [];
                         if ($existing_sale_commission) {
-                            $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                            foreach($existing_rider_ids as $key => $existing_rider_id){
-                                $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
                             }
                             SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                             SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                             SalesCommission::where('shipper_id', $id)->delete();
                         }
-
-                        
-                        $new_ids = array_diff($request->user_id, $rider_ids);
-                        $array = array_fill_keys($request->user_id, null);                    
-                        foreach ($new_ids as $edit_id) {
-                            $array[$edit_id] = $edit_id;
-                        }
-                        
-                        $array = array_combine(range(1, count($array)), array_values($array));
                         $total_commission = $request->total_commission;
                         $users_count = count($request->user_id);
 
@@ -22086,23 +21924,13 @@ class AdminCorporateAccountsController extends Controller
                                 $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                 $sales_commission_user->tier_id = $tier;
                                 if($sales_tier->tier_type == 1){
-                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                        preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                        $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                        if (!empty($matches)) {
-                                            $rider_id = $matches[0];
-                                            $sales_commission_user->rider_id = $rider_id;
-                                        }
-                                    } else {
-                                        if(count($rider_ids) > 0){
-                                            if(isset($rider_ids[$row_id])){
-                                                $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                            }
-                                        }
-                                        if(isset($array[$row_id])){
-                                            $sales_commission_user->user_id = $array[$row_id];
-                                        }
-                                    }                                 
+                                    if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                                 }else if($sales_tier->tier_type == 2){
                                     $external_user = new SalesCommissionExternalUser();
                                     $external_user->name = $request->user_id[$row_id];
@@ -22142,25 +21970,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -22180,23 +21999,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -23660,16 +23469,11 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
                         if($sales_tier->tier_type == 1){
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                if (!empty($matches)) {
-                                    $rider_id = $matches[0];
-                                    $sales_commission_user->rider_id = $rider_id;
-                                }
-                            } else {
-                                $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }                        
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                $sales_commission_user->user_type = "2";
+                            }  
+                          
+                            $sales_commission_user->user_id = $request->user_id[$row_id];                    
                         }else if($sales_tier->tier_type == 2){
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
@@ -23702,16 +23506,11 @@ class AdminCorporateAccountsController extends Controller
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
                         if($sales_tier->tier_type == 1){
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                if (!empty($matches)) {
-                                    $rider_id = $matches[0];
-                                    $sales_commission_user->rider_id = $rider_id;
-                                }
-                            } else {
-                                $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }    
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                $sales_commission_user->user_type = "2";
+                            }  
+                    
+                            $sales_commission_user->user_id = $request->user_id[$row_id]; 
                         }else if($sales_tier->tier_type == 2){
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
@@ -26246,25 +26045,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -26284,23 +26074,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -29018,25 +28798,16 @@ class AdminCorporateAccountsController extends Controller
 
                 if($request->total_commission == 1){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -29056,23 +28827,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -29111,25 +28872,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -29149,23 +28901,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -31789,26 +31531,17 @@ class AdminCorporateAccountsController extends Controller
 
                if($request->has('edit_commission') && $request->edit_commission == 1){
                    if($request->total_commission > 0){
-                       $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                       $rider_ids = [];
-                       if ($existing_sale_commission) {
-                           $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                           foreach($existing_rider_ids as $key => $existing_rider_id){
-                               $rider_ids[$key+1] = $existing_rider_id->rider_id;
-                           }
-                           SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                           SalesCommissionExternalUser::where('shipper_id', $id)->delete();
-                           SalesCommission::where('shipper_id', $id)->delete();
-                       }
-   
-                       
-                       $new_ids = array_diff($request->user_id, $rider_ids);
-                       $array = array_fill_keys($request->user_id, null);                    
-                       foreach ($new_ids as $edit_id) {
-                           $array[$edit_id] = $edit_id;
-                       }
-                       
-                       $array = array_combine(range(1, count($array)), array_values($array));
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    $user_type = [];
+                        if ($existing_sale_commission) {
+                            $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                            foreach($types as $key => $user_type_value){
+                                $user_type[$key+1] = $user_type_value;
+                            }
+                            SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                            SalesCommissionExternalUser::where('shipper_id', $id)->delete();
+                            SalesCommission::where('shipper_id', $id)->delete();
+                        }
                        $total_commission = $request->total_commission;
                        $users_count = count($request->user_id);
 
@@ -31828,23 +31561,13 @@ class AdminCorporateAccountsController extends Controller
                                $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                                $sales_commission_user->tier_id = $tier;
                                if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                    
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                               
                             }else if($sales_tier->tier_type == 2){
                                    $external_user = new SalesCommissionExternalUser();
                                    $external_user->name = $request->user_id[$row_id];
@@ -31895,25 +31618,16 @@ class AdminCorporateAccountsController extends Controller
             if($request->has('edit_commission') && $request->edit_commission == 1){
                 if($request->total_commission > 0){
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
+                    $user_type = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
+                        $types = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->pluck('user_type')->toArray();
+                        foreach($types as $key => $user_type_value){
+                            $user_type[$key+1] = $user_type_value;
                         }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -31933,23 +31647,13 @@ class AdminCorporateAccountsController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                                 
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];                            
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -36312,16 +36016,11 @@ class AdminCorporateAccountsController extends Controller
                           $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                           $sales_commission_user->tier_id = $tier;
                           if($sales_tier->tier_type == 1){
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                if (!empty($matches)) {
-                                    $rider_id = $matches[0];
-                                    $sales_commission_user->rider_id = $rider_id;
-                                }
-                            } else {
-                                $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }    
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                $sales_commission_user->user_type = "2";
+                            }  
+                       
+                            $sales_commission_user->user_id = $request->user_id[$row_id]; 
                           }else if($sales_tier->tier_type == 2){
                               $external_user = new SalesCommissionExternalUser();
                               $external_user->name = $request->user_id[$row_id];
@@ -36354,16 +36053,11 @@ class AdminCorporateAccountsController extends Controller
                           $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                           $sales_commission_user->tier_id = $tier;
                           if($sales_tier->tier_type == 1){
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                if (!empty($matches)) {
-                                    $rider_id = $matches[0];
-                                    $sales_commission_user->rider_id = $rider_id;
-                                }
-                            } else {
-                                $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }    
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                $sales_commission_user->user_type = "2";
+                            }  
+                         
+                            $sales_commission_user->user_id = $request->user_id[$row_id];
                           }else if($sales_tier->tier_type == 2){
                               $external_user = new SalesCommissionExternalUser();
                               $external_user->name = $request->user_id[$row_id];

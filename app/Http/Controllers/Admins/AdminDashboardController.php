@@ -9152,7 +9152,7 @@ class AdminDashboardController extends Controller
                                 $sales_commission_user->user_type = "2";
                             }  
                             $sales_commission_user->user_id = $request->user_id[$row_id];
-                    }                        
+                        }                        
                         else if ($sales_tier->tier_type == 2) {
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
