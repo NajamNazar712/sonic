@@ -2480,7 +2480,6 @@ class AdminDashboardController extends Controller
 
     public function editRates(Request $request, $id)
     {
-        // dd($request->all());
         $user = User::find($id);
 
         if ($user['status'] != 3) {
@@ -4373,26 +4372,14 @@ class AdminDashboardController extends Controller
             if ($request->has('edit_commission') && $request->edit_commission == 1) {
                 if ($request->total_commission > 0) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
-                        }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                   
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
+
                     $sales_commission = new SalesCommission();
                     $sales_commission->shipper_id = $id;
                     $sales_commission->commission_users_count = $users_count;
@@ -4409,23 +4396,7 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if ($sales_tier->tier_type == 1) {
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
                             } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -4441,7 +4412,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
                 } else {
-                      $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
+                    $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
@@ -7045,23 +7016,10 @@ class AdminDashboardController extends Controller
                 if ($request->total_commission == 1) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
                     if ($existing_sale_commission) {
-                        $rider_ids = [];
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
-                        }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                   
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -7081,23 +7039,7 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if ($sales_tier->tier_type == 1) {
-                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                    preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                    $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                    if (!empty($matches)) {
-                                        $rider_id = $matches[0];
-                                        $sales_commission_user->rider_id = $rider_id;
-                                    }
-                                } else {
-                                    if(count($rider_ids) > 0){
-                                        if(isset($rider_ids[$row_id])){
-                                            $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                        }
-                                    }
-                                    if(isset($array[$row_id])){
-                                        $sales_commission_user->user_id = $array[$row_id];
-                                    }
-                                }                       
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
                             } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
@@ -7134,25 +7076,11 @@ class AdminDashboardController extends Controller
             if ($request->has('edit_commission') && $request->edit_commission == 1) {
                 if ($request->total_commission > 0) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    $rider_ids = [];
                     if ($existing_sale_commission) {
-                        $existing_rider_ids = SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->get();
-                        foreach($existing_rider_ids as $key => $existing_rider_id){
-                            $rider_ids[$key+1] = $existing_rider_id->rider_id;
-                        }
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
                         SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
-
-                    
-                    $new_ids = array_diff($request->user_id, $rider_ids);
-                    $array = array_fill_keys($request->user_id, null);                    
-                    foreach ($new_ids as $edit_id) {
-                        $array[$edit_id] = $edit_id;
-                    }
-                    
-                    $array = array_combine(range(1, count($array)), array_values($array));
                     $total_commission = $request->total_commission;
                     $users_count = count($request->user_id);
 
@@ -7166,29 +7094,14 @@ class AdminDashboardController extends Controller
                     $actual_commission = 0;
                     foreach ($request->tier_id as $row_id => $tier) {
                         $sales_tier = SalesTier::find($tier);
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                                                                   
-                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
-                                $rider_id = isset($matches[0]) ? $matches[0] : null;
-                                if (!empty($matches)) {
-                                    $rider_id = $matches[0];
-                                    $sales_commission_user->rider_id = $rider_id;
-                                }
-                            } else {
-                                if(count($rider_ids) > 0){
-                                    if(isset($rider_ids[$row_id])){
-                                        $sales_commission_user->rider_id = $rider_ids[$row_id];
-                                    }
-                                }
-                                if(isset($array[$row_id])){
-                                    $sales_commission_user->user_id = $array[$row_id];
-                                }
-                            }
-                        }else if ($sales_tier->tier_type == 2) {
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
                                 $external_user->shipper_id = $id;
@@ -7198,7 +7111,7 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->commission = $request->commission_percentage[$row_id];
                             $actual_commission += $request->commission_percentage[$row_id];
                             $sales_commission_user->save();
-                        
+                        }
                     }
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
@@ -7216,7 +7129,6 @@ class AdminDashboardController extends Controller
 
             return redirect()->back()->with('success', 'All Rates are updated');
         }
-        
     }
     /**
      * @param Request $request
