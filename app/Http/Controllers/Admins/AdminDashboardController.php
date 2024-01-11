@@ -9364,10 +9364,10 @@ class AdminDashboardController extends Controller
                 }
             })
             ->editColumn('eso', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id;
+                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id ?? null;
                 $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if ($shipper) {
+                if (isset($shipper, $sales_tiers)) {
                     $sales_commission_users = DB::table('sales_commission_users')
                         ->where(['user_type' => '2', 'tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
                         ->get();
@@ -9829,10 +9829,10 @@ class AdminDashboardController extends Controller
 
             })
             ->editColumn('eso', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id;
+                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id ?? null;
                 $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if ($shipper) {
+                if (isset($sales_tiers,$shipper)) {
                     $sales_commission_users = DB::table('sales_commission_users')
                         ->where(['user_type' => '2', 'tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
                         ->get();
