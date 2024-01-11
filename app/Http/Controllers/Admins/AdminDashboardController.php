@@ -9392,6 +9392,35 @@ class AdminDashboardController extends Controller
                 }
 
             })
+            ->editColumn('eso', function ($users) {
+                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id;
+                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+                
+                if ($shipper) {
+                    $sales_commission_users = DB::table('sales_commission_users')
+                        ->where(['user_type' => '2', 'tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+                        ->get();
+                
+                    if ($sales_commission_users->isNotEmpty()) {
+                        $rider_names = [];
+                        foreach ($sales_commission_users as $sales_commission_user) {
+                            $rider = Rider::find($sales_commission_user->user_id);
+                            if ($rider) {
+                                $rider_names[] = $rider->name;
+                            } else {
+                                return '-';
+                            }
+                        }
+                        $rider_name = implode(', ', $rider_names);
+                        return $rider_name;
+                    } else {
+                        return '-';
+                    }
+                } else {
+                    return '-';
+                }
+
+            })
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword == 3 || $keyword == 4) {
                     $query->where('users.status', '=', $keyword);
@@ -9826,6 +9855,35 @@ class AdminDashboardController extends Controller
             ->editColumn('id_padded', function ($users) {
                 $route = route('admin.accounts.view.profile', ['id' => $users->id]);
                 return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
+
+            })
+            ->editColumn('eso', function ($users) {
+                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%ESO%')->orWhere('tier_name', 'LIKE', '%eso%')->first()->id;
+                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+                
+                if ($shipper) {
+                    $sales_commission_users = DB::table('sales_commission_users')
+                        ->where(['user_type' => '2', 'tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+                        ->get();
+                
+                    if ($sales_commission_users->isNotEmpty()) {
+                        $rider_names = [];
+                        foreach ($sales_commission_users as $sales_commission_user) {
+                            $rider = Rider::find($sales_commission_user->user_id);
+                            if ($rider) {
+                                $rider_names[] = $rider->name;
+                            } else {
+                                return '-';
+                            }
+                        }
+                        $rider_name = implode(', ', $rider_names);
+                        return $rider_name;
+                    } else {
+                        return '-';
+                    }
+                } else {
+                    return '-';
+                }
 
             })
             ->editColumn('eso', function ($users) {
