@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Admins\Reports;
 
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipper\User;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
-class MMSReportController extends Controller
+
+class LogisticReportController extends Controller
 {
     public function __construct()
     {
@@ -20,35 +21,34 @@ class MMSReportController extends Controller
 
         $this->middleware('Permission');
     }
-
-    public function index()
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
+    public function index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 718); //trail ID
         $shippers_ids = array();
-        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
+        $setting = GlobalSettings::where('type', 'logistic_setting')->select('text')->first();
         if ($setting) {
             $shippers_ids = explode(',', $setting->text);
         }
 
-         $shippers = User::whereIn('id', $shippers_ids)->select('id', 'name')->get();
+        $shippers = User::whereIn('id', $shippers_ids)->select('id', 'name')->get();
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
-        $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->where('id', '!=', 17)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
 
-        return view('admin.reports.mms')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
+        return view('admin.reports.logistic')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
     }
+
     public function list(Request $request)
     {
         $connection = 'reports';
 
-        $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+        $shippers = GlobalSettings::where('type','logistic_setting')->select('text')->first();
         $special_shippers = explode(',', $shippers->text);
 
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 567);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 719); //trail ID
         }
 
         $from = $request->get('search_date_from');
@@ -99,9 +99,9 @@ class MMSReportController extends Controller
         })
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', 2)
+                    ->whereIn('sj.shipper_status_id', [1,2])
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id)"));
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN(1,2) and shipments_journey.id >= $sj_from_id)"));
             })
             ->leftJoin('shipments_journey as sjr', function ($join) use ($connection, $sj_from_id) {
                 $join->on('sjr.shipment_id', '=', 'shipments.id')
@@ -114,15 +114,14 @@ class MMSReportController extends Controller
                     ->where('dr.id','=',
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37,38) and shipments_journey.verification = 1 and shipments_journey.id >= $sj_from_id)"));
             })
-            ->leftJoin('riders as riders','riders.id','=','dr.rider_id')
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','riders.trax_id as rider_id', 'riders.name as rider_name','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.received_or_refused_by', 'dr.cnic', 'dr.relation','ssr.name as reason', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2')
-            ->whereNotIn('shipments.shipper_status_id',[1,17])
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'si.description','si.quantity','shipments.pieces','shipments.estimated_weight', 'oc.name as origin')
+            ->where('shipments.shipper_status_id', '!=', 17)
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to]);
    
@@ -146,7 +145,7 @@ class MMSReportController extends Controller
 
         $datatable = Datatables::of($sales)
             ->addColumn('aging', function ($shipments){
-                $from = Carbon::parse($shipments->arrival_date);
+                $from = Carbon::parse($shipments->booking_date);
                 $days = Carbon::now()->diffInDays($from);
                 if ($days == 0) {
                     return "-";
@@ -165,41 +164,7 @@ class MMSReportController extends Controller
                     return '';
                 }
             })
-            ->editColumn('received_or_refused_by', function ($sale) {
-                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                    $received_or_refused_by = '';
-                    if($sale->received_or_refused_by){
-                        $received_or_refused_by = $sale->received_or_refused_by;
-                    }
-                    return $received_or_refused_by;
-                } else {
-                    return '';
-                }
-            })
-
-            ->editColumn('relation', function ($sale) {
-                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                    $relation = '';
-                    if($sale->relation){
-                        $relation = $sale->relation;
-                    }
-                    return $relation;
-                } else {
-                    return '';
-                }
-            })
-
-            ->editColumn('cnic', function ($sale) {
-                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                    $cnic = '';
-                    if($sale->cnic){
-                        $cnic = $sale->cnic;
-                    }
-                    return $cnic;
-                } else {
-                    return '';
-                }
-            })
+            
             ->addColumn('consignee_phone', function ($shipments) {
                 return $shipments->consignee_phone_number_1 . "<br>" . $shipments->consignee_phone_number_2;
             })
@@ -252,5 +217,6 @@ class MMSReportController extends Controller
         }
 
         return $datatable->make(true);
-    }
+    } 
+
 }

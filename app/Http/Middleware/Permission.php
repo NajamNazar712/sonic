@@ -639,6 +639,8 @@ class Permission
             'reports.fintech_report.list' => 896,
             'reports.ordinary_discrepancy_report.index' => 901,
             'reports.ordinary_discrepancy_report.list' => 901,
+            'reports.ibft_report.index' => 915,
+            'reports.ibft_report.list' => 915,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -994,6 +996,9 @@ class Permission
             'settings.product_type.index'=> 912,
             'settings.product_type.list'=> 912,
 
+            'settings.shipper_ibft_charges_settings.index'=> 917,
+            'settings.shipper_ibft_charges_settings.list'=> 917,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1260,6 +1265,8 @@ class Permission
             'admin.reports.pay_fast_report.index' => 894,
             'admin.reports.pay_fast_report.list' => 894,
             'admin.reports.csat_report.index' => 899,
+            'reports.logistic.index' => 916,
+
 
 
             'admin.reports.hbl_konnect.index' => 895,

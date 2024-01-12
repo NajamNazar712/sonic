@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\NotificationsController;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +12,7 @@ class EmailTest extends Command
      *
      * @var string
      */
-    protected $signature = 'email:test';
+    protected $signature = 'email:test {name} {gard}';
 
     /**
      * The console command description.
@@ -39,7 +38,11 @@ class EmailTest extends Command
      */
     public function handle()
     {
-        Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
+        $gard = $this->argument('gard');
+        $id = $this->argument('name');
+        
+
+        Log::channel('code_test_log')->info($gard);
         echo "Noman bhai ka log!";
 //        $ref = 'nothing';
 //        NotificationsController::send(219, $ref);

@@ -276,11 +276,13 @@
                                                                     class="select2 form-control required"
                                                                     style="width: 100%">
                                                                     @foreach ($average_shipment_durations as $average_shipment_duration)
-                                                                        <option
-                                                                            value="{{ $average_shipment_duration->id }}"
-                                                                            {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }}>
-                                                                            {{ $average_shipment_duration->name }}
-                                                                        </option>
+                                                                        @if ($average_shipment_duration->id==3)
+                                                                            <option
+                                                                                value="{{ $average_shipment_duration->id }}"
+                                                                                {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }} selected>
+                                                                                {{ $average_shipment_duration->name }}
+                                                                            </option>
+                                                                        @endif
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -1079,7 +1081,7 @@
 
             }
         });
-        $('select[name="average_shipment_duration"]').prepend('<option value="" selected="selected"></option>').select2({
+        $('select[name="average_shipment_duration"]').select2({
             placeholder:'Select Duration',
             // dropdownParent:$('#registership')
         });
