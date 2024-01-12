@@ -405,7 +405,7 @@ class AdminCommissionController extends Controller
             $total_commission=0;
 
             foreach($shipper_ids as $shippersId){
-                $shippers[] = DB::connection('reports')->table('users')->where('status','>=',3)->where('id',$shippersId['shipper_id'])->first();
+                $shippers[] = User::where('status','>=',3)->where('id',$shippersId['shipper_id'])->first();
                 $shipment_journey_received = Shipment::leftjoin('shipments_journey as s', 's.shipment_id', '=', 'shipments.id')->where('s.shipper_status_id', 2)->where('shipments.user_id',  $shippersId['shipper_id'])
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
                 ->select(DB::raw('count(shipments.id) AS received'))->first();
@@ -415,8 +415,7 @@ class AdminCommissionController extends Controller
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
                 ->select(DB::raw('count(id) AS booked'))->first();
 
-                $sale_person_shipment =  DB::connection('reports')->table('shipments')
-                ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                $sale_person_shipment =  Shipment::leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
                 ->where('shipments.user_id', $shippersId['shipper_id'])
                 ->where('sj.shipper_status_id',2)
                 ->whereBetween('shipments.created_at',[$first_day, $last_day])
