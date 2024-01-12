@@ -111,15 +111,16 @@ trait RvTrait
                     'rv_state_id' => $data['rv_state_id'],
                     'updated_type_id' => Auth::guard('agent')->check() ? 2 : 1,
                     'updated_by_id' => Auth::id(),
+                    'assigned_to_type_id' => $data['assigned_to_type_id'] ?? 0,
                     'assigned_by' => $data['assigned_by'] ?? 0,
                     'created_at' => Carbon::now(),
                 ]
             );
-
+            
         }
 
         $rv_shipment_assign_agent_id = RvShipmentAssignAgent::max('id');
-
+        
         RvShipmentAssignAgentDetails::create([
             'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent_id,
             'shipment_id' => $data['shipment_id'],
@@ -132,6 +133,7 @@ trait RvTrait
             'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
             'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
             'call_to_id' => $data['call_to_id'] ?? '0',
+            'assigned_to_type_id' => $data['assigned_to_type_id'],
             'assigned_by' => $data['assigned_by']
         ]);
         
@@ -1619,6 +1621,7 @@ trait RvTrait
                         'rv_state_id' => 1, //Assigned
                         'rv_assign_agent_status_id' => null,
                         'rv_assign_agent_sub_status_id' => null,
+                        'assigned_to_type_id' => 1, 
                         'assigned_by' => Auth::id(),
                     ];
                     
@@ -1659,6 +1662,7 @@ trait RvTrait
                                     'rv_fake_status_id' => Null,
                                     'remarks' => Null,
                                     'call_to_id' => 0,
+                                    'assigned_to_type_id' => Null,
                                     'assigned_by' => Null,
                                 ];
                             $this->data_rv_shipment_assign_agent_details($data);
@@ -1689,6 +1693,7 @@ trait RvTrait
                             'rv_state_id' => 1, //Assigned
                             'rv_assign_agent_status_id' => null,
                             'rv_assign_agent_sub_status_id' => null,
+                            'assigned_to_type_id' => null,
                             'assigned_by' => null,
                         ];
                         

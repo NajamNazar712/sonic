@@ -1554,6 +1554,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('confirmed/search', 'Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store', 'Admins\ReturnController@excel_store')->name('excel.store');
         Route::post('excel/assign_agent_excel', 'Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
+        Route::get('fetch/agent', 'Admins\ReturnController@fetch_agent')->name('fetch.agent');
         Route::post('assign/agent', 'Admins\ReturnController@assign_agent')->name('assign.agent');
         Route::post('unassign/agent', 'Admins\ReturnController@unassign_agent')->name('unassign.agent');
         Route::get('/confirmation_pending/sms', 'Admins\ReturnController@confirmation_pending_sms_index')->name('confirmation_pending_sms');

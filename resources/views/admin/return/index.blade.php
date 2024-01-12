@@ -701,14 +701,20 @@
             </div>
         </div>
 
-        <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog"
-            aria-labelledby="AssignAgentModal" aria-hidden="true">
+        {{-- <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal" aria-hidden="true">
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="">Assign Agent</h4>
                     </div>
                     <div class="modal-body">
+                        <div class="form-group text-left">
+                                <select name="select_emp_type" class="form-control select2" id="select_emp_type" required>
+                                    @foreach ($staff_types as $staff_type)
+                                        <option value="{{ $staff_type->id }}">{{ $staff_type->name }}</option>
+                                    @endforeach
+                                </select>
+                        </div>
                         <select name="assign_agent" id="assign_agent" class="form-control select2">
                             @foreach ($agents as $agent)
                                 <option value="{{ $agent->id }}"> {{ $agent->name }} - {{ $agent->trax_id }} - {{ $agent->city_name }} </option>
@@ -716,12 +722,138 @@
                         </select>
                     </div>
                     <div class="modal-footer">
+                        <span id="error_emp_type" style="color: red;"></span>
                         <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
+        </div> --}}
+
+        {{-- assign agent modal --}}
+        <div class="modal fade" id="AssignAgentModal" data-backdrop="static" role="dialog"
+            aria-labelledby="AssignAgentModal" aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Assign Agent</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        {{-- <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" --}}
+                        {{-- <form id="update_assign_agent_form" class="form-horizontal mb-1 justify-content-center"
+                            novalidate="novalidate">
+                            @csrf --}}
+                            <div class="form-group text-left">
+                                <select name="select_emp_type" class="form-control select2" id="select_emp_type" required>
+                                    @foreach ($staff_types as $staff_type)
+                                        <option value="{{ $staff_type->id }}">{{ $staff_type->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group text-left assign_agent_container d-none">
+                                <select name="assign_agent" id="assign_agent" class="form-control assign_agent select2" required>
+                                </select>
+                            </div>
+
+                            
+
+                            <div class="form-group ml-1 ">
+                                {{-- <button type="submit" name="add" id="btnReturn" class="btn btn-primary update_return_confirm" value="Add">Update Call History</button> --}}
+                                <button type="submit" name="add" id="assign_agentSubmit" class="btn btn-primary update_assign_agent" value="Add">Assign</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                            </div>
+
+                        {{-- </form> --}}
+                    </div>
+                </div>
+            </div>
         </div>
+
+         {{-- call history modal --}}
+         <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="update_call_status_modal" aria-hidden="true">
+         <div class="modal-dialog modal-md" role="document">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h4 class="modal-title">Call History</h4>
+
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">×</span>
+                     </button>
+                 </div>
+                 <div class="modal-body text-center">
+                     <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center"
+                         novalidate="novalidate">
+                         @csrf
+                         <div class="form-group text-left">
+                             <input type="hidden" id="shipment_id" value="">
+                             <select name="call_finding_dropdown" class="form-control select2"
+                                 id="call_finding_dropdown" data-rule-required="true"
+                                 data-msg-required="Call Finding is required">
+
+                                 {{-- id 6 is for unresposive is in rv_assign_agent_statuses table --}}
+                                 <option value="6">Unresponsive</option>  
+                             </select>
+                         </div>
+
+                         <div class="form-group text-left sub_status_call_finding_container d-none">
+                             <select name="sub_status_call_finding" class="form-control select2"
+                                 id="sub_status_call_finding">
+                                 @foreach ($sub_status_call_finding as $sscf)
+                                     <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
+                                 @endforeach
+                             </select>
+                         </div>
+
+                         <div class="form-group text-left custom_remark_container d-none">
+                             <input type="text" id="custom_remark" name="custom_remark" class="form-control"
+                                 placeholder="Enter Other Text">
+                         </div>
+
+                         <div class="form-group text-left">
+                             <select name="call_to" class="form-control select2" id="call_to"
+                                 data-rule-required="true" data-msg-required="Call To is required">
+                                 {{-- <option value="0">Shippper</option> --}}
+                                 <option value="1">Consigneee</option>
+                             </select>
+                         </div>
+
+                         <div class="form-group ml-1 ">
+                             <button type="submit" name="add" id="btnReturn"
+                                 class="btn btn-primary update_return_confirm" value="Add">Update Call
+                                 History</button>
+                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                         </div>
+
+                     </form>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     {{-- call history log modal --}}
+     <div class="modal fade" id="call_history_modal" role="dialog" aria-labelledby="call_history_modal_title"
+         aria-hidden="true">
+         <div class="modal-dialog modal-xl" role="document">
+             <div class="modal-content">
+                 <div class="modal-header text-center">
+                     <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">×</span>
+                     </button>
+
+                 </div>
+                 <div class="modal-body text-center">
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                 </div>
+             </div>
+         </div>
+     </div>
 
 
         <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
@@ -828,88 +960,7 @@
             </div>
         </div>
 
-        {{-- call history modal --}}
-        <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog"
-            aria-labelledby="update_call_status_modal" aria-hidden="true">
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Call History</h4>
-
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center"
-                            novalidate="novalidate">
-                            @csrf
-                            <div class="form-group text-left">
-                                <input type="hidden" id="shipment_id" value="">
-                                <select name="call_finding_dropdown" class="form-control select2"
-                                    id="call_finding_dropdown" data-rule-required="true"
-                                    data-msg-required="Call Finding is required">
-
-                                    {{-- id 6 is for unresposive is in rv_assign_agent_statuses table --}}
-                                    <option value="6">Unresponsive</option>  
-                                </select>
-                            </div>
-
-                            <div class="form-group text-left sub_status_call_finding_container d-none">
-                                <select name="sub_status_call_finding" class="form-control select2"
-                                    id="sub_status_call_finding">
-                                    @foreach ($sub_status_call_finding as $sscf)
-                                        <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="form-group text-left custom_remark_container d-none">
-                                <input type="text" id="custom_remark" name="custom_remark" class="form-control"
-                                    placeholder="Enter Other Text">
-                            </div>
-
-                            <div class="form-group text-left">
-                                <select name="call_to" class="form-control select2" id="call_to"
-                                    data-rule-required="true" data-msg-required="Call To is required">
-                                    {{-- <option value="0">Shippper</option> --}}
-                                    <option value="1">Consigneee</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group ml-1 ">
-                                <button type="submit" name="add" id="btnReturn"
-                                    class="btn btn-primary update_return_confirm" value="Add">Update Call
-                                    History</button>
-                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- call history log modal --}}
-        <div class="modal fade" id="call_history_modal" role="dialog" aria-labelledby="call_history_modal_title"
-            aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <div class="modal-header text-center">
-                        <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-
-                    </div>
-                    <div class="modal-body text-center">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+       
 
 
     @endsection
@@ -1057,6 +1108,66 @@
                 }
             @endphp
             $(document).ready(function() {
+
+                
+
+                // update_AssignAgentModal function
+                $('#AssignAgentModal').on('shown.bs.modal', function() {
+                    $('#select_emp_type').val('').change();
+                    $('#assign_agent').val('');
+                });
+
+                $("#assign_agent").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Agent",
+                    width: '100%',
+                    dropdownParent: $('#AssignAgentModal')
+                });
+
+                $("#select_emp_type").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Employee Type",
+                    width: '100%',
+                    dropdownParent: $('#AssignAgentModal')
+                });
+
+                $('#AssignAgentModal').on('hide.bs.modal', function(e) {
+                    $('#select_emp_type').val('').trigger('change');
+                    $('#assign_agent').val('').trigger('change');
+                });
+
+                $("#select_emp_type").change(function() {
+                    var selectedValue = $(this).val();
+                    if (selectedValue !== '') {
+                        $('.assign_agent_container').removeClass('d-none');
+                        $('#assign_agent').attr('data-rule-required', true);
+                        $('#assign_agent').attr('data-msg-required', 'Please Select Agent');
+                    } else {
+                        $('.assign_agent_container').addClass('d-none');
+                        $('#assign_agent').removeAttr('data-rule-required', true);
+                        $('#assign_agent').removeAttr('data-msg-required', 'Please Select Agent');
+                    }
+
+                });
+
+                $('#select_emp_type').on('change', function() {
+                    var emp_type_id = $('#select_emp_type').val();
+                                $.ajax({
+                                        url: '{!! route('admin.return.fetch.agent') !!}',
+                                        data: {
+                                            'emp_type_id': emp_type_id
+                                        }
+                                    })
+                                    .done(function(data) {
+                                        if (data.status == 0) 
+                                        {
+                                            $.each(data.data, function(index, agent) {
+                                                $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
+                                            });
+
+                                            $('.assign_agent_container').removeClass('d-none');
+                                        }
+                                    });
+                        
+                    });
 
                 // update_call_status_modal function
                 $('#update_call_status_modal').on('shown.bs.modal', function() {
@@ -1488,11 +1599,7 @@
                     width: '100%',
                     placeholder: 'Labeling*'
                 });
-                $("#assign_agent").prepend('<option value="" selected></option>').select2({
-                    placeholder: "Select Agent",
-                    width: '100%',
-                    dropdownParent: $('#AssignAgentModal')
-                });
+                
 
                 $("#consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select Sub Reason",
@@ -1646,6 +1753,14 @@
 
                                             $('#assign_agentSubmit').on('click', function() {
                                                 var assign = parseInt($('#assign_agent').val());
+                                                // var select_emp_type = $('#select_emp_type').val();
+
+                                                // if(!select_emp_type){
+                                                //     $('#error_emp_type').html("Employee type not selected");
+                                                //     return false;
+                                                // }
+                                               
+                                                
                                                 swal({
                                                     text: 'Are you sure, you want to Assign these shipments(s)?',
                                                     icon: 'info',
@@ -1694,11 +1809,11 @@
                                                                                 }
                                                                                 $('#AssignAgentModal').modal('hide');
 
-                                                                                // setTimeout(function() {
-                                                                                //     $divElement.addClass('d-none');
-                                                                                // }, 10000); //
+                                                                                setTimeout(function() {
+                                                                                    $divElement.addClass('d-none');
+                                                                                }, 5000); // 5 seconds
 
-                                                                                table.draw()
+                                                                                table.draw();
                                                                             } 
                                                                             else {
                                                                             const $divElement = $('.shipment_msg_error');
@@ -1724,9 +1839,10 @@
 
                                                                             $('#AssignAgentModal').modal('hide');
 
-                                                                            // setTimeout(function() {
-                                                                            //     $divElement.addClass('d-none');
-                                                                            // }, 10000); //
+                                                                            // hide error message after 5 seconds
+                                                                            setTimeout(function() {
+                                                                                $divElement.addClass('d-none');
+                                                                            }, 5000);
 
                                                                             table.draw();
                                                                         }
@@ -2338,10 +2454,7 @@
                     }
                 });
 
-                $('#AssignAgentModal').on('shown.bs.modal', function(e) {});
-                $('#AssignAgentModal').on('hide.bs.modal', function(e) {
-                    $('#assign_agent').val('').trigger('change');
-                });
+                
                 $('#ReturnConfirmReasonModal').on('hide.bs.modal', function(e) {
                     $('#return_reason_select').val('').trigger('change');
                     $('#return_reason_shipment_remarks').val('');
@@ -2558,11 +2671,9 @@
                         }
                     }
                     if (verify_shipment === 1) {
-                        // console.log('button should be enable');
                         table.button('.confirm').enable();
                     }
                     else{
-                        // console.log('button should be disabled');
                         table.button('.confirm').disable();
                     }
 
@@ -3395,7 +3506,7 @@
                     table.draw(true);
                     $('#return_confirmation_pending_filter').val(0);
                 });
-
+                
             });
         </script>
     @endsection
