@@ -49,7 +49,7 @@ class AdminShipmentHandoverController extends Controller
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
             $output .= '<option value ="'.$row->id.'">' .$row->name. '</option> ';
-          }else if ($type == 1 && !isset($row->name)){
+          }else if ($type == 1 && !isset($row->name) && isset($row->admin_id)){
             $output .= '<option value ="'.$row->id.'">' . Admin::where('id' ,$row->admin_id)->first()->name   . '</option> ';
 
           }
@@ -738,7 +738,7 @@ class AdminShipmentHandoverController extends Controller
           $responsible->admin_id = NULL;
       } else {
           $responsible->name = NULL;
-          $responsible->admin_id = $request->edit_city_responsible_hubs_admins;
+          $responsible->admin_id = $request->city_responsible_hubs_admins;
       }
   
       $responsible->updated_by = Auth::id();

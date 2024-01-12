@@ -28,9 +28,9 @@
 
                         
                     </form>
-                    <div class="row mb-2 justify-content-center">
+                    <div class="row mb-2 justify-content-center d-none">
                         <label class="mr-10 font-medium-3"><b>Depart</b></label>
-                        <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
+                        <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" checked data-size="sm" data-switchery="true">
                         <label class="mr-10 font-medium-3"><b>User</b></label>
                     </div>
 
@@ -202,17 +202,19 @@
 
             var user_val = 0;
             function handleResponsiblesSwitchChange(isChecked) {
-                if (isChecked) {
+                if (!isChecked) {
                     user_val = 1;
-                } else {
-                    user_val = 0;
                 }
+                // } else {
+                //     user_val = 0;
+                // }
             }
 
-            $('#responsibles_switch').change(function () {
+            // $('#responsibles_switch').change(function () {
                 var isChecked = $(this).is(':checked');
+                // console.log(isChecked);
                 handleResponsiblesSwitchChange(isChecked);
-            });
+            // });
 
             let global_responsibility_id = null;
             function fetchDataAndPopulate() {
