@@ -1134,12 +1134,15 @@
                 $('#AssignAgentModal').on('hide.bs.modal', function(e) {
                     $('#select_emp_type').val('').trigger('change');
                     $('#assign_agent').val('').trigger('change');
+                    $('#error_staff_type').text(''); //clearing error message when modal is close
+                    $('#error_assign_agent').text(''); //clearing error message when modal is close
                 });
 
                 $("#select_emp_type").change(function() {
                     var selectedValue = $(this).val();
                     if (selectedValue !== '') {
                         $('.assign_agent_container').removeClass('d-none');
+                        $('#error_staff_type').text('');
                     } else {
                         $('.assign_agent_container').addClass('d-none');
                     }
@@ -1190,32 +1193,6 @@
                         
                 });
 
-                // $("#update_assign_agent_form").validate({
-                //     rules: {
-                //         select_emp_type: {
-                //             required: true
-                //         },
-                //         assign_agent: {
-                //             required: true
-                //         }
-                //     },
-                //     messages: {
-                //         select_emp_type: {
-                //             required: "Please select an Employee Type"
-                //         },
-                //         assign_agent: {
-                //             required: "Please select an Agent"
-                //         }
-                //     },
-                // });
-                // $("#update_assign_agent_form").validate({
-                // // Other settings...
-                // errorPlacement: function(error, element) {
-                //     // Customize error placement if needed
-                //     // For example, you can append errors to a specific div
-                //     error.appendTo("#error-container");
-                // }
-                // });
 
                 // update_call_status_modal function
                 $('#update_call_status_modal').on('shown.bs.modal', function() {
