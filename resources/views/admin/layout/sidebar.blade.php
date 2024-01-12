@@ -17,12 +17,15 @@
                 <ul> <!-- Nested menu for Team Lead -->
 
                     @if (session('role_id') == 1 || in_array(416, session('permissions')))
-                    <li><a class="menu-item" href="{{ route('admin.leads.index') }}">Leads</a></li>
-                @endif
+                        <li><a class="menu-item" href="{{ route('admin.leads.index') }}">Leads</a></li>
+                    @endif
 
                     @if (session('role_id') == 1 || in_array(903, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
+                    @endif
 
-                    <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
+                    @if (session('role_id') == 1 || in_array(416, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}"><i class="la la-user-plus"></i>Rv Assigned Agent Shipments</a></li>
                     @endif
 
                 </ul>
@@ -31,10 +34,7 @@
         
 
 
-            @if (session('role_id') == 1 || in_array(416, session('permissions')))
-                <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}"><i
-                            class="la la-user-plus"></i>Assigned Shipment</a></li>
-            @endif
+            
             @if (session('role_id') == 1 || in_array(669, session('permissions')))
                 <li><a class="menu-item" href="{{ route('admin.pam_leads.index') }}"><i class="la la-truck"></i>Movit
                         Leads</a></li>
