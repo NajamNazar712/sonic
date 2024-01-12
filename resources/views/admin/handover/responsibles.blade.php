@@ -257,6 +257,32 @@
             width: '100%',
             placeholder: 'Select Hub',
             dropdownParent:$('#add_responsible_form')
+        }).on('change', function(){
+            $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: $(this).val()
+                        , '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        const uniqueAdminIds = new Set();
+                        let responsible_data = `<option value="">Select Admin</option>`;
+                        $.each(result.city_area, function (index, cityArea) {
+                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                                // Check if admin.id is already added to the Set
+                                if (!uniqueAdminIds.has(admin.id)) {
+                                    responsible_data += `<option value="${admin.id}"}>${admin.name} - ${admin.trax_id}</option>`;
+                                    // Add admin.id to the Set to track uniqueness
+                                    uniqueAdminIds.add(admin.id);
+                                }
+                            });
+                        });
+                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Admin',
+                            dropdownParent: $('#add_responsible_form')
+                        });  
+                    }
+                })
         });
         $('#city_area_id').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
@@ -516,7 +542,7 @@
         $('#edit_hub').change(function () {
             var city_id = $(this).val();
             get_area(city_id, true, city_area_id, admin_id);
-            var isChecked = admin_id ? true : false;
+            var isChecked = admin_id ? false : true;
             $(".checked_edit").prop('checked', isChecked).prop('disabled', true);
             handleResponsiblesSwitchChange(isChecked, null, null, admin_id ? null : user_name);
         });
@@ -540,25 +566,6 @@
                         $('#city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
-                            dropdownParent: $('#add_responsible_form')
-                        });
-                        
-                        const uniqueAdminIds = new Set();
-                        let responsible_data = `<option value="">Select Admin</option>`;
-                        $.each(result.city_area, function (index, cityArea) {
-                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
-                                // Check if admin.id is already added to the Set
-                                if (!uniqueAdminIds.has(admin.id)) {
-                                    const isSelected = (admin.id == val_2) ? 'selected' : '';
-                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name} - ${admin.trax_id}</option>`;
-                                    // Add admin.id to the Set to track uniqueness
-                                    uniqueAdminIds.add(admin.id);
-                                }
-                            });
-                        });
-                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
-                            width: '100%',
-                            placeholder: 'Select Admin',
                             dropdownParent: $('#add_responsible_form')
                         });
                     }
@@ -591,7 +598,7 @@
                                 // Check if admin.id is already added to the Set
                                 if (!uniqueAdminIds.has(admin.id)) {
                                     const isSelected = (admin.id == val_2) ? 'selected' : '';
-                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name} - ${admin.trax_id} </option>`;
                                     // Add admin.id to the Set to track uniqueness
                                     uniqueAdminIds.add(admin.id);
                                 }
