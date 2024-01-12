@@ -550,7 +550,7 @@
                                 // Check if admin.id is already added to the Set
                                 if (!uniqueAdminIds.has(admin.id)) {
                                     const isSelected = (admin.id == val_2) ? 'selected' : '';
-                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name} - ${admin.trax_id}</option>`;
                                     // Add admin.id to the Set to track uniqueness
                                     uniqueAdminIds.add(admin.id);
                                 }
