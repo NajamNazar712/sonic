@@ -1859,7 +1859,7 @@
 
                                                                                 setTimeout(function() {
                                                                                     $divElement.addClass('d-none');
-                                                                                }, 5000); // 5 seconds
+                                                                                }, 10000); // 5 seconds
 
                                                                                 table.draw();
                                                                             } 
@@ -1890,7 +1890,7 @@
                                                                             // hide error message after 5 seconds
                                                                             setTimeout(function() {
                                                                                 $divElement.addClass('d-none');
-                                                                            }, 5000);
+                                                                            }, 10000);
 
                                                                             table.draw();
                                                                         }

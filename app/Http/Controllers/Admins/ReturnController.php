@@ -5304,6 +5304,7 @@ class ReturnController extends Controller
             $only_shippers = [];
             $assigned_to_new_user = [];
             $assigned_to_now_new_user = [];
+            $osa_shipments = [];
 
             // $agent_id = $request->admin_id;
             // $admin = Admin::where('employee_id', $agent_id)->first();
@@ -5344,15 +5345,16 @@ class ReturnController extends Controller
                 if(!empty($sorted_agents_zones)){
                     foreach($shipment_ids as $shipment_id){
                         $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-
+                        
                         // status_reason_id == 12 (osa shipment)
-                        if($osa_reason->status_reason_id == 12){
-                            return response()->json([
-                                'status' => 1,
-                                'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
-                            ]);
-                        }
                         $shipment = Shipment::where('id', $shipment_id)->first();
+                        if($osa_reason->status_reason_id == 12){
+                            $osa_shipments[] = $shipment->tracking_number;
+                            // return response()->json([
+                            //     'status' => 1,
+                            //     'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
+                            // ]);
+                        }
                         $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                         if($already_assigned_state->exists()){
                             $already_assigned_state =  $already_assigned_state->first();
@@ -5381,11 +5383,12 @@ class ReturnController extends Controller
                             }
                         }
                     } 
-                    if(!empty($no_zone_shipment) || !empty($already_assigned)){
+                    if(!empty($no_zone_shipment) || !empty($already_assigned) || !empty($osa_shipments)){
                         $no_zone_shipment = implode(',', $no_zone_shipment);
                         $already_assigned = implode(',', $already_assigned);
                         $assigned_shipment = implode(',', $assigned_shipment);
                         $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                        $osa_shipments = implode(',', $osa_shipments);
                         
                         if ($already_assigned == '') {
                             return response()->json([
@@ -5393,7 +5396,15 @@ class ReturnController extends Controller
                                 'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' because Zone is not Assigned' .
                                         (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                             ]);
-                        } else {
+                        } 
+                        else if($osa_shipments != ''){
+                            return response()->json([
+                                'status' => 1,
+                                'error' => 'Tracking Numbers Are Not Assigned: ' . $osa_shipments . ' because OSA Shipments cannot be assigned to Contractual Agent' .
+                                        (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                            ]);
+                        }
+                        else {
                             return response()->json([
                                 'status' => 1,
                                 'error' => ($assigned_to_new_user != null)
