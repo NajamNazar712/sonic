@@ -1852,10 +1852,10 @@
 
                                                                     table.rows().deselect();
                                                                     table.draw(true);
-                                                                    table.button('.assign').disable();
-                                                                    table.button('.confirm').disable();
-                                                                    table.button('.re-attempt').disable();
-                                                                    table.button('.un-assign').disable();
+                                                                    // table.button('.assign').disable();
+                                                                    // table.button('.confirm').disable();
+                                                                    // table.button('.re-attempt').disable();
+                                                                    // table.button('.un-assign').disable();
                                                                 });
                                                         } else {
                                                             var error =
