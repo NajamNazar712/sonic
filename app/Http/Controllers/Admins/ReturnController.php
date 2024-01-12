@@ -5346,14 +5346,11 @@ class ReturnController extends Controller
                     foreach($shipment_ids as $shipment_id){
                         $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
                         
-                        // status_reason_id == 12 (osa shipment)
                         $shipment = Shipment::where('id', $shipment_id)->first();
+                        // status_reason_id == 12 (osa shipment)
                         if($osa_reason->status_reason_id == 12){
+                            //saving shipments in $osa_shipments because osa shipments cannot be assigned to contratual agent
                             $osa_shipments[] = $shipment->tracking_number;
-                            // return response()->json([
-                            //     'status' => 1,
-                            //     'error' => 'OSA Shipments cannot be assigned to Contractual Agent',
-                            // ]);
                         }
                         $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                         if($already_assigned_state->exists()){

@@ -91,7 +91,7 @@ class TeamLeadDashboardController extends Controller
         $number_of_rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 0;
         $number_of_rv_ticket = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
-        $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / ($number_of_rv_ticket) * 100);
+        $number_of_pending_ticket_percentage = number_format((count($number_of_pending_tickets) / ($number_of_rv_ticket) * 100));
         $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
         $number_of_closed_ticket_percentage = (count($number_of_closed_tickets) / ($number_of_rv_ticket) * 100);
         $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
