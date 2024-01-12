@@ -54,6 +54,11 @@
                         @csrf
                         <div class="container">
                             <div class="row justify-content-center">
+                                <div class="col-6 m-1 d-none">
+                                    <label class="mr-10 font-medium-3"><b>Depart</b></label>
+                                    <input type="checkbox" name="responsibles_switch" id="responsibles_switch" class="switchery responsibles_switch" data-size="sm" data-switchery="true">
+                                    <label class="mr-10 font-medium-3"><b>User</b></label>
+                                  </div>
                                 <div class="col-6 form-group">
                                     <input  class="form-control" id="name" name="name" type="text" placeholder="Enter Name"
                                     data-rule-required="true" data-msg-required="" />
@@ -63,11 +68,11 @@
                             <div class="row justify-content-center">
                                <div class="col-6 form-group">
                                     <fieldset class="form-group">
-                                            <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="">
-                                                @foreach($hubs as $hub)
-                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                                @endforeach
-                                            </select>
+                                        <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select>
                                     </fieldset>
                                </div>
 
@@ -78,11 +83,20 @@
                                         </select>
                                     </fieldset>
                                 </div>
+
+                                    <div class="col-6 form-group d-none" id="city_responsible_hubs_admins_div">
+                                        <fieldset class="form-group">
+                                            <select  name="city_responsible_hubs_admins" id="city_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
                             </div>
                             <br>
                             <div class="row justify-content-center">
-                                <div class="col-6">
-                                        <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Responsible</button>
+                                <div class="col-12">
+                                    <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Add Responsible</button>
                                 </div>
                             </div>
                         </div>
@@ -111,6 +125,12 @@
                             <div class="row justify-content-center">
                                 <div class="col-6">
                                     <input type="hidden" id="responsible_id" name="id">
+                                    <label class="font-medium-3"><b class="mb-3">Depart</b></label>
+                                    <label class="switch">
+                                        <input type="checkbox" class="checked_edit">
+                                        <span class="slider round"></span>
+                                      </label>
+                                    <label class="font-medium-3"><b>User</b></label>
                                     <input  class="form-control" id="edit_name" name="name" type="text" placeholder="Enter Tier Name"
                                         data-rule-required="true" data-msg-required="" />
                                 </div>
@@ -129,6 +149,14 @@
                                 <div class="col-6 form-group">
                                     <fieldset class="form-group">
                                         <select  name="city_area_id" id="edit_city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
+
+                                <div class="col-6 form-group d-none" id="edit_city_responsible_hubs_admins_div">
+                                    <fieldset class="form-group">
+                                        <select  name="edit_city_responsible_hubs_admins" id="edit_city_responsible_hubs_admins" class="form-control select2" data-rule-required="true" data-msg-required="">
 
                                         </select>
                                     </fieldset>
@@ -153,7 +181,67 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 55px;
+        height: 28px;
+    }
 
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: -4px;
+        left: 1px;
+        right: 0;
+        bottom: 4px;
+        background-color: #9b9b9b;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #9b9b9b;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #9b9b9b;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    .slider.round {
+        border-radius: 34px;
+    }
+    .slider.round:before {
+        border-radius: 50%;
+    }
+</style>
 @endsection
 
 @section('js')
@@ -180,6 +268,19 @@
             placeholder: 'Select Area',
             dropdownParent:$('#edit_responsible_form')
         });
+
+        $('#city_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Admin',
+            dropdownParent:$('#add_responsible_form')
+        });
+
+        $('#edit_city_responsible_hubs_admins').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Admin',
+            dropdownParent:$('#edit_responsible_form')
+        });
+
 
 
         $( "#add_responsible_form" ).validate({
@@ -222,20 +323,22 @@
                     form.submit();
                 }
         });
-
+        var hub_id;
+        var admin_id;
+        var city_area_id;
+        var user_name;
 
         $('body').on('click','button.edit',function () {
             var id = $(this).parents('tr').attr('id');
-            // var hub= $(this).parents('tr').attr('hub');
             var hub = $(this).parents('tr').attr('hub'); 
+            var rowData = table.row($(this).parents('tr')).data();
+        
+
             // var hub = $(this).find(':selected');
             // var hub_id =  $('#edit_hub :selected').val();
-
             // var hub = $(this).find(':selected');
             //     var hub_id = hub.val();
-            //var status = table.row($(this).parents('tr')).data().status;
             
-
             $.ajax({
                     url: '{!! route('admin.handover.responsibles.details') !!}',
                     method: 'POST',
@@ -247,19 +350,17 @@
                     if(data.status === 1){
                         $('#responsible_id').val(data.responsible.id);
                         $('#edit_name').val(data.responsible.name);
-                       
                         $("#edit_hub").select2({
                             width:'100%',
                             class:'form-control',
                             dropdownParent:$('#edit_responsible_form')
                         });
-
-                        $('#edit_hub').val(hub).trigger('change');
-
-                        get_area(data.responsible.hub_id,true,data.responsible.city_area_id);
-                
+                         hub_id = data.responsible.hub_id
+                         admin_id = data.responsible.admin_id
+                         city_area_id = data.responsible.city_area_id
+                         user_name = data.responsible.name
+                        $('#edit_hub').val(data.responsible.hub_id).trigger('change');
                         $('#EditResponsibleModal').modal('show');
-
                     }
                     else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -405,16 +506,27 @@
             $('#responsible_id').val('');
             $('#edit_name').val('');
         });
-
+        
         $('#hub').change(function(){
             var city_id = $(this).val();
             get_area(city_id,false);
         });
 
-        function get_area(city_id,edit = false,val = null){
+   
+        $('#edit_hub').change(function () {
+            var city_id = $(this).val();
+            get_area(city_id, true, city_area_id, admin_id);
+            var isChecked = admin_id ? true : false;
+            $(".checked_edit").prop('checked', isChecked).prop('disabled', true);
+            handleResponsiblesSwitchChange(isChecked, null, null, admin_id ? null : user_name);
+        });
 
+
+        
+        function get_area(city_id,edit = false,val = null, val_2 = null){
+            $('#city_area_id').empty();
+            $('#city_responsible_hubs_admins').empty();
             if(!edit) {
-                $('#city_area_id').empty();
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
@@ -424,40 +536,104 @@
                         $.each(result.city_area, function (index, value) {
                             data += `<option value="${value.id}">${value.name}</option>`
                         });
-
+                        
                         $('#city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
                             dropdownParent: $('#add_responsible_form')
                         });
-
+                        
+                        const uniqueAdminIds = new Set();
+                        let responsible_data = `<option value="">Select Admin</option>`;
+                        $.each(result.city_area, function (index, cityArea) {
+                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                                // Check if admin.id is already added to the Set
+                                if (!uniqueAdminIds.has(admin.id)) {
+                                    const isSelected = (admin.id == val_2) ? 'selected' : '';
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    // Add admin.id to the Set to track uniqueness
+                                    uniqueAdminIds.add(admin.id);
+                                }
+                            });
+                        });
+                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Admin',
+                            dropdownParent: $('#add_responsible_form')
+                        });
                     }
                 })
             }else{
-
                 $('#edit_city_area_id').empty();
+                $('#edit_city_responsible_hubs_admins').empty();
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
-                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    data: { city_id: city_id, '_token': '{{ csrf_token() }}' },
                     success: function (result) {
                         let data = `<option value="">Select Area</option>`;
                         $.each(result.city_area, function (index, value) {
-                            data += `<option value="${value.id}">${value.name}</option>`
+                            const isSelected = (value.id == val) ? 'selected' : '';
+                            data += `<option value="${value.id}" ${isSelected}>${value.name}</option>`;
+                            
                         });
-
                         $('#edit_city_area_id').prepend(data).select2({
                             width: '100%',
                             placeholder: 'Select Area',
                             dropdownParent: $('#edit_responsible_form')
                         });
-
+                        
                         $('#edit_city_area_id').val(val).trigger('change');
+                        const uniqueAdminIds = new Set();
+                        let responsible_data = `<option value="">Select Admin</option>`;
+                        $.each(result.city_area, function (index, cityArea) {
+                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                                // Check if admin.id is already added to the Set
+                                if (!uniqueAdminIds.has(admin.id)) {
+                                    const isSelected = (admin.id == val_2) ? 'selected' : '';
+                                    responsible_data += `<option value="${admin.id}" ${isSelected}>${admin.name}</option>`;
+                                    // Add admin.id to the Set to track uniqueness
+                                    uniqueAdminIds.add(admin.id);
+                                }
+                            });
+                        });
+
+                        $('#edit_city_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Concern Admin',
+                            dropdownParent: $('#edit_responsible_form')
+                        });
                     }
                 })
             }
         }
+
+
     });
+    
+    function handleResponsiblesSwitchChange(isChecked, nameClass = null, cityResponsibleClass = null, old_value = null) {
+        if (!isChecked) {
+            $(nameClass ? nameClass : '#edit_name').addClass('d-none');
+            $(cityResponsibleClass ? cityResponsibleClass : '#edit_city_responsible_hubs_admins_div').removeClass('d-none');
+            $('#edit_name').val('');
+            $('#name-error').addClass('d-none')
+        } else {
+            $(nameClass ? nameClass : '#edit_name').removeClass('d-none');
+            $(cityResponsibleClass ? cityResponsibleClass : '#edit_city_responsible_hubs_admins_div').addClass('d-none');
+            $("#edit_name").val(old_value);
+            $('#name-error').addClass('d-none')
+
+        }
+    }
+
+    var isChecked = $(this).is(':checked');
+    handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
+
+    // $('#AddResponsibleModal #responsibles_switch').change(function() {
+    //     var isChecked = $(this).is(':checked');
+    //     handleResponsiblesSwitchChange(isChecked,'#name','#city_responsible_hubs_admins_div');
+    // });
+
 
 
     </script>

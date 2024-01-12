@@ -2260,7 +2260,7 @@ class ReturnController extends Controller
                 if(!$dispute_check){
                     return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
+                ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if($request->shipper_id != null){
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if($request->shipper_id != $shipment->user_id){
@@ -2643,7 +2643,7 @@ class ReturnController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 7, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -6278,7 +6278,7 @@ class ReturnController extends Controller
                 $details[$key]['shipper'] = isset($shipment->user->name) ? $shipment->user->name : '';
                 $details[$key]['return_note'] = $return_note_id->return_note_id;
 
-                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id,29,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
             } else {
                 $tr_e[] = $t_n;
