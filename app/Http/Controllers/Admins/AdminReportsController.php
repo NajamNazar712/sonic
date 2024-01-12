@@ -11527,13 +11527,15 @@ class AdminReportsController extends Controller
 
     public function created_shipment_index(){
       
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 726);
         $cities=City::select('id','name')->where('status',1)->get();
         return view ('admin.reports.created_shipment_report')->with(['cities'=>$cities]);
     }
 
 
     public function created_shipment_list(Request $request){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 727);
 
         $from =Carbon::parse($request->get('search_from'))->format('Y-m-d');
         $to = Carbon::parse($request->get('search_to'))->format('Y-m-d');
@@ -11601,14 +11603,14 @@ class AdminReportsController extends Controller
 
     //pickup vs arrival
     public function pickup_arival_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 728);
         $cities=City::select('id','name')->where('status',1)->get();
         return view ('admin.reports.pickup_arival_report')->with(['cities'=>$cities]);
     }
     public function pickup_arival_list(Request $request){
        
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 729);
         }
         // if ($request->get('search_from') && $request->get('search_to')) {
            
