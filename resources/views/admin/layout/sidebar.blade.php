@@ -25,7 +25,7 @@
                     @endif
 
                     @if (session('role_id') == 1 || in_array(416, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}"><i class="la la-user-plus"></i>Rv Assigned Agent Shipments</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}">Rv Assigned Agent Shipments</a></li>
                     @endif
 
                 </ul>
