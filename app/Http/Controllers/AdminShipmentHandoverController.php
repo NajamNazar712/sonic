@@ -61,89 +61,95 @@ class AdminShipmentHandoverController extends Controller
     //admin.handover.create.shipment_details
     public function arrival_bulk_shipment_details(Request $request){
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
-      
       if ($shipment->exists()) {
         $shipment = $shipment->first();
+        $latest_shipper_status = $shipment->shipment_journey()->latest('id')->first()->shipper_status_id ?? null;
         $shipment_pieces1 = $shipment->pieces;
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
-        if($handover_shipment->exists()){
-                return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
-            }
-            $details = array();
+        if(!in_array($latest_shipper_status, [1,3,5,14,18,21,23,25,26,28,30,31,32,34,36,37,38,51]) && isset($latest_shipper_status)){
+          if($handover_shipment->exists()){
+            return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
+          }
 
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['shipper'] = $shipment->user->name;
-            $details['phone_number'] = $shipment->user->phone;
-            $details['pickup_date'] = $shipment->pickup_date;
-            $details['special_instructions'] = $shipment->special_instructions;
-            ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+          $details = array();
+          $details['id'] = $shipment->id;
+          $details['tracking_number'] = $shipment->tracking_number;
+          $details['shipper'] = $shipment->user->name;
+          $details['phone_number'] = $shipment->user->phone;
+          $details['pickup_date'] = $shipment->pickup_date;
+          $details['special_instructions'] = $shipment->special_instructions;
+          ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
-            $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
+          $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
-            $msg_string = null;
-            $str_arr = null;
-            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
-            // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
-            foreach ($check as $nsa) {
-                foreach ($str_arr as $arr_value) {
-                    if (strtolower($nsa) == strtolower($arr_value)) {
-                       
-                            $msg_string = $arr_value;
-                    }
-                }
-            }
-
-            
-            $delivery_area = null;
-            if($msg_string != null){
-                $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                            ->select('dlm.area_name as area_name','dlm.id')
-                            ->where('delivery_location_mapping_keywords.keyword',$msg_string)
-                            ->where('dlm.city_id',$shipment->consignee_city_id)
-                            ->where('status',1);
-                            if($found->exists()){
-                              $found = $found->first();
-                    $delivery_area = $found->id;
-                    if($request->delivery_location_mapping != null){
-                      if($request->delivery_location_mapping != $delivery_area){
-                            return ['status' => 1, 'error' => 'Delivery Location is different'];
+              $msg_string = null;
+              $str_arr = null;
+              $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
+              // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
+              foreach ($check as $nsa) {
+                  foreach ($str_arr as $arr_value) {
+                      if (strtolower($nsa) == strtolower($arr_value)) {
+                        
+                              $msg_string = $arr_value;
                       }
-                    }
-                }
-                else{
-                    $delivery_area = 0;
-                    if($request->delivery_location_mapping != $delivery_area){
-                      return ['status' => 1, 'error' => 'Delivery Location is different'];
-                    }
-                }
-            }else{
-              $delivery_area = 0;
+                  }
+              }
+
+              
+          $delivery_area = null;
+          if($msg_string != null){
+          $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                      ->select('dlm.area_name as area_name','dlm.id')
+                      ->where('delivery_location_mapping_keywords.keyword',$msg_string)
+                      ->where('dlm.city_id',$shipment->consignee_city_id)
+                      ->where('status',1);
+                      if($found->exists()){
+                        $found = $found->first();
+              $delivery_area = $found->id;
               if($request->delivery_location_mapping != null){
                 if($request->delivery_location_mapping != $delivery_area){
-                  return ['status' => 1, 'error' => 'Delivery Location is different'];
+                      return ['status' => 1, 'error' => 'Delivery Location is different'];
                 }
               }
             }
+              else{
+                  $delivery_area = 0;
+                  if($request->delivery_location_mapping != $delivery_area){
+                    return ['status' => 1, 'error' => 'Delivery Location is different'];
+                  }
+              }
+          }else{
+            $delivery_area = 0;
+            if($request->delivery_location_mapping != null){
+              if($request->delivery_location_mapping != $delivery_area){
+                return ['status' => 1, 'error' => 'Delivery Location is different'];
+              }
+            }
+          }
 
-            $details['delivery_area'] = $delivery_area;
-            
-            if($shipment_pieces1 === 1)
-            {
-        
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-            }
-            else if($shipment_pieces1 > 1)
-            {
-              $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-              $details['pieces_count'] = $shipment->pieces;
-              ShipmentScanningJourneyController::add($shipment->id,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
-              return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
-            }
-        }  
-      else {
-            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+          $details['delivery_area'] = $delivery_area;
+          
+          if($shipment_pieces1 === 1)
+          {
+      
+          return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+          }
+          else if($shipment_pieces1 > 1)
+          {
+            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+            $details['pieces_count'] = $shipment->pieces;
+            ShipmentScanningJourneyController::add($shipment->id,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+            return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+          }
+          else {
+              return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+          }        
+        }else{
+          return ['status' => 1, 'error' => 'Restricted To Scan !!'];
+
         }
+      }
+        
     }
 
     //receive
@@ -152,6 +158,7 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function arrival_bulk_shipment_details_receive(Request $request){
+      dd(1);
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
       if ($shipment->exists()) {
@@ -849,9 +856,9 @@ class AdminShipmentHandoverController extends Controller
         }])
         ->where('status', 1);
 
-            if($city_area->exists()){
-                return response()->json(['status' => 1,'city_area'=>$city_area->get()]);
-            }
+        if($city_area->exists()){
+            return response()->json(['status' => 1,'city_area'=>$city_area->get()]);
+        }
         }else{
             return response()->json(['status' => 0 ]);
         }
