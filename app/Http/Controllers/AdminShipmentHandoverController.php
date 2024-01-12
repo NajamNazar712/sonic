@@ -63,10 +63,10 @@ class AdminShipmentHandoverController extends Controller
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
       if ($shipment->exists()) {
         $shipment = $shipment->first();
-        $latest_shipper_status = $shipment->shipment_journey()->latest('id')->first()->shipper_status_id;
+        $latest_shipper_status = $shipment->shipment_journey()->latest('id')->first()->shipper_status_id ?? null;
         $shipment_pieces1 = $shipment->pieces;
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
-        if(!in_array($latest_shipper_status, [1,3,5,14,18,21,23,25,26,28,30,31,32,34,36,37,38,51])){
+        if(!in_array($latest_shipper_status, [1,3,5,14,18,21,23,25,26,28,30,31,32,34,36,37,38,51]) && isset($latest_shipper_status)){
           if($handover_shipment->exists()){
             return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
           }
