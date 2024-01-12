@@ -752,10 +752,12 @@
                                         <option value="{{ $staff_type->id }}">{{ $staff_type->name }}</option>
                                     @endforeach
                                 </select>
+                                <div id="error_staff_type" class="text-danger"></div>
                             </div>
                             <div class="form-group text-left assign_agent_container d-none">
                                 <select name="assign_agent" id="assign_agent" class="form-control assign_agent select2" required>
                                 </select>
+                                <div id="error_assign_agent" class="text-danger"></div>
                             </div>
 
                             
@@ -1138,36 +1140,82 @@
                     var selectedValue = $(this).val();
                     if (selectedValue !== '') {
                         $('.assign_agent_container').removeClass('d-none');
-                        $('#assign_agent').attr('data-rule-required', true);
-                        $('#assign_agent').attr('data-msg-required', 'Please Select Agent');
                     } else {
                         $('.assign_agent_container').addClass('d-none');
-                        $('#assign_agent').removeAttr('data-rule-required', true);
-                        $('#assign_agent').removeAttr('data-msg-required', 'Please Select Agent');
                     }
 
+                });
+                $('#assign_agentSubmit').on('click', function() {
+                    var selectedEmpType = $('#select_emp_type').val();
+                    var assign = parseInt($('#assign_agent').val());
+                    var $errorStaffType = $('#error_staff_type');
+                    var $errorAssignAgent = $('#error_assign_agent');
+
+                    if (!selectedEmpType) {
+                        // Display an error message for staff type
+                        $errorStaffType.text('Please Select Employee Type');
+                        return;
+                    } else {
+                        $errorStaffType.text(''); // Clear the error message
+                    }
+
+                    if (!assign) {
+                        // Display an error message for agent selection
+                        $errorAssignAgent.text('Please Select Agent');
+                        return;
+                    } else {
+                        $errorAssignAgent.text(''); // Clear the error message
+                    }
                 });
 
                 $('#select_emp_type').on('change', function() {
                     var emp_type_id = $('#select_emp_type').val();
-                                $.ajax({
-                                        url: '{!! route('admin.return.fetch.agent') !!}',
-                                        data: {
-                                            'emp_type_id': emp_type_id
-                                        }
-                                    })
-                                    .done(function(data) {
-                                        if (data.status == 0) 
-                                        {
-                                            $.each(data.data, function(index, agent) {
-                                                $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
-                                            });
+                    $.ajax({
+                        url: '{!! route('admin.return.fetch.agent') !!}',
+                        data: {
+                            'emp_type_id': emp_type_id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data.status == 0) 
+                        {
+                            $('#assign_agent').empty();
+                            $.each(data.data, function(index, agent) {
+                                $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
+                            });
 
-                                            $('.assign_agent_container').removeClass('d-none');
-                                        }
-                                    });
-                        
+                            $('.assign_agent_container').removeClass('d-none');
+                        }
                     });
+                        
+                });
+
+                // $("#update_assign_agent_form").validate({
+                //     rules: {
+                //         select_emp_type: {
+                //             required: true
+                //         },
+                //         assign_agent: {
+                //             required: true
+                //         }
+                //     },
+                //     messages: {
+                //         select_emp_type: {
+                //             required: "Please select an Employee Type"
+                //         },
+                //         assign_agent: {
+                //             required: "Please select an Agent"
+                //         }
+                //     },
+                // });
+                // $("#update_assign_agent_form").validate({
+                // // Other settings...
+                // errorPlacement: function(error, element) {
+                //     // Customize error placement if needed
+                //     // For example, you can append errors to a specific div
+                //     error.appendTo("#error-container");
+                // }
+                // });
 
                 // update_call_status_modal function
                 $('#update_call_status_modal').on('shown.bs.modal', function() {
@@ -1752,13 +1800,34 @@
                                             $('#AssignAgentModal').modal('show');
 
                                             $('#assign_agentSubmit').on('click', function() {
+
+                                                var selectedEmpType = $('#select_emp_type').val();
                                                 var assign = parseInt($('#assign_agent').val());
+                                                var $errorStaffType = $('#error_staff_type');
+                                                var $errorAssignAgent = $('#error_assign_agent');
+
+                                                if (!selectedEmpType) {
+                                                    // Display an error message for staff type
+                                                    $errorStaffType.text('Please Select Employee Type');
+                                                    return;
+                                                } else {
+                                                    $errorStaffType.text(''); // Clear the error message
+                                                }
+
+                                                if (!assign) {
+                                                    // Display an error message for agent selection
+                                                    $errorAssignAgent.text('Please Select Agent');
+                                                    return;
+                                                } else {
+                                                    $errorAssignAgent.text(''); // Clear the error message
+                                                }
                                                 // var select_emp_type = $('#select_emp_type').val();
 
                                                 // if(!select_emp_type){
                                                 //     $('#error_emp_type').html("Employee type not selected");
                                                 //     return false;
                                                 // }
+                                                // if ($("#update_assign_agent_form").valid()) {
                                                
                                                 
                                                 swal({
@@ -1784,6 +1853,8 @@
                                                 }).then(function(confirm) {
                                                     if (confirm) {
                                                         if (assign) {
+                                                            // console.log(assign, selected_rows);
+                                                            // return false;
                                                             $.ajax({
                                                                             //Admins\ReturnController@assign_agent
                                                                     url: '{!! route('admin.return.assign.agent') !!}',
@@ -1866,7 +1937,7 @@
                                                                     containerId: 'toast-top-center'
                                                                 });
                                                         }
-                                                    }
+                                            }
                                                 });
                                             });
 
