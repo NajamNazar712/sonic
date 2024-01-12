@@ -1509,7 +1509,37 @@ class AdminDashboardController extends Controller
         $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $corporate_rate_types = CorporateRateType::all();
         $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories]);
+        $commission_percentage = '';
+            $settings = GlobalSettings::where('type', 'commission_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $commission_percentage = $settings->text;
+            }
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
+            $riders_permanent = Rider::where('rider_type_id', 1)->get();
+     
+            $users = array();
+            $sales = array();
+            $all_users = array();
+            foreach ($admin_users as $u) {
+                if ($u->department_id != 7) {
+                    $users[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                } else {
+                    $sales[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                }
+            }
+          
+            $all_users['results'][0]['text'] = 'Sales';
+            $all_users['results'][0]['children'] = $sales;
+            $all_users['results'][1]['text'] = 'Admins';
+            $all_users['results'][1]['children'] = $users;
+            $all_users['results'][2]['text'] = 'Riders';
+            $all_users['results'][2]['children'] = [];
+            $all_users['pagination']['more'] = true;
+
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users]);
     }
 
     public function activeAccountsList()

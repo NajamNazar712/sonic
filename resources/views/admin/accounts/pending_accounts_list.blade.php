@@ -134,54 +134,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Sales Tiers</h4>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="shipper_id1">
-                    <div class="mb-2">
-                        <select name="poc" id="poc" class="form-control select2">
-                            @foreach($sale_tier_types as $poc)
-                                <option value="{{ $poc->id }}" > {{ $poc->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="kam" id="kam" class="form-control select2">
-                            @foreach($sale_tier_types as $kam)
-                                <option value="{{ $kam->id }}" > {{ $kam->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="ref" id="ref" class="form-control select2">
-                            @foreach($sale_tier_types as $ref)
-                                <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- <div class="mb-2">
-                        <select name="eso" id="eso" class="form-control select2">
-                            @foreach($sale_tier_types as $eso)
-                                <option value="{{ $eso->id }}" > {{ $eso->name }} </option>
-                            @endforeach
-                        </select>
-                    </div> --}}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  
 
     <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
          aria-hidden="true">
@@ -447,6 +400,114 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
+         aria-hidden="true">
+         <div class="modal-dialog" style="max-width: 100%;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Rates</h4>
+                </div>
+                <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.add.rates.submit',['id'=> 2])}}" method="post" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <div class="row justify-content-center mt-2" id="commission_div">
+                                <div class="form-group row">
+                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                    <div class="col-md-8">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="Total Commission"
+                                                   id="commission_max" name="commission_max"
+                                                   value="{{$commission_percentage}}" readonly>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                        <div class="row justify-content-center">
+                                            <div class="col-2 form-group">
+                                                <select name="sales_tier" class="select2" id="sales_tier_select"
+                                                        data-rule-required="true"
+                                                        data-msg-required="Sales Tier is required">
+                                                    @foreach($sales_tiers as $tier)
+                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                                sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-3 form-group">
+                                                <input type="text" id="external_person_name" name="external_person_name"
+                                                       class="form-control" placeholder="External Tier Person Name"
+                                                       disabled data-rule-required="true"
+                                                       data-msg-required="Person Name is required">
+                                            </div>
+                                            <div class="col-2 form-group">
+                                                <select name="user" class="select2" id="user_select"
+                                                        data-rule-required="true" data-msg-required="User is required"
+                                                        disabled>
+                                                </select>
+                                            </div>
+                                            <div class="col-3 form-group">
+                                                <div class="input-group form-group">
+                                                    <input type="text" id="user_commission"
+                                                           class="form-control commission" placeholder="User Commission"
+                                                           name="user_commission" data-rule-required="true"
+                                                           data-msg-required="User Commission is required">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-1 form-group">
+                                                <button type="button" class="btn btn-primary"
+                                                        id="commission_add_button">Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <table class="table table-bordered datatable_rate" id="datatable_rate" style="z-index: 3;">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">S. No.</th>
+                                            <th class="border-primary border-darken-1">User Name</th>
+                                            <th class="border-primary border-darken-1">Tier</th>
+                                            <th class="border-primary border-darken-1">Commission Percentage</th>
+                                            <th class="border-primary border-darken-1"></th>
+                                        </tr>
+                                        </thead>
+                                        <tfoot>
+                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                        <tr>
+                                            <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
+                                            <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="restrict_order_id_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    
+
+
+
 @endsection
 
 @section('css')
@@ -467,7 +528,258 @@
 
     <script>
 
+var selected_users = [];
+            var tier_sales;
+            var users = @json($all_users);
 
+            var users_data = $.map(users, function (obj) {
+                obj.id = obj.id || obj.text;
+                return obj;
+            });
+            $('#user_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select User",
+                width: '100%',
+                data: users_data,
+            }).bind('change', function () {
+                var th = $(this);
+                var id = $(this).val();
+                var group = $(this).find(':selected').closest('optgroup').attr('label');
+                if (group == 'Admins') {
+                    if (tier_sales == 1) {
+                        th.val(null).trigger('change');
+                        var error = 'Select sales related user!';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                if (group != 'Admins' && group != 'Sales'){
+                    $('#user_commission').val(1.8)
+                    $('#user_commission').attr('disabled', true)
+                } else {
+                    $('#user_commission').val('');
+                    $('#user_commission').attr('disabled', false)
+                }
+                var index = $.inArray(id, selected_users);
+                if (index !== -1) {
+                    var error = 'User previously selected!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    $('#user_select').val(null).trigger('change');
+                }
+            });
+
+            var riders_permanents_data = {!! json_encode($riders_permanent) !!};
+            var selectHtml = '';
+            for (var i = 0; i < riders_permanents_data.length; i++) {
+                selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
+            }
+            $('#user_select').append(selectHtml);
+
+            $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Sales Tier",
+                width: '100%'
+            }).bind('change', function () {
+                $('#user_select').attr('disabled', true);
+                $('#external_person_name').attr('disabled', true);
+                var type = $(this).find(":selected").attr('type');
+                var sales = $(this).find(":selected").attr('sales');
+                tier_sales = sales;
+                if (type == 1) {
+                    $('#user_select').attr('disabled', false);
+                } else {
+                    $('#external_person_name').attr('disabled', false);
+                }
+
+            });
+
+            var commission_max = $('#commission_max').val();
+            $('.commission').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': commission_max,
+            });
+
+            var table = $('#datatable_rate').DataTable({
+                dom: 'ltipr',
+                paging: false,
+                ordering: false,
+                sorting: false,
+                bInfo: false,
+                columns: [
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 1,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
+                    {name: 'user_name', class: 'align-middle user_name'},
+                    {name: 'tier', class: 'align-middle tier'},
+                    {name: 'commission_percentage', class: 'align-middle commission_percentage'},
+                    {name: 'action', class: 'align-middle action'}
+
+                ],
+                rowCallback: function (row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+            });
+
+            var row = 1;
+            var selected_commission = 0;
+
+            function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission) {
+                var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
+                var tier = '<div><input type="hidden" name="tier_id[' + row + ']"  value="' + tier_id + '">' + tier_name + '</div>';
+                if (tier_type == 1) {
+                    var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_id + '">' + user_name + '</div>';
+                } else {
+                    var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_name + '">' + user_name + '</div>';
+                }
+                var commission_percentage = '<div><input type="hidden" name="commission_percentage[' + row + ']"  value="' + commission + '">' + commission + '%</div>';
+                table.row.add([row, name, tier, commission_percentage, remove]).node().id = row;
+                table.draw(false);
+                if (tier_type == 1) {
+                    selected_users.push(user_id);
+                }
+                $('#commission_add_button').attr('disabled', false);
+                $('#total_commission_value').html(selected_commission);
+                $('#total_commission').val(selected_commission);
+                row++;
+            }
+
+            function roundToTwo(num) {
+                return +(Math.round(num + "e+2") + "e-2");
+            }
+
+            $('#commission_add_button').on('click', function () {
+                var commission = parseFloat($('#user_commission').val());
+                var this_btn = $(this);
+
+                var flag = true;
+                var type = $('#sales_tier_select').find(":selected").attr('type');
+                if (!$('#sales_tier_select').valid()) {
+                    flag = false;
+                }
+                if (type == 1) {
+                    if (!$('#user_select').valid()) {
+                        flag = false;
+                    }
+                }
+                if (type == 2) {
+                    if (!$('#external_person_name').valid()) {
+                        flag = false;
+                    }
+                }
+                if (!$('#user_commission').valid()) {
+                    flag = false;
+                }
+
+                if (flag) {
+                    if (commission <= commission_max) {
+                        selected_commission = roundToTwo(selected_commission + commission);
+                        commission_max = commission_max - commission;
+                        this_btn.attr('disabled', true);
+                        var user_id = '';
+                        var user_name = '';
+                        var tier_id = '';
+                        var tier_name = '';
+                        var tier_type = '';
+                        tier_id = $('#sales_tier_select').val();
+                        tier_name = $('#sales_tier_select').find(":selected").text();
+                        tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                        if (tier_type == 1) {
+                            user_id = $('#user_select').val();
+                            user_name = $('#user_select').find(":selected").text();
+                        } else {
+                            user_name = $('#external_person_name').val();
+                        }
+
+                        add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                        $('#sales_tier_select').val(null).trigger('change');
+                        $('#user_select').val(null).trigger('change');
+                        $('#user_select').attr('disabled', true);
+                        $('#external_person_name').val('');
+                        $('#external_person_name').attr('disabled', true);
+                        $('#user_commission').val('');
+
+                    } else {
+                        var error = 'Selected Commission value exceeds!';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                }
+            });
+            $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
+                var id = $(this).parents('tr').attr('id');
+
+                var user_id = $('input[name="user_id[' + id + ']"]').val();
+                if (user_id) {
+                    var index = $.inArray(user_id, selected_users);
+                    if (index !== -1) {
+                        selected_users.splice(index, 1);
+                    }
+                }
+                var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
+                commission_max = roundToTwo(commission_max + commission);
+                selected_commission = roundToTwo(selected_commission - commission);
+                $('#total_commission_value').html(selected_commission);
+                $('#total_commission').val(selected_commission);
+                table.row($(this).parents('tr')).remove().draw();
+            });
+            $('.decimal').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 100000
+        });
+        $('.amount').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 1000000.00
+        });
+
+        $('.percent').inputmask({
+            'alias': 'numeric',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 500
+        });
+        $('.numeric').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 1000000
+        });
+        $('.dec-percent').inputmask("Regex", {
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
+        });
 
     function checkboxStatus() {
         if (document.getElementById('user_fintech_charges_checkbox').checked) {
