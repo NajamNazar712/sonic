@@ -312,7 +312,7 @@ class V3AdminPickupsController extends Controller
     }
 
     public function pending_requests_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 722);
 
         $statuses = array();
 
@@ -372,7 +372,7 @@ class V3AdminPickupsController extends Controller
         
        
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 723);
         }
         // $today = Carbon::now()->startOfDay();
         // $statuses=V3PickupRequestStatus::where('id','!=',7)->get();
@@ -633,7 +633,7 @@ class V3AdminPickupsController extends Controller
 
     public function schedule_requests_index(){
         
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 720);
 
         // $statuses = array();
       
@@ -681,7 +681,7 @@ class V3AdminPickupsController extends Controller
 
     public function schedule_requests_list(Request $request){
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 721);
         }
         $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
@@ -900,7 +900,7 @@ class V3AdminPickupsController extends Controller
     public function history_pickup_index(Request $request)
     {
        
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 724);
 
         $statuses = array();
 
@@ -951,7 +951,7 @@ class V3AdminPickupsController extends Controller
        
 
             if ($request->get('excel') && $request->get('excel') == true) {
-                ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
+                ActivityTrailController::createActivityTrailLog(Auth::id(), 725);
             }
             // $today = Carbon::now()->startOfDay();
             $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')

@@ -121,7 +121,10 @@ class Permission
             'v2_pickups.rider_tracking.by_rider' => 446,
             'v2_pickups.rider_tracking.by_city' => 446,
 
-
+            'v3_pickups.pending.schedule.index'=>919,
+            'v3_pickups.pending.index'=>920,
+            'v3_pickups.history.index'=>921,
+           
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
@@ -641,6 +644,9 @@ class Permission
             'reports.ordinary_discrepancy_report.list' => 901,
             'reports.ibft_report.index' => 915,
             'reports.ibft_report.list' => 915,
+
+            'reports.created_shipment.index' => 922,
+            'reports.pickup_arival.index' => 923,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
