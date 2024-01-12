@@ -13930,15 +13930,15 @@ class AdminDashboardController extends Controller
                     'shipping_mode_id' => 0,
                 ]);
                 $user = User::find($shipper_id);
+                $action = $user->status;
                 if($user->status == 0){
                     $user->status = 1;
                     $user->rates_added_by = Auth::id();
-
                     $user->save();
                 }
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
-           
+                $user = User::find($shipper_id);
                 $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
                 if($sales_commission->exists()){
                     $sales_commission = $sales_commission->first();
@@ -13948,8 +13948,17 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    if($user->status == 0){
+                    if($action == 0){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                    }
+                    RateStatus::create([
+                        'user_id' => $shipper_id,
+                        'shipping_mode_id' => 0,
+                    ]);
+                    if($user->status == 0){
+                        $user->status = 1;
+                        $user->rates_added_by = Auth::id();
+                        $user->save();
                     }
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
