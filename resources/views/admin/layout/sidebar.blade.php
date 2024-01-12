@@ -233,16 +233,16 @@
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.v3_pickups.pending.index') }}">Pending Requests</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(921, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.v3_pickups.history.index') }}">Pickup Request
                                                 History</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(919, session('permissions')))
                                     <li><a class="menu-item"
                                            href="{{ route('admin.v3_pickups.pending.schedule.index') }}">Schedule Pickups</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(920, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
                                     @endif
@@ -1692,10 +1692,10 @@
                         @if (session('role_id') == 1 || in_array(916, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.logistic.index') }}">Logistic Report</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(823, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(922, session('permissions')))
                              <li><a class="menu-item" href="{{ route('admin.reports.created_shipment.index') }}">Created Shipments vs Unpicked Shipments</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(823, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(923, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_arival.index') }}">Rider Picked Vs Arrival Shipments</a></li>
                         @endif
                     </ul>
