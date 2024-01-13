@@ -1301,11 +1301,11 @@
                         className: 'btn btn-primary tag',
                         enabled:false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
+                            if(selected_rows_2 != ''){
 
                                 $('#SalesTierTypeTagModal').modal('show');
                                 var route = '{!! route('admin.accounts.add_rate_commission_corporate_reimb', ':shippers') !!}';
-                                route = route.replace(':shippers', encodeURIComponent(selected_rows));
+                                route = route.replace(':shippers', encodeURIComponent(selected_rows_2));
                                 $("#SalesTierTypeTagModal #ratesAdditionForm").attr('action', route);
 
                             }else{
@@ -1971,12 +1971,27 @@
             }
         });
 
+        var selected_rows_2 = [];
 
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                 console.log(id);
                 var index = $.inArray(id, selected_rows);
+                var index_2 = $.inArray(id, selected_rows_2);
 
+                var dataTable = $('#datatable').DataTable();
+                var tr = $(this).closest('tr');
+                var row = dataTable.row(tr);
+                var rowData = row.data();
+                var cond = (rowData.account_type_id == 2 && rowData.corporate_rate_type_id == 3 && rowData.status_id != 2) ||
+               (rowData.account_type_id == 1 && rowData.status_id != 2);
+               
+               if (index_2 === -1 && cond) {
+                    selected_rows_2.push(id);
+                }else {
+                    if(selected_rows_2.includes(id)){
+                        selected_rows_2.splice(index_2, 1);
+                    }
+                }
                 if (index === -1) {
                     selected_rows.push(id);
                 }
@@ -1987,18 +2002,18 @@
                 if (selected_rows.length > 0) {
                     table.button('.assign_rider').enable();
                     table.button('.bulk_segment_tagging').enable();
-                    
+                    table.button('.tag').enable();
+
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
-                    table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign_rider').disable();
                     table.button('.bulk_segment_tagging').disable();
-                    
+                    table.button('.tag').disable();
+
                     table.button('.territory_tag').disable();
                     table.button('.territory_retag').disable();
-                    table.button('.tag').disable();
                 }
         });
 
