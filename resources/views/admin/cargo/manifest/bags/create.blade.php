@@ -117,6 +117,16 @@
                                                     </div>
                                                 </div>
                                                 <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group ml-lg-2">
+                                                            <input class="form-check-input" type="checkbox" value="" id="is_sack_bag_check">
+                                                            <label class="form-check-label" for="flexCheckDefault">
+                                                                Is Sack Bag
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" id="sackbag_row" style="display: none">
                                                     <div class="col-6">
                                                         <div class="form-group">
                                                             <label for="origin">Sack Bag</label>
@@ -745,6 +755,18 @@
                 $('#scan_piece_tracking_number').val('');
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
+            });
+
+            $("#is_sack_bag_check").on('change',function(){
+                if($("#is_sack_bag_check").is(":checked")) {
+                    $("#sackbag_row").css('display','block');
+                    $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
+                }else{
+                    $("#sackbag_row").css('display','none');
+                    $("#sack_bag_no").removeAttr('data-rule-required data-msg-required');
+                    $("#sack_bag_no-error").remove();
+
+                }
             });
         });
 

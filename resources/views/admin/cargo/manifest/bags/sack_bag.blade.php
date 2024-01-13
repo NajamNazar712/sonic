@@ -67,25 +67,31 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{-- <label>Sack Bag No#</label> --}}
-                                    <input type="text"  name="sack_bag_no" class="form-control" placeholder="Sack Bag No" data-rule-required="true" data-msg-required="Sack Bag No is required">
-                                </div>
-                            </div>
-                            
+                           <div class="col-md-12">
+                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
+                                    <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                            <th class="border-primary border-darken-1">Remark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sackbag_detail">
+                                        <tr>
+                                            <td><input type="text" name="sack_bag_no[]" class="form-control"></td>
+                                            <td><input type="text" name="remarks[]" class="form-control"></td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+                                
+                           </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <input type="text"  name="remarks" class="form-control" placeholder="Remarks">
-                                </div>
-                            </div>
-                        </div>
-                   
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary">Submit</button>
+                            <button type="button" id="addrow" class="btn btn-success ">Add Row</button>
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
 
                         </div>
                     </form>
@@ -419,6 +425,7 @@
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
                             $("#add_sack_bag_form")[0].reset();
+                            $("#sackbag_detail tr:not(:first-child)").empty();
                             $("#add_sack_bag_form select").val(null).trigger('change.select2');
                             $('#AddSackBagModal').modal('show');
                          
@@ -595,6 +602,10 @@
 
                     $(this).removeAttr('checked');
                 }
+            });
+            $("#addrow").click(function(){
+                var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td></tr>';
+                $("#sackbag_detail").append(row);
             });
 
         });

@@ -22,8 +22,8 @@ class CreateIssueSackbagOriginsTable extends Migration
             $table->tinyInteger('status')->default(1); //1 active
             $table->tinyInteger('action')->default(0);
             $table->tinyInteger('type')->nullable(); //1 admin
-            $table->integer('created_by')->nullable();
-            $table->integer('udpated_by')->nullable();
+            // $table->integer('created_by')->nullable();
+            // $table->integer('udpated_by')->nullable();
             $table->timestamps();
         });
     }
