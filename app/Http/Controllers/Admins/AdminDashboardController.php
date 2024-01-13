@@ -14208,9 +14208,18 @@ class AdminDashboardController extends Controller
                 foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
                         if(isset($request->user_id[$row_id])){
-                            $same_user = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->where('user_id', $request->user_id[$row_id]);
-                            if($same_user->exists()){
-                                $same_user->delete();
+                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                preg_match('/\d+/', $request->user_id[$row_id], $matches);
+                                $rider_id = isset($matches[0]) ? $matches[0] : null;
+                                $same_user = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->where('user_id', $rider_id);
+                                if($same_user->exists()){
+                                    $same_user->delete();
+                                }
+                            }else{
+                                $same_user = SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->where('user_id', $request->user_id[$row_id]);
+                                if($same_user->exists()){
+                                    $same_user->delete();
+                                }
                             }
                         }
                         if($sales_tier){
