@@ -39,7 +39,7 @@
 
     <div class="modal fade" id="AddSackBagModal" data-backdrop="static" role="dialog" aria-labelledby="AddSackBagModal"
         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Add Sack Bag</h4>
@@ -54,13 +54,7 @@
                         class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{-- <label>Sack Bag No#</label> --}}
-                                    <input type="text"  name="sack_bag_no" class="form-control" placeholder="Sack Bag No" data-rule-required="true" data-msg-required="Sack Bag No is required">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <select name="origin" id="origin_select" class="form-control select2"
                                       data-rule-required="true" data-msg-required="Origin is required">
@@ -71,6 +65,15 @@
 
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{-- <label>Sack Bag No#</label> --}}
+                                    <input type="text"  name="sack_bag_no" class="form-control" placeholder="Sack Bag No" data-rule-required="true" data-msg-required="Sack Bag No is required">
+                                </div>
+                            </div>
+                            
                         </div>
                         <div class="row">
                             <div class="col-md-12">
