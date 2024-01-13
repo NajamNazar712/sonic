@@ -414,6 +414,7 @@
 
                     <div class="modal-body">
                         <div class="col text-center">
+                            <h1 id="shipper_ids_msg"></h1>
                             <div class="row justify-content-center mt-2" id="commission_div">
                                 <div class="form-group row">
                                     <label class="col-md-4 label-control" for="commission">Total Commission</label>
@@ -1302,11 +1303,12 @@
                         enabled:false,
                         action: function (e, dt, node, config) {
                             if(selected_rows_2 != ''){
-
                                 $('#SalesTierTypeTagModal').modal('show');
                                 var route = '{!! route('admin.accounts.add_rate_commission_corporate_reimb', ':shippers') !!}';
                                 route = route.replace(':shippers', encodeURIComponent(selected_rows_2));
                                 $("#SalesTierTypeTagModal #ratesAdditionForm").attr('action', route);
+
+                                $('#shipper_ids_msg').text("Selected Shipper:"+ selected_rows_2)
 
                             }else{
                                 var error = "Atleast Select One Shipper";
