@@ -14193,11 +14193,7 @@ class AdminDashboardController extends Controller
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
     {
-        // dd($shipper_ids);
-        // dd($request->all());
-
         $shipper_ids = explode(',', $shipper_ids);
-
         foreach($shipper_ids as $shipper_id)
         {
             if($request->has('user_id')){
@@ -14225,8 +14221,9 @@ class AdminDashboardController extends Controller
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
                 $user = User::find($shipper_id);
-                $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
-                if($sales_commission->exists()){
+                $sales_commission = SalesCommission::where('shipper_id', $shipper_id)->exists();
+                if(count($sales_commission->first()) && isset($sales_commission->updated_by)){
+                    
                     $sales_commission = $sales_commission->first();
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
                     $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
@@ -14244,9 +14241,10 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    if($action == 0)
+                    if($action == 0){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                foreach($request->tier_id as $row_id => $tier){
+                    }
+                    foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
                         if(isset($request->user_id[$row_id])){
                             if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
