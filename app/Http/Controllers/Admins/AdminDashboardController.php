@@ -1554,8 +1554,35 @@ class AdminDashboardController extends Controller
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories]);
-
+        $commission_percentage = '';
+        $settings = GlobalSettings::where('type', 'commission_percentage');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $commission_percentage = $settings->text;
+        }
+        $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
+        $riders_permanent = Rider::where('rider_type_id', 1)->get();
+ 
+        $users = array();
+        $sales = array();
+        $all_users = array();
+        foreach ($admin_users as $u) {
+            if ($u->department_id != 7) {
+                $users[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+            } else {
+                $sales[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+            }
+        }
+      
+        $all_users['results'][0]['text'] = 'Sales';
+        $all_users['results'][0]['children'] = $sales;
+        $all_users['results'][1]['text'] = 'Admins';
+        $all_users['results'][1]['children'] = $users;
+        $all_users['results'][2]['text'] = 'Riders';
+        $all_users['results'][2]['children'] = [];
+        $all_users['pagination']['more'] = true;
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users]);
     }
 
     public function blockAccountsList()
@@ -14162,12 +14189,16 @@ class AdminDashboardController extends Controller
         }
     }
 
+   
+
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
     {
         // dd($shipper_ids);
+        // dd($request->all());
+
         $shipper_ids = explode(',', $shipper_ids);
 
-        foreach($shipper_ids as $key => $shipper_id)
+        foreach($shipper_ids as $shipper_id)
         {
             if($request->has('user_id')){
                 
@@ -14197,8 +14228,18 @@ class AdminDashboardController extends Controller
                 $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
                 if($sales_commission->exists()){
                     $sales_commission = $sales_commission->first();
-                    $sales_commission->commission_users_count = $users_count;
-                    $sales_commission->commission = $total_commission;
+                    $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
+                    $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
+
+                    if($sales_commission_user){
+                        $total_commission = array_sum($sales_commission_user) + $total_commission;
+                        $sales_commission_user_count = array_unique(array_merge($sales_commission_user_count, $request->user_id));
+                    }else{
+                        $total_commission;
+                    }
+
+                    $sales_commission->commission_users_count = count($sales_commission_user_count);
+                    $sales_commission->commission = strval($total_commission);
                     $sales_commission->updated_by = Auth::id();
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
@@ -14245,7 +14286,7 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->save();
                         }
                     }
-                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->commission = $total_commission;
                     $sales_commission->save();
     
                 }else{
