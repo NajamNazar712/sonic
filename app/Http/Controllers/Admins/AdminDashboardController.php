@@ -14238,7 +14238,7 @@ class AdminDashboardController extends Controller
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
                     $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
 
-                    if($sales_commission_user){
+                    if(count($sales_commission_user) > 0){
                         $total_commission = array_sum($sales_commission_user) + $total_commission;
                         $sales_commission_user_count = array_unique(array_merge($sales_commission_user_count, $request->user_id));
                     }else{
@@ -14335,10 +14335,25 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                 }
             }
+
+            self::balance_count_commission($shipper_id);
         }
 
         return back()->with('success', 'Commission Has Been Added !!');
 
     }
+
+    public function balance_count_commission($shipperId)
+    {
+        $sales_commission = SalesCommission::where('shipper_id', $shipperId)->first();
+    
+        if ($sales_commission) {
+            $sales_commission_id = $sales_commission->id;
+            $actual_commission = SalesCommissionUser::whereIn('sales_commission_id', [$sales_commission_id])->pluck('commission')->toArray();
+            $sales_commission->commission = array_sum($actual_commission);
+            $sales_commission->save();
+        }
+    }
+    
 }
 
