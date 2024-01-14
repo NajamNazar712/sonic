@@ -14221,8 +14221,18 @@ class AdminDashboardController extends Controller
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
                 $user = User::find($shipper_id);
-                $sales_commission = SalesCommission::where('shipper_id', $shipper_id)->exists();
-                if(count($sales_commission->first()) && isset($sales_commission->updated_by)){
+
+                //when shipper register
+                $sales_commission_register = SalesCommission::where('shipper_id', $shipper_id);
+                if($sales_commission_register->exists()){
+                    if(!isset($sales_commission_register->first()->updated_at)){
+                        SalesCommissionUser::where('sales_commission_id', $sales_commission_register->id)->delete();
+                        SalesCommission::where('shipper_id', $shipper_id)->delete();
+                    }
+                }
+
+                $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
+                if($sales_commission->exists()){
                     
                     $sales_commission = $sales_commission->first();
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
