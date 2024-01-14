@@ -14226,7 +14226,7 @@ class AdminDashboardController extends Controller
                 $sales_commission_register = SalesCommission::where('shipper_id', $shipper_id);
                 if($sales_commission_register->exists()){
                     if(!isset($sales_commission_register->first()->updated_by)){
-                        SalesCommissionUser::where('sales_commission_id', $sales_commission_register->id)->delete();
+                        SalesCommissionUser::where('sales_commission_id', $sales_commission_register->first()->id)->delete();
                         SalesCommission::where('shipper_id', $shipper_id)->delete();
                     }
                 }
