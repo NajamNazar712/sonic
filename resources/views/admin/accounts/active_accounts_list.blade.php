@@ -2441,7 +2441,7 @@ function checkboxStatus() {
                 var tr = $(this).closest('tr');
                 var row = dataTable.row(tr);
                 var rowData = row.data();
-                var cond = (rowData.account_type_id == 2 && rowData.corporate_rate_type_id == 3 && rowData.status_id != 2) ||
+                var cond = (rowData.status_id != 2) ||
                (rowData.account_type_id == 1 && rowData.status_id != 2);
                
                if (index_2 === -1 && cond) {
