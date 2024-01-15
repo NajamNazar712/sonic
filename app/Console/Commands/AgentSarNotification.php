@@ -36,13 +36,13 @@ class AgentSarNotification extends Command
         parent::__construct();
     }
 
-     // create Rv Cron Log
-     public function createRvCronLog($message)
-     {
-         RvCronLog::create([
-             'message' => $message,
-         ]);
-     }
+    // create Rv Cron Log
+    public function createRvCronLog($message)
+    {
+        RvCronLog::create([
+            'message' => $message,
+        ]);
+    }
 
     /**
      * Execute the console command.
@@ -53,18 +53,18 @@ class AgentSarNotification extends Command
     {
         try {
             $currentDateTime = Carbon::now();
-        
+
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmail = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
-            ->where('rv_state_id', 2)
-            ->where('unresponsive_count', 2)
-            //selects older records, i.e., records that were updated more than 12 hours ago.            
-            // ->where('updated_at', '<', $currentDateTime->subHours(12))
-            ->where('unresponsive_email_count', '<', 1)
-            ->get();
+                ->where('rv_state_id', 2)
+                ->where('unresponsive_count', 2)
+                //selects older records, i.e., records that were updated more than 12 hours ago.            
+                ->where('updated_at', '<', $currentDateTime->subHours(16))
+                ->where('unresponsive_email_count', '<', 1)
+                ->get();
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
-            
+
             if ($sendEmail->isNotEmpty()) {
                 NotificationsController::send(220, $sendEmail);
 
@@ -75,28 +75,30 @@ class AgentSarNotification extends Command
                     $shipment->unresponsive_email_time = $currentDateTime;
                     $shipment->save();
                 }
-
             }
-            else {
-                // Else If there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
-                // the system will automatically update the shipment status to "Return Confirm."
-                $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
-                    ->where('rv_state_id', 2)
-                    ->where('unresponsive_count', 2)
-                    ->where('unresponsive_email_count', '>', 0)
-                    ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48))
-                    ->get();
-        
-                if ($shipmentsToUpdate->isNotEmpty()) {
-                    foreach ($shipmentsToUpdate as $shipment) {
-                        $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
 
-                        $request = $shipment->request->add(['shipment_id' => $shipment->shipment_id, 'is_fake_status' => $shipment->is_fake_status, 'remarks' => $shipment->remarks, 
-                        'call_to_id' => $shipment->call_to_id, 'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id]);
-                        $this->return_confirm($request);
+            // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
+            // the system will automatically update the shipment status to "Return Confirm."
+            $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
+                ->where('rv_state_id', 2)
+                ->where('unresponsive_count', 2)
+                ->where('unresponsive_email_count', '>', 0)
+                ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48))
+                ->get();
+
+            if ($shipmentsToUpdate->isNotEmpty()) {
+                foreach ($shipmentsToUpdate as $shipment) {
+                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+
+                    $request = $shipment->request->add([
+                        'shipment_id' => $shipment->shipment_id, 'is_fake_status' => $shipment->is_fake_status, 'remarks' => $shipment->remarks,
+                        'call_to_id' => $shipment->call_to_id, 'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id
+                    ]);
+                    $this->return_confirm($request);
 
 
-                        $data = ['rv_shipment_assign_agent_id' => $shipment->id,
+                    $data = [
+                        'rv_shipment_assign_agent_id' => $shipment->id,
                         'agent_id' => $shipment->agent_id,
                         'shipments_journey_id' => $shipment->shipments_journey_id,
                         'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
@@ -111,8 +113,7 @@ class AgentSarNotification extends Command
                         'remarks' => $shipment->remarks,
                         'call_to_id' => $shipment->call_to_id,
                     ];
-                        $this->data_rv_shipment_assign_agent_details($data);
-                    }
+                    $this->data_rv_shipment_assign_agent_details($data);
                 }
             }
         } catch (\Throwable $th) {
