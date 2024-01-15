@@ -1595,9 +1595,11 @@ class AdminTrackingController extends Controller
                                 ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
                                 ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id','shipment_scanning_journeys.created_at','hsj.status');    
                                 $admin_id = Handover::where('id', $journey_details['handover_id']);
-
+                                
                                 if($shipment_scanning_query->exists()){
-                                    $journey_details['user'] = Admin::find($admin_id->first()->created_by)->name ?? null;
+                                    $journey_details['user_created_by'] = Admin::find($admin_id->first()->created_by)->name ?? '-';
+                                    $journey_details['user_received_by'] = Admin::find($admin_id->first()->received_by)->name ?? '-';
+
                                     switch ($journey->status) {
                                         case 1:
                                             $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
@@ -1616,7 +1618,7 @@ class AdminTrackingController extends Controller
                                 $details['handover_history'][] = $journey_details;
                             }
                         }
-
+                        
 
 
                         $quick_receiving_shipment_journey = DeliveryShipmentsReceivedOperation::where('shipment_id', $shipment->id);

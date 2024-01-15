@@ -1585,7 +1585,8 @@
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Location</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '<th><strong>User Created By</strong></th>';
+                                    shipment += '<th><strong>User Received By</strong></th>';
 
                                     shipment += '</tr>';
                                     shipment += '</thead>';
@@ -1602,7 +1603,9 @@
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
                                         shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + (history.area_log ? history.area_log.area : '') + ' | '+ googleMapsUrl + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '<td>' + history.user_created_by + '</td>';
+                                        shipment += '<td>' + history.user_received_by + '</td>';
+
                                         shipment += '</tr>';
                                     });
 
