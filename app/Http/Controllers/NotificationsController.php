@@ -10438,8 +10438,8 @@ class NotificationsController extends Controller
                             $to_user_email = $shipment->user->email;
                             // dd($to_user_email);
                         }
-                        dd(1);
                         $html .= '</tbody></table>';
+                        // dd(1);
 
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
                         $link = '<a href="' .route('cod.tracking') . '">Track</a>';
@@ -10450,7 +10450,8 @@ class NotificationsController extends Controller
 
                         // Send the email to the user with all their shipments
                         // self::email($subject, $body, $email, $from);
-                        dd($subject, $body, $to_user_email, $from);
+                        echo "test";
+                        // dd($subject, $body, $to_user_email, $from);
                         self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
 
