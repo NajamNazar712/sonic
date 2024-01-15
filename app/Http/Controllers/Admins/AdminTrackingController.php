@@ -1579,34 +1579,39 @@ class AdminTrackingController extends Controller
                         }
 
                         $handover_shipment_journey = $shipment->handover_shipments_journeys;
-
+                        
+                        
                         if ($handover_shipment_journey) {
                             foreach ($handover_shipment_journey as $journey) {
                                 $journey_details = array();
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
                                 $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                                $shipment_scanning_query = ShipmentScanningJourney::join('handover_shipments_journeys as hsj', function ($join) use ($journey) {
+                                $shipment_scanning_query = ShipmentScanningJourney::leftjoin('handover_shipments_journeys as hsj', function ($join) use ($journey) {
                                     $join->on('hsj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                                    ->where('hsj.id', '=', $journey->id);
+                                    ->where('hsj.shipment_id', '=', $journey->id);
                                 })
-                                ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                                ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                                 ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                                ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id','shipment_scanning_journeys.created_at');    
+                                ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id','shipment_scanning_journeys.created_at','hsj.status');    
+                                $admin_id = Handover::where('id', $journey_details['handover_id']);
 
-                                $journey_details['user'] = Admin::find($shipment_scanning_query->first()->admin_id)->name ?? Rider::find($shipment_scanning_query->first()->rider_id)->name;
-                                switch ($journey->status) {
-                                    case 1:
-                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
-                                        break;
-                                    case 2:
-                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
-                                        break;
-                                    default:
-                                        $scanning_data = null;
-                                        break;
+                                if($shipment_scanning_query->exists()){
+                                    $journey_details['user'] = Admin::find($admin_id->first()->created_by)->name ?? null;
+                                    switch ($journey->status) {
+                                        case 1:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
+                                            break;
+                                        case 2:
+                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
+                                            break;
+                                        default:
+                                            $scanning_data = null;
+                                            break;
+                                    }
+                                }else{
+                                    $scanning_data = null;
                                 }
-                                
                                 $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                 $details['handover_history'][] = $journey_details;
                             }
