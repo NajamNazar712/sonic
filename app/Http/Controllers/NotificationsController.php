@@ -10441,7 +10441,8 @@ class NotificationsController extends Controller
                         $html .= '</tbody></table>';
                         
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
-                        $link = '<a href="' .route('cod.tracking') . '">Track</a>';
+                        // $link = '<a href="' .route('cod.tracking') . '">Track</a>';
+                        $link = '<a href="' . route('cod.tracking.index') . '" target="_blank">Track</a>';
                         dd(1);
 
                         // Use $html to replace [preview] in the email body
