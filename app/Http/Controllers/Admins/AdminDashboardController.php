@@ -9172,7 +9172,7 @@ class AdminDashboardController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
-        $users = DB::connection('reports')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
+        $users = DB::connection('mysql')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p', 'p.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
             ->leftjoin('referrals as ref', 'ref.id', '=', 'users.referral_id')
