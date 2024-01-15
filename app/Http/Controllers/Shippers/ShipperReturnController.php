@@ -62,20 +62,14 @@ class ShipperReturnController extends Controller
     }
     public function confirmation_pending_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            // ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            // ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            // ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            // ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            // ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
-            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftJoin('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->leftJoin('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            // ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->leftJoin('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.created_at','=',
@@ -93,10 +87,9 @@ class ShipperReturnController extends Controller
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
             ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','ssr.id as reason_id','ssr.name as reason','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.shipper_status_id as shipper_status_id', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','shipments.nsa_osa_estimated_charges', 'consolidations.consolidation_id')
-            // ->where('shipments.shipper_status_id', DB::raw(12))
-            ->where('shipments.shipper_status_id', 65) //shipper advise request
-            ->where('rsaa.unresponsive_count', 1) //Unresponsive Count
-            ->where('shipments.user_id', session('user_id'))
+            // ->where('shipments.shipper_status_id', 65) //shipper advise request
+            // ->where('rsaa.unresponsive_count', 1) //Unresponsive Count
+            // ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
 
             if(session('user_type') == 2){
