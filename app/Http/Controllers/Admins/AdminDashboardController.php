@@ -9515,7 +9515,7 @@ class AdminDashboardController extends Controller
                 
                 if (isset($shipper, $sales_tiers)) {
                     $sales_commission_users = DB::table('sales_commission_users')
-                        ->where(['user_type' => '2', 'tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+                        ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
                         ->get();
                 
                     if ($sales_commission_users->isNotEmpty()) {
