@@ -10401,7 +10401,7 @@ class NotificationsController extends Controller
                         }
                     }
 
-                    $htmlHeader = '<table style="width:100%;">';
+                    $htmlHeader = '<table style="width:100%;margin-top:-50px">';
                     $htmlHeader .= '<thead><tr>
                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cn</th>
                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Order ID</th>
