@@ -10438,7 +10438,7 @@ class NotificationsController extends Controller
                             $to_user_email = $shipment->user->email;
                             // dd($to_user_email);
                         }
-
+                        dd(1);
                         $html .= '</tbody></table>';
 
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
