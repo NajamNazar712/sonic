@@ -10383,6 +10383,7 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 220) {
+                    dd(1);
                     $from = 'noreply@trax.pk';
                     $emailShipments = [];
                     $subject = str_replace('[date]', date('Y-m-d'), $subject);
