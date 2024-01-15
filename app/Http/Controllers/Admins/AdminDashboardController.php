@@ -14202,7 +14202,6 @@ class AdminDashboardController extends Controller
                 $action = $user->status;
 
                 if($action == 0){
-                
                     $user->status = 1;
                     $user->rates_added_by = Auth::id();
                     $user->save();
@@ -14242,6 +14241,8 @@ class AdminDashboardController extends Controller
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
                     if($action == 0){
+                        SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                    }else if ($request->has('edit')){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
                     }
                     foreach($request->tier_id as $row_id => $tier){
@@ -14324,6 +14325,13 @@ class AdminDashboardController extends Controller
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
                 }
+            }else{
+                $existing_sale_commission = SalesCommission::where('shipper_id', $shipper_ids)->first();
+                    if ($existing_sale_commission) {
+                        SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $shipper_ids)->delete();
+                        SalesCommission::where('shipper_id', $shipper_ids)->delete();
+                    }
             }
 
             self::balance_count_commission($shipper_id);
@@ -14341,6 +14349,7 @@ class AdminDashboardController extends Controller
             $sales_commission_id = $sales_commission->id;
             $actual_commission = SalesCommissionUser::whereIn('sales_commission_id', [$sales_commission_id])->pluck('commission')->toArray();
             $sales_commission->commission = array_sum($actual_commission);
+            $sales_commission->commission_users_count = SalesCommissionUser::whereIn('sales_commission_id', [$sales_commission_id])->count();
             $sales_commission->save();
         }
     }
