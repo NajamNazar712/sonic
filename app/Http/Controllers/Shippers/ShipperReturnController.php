@@ -62,14 +62,20 @@ class ShipperReturnController extends Controller
     }
     public function confirmation_pending_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
+            // ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            // ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            // ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            // ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            // ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftJoin('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            // ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.created_at','=',
