@@ -10420,7 +10420,6 @@ class NotificationsController extends Controller
 
                         foreach ($shipments as $rv_shipment) {
                             $shipment = Shipment::find($rv_shipment);
-                            // $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
                             $last_unresposnsive_reasons = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->where('rv_assign_agent_status_id', 7)->where('unresponsive_count', 2)->latest()->first();
 
@@ -10441,18 +10440,13 @@ class NotificationsController extends Controller
                         $html .= '</tbody></table>';
                         
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
-                        // $link = '<a href="' .route('cod.tracking') . '">Track</a>';
-                        $link = '<a href="' . route('cod.tracking.index') . '" target="_blank">Track</a>';
-                        // dd(1);
+                        $link = '<a href="' . route('cod.tracking.index') . '" target="_blank">https://sonic.pk/cod/tracking</a>';
 
                         // Use $html to replace [preview] in the email body
                         $body = str_replace(['[preview]', '[link]'], [$html, $link], $notification->body);
 
 
                         // Send the email to the user with all their shipments
-                        // self::email($subject, $body, $email, $from);
-                        // echo "test";
-                        // dd($subject, $body, $to_user_email, $from);
                         self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
 

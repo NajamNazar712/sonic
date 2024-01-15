@@ -15,11 +15,10 @@ class UpdateNotificationSeederForSarEmail extends Seeder
          DB::table('notifications')->insert(array(
              array('id' => 220, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper Advise Requested Notification', 'type_id' => 1, 
             'subject' => 'Action Required: Shipper Advise Requested - Shipment Update', 
-            'body' => 'Dear Valued Customer,
-            Thank you for using Trax Services,
-            This is to inform you that below shipment(s) are undelivered. You are requested to advise next course of action or disposal for the undelivered shipments through your portal by using below link within 24 hours of this notification.
-            [link]
-            No response within the specified time, the shipment will be automatically processed as return.[preview]'.'Thankyou for your cooperation',
+            'body' => 'Dear Valued Customer, '.PHP_EOL.'Thank you for using Trax Services.'.PHP_EOL.'
+            This is to inform you that below shipment(s) are undelivered. You are requested to advise next course of action or disposal for the undelivered shipments through your portal by using below link within 24 hours of this notification.'.PHP_EOL.'
+            [link]'.PHP_EOL.'
+            No response within the specified time, the shipment will be automatically processed as return.'.PHP_EOL.'[preview]'.PHP_EOL.'Thankyou for your cooperation',
             'updated_by' => 7, 'status' => 1)
          ));
     }
