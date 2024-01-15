@@ -14202,17 +14202,7 @@ class AdminDashboardController extends Controller
                 $action = $user->status;
 
                 if($action == 0){
-                    if($user->account_type_id == 2 && $user->corporate_rate_type_id == 3){
-                        CorporateDefaultRateStatus::create([
-                            'user_id' => $shipper_id,
-                            'shipping_mode_id' => 0,
-                        ]);
-                    }else{
-                        RateStatus::create([
-                            'user_id' => $shipper_id,
-                            'shipping_mode_id' => 0,
-                        ]);
-                    }
+                
                     $user->status = 1;
                     $user->rates_added_by = Auth::id();
                     $user->save();
