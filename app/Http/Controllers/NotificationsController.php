@@ -10452,7 +10452,7 @@ class NotificationsController extends Controller
                         // Send the email to the user with all their shipments
                         // self::email($subject, $body, $email, $from);
                         // echo "test";
-                        dd($subject, $body, $to_user_email, $from);
+                        // dd($subject, $body, $to_user_email, $from);
                         self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
 
