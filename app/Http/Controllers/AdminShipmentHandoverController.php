@@ -158,7 +158,6 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function arrival_bulk_shipment_details_receive(Request $request){
-      dd(1);
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
       if ($shipment->exists()) {
