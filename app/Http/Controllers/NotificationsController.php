@@ -10436,7 +10436,7 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($last_unresposnsive_reasons->rv_sub_status->name) ? $last_unresposnsive_reasons->rv_sub_status->name : '---') . '</td>';
                             $html .= '</tr>';
                             $to_user_email = $shipment->user->email;
-                            dd($to_user_email);
+                            // dd($to_user_email);
                         }
 
                         $html .= '</tbody></table>';
@@ -10450,8 +10450,8 @@ class NotificationsController extends Controller
 
                         // Send the email to the user with all their shipments
                         // self::email($subject, $body, $email, $from);
-                        // dd($subject, $body, $email, $from);
-                        self::email($subject, $body, $email, NULL, NULL, $from);
+                        dd($subject, $body, $to_user_email, $from);
+                        self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
 
                 }
