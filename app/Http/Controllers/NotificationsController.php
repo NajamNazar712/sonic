@@ -10443,7 +10443,7 @@ class NotificationsController extends Controller
                         // $link = '<a href="https://sonic.pk/cod/tracking">https://sonic.pk/cod/tracking</a>';
                         // $link = '<a href="' .route('cod.tracking') . '">Track</a>';
                         $link = '<a href="' . route('cod.tracking.index') . '" target="_blank">Track</a>';
-                        dd(1);
+                        // dd(1);
 
                         // Use $html to replace [preview] in the email body
                         $body = str_replace(['[preview]', '[Link]'], [$html, $link], $notification->body);
@@ -10452,7 +10452,7 @@ class NotificationsController extends Controller
                         // Send the email to the user with all their shipments
                         // self::email($subject, $body, $email, $from);
                         // echo "test";
-                        // dd($subject, $body, $to_user_email, $from);
+                        dd($subject, $body, $to_user_email, $from);
                         self::email($subject, $body, $to_user_email, NULL, NULL, $from);
                     }
 
