@@ -62,7 +62,6 @@ class AgentSarNotification extends Command
             // ->where('updated_at', '<', $currentDateTime->subHours(12))
             ->where('unresponsive_email_count', '<', 1)
             ->get();
-            dd($sendEmail);
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
             

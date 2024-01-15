@@ -10450,7 +10450,7 @@ class NotificationsController extends Controller
                         // self::email($subject, $body, $email, $from);
                         self::email($subject, $body, $email, NULL, NULL, $from);
                     }
-
+                    dd($body);
 
                 }
 
