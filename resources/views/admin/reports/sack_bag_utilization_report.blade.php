@@ -54,13 +54,16 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Stock Destination</th>
-                            <th class="border-primary border-darken-1">Issue Sack Bag</th>
-                            <th class="border-primary border-darken-1">CB Sack Bag</th>
-                            <th class="border-primary border-darken-1">TM Sack Bag</th>
-                            <th class="border-primary border-darken-1">BR Sack Bag</th>
-                            <th class="border-primary border-darken-1">SDM Sack Bag</th>
-                            <th class="border-primary border-darken-1">Total Bag In Hand</th>
+                            {{-- <th class="border-primary border-darken-1">Date</th>  --}}
+                            <th class="border-primary border-darken-1">Destination</th>
+                            {{-- <th class="border-primary border-darken-1">Address</th> --}}
+                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
+                            {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
+                            {{-- <th class="border-primary border-darken-1">Rider Picked</th>
+                            <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
+                            <th class="border-primary border-darken-1">Balance Shipments</th> --}}
+                              {{-- <th class="border-primary border-darken-1">Rider</th> --}}
+
                         </tr>
                         </thead>
                     </table>
@@ -258,7 +261,7 @@
             var table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     scrollX: true, scrollY: '500px',
-                    deferLoading:0,
+                    // deferLoading:0,
                     buttons: [
                         // {
                         //     extend: 'excelHtml5',

@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Utilization of Sack Bag')
+@section('title', 'Sack Bag Status')
 
 
 @section('content')
     <h1 class="mb-1">
-        Utilization of Sack Bag 
+       Sack Bag Status
     </h1>
 
     <div class="card">
@@ -18,8 +18,8 @@
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
-                                @foreach ($origins as $origin)
-                                    <option value="{{ $origin->id }}"> {{ $origin->name }}</option>
+                                @foreach ($destinations as $destination)
+                                    <option value="{{ $destination->id }}"> {{ $destination->name }}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -54,16 +54,13 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            {{-- <th class="border-primary border-darken-1">Date</th>  --}}
-                            <th class="border-primary border-darken-1">Destination</th>
-                            {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
-                            {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
-                            {{-- <th class="border-primary border-darken-1">Rider Picked</th>
-                            <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Balance Shipments</th> --}}
-                              {{-- <th class="border-primary border-darken-1">Rider</th> --}}
-
+                            <th class="border-primary border-darken-1">Stock Destination</th>
+                            <th class="border-primary border-darken-1">Issue Sack Bag</th>
+                            <th class="border-primary border-darken-1">CB Sack Bag</th>
+                            <th class="border-primary border-darken-1">TM Sack Bag</th>
+                            <th class="border-primary border-darken-1">BR Sack Bag</th>
+                            <th class="border-primary border-darken-1">SDM Sack Bag</th>
+                            <th class="border-primary border-darken-1">Total Bag In Hand</th>
                         </tr>
                         </thead>
                     </table>
@@ -281,7 +278,7 @@
                     },
                     serverSide: true,
                     ajax:{
-                        url: '{{ route('admin.reports.sack_bag_utilization.list') }}',
+                        url: '{{ route('admin.reports.sack_bag_status.list') }}',
                         data: function (d) {
                             d.destination_id = $('#search_origin').val();
                             d.search_from = $('input[name="from_date_formatted"]').val();
@@ -292,13 +289,15 @@
                     order: [[1, 'desc']],
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                        // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
                         
                         { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
-                        // { data:'stock_sack_bag_btn',class: 'align-middle text-center stock_sack_bag', orderable: false, searchable: false},
-                        { data:'sack_bag_count_btn',class: 'align-middle text-center sack_bag_count', orderable: false, searchable: false},
-                        // { data:'re_used_sack_bag_btn',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
-                        // { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
+                        { data:'isu',class: 'align-middle text-center isu', orderable: false, searchable: false},
+                        { data:'cb',class: 'align-middle text-center cb', orderable: false, searchable: false},
+                        { data:'tm',class: 'align-middle text-center tm', orderable: false, searchable: false},
+                        { data:'br',class: 'align-middle text-center br', orderable: false, searchable: false},
+                        { data:'sdm',class: 'align-middle text-center sdm', orderable: false, searchable: false},
+                        { data:'total_hand',class: 'align-middle text-center total_hand', orderable: false, searchable: false},
+
         
                     ],
                     rowCallback: function(row, data, index) {
