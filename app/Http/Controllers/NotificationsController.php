@@ -10390,6 +10390,7 @@ class NotificationsController extends Controller
                     foreach ($reference_1_id as $user) {
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
                         $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
+                        dd($emails);
 
                         
                         foreach ($emails as $email) {
@@ -10419,8 +10420,6 @@ class NotificationsController extends Controller
                         $html = $htmlHeader;
 
                         foreach ($shipments as $rv_shipment) {
-
-                            dd($shipments,$rv_shipment);
                             $shipment = Shipment::find($rv_shipment);
                             // $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $rv_shipment)->whereIn('shipper_status_id',[7,8,9,12,15])->latest()->first();
