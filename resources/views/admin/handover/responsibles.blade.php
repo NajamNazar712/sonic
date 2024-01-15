@@ -78,7 +78,7 @@
 
                                 <div class="col-6 form-group">
                                     <fieldset class="form-group">
-                                        <select  name="city_area_id" id="city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+                                        <select  name="city_area_id" id="city_area_id" class="form-control select2">
 
                                         </select>
                                     </fieldset>
@@ -257,33 +257,7 @@
             width: '100%',
             placeholder: 'Select Hub',
             dropdownParent:$('#add_responsible_form')
-        }).on('change', function(){
-            $.ajax({
-                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
-                    method: "POST",
-                    data: {city_id: $(this).val()
-                        , '_token': '{{ csrf_token() }}',},
-                    success: function (result) {
-                        const uniqueAdminIds = new Set();
-                        let responsible_data = `<option value="">Select Admin</option>`;
-                        $.each(result.city_area, function (index, cityArea) {
-                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
-                                // Check if admin.id is already added to the Set
-                                if (!uniqueAdminIds.has(admin.id)) {
-                                    responsible_data += `<option value="${admin.id}"}>${admin.name} - ${admin.trax_id}</option>`;
-                                    // Add admin.id to the Set to track uniqueness
-                                    uniqueAdminIds.add(admin.id);
-                                }
-                            });
-                        });
-                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
-                            width: '100%',
-                            placeholder: 'Select Admin',
-                            dropdownParent: $('#add_responsible_form')
-                        });  
-                    }
-                })
-        });
+        })
         $('#city_area_id').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Area',
@@ -534,8 +508,47 @@
         });
         
         $('#hub').change(function(){
-            var city_id = $(this).val();
-            get_area(city_id,false);
+            // var city_id = $(this).val();
+            // get_area(city_id,false);
+            $('#city_area_id').empty();
+            $('#city_responsible_hubs_admins').empty();
+
+            $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: $(this).val()
+                        , '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        console.log(result);
+                        const uniqueAdminIds = new Set();
+                        let responsible_data = `<option value="">Select Admin</option>`;
+                        $.each(result.admins, function (index, admin) {
+                            // Check if admin.id is already added to the Set
+                            if (!uniqueAdminIds.has(admin.id)) {
+                                responsible_data += `<option value="${admin.id}"}>${admin.name} - ${admin.trax_id}</option>`;
+                                // Add admin.id to the Set to track uniqueness
+                                uniqueAdminIds.add(admin.id);
+                            }
+                            
+                        });
+                        $('#city_responsible_hubs_admins').prepend(responsible_data).select2({
+                            width: '100%',
+                            placeholder: 'Select Admin',
+                            dropdownParent: $('#add_responsible_form')
+                        });  
+
+                        let data = [];
+                        $.each(result.areas, function (index, value) {
+                            data += `<option value="${value.id}">${value.name}</option>`
+                        });
+                        
+                        $('#city_area_id').prepend(data).select2({
+                            width: '100%',
+                            placeholder: 'Select Area',
+                            dropdownParent: $('#add_responsible_form')
+                        });
+                    }
+                })
         });
 
    
@@ -552,7 +565,7 @@
         function get_area(city_id,edit = false,val = null, val_2 = null){
             $('#city_area_id').empty();
             $('#city_responsible_hubs_admins').empty();
-            if(!edit) {
+            if(!edit == true) {
                 $.ajax({
                     url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
                     method: "POST",
@@ -579,7 +592,7 @@
                     data: { city_id: city_id, '_token': '{{ csrf_token() }}' },
                     success: function (result) {
                         let data = `<option value="">Select Area</option>`;
-                        $.each(result.city_area, function (index, value) {
+                        $.each(result.areas, function (index, value) {
                             const isSelected = (value.id == val) ? 'selected' : '';
                             data += `<option value="${value.id}" ${isSelected}>${value.name}</option>`;
                             
@@ -593,8 +606,7 @@
                         $('#edit_city_area_id').val(val).trigger('change');
                         const uniqueAdminIds = new Set();
                         let responsible_data = `<option value="">Select Admin</option>`;
-                        $.each(result.city_area, function (index, cityArea) {
-                            $.each(cityArea.hubs.responsible_admins, function (hubIndex, admin) {
+                            $.each(result.admins, function (hubIndex, admin) {
                                 // Check if admin.id is already added to the Set
                                 if (!uniqueAdminIds.has(admin.id)) {
                                     const isSelected = (admin.id == val_2) ? 'selected' : '';
@@ -603,7 +615,6 @@
                                     uniqueAdminIds.add(admin.id);
                                 }
                             });
-                        });
 
                         $('#edit_city_responsible_hubs_admins').prepend(responsible_data).select2({
                             width: '100%',
