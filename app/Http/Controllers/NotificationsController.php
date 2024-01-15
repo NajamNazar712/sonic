@@ -10383,10 +10383,9 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 220) {
-                    dd(1);
                     $from = 'noreply@trax.pk';
                     $emailShipments = [];
-                    $subject = str_replace('[date]', date('Y-m-d'), $subject);
+                    $subject = $notification->subject;
 
                     foreach ($reference_1_id as $user) {
                         $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
@@ -10415,6 +10414,7 @@ class NotificationsController extends Controller
                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Calling Status</th>
                 ';
                     $htmlHeader .= '</tr></thead><tbody>';
+                    dd($emailShipments);
 
                     foreach ($emailShipments as $email => $shipments) {
                         $html = $htmlHeader;
@@ -10449,9 +10449,9 @@ class NotificationsController extends Controller
 
                         // Send the email to the user with all their shipments
                         // self::email($subject, $body, $email, $from);
+                        // dd($subject, $body, $email, $from);
                         self::email($subject, $body, $email, NULL, NULL, $from);
                     }
-                    dd($body);
 
                 }
 
