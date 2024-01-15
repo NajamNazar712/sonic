@@ -10446,7 +10446,7 @@ class NotificationsController extends Controller
                         // dd(1);
 
                         // Use $html to replace [preview] in the email body
-                        $body = str_replace(['[preview]', '[Link]'], [$html, $link], $notification->body);
+                        $body = str_replace(['[preview]', '[link]'], [$html, $link], $notification->body);
 
 
                         // Send the email to the user with all their shipments

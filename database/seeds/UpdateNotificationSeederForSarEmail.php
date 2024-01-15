@@ -18,8 +18,8 @@ class UpdateNotificationSeederForSarEmail extends Seeder
             'body' => 'Dear Valued Customer,
             Thank you for using Trax Services,
             This is to inform you that below shipment(s) are undelivered. You are requested to advise next course of action or disposal for the undelivered shipments through your portal by using below link within 24 hours of this notification.
-            [Link]
-            No response within the specified time, the shipment will be automatically processed as return.'. PHP_EOL .'[preview]'.'Thankyou for your cooperation',
+            [link]
+            No response within the specified time, the shipment will be automatically processed as return.[preview]'.'Thankyou for your cooperation',
             'updated_by' => 7, 'status' => 1)
          ));
     }
