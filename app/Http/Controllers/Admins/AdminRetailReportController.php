@@ -263,15 +263,15 @@ class AdminRetailReportController extends Controller
     public static function retail_sales_report($report_type){
 
         if($report_type == 1){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
 
@@ -333,13 +333,13 @@ class AdminRetailReportController extends Controller
 
 
         if($report_type == 1){
-            $filename = 'retail_sales_report_by_arrival_first_to_last.xlsx';
+            $filename = 'retail_sales_report_by_arrival_first_ten_days.xlsx';
         }
         if($report_type == 2){
-            $filename = 'retail_sales_report_by_arrival_first_to_25.xlsx';
+            $filename = 'retail_sales_report_by_arrival_second_ten_days.xlsx';
         }
         if($report_type == 3){
-            $filename = 'retail_sales_report_by_arrival_26_to_last.xlsx';
+            $filename = 'retail_sales_report_by_arrival_last_ten_days.xlsx';
         }
 
         $details = array();
@@ -462,15 +462,15 @@ class AdminRetailReportController extends Controller
     public static function retail_sales_report_by_delivery($report_type){
 
         if($report_type == 1){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
-            $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 2){
-            $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-            $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+            $from = Carbon::today()->startOfMonth()->addDays(10)->toDateTimeString();
+            $to = Carbon::parse($from)->addDays(9)->endOfDay()->toDateTimeString();
         }
         if($report_type == 3){
-            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
+            $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(20)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
 
@@ -531,13 +531,13 @@ class AdminRetailReportController extends Controller
             ->get();
 
         if($report_type == 1){
-            $filename = 'retail_sales_report_by_delivery_first_to_last.xlsx';
+            $filename = 'retail_sales_report_by_delivery_first_ten_days.xlsx';
         }
         if($report_type == 2){
-            $filename = 'retail_sales_report_by_delivery_first_to_25.xlsx';
+            $filename = 'retail_sales_report_by_delivery_second_ten_days.xlsx';
         }
         if($report_type == 3){
-            $filename = 'retail_sales_report_by_delivery_to_last.xlsx';
+            $filename = 'retail_sales_report_by_delivery_last_ten_days.xlsx';
         }
 
         $details = array();

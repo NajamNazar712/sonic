@@ -706,6 +706,14 @@ class ShipperInternationalShipmentBookController extends Controller
                             if ($row['payment_mode_id'] == 4) {
                                 $row['amount'] = 0;
                             }
+                            if(!isset($row['parcel_value'])){
+                                if($row['amount'] == 0){
+                                    $row['parcel_value'] = 1;
+                                }
+                                else{
+                                    $row['parcel_value'] = 0;
+                                }
+                            }
 
                             $row['business_category_id'] = 2;
                             if ($user_id != 3324) {

@@ -9167,11 +9167,12 @@ class AdminDashboardController extends Controller
     }
 
     public function activeAccountListAjax(Request $request)
-    {
+    {        
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
-        $users = DB::connection('reports_2')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
+        $users = DB::connection('mysql')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p', 'p.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
             ->leftjoin('referrals as ref', 'ref.id', '=', 'users.referral_id')
@@ -9392,6 +9393,11 @@ class AdminDashboardController extends Controller
                 } else {
                     return "-";
                 }
+                
+            })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
             })
             ->editColumn('international_rejected_reason', function ($users) {
                 if ($users->international_rejected_reason != null && $users->international_rate_status == 3) {
@@ -9686,7 +9692,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
-            ->addColumn('id_padded', function ($user) {
+            ->addColumn('id', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -9723,6 +9729,11 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0 ? 'Request Received' : ($users->status == 1 ? 'Rates Added' : ($users->status == 2 ? 'Pending for Activation' : ($users->status == 5 ? 'Rates Rejected' : '')));
+            })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
+
             })
             ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -10043,11 +10054,16 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
-            ->addColumn('id_padded', function ($user) {
+            ->addColumn('id', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
+            })
+            ->editColumn('id_padded', function ($users) {
+                $route = route('admin.accounts.view.profile', ['id' => $users->id]);
+                return '<a href="' . $route . '" style="text-decoration: underline;">' . $users->id . '</a>';
+
             })
             ->addColumn("action", function ($result) {
                 $dropdown = '
@@ -11984,43 +12000,52 @@ class AdminDashboardController extends Controller
 
     public function payment_cycle_submit(Request $request)
     {
-        try{
-            $payment_cycles = $request->payment_cycles;
-            $selected_days = $request->selected_days;
-            $fortnite = $request->fortnite;
-            $monthly = $request->monthly;
-    
-            switch ($payment_cycles) {
-                case '2':
-                case '4':
-                case '5':
-                    $payment_cycle_days = $selected_days;
-                    break;
-                case '6':
-                    $payment_cycle_days = $fortnite;
-                    break;
-                case '3':
-                    $payment_cycle_days = $monthly;
-                    break;
-                default:
-                    $payment_cycle_days = 0;
+        $shipper_ids = explode(',', $request->shipper_id);
+        $error_messages = [];
+        
+        foreach ($shipper_ids as $shipper_id) {
+            try {
+                $payment_cycles = $request->payment_cycles;
+                $selected_days = $request->selected_days;
+                $fortnite = $request->fortnite;
+                $monthly = $request->monthly;
+        
+                switch ($payment_cycles) {
+                    case '2':
+                    case '4':
+                    case '5':
+                        $payment_cycle_days = $selected_days;
+                        break;
+                    case '6':
+                        $payment_cycle_days = $fortnite;
+                        break;
+                    case '3':
+                        $payment_cycle_days = $monthly;
+                        break;
+                    default:
+                        $payment_cycle_days = 0;
+                }
+        
+                $shipper = User::find($shipper_id);
+                if ($shipper) {
+                    $shipper->update([
+                        'payment_cycle_id' => $payment_cycles,
+                        'payment_cycle_days' => $payment_cycle_days
+                    ]);
+                } else {
+                    $error_messages[] = $shipper_id;
+                }
+            } catch (Exception $th) {
+                $error_messages[] = $th->getMessage();
             }
-
-            $shipper_id =  $request->shipper_id;
-            $shipper = User::find($shipper_id);
-            if($shipper){
-                $shipper->update([
-                    'payment_cycle_id' => $payment_cycles, 
-                    'payment_cycle_days' => $payment_cycle_days
-                ]);
-                return redirect()->back()->with(['success' => 'Payment Cycle updated successfully']);
-            }else{
-                return redirect()->back()->with(['error' => 'Shipper not found']);
-            }
-        }catch(Exception $th){
-            return redirect()->back()->with(['error' => $th->getMessage()]);
         }
-
+        
+        if (!empty($error_messages)) {
+            $error_message = implode(', ', $error_messages);
+            return redirect()->back()->with(['error' => "Shipper with IDS : $error_message Not Found"]);
+        } else {
+            return redirect()->back()->with(['success' => 'Payment Cycle Updated Successfully']);
+        }        
     }
     public function getInternationalCityForm()
     {

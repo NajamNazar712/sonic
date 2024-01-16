@@ -968,7 +968,7 @@ function checkboxStatus() {
 
 
                             row.push(index + 1);
-                            row.push(values.id_padded);
+                            row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
@@ -1122,6 +1122,26 @@ function checkboxStatus() {
                         //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         //     }
                         }
+                    },
+                    @endif
+
+
+                    @if (session('role_id') == 1 || in_array(365, session('permissions')))
+                    {
+                            text: 'Payment Cycle',
+                            className: 'btn btn-primary payment_cycle',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('#payment_cycle_form [name="shipper_id"]').val(selected_rows);
+                           $('#PaymentCycleModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+        
+                    }
                     },
                     @endif
                    @if (session('role_id') == 1 || in_array(427, session('permissions')))
@@ -1549,6 +1569,8 @@ function checkboxStatus() {
                                         table.button('.tag').enable();
                                         table.button('.territory_tag').enable();
                                         table.button('.territory_retag').enable();
+                                        table.button('.payment_cycle').enable();
+
                                     }
                                 }
                             });
@@ -2421,17 +2443,19 @@ function checkboxStatus() {
                     table.button('.approve_commission').enable();
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
+                    table.button('.payment_cycle').enable();
 
                 }
                 else {
                     table.button('.bulk_tagging').disable();
                     table.button('.bulk_segment_tagging').disable();
-                    
+                    table.button('.territory_retag').disable();
+
                     table.button('.tag').disable();
                     table.button('.set_commission').disable();
                     table.button('.approve_commission').disable();
                     table.button('.territory_tag').disable();
-                    table.button('.territory_retag').disable();
+                    table.button('.payment_cycle').disable();
                 }
         });
         $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
@@ -2931,7 +2955,7 @@ function checkboxStatus() {
     });
 }
 
-var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         var selectedValues = []; // Create an array to store selected values
         for (var i = 0; i < days.length; i++) {
             var day = days[i];

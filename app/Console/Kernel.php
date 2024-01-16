@@ -192,13 +192,13 @@ class Kernel extends ConsoleKernel
             {
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
+                $schedule->command('employee:attendanceadjustment', [$shift->id, 'web'])
                 ->dailyAt($dailyAt)
                 ->runInBackground();
 
                 // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
                 $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
+                $schedule->command('employee:attendanceadjustment', [$shift->id, 'app'])
                 ->dailyAt($dailyAt)
                 ->runInBackground();
             }
@@ -393,23 +393,23 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
-        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
-        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreport')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
 
-        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
-        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();

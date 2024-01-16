@@ -323,11 +323,13 @@
                                                                     class="select2 form-control required"
                                                                     style="width: 100%">
                                                                     @foreach ($average_shipment_durations as $average_shipment_duration)
-                                                                        <option
-                                                                            value="{{ $average_shipment_duration->id }}"
-                                                                            {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }}>
-                                                                            {{ $average_shipment_duration->name }}
-                                                                        </option>
+                                                                        @if ($average_shipment_duration->id==3)
+                                                                            <option
+                                                                                value="{{ $average_shipment_duration->id }}"
+                                                                                {{ old('average_shipment_duration') == $average_shipment_duration->id ? 'selected' : '' }} selected>
+                                                                                {{ $average_shipment_duration->name }}
+                                                                            </option>
+                                                                        @endif
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -424,7 +426,7 @@
 
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <label for="payment_cycles">payment_cycles:
+                                                            <label for="payment_cycles">Payment Cycles:
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
@@ -432,9 +434,13 @@
                                                                     class="select2 form-control"
                                                                     style="width: 100%">
                                                                     @foreach ($payment_cycles as $payment_cycle)
-                                                                        <option value="{{ $payment_cycle->id }}">
-                                                                            {{ $payment_cycle->name }}</option>
+                                                                        @if ($payment_cycle->id != 1)
+                                                                            <option value="{{ $payment_cycle->id }}">
+                                                                                {{ $payment_cycle->name }}
+                                                                            </option>
+                                                                        @endif
                                                                     @endforeach
+
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -1238,7 +1244,7 @@
 
                     }
                 });
-            $('select[name="average_shipment_duration"]').prepend('<option value="" selected="selected"></option>')
+            $('select[name="average_shipment_duration"]')
                 .select2({
                     placeholder: 'Select Duration',
                     // dropdownParent:$('#registership')
@@ -1524,7 +1530,7 @@
 
 
 
-        var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         var selectedValues = []; // Create an array to store selected values
         for (var i = 0; i < days.length; i++) {
             var day = days[i];

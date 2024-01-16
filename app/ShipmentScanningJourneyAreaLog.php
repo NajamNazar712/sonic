@@ -13,6 +13,7 @@ class ShipmentScanningJourneyAreaLog extends Model
         'hub_id',
         'area_id',
         'admin_id',
+        'rider_id',
         'location_status',
         'status',
     ];
