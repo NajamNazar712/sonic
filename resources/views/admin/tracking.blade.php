@@ -534,8 +534,8 @@
 
     <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog"
         aria-labelledby="update_call_status_modal" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content ">
                 <div class="modal-header">
                     <h4 class="modal-title">Call History</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -546,32 +546,42 @@
                     <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center"
                         novalidate="novalidate">
                         @csrf
-                        <div class="form-group text-left">
-                            <input type="hidden" id="shipment_id" value="">
-                            <select name="call_finding_dropdown" class="form-control select2" id="call_finding_dropdown"
-                                data-rule-required="true" data-msg-required="Call Finding is required">
-                                <option value="6">Unresponsive</option>
-                            </select>
+
+
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-6">
+                                    <div class="form-group text-left">
+                                        <input type="hidden" id="shipment_id" value="">
+                                        <select name="call_finding_dropdown" class="form-control select2" id="call_finding_dropdown"
+                                            data-rule-required="true" data-msg-required="Call Finding is required">
+                                            <option value="6">Unresponsive</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group text-left sub_status_call_finding_container d-none ">
+                                        <select name="sub_status_call_finding" class="form-control select2"
+                                            id="sub_status_call_finding">
+                                            @foreach ($sub_status_call_finding as $sscf)
+                                                <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                
+                                    <div class="form-group text-left custom_remark_container d-none ">
+                                        <input type="text" id="custom_remark" name="custom_remark" class="form-control"
+                                            placeholder="Enter Other Text">
+                                    </div>
+                                    <div class="form-group text-left">
+                                        <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true"
+                                            data-msg-required="Call To is required">
+                                            <option value="1">Consignee</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group text-left sub_status_call_finding_container d-none">
-                            <select name="sub_status_call_finding" class="form-control select2"
-                                id="sub_status_call_finding">
-                                @foreach ($sub_status_call_finding as $sscf)
-                                    <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group text-left custom_remark_container d-none">
-                            <input type="text" id="custom_remark" name="custom_remark" class="form-control"
-                                placeholder="Enter Other Text">
-                        </div>
-                        <div class="form-group text-left">
-                            <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true"
-                                data-msg-required="Call To is required">
-                                {{-- <option value="1">Shipper</option> --}}
-                                <option value="1">Consignee</option>
-                            </select>
-                        </div>
+
+
                         <div class="form-group ml-1">
                             <button type="submit" name="add" id="btnReturn"
                                 class="btn btn-primary update_return_confirm" value="Add">Update Call History</button>
@@ -582,7 +592,7 @@
                         <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
                     </div>
                    
-                        <div class="modal-dialog modal-lg d-none" role="document" id="call_history">
+                        <div class="modal-dialog modal-xl d-none" role="document" id="call_history">
                             <div class="modal-content">
                                 {{-- <div class="modal-header">
                                     <h4 class="modal-title">Call History</h4>
@@ -599,7 +609,9 @@
                                                 <th>Calling Time</th>
                                                 <th>Call Findings</th>
                                                 <th>Call Finding Reasons</th>
-                                                <th>Other Remarks</th>
+                                                <th>Remarks</th>
+                                                <th>Call To</th>
+                                                <th>Status</th>
                                                 <th>User</th>
                                             </tr>
                                         </thead>
@@ -687,6 +699,8 @@
                                 row.append($('<td>').text('Unresponsive'));
                                 row.append($('<td>').text(value.data.rv_call_finding.name));
                                 row.append($('<td>').text(value.data.remarks != null ? value.data.remarks : '-'));
+                                row.append($('<td>').text('Consigneee')); //call to
+                                row.append($('<td>').text(value.data.shipment.status_shipper.name != null ? value.data.shipment.status_shipper.name : '-'));
                                 row.append($('<td>').text(value.user_name));
                                 tableBody.append(row);
                         });

@@ -110,7 +110,7 @@
 
     
     <div class="modal fade" id="unresponsive_count" data-backdrop="static" role="dialog" aria-labelledby="unresponsive_count" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Call History</h4>
@@ -122,12 +122,13 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                {{-- <th>S No</th> --}}
                                 <th>Calling Date</th>
                                 <th>Calling Time</th>
                                 <th>Call Findings</th>
                                 <th>Call Finding Reasons</th>
-                                <th>Other Remarks</th>
+                                <th>Remarks</th>
+                                <th>Call To</th>
+                                <th>Status</th>
                                 <th>User</th>
                             </tr>
                         </thead>
@@ -598,13 +599,14 @@
 
                             var dateTimeParts = rowData.data.updated_at.split(' ');
                             var row = $('<tr>');
-                            // row.append($('<td>').text(index + 1)); 
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
-                            row.append($('<td>').text('Unresponsive'));
-                            row.append($('<td>').text(rowData.data.rv_call_finding.name));
-                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-'));
-                            row.append($('<td>').text(rowData.user_name));
+                            row.append($('<td>').text('Unresponsive')); //Call Findings
+                            row.append($('<td>').text(rowData.data.rv_call_finding.name)); //Call Finding reasons
+                            row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-')); //Reamrks
+                            row.append($('<td>').text('Consignee')); //Call To
+                            row.append($('<td>').text(rowData.data.shipment.status_shipper.name != null ? rowData.data.shipment.status_shipper.name : '-')); //Status
+                            row.append($('<td>').text(rowData.user_name)); //User
                             tableBody.append(row);
                         });
 
