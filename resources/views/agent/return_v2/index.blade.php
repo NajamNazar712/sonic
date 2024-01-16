@@ -425,21 +425,21 @@
         <script type="text/javascript">
             $(document).ready(function() {
 
-                $(document).on('change', '#tswitch', function() {
-                    if ($("#tswitch").is(":checked")) {
-                        $('#tmsg').removeClass('d-none');
-                        $('#switch2').removeClass('d-none');
-                        $('#scswitch').removeClass('d-none');
-                        $('#scswitch1').removeClass('d-none');
+                // $(document).on('change', '#tswitch', function() {
+                //     if ($("#tswitch").is(":checked")) {
+                //         $('#tmsg').removeClass('d-none');
+                //         $('#switch2').removeClass('d-none');
+                //         $('#scswitch').removeClass('d-none');
+                //         $('#scswitch1').removeClass('d-none');
 
 
-                    } else {
-                        $('#tmsg').addClass('d-none');
-                        $('#switch2').addClass('d-none');
-                        $('#scswitch').addClass('d-none');
-                        $('#scswitch1').addClass('d-none')
-                    }
-                });
+                //     } else {
+                //         $('#tmsg').addClass('d-none');
+                //         $('#switch2').addClass('d-none');
+                //         $('#scswitch').addClass('d-none');
+                //         $('#scswitch1').addClass('d-none')
+                //     }
+                // });
 
 
                 $('#consignee_city').select2({
@@ -881,34 +881,34 @@
                                 // shipment += '<div class="d-flex align-item-center" style="margin-right: 200px; ">';
                                 // shipment += '<h4 class="tsize align-self-center mr-1 mb-0">Off</h4>';
 
-                                shipment += '<div class="" style="margin-top: 5px;">';
-                                shipment += '<label class="switch align-self-center">';
-                                shipment += '<input type="checkbox" id="tswitch">';
-                                shipment += '<span class="slider round"></span>';
-                                shipment += '</label>';
-                                shipment += '</div>';
-                                shipment += '<h4 class="tsize align-self-center mb-0">On</h4>';
-                                shipment += '</div>';
-                                shipment += '</div>';
-                                shipment +=
-                                    '<h4 class="tsize align-self-center mr-1 mb-0 d-none" style="margin-top: 30px"; id="scswitch1">Shipper</h4>';
-                                shipment += '<div class="" style="margin-top: 37px;">';
+                                // shipment += '<div class="" style="margin-top: 5px;">';
+                                // shipment += '<label class="switch align-self-center">';
+                                // shipment += '<input type="checkbox" id="tswitch">';
+                                // shipment += '<span class="slider round"></span>';
+                                // shipment += '</label>';
+                                // shipment += '</div>';
+                                // shipment += '<h4 class="tsize align-self-center mb-0">On</h4>';
+                                // shipment += '</div>';
+                                // shipment += '</div>';
+                                // shipment +=
+                                //     '<h4 class="tsize align-self-center mr-1 mb-0 d-none" style="margin-top: 30px"; id="scswitch1">Shipper</h4>';
+                                // shipment += '<div class="" style="margin-top: 37px;">';
 
-                                shipment += '<label class="switch d-none" id="switch2">';
-                                shipment += '<input type="checkbox" >';
-                                shipment += '<span class="slider round"></span>';
-                                shipment += '</label>';
-                                shipment += '</div>';
-                                shipment +=
-                                    '<h4 class="tsize align-self-center mr-1 mb-0 d-none"  style="margin-top: 30px"; id="scswitch">Consignee</h4>';
+                                // shipment += '<label class="switch d-none" id="switch2">';
+                                // shipment += '<input type="checkbox" >';
+                                // shipment += '<span class="slider round"></span>';
+                                // shipment += '</label>';
+                                // shipment += '</div>';
+                                // shipment +=
+                                //     '<h4 class="tsize align-self-center mr-1 mb-0 d-none"  style="margin-top: 30px"; id="scswitch">Consignee</h4>';
 
-                                shipment += '</div>';
-                                shipment += '</div>';
-                                shipment += '<div class="col-12">';
+                                // shipment += '</div>';
+                                // shipment += '</div>';
+                                // shipment += '<div class="col-12">';
 
-                                shipment +=
-                                    '<br/><textarea class="form-control form-control-sm d-none" rows="2" id="tmsg" placeholder="Type Message Here ...."></textarea>';
-                                shipment += '</div>';
+                                // shipment +=
+                                //     '<br/><textarea class="form-control form-control-sm d-none" rows="2" id="tmsg" placeholder="Type Message Here ...."></textarea>';
+                                // shipment += '</div>';
 
                                 shipment += '</div>';
                                 shipment += '</thead>';
