@@ -1298,10 +1298,11 @@
                                         call_to_id = 'Shipper'
                                     }
 
-                                    tableHtml += '<tr><td class="p-1">' + trimmedDateTime +
-                                        '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
-                                        '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
-                                        '</td><td>' + updated_by + '</td></tr>';
+                                    tableHtml += 
+                                    '<tr><td class="p-1">' + trimmedDateTime +
+                                    '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
+                                    '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
+                                    '</td><td>' + updated_by + '</td></tr>';
                                 });
 
                                 tableHtml += '</tbody></table>';

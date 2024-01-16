@@ -876,9 +876,10 @@
 
                                 shipment += '<div class="col-3">';
 
-                                shipment += '<h3><strong>SMS</strong></h3>';
-                                shipment += '<div class="d-flex align-item-center" style="margin-right: 200px; ">';
-                                shipment += '<h4 class="tsize align-self-center mr-1 mb-0">Off</h4>';
+                                //hide from agent screen (Sms option)
+                                // shipment += '<h3><strong>SMS</strong></h3>';
+                                // shipment += '<div class="d-flex align-item-center" style="margin-right: 200px; ">';
+                                // shipment += '<h4 class="tsize align-self-center mr-1 mb-0">Off</h4>';
 
                                 shipment += '<div class="" style="margin-top: 5px;">';
                                 shipment += '<label class="switch align-self-center">';
@@ -929,9 +930,9 @@
                                 shipment += '<th>Calling Time</th>';
                                 shipment += '<th>Call Finding</th>';
                                 shipment += '<th>Un-responsive Findings</th>';
-                                shipment += '<th>Shipment Status</th>';
                                 shipment += '<th>Remarks</th>';
                                 shipment += '<th>Call To</th>';
+                                shipment += '<th>Shipment Status</th>';
                                 shipment += '<th>User</th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
@@ -943,14 +944,14 @@
 
                                 shipment += '<tr>';
                                 shipment += '<td>' + (index + 1) + '</td>'; // S.no
-                                shipment += '<td>' + date[0] + '</td>';
-                                shipment += '<td>' + date[1] + '</td>';
-                                shipment += '<td>' + 'Unresponsive' + '</td>';
-                                shipment += '<td>' + item.data.rv_call_finding.name + '</td>';
-                                shipment += '<td>' + item.data.shipment.status_shipper.name + '</td>';
-                                shipment += '<td>' + ((item.data.remarks != null) ? item.data.remarks : '-') + '</td>';
-                                shipment += '<td>' + 'Consigneee' + '</td>';
-                                shipment += '<td>' + item.user_name + '</td>';
+                                shipment += '<td>' + date[0] + '</td>'; //Calling Date
+                                shipment += '<td>' + date[1] + '</td>'; //Calling Time
+                                shipment += '<td>' + 'Unresponsive' + '</td>'; //Call Finding
+                                shipment += '<td>' + item.data.rv_call_finding.name + '</td>'; //Call finding reason or Un-responsive Findings
+                                shipment += '<td>' + ((item.data.remarks != null) ? item.data.remarks : '-') + '</td>'; //Remarks
+                                shipment += '<td>' + 'Consigneee' + '</td>'; //call to
+                                shipment += '<td>' + item.data.shipment.status_shipper.name + '</td>'; //Shipment Status
+                                shipment += '<td>' + item.user_name + '</td>'; //User
                                 shipment += '</tr>';
                                 });
                                 shipment += '</tbody>';
