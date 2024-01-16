@@ -755,12 +755,10 @@ class ShipperTrackingController extends Controller
             $query->select('id', 'name');
         }, 'shipment.status_shipper' => function ($query) {
             $query->select('id', 'name');
-        },  'updated_by'])->where('shipment_id', $request->shipment_id)->get();
+        },  'updated_by'])->where('shipment_id', $request->shipment_id)->orderby('updated_at', 'desc')->get();
         
         if($data){
-            // dd($data);
             foreach ($data as $item) {
-                // $userData = Admin::where('id', $item['user']['max_rv_shipment_assign_agent_detail']['updated_by_id'])->value('name');
                 $mergedArray[] = [
                     'data' => $item,
                     'user_name' => $item->updated_by->name ?? '-',
