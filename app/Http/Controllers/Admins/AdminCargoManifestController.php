@@ -4181,7 +4181,7 @@ class AdminCargoManifestController extends Controller
             DB::beginTransaction();
 
 
-        $shipment_status_array = [3, 11,21, 26, 32, 49];
+        $shipment_status_array = [3, 11,21, 26, 32, 49,66];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
@@ -4229,10 +4229,15 @@ class AdminCargoManifestController extends Controller
                         {
                             if (in_array($shipment->shipper_status_id, $shipment_status_array)) {
 
-                                if ($bag_shipment->status == 0) {
+                                if($shipment->consignee_city_id == $default_hub_id)
+                                {
                                     $bag_shipment->status = 1;
                                     $bag_shipment->save();
                                 }
+                                //if ($bag_shipment->status == 0) {
+                                //    $bag_shipment->status = 1;
+                                //    $bag_shipment->save();
+                                //}
 
                                 $bag = $bag_shipment->bag;
 
@@ -4384,6 +4389,35 @@ class AdminCargoManifestController extends Controller
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                         }
                     }
+
+                    //check previous bag received shipments
+                    if ($shipment->shipper_status_id == 4)
+                    {
+                        $check_previous_shipment = CargoManifestBagShipments::where('shipment_id',$shipment_id)->where('status',0);
+                        if ($check_previous_shipment->exists())
+                        {
+                            $check_previous_shipment = $check_previous_shipment->first();
+                            $check_previous_shipment->status = 1;
+                            $check_previous_shipment->save();
+
+                            $check_previous_shipment_bag = $check_previous_shipment->bag;
+
+                            if (!$check_previous_shipment_bag->completed)
+                            {
+                                $check_previous_shipment_bag->short_received_shipments = $check_previous_shipment_bag->short_received_shipments - 1;
+                                $check_previous_shipment_bag->received_shipments = $check_previous_shipment_bag->received_shipments + 1;
+                                $check_previous_shipment_bag->save();
+                                $final_qty = $check_previous_shipment_bag->shipments - $check_previous_shipment_bag->received_shipments;
+                                if($final_qty == 0)
+                                {
+                                    $check_previous_shipment_bag->status_id = 7;
+                                    $check_previous_shipment_bag->completed = 1;
+                                    $check_previous_shipment_bag->save();
+                                }
+                            }
+                        }
+                    }
+                    //check previous bag received shipments end
                 }
             }
             else
