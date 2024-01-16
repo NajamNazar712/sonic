@@ -12219,14 +12219,6 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    // ->editColumn('action_updated_by', function($rv_report) {
-                    //     if ($rv_report['updated_type_id'] == 1 || $rv_report['updated_type_id'] == 3) {
-                    //         return $rv_report['action_updated_by'];
-                    //     }
-                    //     else {
-                    //         return '-';
-                    //     }
-                    // })
                     ->addColumn('action_updated_by', function($rv_report) {
                         //admin or agent
                         if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {

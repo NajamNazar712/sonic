@@ -1836,6 +1836,7 @@ trait RvTrait
             $rv_shipment_assign_agent->unresponsive_count  = 0;
             $rv_shipment_assign_agent->unresponsive_email_count  = 0;
             $rv_shipment_assign_agent->unresponsive_attempt_time  = null;
+            $rv_shipment_assign_agent->assigned_to_type_id  = null;
             $rv_shipment_assign_agent->save();
     
             $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->where('agent_id',$data['agent_id'])->latest()->first();
@@ -1854,6 +1855,7 @@ trait RvTrait
                 'rv_fake_status_id' => $rv_shipment_assign_agent->rv_fake_status_id,
                 'remarks' => $rv_shipment_assign_agent->remarks,
                 'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                'assigned_to_type_id' => $rv_shipment_assign_agent->assigned_to_type_id,
             ];
             $this->data_rv_shipment_assign_agent_details($data);
         }

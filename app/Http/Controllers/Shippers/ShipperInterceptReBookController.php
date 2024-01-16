@@ -152,10 +152,10 @@ class ShipperInterceptReBookController extends Controller
 
                             $updated_by_id = Auth::id();
                             $updated_type_id = 3; //updated by shipper;
-                            $updated_rv_assign_agent_status_id = 3; //intercept requested
+                            $update_rv_assign_agent_status_id = 3; //intercept requested
                             $updated_rv_state_id = 4; //complete
 
-                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id);
                     }
 
                     // Same Consignee
@@ -227,10 +227,10 @@ class ShipperInterceptReBookController extends Controller
                             request()->request->add(['shipment_id' => $request->shipment_id]);
                             $updated_by_id = Auth::id();
                             $updated_type_id = 3; //updated by shipper;
-                            $updated_rv_assign_agent_status_id = 4; //intercept approved
+                            $update_rv_assign_agent_status_id = 4; //intercept approved
                             $updated_rv_state_id = 4; //complete
 
-                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id);
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
