@@ -12173,8 +12173,8 @@ class AdminReportsController extends Controller
         'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 
         'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 
         'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks',
-        'rv_shipment_assign_agents.updated_at as action_date', 'ad.name as action_updated_by','ad.name as rcp_agent_updated_by', 
-        'rv_shipment_assign_agents.updated_type_id as updated_type_id',
+        'rv_shipment_assign_agents.updated_at as action_date', /*'ad.name as action_updated_by',*/'ad.name as rcp_agent_updated_by', 
+        'rv_shipment_assign_agents.updated_type_id as updated_type_id','rv_shipment_assign_agents.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count')
 
@@ -12219,11 +12219,46 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    ->editColumn('action_updated_by', function($rv_report) {
-                        if ($rv_report['updated_type_id'] == 1) {
-                            return $rv_report['action_updated_by'];
+                    // ->editColumn('action_updated_by', function($rv_report) {
+                    //     if ($rv_report['updated_type_id'] == 1 || $rv_report['updated_type_id'] == 3) {
+                    //         return $rv_report['action_updated_by'];
+                    //     }
+                    //     else {
+                    //         return '-';
+                    //     }
+                    // })
+                    ->addColumn('action_updated_by', function($rv_report) {
+                        //admin or agent
+                        if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {
+                            $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
+                                $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
+                            })
+                            ->select('ad.name')
+                            ->first();
+                        
+                            return $query->name;
                         }
-                        else {
+                        //shipper or retail user
+                        else if(($rv_report['updated_type_id'] == 3) || ($rv_report['updated_type_id'] == 5)){
+                            $query = $rv_report->leftJoin('users as u', function ($join) use ($rv_report) {
+                                $join->on('u.id', '=', \DB::raw($rv_report['updated_by_id']));
+                            })
+                            ->select('u.name')
+                            ->first();
+                        
+                            return $query->name;
+                        }
+                        //substitute user
+                        else if($rv_report['updated_type_id'] == 4){
+                            $query = $rv_report->leftJoin('substitute_users as su', function ($join) use ($rv_report) {
+                                $join->on('su.id', '=', \DB::raw($rv_report['updated_by_id']));
+                            })
+                            ->select('su.name')
+                            ->first();
+                        
+                            return $query->name;
+                        }
+                        else{
                             return '-';
                         }
                     })
