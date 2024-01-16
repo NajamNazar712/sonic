@@ -122,7 +122,7 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>S No</th>
+                                {{-- <th>S No</th> --}}
                                 <th>Calling Date</th>
                                 <th>Calling Time</th>
                                 <th>Call Findings</th>
@@ -598,7 +598,7 @@
 
                             var dateTimeParts = rowData.data.updated_at.split(' ');
                             var row = $('<tr>');
-                            row.append($('<td>').text(index + 1)); 
+                            // row.append($('<td>').text(index + 1)); 
                             row.append($('<td>').text(dateTimeParts[0])); // Display date
                             row.append($('<td>').text(dateTimeParts[1])); // Display time
                             row.append($('<td>').text('Unresponsive'));
