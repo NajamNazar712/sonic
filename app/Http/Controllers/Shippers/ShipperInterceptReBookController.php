@@ -88,7 +88,8 @@ class ShipperInterceptReBookController extends Controller
         
         $shipment_status = $shipment->status_shipper->name;
 
-        if ($shipment['shipper_status_id'] == 12) {
+        // if ($shipment['shipper_status_id'] == 12) {
+        if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                 if ($shipment['intercepted'] == 1) {
                     return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
@@ -148,10 +149,13 @@ class ShipperInterceptReBookController extends Controller
                         }
 
                             request()->request->add(['shipment_id' => $request->shipment_id]);
-                            //$updated_type_id updated by shipper = 3
-                            //$updated_rv_assign_agent_status_id, intercept requested i.e is 3 
-                            //$updated_rv_state_id updating rv status to 3 i.e open 
-                            $this->shipment_status_update_shipper($request, Auth::id(), 3, 3, 4);
+
+                            $updated_by_id = Auth::id();
+                            $updated_type_id = 3; //updated by shipper;
+                            $updated_rv_assign_agent_status_id = 3; //intercept requested
+                            $updated_rv_state_id = 4; //complete
+
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
                     }
 
                     // Same Consignee
@@ -220,10 +224,12 @@ class ShipperInterceptReBookController extends Controller
                         }
 
                             request()->request->add(['shipment_id' => $request->shipment_id]);
-                            //$updated_type_id updated by shipper = 3
-                            //$updated_rv_assign_agent_status_id, intercept approved i.e is 4 
-                            //$updated_rv_state_id updating rv status to 4 i.e completed 
-                            $this->shipment_status_update_shipper($request, Auth::id(), 3, 4, 4);
+                            $updated_by_id = Auth::id();
+                            $updated_type_id = 3; //updated by shipper;
+                            $updated_rv_assign_agent_status_id = 4; //intercept approved
+                            $updated_rv_state_id = 4; //complete
+
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);

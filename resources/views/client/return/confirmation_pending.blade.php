@@ -709,7 +709,6 @@
                     }
 
                 });
-                // console.log(shipment_remarks);
                 $.ajax({
                     url: "{{route('cod.return.pending.reattempt.status')}}",
                     method: 'POST',
