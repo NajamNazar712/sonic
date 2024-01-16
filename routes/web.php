@@ -4711,6 +4711,9 @@ Route::prefix('retail')->name('retail.')->group(function () {
 });
 
 Route::prefix('agent')->name('agent.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('agent.login');
+    });
 
     Route::get('/login', 'Auth\AgentLoginController@showLoginForm')->name('login');
     Route::post('/login', 'Auth\AgentLoginController@login')->name('login.submit');

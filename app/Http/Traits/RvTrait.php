@@ -1753,6 +1753,7 @@ trait RvTrait
         $rv_shipment_assign_agent_details->rv_fake_status_id = $data['rv_fake_status_id'];
         $rv_shipment_assign_agent_details->remarks = $data['remarks'];
         $rv_shipment_assign_agent_details->call_to_id  = $data['call_to_id'];
+        $rv_shipment_assign_agent_details->assigned_to_type_id  = $data['assigned_to_type_id'];
         $rv_shipment_assign_agent_details->save();
     }
 
@@ -1776,7 +1777,7 @@ trait RvTrait
                 if ($rv_shipment_assign_agents) {
                     $rv_shipment_assign_agents->rv_assign_agent_status_id = $update_rv_assign_agent_status_id;
                     $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
-                    $rv_shipment_assign_agents->updated_type_id = $updated_type_id; //Shipper or retail
+                    $rv_shipment_assign_agents->updated_type_id = $updated_type_id;
                     $rv_shipment_assign_agents->updated_by_id = $updated_by_id;
                     $rv_shipment_assign_agents->update();
     
@@ -1794,6 +1795,7 @@ trait RvTrait
                             'rv_fake_status_id' => $rv_shipment_assign_agents->rv_fake_status_id,
                             'remarks' => $rv_shipment_assign_agents->remarks,
                             'call_to_id' => $rv_shipment_assign_agents->call_to_id,
+                            'assigned_to_type_id' => $rv_shipment_assign_agents->assigned_to_type_id,
                         ];
                     $this->data_rv_shipment_assign_agent_details($data);
                     DB::commit();
@@ -1821,7 +1823,6 @@ trait RvTrait
             $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
-            // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'] ? $data['rv_assign_agent_sub_status_id'] : null;
             $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
             $rv_shipment_assign_agent->rv_state_id = 4;
             $rv_shipment_assign_agent->is_fake_status = 0;
@@ -1829,7 +1830,6 @@ trait RvTrait
             $rv_shipment_assign_agent->rv_shipment_agent_id = 0; 
             $rv_shipment_assign_agent->updated_type_id = 1; 
             $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
-            // $rv_shipment_assign_agent->remarks = $data['remarks'] ? $data['remarks'] : null;
             $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
             $rv_shipment_assign_agent->call_to_id  = 1;
             $rv_shipment_assign_agent->assigned_by  = 0;
