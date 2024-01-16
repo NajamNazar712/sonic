@@ -351,6 +351,12 @@ class AdminCargoManifestController extends Controller
                     ->where('mh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
+            ->leftjoin('misrouted_history as gmh', function ($join) {
+                $join->on('gmh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(11))
+                    ->where('gmh.id', '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
+            })
             ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
             ->leftjoin('cities as olddhc', 'olddc.hub_id', '=', 'olddhc.id')
             ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
@@ -382,6 +388,10 @@ class AdminCargoManifestController extends Controller
                                     ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 11)
+                                    ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 55)
                                     ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             });
@@ -409,6 +419,10 @@ class AdminCargoManifestController extends Controller
                     })
                     ->orWhere(function ($sub_query) {
                         $sub_query->where('shipments.shipper_status_id', 49)
+                            ->whereIn('olddc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 11)
                             ->whereIn('olddc.hub_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
@@ -654,14 +668,14 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11]);
             } else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11]);
             } else if ($shipment_type == 2) {
                 $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37]);
             }
         } else {
-            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55]);
+            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11]);
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $datatables->where('sm.id', '=', $mode);
