@@ -7359,20 +7359,20 @@ class ReturnController extends Controller
     // There is a hot fix to remove the shipper (id = 1) option from the dropdown call_to. 
     // Therefore, we are now only passing the consignee ID, which is 2, in the call_to_id.
     //This function only update status to unresponsive
-    public function update_call_status(Request $request){
-
+    public function update_call_status(Request $request)
+    {
         $shipment_ids = explode(',',$request->shipment_id);
 
         foreach ($shipment_ids as $shipment_id) {
-            # code...
             $shipment = Shipment::find($shipment_id);
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
             if (!$shipment) {
                 return response()->json(['status' => 0]);
             }
     
-            //updating status in rv_shipment_sassigned_agent table
             $update_status = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->whereIn('rv_state_id',[1,3])->latest()->first();
+
+            //updating status in rv_shipment_sassigned_agent table row and add new row in rv_shipment_assign_agent_details
             if($update_status){
                 $update_status->shipments_journey_id = $shipments_journey->id;
                 $update_status->last_shipments_journey_id = $shipments_journey->id;
@@ -7381,7 +7381,7 @@ class ReturnController extends Controller
                 $update_status->rv_state_id = 2;
                 $update_status->call_to_id = $request->call_to_id;
                 $update_status->updated_type_id = 1; //this status will always updated by admin
-                $update_status->remarks =  $request->remarks; //this status will always updated by admin
+                $update_status->remarks =  $request->remark; //this status will always updated by admin
                 $update_status->updated_by_id = Auth::id();
                 $update_status->save();
 
@@ -7406,7 +7406,7 @@ class ReturnController extends Controller
                 $add_call_status->rv_shipment_agent_id = 0;
                 $add_call_status->updated_type_id = 1;
                 $add_call_status->updated_by_id = Auth::id();
-                $add_call_status->remarks = $request->remarks;
+                $add_call_status->remarks = $request->remark;
                 $add_call_status->call_to_id = $request->call_to_id;
                 $add_call_status->assigned_by = Auth::id();
                 $add_call_status->save();
@@ -7417,6 +7417,7 @@ class ReturnController extends Controller
                 //adding new ro in rv_agent_call_histories and updating unresposive count
                 $new_call_history = $this->unresponsive($request);
             }
+            $update_status = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->whereIn('rv_state_id',[1,3])->latest()->first();
         }
         return response()->json(['status' => 1]);
     }
