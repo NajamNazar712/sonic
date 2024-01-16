@@ -1623,7 +1623,6 @@
                         }
                     })
                     .done(function(response) {
-                        console.log(response);
                         if (response) {
                             var modalBody = $('#call_history_modal .modal-body');
                             modalBody.html('');

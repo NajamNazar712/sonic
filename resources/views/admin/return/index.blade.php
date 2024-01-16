@@ -742,10 +742,6 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        {{-- <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" --}}
-                        {{-- <form id="update_assign_agent_form" class="form-horizontal mb-1 justify-content-center"
-                            novalidate="novalidate">
-                            @csrf --}}
                             <div class="form-group text-left">
                                 <select name="select_emp_type" class="form-control select2" id="select_emp_type" required>
                                     @foreach ($staff_types as $staff_type)
@@ -787,23 +783,19 @@
                      </button>
                  </div>
                  <div class="modal-body text-center">
-                     <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center"
-                         novalidate="novalidate">
+                     <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                          @csrf
                          <div class="form-group text-left">
                              <input type="hidden" id="shipment_id" value="">
                              <select name="call_finding_dropdown" class="form-control select2"
                                  id="call_finding_dropdown" data-rule-required="true"
                                  data-msg-required="Call Finding is required">
-
-                                 {{-- id 6 is for unresposive is in rv_assign_agent_statuses table --}}
                                  <option value="6">Unresponsive</option>  
                              </select>
                          </div>
 
                          <div class="form-group text-left sub_status_call_finding_container d-none">
-                             <select name="sub_status_call_finding" class="form-control select2"
-                                 id="sub_status_call_finding">
+                             <select name="sub_status_call_finding" class="form-control select2" id="sub_status_call_finding">
                                  @foreach ($sub_status_call_finding as $sscf)
                                      <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
                                  @endforeach
@@ -812,7 +804,7 @@
 
                          <div class="form-group text-left custom_remark_container d-none">
                              <input type="text" id="custom_remark" name="custom_remark" class="form-control"
-                                 placeholder="Enter Other Text">
+                                 placeholder="Enter Other Text*">
                          </div>
 
                          <div class="form-group text-left">
@@ -1446,7 +1438,7 @@
 
                 $("#sub_status_call_finding").change(function() {
                     var selectedValue = $(this).val();
-                    if (selectedValue === '19') {
+                    if (selectedValue === '32') {
                         $('.custom_remark_container').removeClass('d-none');
                         $('#custom_remark').attr('data-rule-required', true);
                         $('#custom_remark').attr('data-msg-required', 'Other text is required');
@@ -1831,8 +1823,6 @@
                                                 }).then(function(confirm) {
                                                     if (confirm) {
                                                         if (assign) {
-                                                            // console.log(assign, selected_rows);
-                                                            // return false;
                                                             $.ajax({
                                                                             //Admins\ReturnController@assign_agent
                                                                     url: '{!! route('admin.return.assign.agent') !!}',

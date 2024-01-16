@@ -543,11 +543,8 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center"
-                        novalidate="novalidate">
+                    <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         @csrf
-
-
                         <div class="container">
                             <div class="row justify-content-center">
                                 <div class="col-md-6">
@@ -559,8 +556,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group text-left sub_status_call_finding_container d-none ">
-                                        <select name="sub_status_call_finding" class="form-control select2"
-                                            id="sub_status_call_finding">
+                                        <select name="sub_status_call_finding" class="form-control select2" id="sub_status_call_finding">
                                             @foreach ($sub_status_call_finding as $sscf)
                                                 <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
                                             @endforeach
@@ -569,7 +565,7 @@
                                 
                                     <div class="form-group text-left custom_remark_container d-none ">
                                         <input type="text" id="custom_remark" name="custom_remark" class="form-control"
-                                            placeholder="Enter Other Text">
+                                            placeholder="Enter Other Text*">
                                     </div>
                                     <div class="form-group text-left">
                                         <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true"
