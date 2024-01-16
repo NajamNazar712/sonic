@@ -925,7 +925,7 @@
                                     '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
-                                shipment += '<th>S.no</th>';
+                                // shipment += '<th>S.no</th>';
                                 shipment += '<th>Calling Date</th>';
                                 shipment += '<th>Calling Time</th>';
                                 shipment += '<th>Call Finding</th>';
@@ -943,7 +943,7 @@
                                 date = item.data.created_at.split(' ')
 
                                 shipment += '<tr>';
-                                shipment += '<td>' + (index + 1) + '</td>'; // S.no
+                                // shipment += '<td>' + (index + 1) + '</td>'; // S.no
                                 shipment += '<td>' + date[0] + '</td>'; //Calling Date
                                 shipment += '<td>' + date[1] + '</td>'; //Calling Time
                                 shipment += '<td>' + 'Unresponsive' + '</td>'; //Call Finding
