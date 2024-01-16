@@ -70,6 +70,7 @@ class RvAssignAgentSubStatusSeeder extends Seeder
             array('name' => 'Not Answered','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Hang up by Customer','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Number Busy','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Others','shipment_status_reason_id'=> Null,'rv_assign_agent_status_id'=> 6,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }
