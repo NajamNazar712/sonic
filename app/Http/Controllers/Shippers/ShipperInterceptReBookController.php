@@ -180,6 +180,7 @@ class ShipperInterceptReBookController extends Controller
                             'old_amount' => $shipment->amount,
                             'new_amount' => $amount,
                             'shipper_id' => $user_id,
+                            'intercept_type' => $intercept_type,
                             'new_con_city_area_id' => $new_con_city_area_id,
                             'old_con_city_area_id' => $old_con_city_area_id
                         ]);
