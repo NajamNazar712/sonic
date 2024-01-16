@@ -127,10 +127,11 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Booking Date</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
+                            <th class="border-primary border-darken-1">User Hub</th>
+                            <th class="border-primary border-darken-1">User Area</th>
                             <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
                             <th class="border-primary border-darken-1">Difference (B-A)</th>
-                            <th class="border-primary border-darken-1">Chargeable Weight</th>
                             <th class="border-primary border-darken-1">Weighted As</th> 
                             <th class="border-primary border-darken-1">Weight Recorded As</th>
                         </tr>
@@ -298,10 +299,11 @@
                             head.push('Destination');
                             head.push('Booking Date');
                             head.push('Arrival Date');
+                            head.push('User Hub');
+                            head.push('User Area');
                             head.push('Weight Input by Shipper (A)');
                             head.push('Arrival Weight (B)');
                             head.push('Difference (B-A)');
-                            head.push('Chargeable Weight')
                             head.push('Weighted As');
                             head.push('Weight Recorded As');
 
@@ -318,10 +320,11 @@
                                 row.push(values.destination);
                                 row.push(values.booking_date);
                                 row.push(values.arrival_date);
+                                row.push(values.hub_name);
+                                row.push(values.area_name);
                                 row.push(values.estimated_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
-                                row.push(values.chargeable_weight);
                                 row.push(values.weighted_as);
                                 row.push(values.weight_type_name)
                                 body.push(row);
@@ -381,10 +384,11 @@
                     { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
                     { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
                     { data:'arrival_date' ,name: 'arv_date.created_at', class: 'align-middle text-center arrival_date'},
+                    { data:'hub_name' ,name: 'hub.hub_name', class: 'align-middle text-center hub_name'},
+                    { data:'area_name' ,name: 'area.area_name', class: 'align-middle text-center area_name'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
-                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle text-center chargeable_weight', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
                     { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
                 ],
