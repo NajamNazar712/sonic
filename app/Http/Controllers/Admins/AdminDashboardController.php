@@ -14226,7 +14226,10 @@ class AdminDashboardController extends Controller
                     $sales_commission = $sales_commission->first();
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
                     $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
-
+                    $types = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_type')->toArray();
+                    foreach($types as $key => $user_type_value){
+                        $user_type[$key+1] = $user_type_value;
+                    }
                     if(count($sales_commission_user) > 0){
                         $total_commission = array_sum($sales_commission_user) + $total_commission;
                         $sales_commission_user_count = array_unique(array_merge($sales_commission_user_count, $request->user_id));
@@ -14245,6 +14248,10 @@ class AdminDashboardController extends Controller
                     }else if ($request->has('edit')){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
                     }
+
+               
+                 
+
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
                         if(isset($request->user_id[$row_id])){
@@ -14271,8 +14278,12 @@ class AdminDashboardController extends Controller
                                 if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
                                     $sales_commission_user->user_type = "2";
                                 }  
+
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                } 
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
                               
-                                $sales_commission_user->user_id = $request->user_id[$row_id];                    
                             }else if($sales_tier->tier_type == 2){
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
