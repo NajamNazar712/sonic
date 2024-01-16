@@ -14249,9 +14249,6 @@ class AdminDashboardController extends Controller
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
                     }
 
-               
-                 
-
                     foreach($request->tier_id as $row_id => $tier){
                         $sales_tier = SalesTier::find($tier);
                         if(isset($request->user_id[$row_id])){

@@ -69,7 +69,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
-                                        <th class="border-primary border-darken-1">ESO Tagged</th>
+                                        {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -401,78 +401,74 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
-         aria-hidden="true">
-         <div class="modal-dialog" style="max-width: 100%;" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Rates</h4>
-                </div>
-                <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate>
-                    @csrf
-                    <input type="hidden" name="datatable_check" id="datatable_check">
+{{-- Commission Moal --}}
+<div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 100%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Rates</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate>
+                @csrf
+                <input type="hidden" name="datatable_check" id="datatable_check">
 
-                    <div class="modal-body">
-                        <div class="col text-center">
-                            <h1 id="shipper_ids_msg"></h1>
-                            <div class="row justify-content-center mt-2" id="commission_div">
-                                <div class="form-group row">
-                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
-                                    <div class="col-md-8">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Total Commission"
-                                                   id="commission_max" name="commission_max"
-                                                   value="{{$commission_percentage}}" readonly>
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">%</span>
-                                            </div>
+                <div class="modal-body">
+                    <div class="col text-center">
+                        <h1 id="shipper_ids_msg"></h1>
+                        <div class="row justify-content-center mt-2" id="commission_div">
+                            <div class="form-group row">
+                                <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Total Commission"
+                                            id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12">
-                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
-                                        <div class="row justify-content-center">
-                                            <div class="col-2 form-group">
-                                                <select name="sales_tier" class="select2" id="sales_tier_select">
-                                                    @foreach($sales_tiers as $tier)
-                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
-                                                                sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <input type="text" id="external_person_name" name="external_person_name"
-                                                       class="form-control" placeholder="External Tier Person Name"
-                                                       disabled >
-                                            </div>
-                                            <div class="col-2 form-group">
-                                                <select name="user" class="select2" id="user_select"
-                                                        
-                                                        disabled>
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <div class="input-group form-group">
-                                                    <input type="text" id="user_commission"
-                                                           class="form-control commission" placeholder="User Commission"
-                                                           name="user_commission">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">%</span>
-                                                    </div>
+                            <div class="col-12">
+                                <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                    <div class="row justify-content-center">
+                                        <div class="col-2 form-group">
+                                            <select name="sales_tier" class="select2" id="sales_tier_select">
+                                                @foreach($sales_tiers as $tier)
+                                                    <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                        sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <input type="text" id="external_person_name" name="external_person_name"
+                                                class="form-control" placeholder="External Tier Person Name" disabled>
+                                        </div>
+                                        <div class="col-2 form-group">
+                                            <select name="user" class="select2" id="user_select" disabled>
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <div class="input-group form-group">
+                                                <input type="text" id="user_commission" class="form-control commission"
+                                                    placeholder="User Commission" name="user_commission">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
-                                            <div class="col-1 form-group">
-                                                <button type="button" class="btn btn-primary"
-                                                        id="commission_add_button">Add
-                                                </button>
-                                            </div>
+                                        </div>
+                                        <div class="col-1 form-group">
+                                            <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12">
-                                    <table class="table table-bordered datatable_rate" id="datatable_rate" style="z-index: 3;">
-                                        <thead>
+                            </div>
+                            <div class="col-12">
+                                <table class="table table-bordered datatable_rate" id="datatable_rate" style="z-index: 3;">
+                                    <thead>
                                         <tr role="row" class="bg-primary white">
                                             <th class="border-primary border-darken-1">S. No.</th>
                                             <th class="border-primary border-darken-1">User Name</th>
@@ -480,27 +476,27 @@
                                             <th class="border-primary border-darken-1">Commission Percentage</th>
                                             <th class="border-primary border-darken-1"></th>
                                         </tr>
-                                        </thead>
-                                        <tfoot>
+                                    </thead>
+                                    <tfoot>
                                         <input type="hidden" value="0" name="total_commission" id="total_commission">
                                         <tr>
                                             <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
                                             <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
                                         </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Submit</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+{{-- End --}}
 
 @endsection
 
@@ -913,6 +909,12 @@
             width:'100%',
             dropdownParent:$('#set_segments')
         });
+
+        $("#user_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Users",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
         
         $("#bulk_segment1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Segment",
@@ -987,7 +989,7 @@
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
-                        head.push('ESO Tagged');
+                        // head.push('ESO Tagged');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -1031,7 +1033,7 @@
                             row.push(values.tagged_poc);
                             row.push(values.kam);
                             row.push(values.ref);
-                            row.push(values.eso);
+                            // row.push(values.eso);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -1487,7 +1489,7 @@
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
-                {data: 'eso', name: 'e.name', class: 'align-middle eso'},
+                // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},

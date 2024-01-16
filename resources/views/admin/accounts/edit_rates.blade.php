@@ -4637,9 +4637,8 @@
                    </div>
                </div>
                <div class="modal-footer">
-                   <button type="submit" class="btn btn-success">Submit</button>
-                   <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-               </div>
+                    <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
+                </div>
            </form>
    
                        
