@@ -260,7 +260,14 @@
                                                     swal('Booking Enabled!', {
                                                         icon: 'success',
                                                     });
+                                                    table.draw();
+
                                                 }
+                                            },
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
                                             }
                                         });
                                       
@@ -298,7 +305,14 @@
                                                     swal('Booking Disabled!', {
                                                         icon: 'success',
                                                     });
+
+                                                    table.draw();
                                                 }
+                                            }, 
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
                                             }
                                         });
                                       
