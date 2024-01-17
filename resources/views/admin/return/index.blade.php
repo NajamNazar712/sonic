@@ -454,9 +454,7 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <form id="assign_agent_form" class="form-horizontal" method="POST"
-                            action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate"
-                            enctype="multipart/form-data">
+                        <form id="assign_agent_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate" enctype="multipart/form-data">
                             {{ csrf_field() }}
                             <div class="row align-items-center justify-content-center">
                                 <div class="col">
@@ -494,7 +492,7 @@
                                         <th colspan="3" class="border-primary border-darken-1 ">Agents</th>
                                     </tr>
                                     <tr role="row" class="bg-primary bg-lighten-1 white">
-                                        <th class="text-center border-primary border-lighten-2">ID</th>
+                                        <th class="text-center border-primary border-lighten-2">Agent ID</th>
                                         <th class="border-primary border-lighten-2">Trax ID</th>
                                         <th class="border-primary border-lighten-2">Name</th>
                                     </tr>
@@ -1111,12 +1109,6 @@
                     $('#assign_agent').val('');
                 });
 
-                $("#assign_agent").prepend('<option value="" selected></option>').select2({
-                    placeholder: "Select Agent",
-                    width: '100%',
-                    dropdownParent: $('#AssignAgentModal')
-                });
-
                 $("#select_emp_type").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select Employee Type",
                     width: '100%',
@@ -1138,8 +1130,8 @@
                     } else {
                         $('.assign_agent_container').addClass('d-none');
                     }
-
                 });
+
                 $('#assign_agentSubmit').on('click', function() {
                     var selectedEmpType = $('#select_emp_type').val();
                     var assign = parseInt($('#assign_agent').val());
@@ -1163,6 +1155,18 @@
                     }
                 });
 
+                // $("#assign_agent").prepend('<option value="" selected></option>').select2({
+                //     placeholder: "Select Agent",
+                //     width: '100%',
+                //     dropdownParent: $('#AssignAgentModal')
+                // });
+                $('#assign_agent').empty().append('<option value="" selected></option>').select2({
+                    placeholder: "Select Agent",
+                    width: '100%',
+                    dropdownParent: $('#AssignAgentModal')
+                });
+
+
                 $('#select_emp_type').on('change', function() {
                     var emp_type_id = $('#select_emp_type').val();
                     $.ajax({
@@ -1174,8 +1178,18 @@
                     .done(function(data) {
                         if (data.status == 0) 
                         {
-                            $('#assign_agent').empty();
-                            $.each(data.data, function(index, agent) {
+                            // $('#assign_agent').empty();
+                            // $("#assign_agent").prepend('<option value="" selected></option>').select2({
+                            //     placeholder: "Select Agent",
+                            //     width: '100%',
+                            //     dropdownParent: $('#AssignAgentModal')
+                            // });
+                            // $.each(data.data, function(index, agent) {
+                            //     $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
+                            // });
+
+                            // $('.assign_agent_container').removeClass('d-none');
+                            $.map(data.data, function(agent) {
                                 $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
                             });
 

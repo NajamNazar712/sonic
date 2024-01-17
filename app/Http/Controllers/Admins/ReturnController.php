@@ -181,7 +181,7 @@ class ReturnController extends Controller
         //for assigned_agent
         ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) {
             $join->on('rvsaad.shipment_id', '=', 'shipments.id')
-                 ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
+                ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
         })
         
         ->leftjoin('employee_attendances as ea', function ($join) {
@@ -198,11 +198,11 @@ class ReturnController extends Controller
                     DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
         })
 
-       ->leftJoin('rider_deliveries', function ($join) {
-           $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
-               ->where('rider_deliveries.id','=',
-                   DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
-       })
+    ->leftJoin('rider_deliveries', function ($join) {
+        $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
+            ->where('rider_deliveries.id','=',
+                DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
+    })
         ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
         
         ->select('ea.attendance_date as attendance_date','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
@@ -210,19 +210,19 @@ class ReturnController extends Controller
         'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
         'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
         'shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id',
-         'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), DB::raw('count(rvsaa.shipment_id) as rvsaa_count'),
-         'shipments_journey.remarks as shipper_remarks',
-         'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
-         'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
-         'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
-         'new_ras.created_at as assigned_at',
-         'asadby.name as assigned_by','consolidations.consolidation_id',
-         'assigned_agent.id as assigned_agent_id',
-         'tat_options.value as tat_value',
-         'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-         'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id',
-         'z.name as zone')
+        'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), DB::raw('count(rvsaa.shipment_id) as rvsaa_count'),
+        'shipments_journey.remarks as shipper_remarks',
+        'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
+        'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
+        'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
+        'new_ras.created_at as assigned_at',
+        'asadby.name as assigned_by','consolidations.consolidation_id',
+        'assigned_agent.id as assigned_agent_id',
+        'tat_options.value as tat_value',
+        'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
+        'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
+        'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id',
+        'z.name as zone')
         // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
         ->whereIn('shipments.shipper_status_id', [12,65,66])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
@@ -261,7 +261,7 @@ class ReturnController extends Controller
 
         $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
         $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
-             
+            
         //Average Response Time
         $rvShipments = RvShipmentAssignAgent::get();
         $details = [];
@@ -563,7 +563,7 @@ class ReturnController extends Controller
             })
 
              //for shipment remarks in excel
-             ->addColumn('shipment_remarks_excel',function ($shipments){
+            ->addColumn('shipment_remarks_excel',function ($shipments){
                 return $shipments->remarks;
             })
             ->addColumn('reattempt_status_remarks',function ($shipments){
@@ -719,7 +719,7 @@ class ReturnController extends Controller
                     if (session('role_id') == 1 || count(array_intersect([45, 46, 211, 212, 245], session('permissions'))) !== 0) {
                         $dropdown = "
                         <div class='btn-group'>
-                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                        <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 
                         if ((session('role_id') == 1 || (in_array(45, session('permissions')))) && !$result->consolidation_id && $result->delivery_note_pending_status == 1) {
@@ -800,7 +800,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('number_of_available_agents_value_div') == '7') {
-           $datatable->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
+        $datatable->where('ea.attendance_date', Carbon::now()->format('Y-m-d'));
         }
 
         if ($request->get('number_of_oldest_shipments_value_div') == '8') {
@@ -1403,7 +1403,7 @@ class ReturnController extends Controller
                             $return_assign_log->status = 3; //reattempt status
                             $return_assign_log->admin_id = Auth::id();
                             $return_assign_log->save();
-                         }
+                        }
                     }
 
                     $rv_shipment_assign_agent_data = [
@@ -1445,57 +1445,57 @@ class ReturnController extends Controller
                         ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, NULL, Auth::id());
 
                      //Updating New RcpAssigned Tables for Self Collection Status for consolidated_shipments
-                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                     //  if($rcp_assigned_shipment->exists()){
-                     if($rcp_assigned_shipment){
+                    if($rcp_assigned_shipment){
 
                          //Assuring if agent is updating the status update rows in rcp_assigned_agent
                         //  $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
-                         if($rcp_assigned_shipment->admin_id == Auth::id()){
+                        if($rcp_assigned_shipment->admin_id == Auth::id()){
 
-                             $rcp_assigned_shipment->shipment_status = 5; //on_hold_for_sc status
-                             $rcp_assigned_shipment->admin_id = Auth::id();
-                             $rcp_assigned_shipment->save();
-                             
+                            $rcp_assigned_shipment->shipment_status = 5; //on_hold_for_sc status
+                            $rcp_assigned_shipment->admin_id = Auth::id();
+                            $rcp_assigned_shipment->save();
+                            
 
                              //updating return row of agent 
-                             $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                             $rcp_assigned_agent->increment('on_hold_for_self_collection');
-                             $rcp_assigned_agent->decrement('pending_shipments');
-                             $rcp_assigned_agent->increment('actual_productivity');
-                             $rcp_assigned_agent->admin_id = Auth::id();
-                             $rcp_assigned_agent->save();
+                            $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                            $rcp_assigned_agent->increment('on_hold_for_self_collection');
+                            $rcp_assigned_agent->decrement('pending_shipments');
+                            $rcp_assigned_agent->increment('actual_productivity');
+                            $rcp_assigned_agent->admin_id = Auth::id();
+                            $rcp_assigned_agent->save();
 
                              //creating log 
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
                              $return_assign_log->status = 5; //on_hold_for_sc status
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
-                             }
-                             
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                            }
+                            
                          //If admin is updating the status update rcp_assigned_shipment & log
-                             else{
+                            else{
                             //  $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                              $rcp_assigned_shipment->shipment_status = 5; //on_hold_for_sc status
-                             $rcp_assigned_shipment->admin_id = Auth::id();
-                             $rcp_assigned_shipment->save();
+                            $rcp_assigned_shipment->admin_id = Auth::id();
+                            $rcp_assigned_shipment->save();
 
                              //updating already_updated & pending of agent if shipment is updated by admin 
-                             $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                             $already_updated = $rcp_assigned_agent->increment('already_updated');
-                             $rcp_assigned_agent->decrement('pending_shipments');
-                             $rcp_assigned_agent->save();
+                            $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                            $already_updated = $rcp_assigned_agent->increment('already_updated');
+                            $rcp_assigned_agent->decrement('pending_shipments');
+                            $rcp_assigned_agent->save();
 
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                             $return_assign_log->status = 5; //on_hold_for_sc status
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
-                             }
-                     }
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $return_assign_log->status = 5; //on_hold_for_sc status
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                            }
+                    }
 
                         $rv_shipment_assign_agent_data = [
                             'agent_id' => Auth::id(),
@@ -2323,15 +2323,15 @@ class ReturnController extends Controller
                     if ($flag == true) {
                         $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
                         $dropdown = '
-				              <div class="btn-group">
-				                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-				                <div class="dropdown-menu dropdown-menu-sm">
-				            ';
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                                ';
                         $dropdown .= $revert_button;
                         $dropdown .= '
-				                </div>
-				              </div>
-				            ';
+                        </div>
+                        </div>
+                        ';
                         return $dropdown;
                     } else {
                         return '';
@@ -2967,7 +2967,7 @@ class ReturnController extends Controller
                 if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
                     $dropdown = "
                     <div class='btn-group'>
-                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                        <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 
                     if (session('role_id') == 1 || in_array(50, session('permissions'))) {
@@ -4129,7 +4129,7 @@ class ReturnController extends Controller
         $html = '
                 <!doctype html>
                 <html lang="en">
-                  <head>
+                <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -4138,58 +4138,58 @@ class ReturnController extends Controller
                     <title>Return Note</title>
 
                     <style>
-                      @page {
+                    @page {
                         size: A4 portrait;
-                      }
+                    }
 
                       * {
                         -webkit-print-color-adjust: exact !important;
                         color-adjust: exact !important;
-                      }
+                    }
 
-                      body {
+                    body {
                         background: none !important;
                         color: #09262e !important;
                         font-size: 0.9rem !important;
-                      }
+                    }
 
-                      hr {
+                    hr {
                         border-top: 1px dashed #000000;
-                      }
+                    }
 
-                      /*table.table-bordered {
+                    /*table.table-bordered {
                         page-break-inside: avoid;
-                      }*/
+                    }*/
 
-                      table.table-bordered tbody tr td {
+                    table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
+                    }
 
-                      .color.primary {
+                    .color.primary {
                         background: #c8c8c8 !important;
-                      }
+                    }
 
-                      .color.secondary {
+                    .color.secondary {
                         background: #ebebeb !important;
-                      }
+                    }
 
-                      .border {
+                    .border {
                         border: 1px solid #09262e !important;
-                      }
-                      td.complaint {
+                    }
+                    td.complaint {
                             background: #09262e !important;
                             color: #ffffff;
-                       }
-                       div.page
+                    }
+                    div.page
                         {
                             page-break-after: always;
                             page-break-inside: avoid;
                         }
                     </style>
-                  </head>
-                  <body>
+                </head>
+                <body>
                     <div>
-      ';
+    ';
         $return_note = ReturnNote::where('id', $request->id);
         if ($return_note->exists()) {
             $total_shipments = 0;
@@ -4209,12 +4209,12 @@ class ReturnController extends Controller
 
             if (count($filtered_shipments_regular) > 0) {
                 $shipment_details .= '
-                              <table class="table table-sm table-bordered border mt-1">
+                            <table class="table table-sm table-bordered border mt-1">
                                 <tbody>
                                     <tr>
                                         <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY - Regular</strong></td>
                                     </tr>
-                                  <tr>
+                                <tr>
                                     <td class="color primary"><strong>S. No.</strong></td>
                                     <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
                                     
@@ -4223,7 +4223,7 @@ class ReturnController extends Controller
                                     <td class="color primary"><strong>Client Address</strong></td>
                                     <td class="color primary"><strong>Total Shipments</strong></td>
                                     <td class="color primary"><strong>Sign</strong></td>
-                                  </tr>
+                                </tr>
                 ';
 
                 foreach ($filtered_shipments_users as $filtered_shipments_user) {
@@ -4238,12 +4238,12 @@ class ReturnController extends Controller
                         $total_users++;
                         if ($filtered_shipments_user->return_address_id != NULL) {
                             $shipment_details_row_start_summary = '
-                                  <tr>
+                                <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
-                                   
-                                   
-                                   
+                                
+                                
+                                
                                     <td>' . $filtered_shipments_user->return_address->poc . '</td>
                                     <td>' . $filtered_shipments_user->return_address->phone . '</td>
                                     <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
@@ -4252,12 +4252,12 @@ class ReturnController extends Controller
                         ';
                         } else {
                             $shipment_details_row_start_summary = '
-                                  <tr>
+                                <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
-                                   
-                                   
-                                   
+                                
+                                
+                                
                                     <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
                                     <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
                                     <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
@@ -4272,19 +4272,19 @@ class ReturnController extends Controller
                 }
                 $shipment_details .= '
                             </tbody>
-                          </table>
-                         
+                        </table>
+                        
                 ';
             }
             if (count($filtered_shipments_replacement) > 0) {
 
                 $shipment_details .= '
-                          <table class="table table-sm table-bordered border mt-1">
+                        <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY - Replacement</strong></td>
                                 </tr>
-                              <tr>
+                            <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
                                 <td class="color primary"><strong>Contact Person</strong></td>
@@ -4292,7 +4292,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>Client Address</strong></td>
                                 <td class="color primary"><strong>Total Shipments</strong></td>
                                 <td class="color primary"><strong>Sign</strong></td>
-                              </tr>
+                            </tr>
             ';
 
                 foreach ($filtered_shipments_users as $filtered_shipments_user) {
@@ -4307,7 +4307,7 @@ class ReturnController extends Controller
                         $replacement_total_users++;
                         if ($filtered_shipments_user->return_address_id != NULL) {
                             $shipment_details_row_start_summary = '
-                              <tr>
+                            <tr>
                                 <td>' . $replacement_total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
                                 <td>' . $filtered_shipments_user->return_address->poc . '</td>
@@ -4318,7 +4318,7 @@ class ReturnController extends Controller
                     ';
                         } else {
                             $shipment_details_row_start_summary = '
-                              <tr>
+                            <tr>
                                 <td>' . $replacement_total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
                                 <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
@@ -4335,19 +4335,19 @@ class ReturnController extends Controller
                 }
                 $shipment_details .= '
                         </tbody>
-                      </table>
-                     
+                    </table>
+                    
         ';
             }
             if (count($filtered_shipments_try_and_buy) > 0) {
 
                 $shipment_details .= '
-                          <table class="table table-sm table-bordered border mt-1">
+                        <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY - Try & Buy</strong></td>
                                 </tr>
-                              <tr>
+                            <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
                                 <td class="color primary"><strong>Contact Person</strong></td>
@@ -4355,7 +4355,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>Client Address</strong></td>
                                 <td class="color primary"><strong>Total Shipments</strong></td>
                                 <td class="color primary"><strong>Sign</strong></td>
-                              </tr>
+                            </tr>
             ';
 
                 foreach ($filtered_shipments_users as $filtered_shipments_user) {
@@ -4369,7 +4369,7 @@ class ReturnController extends Controller
                     if ($user_total_shipments[$filtered_shipments_user->user_id] > 0) {
                         $try_and_buy_total_users++;
                         $shipment_details_row_start_summary = '
-                              <tr>
+                            <tr>
                                 <td>' . $try_and_buy_total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
                                 <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
@@ -4384,24 +4384,24 @@ class ReturnController extends Controller
                 }
                 $shipment_details .= '
                         </tbody>
-                      </table>
-                     
+                    </table>
+                    
         ';
             }
             $shipment_details .= '
-                      </div>
-                     
+                    </div>
+                    
         ';
             foreach ($filtered_shipments_users as $filtered_shipments_user) {
                 $shipment_details .= '<div class="mb-1 text-center">';
 
                 $shipment_details .= '
-                          <table class="table table-sm table-bordered border" style="display:table-row-group;page-break-inside:avoid;page-break-after:auto;">
+                        <table class="table table-sm table-bordered border" style="display:table-row-group;page-break-inside:avoid;page-break-after:auto;">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="10"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
                                 </tr>
-                              <tr>
+                            <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Tracking No.</strong></td>
                                 
@@ -4414,7 +4414,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>No. of Items</strong></td>
                                 <td class="color primary"><strong>Collection Charges</strong></td>
                                 <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
-                              </tr>
+                            </tr>
             ';
 
                 foreach ($filtered_shipments as $shipment) {
@@ -4426,7 +4426,7 @@ class ReturnController extends Controller
                         }
                         if ($shipment->return_address_id != NULL) {
                             $shipment_details_row_start = '
-                              <tr>
+                            <tr>
                                 <td>' . $total_shipments . '</td>
                                 <td class="' . $class . '">' . $shipment->tracking_number . '</td>
                                 <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
@@ -4440,7 +4440,7 @@ class ReturnController extends Controller
                     ';
                         } else {
                             $shipment_details_row_start = '
-                              <tr>
+                            <tr>
                                 <td>' . $total_shipments . '</td>
                                 <td class="' . $class . '">' . $shipment->tracking_number . '</td>
                                 <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
@@ -4472,7 +4472,7 @@ class ReturnController extends Controller
                         $shipment_details_row_start .= '
                                 <td></td>
     
-                              </tr>
+                            </tr>
                 ';
 
                         $shipment_details .= $shipment_details_row_start;
@@ -4480,8 +4480,8 @@ class ReturnController extends Controller
                 }
                 $shipment_details .= '
                         </tbody>
-                      </table>
-                      </div>
+                    </table>
+                    </div>
         ';
             }
             $return_note_details = ReturnNote::where('id', $request->id)->first();
@@ -4492,45 +4492,45 @@ class ReturnController extends Controller
             $category = $rider->rider_category->name;
             $route_name = $return_note_details->route->code . ' (' . $return_note_details->route->start . ' to ' . $return_note_details->route->end . ')';
             $main_details = '
-                      <table class="table table-sm table-bordered border">
+                    <table class="table table-sm table-bordered border">
                         <tbody>
-                          <tr>
+                        <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Return Note</strong></td>
                             <td class="text-center align-middle color secondary">Created at ' . $return_note_details->created_at . '</br> by ' . ucfirst($return_note_details->admin->name) . '</td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
                             <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                            <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Rider Trax ID</strong></td>
                             <td>' . $rider_id . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Category</strong></td>
                             <td>' . $category . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Route</strong></td>
                             <td>' . $route_name . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>City</strong></td>
                             <td>' . $city_name  . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
-                          </tr>
+                        </tr>
                         
                         </tbody>
-                      </table>
+                    </table>
         ';
             $html .= $main_details;
             $html .= $shipment_details;
@@ -4543,13 +4543,13 @@ class ReturnController extends Controller
                     </div>
 
                     <script>
-                      window.onload = function() {
+                    window.onload = function() {
                         window.print();
-                      }
+                    }
                     </script>
-                  </body>
+                </body>
                 </html>
-      ';
+    ';
 
         return $html;
     }
@@ -5039,7 +5039,7 @@ class ReturnController extends Controller
         $html = '
                 <!doctype html>
                 <html lang="en">
-                  <head>
+                <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -5048,58 +5048,58 @@ class ReturnController extends Controller
                     <title>Return Note</title>
 
                     <style>
-                      @page {
+                    @page {
                         size: A4 portrait;
-                      }
+                    }
 
                       * {
                         -webkit-print-color-adjust: exact !important;
                         color-adjust: exact !important;
-                      }
+                    }
 
-                      body {
+                    body {
                         background: none !important;
                         color: #09262e !important;
                         font-size: 0.9rem !important;
-                      }
+                    }
 
-                      hr {
+                    hr {
                         border-top: 1px dashed #000000;
-                      }
+                    }
 
-                      /*table.table-bordered {
+                    /*table.table-bordered {
                         page-break-inside: avoid;
-                      }*/
+                    }*/
 
-                      table.table-bordered tbody tr td {
+                    table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
+                    }
 
-                      .color.primary {
+                    .color.primary {
                         background: #c8c8c8 !important;
-                      }
+                    }
 
-                      .color.secondary {
+                    .color.secondary {
                         background: #ebebeb !important;
-                      }
+                    }
 
-                      .border {
+                    .border {
                         border: 1px solid #09262e !important;
-                      }
-                      td.complaint {
+                    }
+                    td.complaint {
                             background: #09262e !important;
                             color: #ffffff;
-                       }
-                       div.page
+                    }
+                    div.page
                         {
                             page-break-after: always;
                             page-break-inside: avoid;
                         }
                     </style>
-                  </head>
-                  <body>
+                </head>
+                <body>
                     <div>
-      ';
+    ';
         $return_note = ReturnNote::where('id', $request->id);
         if ($return_note->exists()) {
             $total_shipments = 0;
@@ -5111,12 +5111,12 @@ class ReturnController extends Controller
 
             $shipment_details .= '<div class="page text-center">';
             $shipment_details .= '
-                          <table class="table table-sm table-bordered border mt-1">
+                        <table class="table table-sm table-bordered border mt-1">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="7"><strong style="font-size: large">SUMMARY</strong></td>
                                 </tr>
-                              <tr>
+                            <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
                                 <td class="color primary"><strong>Contact Person</strong></td>
@@ -5124,7 +5124,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>Client Address</strong></td>
                                 <td class="color primary"><strong>Total Shipments</strong></td>
                                 <td class="color primary"><strong>Sign</strong></td>
-                              </tr>
+                            </tr>
             ';
 
             foreach ($filtered_shipments_users as $filtered_shipments_user) {
@@ -5137,7 +5137,7 @@ class ReturnController extends Controller
                     }
                 }
                 $shipment_details_row_start_summary = '
-                              <tr>
+                            <tr>
                                 <td>' . $total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
                                 <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
@@ -5151,20 +5151,20 @@ class ReturnController extends Controller
             }
             $shipment_details .= '
                         </tbody>
-                      </table>
-                      </div>
-                     
+                    </table>
+                    </div>
+                    
         ';
             foreach ($filtered_shipments_users as $filtered_shipments_user) {
                 $shipment_details .= '<div class="mb-1 text-center">';
 
                 $shipment_details .= '
-                          <table class="table table-sm table-bordered border">
+                        <table class="table table-sm table-bordered border">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="9"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
                                 </tr>
-                              <tr>
+                            <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Tracking No.</strong></td>
                                 <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
@@ -5174,7 +5174,7 @@ class ReturnController extends Controller
                                 <td class="color primary"><strong>No. of Items</strong></td>
                                 <td class="color primary"><strong>Collection Charges</strong></td>
                                 <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
-                              </tr>
+                            </tr>
             ';
 
                 foreach ($filtered_shipments as $shipment) {
@@ -5185,7 +5185,7 @@ class ReturnController extends Controller
                             $class = 'complaint';
                         }
                         $shipment_details_row_start = '
-                              <tr>
+                            <tr>
                                 <td>' . $total_shipments . '</td>
                                 <td class="' . $class . '">' . $shipment->tracking_number . '</td>
                                 <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
@@ -5214,7 +5214,7 @@ class ReturnController extends Controller
                         $shipment_details_row_start .= '
                                 <td></td>
     
-                              </tr>
+                            </tr>
                 ';
 
                         $shipment_details .= $shipment_details_row_start;
@@ -5222,8 +5222,8 @@ class ReturnController extends Controller
                 }
                 $shipment_details .= '
                         </tbody>
-                      </table>
-                      </div>
+                    </table>
+                    </div>
         ';
             }
             $return_note_details = ReturnNote::where('id', $request->id)->first();
@@ -5233,42 +5233,42 @@ class ReturnController extends Controller
             $category = $rider->rider_category->name;
             $route_name = $return_note_details->route->code . ' (' . $return_note_details->route->start . ' to ' . $return_note_details->route->end . ')';
             $main_details = '
-                      <table class="table table-sm table-bordered border">
+                    <table class="table table-sm table-bordered border">
                         <tbody>
-                          <tr>
+                        <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Return Note</strong></td>
                             <td class="text-center align-middle color secondary">Created at ' . $return_note_details->created_at . '</br> by ' . ucfirst($return_note_details->admin->name) . '</td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                          </tr>
-                         
-                          <tr>
+                        </tr>
+                        
+                        <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
                             <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                            <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Category</strong></td>
                             <td>' . $category . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Route</strong></td>
                             <td>' . $route_name . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>City</strong></td>
                             <td>' . $city_name  . '</td>
-                          </tr>
-                          <tr>
+                        </tr>
+                        <tr>
                             <td class="color secondary"><strong>Total Undelivered Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
-                          </tr>
+                        </tr>
                         
                         </tbody>
-                      </table>
+                    </table>
         ';
             $html .= $main_details;
             $html .= $shipment_details;
@@ -5281,13 +5281,13 @@ class ReturnController extends Controller
                     </div>
 
                     <script>
-                      window.onload = function() {
+                    window.onload = function() {
                         window.print();
-                      }
+                    }
                     </script>
-                  </body>
+                    </body>
                 </html>
-      ';
+                ';
 
         return $html;
     }
@@ -5305,10 +5305,6 @@ class ReturnController extends Controller
             $assigned_to_new_user = [];
             $assigned_to_now_new_user = [];
             $osa_shipments = [];
-
-            // $agent_id = $request->admin_id;
-            // $admin = Admin::where('employee_id', $agent_id)->first();
-            // $admin = Admin::where('id', $agent_id)->first();
 
             $contractual_agent = Admin::where('id',$request->admin_id)->where('trax_id','like','%Trax-C%')->first();
             if($contractual_agent){
@@ -5426,107 +5422,107 @@ class ReturnController extends Controller
                 ->where('trax_id','not like','%Trax-C%')
                 ->first();
 
-                    if($agent){
-                    $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
-                    $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
-                    
-                        foreach($shipment_ids as $shipment_id)
-                        {
-                            $shipment = Shipment::where('id', $shipment_id)->first();
-                            $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
-                            if($already_assigned_state->exists()){
-                                $already_assigned_state =  $already_assigned_state->first();
-                            }else{
-                                $already_assigned_state = null;
+                if($agent){
+                $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
+                $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
+                
+                    foreach($shipment_ids as $shipment_id)
+                    {
+                        $shipment = Shipment::where('id', $shipment_id)->first();
+                        $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
+                        if($already_assigned_state->exists()){
+                            $already_assigned_state =  $already_assigned_state->first();
+                        }else{
+                            $already_assigned_state = null;
+                        }
+
+                        if($shipment->exists()){
+                            // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
+                            if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
+                            {
+                            DB::commit();
+
+                            // $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
+                            $shipments = Shipment::whereIn('shipper_status_id', [12,65,66])
+                            ->where('consignee_city_id', $agent['city_id'])  
+                            ->whereRaw('NOT EXISTS (
+                                    SELECT sj.id
+                                    FROM shipments_journey AS sj
+                                    WHERE sj.status_reason_id = 12
+                                    AND sj.shipment_id = shipments.id
+                                    AND sj.id = (
+                                        SELECT MAX(id)
+                                        FROM shipments_journey
+                                        WHERE shipment_id = shipments.id
+                                    )
+                                )');
+                        
+                                // if agent shipment is assigned - not assigned to same agent only 
+                                $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
+                                if ($shipment_assigned_assigned_agent->exists()) {
+                                    return response()->json(['status' => 1, 'error' => 'Shipment is already assigned to same agent']);
+                                }
+                                
+                                // Shipment is found and already in working state or return is completed, will not assigned to agent
+                                $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->first();
+                                if ($find_shipment_assigned_agent) {
+                                    return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
+                                }
+
+                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                                $data = [
+                                    'agent_id' => $agent->id,
+                                    'shipment_id' => $shipment_id,
+                                    'shipments_journey_id' => $shipments_journey->id,
+                                    'rv_state_id' => 1, //Assigned
+                                    'rv_assign_agent_status_id' => null,
+                                    'rv_assign_agent_sub_status_id' => null,
+                                    'assigned_to_type_id' => 1, //admin
+                                    'assigned_by' => Auth::id(),
+                                ];
+                                
+                                // creating a new record
+                                $this->rv_shipment_assign($data);
+                                return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                             }
-
-                            if($shipment->exists()){
-                                // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
-                                if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
-                                {
-                                DB::commit();
-
-                                // $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                                $shipments = Shipment::whereIn('shipper_status_id', [12,65,66])
-                                ->where('consignee_city_id', $agent['city_id'])  
-                                ->whereRaw('NOT EXISTS (
-                                        SELECT sj.id
-                                        FROM shipments_journey AS sj
-                                        WHERE sj.status_reason_id = 12
-                                        AND sj.shipment_id = shipments.id
-                                        AND sj.id = (
-                                            SELECT MAX(id)
-                                            FROM shipments_journey
-                                            WHERE shipment_id = shipments.id
-                                        )
-                                    )');
-                            
-                                    // if agent shipment is assigned - not assigned to same agent only 
-                                    $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                                    if ($shipment_assigned_assigned_agent->exists()) {
-                                        return response()->json(['status' => 1, 'error' => 'Shipment is already assigned to same agent']);
-                                    }
-                                    
-                                    // Shipment is found and already in working state or return is completed, will not assigned to agent
-                                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->first();
-                                    if ($find_shipment_assigned_agent) {
-                                        return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
-                                    }
-
-                                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                                    $data = [
-                                        'agent_id' => $agent->id,
-                                        'shipment_id' => $shipment_id,
-                                        'shipments_journey_id' => $shipments_journey->id,
-                                        'rv_state_id' => 1, //Assigned
-                                        'rv_assign_agent_status_id' => null,
-                                        'rv_assign_agent_sub_status_id' => null,
-                                        'assigned_to_type_id' => 1, //admin
-                                        'assigned_by' => Auth::id(),
-                                    ];
-                                    
-                                    // creating a new record
-                                    $this->rv_shipment_assign($data);
-                                    return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
-                                }
-                                else{
-                                    $no_zone_shipment[] = $shipment->tracking_number;
-                                }
-                                if(!empty($no_zone_shipment) || !empty($already_assigned)){
-                                    $no_zone_shipment = implode(',', $no_zone_shipment);
-                                    $already_assigned = implode(',', $already_assigned);
-                                    $assigned_shipment = implode(',', $assigned_shipment);
-                                    $assigned_to_new_user = implode(',', $assigned_to_new_user);
-                                    
-                                    if ($already_assigned == '') {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
-                                                    (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                                        ]);
-                                    } else {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => ($assigned_to_new_user != null)
-                                                ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
-                                                (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
-                                                : 'Already Assigned' 
-                                        ]);
-                                    } 
-                                }
-                                return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
+                            else{
+                                $no_zone_shipment[] = $shipment->tracking_number;
                             }
+                            if(!empty($no_zone_shipment) || !empty($already_assigned)){
+                                $no_zone_shipment = implode(',', $no_zone_shipment);
+                                $already_assigned = implode(',', $already_assigned);
+                                $assigned_shipment = implode(',', $assigned_shipment);
+                                $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                                
+                                if ($already_assigned == '') {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
+                                                (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                    ]);
+                                } else {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'error' => ($assigned_to_new_user != null)
+                                            ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
+                                            (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                                            : 'Already Assigned' 
+                                    ]);
+                                } 
+                            }
+                            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                         }
                     }
-                    else{
-                        return response()->json(['status'=> 1, 'error'=>'Agent not found']);
-                    }
+                }
+                else{
+                    return response()->json(['status'=> 1, 'error'=>'Agent not found']);
                 }
             }
-            catch(Exception $th){
-                DB::rollBack();
-                return response()->json(['error'=> $th->getMessage()]);
-            } 
+        }
+        catch(Exception $th){
+            DB::rollBack();
+            return response()->json(['error'=> $th->getMessage()]);
+        } 
     }
     public function fetch_agent(Request $request){
         $emp_type = $request->emp_type_id;
@@ -5579,6 +5575,16 @@ class ReturnController extends Controller
             'tracking_number' => ['required', 'integer']
         ];
         $fields = [0 => 'tracking_number', 1 => 'agent_id'];
+        $no_zone_shipment = [];
+        $assigned_shipment = [];
+        $flag = null;
+        $all_shippers = [];
+        $included_shippers = [];
+        $only_shippers = [];
+        $assigned_to_new_user = [];
+        $assigned_to_now_new_user = [];
+        $osa_shipments = [];
+        $already_assigned_list = [];
 
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -5647,16 +5653,8 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    // if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 65])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
-                    }
-                    if (!empty($row['agent_id'])) {
-                        // $agent = Employee::where('trax_id', $row['agent_id'])->first();
-                        $agent = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
-                        if (!$agent) {
-                            $errors['Row #' . $row_id][] = 'Agent ID is not valid or Agent is Not Contractual #' . $row['agent_id'];
-                        }
                     }
                 }
             }
@@ -5675,58 +5673,207 @@ class ReturnController extends Controller
                         $this->rv_unassign_agents($request, $shipment_id);
                     }
                     else{
-                        // $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
-                        // $admin_id = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
-                        $admin_id = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        $contractual_agent = Admin::where('id', $row['agent_id'])->where('trax_id','like','%Trax-C%')->first();
+                        $admin = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
                         ->where('admin_roles.department_id',3)
                         ->where('a.id', $row['agent_id'])
                         ->where('a.status',1)
-                        ->orWhere('a.trax_id','like','%Trax-C%')
+                        ->orWhere('a.trax_id','not like','%Trax-C%')
                         ->first();
-                        if($admin_id){
+                        if($contractual_agent){
+                            $sorted_agents = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->orderBy('priority', 'ASC')->get();
+                            $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->pluck('zone_id')->toArray();
+                
+                            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+                            if ($included_shipper->exists()) {
+                                $flag = true;
+                                $included_shipper = $included_shipper->first();
+                                $included_shippers = explode(',', $included_shipper['text']);
+                                $included_shippers = array_filter($included_shippers, function($value){
+                                    return $value != "";
+                                });
+                            }
+                
+                            $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+                            if ($only_shipper->exists()) {
+                                $flag = false;
+                                $only_shipper = $only_shipper->first();
+                                $only_shippers = explode(',', $only_shipper['text']);
+                                $only_shippers = array_filter($only_shippers, function($value){
+                                    return $value != "";
+                                });
+                                $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+                                $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+                                    return !in_array($value, $only_shippers);
+                                });
+                            }
+                
+                            $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_id)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
+                            $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
                             
-                            $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
-                            $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
-        
-                            $no_zone_shipment = [];
-                            if(!empty($sorted_agents_zones))
-                            {
-                                $shipment = Shipment::where('id',$shipment_id)->first();
-                                if($shipment->exists())
-                                {
-                                    
-                                    if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
-                                        $include_shippers = $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
-                                        if($include_shippers == true){
-                                            $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                            if(!empty($sorted_agents_zones)){
+                                // foreach($shipment_ids as $shipment_id){
+                                $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                                
+                                $shipment = Shipment::where('id', $shipment_id)->first();
+                                // status_reason_id == 12 (osa shipment)
+                                if($osa_reason->status_reason_id == 12){
+                                    //saving shipments in $osa_shipments because osa shipments cannot be assigned to contratual agent
+                                    $osa_shipments[] = $shipment->tracking_number;
+                                }
+                                $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
+                                if($already_assigned_state->exists()){
+                                    $already_assigned_state =  $already_assigned_state->first();
+                                }else{
+                                    $already_assigned_state = null;
+                                }
+                                $currentDateTime = Carbon::now();
+                                $shipment_journey = $shipment->shipment_journey;
+                                
+                                $shipment_journey = $shipment_journey->sortBy(function ($item) use ($currentDateTime) {
+                                    return abs($item->created_at->diffInSeconds($currentDateTime));
+                                })->first();
+                                if($shipment->exists()){
+                                    if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
+                                    $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                                        DB::commit();
+                                        $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
+                                        $assigned_shipment[] = $shipment->tracking_number;
+                                        if($already_assigned_state != null){
+                                            $assigned_to_new_user[] = $shipment->tracking_number;
+                                        }else{
+                                            $assigned_to_now_new_user[] = $shipment->tracking_number;
                                         }
-                                        else{
-                                            return redirect()->back()->with('error', 'Shipper is disabled');
-                                        }
-                                    }
-                                    else{
-                                        $no_zone_shipment[] = $shipment->id;
-                                    }
-        
-                                    if(!empty($no_zone_shipment)){
-                                        $no_zone_shipment = implode(',', $no_zone_shipment);
-                                        return redirect()->back()->with('error', 'No Shipment Of These Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned');
-                                    }
-                                    else{
-                                        return redirect()->back()->with('success', 'Shipments Assigned Successfully');
+                                    }else{
+                                        $no_zone_shipment[] = $shipment->tracking_number;
                                     }
                                 }
-                            }
-        
-                            else{
-                                // return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+                                if(!empty($no_zone_shipment) || !empty($already_assigned) || !empty($osa_shipments)){
+                                    $no_zone_shipment = implode(',', $no_zone_shipment);
+                                    $already_assigned = implode(',', $already_assigned);
+                                    $assigned_shipment = implode(',', $assigned_shipment);
+                                    $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                                    $osa_shipments = implode(',', $osa_shipments);
+                                    
+                                    if ($already_assigned == '') {
+                                        $already_assigned_list[] = $already_assigned;
+                                        // return response()->json([
+                                        //     'status' => 1,
+                                        //     'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' because Zone is not Assigned' .
+                                        //             (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                        // ]);
+                                    } 
+                                    else if($osa_shipments != ''){
+                                        $osa_shipments[] = $osa_shipments;
+                                        // return response()->json([
+                                        //     'status' => 1,
+                                        //     'error' => 'Tracking Numbers Are Not Assigned: ' . $osa_shipments . ' because OSA Shipments cannot be assigned to Contractual Agent' .
+                                        //             (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                        // ]);
+                                    }
+                                    else {
+                                        return response()->json([
+                                            'status' => 1,
+                                            'error' => ($assigned_to_new_user != null)
+                                                ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
+                                                (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                                                : 'Already Assigned' 
+                                        ]);
+                                    } 
+                                }else{
+                                    return redirect()->back()->with('success', 'Shipments Assigned to Contractual Agent Successfully');
+                                }
+                            }else{
                                 return redirect()->back()->with('error', 'No Zone Assigned To Agent');
                             }
+                        }
+                        else if($admin)
+                        {
+                            $already_assign =  RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
+                            $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
+                    
+                            // $shipment = Shipment::where('id', $shipment_id)->first();
+                            $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
+                            if($already_assigned_state->exists()){
+                                $already_assigned_state =  $already_assigned_state->first();
+                            }
+                            else{
+                                $already_assigned_state = null;
+                            }
+                            if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
+                            {
+                            $shipments = Shipment::whereIn('shipper_status_id', [12,65,66])
+                            ->where('consignee_city_id', $admin['city_id'])  
+                            ->whereRaw('NOT EXISTS (
+                                    SELECT sj.id
+                                    FROM shipments_journey AS sj
+                                    WHERE sj.status_reason_id = 12
+                                    AND sj.shipment_id = shipments.id
+                                    AND sj.id = (
+                                        SELECT MAX(id)
+                                        FROM shipments_journey
+                                        WHERE shipment_id = shipments.id
+                                    )
+                                )');
+                        
+                                // if agent shipment is assigned - not assigned to same agent only 
+                                $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
+                                if ($shipment_assigned_assigned_agent->exists()) {
+                                    return response()->json(['status' => 1, 'error' => 'Shipment is already assigned to same agent']);
+                                }
+                                
+                                // Shipment is found and already in working state or return is completed, will not assigned to agent
+                                $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->first();
+                                if ($find_shipment_assigned_agent) {
+                                    return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
+                                }
+
+                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                                $data = [
+                                    'agent_id' => $admin->id,
+                                    'shipment_id' => $shipment_id,
+                                    'shipments_journey_id' => $shipments_journey->id,
+                                    'rv_state_id' => 1, //Assigned
+                                    'rv_assign_agent_status_id' => null,
+                                    'rv_assign_agent_sub_status_id' => null,
+                                    'assigned_to_type_id' => 1, //admin
+                                    'assigned_by' => Auth::id(),
+                                ];
+                                
+                                // creating a new record
+                                $this->rv_shipment_assign($data);
+                                return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                            }
+                            else{
+                                $shipment_tracking_number[] = $shipment->tracking_number;
+                            }
+                            if(!empty($shipment_tracking_number) || !empty($already_assigned)){
+                                $shipment_tracking_number = implode(',', $shipment_tracking_number);
+                                $already_assigned = implode(',', $already_assigned);
+                                $assigned_shipment = implode(',', $assigned_shipment);
+                                $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                                
+                                if ($already_assigned == '') {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'error' => 'Tracking Numbers Are Not Assigned: ' . $shipment_tracking_number . ' its already Assigned to an agent' .
+                                                (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                    ]);
+                                } else {
+                                    return response()->json([
+                                        'status' => 1,
+                                        'error' => ($assigned_to_new_user != null)
+                                            ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
+                                            (($shipment_tracking_number != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $shipment_tracking_number : '')
+                                            : 'Already Assigned' 
+                                    ]);
+                                } 
+                            }
+                            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                         }
                         else{
                             return redirect()->back()->with('error', 'Invalid Agent');
                         }
-
                     }
                 }
 
