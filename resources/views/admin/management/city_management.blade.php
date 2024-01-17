@@ -237,30 +237,30 @@
                         className: 'btn btn-primary booking_enable',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if (selected_rows.length > 0) { // Removed the extra closing parenthesis
+                            if (selected_rows.length > 0) { 
                                 swal({
-                                    title: 'Booking Disable',
+                                    title: 'Booking Enable',
                                     text: 'Are you sure you want to enable booking?',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: 'Cancel',
-                                        confirm: 'Yes, disable it'
+                                        confirm: 'Yes, enable it'
                                     },
                                 }).then((willDisable) => {
                                     if (willDisable) {
                                         $.ajax({
                                             type: 'POST',
-                                            url: "{!! route('admin.management.disable_booking_status') !!}",
+                                            url: "{!! route('admin.management.enable_booking_status') !!}",
                                             data: {
                                                 userIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
                                                 if (res.status == '200') {
-                                                    swal('Booking Disabled!', {
+                                                    swal('Booking Enabled!', {
                                                         icon: 'success',
                                                     });
-                                                } 
+                                                }
                                             }
                                         });
                                       
@@ -275,7 +275,7 @@
                         className: 'btn btn-primary booking_disable',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if (selected_rows.length > 0) { // Removed the extra closing parenthesis
+                            if (selected_rows.length > 0) { 
                                 swal({
                                     title: 'Booking Disable',
                                     text: 'Are you sure you want to disable booking?',
@@ -298,7 +298,7 @@
                                                     swal('Booking Disabled!', {
                                                         icon: 'success',
                                                     });
-                                                } 
+                                                }
                                             }
                                         });
                                       

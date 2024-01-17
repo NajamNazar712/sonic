@@ -13759,13 +13759,27 @@ class AdminDashboardController extends Controller
         }
     }
 
-      public function disable_booking_status(Request $request){
-        $userIDS = $request->userIDS;
-        if(count($userIDS) > 0){
-            City::whereIn('id', $userIDS)->update(['booking_disable_status' => '0']);
+    public function disable_booking_status(Request $request){
+        $userIDS = $request->input('userIDS', []);
+   
+        if(!is_array($userIDS) || empty($userIDS)){
+            return response()->json(['status' => 'Invalid IDS'], 400);
         }
-        
-        
+   
+        City::whereIn('id', $userIDS)->update(['booking_disable_status' => '0']);
+        return response()->json(['status' => 200]);
     }
+   
+    public function enable_booking_status(Request $request){
+        $userIDS = $request->input('userIDS', []);
+   
+        if(!is_array($userIDS) || empty($userIDS)){
+            return response()->json(['status' => 'Invalid IDS'], 400);
+        }
+   
+        City::whereIn('id', $userIDS)->update(['booking_disable_status' => '1']);
+        return response()->json(['status' => 200]);
+    }
+   
 }
 
