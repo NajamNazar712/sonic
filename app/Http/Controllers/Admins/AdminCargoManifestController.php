@@ -3515,7 +3515,7 @@ class AdminCargoManifestController extends Controller
 
             $timestamp = Carbon::now();
             foreach ($request->sack_bag_no  as  $key => $data) {
-                array_push($sackbag_array, ['sack_bag_no' => $data, 'origin' => $request->origin, 'remarks' => $request->remarks[$key], 'user_id' => $user_id, 'type' => 1, 'created_at' =>  $timestamp, 'updated_at' =>  $timestamp, 'reporting_date' =>  $timestamp]);
+                array_push($sackbag_array, ['sack_bag_no' => $data, 'origin' => $request->origin, 'sack_destination_id' => $request->origin, 'remarks' => $request->remarks[$key], 'user_id' => $user_id, 'type' => 1, 'created_at' =>  $timestamp, 'updated_at' =>  $timestamp, 'reporting_date' =>  $timestamp]);
             }
 
             try {

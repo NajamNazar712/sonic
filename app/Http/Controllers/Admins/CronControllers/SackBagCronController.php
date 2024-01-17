@@ -29,6 +29,7 @@ class SackBagCronController extends Controller
             ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at');
 
 
+
         if ($cbs->exists()) {
 
             $cbs = $cbs->get();
@@ -103,6 +104,7 @@ class SackBagCronController extends Controller
                 if ($sackbag) {
 
                     if ($br->created_at >= $sackbag->reporting_date) {
+
                         $sackbag->sack_status_id = 4;
                         $sackbag->reporting_date = $br->created_at;
                         $sackbag->sack_destination_id = $br->destination_hub_id;
@@ -129,12 +131,16 @@ class SackBagCronController extends Controller
                 'cmb.sack_bag_id',
                 'sj.city_id as received_city',
                 DB::raw('COUNT(sj.shipment_id) as received_shipment'),
-                DB::raw('MAX(sj.created_at) as received_created')
+                DB::raw('MAX(sj.created_at) as received_created'),
+                'cmb.id'
             )
             ->where('sj.shipper_status_id', 4)
             ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->groupBy('cmb.sack_bag_id', 'isbo.sack_bag_no', 'sj.city_id', 'cmb.created_at')
             ->get();
+
+
+
 
         //misrouted shipments
         $mis_shipments  = DB::table('cargo_manifest_bags as cmb')
@@ -157,17 +163,48 @@ class SackBagCronController extends Controller
 
         $rev_count = count($rev_shipments);
         $mis_count = count($mis_shipments);
-
         if (($rev_count >= $mis_count) || (count($mis_shipments) == 0)) {
 
             foreach ($rev_shipments as $key => $rev_shipment) {
 
-                foreach ($mis_shipments as $key => $mis_shipment) {
+                if ($mis_count != 0) {
+
+                    foreach ($mis_shipments as $key => $mis_shipment) {
 
 
-                    if ($rev_shipment->sack_bag_id == $mis_shipment->sack_bag_id) {
+                        if ($rev_shipment->sack_bag_id == $mis_shipment->sack_bag_id) {
 
-                        if ($rev_shipment->received_shipment >= $mis_shipment->misrouted_shipment) {
+                            if ($rev_shipment->received_shipment >= $mis_shipment->misrouted_shipment) {
+
+                                $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
+
+                                if ($sackbag) {
+
+                                    if ($rev_shipment->received_created >= $sackbag->reporting_date) {
+
+                                        $sackbag->sack_status_id = 5;
+                                        $sackbag->reporting_date = $rev_shipment->received_created;
+                                        $sackbag->sack_destination_id = $rev_shipment->received_city;
+                                        $sackbag->bag_count = ($sackbag->bag_count + 1);
+                                        $sackbag->save();
+                                    }
+                                }
+                            } else {
+                                $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
+
+                                if ($sackbag) {
+
+                                    if ($mis_shipment->misrouted_created >= $sackbag->reporting_date) {
+
+                                        $sackbag->sack_status_id = 5;
+                                        $sackbag->reporting_date = $mis_shipment->misrouted_created;
+                                        $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
+                                        $sackbag->bag_count = ($sackbag->bag_count + 1);
+                                        $sackbag->save();
+                                    }
+                                }
+                            }
+                        } else {
 
                             $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
 
@@ -178,34 +215,25 @@ class SackBagCronController extends Controller
                                     $sackbag->sack_status_id = 5;
                                     $sackbag->reporting_date = $rev_shipment->received_created;
                                     $sackbag->sack_destination_id = $rev_shipment->received_city;
-                                    $sackbag->save();
-                                }
-                            }
-                        } else {
-                            $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
-
-                            if ($sackbag) {
-
-                                if ($mis_shipment->misrouted_created >= $sackbag->reporting_date) {
-
-                                    $sackbag->sack_status_id = 5;
-                                    $sackbag->reporting_date = $mis_shipment->misrouted_created;
-                                    $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
+                                    $sackbag->bag_count = ($sackbag->bag_count + 1);
                                     $sackbag->save();
                                 }
                             }
                         }
-                    } else {
-                        $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
-                        if ($sackbag) {
+                    }
+                } else {
 
-                            if ($rev_shipment->received_created >= $sackbag->reporting_date) {
+                    $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
 
-                                $sackbag->sack_status_id = 5;
-                                $sackbag->reporting_date = $rev_shipment->received_created;
-                                $sackbag->sack_destination_id = $rev_shipment->received_city;
-                                $sackbag->save();
-                            }
+                    if ($sackbag) {
+                        if ($rev_shipment->received_created >= $sackbag->reporting_date) {
+
+
+                            $sackbag->sack_status_id = 5;
+                            $sackbag->reporting_date = $rev_shipment->received_created;
+                            $sackbag->sack_destination_id = $rev_shipment->received_city;
+                            $sackbag->bag_count = ($sackbag->bag_count + 1);
+                            $sackbag->save();
                         }
                     }
                 }
@@ -214,12 +242,42 @@ class SackBagCronController extends Controller
 
             foreach ($mis_shipments as $key => $mis_shipment) {
 
-                foreach ($rev_shipments as $key => $rev_shipment) {
+                if ($rev_count != 0) {
+                    foreach ($rev_shipments as $key => $rev_shipment) {
 
-                    if ($mis_shipment->sack_bag_id == $rev_shipment->sack_bag_id) {
+                        if ($mis_shipment->sack_bag_id == $rev_shipment->sack_bag_id) {
 
-                        if ($mis_shipment->misrouted_shipment >= $rev_shipment->received_shipment) {
+                            if ($mis_shipment->misrouted_shipment >= $rev_shipment->received_shipment) {
 
+                                $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
+
+                                if ($sackbag) {
+
+                                    if ($mis_shipment->misrouted_created >= $sackbag->reporting_date) {
+
+                                        $sackbag->sack_status_id = 5;
+                                        $sackbag->reporting_date = $mis_shipment->misrouted_created;
+                                        $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
+                                        $sackbag->bag_count = ($sackbag->bag_count + 1);
+                                        $sackbag->save();
+                                    }
+                                }
+                            } else {
+                                $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
+
+                                if ($sackbag) {
+
+                                    if ($rev_shipment->received_created >= $sackbag->reporting_date) {
+
+                                        $sackbag->sack_status_id = 5;
+                                        $sackbag->reporting_date = $rev_shipment->received_created;
+                                        $sackbag->sack_destination_id = $rev_shipment->received_city;
+                                        $sackbag->bag_count = ($sackbag->bag_count + 1);
+                                        $sackbag->save();
+                                    }
+                                }
+                            }
+                        } else {
                             $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
 
                             if ($sackbag) {
@@ -229,39 +287,91 @@ class SackBagCronController extends Controller
                                     $sackbag->sack_status_id = 5;
                                     $sackbag->reporting_date = $mis_shipment->misrouted_created;
                                     $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
-                                    $sackbag->save();
-                                }
-                            }
-                        } else {
-                            $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
-
-                            if ($sackbag) {
-
-                                if ($rev_shipment->received_created >= $sackbag->reporting_date) {
-
-                                    $sackbag->sack_status_id = 5;
-                                    $sackbag->reporting_date = $rev_shipment->received_created;
-                                    $sackbag->sack_destination_id = $rev_shipment->received_city;
+                                    $sackbag->bag_count = ($sackbag->bag_count + 1);
                                     $sackbag->save();
                                 }
                             }
                         }
-                    } else {
-                        $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
+                    }
+                } else {
+                    $sackbag = IssueSackBagOrigin::find($mis_shipment->sack_bag_id);
 
-                        if ($sackbag) {
+                    if ($sackbag) {
 
-                            if ($mis_shipment->misrouted_created >= $sackbag->reporting_date) {
+                        if ($mis_shipment->misrouted_created >= $sackbag->reporting_date) {
 
-                                $sackbag->sack_status_id = 5;
-                                $sackbag->reporting_date = $mis_shipment->misrouted_created;
-                                $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
-                                $sackbag->save();
-                            }
+                            $sackbag->sack_status_id = 5;
+                            $sackbag->reporting_date = $mis_shipment->misrouted_created;
+                            $sackbag->sack_destination_id = $mis_shipment->misrouted_city;
+                            $sackbag->bag_count = ($sackbag->bag_count + 1);
+                            $sackbag->save();
                         }
                     }
                 }
             }
         }
+
+        // old work
+
+        // // $sdms = DB::table('cargo_manifest_bags as cmb')
+        // //     ->join('cargo_manifest_bag_shipments as cmbs', 'cmbs.cargo_manifest_bag_id', '=', 'cmb.id')
+        // //     ->join('issue_sack_bag_origins as isb', 'isb.id', '=', 'cmb.sack_bag_id')
+        // //     ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'cmbs.shipment_id')
+        // //     ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+        // //     ->select('cmb.sack_bag_id', 'sj.shipment_id', 'sj.shipper_status_id', 'sj.city_id', 'sj.created_at');
+
+        // $sdms = DB::table('cargo_manifest_bags as cmb')
+        //     ->join('cargo_manifest_bag_shipments as cmbs', 'cmb.id', '=', 'cmbs.cargo_manifest_bag_id')
+        //     ->join('issue_sack_bag_origins as isb', 'isb.id', '=', 'cmb.sack_bag_id')
+        //     ->join(
+        //         'shipments_journey as sj',
+        //         'sj.shipment_id',
+        //         '=',
+        //         'cmbs.shipment_id'
+        //     )
+        //     ->whereIn('sj.shipper_status_id', [4, 11])
+        //     ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+        //     ->groupBy('cmb.sack_bag_id', 'sj.city_id', 'sj.shipper_status_id')
+        //     ->select(
+        //         'cmb.sack_bag_id',
+        //         DB::raw('COUNT(sj.shipment_id) as shipment_count'),
+        //         'sj.city_id',
+        //         DB::raw('MAX(sj.created_at) as max_created_at'),
+        //         'sj.shipper_status_id'
+        //     );
+
+
+        // if ($sdms->exists()) {
+
+        //     $sdms = $sdms->get();
+        //     $total_received = 0;
+        //     $total_misrouted = 0;
+        //     $max_created = '';
+        //     $old_sack_bag_id = 0;
+        //     $arr = array();
+        //     $count = 0;
+        //     $sack_bag_list = IssueSackBagOrigin::where('status', 1)->get();
+        //     $sdms = $sdms->toArray();
+
+        //     foreach ($sdms as $sdm) {
+
+        //         dd(in_array(10, $sdms));
+        //         // if (in_array($sdm['sack_bag_id'], $sdms)) {
+        //         //     echo 1;
+        //         // }
+
+        //         // foreach ($sack_bag_list as  $sack_bag) {
+
+        //         //     if ($sack_bag->id == $sdm->sack_bag_id) {
+
+        //         //         echo 'bag_id' . $sack_bag->id;
+        //         //         echo 'sdm bag_id' . $sdm->sack_bag_id;
+        //         //     }
+        //         // }
+
+
+        //     }
+        //     // $old_sack_bag_id = $sdm;
+        // }
     }
 }
