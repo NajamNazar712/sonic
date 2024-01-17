@@ -105,6 +105,7 @@
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -112,6 +113,26 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            var selected_rows = [];
+            $('#datatable').on('click', 'td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if(selected_rows.lenght > 0){
+                    console.log(1);
+                    table.button('.booking').enable()
+                }else{
+                    table.button('.booking').disable()
+                }
+                
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -210,7 +231,36 @@
                     title: 'City Management',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
+                    },{
+                        text: '<i class="la la-map-marker"></i> Booking Disable',
+                        className: 'btn btn-primary booking',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { // Removed the extra closing parenthesis
+                                swal({
+                                    title: 'Booking Disable',
+                                    text: 'Are you sure you want to disable booking?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, disable it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        // Perform the action to disable booking
+                                        // You can add your logic here
+                                        swal('Booking Disabled!', {
+                                            icon: 'success',
+                                        });
+                                    } else {
+                                        swal('Booking is not disabled.');
+                                    }
+                                });
+                            }
+                        }
+                    },
+
+                        'reset'],
                 @else
                 buttons: [{
                     extend: 'excel',
@@ -239,8 +289,8 @@
                rowId: 'id',
                 order: [[13, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
                     {data: 'city_code', name: 'cities.city_code', class: 'align-middle city_code'},
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
@@ -361,6 +411,9 @@
                 checkboxClass: 'icheckbox_squaret-red',
                 radioClass: 'iradio_square-red'
             });
+            
+     
+
         });
         {{--$('#datatable tbody').on('click', 'tr td.modes button', function() {--}}
         {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
@@ -450,6 +503,7 @@
                 });
             }
         });
+        
         $('body').on('click','#datatable tbody tr td.osa_list button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#osa_modal .modal-body').html('');
@@ -485,6 +539,8 @@
                     }
                 });
             });
+
+            
         $('body').on('click','.deactivate',function (e) {
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
@@ -630,7 +686,6 @@
             }
 
         });
-
 
 
     </script>
