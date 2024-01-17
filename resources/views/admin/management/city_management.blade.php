@@ -265,7 +265,7 @@
                                         });
                                       
                                     } else {
-                                        swal('Booking is not disabled.');
+                                        swal('Booking is not enabled.');
                                     }
                                 });
                             }
