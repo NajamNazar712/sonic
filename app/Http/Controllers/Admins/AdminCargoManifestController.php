@@ -3064,6 +3064,24 @@ class AdminCargoManifestController extends Controller
                                         $shipment_table->consignee_status_id = 11;
                                         $shipment_table->update();
                                         $short_received_count++;
+
+                                        MisroutedHistory::create([
+                                            'shipment_id' => $shipment_table->id,
+                                            'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                            'old_consignee_name' => $shipment_table->consignee_name,
+                                            'old_consignee_address' => $shipment_table->consignee_address,
+                                            'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                            'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                            'old_consignee_email' => $shipment_table->consignee_email,
+                                            'new_consignee_city_id' => $shipment_table->consignee_city_id,
+                                            'new_consignee_name' => $shipment_table->consignee_name,
+                                            'new_consignee_address' => $shipment_table->consignee_address,
+                                            'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                            'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                            'new_consignee_email' => $shipment_table->consignee_email,
+                                            'admin_id' => Auth::id()
+                                        ]);
+
                                     } else {
                                         $received_count++;
                                     }
@@ -3109,6 +3127,24 @@ class AdminCargoManifestController extends Controller
                                         $shipment_table->consignee_status_id = 11;
                                         $shipment_table->update();
                                         $short_received_count++;
+
+                                        MisroutedHistory::create([
+                                            'shipment_id' => $shipment_table->id,
+                                            'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                            'old_consignee_name' => $shipment_table->consignee_name,
+                                            'old_consignee_address' => $shipment_table->consignee_address,
+                                            'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                            'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                            'old_consignee_email' => $shipment_table->consignee_email,
+                                            'new_consignee_city_id' => $shipment_table->consignee_city_id,
+                                            'new_consignee_name' => $shipment_table->consignee_name,
+                                            'new_consignee_address' => $shipment_table->consignee_address,
+                                            'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                            'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                            'new_consignee_email' => $shipment_table->consignee_email,
+                                            'admin_id' => Auth::id()
+                                        ]);
+
                                     } else {
                                         $received_count++;
                                     }
@@ -4279,6 +4315,23 @@ class AdminCargoManifestController extends Controller
                                             $shipper_status_id = 66;
                                             $consignee_status_id = 66;
                                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+
+                                            MisroutedHistory::create([
+                                                'shipment_id' => $shipment->id,
+                                                'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                                'old_consignee_name' => $shipment->consignee_name,
+                                                'old_consignee_address' => $shipment->consignee_address,
+                                                'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                                'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                                'old_consignee_email' => $shipment->consignee_email,
+                                                'new_consignee_city_id' => $shipment->consignee_city_id,
+                                                'new_consignee_name' => $shipment->consignee_name,
+                                                'new_consignee_address' => $shipment->consignee_address,
+                                                'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                                'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                                'new_consignee_email' => $shipment->consignee_email,
+                                                'admin_id' => Auth::id()
+                                            ]);
                                         }
 
                                         $self_collection = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
@@ -4367,6 +4420,23 @@ class AdminCargoManifestController extends Controller
                                 ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
                                 ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
                                 array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+
+                                MisroutedHistory::create([
+                                    'shipment_id' => $shipment->id,
+                                    'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                    'old_consignee_name' => $shipment->consignee_name,
+                                    'old_consignee_address' => $shipment->consignee_address,
+                                    'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                    'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                    'old_consignee_email' => $shipment->consignee_email,
+                                    'new_consignee_city_id' => $shipment->consignee_city_id,
+                                    'new_consignee_name' => $shipment->consignee_name,
+                                    'new_consignee_address' => $shipment->consignee_address,
+                                    'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                    'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                    'new_consignee_email' => $shipment->consignee_email,
+                                    'admin_id' => Auth::id()
+                                ]);
                             }
                         }
                     }
@@ -4401,6 +4471,23 @@ class AdminCargoManifestController extends Controller
                             ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
                             ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
+
+                            MisroutedHistory::create([
+                                'shipment_id' => $shipment->id,
+                                'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                'old_consignee_name' => $shipment->consignee_name,
+                                'old_consignee_address' => $shipment->consignee_address,
+                                'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                'old_consignee_email' => $shipment->consignee_email,
+                                'new_consignee_city_id' => $shipment->consignee_city_id,
+                                'new_consignee_name' => $shipment->consignee_name,
+                                'new_consignee_address' => $shipment->consignee_address,
+                                'new_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                'new_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                'new_consignee_email' => $shipment->consignee_email,
+                                'admin_id' => Auth::id()
+                            ]);
                         }
                     }
 
@@ -4654,7 +4741,6 @@ class AdminCargoManifestController extends Controller
                     }
                 }
             }
-
 
         // received and short received
         foreach ($bag_ids as $bag_id) {
