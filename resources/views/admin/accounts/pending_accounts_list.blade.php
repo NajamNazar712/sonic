@@ -1313,7 +1313,7 @@
                                 $('#shipper_ids_msg').text("Selected Shipper:"+ selected_rows_2)
 
                             }else{
-                                var error = "Atleast Select One Shipper";
+                                var error = "Inappropiate Corporate Type Selected OR Rates Are Rejected !!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         }
