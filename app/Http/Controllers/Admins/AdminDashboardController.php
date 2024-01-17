@@ -13758,5 +13758,14 @@ class AdminDashboardController extends Controller
             return $data;
         }
     }
+
+      public function disable_booking_status(Request $request){
+        $userIDS = $request->userIDS;
+        if(count($userIDS) > 0){
+            City::whereIn('id', $userIDS)->update(['booking_disable_status' => '0']);
+        }
+        
+        
+    }
 }
 

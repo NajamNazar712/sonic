@@ -890,6 +890,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/city/city_sub_area_post', 'Admins\AdminDashboardController@city_sub_area_post')->name('city_sub_area_post');
         Route::post('city/city_area_status', 'Admins\AdminDashboardController@city_area_status')->name('city_area_status');
         Route::post('city/city_area_default', 'Admins\AdminDashboardController@city_area_default')->name('city_area_default');
+        Route::post('city/disable_booking_status', 'Admins\AdminDashboardController@disable_booking_status')->name('disable_booking_status');
+
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route

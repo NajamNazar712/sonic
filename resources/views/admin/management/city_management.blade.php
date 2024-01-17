@@ -126,9 +126,11 @@
                 }
 
                 if(selected_rows.length > 0){
-                    table.button('.booking').enable()
+                    table.button('.booking_enable').enable()
+                    table.button('.booking_disable').enable()
                 }else{
-                    table.button('.booking').disable()
+                    table.button('.booking_enable').disable()
+                    table.button('.booking_disable').disable()
                 }
                 
             });
@@ -231,8 +233,46 @@
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     },{
+                        text: '<i class="la la-map-marker"></i> Booking Enable',
+                        className: 'btn btn-primary booking_enable',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { // Removed the extra closing parenthesis
+                                swal({
+                                    title: 'Booking Disable',
+                                    text: 'Are you sure you want to enable booking?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, disable it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: "{!! route('admin.management.disable_booking_status') !!}",
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '200') {
+                                                    swal('Booking Disabled!', {
+                                                        icon: 'success',
+                                                    });
+                                                } 
+                                            }
+                                        });
+                                      
+                                    } else {
+                                        swal('Booking is not disabled.');
+                                    }
+                                });
+                            }
+                        }
+                    },{
                         text: '<i class="la la-map-marker"></i> Booking Disable',
-                        className: 'btn btn-primary booking',
+                        className: 'btn btn-primary booking_disable',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if (selected_rows.length > 0) { // Removed the extra closing parenthesis
@@ -248,9 +288,9 @@
                                     if (willDisable) {
                                         $.ajax({
                                             type: 'POST',
-                                            url: "{!! route('admin.accounts.add_fintech_charges') !!}",
+                                            url: "{!! route('admin.management.disable_booking_status') !!}",
                                             data: {
-                                                userID: selected_rows,
+                                                userIDS: selected_rows,
                                                 '_token': '{{ csrf_token() }}'
                                             },
                                             success: function(res) {
