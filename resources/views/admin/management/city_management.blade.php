@@ -16,6 +16,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1" >S No.</th>
                                     <th class="border-primary border-darken-1" >City Name</th>
                                     <th class="border-primary border-darken-1" >City Code</th>
@@ -227,12 +228,19 @@
                 language: {
                     processing: data_table_loader
                 },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
                rowId: 'id',
                 order: [[13, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
                     {data: 'city_code', name: 'cities.city_code', class: 'align-middle city_code'},
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
@@ -255,7 +263,7 @@
                rowCallback: function(row, data, index) {
                    var info = table.page.info();
 
-                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                   $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
                },
                initComplete: function() {
@@ -284,8 +292,8 @@
                    this.api().columns().every(function(column_id) {
                        var column = this;
                        var header = column.header();
-
-                       if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
+             
+                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
