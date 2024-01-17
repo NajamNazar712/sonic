@@ -125,8 +125,7 @@
                     selected_rows.splice(index, 1);
                 }
 
-                if(selected_rows.lenght > 0){
-                    console.log(1);
+                if(selected_rows.length > 0){
                     table.button('.booking').enable()
                 }else{
                     table.button('.booking').disable()
@@ -247,11 +246,22 @@
                                     },
                                 }).then((willDisable) => {
                                     if (willDisable) {
-                                        // Perform the action to disable booking
-                                        // You can add your logic here
-                                        swal('Booking Disabled!', {
-                                            icon: 'success',
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: "{!! route('admin.accounts.add_fintech_charges') !!}",
+                                            data: {
+                                                userID: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '200') {
+                                                    swal('Booking Disabled!', {
+                                                        icon: 'success',
+                                                    });
+                                                } 
+                                            }
                                         });
+                                      
                                     } else {
                                         swal('Booking is not disabled.');
                                     }
