@@ -2,13 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Http\Models\ShipmentScanningJourney;
-use App\ShipmentScanningJourneyAreaLog;
 use Illuminate\Bus\Queueable;
+use App\Http\Models\ReportingLocation;
 use Illuminate\Queue\SerializesModels;
+use App\ShipmentScanningJourneyAreaLog;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Http\Models\ShipmentScanningJourney;
 
 class ShipmentReportingAreaStatusJob implements ShouldQueue
 {
@@ -43,7 +44,7 @@ class ShipmentReportingAreaStatusJob implements ShouldQueue
             return;
         }
 
-        $cityArea = $areaLog->city_area->reporting_location ?? null;
+        $cityArea = $areaLog->city_area->reporting_location ?? ReportingLocation::where('city_id',$areaLog->hub_id)->first() ?? null;;
 
         if (isset($shipmentScanning, $cityArea)) {
             if (isset($shipmentScanning->latitude, $shipmentScanning->longitude, $cityArea->lat, $cityArea->long)) {
