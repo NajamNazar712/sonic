@@ -129,17 +129,15 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                                    @if( session('role_id') == 1 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90]))
-                                        <div class="col-4">
-                                            <fieldset class="form-group">
-                                                <select name="search_agent" id="search_agent" class="form-control select2">
-                                                    @foreach($agents as $agent)
-                                                        <option value="{{$agent->id}}">{{$agent->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                    @endif
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_agent" id="search_agent" class="form-control select2">
+                                                @foreach($agents as $agent)
+                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
                                     <div class="col-4">
                                         <fieldset class="form-group">
                                             <select name="shipment_status" id="search_shipment_status" class="form-control select2">

@@ -816,7 +816,7 @@
                 var errros = 'Something went wrong, Refresh page and try again';
                 var actual_date = $('input[name="actual_date_formatted"]').val();
                 if(selected_rows.length > 0){
-                    if(select_all_status != ''){
+                    if((select_all_status == '25') || (select_all_status != '' && select_all_reason != null)){
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to change the status of shipments!',
@@ -1093,7 +1093,7 @@
                         });
                     }
                     else{
-                        var error = "Please Select A Status!";
+                        var error = (select_all_reason == null) ? "Please Select A Reason!" : "Please Select A Status!";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }

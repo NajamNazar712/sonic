@@ -240,7 +240,8 @@ class ReturnController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55,56,13])->pluck('shipment_status_reason_id')->toArray();
+		$rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
         $total_of_shipments = $this->shipments()->get()->count();
         $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
 
@@ -4898,17 +4899,23 @@ class ReturnController extends Controller
             }
         }
 
-        $files = File::glob(asset('storage/uploads/return_notes/*.*'));
-        $now = Carbon::now();
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                $created = date("F d Y H:i:s.", filemtime($file));
-                $file_name = pathinfo($file);
-                if ($now->diffInDays($created) > 1) {
-                    Storage::disk('s3')->put('return_note_images/' . $file_name['basename'], file_get_contents($file));
-                    $exists = Storage::disk('s3')->exists('return_note_images/' . $file_name['basename']);
-                    if ($exists) {
-                        File::delete($file);
+        $path = storage_path('app/public/uploads/return_notes');
+        $paths = ['81', '82', '83', '84', '85', '86', '87'];
+        foreach ($paths as $p){
+            $files = File::glob("$path/2023_$p*.*", GLOB_NOSORT);
+            $now = Carbon::now();
+            if(count($files) > 0){
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+//                        $created = date("F d Y H:i:s.",filemtime($file));
+                        $file_name = pathinfo($file);
+//                        if($now->diffInDays($created) > 1){
+                            Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                            $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                            if($exists){
+                                File::delete($file);
+                            }
+//                        }
                     }
                 }
             }

@@ -498,12 +498,14 @@
                                                                 </button>
                                                             </fieldset>
 
-                                                            <fieldset class="form-group has-icon-left m-0 mb-1 ml-2" style="float: right;">
-                                                                <div class="form-group">
-                                                                    <label for="sms_check" class="font-medium-2 text-bold-600 mr-1">Send SMS</label>
-                                                                    <input type="checkbox" name="sms_check" id="sms_check" class="switchery sms_check" data-size="sm" data-switchery="true">
-                                                                </div>
-                                                            </fieldset>
+                                                            @if (session('role_id') == 1 || in_array(914, session('permissions')))
+                                                                <fieldset class="form-group has-icon-left m-0 mb-1 ml-2" style="float: right;">
+                                                                    <div class="form-group">
+                                                                        <label for="sms_check" class="font-medium-2 text-bold-600 mr-1">Send SMS</label>
+                                                                        <input type="checkbox" name="sms_check" id="sms_check" class="switchery sms_check" data-size="sm" data-switchery="true">
+                                                                    </div>
+                                                                </fieldset>
+                                                            @endif
                                                         </div>
                                                     </form>
                                                     @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))

@@ -162,7 +162,12 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\BookingType;
+use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Product;
+use App\Http\Models\UserIbftCharge;
+use App\Http\Models\UserIbftChargeDetail;
 
 class GlobalSettingsController extends Controller
 {
@@ -1281,24 +1286,51 @@ class GlobalSettingsController extends Controller
             $ibft_charges = 0;
         }
 
-        return view('admin.settings.ibft_charges')->with('ibft_charges', $ibft_charges);
+        $settings = GlobalSettings::where('type', 'ibft_charges_retail');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $ibft_charges_retail = $settings->setting_value;
+        } else {
+            $ibft_charges_retail = 0;
+        }
+
+        return view('admin.settings.ibft_charges')->with(['ibft_charges' => $ibft_charges, 'ibft_charges_retail' => $ibft_charges_retail]);
     }
 
     public function ibft_charges_store(Request $request)
     {
-        $settings = GlobalSettings::where('type', 'ibft_charges');
+        $ibft_charges_shipper = $request->ibft_charges_shipper;
+        $ibft_charges_retail = $request->ibft_charges_retail;
 
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        } else {
-            $settings = new GlobalSettings();
-
-            $settings->type = 'ibft_charges';
+        if($ibft_charges_shipper){
+            $shipperSettings = GlobalSettings::where('type', 'ibft_charges');
+    
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
+            } else {
+                $shipperSettings = new GlobalSettings();
+    
+                $shipperSettings->type = 'ibft_charges';
+            }
+            $shipperSettings->setting_value = $ibft_charges_shipper;
+            $shipperSettings->save();
+        }
+        if($ibft_charges_retail){
+            $retailSettings = GlobalSettings::where('type', 'ibft_charges_retail');
+    
+            if ($retailSettings->exists()) {
+                $retailSettings = $retailSettings->first();
+            } else {
+                $retailSettings = new GlobalSettings();
+    
+                $retailSettings->type = 'ibft_charges_retail';
+            }
+            $retailSettings->setting_value = $ibft_charges_retail;
+            $retailSettings->save();
         }
 
-        $settings->setting_value = $request->ibft_charges;
-
-        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -8627,15 +8659,16 @@ class GlobalSettingsController extends Controller
             $bypass_excluded_shippers = $bypass_excluded_shippers->first();
             $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
         }
-
-        $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
-            ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
-            ->whereIn('notification_id', [11, 12]);
         $notification_details = array();
-        $details = array();
-        if($notification_settings->exists()){
-            $notification_settings = $notification_settings->get();
-            foreach ($notification_settings as $notification_setting){
+        $shipper_notification_ids = [11, 12, 132];
+        foreach ($shipper_notification_ids as $notification_id){
+            $details = array();
+            $notification_settings = NotificationSetting::join('notifications as n', 'n.id', '=', 'notification_settings.notification_id')
+                ->select('notification_settings.id', 'notification_settings.shipper_toggle', 'n.id as notification_id', 'n.name as notification_name')
+                ->where('notification_id', $notification_id);
+
+            if($notification_settings->exists()){
+                $notification_setting = $notification_settings->first();
                 $details['id'] = $notification_setting->notification_id;
                 $details['name'] = $notification_setting->notification_name;
                 $details['shipper_toggle'] = $notification_setting->shipper_toggle;
@@ -8647,17 +8680,19 @@ class GlobalSettingsController extends Controller
                 else{
                     $details['shippers'] = null;
                 }
+
                 $notification_details[] = $details;
+
             }
-        }
-        else{
-            $notification_settings = Notification::whereIn('id', [11, 12])->get();
-            foreach ($notification_settings as $notification_setting){
-                $details['id'] = $notification_setting->id;
-                $details['name'] = $notification_setting->name;
-                $details['shipper_toggle'] = 1;
-                $details['shippers'] = null;
-                $notification_details[] = $details;
+            else{
+                $notification_setting = Notification::find($notification_id);
+                if($notification_setting){
+                    $details['id'] = $notification_setting->id;
+                    $details['name'] = $notification_setting->name;
+                    $details['shipper_toggle'] = 1;
+                    $details['shippers'] = null;
+                    $notification_details[] = $details;
+                }
             }
         }
 
@@ -9154,4 +9189,311 @@ class GlobalSettingsController extends Controller
 
         return response(['hubs'=>$hubs]);
     }
+
+    public function parcel_value_bypass_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 707);
+
+        $shippers = array();
+        $parcel_value_bypass_accounts = array();
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        return view('admin.settings.parcel_value_bypass_users')->with(['shippers' => $parcel_value_bypass_accounts, 'users' => $users]);
+    }
+
+    public function parcel_value_bypass_setting_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'parcel_value_bypass_users';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
+    public function bypass_weight_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 706);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+        $bypassed_shippers = array();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $bypassed_shippers = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.bypass_weight')->with(['shippers' => $shippers, 'bypassed_shippers'=> $bypassed_shippers]);
+    }
+
+    public function bypass_weight_update(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'bypass_weight_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'bypass_weight_setting';
+                }
+                $settings->setting_value = 1;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
+    public function product_type_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),27);
+        
+        return view('admin.settings.product_type');
+    }
+
+    public function product_type_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),87);
+        }
+
+        $products = Product::select('id as product_type_id','product_name')->orderby('product_type_id','desc');
+    
+        $datatables = Datatables::of($products)
+            ->addColumn('action', function($product_type) {
+                    $edit_product_type = '<button data-id="'.$product_type->product_type_id.'" data-product_type_name="'.$product_type->product_name.'" data-target="#edit_product_name_modal" data-toggle="modal" type="button" class="dropdown-item edit_fields" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div>Edit</button>';
+                    $delete_product_type = '<button data-id="'.$product_type->product_type_id.'" type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    $dropdown = '
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                        $dropdown .= $edit_product_type;
+                        $dropdown .= $delete_product_type;
+                    $dropdown .= '
+                        </div>
+                        </div>
+                    ';
+                        return $dropdown;
+            });
+        return $datatables->make(true);
+    }
+
+    public function product_type_add(Request $request){
+        
+        if($request->has('product_name')){
+            $product_type_name = $request->get('product_name');
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
+
+            if(!$existing_product_type_name){
+
+            $products = new Product();
+            $products->product_name = $product_type_name;
+            $products->save();
+
+            return response()->json(['status' => 0, 'message' => 'Product Type Added Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Product Type Already Exist!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'No Product Type Name found!']);
+        }
+
+    }
+    public function product_type_edit(Request $request){
+        if($request->has('product_type_name')){
+            $product_type_id = $request->get('product_type_id');
+            $product_type_name = $request->get('product_type_name');
+
+            $existing_product_type_name = Product::where('product_name', 'like','%'.$product_type_name.'%')->first();
+
+            if(!$existing_product_type_name){
+                $update_product_type_name = Product::where('id', $product_type_id)->update(['product_name' => $product_type_name]);
+                if($update_product_type_name){
+                    return redirect()->back()->with('success', 'Product Type Updated Successfully!');
+                }
+                else{
+                    return redirect()->back()->with('error', 'Something went wrong!');
+                }
+            }
+            else{
+                return redirect()->back()->with('error', 'Product Type Already Exist!');
+            }
+            
+        }
+        else{
+            return redirect()->back()->with('error', 'No Product Name Found!');
+        }
+
+    }
+
+    public function product_type_delete(Request $request){
+
+        $product = Product::find($request->id);
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product Type Not Found']);
+        }
+        
+        $product->delete();
+        return response()->json(['status' => 'success', 'message' => 'Product Type Deleted Successfully']);
+    }
+
+    public function shipper_ibft_charges_settings_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 712);
+        $shippers = User::where('status', '>', 1)->select('id', 'name');
+        $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
+        if($all_shippers){
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+            if (session('department_id') == 7 && $authorized == true) {
+                $shippers = $shippers->get();
+            }
+            else if(session('department_id') == 7){
+                $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+                ->select('u.id', 'u.name')
+                ->where('sale_person_tags.admin_id', Auth::id())
+                ->get();
+            }
+            else{
+                $shippers = $shippers->get();
+            }
+        }
+        else if(session('department_id') == 7){
+            $shippers = SalePersonTag::leftJoin('users as u', 'u.id', '=', 'sale_person_tags.user_id')
+            ->select('u.id', 'u.name')
+            ->where('sale_person_tags.admin_id', Auth::id())
+            ->get();
+        }
+        else{
+            $shippers = $shippers->get();
+        }
+
+        $business_shipment = BusinessProjectionShipment::all();
+
+        return view('admin.settings.shipper_ibft_charges_settings')->with(['shippers' => $shippers, 'shipments' => $business_shipment]);
+    }
+
+    public function shipper_ibft_charges_settings_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 713);
+        }
+
+        $all_shippers = GlobalSettings::where('type', 'sales_user_restriction_bypass')->select('text')->first();
+
+        $query = UserIbftCharge::join('users as u', 'u.id', 'user_ibft_charges.user_id')
+            ->leftJoin('admins as a', 'a.id', 'user_ibft_charges.updated_by')
+            ->leftJoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.admin_id', '=', Auth::id())
+                    ->where('spt.status', 0);
+            })
+            ->select(
+                'u.name as shipper', 
+                'user_ibft_charges.current_charges as current_charges',
+                'a.name as updated_by', 
+                'user_ibft_charges.updated_at as updated_at'
+            )
+            ->orderBy('updated_at', 'desc');
+
+        if ($all_shippers) {
+            $all_shippers = $all_shippers->toArray();
+            $authorized = in_array(Auth::id(), explode(',', $all_shippers['text']));
+
+            if (session('department_id') == 7 && !$authorized) {
+                $query->where('spt.admin_id', Auth::id());
+            }
+        }
+
+        if (session('department_id') == 7 && !$all_shippers) {
+            $query->where('spt.admin_id', Auth::id());
+        }
+
+        $datatable = Datatables::of($query);
+        return $datatable->make(true);
+    }
+
+    public function shipper_ibft_charges_settings_update(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 714);
+
+        $shippers = $request->shippers;
+        $Ibft_charges = $request->Ibft_charges;
+        $updated_by = Auth::id();
+            foreach ($shippers as $shipper){
+                UserIbftCharge::updateOrCreate(
+                    ['user_id' => $shipper],
+                    ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
+                );
+                $ibft_charges_log = new UserIbftChargeDetail();
+                $ibft_charges_log->charges = $Ibft_charges;
+                $ibft_charges_log->user_id = $shipper;
+                $ibft_charges_log->updated_by = $updated_by;
+                $ibft_charges_log->save();
+            }
+            
+         return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
+        }
+        
+        public function logistic_report_index()
+        {
+            $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+            $settings = GlobalSettings::where('type', 'logistic_setting');
+            $logistic_setting_tags = array();
+            if ($settings->exists())
+            {
+                $settings = $settings->first();
+                $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
+            }
+            return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
+        }
+    
+        public function logistic_report_store(Request $request)
+        {
+                if ($request->has('users') && count($request->users) > 0) {
+                    $users = implode(',', $request->users);
+                } else{
+                    $users = null;
+                }
+                $settings = GlobalSettings::where('type', 'logistic_setting');
+    
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+    
+                    $settings->type = 'logistic_setting';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $users;
+                $settings->save();
+            
+            return redirect()->back()->with('success', 'Settings Updated!');
+        }
 }

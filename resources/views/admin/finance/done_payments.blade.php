@@ -168,6 +168,7 @@
 										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductible</th>
+										<th class="border-primary border-darken-1">Ibft Charges</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -541,6 +542,7 @@
                             head.push('Total WHT');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
+                            head.push('Ibft Charges');
 							head.push('Adjustment Charges');
                             head.push('Total Payable');
                             head.push('Bank');
@@ -572,6 +574,7 @@
                                 row.push(values.total_wht);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
+                                row.push(values.ibft_charges);
 								row.push(values.adjustment_charges);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
@@ -817,6 +820,7 @@
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
+					{data:'ibft_charges', name: 'done_payments.ibft_charges', class: 'align-middle text-center ibft_charges', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},

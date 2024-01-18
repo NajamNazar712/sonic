@@ -399,7 +399,20 @@ class GulAhmedCitiesMappingTableSeeder extends Seeder
             ["warehouse_id" => "E-Com", "name" => "Karachi", "city_id" => "202", "poc" => "Muhammad Hadi", "phone" => "0321-2117123", "address" => "Plot No.65/1, Sector 30, Korangi Industrial Area, Karachi"],
             ["warehouse_id" => "Mock Shop", "name" => "Karachi", "city_id" => "202", "poc" => "Khawar ", "phone" => "0321-1002426", "address" => "Plot # 12 , Sec 23 Korangi Industrial Area, Near Brooks Chowrangi, Next To Toyota & K.I.A Motors "],
             ["warehouse_id" => "MWH002", "name" => "Lahore", "city_id" => "223", "poc" => "Karachi", "phone" => "042-35971511", "address" => "Gul Ahmed Lahore Warehouse New Bakar Mandi , Slaughter House, 18 Km Shahpur Kanjran Multan Road"],
-            ["warehouse_id" => "MWH003", "name" => "Islamabad", "city_id" => "174", "poc" => "Islamabad", "phone" => "0321-2440758", "address" => "Plot No. 331-332 Opposite Kashmir floor Mills limited Street No. 1 I-9/3 Industrial Area Islamabad"]
+            ["warehouse_id" => "MWH003", "name" => "Islamabad", "city_id" => "174", "poc" => "Islamabad", "phone" => "0321-2440758", "address" => "Plot No. 331-332 Opposite Kashmir floor Mills limited Street No. 1 I-9/3 Industrial Area Islamabad"],
+
+            // hotfix/TO-6468 - warehouse id's missing in Gul Ahmed Pickup Address 
+            // #region new ticket work
+            ["warehouse_id" => "IDS103", "name" => "Okara", "city_id" => "267", "poc" => "044-2510526", "phone" => "0322-6920069", "address" => "Ideas Outlet, M.A Jinnah Road, opposite to Diners, Okara"],
+            ["warehouse_id" => "IDS122", "name" => "Karachi", "city_id" => "202", "poc" => "0213-3393216", "phone" => "0324-2031924", "address" => "Shop # 03 Plot # D-03, Block C, North Nazimabad, North Walk, Near KDA Chw, khi"],
+            ["warehouse_id" => "IDS132", "name" => "Muzaffarabad", "city_id" => "255", "poc" => "(058224)42833", "phone" => "0321-5844542", "address" => "Ideas by Gul Ahmed Neelum Valley Road Lower Plate Muzaffarabad"],
+            ["warehouse_id" => "IDS124", "name" => "Dera Ismail Khan", "city_id" => "135", "poc" => "0966-711193", "phone" => "0333-9986727", "address" => "Rasool Khan Plaza, North Circular Road, D.I.Khan"],
+            ["warehouse_id" => "IDS115", "name" => "Rahim Yar Khan", "city_id" => "284", "poc" => "92-068 5877117-8", "phone" => "9203-4838992", "address" => "A 28,model town,oppositecity city park Main gate,Rahim yar Khan"],
+            ["warehouse_id" => "IDS128", "name" => "Attock", "city_id" => "107", "poc" => "057-2700695", "phone" => "0334-9900962", "address" => "Ideas Attock, Near railway view park,Attock City. Tel: 057-2700695 Mob# 034-9900962"],
+            ["warehouse_id" => "IDS126", "name" => "Bahawalnagar", "city_id" => "109", "poc" => "063-2273944 - 0632607944", "phone" => "0307-0109026", "address" => "ZM Mall Near Police Line Bahawalnagar"],
+            ["warehouse_id" => "IDS121", "name" => "Karachi", "city_id" => "202", "poc" => "021-33393257", "phone" => "0345-7020441", "address" => "G16/17,Plot # D-10, Block-C, north Nazimabad Karachi"],
+            // #endregion new ticket work
+
         ];
 
         foreach ($pickup_addresses as $pickup_address){

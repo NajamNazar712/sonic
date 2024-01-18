@@ -69,6 +69,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
+                                        {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
                                         <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
@@ -90,6 +91,8 @@
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Referral Code</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -131,46 +134,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Sales Tiers</h4>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="shipper_id1">
-                    <div class="mb-2">
-                        <select name="poc" id="poc" class="form-control select2">
-                            @foreach($sale_tier_types as $poc)
-                                <option value="{{ $poc->id }}" > {{ $poc->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="kam" id="kam" class="form-control select2">
-                            @foreach($sale_tier_types as $kam)
-                                <option value="{{ $kam->id }}" > {{ $kam->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <select name="ref" id="ref" class="form-control select2">
-                            @foreach($sale_tier_types as $ref)
-                                <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  
 
     <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
          aria-hidden="true">
@@ -436,6 +400,104 @@
             </div>
         </div>
     </div>
+
+{{-- Commission Moal --}}
+<div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 100%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Rates</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate>
+                @csrf
+                <input type="hidden" name="datatable_check" id="datatable_check">
+
+                <div class="modal-body">
+                    <div class="col text-center">
+                        <h1 id="shipper_ids_msg"></h1>
+                        <div class="row justify-content-center mt-2" id="commission_div">
+                            <div class="form-group row">
+                                <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Total Commission"
+                                            id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                    <div class="row justify-content-center">
+                                        <div class="col-2 form-group">
+                                            <select name="sales_tier" class="select2" id="sales_tier_select">
+                                                @foreach($sales_tiers as $tier)
+                                                    <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                        sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <input type="text" id="external_person_name" name="external_person_name"
+                                                class="form-control" placeholder="External Tier Person Name" disabled>
+                                        </div>
+                                        <div class="col-2 form-group">
+                                            <select name="user" class="select2" id="user_select" disabled>
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <div class="input-group form-group">
+                                                <input type="text" id="user_commission" class="form-control commission"
+                                                    placeholder="User Commission" name="user_commission">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-1 form-group">
+                                            <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <table class="table table-bordered datatable_rate" id="datatable_rate" style="z-index: 3;">
+                                    <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">S. No.</th>
+                                            <th class="border-primary border-darken-1">User Name</th>
+                                            <th class="border-primary border-darken-1">Tier</th>
+                                            <th class="border-primary border-darken-1">Commission Percentage</th>
+                                            <th class="border-primary border-darken-1"></th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                        <tr>
+                                            <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
+                                            <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{-- End --}}
+
 @endsection
 
 @section('css')
@@ -456,8 +518,7 @@
 
     <script>
 
-
-
+           
     function checkboxStatus() {
         if (document.getElementById('user_fintech_charges_checkbox').checked) {
             $(".UserFintechCharges").append(`
@@ -544,6 +605,284 @@
     });
 
     $(document).ready(function() {
+
+        $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
+            selected_commission = 0;
+            commission = 0;
+            selected_users.length = 0;   
+            commission_max = $('#commission_max').val()         
+            $('#total_commission').val(0).trigger('change');
+            $('#total_commission_value').text('0');
+            $('#datatable_rate').DataTable().clear().draw();
+        });
+        
+    var selected_users = [];
+    var tier_sales;
+    var users = @json($all_users);
+
+    var users_data = $.map(users, function (obj) {
+        obj.id = obj.id || obj.text;
+        return obj;
+    });
+    $('#user_select').prepend('<option value="" selected></option>').select2({
+        placeholder: "Select User",
+        width: '100%',
+        data: users_data,
+    }).bind('change', function () {
+        var th = $(this);
+        var id = $(this).val();
+        var group = $(this).find(':selected').closest('optgroup').attr('label');
+        if (group == 'Admins') {
+            if (tier_sales == 1) {
+                th.val(null).trigger('change');
+                var error = 'Select sales related user!';
+                toastr.error(error, 'Error!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center'
+                });
+            }
+        }
+        if (group != 'Admins' && group != 'Sales'){
+            $('#user_commission').val(1.8)
+            $('#user_commission').attr('disabled', true)
+        } else {
+            $('#user_commission').val('');
+            $('#user_commission').attr('disabled', false)
+        }
+        var index = $.inArray(id, selected_users);
+        if (index !== -1) {
+            var error = 'User previously selected!';
+            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            $('#user_select').val(null).trigger('change');
+        }
+    });
+
+    var riders_permanents_data = {!! json_encode($riders_permanent) !!};
+    var selectHtml = '';
+    for (var i = 0; i < riders_permanents_data.length; i++) {
+        selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
+    }
+    $('#user_select').append(selectHtml);
+
+    $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
+        placeholder: "Select Sales Tier",
+        width: '100%'
+    }).bind('change', function () {
+        $('#user_select').attr('disabled', true);
+        $('#external_person_name').attr('disabled', true);
+        var type = $(this).find(":selected").attr('type');
+        var sales = $(this).find(":selected").attr('sales');
+        tier_sales = sales;
+        if (type == 1) {
+            $('#user_select').attr('disabled', false);
+        } else {
+            $('#external_person_name').attr('disabled', false);
+        }
+
+    });
+
+    var commission_max = $('#commission_max').val();
+    $('.commission').inputmask({
+        'alias': 'decimal',
+        'allowMinus': false,
+        'allowPlus': false,
+        'rightAlign': false,
+        'digits': 2,
+        'min': 0.00,
+        'max': commission_max,
+    });
+
+    var table_2 = $('#datatable_rate').DataTable({
+        dom: 'ltipr',
+        paging: false,
+        ordering: false,
+        sorting: false,
+        bInfo: false,
+        columns: [
+            {
+                orderable: false,
+                searchable: false,
+                name: 'serial_number',
+                class: 'align-middle serial_number',
+                targets: 1,
+                render: function (data, type, row) {
+                    return '';
+                }
+            },
+            {name: 'user_name', class: 'align-middle user_name'},
+            {name: 'tier', class: 'align-middle tier'},
+            {name: 'commission_percentage', class: 'align-middle commission_percentage'},
+            {name: 'action', class: 'align-middle action'}
+
+        ],
+        rowCallback: function (row, data, index) {
+            var info = table_2.page.info();
+
+            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+        },
+    });
+
+    var row = 1;
+    var selected_commission = 0;
+
+    function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission) {
+        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
+        var tier = '<div><input type="hidden" name="tier_id[' + row + ']"  value="' + tier_id + '">' + tier_name + '</div>';
+        if (tier_type == 1) {
+            var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_id + '">' + user_name + '</div>';
+        } else {
+            var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_name + '">' + user_name + '</div>';
+        }
+        var commission_percentage = '<div><input type="hidden" name="commission_percentage[' + row + ']"  value="' + commission + '">' + commission + '%</div>';
+        table_2.row.add([row, name, tier, commission_percentage, remove]).node().id = row;
+        table_2.draw(false);
+        if (tier_type == 1) {
+            selected_users.push(user_id);
+        }
+        $('#commission_add_button').attr('disabled', false);
+        $('#total_commission_value').html(selected_commission);
+        $('#total_commission').val(selected_commission);
+        $('#total_commission_value').val(selected_commission);
+
+        row++;
+    }
+
+    function roundToTwo(num) {
+        return +(Math.round(num + "e+2") + "e-2");
+    }
+
+    $('#commission_add_button').on('click', function () {
+        var commission = parseFloat($('#user_commission').val());
+        var this_btn = $(this);
+
+        var flag = true;
+        var type = $('#sales_tier_select').find(":selected").attr('type');
+        if (!$('#sales_tier_select').valid()) {
+            flag = false;
+        }
+        if (type == 1) {
+            if (!$('#user_select').valid()) {
+                flag = false;
+            }
+        }
+        if (type == 2) {
+            if (!$('#external_person_name').valid()) {
+                flag = false;
+            }
+        }
+        if (!$('#user_commission').valid()) {
+            flag = false;
+        }
+
+        if (flag) {
+       
+
+            if (commission <= commission_max) {
+                selected_commission = roundToTwo(selected_commission + commission);
+                commission_max = commission_max - commission;
+                this_btn.attr('disabled', true);
+                var user_id = '';
+                var user_name = '';
+                var tier_id = '';
+                var tier_name = '';
+                var tier_type = '';
+                tier_id = $('#sales_tier_select').val();
+                tier_name = $('#sales_tier_select').find(":selected").text();
+                tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                if (tier_type == 1) {
+                    user_id = $('#user_select').val();
+                    user_name = $('#user_select').find(":selected").text();
+                } else {
+                    user_name = $('#external_person_name').val();
+                }
+
+                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                $('#sales_tier_select').val(null).trigger('change');
+                $('#user_select').val(null).trigger('change');
+                $('#user_select').attr('disabled', true);
+                $('#external_person_name').val('');
+                $('#external_person_name').attr('disabled', true);
+                $('#user_commission').val('');
+
+            } else {
+                var error = 'Selected Commission value exceeds!';
+                toastr.error(error, 'Error!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center'
+                });
+            }
+        }
+    });
+        $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
+            var id = $(this).parents('tr').attr('id');
+
+            var user_id = $('input[name="user_id[' + id + ']"]').val();
+            if (user_id) {
+                var index = $.inArray(user_id, selected_users);
+                if (index !== -1) {
+                    selected_users.splice(index, 1);
+                }
+            }
+            var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
+            commission_max = roundToTwo(commission_max + commission);
+            selected_commission = roundToTwo(selected_commission - commission);
+            $('#total_commission_value').html(selected_commission);
+            $('#total_commission').val(selected_commission);
+            table_2.row($(this).parents('tr')).remove().draw();
+        });
+        $('.decimal').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 100000
+        });
+
+        $('.amount').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 1000000.00
+        });
+
+        $('.percent').inputmask({
+            'alias': 'numeric',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 500
+        });
+        $('.numeric').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 1000000
+        });
+        $('.dec-percent').inputmask("Regex", {
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
+        });
+
+         $('#ratesAdditionForm').submit(function (cz) {
+            if (table_2.data().count() === 0) {
+                toastr.error('Enter Atleast One Row', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                cz.preventDefault();
+            } else {
+                $('#ratesAdditionForm').submit()
+            }
+        });
+
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='search_cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $('body').on('change','#search_iban',function() {
@@ -569,6 +908,12 @@
             placeholder: "Select Sub Segment",
             width:'100%',
             dropdownParent:$('#set_segments')
+        });
+
+        $("#user_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Users",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
         });
         
         $("#bulk_segment1").prepend('<option value="" selected></option>').select2({
@@ -644,6 +989,7 @@
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
+                        // head.push('ESO Tagged');
                         head.push('Rate Status');
                         head.push('Rates Status Remarks');
                         head.push('Rates Added By');
@@ -665,12 +1011,15 @@
                         head.push('Segment');
                         head.push('Sub Category Segment');
                         head.push('Referral Code');
+                        head.push('Payment Cycle');
+                        head.push('Payment Cycle Days');
+
                         $.each(result.data, function(index, values) {
                             row = [];
 
 
                             row.push(index + 1);
-                            row.push(values.id_padded);
+                            row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
@@ -684,6 +1033,7 @@
                             row.push(values.tagged_poc);
                             row.push(values.kam);
                             row.push(values.ref);
+                            // row.push(values.eso);
                             row.push(values.rate_status);
                             row.push(values.rejected_reason);
                             row.push(values.rates_added_by);
@@ -705,7 +1055,8 @@
                             row.push(values.segment);
                             row.push(values.sub_segment);
                             row.push(values.referral_name);
-
+                            row.push(values.payment_cycle);
+                            row.push(values.payment_cycle_days);
                             body.push(row);
                         });
                     },
@@ -953,81 +1304,16 @@
                         className: 'btn btn-primary tag',
                         enabled:false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-
+                            if(selected_rows_2 != ''){
                                 $('#SalesTierTypeTagModal').modal('show');
-                                $('#salesTierTypeTagSubmit').on('click',function () {
-                                    var poc = $('#poc').val();
-                                    var kam = $('#kam').val();
-                                    var ref = $('#ref').val();
-                                    swal({
-                                        text: 'Are you sure, you want to Tag?',
-                                        icon: 'info',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'No',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                            confirm: {
-                                                text: 'Yes',
-                                                value: true,
-                                                visible: true,
-                                                closeModal: true
-                                            }
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    }).then(function(confirm) {
-                                        if (confirm) {
+                                var route = '{!! route('admin.accounts.add_rate_commission_corporate_reimb', ':shippers') !!}';
+                                route = route.replace(':shippers', encodeURIComponent(selected_rows_2));
+                                $("#SalesTierTypeTagModal #ratesAdditionForm").attr('action', route);
 
-                                            $.ajax({
-                                                url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'poc': poc,
-                                                    'kam': kam,
-                                                    'ref': ref,
-                                                    'shipper_ids[]': selected_rows,
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                                .done(function (data) {
-                                                    if (data.status === 0) {
-                                                        toastr.error(data.error, 'Error!', {
-                                                            positionClass: 'toast-top-center',
-                                                            containerId: 'toast-top-center'
-                                                        });
-                                                    } else {
-                                                        $('#SalesTierTypeTagModal').modal('hide');
-                                                        toastr.success(data.success, 'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                    }
-                                                    selected_rows = [];
-
-                                                    table.rows().deselect();
-                                                    // $('#poc').val('').trigger('change');
-                                                    // $('#kam').val('').trigger('change');
-                                                    // $('#ref').val('').trigger('change');
-                                                    $('#SalesTierTypeTagModal').modal('hide');
-                                                    table.draw(true);
-                                                    table.button('.tag').disable();
-                                                    table.button('.assign_rider').disable();
-                                                    table.button('.bulk_segment_tagging').disable();
-                                                    
-
-
-                                                });
-                                        }
-                                    });
-                                });
+                                $('#shipper_ids_msg').text("Selected Shipper:"+ selected_rows_2)
 
                             }else{
-                                var error = "Atleast Select One Shipper";
+                                var error = "Inappropiate Corporate Type Selected OR Rates Are Rejected !!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                         }
@@ -1203,6 +1489,7 @@
                 {data: 'tagged_poc', name: 'p.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'rate_status', name: 'users.rate_status', class: 'align-middle rate_status'},
                 {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -1224,6 +1511,8 @@
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
+                {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -1256,7 +1545,16 @@
                     '<option value="3">Rejected</option>' +
                     '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
 
+                        '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -1278,7 +1576,12 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }
+                    } else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1301,6 +1604,14 @@
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+                $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    });
                 var data1 = $.map({!! $products !!}, function (obj) {
                     obj.id = obj.id // replace pk with your identifier
 
@@ -1584,21 +1895,27 @@
             dropdownParent:$('#SalesTagModal1')
         });
 
-        $("#poc").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select POC",
-            width:'100%',
-            dropdownParent:$('#SalesTierTypeTagModal')
-        });
-        $("#kam").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select KAM",
-            width:'100%',
-            dropdownParent:$('#SalesTierTypeTagModal')
-        });
-        $("#ref").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select REFFERAL",
-            width:'100%',
-            dropdownParent:$('#SalesTierTypeTagModal')
-        });
+        // $("#poc").prepend('<option value="" selected></option>').select2({
+        //     placeholder: "Select POC",
+        //     width:'100%',
+        //     dropdownParent:$('#SalesTierTypeTagModal')
+        // });
+        // $("#kam").prepend('<option value="" selected></option>').select2({
+        //     placeholder: "Select KAM",
+        //     width:'100%',
+        //     dropdownParent:$('#SalesTierTypeTagModal')
+        // });
+        // $("#ref").prepend('<option value="" selected></option>').select2({
+        //     placeholder: "Select REFFERAL",
+        //     width:'100%',
+        //     dropdownParent:$('#SalesTierTypeTagModal')
+        // });
+
+        // $("#eso").prepend('<option value="" selected></option>').select2({
+        //     placeholder: "Select ESO",
+        //     width:'100%',
+        //     dropdownParent:$('#SalesTierTypeTagModal')
+        // });
 
         
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
@@ -1658,12 +1975,27 @@
             }
         });
 
+        var selected_rows_2 = [];
 
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                 console.log(id);
                 var index = $.inArray(id, selected_rows);
+                var index_2 = $.inArray(id, selected_rows_2);
 
+                var dataTable = $('#datatable').DataTable();
+                var tr = $(this).closest('tr');
+                var row = dataTable.row(tr);
+                var rowData = row.data();
+                var cond = (rowData.account_type_id == 2 && rowData.corporate_rate_type_id == 3 && rowData.status_id != 2) ||
+               (rowData.account_type_id == 1 && rowData.status_id != 2);
+               
+               if (index_2 === -1 && cond) {
+                    selected_rows_2.push(id);
+                }else {
+                    if(selected_rows_2.includes(id)){
+                        selected_rows_2.splice(index_2, 1);
+                    }
+                }
                 if (index === -1) {
                     selected_rows.push(id);
                 }
@@ -1674,18 +2006,18 @@
                 if (selected_rows.length > 0) {
                     table.button('.assign_rider').enable();
                     table.button('.bulk_segment_tagging').enable();
-                    
+                    table.button('.tag').enable();
+
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
-                    table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign_rider').disable();
                     table.button('.bulk_segment_tagging').disable();
-                    
+                    table.button('.tag').disable();
+
                     table.button('.territory_tag').disable();
                     table.button('.territory_retag').disable();
-                    table.button('.tag').disable();
                 }
         });
 
@@ -1735,11 +2067,7 @@
             }
 
         });
-        $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
-            $('#SalesTierTypeTagModal #poc').val('').trigger('change');
-            $('#SalesTierTypeTagModal #kam').val('').trigger('change');
-            $('#SalesTierTypeTagModal #ref').val('').trigger('change');
-        });
+    
 
         $( "#set_territory" ).validate({
             errorClass:"danger",
@@ -1905,6 +2233,8 @@
             this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9.%.]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
         }
     });
+
+  
 }
 </script>
 

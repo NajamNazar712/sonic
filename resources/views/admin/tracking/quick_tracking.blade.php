@@ -14,7 +14,9 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <div>
+                                <button class="btn btn-primary d-none" id="remarks_btn">Add Remarks</button>
+                            </div>
                             <form action="#" id="quick_tracking_form">
                                 <div class="row justify-content-center mb-2">
                                     <div class="row">
@@ -40,9 +42,11 @@
                                             </div>
                                         </fieldset>
                                     </div>
+
+                                   
                                 </div>
                             </form>
-
+                          
                             <div id="single_div" class="d-none">
                                 <div class="row">
                                 <div class="col-3"><div class="card text-center">
@@ -174,10 +178,35 @@
                             </div>
 
                 
-
-
-
-
+                        <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Add Remarks</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <form method="post" id="add_remarks_form" action="{{ route('admin.quick_tracking.update_remarks') }}"
+                                            class="form-horizontal mb-1 justify-content-center">
+                                            @csrf
+                                            <input type="hidden" id="tracking_numbers" name="tracking_numbers">
+                                            <div class="form-group ml-1">
+                                                <textarea name="add_remark" id="add_remark" class="form-control" rows="4"
+                                                data-rule-required="true" data-msg-required="Remarks is required"
+                                                placeholder="Add Remarks*"></textarea>
+                                            </div>
+                                            <div class="form-group ml-1">
+                                                <button type="submit" name="add" class="btn btn-primary">Add</button>
+                                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <div id="bag_single_div" class="d-none">
                                 <div class="row">
                                 <div class="col-3"><div class="card text-center">
@@ -447,7 +476,9 @@
             background-color: darkgrey;	
         }
 
-
+        .text-red {
+            color: red;
+        }
 
     </style>
 @endsection
@@ -456,7 +487,7 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
@@ -465,15 +496,20 @@
     <script type="text/javascript">
     
         $(document).ready(function () {
+            
             var table;
             var bag_table;
             var selection = true;
             var isSingleMode = true; 
-            
+            var tracking_numbers_remarks = [];
+            var remarksChecked = null;
 
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
                 isSingleMode = single_multiple_switch.checked;
+                tracking_numbers_remarks = []
+                $('#remarks_btn').addClass('d-none');
+                $('#add_remark').val('');
 
                 if (isSingleMode === true) {
                    selection = true;
@@ -506,7 +542,8 @@
                     bag_table.destroy();
                     bag_table = undefined;
                 }
-}
+            }
+           
             function init() {
                 table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -537,7 +574,6 @@
                     ],
                     rowCallback: function(row, data, index) {
                         var complaint_id = $(row).find("td:eq(3)").html();
-                        console.log(complaint_id);
                         var status = parseInt($(row).attr('id'));
                         if(status === 13){
                             $(row).addClass('greenClass');
@@ -640,29 +676,7 @@
                 });
             }
 
-            $('#scan_btn').change(function() {
-                if ($(this).is(':checked')) {
-                    $('#scan_bag').show();
-                    $('#multiple_div').hide();
-                    $('#bag_multiple_div').show();
-                    $('#scan_tracking').hide();
-                    $('#single_div').hide();
-                    $('#bag_single_div').show();
-
-                    
-
-                }else {
-                    $('#scan_tracking').show();
-                    $('#multiple_div').show();
-                    $('#bag_multiple_div').hide();
-                    $('#scan_bag').hide();
-                    $('#bag_single_div').hide();
-                    $('#single_div').show();
-
-
-
-                }
-            });
+            
 
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
@@ -683,15 +697,38 @@
             $('input#scan_tracking').focus();
             $('input#scan_bag').focus();
 
-           
 
+            $('#remarks_btn').on('click', function(){
+                $('#AddRemarksModal').modal('show');
+            })
+
+            setTimeout(function () {
+                $(".alert-success").fadeOut(1000);
+            }, 3000); 
+
+            $('#scan_btn').change(function() {
+                remarksChecked = $(this).is(':checked');;
+                if (!remarksChecked && tracking_numbers_remarks.length > 0 ) {
+                    $('#remarks_btn').removeClass('d-none');
+                }else{
+                    $('#remarks_btn').addClass('d-none');
+                }
+            })
+            
+
+            function updateRemarks(tracking, byDefault) {
+                tracking_numbers_remarks = (!remarksChecked && byDefault === 'single') ? [tracking] : tracking_numbers_remarks.concat(!remarksChecked ? [tracking] : []);
+                if (tracking_numbers_remarks.length > 0) {
+                    $('#remarks_btn').removeClass('d-none');
+                    $('#AddRemarksModal input[name="tracking_numbers"]').val(tracking_numbers_remarks);
+                }
+            }
 
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
-
-
+           
                 if (tracking != '') {
                     scan.attr('disabled', true);
                     if(selection === false){
@@ -711,7 +748,7 @@
                                     scan_sound(2);
                                 }else{
                                     var rowNo = table.rows().count();
-
+                                    updateRemarks(tracking, 'multiple')
                                     table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
@@ -736,7 +773,7 @@
                                         scan_sound(2);
                                     }else{
                                         var rowNo = table.rows().count();
-
+                                        updateRemarks(tracking, 'multiple')
                                         table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
@@ -781,6 +818,7 @@
                                     $('#status_card').removeClass('cyanClass');
                                     $('#status_card').removeClass('grey');
                                 }
+                                updateRemarks(tracking, 'single')
 
                                 scan_sound(1);
                                 $('#single_div p.track').text(data.details.tracking_number);
@@ -972,6 +1010,44 @@
 
                     }
                 }
+            });
+            
+            $('#scan_btn').change(function() {
+                var isChecked = $(this).is(':checked');
+                $('#add_remark').val('');
+                $()
+                if (isChecked) {
+                    // If the checkbox is checked
+                    $('#scan_bag').show();
+                    $('#multiple_div').hide();
+                    $('#bag_multiple_div').show();
+                    $('#scan_tracking').hide();
+                    $('#single_div').hide();
+                    $('#bag_single_div').show();
+                } else {
+                    // If the checkbox is not checked
+                    $('#scan_tracking').show();
+                    $('#multiple_div').show();
+                    $('#bag_multiple_div').hide();
+                    $('#scan_bag').hide();
+                    $('#bag_single_div').hide();
+                    $('#single_div').show();
+                }
+            });
+
+            $("#add_remarks_form").validate({
+                rules: {
+                    add_remark: {
+                        required: true
+                    }
+                },
+                messages: {
+                    add_remark: {
+                        required: "Remarks is required"
+                    }
+                },
+                errorClass: "text-red", 
+                errorElement: "span"  
             });
         });
     </script>

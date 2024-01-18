@@ -108,6 +108,11 @@ class RetailAdminAccounts extends Controller
     }
 
     public function retail_bank_info_update(Request $request){
+
+      if(strlen($request->iban) !== 24){
+        return redirect()->back()->with('error', 'Invalid Iban No');
+      }
+      
         $shipper_account = RetailShipperInfo::find($request->id);
         if($shipper_account){
             $shipper_account->iban = $request->iban;

@@ -20,6 +20,7 @@
                         <th class="border-primary border-darken-1">Trax ID</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">Phone Number</th>
                         <th class="border-primary border-darken-1">CNIC</th>
@@ -217,6 +218,7 @@
                             head.push('Trax ID');
                             head.push('City');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Name');
                             head.push('Phone Number');
                             head.push('CNIC');
@@ -236,6 +238,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.city);
                                 row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.name);
                                 row.push(values.phone_no);
                                 row.push(values.cnic);
@@ -294,6 +297,7 @@
                     { data:'trax_id' ,name: 'retail_users.trax_id', class: 'align-middle text-center trax_id'},
                     { data:'city' ,name: 'c.name', class: 'align-middle text-center city'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle text-center hub'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle text-center zone'},
                     { data:'name' ,name: 'retail_users.name', class: 'align-middle text-center name'},
                     { data:'phone_no' ,name: 'retail_users.phone_no', class: 'align-middle text-center phone_no'},
                     { data:'cnic' ,name: 'retail_users.cnic', class: 'align-middle text-center cnic'},

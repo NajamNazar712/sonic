@@ -416,19 +416,31 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        $airway_bill_address_visibility_users = 1;
-        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        $parcel_bypass = 0;
+        $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
         if ($settings->exists()) {
             $settings = $settings->first();
             if ($settings->text != NULL) {
-                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                    $parcel_bypass = 1;
+                }
+            }
+        }
+
+        $airway_bill_address_visibility_users = 1;
+        $bypass_settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($bypass_settings->exists()) {
+            $bypass_settings = $bypass_settings->first();
+            if ($bypass_settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $bypass_settings->text));
                 if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
                     $airway_bill_address_visibility_users = 0;
                 }
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users]);
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users, 'parcel_bypass' => $parcel_bypass]);
     }
 
     public function shipping_modes(Request $request)
@@ -506,14 +518,18 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
         $validate = Validator::make($request->all(), $rules);
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
-        } else {
+        }
+        else {
+            if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            {
+                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+            }
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
             if ($request->filled('open_shipment')) {
@@ -2860,6 +2876,22 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $pieces_quantity = $data['pieces_quantity'];
+            if ($value) {
+                if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
+                    return false;
+                }
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                    return false;
+                }
+                else
+                    return true;
+            }
+        });
+
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -2969,6 +3001,7 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_value' => ':attribute is required',
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
         ];
 
         $rules = [
@@ -3049,7 +3082,7 @@ class ShipperShipmentBookController extends Controller
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
                 $query->whereIn('id', [4]);
             })],
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
@@ -3060,7 +3093,11 @@ class ShipperShipmentBookController extends Controller
             'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
-
+            'pieces_quantity' => [
+                'nullable',
+                'integer',
+                'pieces_check'
+            ],
         ];
 
 
@@ -3245,30 +3282,47 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
-//                if (array_key_exists("amount", $row))
-//                {
-//                    if ($row['amount'] == 0) {
-//                        $rules['parcel_value'] = [
-//                            'required_if:amount,0',
-//                            'numeric',
-//                            'digits_between:1,20',
-//                            'min:1'];
-//                    }
-//                }
+                if($omni == 1){
+                    if($rows[$key]['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
                 if(in_array($row['service_type_id'],[1,2]))
                 {
-                    $rules['parcel_value'] = [
-                        'nullable',
-                        'integer',
-                        'min:1',
-                        'digits_between:1,20' ,
-                        Rule::requiredIf(function () use ($row) {
-                            return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                        })
-                    ];
+                    $parcel_bypass = 0;
+                    $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        if ($settings->text != NULL) {
+                            $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                            if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                                $parcel_bypass = 1;
+                            }
+                        }
+                    }
+                    if(!$parcel_bypass){
+                        $rules['parcel_value'] = [
+                            'nullable',
+                            'integer',
+                            'min:1',
+                            'digits_between:1,20' ,
+                            Rule::requiredIf(function () use ($row) {
+                                return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                            })
+                        ];
+                    }
                 }
 
 
@@ -3326,6 +3380,12 @@ class ShipperShipmentBookController extends Controller
 
                                 if (!$user_return_info->status) {
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
+                                }
+                            }
+                            else{
+                                $return_address_id = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                                if($return_address_id->exists()){
+                                    $row['return_address_id'] = $return_address_id->first()->id;
                                 }
                             }
                         }
@@ -3802,6 +3862,10 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
+        if ($request->input('shipping_mode') != 2 && $request->input('pieces_quantity') > 10)
+            {
+                return back()->with(['error' => "Pieces quantity should be less then and equal to 10 if shipping mode is not saver plus !"]);
+            }
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
@@ -4898,6 +4962,22 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('pieces_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $pieces_quantity = $data['pieces_quantity'];
+            if ($value) {
+                if ($shipping_mode_id == 2 && ($value < 1 || $value > 500)) {
+                    return false;
+                }
+                elseif($shipping_mode_id != 2 && ($value < 1 || $value > 10)) {
+                    return false;
+                }
+                else
+                    return true;
+            }
+        });
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -4994,6 +5074,7 @@ class ShipperShipmentBookController extends Controller
             'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'origin_check' => 'Origin city not allowed, please contact your sales person!',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
+            'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
         ];
 
         $rules = [
@@ -5022,7 +5103,7 @@ class ShipperShipmentBookController extends Controller
             'item_insurance' => ['required_if:service_type_id,1,2,5', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-            'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            //'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
 
             'item_product_type_id_1' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
             'item_description_1' => ['required_if:service_type_id,3', 'nullable', 'between:0,1000'],
@@ -5063,13 +5144,6 @@ class ShipperShipmentBookController extends Controller
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'parcel_value' => [
-                'required_if:amount,0',
-                'nullable',
-                'integer',
-                'digits_between:1,20' ,
-                //'check_parcel_value',
-                'min:1'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -5084,6 +5158,11 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+            'pieces_quantity' => [
+                'nullable',
+                'integer',
+                'pieces_check'
+            ],
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
@@ -5288,8 +5367,22 @@ class ShipperShipmentBookController extends Controller
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
-
+                if($omni == 1){
+                    if($row['return_address_id'] == null){
+                        $return_address = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                        if($return_address->exists()){
+                            $rows[$key]['return_address_id'] = $return_address->first()->id;
+                        }
+                        else{
+                            $rows[$key]['return_address_id'] = $row['return_address_id'];
+                        }
+                    }
+                    else{
+                        $rows[$key]['return_address_id'] = $row['return_address_id'];
+                    }
+                }else{
+                    $rows[$key]['return_address_id'] = $row['return_address_id'];
+                }
 
 //                if (array_key_exists("amount", $row))
 //                {
@@ -5303,15 +5396,28 @@ class ShipperShipmentBookController extends Controller
 //                    }
 //                }
 
-                $rules['parcel_value'] = [
-                    'nullable',
-                    'integer',
-                    'min:1',
-                    'digits_between:1,20' ,
-                    Rule::requiredIf(function () use ($row) {
-                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                    })
-                ];
+                $parcel_bypass = 0;
+                $settings = GlobalSettings::where('type', 'parcel_value_bypass_users');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    if ($settings->text != NULL) {
+                        $parcel_value_bypass_accounts = array_map('intval', explode(',', $settings->text));
+                        if (in_array(session('user_id'), $parcel_value_bypass_accounts)) {
+                            $parcel_bypass = 1;
+                        }
+                    }
+                }
+                if(!$parcel_bypass){
+                    $rules['parcel_value'] = [
+                        'nullable',
+                        'integer',
+                        'min:1',
+                        'digits_between:1,20' ,
+                        Rule::requiredIf(function () use ($row) {
+                            return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                        })
+                    ];
+                }
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -5381,6 +5487,12 @@ class ShipperShipmentBookController extends Controller
 
                                 if (!$user_return_info->status) {
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
+                                }
+                            }
+                            else{
+                                $return_address_id = UserShippingInfo::where('user_id', $user_id)->where('status', 1)->where('default_return_address', 1);
+                                if($return_address_id->exists()){
+                                    $row['return_address_id'] = $return_address_id->first()->id;
                                 }
                             }
 

@@ -143,7 +143,6 @@ class ShipperDashboardController extends Controller
 
             $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
             $special_shippers = explode(',', $shippers->text);
-       
 
             if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
@@ -241,7 +240,7 @@ class ShipperDashboardController extends Controller
                 $routes = array();
                 $riders = array();
                 $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-                if(count($pickup_address_ids) > 0){
+                if((count($pickup_address_ids) > 0) && (count($pickup_address_ids) < 100)){
                     $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
                     $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
                     $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
@@ -624,65 +623,6 @@ class ShipperDashboardController extends Controller
              $connection = 'mysql';
          }
 
-        $count = DB::connection($connection)->table('shipments')
-        
-        
-        ->where(function ($query) use ($masp, $request) {
-            if(isset($request->search_account_type) && count($request->search_account_type) > 0){
-                $query->whereIn('shipments.user_id', $request->search_account_type);
-            } else {
-                $query->whereIn('shipments.user_id', $masp);
-            }
-        });
-
-        // ->where(function ($query){ 
-        //     $query->where('shipments.user_id', session('user_id'))
-        //         ->orwhereIn('shipments.user_id', session('sister_users'));
-        // });
-
-      
-
-        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
-            $count = $count->whereBetween('shipments.created_at', [$from, $to]);
-        }
-
-        $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
-
-        $to_id = NULL;
-
-        if ($from_id->exists()) {
-            $from_id = $from_id->first()->id;
-
-            $to_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from)->where('created_at', '<=', $to)->where('id', '>=', $from_id);
-
-            if ($to_id->exists()) {
-                $to_id = $to_id->orderBy('id', 'DESC')->first()->id;
-            }
-            else {
-                $to_id = NULL;
-            }
-        }
-        else {
-            $from_id = NULL;
-        }
-
-        if ($from_id && $to_id) {
-            $count = $count->where('shipments.id', '>=', $from_id)
-                ->where('shipments.id', '<=', $to_id);
-        }
-
-        $from_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-
-        if ($from_sj_id->exists()) {
-            $from_sj_id = $from_sj_id->first()->id;
-        }
-        else {
-            $from_sj_id = NULL;
-        }
-
-        $count = $count->count();
 
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
@@ -693,10 +633,10 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->join('shipments_journey', function ($join) use($from) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.created_at > "'. $from .'")'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -707,6 +647,8 @@ class ShipperDashboardController extends Controller
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
+
+
 
         $shipments = $shipments->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
@@ -726,17 +668,12 @@ class ShipperDashboardController extends Controller
             }
         }
 
-        if ($from_id && $to_id) {
-            $shipments = $shipments->where('shipments.id', '>=', $from_id)
-                ->where('shipments.id', '<=', $to_id);
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
-
-        if ($from_sj_id) {
-            $shipments = $shipments->where('shipments_journey.id', '>=', $from_sj_id);
-        }
-
         $datatable = Datatables::of($shipments)
-            ->setTotalRecords($count)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -868,11 +805,6 @@ class ShipperDashboardController extends Controller
 
             if ($phone_number = $request->get('phone_number')) {
                 $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-            }
-            if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
-                $from = $request->get('booking_from_date');
-                $to = $request->get('booking_to_date');
-                $datatable->whereBetween('shipments.created_at', [$from,$to]);
             }
 
             return $datatable->make(true);
@@ -1123,9 +1055,37 @@ class ShipperDashboardController extends Controller
 
     //User Profile
 
+    function user_payment_cycles_days($user){
+        $payment_cycle_days = explode(',', $user->payment_cycle_days);
+        $weekly = [2, 4, 5]; // Twice, Thrice, and Weekly.
+        $fort_month = [3, 6]; // Monthly and Fortnight.
+        $days = [];
+    
+        if (isset($user->payment_cycle->id)) {
+            if (in_array($user->payment_cycle->id, $weekly)) {
+                foreach ($payment_cycle_days as $payment_cycle_day) {
+                    $date = Carbon::now()->startOfWeek()->addDays($payment_cycle_day - 1);                                                
+                    $dayName = $date->format('l');
+                    $days[] = $dayName;
+                }
+            } else if (in_array($user->payment_cycle->id, $fort_month)) {
+                $days[] = "Every " . implode(', ', $payment_cycle_days) . " of the month";
+            } else {//Daily
+                $days[] = 'Daily';
+            }
+        } else {
+            $days[] = 'Payment Cycle Not Defined'; 
+        }
+    
+        $days = implode(', ', $days);
+    
+        return $days;
+    }
+
     public function userProfile()
     {
         $user = User::find(session('user_id'));
+        $payment_cycle_days = $this->user_payment_cycles_days($user);
         $product = Product::find($user->product_id);
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
@@ -1135,7 +1095,7 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list]);
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function verifyPincode(Request $request)
@@ -1205,7 +1165,7 @@ class ShipperDashboardController extends Controller
 
     public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name'])
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -1221,22 +1181,45 @@ class ShipperDashboardController extends Controller
             $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
+            $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             if ($pickup->default_address == 1) {
-                $dropdown = 'Default Address';
+                $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
+            }
+            else{
+                $dropdown .= $default_button;
+            }
+
+            if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
+                $dropdown .= $edit_button;
+            }
+            if ($pickup->status == 0) {
+                $dropdown .= $enable_button;
             }
             else {
-                if(!Shipment::where('pickup_address_id', $pickup->id)->where('shipper_status_id', '>', 1)->exists()){
-                    $dropdown .= $edit_button;
+                if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
+                    $dropdown .= $disable_button;
                 }
-                if ($pickup->status == 0) {
-                    $dropdown .= $enable_button;
-                }
-                else {
-                    $dropdown .= $default_button;
+            }
 
-                    if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
-                        $dropdown .= $disable_button;
+
+            $omni_user = false;
+            $settings = GlobalSettings::where('type', 'omni_users');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if ($settings->text != NULL) {
+                    $omni_accounts = array_map('intval', explode(',', $settings->text));
+                    if (in_array($pickup->user_id, $omni_accounts)) {
+                        $omni_user = true;
                     }
+                }
+            }
+
+            if($omni_user){
+                if((!$pickup->default_return_address) && ($pickup->status == 1)){
+                    $dropdown .= $return_default_button;
+                }
+                elseif ($pickup->default_return_address){
+                    $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Return Address</label>';
                 }
             }
 
@@ -1295,6 +1278,20 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already default Pickup Address"]);
                 }
 
+            }
+            else if ($status == 'return_default')
+            {
+                if($shipping_info->default_return_address == 0)
+                {
+                    $shipping_info->default_return_address = 1;
+                    $shipping_info->save();
+                    UserShippingInfo::where('user_id', $shipping_info->user_id)->where('id', '!=', $pickup_id)->update(['default_return_address' => 0]);
+                    return response()->json(['status'=>1,'success'=>"This Address is now default Return Address"]);
+                }
+                else
+                {
+                    return response()->json(['status'=>0,'error'=>"This Address is already default Return Address"]);
+                }
             }
         }else{
             return response()->json(['status'=>0,'error'=>"Pickup Address doesn\'t exist!"]);
