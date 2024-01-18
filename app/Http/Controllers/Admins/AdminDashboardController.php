@@ -63,7 +63,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\SalesTierTypeTag;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\Rates\RateHistory;
@@ -217,9 +216,6 @@ class AdminDashboardController extends Controller
         6 => 'Saturday',
     ];
 
-    public function payfast_payment_details(){
-        return view('payfast-payment-view');
-    }
     public function index()
     {
          return view('admin.simple_dashboard');
