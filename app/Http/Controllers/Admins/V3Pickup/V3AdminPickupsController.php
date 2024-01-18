@@ -1741,6 +1741,7 @@ class V3AdminPickupsController extends Controller
 
     public function arrival_individual_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 730);
         $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
         if ($settings) {
