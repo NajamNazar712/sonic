@@ -73,12 +73,14 @@
                                         <tr role="row" class="bg-primary white">
                                             <th class="border-primary border-darken-1">Sack Bag No#</th>
                                             <th class="border-primary border-darken-1">Remark</th>
+                                            <th class="border-primary border-darken-1">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="sackbag_detail">
                                         <tr>
-                                            <td><input type="text" name="sack_bag_no[]" class="form-control"></td>
-                                            <td><input type="text" name="remarks[]" class="form-control"></td>
+                                            <td><input type="text" name="sack_bag_no[]" class="form-control" ></td>
+                                            <td><input type="text" name="remarks[]" class="form-control" ></td>
+                                            <td><span class="btn btn-danger" id="remove_row">x</span></td>
                                         </tr>
                                     </tbody>
                                     
@@ -536,6 +538,7 @@
             // });
             $("#add_sack_bag_form").validate({
                 errorClass: "danger",
+                successClass: 'success',
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -545,67 +548,15 @@
             });
 
 
-          
-        
+         
            
-            // increment and decrement buttons
-
-            $('.quantity').TouchSpin({
-                min: 0,
-                max: 1000,
-                buttondown_class: 'btn btn-primary rounded-left',
-                buttonup_class: 'btn btn-primary rounded-right',
-                buttondown_txt: '<i class="ft-minus"></i>',
-                buttonup_txt: '<i class="ft-plus"></i>'
-            }).bind('input change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-            });
-
-            $('#add_pickup_request').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-              
-                submitHandler: function(form) {
-                    $('#add_pickup_request button#add').prop('disabled', true);
-                    // $('#product_select').attr('disabled', false);
-                    if($('.apply-checked:checked').length>0 || $("#regular_pickup").val()==1){
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Pickup request is being added!',
-                            icon: 'info',
-                        buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        form.submit();
-                    }else{
-                        toastr.error('Select Days in Schedule', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                    }
-                  
-               
-                }
-            });
-
-            $('.apply-checked').change(function() {
-
-                if ($(this).is(':checked')) {
-
-                    $(this).attr('checked', 'checked');
-
-                } else {
-
-                    $(this).removeAttr('checked');
-                }
-            });
             $("#addrow").click(function(){
-                var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td></tr>';
+                var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
                 $("#sackbag_detail").append(row);
+            });
+          
+            $('body').on('click','#remove_row',function(){
+                $(this).closest('tr').remove();
             });
 
         });
