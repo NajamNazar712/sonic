@@ -48,8 +48,29 @@
                 <input type="hidden" name="number_of_available_agents_value_div" id="number_of_available_agents_value_div">
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
-                {{-- <form id="search_rvr" class="card-body card-dashboard" novalidate="novalidate"> --}}
                 <div class="row justify-content-center" >
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-clock text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <p id="total_sar" class="d-inline">
+                                                    {{ ($total_of_shipments) }}</p>
+                                                {{-- ({{ round($percentage_total_of_shipment) }}%) --}}
+                                            </h3>
+                                            <span>Total Of Shipments</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="col-3" id="search_rvr_div">
                         <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                             <div class="card-content">
@@ -71,7 +92,6 @@
                             </div>
                         </div>
                     </div>
-                    {{-- </form> --}}
 
 
                     <div class="col-3">
@@ -96,27 +116,7 @@
                         </div>
                     </div>
 
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-clock text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="total_sar" class="d-inline">
-                                                    {{ ($total_of_shipments) }}</p>
-                                                {{-- ({{ round($percentage_total_of_shipment) }}%) --}}
-                                            </h3>
-                                            <span>Total Of Shipments</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <div class="col-3">
                         <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">

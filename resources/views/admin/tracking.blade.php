@@ -2267,6 +2267,7 @@
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
                 if (id != '') {
+                    //Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     if (status_id == 12 || status_id == 52) {
                         var url = redirect.replace(':id', id);
@@ -2289,8 +2290,6 @@
                     tracking + '</b></span></div>';
                 $('#return_shipment_id').val(id);
                 $('#return_shipments').html(tracking_rows);
-                //$('#return_reason_select').val(0);
-                //$("#return_reason_select").empty();
 
                 $('#ReturnConfirmReasonModal').modal('show');
 

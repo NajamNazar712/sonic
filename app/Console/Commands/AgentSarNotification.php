@@ -17,7 +17,7 @@ class AgentSarNotification extends Command
      *
      * @var string
      */
-    protected $signature = 'agent:SarNotification';
+    protected $signature = 'agent:sarnotification';
 
     /**
      * The console command description.

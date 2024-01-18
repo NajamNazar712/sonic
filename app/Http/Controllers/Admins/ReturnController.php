@@ -1317,11 +1317,6 @@ class ReturnController extends Controller
                 } else {
                 }
             }
-            // $pickup_address_city = $parcel->pickup_address->city_id;
-            // if(!in_array($pickup_address_city, session('hubs')))
-            // {
-            //     return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
-            // }
             if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
