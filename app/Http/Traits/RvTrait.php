@@ -351,25 +351,6 @@ trait RvTrait
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
             $shipment_status_id = $rv_assign_agent_status->shipment_status_id; //replicate values from shipment_status table
             $call_finding_id = $rv_assign_agent_status->call_finding_id; // this is for unresponsive
-            // if ($rv_assign_agent_status && ($shipment_status_id || $call_finding_id)) {
-            //     switch ($shipment_status_id) {
-            //         case '13': //Shipment - Re-Attempt
-            //             return $this->reattempt($request);
-            //         case '15': // Shipment - On Hold for Self Collection
-            //             return $this->on_hold_for_self_collection($request);
-            //         case '20': // Return - Confirm
-            //             return $this->return_confirm($request);
-            //         case '54': // Intercept Requested
-            //             return $this->intercept($request);
-            //         case null: // Unresponsive
-            //             return $this->unresponsive($request);
-            //         case null and call_finding_id in rv_assign_agent_statuses table is also null: // Refusal On Call 
-            //             return $this->refusal_on_call($request);
-
-            //         default:
-            //             break;
-            //     }
-            // }
             if ($rv_assign_agent_status && ($shipment_status_id !== null || $call_finding_id !== null)) {
                 if ($shipment_status_id == 13) {
                     return $this->reattempt($request);

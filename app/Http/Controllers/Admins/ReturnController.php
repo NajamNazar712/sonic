@@ -401,9 +401,10 @@ class ReturnController extends Controller
                     if($shipments->reason_id == 12){
                         return 'nsa_osa_reason';
                     }
-                    if ($shipments->current_status_id == 52) {
+                    if ($shipments->current_status_id == 52 || $shipments->current_status_id == 66) {
                         return 'goldClass';
-                    }else if($shipments->booking_type_id == 3){
+                    }
+                    else if($shipments->booking_type_id == 3){
                         return "tnb_row";
                     }
                     if($shipments->current_status_id == 12 && $shipments->rider_status_id == 12 && $shipments->reason_id == 8 && $shipments->rider_otp_entered == 1){

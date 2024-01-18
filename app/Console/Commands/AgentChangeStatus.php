@@ -14,7 +14,7 @@ class AgentChangeStatus extends Command
      *
      * @var string
      */
-    protected $signature = 'agent:changeStatus';
+    protected $signature = 'agent:changestatus';
 
     /**
      * The console command description.

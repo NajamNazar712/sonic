@@ -304,23 +304,17 @@
                                                     <tr value="0" id="complaint_filter" class="complaint_row">
                                                         <td class="align-middle cursor_color">Complaint</td>
                                                     </tr>
-                                                    <tr value="0" id="out_of_service_area_filter"
-                                                        class=" nsa_osa_reason">
+                                                    <tr value="0" id="out_of_service_area_filter" class="nsa_osa_reason">
                                                         <td class="align-middle cursor_color">Out of Service Area</td>
                                                     </tr>
-                                                    <tr value="0" id="shipment_re_attempt_request_filter"
-                                                        class="goldClass">
-                                                        <td class="align-middle cursor_color">Shipment - Re-Attempt
-                                                            Requested / Re - Attempt Call Requested
-                                                        </td>
+                                                    <tr value="0" id="shipment_re_attempt_request_filter" class="goldClass">
+                                                        <td class="align-middle cursor_color">Shipment - Re-Attempt Requested / Re - Attempt Call Requested</td>
                                                     </tr>
                                                     <tr value="0" id="try_buy_filter" class="tnb_row">
                                                         <td class="align-middle cursor_color">Try & Buy</td>
                                                     </tr>
-                                                    <tr value="0" id="return_confirmation_pending_filter"
-                                                        class="GreenColor">
-                                                        <td class="align-middle cursor_color">Return Confirmation Pending
-                                                        </td>
+                                                    <tr value="0" id="return_confirmation_pending_filter" class="GreenColor">
+                                                        <td class="align-middle cursor_color">Return Confirmation Pending</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -958,10 +952,8 @@
     @endsection
 
     @section('css')
-        <link rel="stylesheet" type="text/css"
-            href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
-        <link rel="stylesheet" type="text/css"
-            href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
 
         <style>
@@ -2318,11 +2310,9 @@
                             d.star_shipper_filter = $('#star_shippers_filter').val();
                             d.complaint_filter = $('#complaint_filter').val();
                             d.out_of_service_area_filter = $('#out_of_service_area_filter').val();
-                            d.shipment_re_attempt_request_filter = $('#shipment_re_attempt_request_filter')
-                                .val();
+                            d.shipment_re_attempt_request_filter = $('#shipment_re_attempt_request_filter')val();
                             d.try_buy_filter = $('#try_buy_filter').val();
-                            d.return_confirmation_pending_filter = $('#return_confirmation_pending_filter')
-                                .val();
+                            d.return_confirmation_pending_filter = $('#return_confirmation_pending_filter').val();
                             d.search_rvr_value_div = $('#search_rvr_value_div').val();
                             d.search_sar_value_div = $('#search_sar_value_div').val();
                             d.search_total_value_div = $('#search_total_value_div').val();
