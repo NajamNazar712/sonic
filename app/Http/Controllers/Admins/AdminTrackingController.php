@@ -900,12 +900,13 @@ class AdminTrackingController extends Controller
 
     function setJourneyDetails($scanning_data) {
        if (isset($scanning_data)) {
+        // dd($scanning_data,  City::where('id', $scanning_data['hub_id'])->first()->name ?? '-');
             return [
                 'latitude' => $scanning_data['latitude'],
                 'longitude' => $scanning_data['longitude'],
                 'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
                 'area' => CityArea::find($scanning_data['area_id'])->name ?? '-', 
-                'city' => City::where('hub_id',$scanning_data['hub_id'])->name ?? '-', 
+                'city' => City::where(['id' => $scanning_data['hub_id'], 'hub'=>"1"])->first()->name ?? '-', 
 
 
             ];
@@ -1450,8 +1451,6 @@ class AdminTrackingController extends Controller
                             }
                             
                             $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
-                                                                           
-                            
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
