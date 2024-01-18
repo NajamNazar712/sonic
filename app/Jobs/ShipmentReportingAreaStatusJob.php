@@ -45,7 +45,7 @@ class ShipmentReportingAreaStatusJob implements ShouldQueue
         $areaLogId = ShipmentScanningJourneyAreaLog::latest('id')->first()->id;
         $areaLog = ShipmentScanningJourneyAreaLog::find($areaLogId);
         
-        $cityArea = $areaLog->city_area->reporting_location ?? City::where(['id' => $areaLog->hub_id, 'hub' => "1"])->first();
+        $cityArea = $areaLog->city_area->reporting_location ?? City::where(['id' => $areaLog->hub_id, 'hub' => "1"])->first() ?? null;
         
         if ($shipmentScanning && $cityArea) {
             $latitude = $cityArea->lat ?? $cityArea->location_latitude ?? null;
