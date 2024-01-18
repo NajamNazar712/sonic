@@ -4846,7 +4846,7 @@ class APIController extends Controller
                     } else {
                         $remark = null;
                     }
-                    if ($shipment->shipper_status_id == 12) {
+                    if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                         
                         Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
@@ -4898,7 +4898,7 @@ class APIController extends Controller
                         $remark = null;
                     }
                     if ($shipment->shipper_status_id != 52) {
-                        if ($shipment->shipper_status_id == 12) {
+                        if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
 
@@ -4986,7 +4986,7 @@ class APIController extends Controller
                                     $phone_number2 = $shipment->consignee_phone_number_2;
                                 }
 
-                                if ($shipment->shipper_status_id == 12) {
+                                if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                                     if ($shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
@@ -5095,7 +5095,7 @@ class APIController extends Controller
                                     $phone_number2 = $shipment->consignee_phone_number_2;
                                 }
 
-                                if ($shipment->shipper_status_id == 12) {
+                                if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                                     if ($shipment->consignee_city_id != $request->consignee_city_id || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $request->amount) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
