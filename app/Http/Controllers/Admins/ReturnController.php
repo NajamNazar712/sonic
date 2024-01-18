@@ -314,8 +314,7 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        // $unresponsive_count = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
-        $unresponsive_count = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
+        $unresponsive_count = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
 
         $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66])->get();
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
