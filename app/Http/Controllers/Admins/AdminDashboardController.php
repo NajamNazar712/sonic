@@ -9481,36 +9481,36 @@ class AdminDashboardController extends Controller
 
             })
 
-            ->editColumn('admin_tag_id', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+            // ->editColumn('admin_tag_id', function ($users) {
+            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
+            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
+            //     if (isset($shipper, $sales_tiers)) {
+            //         $sales_commission_users = DB::table('sales_commission_users')
+            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+            //         ->get();
                     
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
+            //         if ($sales_commission_users->isNotEmpty()) {
+            //             $array = [];
+            //             foreach ($sales_commission_users as $sales_commission_user) {
+            //                 $type = $sales_commission_user->user_type;
+            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
+            //                 if ($admins) {
+            //                     $array[] = $admins->name;
+            //                 } else {
+            //                     return '-';
+            //                 }
+            //             }
+            //             $array = implode(', ', $array);
+            //             return $array;
+            //         } else {
+            //             return '-';
+            //         }
+            //     } else {
+            //         return '-';
+            //     }
 
-            })
+            // })
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword == 3 || $keyword == 4) {
                     $query->where('users.status', '=', $keyword);
@@ -10068,36 +10068,36 @@ class AdminDashboardController extends Controller
             })
 
 
-            ->editColumn('admin_tag_id', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+            // ->editColumn('admin_tag_id', function ($users) {
+            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
+            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
+            //     if (isset($shipper, $sales_tiers)) {
+            //         $sales_commission_users = DB::table('sales_commission_users')
+            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+            //         ->get();
                     
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
+            //         if ($sales_commission_users->isNotEmpty()) {
+            //             $array = [];
+            //             foreach ($sales_commission_users as $sales_commission_user) {
+            //                 $type = $sales_commission_user->user_type;
+            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
+            //                 if ($admins) {
+            //                     $array[] = $admins->name;
+            //                 } else {
+            //                     return '-';
+            //                 }
+            //             }
+            //             $array = implode(', ', $array);
+            //             return $array;
+            //         } else {
+            //             return '-';
+            //         }
+            //     } else {
+            //         return '-';
+            //     }
 
-            })
+            // })
             ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -14138,19 +14138,9 @@ class AdminDashboardController extends Controller
         foreach($shipper_ids as $shipper_id)
         {
             if($request->has('user_id')){
-                
-                $user = User::find($shipper_id);
-                $action = $user->status;
 
-                if($action == 0){
-                    $user->status = 1;
-                    $user->rates_added_by = Auth::id();
-                    $user->save();
-                }
-                
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
-                $user = User::find($shipper_id);
 
                 //when shipper register
                 $sales_commission_register = SalesCommission::where('shipper_id', $shipper_id);
@@ -14163,13 +14153,15 @@ class AdminDashboardController extends Controller
 
                 $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
                 if($sales_commission->exists()){
-                    
+                    $user_type = [];
                     $sales_commission = $sales_commission->first();
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
                     $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
                     $types = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_type')->toArray();
                     foreach($types as $key => $user_type_value){
-                        $user_type[$key+1] = $user_type_value;
+                        if(isset($sales_commission_user_count[$key])){
+                            $user_type[$sales_commission_user_count[$key]] = $user_type_value ;
+                        }
                     }
                     if(count($sales_commission_user) > 0){
                         $total_commission = array_sum($sales_commission_user) + $total_commission;
@@ -14184,9 +14176,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    if($action == 0){
-                        SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                    }else if ($request->has('edit')){
+                    if ($request->has('edit')){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
                     }
 
@@ -14213,13 +14203,14 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
+                                $index = intval($request->user_id[$row_id]);
                                 if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
                                     $sales_commission_user->user_type = "2";
                                 }  
 
-                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                if(isset($user_type[$index]) && $user_type[$index] == "2"){
                                     $sales_commission_user->user_type = "2";
-                                } 
+                                }
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
                               
                             }else if($sales_tier->tier_type == 2){
@@ -14257,6 +14248,11 @@ class AdminDashboardController extends Controller
                                 if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
                                     $sales_commission_user->user_type = "2";
                                 }  
+
+                                
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                }
                         
                                 $sales_commission_user->user_id = $request->user_id[$row_id]; 
                             }else if($sales_tier->tier_type == 2){
