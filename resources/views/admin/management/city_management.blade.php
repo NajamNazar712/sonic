@@ -35,7 +35,7 @@
                                     <th class="border-primary border-darken-1" >Hub Location</th>
                                     <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
-                                    <th class="border-primary border-darken-1" >Booking Disable Status</th>
+                                    <th class="border-primary border-darken-1" >Booking Enable Status</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -162,7 +162,7 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Address');
-                            head.push('Booking Disable Status');
+                            head.push('Booking Enable Status');
 
 
                             $.each(result.data, function(index, values) {
