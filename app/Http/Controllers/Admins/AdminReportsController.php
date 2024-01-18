@@ -13287,27 +13287,33 @@ class AdminReportsController extends Controller
         // ])
         // ->get();
 
-        $sack_bag_utilization = IssueSackBagOrigin::join('cities as c', 'c.id', '=', 'issue_sack_bag_origins.sack_destination_id')->whereNotNull('issue_sack_bag_origins.sack_destination_id')
-            ->select('c.name as destination_name', 'c.id as destination_id', DB::raw('COUNT(issue_sack_bag_origins.id) AS sack_bag_count'))->groupBy('issue_sack_bag_origins.sack_destination_id');
+        $sack_bag_utilization = IssueSackBagOrigin::join('cities as dc', 'dc.id', '=', 'issue_sack_bag_origins.sack_destination_id')
+            ->join('cities as oc', 'oc.id', '=', 'issue_sack_bag_origins.origin')
+            ->whereNotNull('issue_sack_bag_origins.sack_destination_id')
+            ->select('dc.name as destination_name', 'dc.id as destination_id', 'oc.name as origin_name', 'oc.id as origin_id', 'issue_sack_bag_origins.bag_count', 'issue_sack_bag_origins.sack_bag_no', 'issue_sack_bag_origins.status')
+            ->where('issue_sack_bag_origins.bag_count', '>', 0);
+
 
         if ($destination_id = $request->get('destination_id')) {
             $sack_bag_utilization->where('issue_sack_bag_origins.sack_destination_id', $destination_id);
         }
-        $datatable = Datatables::of($sack_bag_utilization)
-            // ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
-            //     if ($sack_bag_utilization->stock_sack_bag > 0) {
-            //         return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
-            //     } else {
-            //         return 0;
-            //     }
-            // });
-            ->addColumn('sack_bag_count_btn', function ($sack_bag_utilization) {
-                if ($sack_bag_utilization->sack_bag_count > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">' . $sack_bag_utilization->sack_bag_count . '</button>';
-                } else {
-                    return 0;
-                }
-            });
+
+
+        $datatable = Datatables::of($sack_bag_utilization);
+        // ->addColumn('stock_sack_bag_btn', function ($sack_bag_utilization) {
+        //     if ($sack_bag_utilization->stock_sack_bag > 0) {
+        //         return '<button class="btn btn-sm btn-outline-info align-middle stock_sack_bag_btn">'.$sack_bag_utilization->stock_sack_bag.'</button>';
+        //     } else {
+        //         return 0;
+        //     }
+        // });
+        // ->addColumn('sack_bag_count_btn', function ($sack_bag_utilization) {
+        //     if ($sack_bag_utilization->sack_bag_count > 0) {
+        //         return '<button class="btn btn-sm btn-outline-info align-middle sack_bag_count_btn">' . $sack_bag_utilization->sack_bag_count . '</button>';
+        //     } else {
+        //         return 0;
+        //     }
+        // });
         // ->addColumn('re_used_sack_bag_btn', function ($sack_bag_utilization) {
         //     if ($sack_bag_utilization->re_used_sack_bag > 0) {
         //         return '<button class="btn btn-sm btn-outline-info align-middle re_used_sack_bag_btn">'.$sack_bag_utilization->re_used_sack_bag.'</button>';

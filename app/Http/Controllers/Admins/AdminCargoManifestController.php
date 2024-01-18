@@ -3506,6 +3506,20 @@ class AdminCargoManifestController extends Controller
         return $datatables->make(true);
     }
 
+    public function sack_bag_no_check(Request $request)
+    {
+        if ($sack_bag_no = $request->get('sack_bag_no')) {
+
+            $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no);
+            if ($sack_bag->exists()) {
+                return response()->json(['error' => 'Sack-Bag No: ' . $sack_bag_no . ' already exist ']);
+            }
+            return response()->json(['success' => 'Sack-Bag No# available']);
+        } else {
+            return response()->json(['error' => 'Sack-Bag No# not found ']);
+        }
+    }
+
     public function add_sack_bag(Request $request)
     {
         $user_id = session('id');
@@ -3515,12 +3529,20 @@ class AdminCargoManifestController extends Controller
 
             $timestamp = Carbon::now();
             foreach ($request->sack_bag_no  as  $key => $data) {
-                array_push($sackbag_array, ['sack_bag_no' => $data, 'origin' => $request->origin, 'sack_destination_id' => $request->origin, 'remarks' => $request->remarks[$key], 'user_id' => $user_id, 'type' => 1, 'created_at' =>  $timestamp, 'updated_at' =>  $timestamp, 'reporting_date' =>  $timestamp]);
+                if (!is_null($data)) {
+                    $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $data);
+                    if (!$sack_bag->exists()) {
+                        array_push($sackbag_array, ['sack_bag_no' => $data, 'origin' => $request->origin, 'sack_destination_id' => $request->origin, 'remarks' => $request->remarks[$key], 'user_id' => $user_id, 'type' => 1, 'created_at' =>  $timestamp, 'updated_at' =>  $timestamp, 'reporting_date' =>  $timestamp]);
+                    }
+                }
             }
 
             try {
-                IssueSackBagOrigin::insert($sackbag_array);
-                return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['success' => 'Sack Bag Added Successfully']);
+                if (!empty($sackbag_array)) {
+                    IssueSackBagOrigin::insert($sackbag_array);
+                    return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['success' => 'Sack Bag Added Successfully']);
+                }
+                return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added']);
             } catch (\Exception $e) {
                 return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added']);
             }

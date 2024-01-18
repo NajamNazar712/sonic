@@ -49,10 +49,15 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+                    
                     <form method="post" id="add_sack_bag_form"
                         action="{{ route('admin.cargo_manifest.bags.sack_bag.store') }}"
-                        class="form-horizontal mb-1" novalidate="novalidate">
+                        class="form-horizontal mb-1" novalidate="novalidate" onkeydown="return event.key != 'Enter';">
                         @csrf
+                        <input type="hidden" id="sack_bag_no_check">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -78,7 +83,7 @@
                                     </thead>
                                     <tbody id="sackbag_detail">
                                         <tr>
-                                            <td><input type="text" name="sack_bag_no[]" class="form-control" ></td>
+                                            <td><input id="sack_bag_no_id" type="text" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)" ></td>
                                             <td><input type="text" name="remarks[]" class="form-control" ></td>
                                             <td><span class="btn btn-danger" id="remove_row">x</span></td>
                                         </tr>
@@ -288,9 +293,13 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script>
-
+ 
 
         $(document).ready(function () {
+
+             
+
+         
             $('#estimated_weight').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -524,35 +533,61 @@
                     this.api().table().columns.adjust();
                 }
 
+               
+
             });
 
- 
 
-         
 
           
             
-            // $('#AddRemarksModal').on('hidden.bs.modal', function () {
-            //     $('#add_remark').val('');
-            //     $("#remark_pickup_request_id").val('');
-            // });
-            $("#add_sack_bag_form").validate({
-                errorClass: "danger",
-                successClass: 'success',
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function (form) {
-                    form.submit();
-                }
-            });
-
-
-         
            
-            $("#addrow").click(function(){
-                var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                $("#sackbag_detail").append(row);
+               $("#add_sack_bag_form").validate({
+                            errorClass: "danger",
+                            successClass: 'success',
+                            errorPlacement: function (error, element) {
+                                error.addClass('w-100').appendTo(element.parent('.form-group'));
+                            },
+                            submitHandler: function (form) {
+                                if($("#sack_bag_no_check").val()!=1)
+                                {
+                                    form.submit();
+                                }else{
+                                    alert("Sack Bag No# already exist");
+                                }
+                            }
+                });
+          
+
+            
+                // Check Sack Bag No#
+                $("#add_sack_bag_form").on("keydown", function(e) {
+                    if(e.which == 13 || e.keyCode == 13) {
+                        $(".errormessage").empty();
+                       var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                       if(sack_bag_no!='')
+                       {
+
+                         sack_bag_no_check(sack_bag_no);
+                          
+
+                       }else{
+                         alert('Please fill Sack Bag No#');
+                       }
+                       
+                    }
+                });
+                $("#addrow").click(function(){
+                    var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                    if(sack_bag_no!='')
+                    {
+                        
+                        sack_bag_no_check(sack_bag_no);
+                    }else{
+                         alert('Please fill Sack Bag No#');
+                    }
+                // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                // $("#sackbag_detail").append(row);
             });
           
             $('body').on('click','#remove_row',function(){
@@ -560,7 +595,45 @@
             });
 
         });
+
+        function sack_bag_check_zero(sack_bag_no)
+        {     var sack_bag_no=$(sack_bag_no).val();
+              sack_bag_no_check(sack_bag_no,'change');
+        }
         
+
+        function sack_bag_no_check(sack_bag_no,type='click')
+        {
+                 $.ajax({
+                            url: '{!! route('admin.cargo_manifest.bags.sack_bag.sack_bag_check') !!}',
+                            method: 'POST',
+                            data: {
+                                'sack_bag_no': sack_bag_no,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function(data){
+                            if(data.error)
+                            {
+                                setTimeout(() => {
+                                     $(".errormessage").empty();
+                                }, 2500);
+                                $(".errormessage").append('<div class="alert alert-danger">'+data.error+'</div>');
+                                $(".errormessage").show();
+                                $("#sack_bag_no_check").val(1);
+                            }else{
+                                    
+                                    if(type!='change')
+                                    {
+                                        var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                                        $("#sackbag_detail").append(row);
+                                    }
+                                    $("#sack_bag_no_check").val(0);
+                            }
+                });
+                          
+        }
+
+      
   
     </script>
 @endsection

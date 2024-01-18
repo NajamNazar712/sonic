@@ -119,18 +119,19 @@
                                                 <div class="row">
                                                     <div class="col-md-12">
                                                         <div class="form-group ml-lg-2">
-                                                            <input class="form-check-input" type="checkbox" value="" id="is_sack_bag_check">
+                                                            <input class="form-check-input" type="checkbox" value="" id="is_not_sack_bag_check">
                                                             <label class="form-check-label" for="flexCheckDefault">
-                                                                Is Sack Bag
+                                                                Is Not Sack Bag
                                                             </label>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="row" id="sackbag_row" style="display: none">
+                                                <div class="row" id="sackbag_row">
                                                     <div class="col-6">
                                                         <div class="form-group">
                                                             <label for="origin">Sack Bag</label>
-                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no">
+                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no" data-rule-required="true" data-msg-required="Sack Bag No is Required">
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -757,14 +758,16 @@
                 piece_table.clear().draw();
             });
 
-            $("#is_sack_bag_check").on('change',function(){
-                if($("#is_sack_bag_check").is(":checked")) {
-                    $("#sackbag_row").css('display','block');
-                    $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
+            $("#is_not_sack_bag_check").on('change',function(){
+                if($("#is_not_sack_bag_check").is(":checked")) {
+                      $("#sack_bag_no").removeAttr('data-rule-required data-msg-required');
+                      $("#sack_bag_no-error").remove();
+                      $("#sackbag_row").css('display','none');
                 }else{
-                    $("#sackbag_row").css('display','none');
-                    $("#sack_bag_no").removeAttr('data-rule-required data-msg-required');
-                    $("#sack_bag_no-error").remove();
+                      $("#sackbag_row").css('display','block');
+                    $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
+                  
+                
 
                 }
             });
