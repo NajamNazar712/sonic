@@ -2310,7 +2310,7 @@
                             d.star_shipper_filter = $('#star_shippers_filter').val();
                             d.complaint_filter = $('#complaint_filter').val();
                             d.out_of_service_area_filter = $('#out_of_service_area_filter').val();
-                            d.shipment_re_attempt_request_filter = $('#shipment_re_attempt_request_filter')val();
+                            d.shipment_re_attempt_request_filter = $('#shipment_re_attempt_request_filter').val();
                             d.try_buy_filter = $('#try_buy_filter').val();
                             d.return_confirmation_pending_filter = $('#return_confirmation_pending_filter').val();
                             d.search_rvr_value_div = $('#search_rvr_value_div').val();
