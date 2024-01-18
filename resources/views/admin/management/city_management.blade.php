@@ -35,6 +35,7 @@
                                     <th class="border-primary border-darken-1" >Hub Location</th>
                                     <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
+                                    <th class="border-primary border-darken-1" >Booking Disable Status</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -161,6 +162,7 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Address');
+                            head.push('Booking Disable Status');
 
 
                             $.each(result.data, function(index, values) {
@@ -181,6 +183,7 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.address);
+                                row.push(values.booking_disable_status);
 
                                 body.push(row);
                             });
@@ -372,6 +375,8 @@
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
+                    {data: 'booking_disable_status', name: 'cities.booking_disable_status', class: 'align-middle booking_disable_status'},
+
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
