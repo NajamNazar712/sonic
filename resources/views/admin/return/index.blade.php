@@ -2327,7 +2327,7 @@
                     },
                     rowId: 'shId',
                     order: [
-                        [24, 'desc']
+                        [25, 'desc']
                     ],
                     columns: 
                         [{data: 'shId',orderable: false,searchable: false,class: 'text-center align-middle select p-1',targets: 0,
