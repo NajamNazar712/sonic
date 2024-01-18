@@ -1467,7 +1467,7 @@
                                     shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
-                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + (history.area_log ? history.area_log.area : '') + ' | '+ googleMapsUrl + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + (history.area_log ? history.area_log.area : history.area_log.city) + ' | '+ googleMapsUrl + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';
                                     shipment += '<td>' + history.rider + '</td>';

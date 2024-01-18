@@ -905,6 +905,8 @@ class AdminTrackingController extends Controller
                 'longitude' => $scanning_data['longitude'],
                 'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
                 'area' => CityArea::find($scanning_data['area_id'])->name ?? '-', 
+                'city' => City::where('hub_id',$scanning_data['hub_id'])->name ?? '-', 
+
 
             ];
         } else {
@@ -913,6 +915,8 @@ class AdminTrackingController extends Controller
                 'longitude' => '-',
                 'location_status' => '-',
                 'area' => '-',
+                'city' => '-',
+
 
             ];
         }
@@ -1416,7 +1420,7 @@ class AdminTrackingController extends Controller
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at');     
+                            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
                             //check for cases
                             switch ($journey->shipper_status_id) {
                                 case 2:
