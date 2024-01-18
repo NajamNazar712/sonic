@@ -748,6 +748,9 @@ class ShipmentChargesController extends Controller
         $shipment = Shipment::find($id);
         if($shipment->business_category_id == 1){
             $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+            //calculation with shipper weight ..for weight qc report purpose
+            $result_shipper_weight = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->estimated_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
             $dhl_check = true;
@@ -845,6 +848,7 @@ class ShipmentChargesController extends Controller
                 $shipment->weight_charges = $result['weight_charges'];
                 $shipment->chargeable_weight = $result['chargeable_weight'];
             }
+            $shipment->received_amount = $result_shipper_weight['weight_charges'];
             $shipment->save();
         }
     }

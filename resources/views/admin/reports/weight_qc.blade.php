@@ -129,9 +129,14 @@
                             <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">User Hub</th>
                             <th class="border-primary border-darken-1">User Area</th>
-                            <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
-                            <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                            <th class="border-primary border-darken-1">Difference (B-A)</th>
+                            <th class="border-primary border-darken-1">Weight Input by Shipper</th>
+                            <th class="border-primary border-darken-1">Weight Input by Shipper (Roundup to shipper/ rates range)</th>
+                            <th class="border-primary border-darken-1">Arrival Weight (Systemetic)</th>
+                            <th class="border-primary border-darken-1">Arrival Weight (As per shipper/ rate range roundup)</th>
+                            <th class="border-primary border-darken-1">Weight Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
+                            <th class="border-primary border-darken-1">Amount as per shipper weight</th>
+                            <th class="border-primary border-darken-1">Amount as per arrival weight</th>
+                            <th class="border-primary border-darken-1">Amount Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
                             <th class="border-primary border-darken-1">Weighted As</th> 
                             <th class="border-primary border-darken-1">Weight Recorded As</th>
                         </tr>
