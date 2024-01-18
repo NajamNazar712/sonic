@@ -13456,11 +13456,12 @@ class AdminReportsController extends Controller
     }
     public function sack_bag_status_list(Request $request)
     {
-        $sack_bag_statuses = City::leftJoin('issue_sack_bag_origins as isu', function ($join) {
-            $join->on('cities.id', '=', 'isu.sack_destination_id')
-                ->where('isu.sack_status_id', '=', 1);
-        })
-            ->leftJoin('issue_sack_bag_origins as cb', function ($join) {
+        $sack_bag_statuses = City::
+            // leftJoin('issue_sack_bag_origins as isu', function ($join) {
+            //     $join->on('cities.id', '=', 'isu.sack_destination_id')
+            //         ->where('isu.sack_status_id', '=', 1);
+            // })
+            leftJoin('issue_sack_bag_origins as cb', function ($join) {
                 $join->on('cities.id', '=', 'cb.sack_destination_id')
                     ->where('cb.sack_status_id', '=', 2);
             })
@@ -13480,7 +13481,7 @@ class AdminReportsController extends Controller
             ->havingRaw('COUNT(cb.sack_bag_no) > 0 OR COUNT(tm.sack_bag_no) > 0 OR COUNT(br.sack_bag_no) > 0 OR COUNT(sdm.sack_bag_no) > 0')
             ->select(
                 'cities.name as destination_name',
-                DB::raw('COUNT(isu.sack_bag_no) as isu'),
+                // DB::raw('COUNT(isu.sack_bag_no) as isu'),
                 DB::raw('COUNT(cb.sack_bag_no) as cb'),
                 DB::raw('COUNT(tm.sack_bag_no) as tm'),
                 DB::raw('COUNT(br.sack_bag_no) as br'),

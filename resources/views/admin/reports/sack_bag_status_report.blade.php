@@ -55,7 +55,7 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Stock Destination</th>
-                            <th class="border-primary border-darken-1">Issue Sack Bag</th>
+                            {{-- <th class="border-primary border-darken-1">Issue Sack Bag</th> --}}
                             <th class="border-primary border-darken-1">CB Sack Bag</th>
                             <th class="border-primary border-darken-1">TM Sack Bag</th>
                             <th class="border-primary border-darken-1">BR Sack Bag</th>
@@ -291,7 +291,7 @@
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         
                         { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
-                        { data:'isu',class: 'align-middle text-center isu', orderable: false, searchable: false},
+                        // { data:'isu',class: 'align-middle text-center isu', orderable: false, searchable: false},
                         { data:'cb',class: 'align-middle text-center cb', orderable: false, searchable: false},
                         { data:'tm',class: 'align-middle text-center tm', orderable: false, searchable: false},
                         { data:'br',class: 'align-middle text-center br', orderable: false, searchable: false},
