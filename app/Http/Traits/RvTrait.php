@@ -722,21 +722,21 @@ trait RvTrait
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
                     $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
                     $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
-                    // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = null; //return confirm 
+                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = null; //return confirm 
                     $rv_shipment_assign_agent->rv_state_id = 4; //completed;
                     $rv_shipment_assign_agent->updated_type_id = 1; //completed;
                     $rv_shipment_assign_agent->updated_by_id = Auth::id();
                     $rv_shipment_assign_agent->save();
 
 
-                    $request = new Request([
-                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
-                        'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
-                        'remarks' => $rv_shipment_assign_agent->remarks,
-                        'call_to_id' => $rv_shipment_assign_agent->call_to_id,
-                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id
-                    ]);
-                    $this->return_confirm($request);
+                    // $request = new Request([
+                    //     'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                    //     'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
+                    //     'remarks' => $rv_shipment_assign_agent->remarks,
+                    //     'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                    //     'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id
+                    // ]);
+                    // $this->return_confirm($request);
 
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
