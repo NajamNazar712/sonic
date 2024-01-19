@@ -720,23 +720,21 @@ trait RvTrait
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-                    $rv_shipment_assign_agent_updated = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
-                    // dd($rv_shipment_assign_agent);
-                    $rv_shipment_assign_agent_updated->rv_assign_agent_status_id = 1; //return confirm 
-                    $rv_shipment_assign_agent_updated->rv_assign_agent_sub_status_id = Null; //return confirm 
-                    $rv_shipment_assign_agent_updated->rv_state_id = 4; //completed;
-                    $rv_shipment_assign_agent_updated->updated_type_id = 1; //completed;
-                    $rv_shipment_assign_agent_updated->updated_by_id = Auth::id();
-                    $rv_shipment_assign_agent_updated->save();
+                    $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
+                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = 0; //return confirm 
+                    $rv_shipment_assign_agent->rv_state_id = 4; //completed;
+                    $rv_shipment_assign_agent->updated_type_id = 1; //completed;
+                    $rv_shipment_assign_agent->updated_by_id = Auth::id();
+                    $rv_shipment_assign_agent->save();
 
-                    // dd($rv_shipment_assign_agent);
                     
                     $request = new Request([
-                        'shipment_id' => $rv_shipment_assign_agent_updated->shipment_id,
-                        'is_fake_status' => $rv_shipment_assign_agent_updated->is_fake_status,
-                        'remarks' => $rv_shipment_assign_agent_updated->remarks,
-                        'call_to_id' => $rv_shipment_assign_agent_updated->call_to_id,
-                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent_updated->rv_assign_agent_sub_status_id
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
+                        'remarks' => $rv_shipment_assign_agent->remarks,
+                        'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id
                     ]);
                     $this->return_confirm($request);
 
