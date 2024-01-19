@@ -709,6 +709,7 @@ trait RvTrait
 
                 //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
                 if ($rv_shipment_assign_agent->unresponsive_count == 2) {
+                    dd(1);
                     //updating the shipment status to Shipper Advise Requested(65) in shipments table
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
                     
@@ -720,6 +721,10 @@ trait RvTrait
 
                 //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
+                    dd(2);
+                    // $rv_shipment_assign_agent->increment('unresponsive_count');
+                    // $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
+                    // $rv_shipment_assign_agent->save();
                     $request = new Request([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
                         'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
