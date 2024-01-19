@@ -4949,7 +4949,7 @@ class APIController extends Controller
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
                             }
-                            return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt - Requested )']);
+                            return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt - Call Requested )']);
                         }
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
