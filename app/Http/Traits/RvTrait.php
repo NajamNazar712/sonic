@@ -737,7 +737,7 @@ trait RvTrait
                     //     'remarks'=>$request->remarks,
                     //     'rv_assign_agent_sub_status_id' => null,
                     // ]);
-                    $request = request()->request->add([
+                   request()->request->add([
                         'shipment_id'=>$rv_shipment_assign_agent->shipment_id, 
                         'remarks'=>$request->remarks,
                         'rv_assign_agent_sub_status_id' => null
