@@ -729,7 +729,7 @@ trait RvTrait
                     $rv_shipment_assign_agent->updated_by_id = Auth::id();
                     $rv_shipment_assign_agent->save();
 
-                    // dd($rv_shipment_assign_agent);
+                    dd($rv_shipment_assign_agent);
                     
                     $request = new Request([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
