@@ -10321,7 +10321,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_disable_status as booking_disable_status'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -10331,8 +10331,8 @@ class AdminDashboardController extends Controller
             ->editColumn('gc_area', function ($cities) {
                 return ($cities->gc_area == 1) ? 'Yes' : 'No';
             })
-            ->editColumn('booking_disable_status', function ($cities) {
-                return ($cities->booking_disable_status == 1) ? 'Yes' : 'No';
+            ->editColumn('booking_enable_status', function ($cities) {
+                return ($cities->booking_enable_status == 1) ? 'Yes' : 'No';
             })
             ->filterColumn('modes', function ($query, $keyword) {
 
@@ -13769,7 +13769,7 @@ class AdminDashboardController extends Controller
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
    
-        City::whereIn('id', $userIDS)->update(['booking_disable_status' => '0']);
+        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
         return response()->json(['status' => 200]);
     }
    
@@ -13780,7 +13780,7 @@ class AdminDashboardController extends Controller
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
    
-        City::whereIn('id', $userIDS)->update(['booking_disable_status' => '1']);
+        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
         return response()->json(['status' => 200]);
     }
    

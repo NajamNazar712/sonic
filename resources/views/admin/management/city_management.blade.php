@@ -183,7 +183,7 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.address);
-                                row.push(values.booking_disable_status);
+                                row.push(values.booking_enable_status);
 
                                 body.push(row);
                             });
@@ -236,7 +236,7 @@
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     },{
-                        text: '<i class="la la-map-marker"></i> Booking Enable',
+                        text: '<i class="la la-enable"></i> Booking Enable',
                         className: 'btn btn-primary booking_enable',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -281,7 +281,7 @@
                             }
                         }
                     },{
-                        text: '<i class="la la-map-marker"></i> Booking Disable',
+                        text: '<i class="la la-disable"></i> Booking Disable',
                         className: 'btn btn-primary booking_disable',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -375,7 +375,7 @@
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
-                    {data: 'booking_disable_status', name: 'cities.booking_disable_status', class: 'align-middle booking_disable_status'},
+                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},
 
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
