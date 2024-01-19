@@ -210,6 +210,21 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                    );
+            })
+            
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            })
+            
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -253,7 +268,9 @@ class AdminReportsController extends Controller
                 'cmb.seal_number as seal_number',
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date'
+                'sjrp.created_at as rider_picked_status_date',
+                'ssjal.location_status as location_status',
+                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
             ]);
 
         $type = $request->get('search_types');
@@ -290,6 +307,31 @@ class AdminReportsController extends Controller
             })
             ->editColumn('order_id', function ($shipment) {
                 return ($shipment->order_id) ? $shipment->order_id : '-';
+            })
+            ->editColumn('location_status', function ($shipment) {
+                if(isset($shipment->location_status)){
+                    return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('latitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
+                    return $lat;
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('longitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
+                    return $long;
+                }else{
+                    return '-';
+                }
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);

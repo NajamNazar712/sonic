@@ -191,6 +191,9 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -480,6 +483,9 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Area');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');
                             head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
@@ -522,6 +528,9 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.area);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -622,6 +631,9 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
