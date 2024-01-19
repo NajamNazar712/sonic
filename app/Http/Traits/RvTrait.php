@@ -443,10 +443,12 @@ trait RvTrait
     // Description:
     protected function return_confirm($request)
     {
+        dd($request->all());
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
-        $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
-        $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id;
+        // $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
+        $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
+        $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id ?? null;
         
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons;
@@ -735,7 +737,7 @@ trait RvTrait
                         // 'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
                         'remarks' => $request->remarks,
                         // 'call_to_id' => $rv_shipment_assign_agent->call_to_id,
-                        'rv_assign_agent_sub_status_id' => 0,
+                        'rv_assign_agent_sub_status_id' => null,
                     ]);
                     $this->return_confirm($request);
 
