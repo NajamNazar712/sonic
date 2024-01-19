@@ -692,7 +692,7 @@ trait RvTrait
 
         if($rv_shipment_assign_agent)
         {
-            // try {
+            try {
                 $status = new RvAgentCallHistory();
                 $status->shipment_id= $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
@@ -720,8 +720,8 @@ trait RvTrait
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-                    $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
-                    $rv_shipment_assign_agent->rv_shipment_assign_agent_id = 1; //return confirm 
+                    // $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
                     $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = Null; //return confirm 
                     $rv_shipment_assign_agent->rv_state_id = 4; //completed;
                     $rv_shipment_assign_agent->save();
@@ -740,11 +740,11 @@ trait RvTrait
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
 
-            // } 
-            // catch (\Throwable $th) {
-            //         $th->getMessage();
-            //         return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
-            // }
+            } 
+            catch (\Throwable $th) {
+                    $th->getMessage();
+                    return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
+            }
         }
         else{
             // return redirect()->back()->with('error', 'Shipment not found');
