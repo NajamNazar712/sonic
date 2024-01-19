@@ -58,6 +58,9 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
@@ -239,6 +242,9 @@
                         head.push('Destination');
                         head.push('Hub');
                         head.push('Area');
+                        head.push('Location Status');
+                        head.push('Latitude');
+                        head.push('Longitude');	
                         head.push('Consignee Name');
                         head.push('Consignee Phone');
                         head.push('Reattempt By');
@@ -269,6 +275,9 @@
                             row.push(values.destination);
                             row.push(values.hub);
                             row.push(values.area);
+                            row.push(values.location_status);
+                            row.push(values.latitude);
+                            row.push(values.longitude);	
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);
                             row.push(values.agent);
@@ -339,6 +348,9 @@
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'area', name: 'ca.name', class: 'align-middle area'},
+                {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},

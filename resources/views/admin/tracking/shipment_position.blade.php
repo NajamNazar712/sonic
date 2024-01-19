@@ -64,6 +64,9 @@
                                     <th class="border-primary border-darken-1">Handover Received By</th>
                                     <th class="border-primary border-darken-1">Handover Received At</th>
                                     <th class="border-primary border-darken-1">Last Action Performed</th>
+                                    <th class="border-primary border-darken-1">Location Status</th>
+                                    <th class="border-primary border-darken-1">Latitude</th>
+                                    <th class="border-primary border-darken-1">Longitude</th>
             
 
                                 </tr>
@@ -205,6 +208,10 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');	
+							
                     
 
                             $.each(result.data, function(index, values) {
@@ -232,7 +239,11 @@
                                 row.push(values.handover_to);
                                 row.push(values.handover_received_by);
                                 row.push(values.handover_received_at);
-                                row.push(values.last_action);                 
+                                row.push(values.last_action);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
+								                 
                                 body.push(row);
                             });
                         },
@@ -292,6 +303,9 @@
                     {data: 'handover_received_by', name: 'shipment_positions.handover_received_by', class: 'align-middle handover_received_by'},
                     {data: 'handover_received_at', name: 'shipment_positions.handover_received_at', class: 'align-middle handover_received_at'},
                     {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
 
                 ],
                 rowCallback: function(row, data, index) {

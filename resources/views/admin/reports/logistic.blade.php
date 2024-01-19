@@ -124,6 +124,9 @@
                         <th class="border-primary border-darken-1">Weight</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Aging (Days)</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Shipment Status</th>
@@ -359,6 +362,9 @@
                             head.push('Weight');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');	
                             head.push('Aging (Days)');
                             head.push('Delivered/Returned Date');
                             head.push('Shipment Status');
@@ -381,6 +387,9 @@
                                 row.push(values.estimated_weight);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.aging);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.current_status);
@@ -448,6 +457,9 @@
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle estimated_weight'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'}, //
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     { data: 'aging' ,name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
