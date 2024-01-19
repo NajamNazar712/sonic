@@ -735,7 +735,7 @@ trait RvTrait
                         'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
                         'remarks' => $rv_shipment_assign_agent->remarks,
                         'call_to_id' => $rv_shipment_assign_agent->call_to_id,
-                        'rv_assign_agent_sub_status_id' => null
+                        'rv_assign_agent_sub_status_id' => 1
                     ]);
                     $this->return_confirm($request);
 
