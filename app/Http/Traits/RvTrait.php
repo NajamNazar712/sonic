@@ -692,7 +692,7 @@ trait RvTrait
 
         if($rv_shipment_assign_agent)
         {
-            try {
+            // try {
                 $status = new RvAgentCallHistory();
                 $status->shipment_id= $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
@@ -740,11 +740,11 @@ trait RvTrait
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
 
-            } 
-            catch (\Throwable $th) {
-                    $th->getMessage();
-                    return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
-            }
+            // } 
+            // catch (\Throwable $th) {
+            //         $th->getMessage();
+            //         return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
+            // }
         }
         else{
             // return redirect()->back()->with('error', 'Shipment not found');
