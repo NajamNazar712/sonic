@@ -329,14 +329,13 @@ class ReturnV2Controller extends Controller
                         if ($assign_agent) 
                         {
                             //if shipment already exists update row
-                            if ($shipment_assign_agent) {
+                            // if ($shipment_assign_agent) {
                                 $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                                 if ($update_shipment_status['status'] == 0) {
                                     DB::rollBack();
                                     return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
-                                } else{
-
-
+                                } 
+                                else{
                                     $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
                                     if($shipment_assign_agents){
                                         $shipment_assign_agent = $shipment_assign_agents;
@@ -349,13 +348,13 @@ class ReturnV2Controller extends Controller
                                     // } 
 
                                     else{
-                                        // this function is updating table rows of rv_shipment_assign_agents increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
+                                        // this function is updating rv_shipment_assign_agents table columns like increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
                                         $add_shipment_agent = $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
                                         if($add_shipment_agent != true){
                                             DB::rollBack();
                                             return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
-                                        } else {
-
+                                        } 
+                                        else {
                                             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                             // //adding logs in rv_shipment_assign_agent_details table
                                             $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
@@ -368,22 +367,24 @@ class ReturnV2Controller extends Controller
                                         }
                                     }
                                 }
-                            } else {
-                                DB::rollBack();
-                                return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
-                            }
+                            // } else {
+                            //     DB::rollBack();
+                            //     return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
+                            // }
                         }
+
                         //when there is no row of agent in rv_shipment_agents table
                         else {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
                                 DB::rollBack();
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
-                            } else {
+                            } 
+                            else {
                                 $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->where('rv_assign_agent_status_id', 8)->latest()->first();
-                                    if($shipment_assign_agents){
-                                        $shipment_assign_agent = $shipment_assign_agents;
-                                    }
+                                if($shipment_assign_agents){
+                                    $shipment_assign_agent = $shipment_assign_agents;
+                                }
 
                                 $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                 if($rv_shipment_assign_agent_details != true){

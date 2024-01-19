@@ -88,21 +88,15 @@ class AgentSarNotification extends Command
 
             if ($shipmentsToUpdate->isNotEmpty()) {
                 foreach ($shipmentsToUpdate as $shipment) {
-                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+                    // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
+                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
                     $request = $shipment->request->add([
-                        'shipment_id' => $shipment->shipment_id, 'is_fake_status' => $shipment->is_fake_status, 'remarks' => $shipment->remarks,
-                        'call_to_id' => $shipment->call_to_id, 'rv_assign_agent_sub_status_id' => null,
+                        'shipment_id' => $shipment->shipment_id, 
+                        'remarks' => $shipment->remarks, 
+                        'rv_assign_agent_sub_status_id' => null,
                     ]);
                     $this->return_confirm($request);
-
-                    // $request = request()->request->add([
-                    //     'shipment_id'=>$shipment->shipment_id, 
-                    //     'remarks'=>$shipment->remarks,
-                    //     'rv_assign_agent_sub_status_id' => null
-                    // ]);
-                    // $this->return_confirm($request);
-
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $shipment->id,

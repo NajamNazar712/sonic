@@ -262,7 +262,8 @@ trait RvTrait
     }
 
     // protected function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
-    protected function update_unresponsive_shipments_status($request, $assigned_agent)
+    // protected function update_unresponsive_shipments_status($request, $assigned_agent)
+    protected function update_shipments_status($request, $assigned_agent)
     {
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
@@ -294,7 +295,8 @@ trait RvTrait
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
         // $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
-        $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $assigned_agent);
+        // $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $assigned_agent);
+        $shipment_assign_agent_table_columns = $this->update_shipments_status($request, $assigned_agent);
         if($admin_agent->employee){
 
             // if $admin_agent is agent
@@ -697,7 +699,7 @@ trait RvTrait
 
         if($rv_shipment_assign_agent)
         {
-            // try {
+            try {
                 $status = new RvAgentCallHistory();
                 $status->shipment_id= $request->shipment_id;
                 $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
@@ -725,19 +727,7 @@ trait RvTrait
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-                    // $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
-                    // $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
-                    // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = 0; //return confirm 
-                    // $rv_shipment_assign_agent->rv_state_id = 4; //completed;
-                    // $rv_shipment_assign_agent->updated_type_id = 1; //completed;
-                    // $rv_shipment_assign_agent->updated_by_id = Auth::id();
-                    // $rv_shipment_assign_agent->save();
-
-                    // request()->request->add([
-                    //     'shipment_id'=>$rv_shipment_assign_agent->shipment_id,
-                    //     'remarks'=>$request->remarks,
-                    //     'rv_assign_agent_sub_status_id' => null,
-                    // ]);
+                    
                    request()->request->add([
                         'shipment_id'=>$rv_shipment_assign_agent->shipment_id, 
                         'remarks'=>$request->remarks,
@@ -747,11 +737,11 @@ trait RvTrait
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
 
-            // } 
-            // catch (\Throwable $th) {
-            //         $th->getMessage();
-            //         return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
-            // }
+            } 
+            catch (\Throwable $th) {
+                    $th->getMessage();
+                    return ['status' => 0, 'error'=> 'Something Went Wrong', 'redirect'=> true];
+            }
         }
         else{
             // return redirect()->back()->with('error', 'Shipment not found');
