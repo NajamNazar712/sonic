@@ -9419,7 +9419,7 @@ class AdminDashboardController extends Controller
                     }
  
                 } else {
-                    return '-';
+                    return $users->tagged_poc ?? '-';
                 }
 
             })
@@ -9454,7 +9454,7 @@ class AdminDashboardController extends Controller
                     }
  
                 } else {
-                    return '-';
+                    return $users->ref ?? '-';
                 }
 
             })
@@ -9487,7 +9487,7 @@ class AdminDashboardController extends Controller
                         return $users->kam;
                     }
                 } else {
-                    return '-';
+                    return $users->kam ?? '-';
                 }
 
             })
@@ -10016,7 +10016,7 @@ class AdminDashboardController extends Controller
                     }
  
                 } else {
-                    return '-';
+                    return $users->tagged_poc ?? '-';
                 }
 
             })
@@ -10051,7 +10051,7 @@ class AdminDashboardController extends Controller
                     }
  
                 } else {
-                    return '-';
+                    return $users->ref ?? '-';
                 }
 
             })
@@ -10085,7 +10085,7 @@ class AdminDashboardController extends Controller
                     }
  
                 } else {
-                    return '-';
+                    return $users->kam ?? '-';
                 }
 
             })
