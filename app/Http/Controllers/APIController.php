@@ -4900,7 +4900,8 @@ class APIController extends Controller
                     if ($shipment->shipper_status_id != 52) {
                         if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+                            // Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]); // 66 is reattempt call request
 
                             $last_reason = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
                             if ($last_reason->exists()) {
@@ -4909,7 +4910,8 @@ class APIController extends Controller
                             } else {
                                 $last_reason_id = null;
                             }
-                            ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, null, null);
+                            // ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, null, null);
+                            ShipmentsJourneyController::add($shipment->id, 66, 66, $last_reason_id, $remark, $user_id, null, null); // 66 is reattempt call request
 
                             //Reattempt Request
                             $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();

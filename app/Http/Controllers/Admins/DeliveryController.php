@@ -121,9 +121,11 @@ use App\Jobs\SwichPaymentGatewayApi;
 use App\Helpers\PayfastApiCall;
 use App\Http\Models\RvShipmentAssignAgent;
 use Illuminate\Support\Facades\Log;
+use App\Http\Traits\RvTrait;
 class DeliveryController extends Controller
 {
 
+    use RvTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
