@@ -9415,7 +9415,7 @@ class AdminDashboardController extends Controller
                         
                         return $new_array;
                     } else {
-                        return $users->kam;
+                        return $users->tagged_poc;
                     }
  
                 } else {
@@ -9450,7 +9450,7 @@ class AdminDashboardController extends Controller
                         
                         return $new_array;
                     } else {
-                        return $users->kam;
+                        return $users->ref;
                     }
  
                 } else {
