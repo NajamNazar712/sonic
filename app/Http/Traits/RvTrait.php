@@ -442,7 +442,9 @@ trait RvTrait
     // URL: 
     // Description:
     protected function return_confirm($request)
-    {
+    {   
+        $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
+        dd($remarks);
         $parcel = Shipment::find($request->shipment_id);
         // $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
@@ -451,7 +453,6 @@ trait RvTrait
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons ?? null;
         //
-        dd(1);
         
         $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
         if (!$dispute_check) {
@@ -495,7 +496,7 @@ trait RvTrait
                     AdminFinanceController::done_payment($request->shipment_id, 1);
                 }
             }
-            $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
+            
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
