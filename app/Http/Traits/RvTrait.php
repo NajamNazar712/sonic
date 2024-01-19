@@ -277,10 +277,11 @@ trait RvTrait
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
 
         } 
-        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
+        else if ($request->rv_assign_agent_status_id == 7 && $shipment_assign_agent->unresponsive_count == 3) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
-            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = 4; //set status as shipment completed
-            $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
+            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
+            $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
+            // $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
         }
         return $shipment_assign_agent_table_columns;
     }
@@ -720,23 +721,23 @@ trait RvTrait
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-                    $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
-                    $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
-                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = null; //return confirm 
-                    $rv_shipment_assign_agent->rv_state_id = 4; //completed;
-                    $rv_shipment_assign_agent->updated_type_id = 1; //completed;
-                    $rv_shipment_assign_agent->updated_by_id = Auth::id();
-                    $rv_shipment_assign_agent->save();
+                    // $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
+                    // $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
+                    // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = 0; //return confirm 
+                    // $rv_shipment_assign_agent->rv_state_id = 4; //completed;
+                    // $rv_shipment_assign_agent->updated_type_id = 1; //completed;
+                    // $rv_shipment_assign_agent->updated_by_id = Auth::id();
+                    // $rv_shipment_assign_agent->save();
 
 
-                    // $request = new Request([
-                    //     'shipment_id' => $rv_shipment_assign_agent->shipment_id,
-                    //     'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
-                    //     'remarks' => $rv_shipment_assign_agent->remarks,
-                    //     'call_to_id' => $rv_shipment_assign_agent->call_to_id,
-                    //     'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id
-                    // ]);
-                    // $this->return_confirm($request);
+                    $request = new Request([
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
+                        'remarks' => $rv_shipment_assign_agent->remarks,
+                        'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
 
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
