@@ -249,7 +249,8 @@ trait RvTrait
         return [
             'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
-            'rv_state_id' => 2, //unassign
+            // 'rv_state_id' => 2, //unassign
+            // 'rv_state_id' => $request->rv_state_id, //unassign
             'rv_fake_status_id' => $request->rv_fake_status_id,
             'remarks' => $request->remarks,
             'is_fake_status' => $request->is_fake_status,
@@ -281,7 +282,7 @@ trait RvTrait
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
             $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
-            // $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
+            $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
         }
         return $shipment_assign_agent_table_columns;
     }
