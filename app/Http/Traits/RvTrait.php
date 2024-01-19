@@ -443,6 +443,7 @@ trait RvTrait
     // Description:
     protected function return_confirm($request)
     {
+        dd($request->all());
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
         // $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
@@ -738,7 +739,10 @@ trait RvTrait
                         // 'call_to_id' => $rv_shipment_assign_agent->call_to_id,
                         'rv_assign_agent_sub_status_id' => null,
                     ]);
-                    $this->return_confirm($request);
+                    $done = $this->return_confirm($request);
+                    if(!$done){
+                        return ['status' => 0, 'error'=> 'Shipment not found'];
+                    }
 
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
