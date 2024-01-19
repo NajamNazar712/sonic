@@ -442,7 +442,8 @@ trait RvTrait
     // URL: 
     // Description:
     protected function return_confirm($request)
-    // {   dd($request->all());
+    {   
+        // dd($request->all());
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         dd($remarks);
         $parcel = Shipment::find($request->shipment_id);
