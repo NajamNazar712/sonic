@@ -9409,11 +9409,15 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $tagged_poc = explode(', ', $users->tagged_poc);
+                        $new_array = array_merge($array, $tagged_poc);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
+ 
                 } else {
                     return '-';
                 }
@@ -9440,11 +9444,15 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $ref = explode(', ', $users->ref);
+                        $new_array = array_merge($array, $ref);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
+ 
                 } else {
                     return '-';
                 }
@@ -9470,10 +9478,13 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $old_kam = explode(', ', $users->kam);
+                        $new_array = array_merge($array, $old_kam);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
                 } else {
                     return '-';
@@ -9995,11 +10006,15 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $tagged_poc = explode(', ', $users->tagged_poc);
+                        $new_array = array_merge($array, $tagged_poc);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->tagged_poc;
                     }
+ 
                 } else {
                     return '-';
                 }
@@ -10026,11 +10041,15 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $old_ref = explode(', ', $users->ref);
+                        $new_array = array_merge($array, $old_ref);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->ref;
                     }
+ 
                 } else {
                     return '-';
                 }
@@ -10056,11 +10075,15 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
-                        $array = implode(', ', $array);
-                        return $array;
+                        $old_kam = explode(', ', $users->kam);
+                        $new_array = array_merge($array, $old_kam);
+                        $new_array = implode(', ', $new_array);
+                        
+                        return $new_array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
+ 
                 } else {
                     return '-';
                 }
