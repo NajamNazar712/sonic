@@ -443,8 +443,8 @@ trait RvTrait
     // Description:
     protected function return_confirm($request)
     {
-        dd($request->all());
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
+        dd($remarks);
         $parcel = Shipment::find($request->shipment_id);
         // $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
