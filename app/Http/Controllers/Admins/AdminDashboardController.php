@@ -9410,7 +9410,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $tagged_poc = explode(', ', $users->tagged_poc);
-                        $new_array = array_merge($array, $tagged_poc);
+                        $new_array = array_unique(array_merge($array, $tagged_poc));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
@@ -9445,7 +9445,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $ref = explode(', ', $users->ref);
-                        $new_array = array_merge($array, $ref);
+                        $new_array = array_unique(array_merge($array, $ref));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
@@ -9479,7 +9479,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $old_kam = explode(', ', $users->kam);
-                        $new_array = array_merge($array, $old_kam);
+                        $new_array = array_unique(array_merge($array, $old_kam));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
@@ -10007,7 +10007,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $tagged_poc = explode(', ', $users->tagged_poc);
-                        $new_array = array_merge($array, $tagged_poc);
+                        $new_array = array_unique(array_merge($array, $tagged_poc));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
@@ -10042,7 +10042,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $old_ref = explode(', ', $users->ref);
-                        $new_array = array_merge($array, $old_ref);
+                        $new_array = array_unique(array_merge($array, $old_ref));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
@@ -10076,7 +10076,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                         $old_kam = explode(', ', $users->kam);
-                        $new_array = array_merge($array, $old_kam);
+                        $new_array = array_unique(array_merge($array, $old_kam));
                         $new_array = implode(', ', $new_array);
                         
                         return $new_array;
