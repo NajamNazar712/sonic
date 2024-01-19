@@ -1851,4 +1851,51 @@ trait RvTrait
             return false;
         }
     }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: this function is updating table rows of rv_shipment_assign_agents requested to approve intercept request
+    protected function update_rv_shipment_assign_agent_by_admin($data){
+
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
+        $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->latest()->first();
+
+        if($rv_shipment_assign_agent){
+            $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+            $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
+            $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
+            $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
+            $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
+            $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
+            $rv_shipment_assign_agent->rv_state_id = 4;
+            $rv_shipment_assign_agent->updated_type_id = 1; 
+            $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
+            $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
+            $rv_shipment_assign_agent->save();
+    
+            $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->latest()->first();
+            $data = [   
+                'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
+                'agent_id' => $rv_shipment_assign_agent->agent_id,
+                'shipments_journey_id' => $rv_shipment_assign_agent->shipments_journey_id,
+                'last_shipments_journey_id' => $rv_shipment_assign_agent->last_shipments_journey_id,
+                'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                'rv_assign_agent_status_id' => $rv_shipment_assign_agent->rv_assign_agent_status_id,
+                'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id,
+                'rv_state_id' => $rv_shipment_assign_agent->rv_state_id,
+                'updated_type_id' => $rv_shipment_assign_agent->updated_type_id,
+                'updated_by_id' =>  $rv_shipment_assign_agent->updated_by_id,
+                'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
+                'rv_fake_status_id' => $rv_shipment_assign_agent->rv_fake_status_id,
+                'remarks' => $rv_shipment_assign_agent->remarks,
+                'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                'assigned_to_type_id' => $rv_shipment_assign_agent->assigned_to_type_id,
+            ];
+            $this->data_rv_shipment_assign_agent_details($data);
+        }
+        else{
+            return false;
+        }
+    }
 }
