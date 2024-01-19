@@ -721,7 +721,7 @@ trait RvTrait
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
                     $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->where('unresponsive_count', 3)->latest()->first();
-                    // dd(1);
+                    dd($rv_shipment_assign_agent);
                     $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
                     $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = Null; //return confirm 
                     $rv_shipment_assign_agent->rv_state_id = 4; //completed;
@@ -729,7 +729,7 @@ trait RvTrait
                     $rv_shipment_assign_agent->updated_by_id = Auth::id();
                     $rv_shipment_assign_agent->save();
 
-                    dd($rv_shipment_assign_agent);
+                    // dd($rv_shipment_assign_agent);
                     
                     $request = new Request([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
