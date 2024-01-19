@@ -735,16 +735,10 @@ trait RvTrait
 
                     $request = new Request([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
-                        // 'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
-                        // 'remarks' => $request->remarks,
-                        'remarks' => $request->remarks ?? null,
-                        // 'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                        'remarks' => optional($request)->remarks,
                         'rv_assign_agent_sub_status_id' => null,
                     ]);
-                    $done = $this->return_confirm($request);
-                    if(!$done){
-                        return ['status' => 0, 'error'=> 'Shipment not found'];
-                    }
+                    $this->return_confirm($request);
 
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
