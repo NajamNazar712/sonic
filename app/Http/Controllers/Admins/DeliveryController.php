@@ -3050,17 +3050,6 @@ class DeliveryController extends Controller
         }
     }
 
-    //    public function check_dn_against_rider(Request $request)
-    //    {
-    //        $rider = $request->id;
-    //        $delivery_note = DeliveryNote::where('rider_id', $rider)->where('dncc_status', 0)->latest()->first();
-    //        if ($delivery_note) {
-    //            return response()->json(['status' => 1, 'note' => $delivery_note]);
-    //        } else {
-    //            return response()->json(['status' => 0, 'error' => 'No Delivery Note Found For the Rider']);
-    //        }
-    //    }
-
     public function rider_category_submit(Request $request)
     {
 
@@ -8035,7 +8024,7 @@ class DeliveryController extends Controller
                     //                 'call_to_id' => 1,
                     //             ];
                     //         $this->data_rv_shipment_assign_agent_details($data);
-                    
+
                     $rv_shipment_assign_agent_data = [
                         'agent_id' => Auth::id(),
                         'shipment_id' => $shipment_id,

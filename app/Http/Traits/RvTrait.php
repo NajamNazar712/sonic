@@ -724,9 +724,11 @@ trait RvTrait
                     $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm 
                     $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = Null; //return confirm 
                     $rv_shipment_assign_agent->rv_state_id = 4; //completed;
+                    $rv_shipment_assign_agent->updated_type_id = 1; //completed;
+                    $rv_shipment_assign_agent->updated_by_id = Auth::id();
                     $rv_shipment_assign_agent->save();
 
-                    dd($rv_shipment_assign_agent);
+                    // dd($rv_shipment_assign_agent);
                     
                     $request = new Request([
                         'shipment_id' => $rv_shipment_assign_agent->shipment_id,
