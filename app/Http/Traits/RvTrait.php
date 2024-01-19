@@ -742,6 +742,7 @@ trait RvTrait
                         'remarks'=>$request->remarks,
                         'rv_assign_agent_sub_status_id' => null
                     ]);
+                    dd($request);
                     $this->return_confirm($request);
                 }
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
