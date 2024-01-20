@@ -318,11 +318,8 @@ class ReturnController extends Controller
 
         $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66])->get();
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
-        
-        // $agents = Employee::where('trax_id','like','%Trax-C%')->get();
-        // $agents = Admin::where('trax_id','like','%Trax-C%')->get();]
 
-        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        $agents_and_contractual_agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->leftjoin('cities as c','c.id','a.default_hub_id')
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)
@@ -346,7 +343,7 @@ class ReturnController extends Controller
             ->get();
 
     return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
-        'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 
+        'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents_and_contractual_agents' => $agents_and_contractual_agents, 'blacklists' => $blacklists, 
         'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $unresponsive_sub_status_call_finding,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
@@ -5296,7 +5293,7 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
-        // try{
+        try{
             DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
             $no_zone_shipment = [];
@@ -5443,23 +5440,8 @@ class ReturnController extends Controller
                                 // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
                                 if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
                                 {
-                                DB::commit();
+                                    DB::commit();
 
-                                // $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                                // $shipments = Shipment::whereIn('shipper_status_id', [12,65,66])
-                                // ->where('consignee_city_id', $admin_agent['city_id'])  
-                                // ->whereRaw('NOT EXISTS (
-                                //         SELECT sj.id
-                                //         FROM shipments_journey AS sj
-                                //         WHERE sj.status_reason_id = 12
-                                //         AND sj.shipment_id = shipments.id
-                                //         AND sj.id = (
-                                //             SELECT MAX(id)
-                                //             FROM shipments_journey
-                                //             WHERE shipment_id = shipments.id
-                                //         )
-                                //     )');
-                            
                                     // if agent shipment is assigned - not assigned to same agent only 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -5521,11 +5503,11 @@ class ReturnController extends Controller
                         return response()->json(['status'=> 1, 'error'=>'Agent not found']);
                     }
                 }
-            // }
-            // catch(Exception $th){
-            //     DB::rollBack();
-            //     return response()->json(['error'=> $th->getMessage()]);
-            // } 
+            }
+            catch(Exception $th){
+                DB::rollBack();
+                return response()->json(['error'=> $th->getMessage()]);
+            } 
     }
     public function fetch_agent(Request $request){
         $emp_type = $request->emp_type_id;

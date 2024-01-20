@@ -166,7 +166,8 @@ trait RvTrait
                         $rv_unassign_agent = $rv_unassign_agent->latest()->first();
                         $rv_unassign_agent->rv_state_id = 3; // we are setting status to open because in future any agent can get the shipment automatically from Virtual RCP Agent Screen
                         $rv_unassign_agent->updated_by_id = Auth::id();
-                        $rv_unassign_agent->assigned_by = Null;
+                        $rv_unassign_agent->assigned_to_type_id = 0;
+                        $rv_unassign_agent->assigned_by = 0;
                         $rv_unassign_agent->save();
 
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
@@ -1780,7 +1781,7 @@ trait RvTrait
             try {
                 if ($rv_shipment_assign_agents) {
                     $rv_shipment_assign_agents->rv_assign_agent_status_id = $update_rv_assign_agent_status_id;
-                    
+
                     //$updated_rv_assign_agent_sub_status_id will be used as null always when shipper has update status as reattempt call request or return confirm because sub status is not required in those stattuses  
                     $rv_shipment_assign_agents->rv_assign_agent_sub_status_id = $updated_rv_assign_agent_sub_status_id ?? $rv_shipment_assign_agents->rv_assign_agent_sub_status_id;
                     $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;

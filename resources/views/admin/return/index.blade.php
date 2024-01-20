@@ -492,7 +492,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($agents as $agent)
+                                    @foreach ($agents_and_contractual_agents as $agent)
                                         <tr role="row">
                                             <td class="text-center">{{ $agent->id }}</td>
                                             <td>{{ $agent->trax_id }}</td>
@@ -692,35 +692,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal" aria-hidden="true">
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="">Assign Agent</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group text-left">
-                                <select name="select_emp_type" class="form-control select2" id="select_emp_type" required>
-                                    @foreach ($staff_types as $staff_type)
-                                        <option value="{{ $staff_type->id }}">{{ $staff_type->name }}</option>
-                                    @endforeach
-                                </select>
-                        </div>
-                        <select name="assign_agent" id="assign_agent" class="form-control select2">
-                            @foreach ($agents as $agent)
-                                <option value="{{ $agent->id }}"> {{ $agent->name }} - {{ $agent->trax_id }} - {{ $agent->city_name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <span id="error_emp_type" style="color: red;"></span>
-                        <button type="button" class="btn btn-success" id="assign_agentSubmit">Assign</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
 
         {{-- assign agent modal --}}
         <div class="modal fade" id="AssignAgentModal" data-backdrop="static" role="dialog"
