@@ -1118,12 +1118,12 @@
                     }
                 });
 
-                // $("#assign_agent").prepend('<option value="" selected></option>').select2({
+                // $('#assign_agent').empty().append('<option value="" selected></option>').select2({
                 //     placeholder: "Select Agent",
                 //     width: '100%',
                 //     dropdownParent: $('#AssignAgentModal')
                 // });
-                $('#assign_agent').empty().append('<option value="" selected></option>').select2({
+                $('#assign_agent').append('<option value="" selected></option>').select2({
                     placeholder: "Select Agent",
                     width: '100%',
                     dropdownParent: $('#AssignAgentModal')
@@ -1132,6 +1132,7 @@
 
                 $('#select_emp_type').on('change', function() {
                     var emp_type_id = $('#select_emp_type').val();
+                    $('#assign_agent').empty().append('<option value="" selected>Select Agent</option>'); // this empty the list then append the agents list
                     $.ajax({
                         url: '{!! route('admin.return.fetch.agent') !!}',
                         data: {
@@ -1142,16 +1143,6 @@
                         if (data.status == 0) 
                         {
                             // $('#assign_agent').empty();
-                            // $("#assign_agent").prepend('<option value="" selected></option>').select2({
-                            //     placeholder: "Select Agent",
-                            //     width: '100%',
-                            //     dropdownParent: $('#AssignAgentModal')
-                            // });
-                            // $.each(data.data, function(index, agent) {
-                            //     $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
-                            // });
-
-                            // $('.assign_agent_container').removeClass('d-none');
                             $.map(data.data, function(agent) {
                                 $('#assign_agent').append('<option value="' + agent.id + '">' + agent.name + ' - ' + agent.trax_id + ' - ' + agent.city_name + '</option>');
                             });
