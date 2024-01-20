@@ -91,6 +91,8 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                        <th class="border-primary border-darken-1">Created At</th>
+
                                     </tr>
                             </thead>
                             <tbody>
@@ -310,8 +312,10 @@
                 }
             }).done(function(data){
                if(data.status==1){
+                    // var option= options = { day: 'numeric', month: 'long', year: 'numeric' };
                     $.each(data.sack_bag_list,function(key,value){
-                        $("#StockSackBagModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle seriral_no">'+(key+1)+'</td><td class=" align-middle sack_bag_no">'+value.sack_bag_no+'</td></tr>');
+                         var created_at=new Date(value.created_at).toLocaleDateString('en-US');
+                        $("#StockSackBagModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle seriral_no">'+(key+1)+'</td><td class=" align-middle sack_bag_no">'+value.sack_bag_no+'</td><td class=" align-middle created_at">'+created_at+'</td></tr>');
                     });
                     $("#StockSackBagModal").modal('show');
                }
