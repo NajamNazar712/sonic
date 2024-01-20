@@ -5296,7 +5296,7 @@ class ReturnController extends Controller
     }
     public function assign_agent(Request $request)
     {
-        try{
+        // try{
             DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
             $no_zone_shipment = [];
@@ -5521,11 +5521,11 @@ class ReturnController extends Controller
                         return response()->json(['status'=> 1, 'error'=>'Agent not found']);
                     }
                 }
-            }
-            catch(Exception $th){
-                DB::rollBack();
-                return response()->json(['error'=> $th->getMessage()]);
-            } 
+            // }
+            // catch(Exception $th){
+            //     DB::rollBack();
+            //     return response()->json(['error'=> $th->getMessage()]);
+            // } 
     }
     public function fetch_agent(Request $request){
         $emp_type = $request->emp_type_id;

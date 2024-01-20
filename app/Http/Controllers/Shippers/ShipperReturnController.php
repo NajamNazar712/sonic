@@ -353,6 +353,7 @@ class ShipperReturnController extends Controller
                     $updated_by_id = Auth::id();
                     $updated_type_id = 3; //updated by shipper
                     $updated_rv_assign_agent_status_id = 1; //return confirm
+                    $updated_rv_assign_agent_sub_status_id = null; //since shipper has only request to "return confirm" then the sub status should be null
                     $updated_rv_state_id = 4; //updating rv state id to 4 i.e completed 
 
                     $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
@@ -377,7 +378,7 @@ class ShipperReturnController extends Controller
                 // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
                 // $this->shipment_status_update_shipper($request, 7, 2, 4);
 
-                request()->request->add(['shipment_id' => $parcel]);
+                request()->request->add(['shipment_id' => $parcel->id]);
                 
                 $updated_by_id = Auth::id();
                 $updated_type_id = 3; //updated by shipper;
@@ -428,7 +429,7 @@ class ShipperReturnController extends Controller
                     // request()->request->add(['shipment_id' => $shipment]);
                     // $this->shipment_status_update_shipper($request, 7, 2, 3);
 
-                    request()->request->add(['shipment_id' => $parcel]);
+                    request()->request->add(['shipment_id' => $shipment]);
                     //$updated_type_id updated by shipper = 3
                     //$updated_rv_assign_agent_status_id, reattempt i.e is 2 
                     //$updated_rv_state_id updating rv status to 4 i.e completed 
@@ -490,14 +491,15 @@ class ShipperReturnController extends Controller
 
 
 
-                    request()->request->add(['shipment_id' => $parcel]);
+                    request()->request->add(['shipment_id' => $parcel->id]);
 
                     $updated_by_id = Auth::id();
                     $updated_type_id = 3; //updated by shipper;
-                    $updated_rv_assign_agent_status_id = 2; //reattempt
+                    $updated_rv_assign_agent_status_id = 2; //reattempt call request
+                    $updated_rv_assign_agent_sub_status_id = null; //since shipper has only request to "reattempt call request" then the sub status should be null
                     $updated_rv_state_id = 3; //Open
 
-                    $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id);
+                    $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $updated_rv_assign_agent_status_id, $updated_rv_state_id, $updated_rv_assign_agent_sub_status_id);
 
                     if ($journey) {
                         NotificationsController::send(33, $request->shipment_id);

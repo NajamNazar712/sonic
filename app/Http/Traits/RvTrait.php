@@ -172,7 +172,7 @@ trait RvTrait
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
                         
                         $request->request->add(['shipment_id' => $shipment, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks, 
-                        'call_to_id' => $rv_unassign_agent->call_to_id, 'assigned_by' => Null]);
+                        'call_to_id' => $rv_unassign_agent->call_to_id, 'assigned_by' => 0]);
                         //new row in RvShipmentAssignAgentDetails table
                         $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
                     }
@@ -231,6 +231,7 @@ trait RvTrait
             $rv_shipment_assign_agent_details->rv_fake_status_id = $request->rv_fake_status_id;
             $rv_shipment_assign_agent_details->remarks = $request->remarks;
             $rv_shipment_assign_agent_details->call_to_id  = $request->call_to_id;
+            $rv_shipment_assign_agent_details->assigned_to_type_id  = $shipment_assign_agent->assigned_to_type_id;
             $rv_shipment_assign_agent_details->assigned_by  = $shipment_assign_agent->assigned_by;
             $rv_shipment_assign_agent_details->save();
     
@@ -247,7 +248,8 @@ trait RvTrait
     private function shipment_assign_agent_table_columns($request, $agent)
     {
         return [
-            'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
+            //if user has requested for intercept same conginee set rv_assign_agent_status_id to 4(Intercept Approved) else $request->rv_assign_agent_status_id
+            'rv_assign_agent_status_id' => ($request->intercept_type != 1) ? 4 : $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
             // 'rv_state_id' => 2, //unassign
             // 'rv_state_id' => $request->rv_state_id, //unassign
@@ -279,11 +281,14 @@ trait RvTrait
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
 
         } 
-        else if ($request->rv_assign_agent_status_id == 7 && $shipment_assign_agent->unresponsive_count == 3) {
+        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
             $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
+        }
+        else{
+            $shipment_assign_agent_table_columns['rv_state_id'] = 2;
         }
         return $shipment_assign_agent_table_columns;
     }
@@ -332,9 +337,11 @@ trait RvTrait
             $add_agent->actual_productivity  = $add_agent->actual_productivity + 1;
             $add_agent->save();
 
+            //this is updating status of rvshipment assign agent row 
             $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $add_agent);
 
             $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
+            $shipment_assign_agent_table_columns['rv_state_id'] = 2;
             $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
             return true;
@@ -1614,7 +1621,8 @@ trait RvTrait
                         'rv_state_id' => 1, //Assigned
                         'rv_assign_agent_status_id' => null,
                         'rv_assign_agent_sub_status_id' => null,
-                        'assigned_to_type_id' => 1, 
+                        // 'assigned_to_type_id' => 1, 
+                        'assigned_to_type_id' => 2, //include shipper function is only using for contractual agent so thats why we have initial it by 2
                         'assigned_by' => Auth::id(),
                     ];
                     
@@ -1636,7 +1644,8 @@ trait RvTrait
                             $shipment_assigned_unassigned_agent->first();
                             RvShipmentAssignAgent::where('shipment_id', $shipment->id)
                             ->where('rv_state_id', 3)
-                            ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => Null]);
+                            // ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => Null]);
+                            ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
                             
                             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->latest()->first();
 
@@ -1649,8 +1658,10 @@ trait RvTrait
                                     'rv_assign_agent_status_id' => Null,
                                     'rv_assign_agent_sub_status_id' => Null,
                                     'rv_state_id' => 1,
-                                    'updated_type_id' => Null,
-                                    'updated_by_id' =>  Null,
+                                    // 'updated_type_id' => Null,
+                                    'updated_type_id' => 2,
+                                    // 'updated_by_id' =>  Null,
+                                    'updated_by_id' =>  Auth::id(),
                                     'is_fake_status' => 0,
                                     'rv_fake_status_id' => Null,
                                     'remarks' => Null,
@@ -1755,7 +1766,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: this function is updating table rows of rv_shipment_assign_agents from shipper side
-    protected function shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id)
+    protected function shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id, $updated_rv_assign_agent_sub_status_id = null)
     {
         $shipper = User::where('id', $updated_by_id)->first();
         if ($shipper) {
@@ -1769,6 +1780,9 @@ trait RvTrait
             try {
                 if ($rv_shipment_assign_agents) {
                     $rv_shipment_assign_agents->rv_assign_agent_status_id = $update_rv_assign_agent_status_id;
+                    
+                    //$updated_rv_assign_agent_sub_status_id will be used as null always when shipper has update status as reattempt call request or return confirm because sub status is not required in those stattuses  
+                    $rv_shipment_assign_agents->rv_assign_agent_sub_status_id = $updated_rv_assign_agent_sub_status_id ?? $rv_shipment_assign_agents->rv_assign_agent_sub_status_id;
                     $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
                     $rv_shipment_assign_agents->updated_type_id = $updated_type_id;
                     $rv_shipment_assign_agents->updated_by_id = $updated_by_id;
