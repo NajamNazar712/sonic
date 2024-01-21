@@ -1191,7 +1191,17 @@
                                         closeOnEsc: false
                                     });
                                     $('#update_call_status_modal').modal('hide');
-                                } else {
+                                } 
+                                else if(response.status == 0){
+                                    swal({
+                                        text: response.message,
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                    $('#update_call_status_modal').modal('hide');
+                                }
+                                else {
                                     swal({
                                         title: 'Something Went Wrong!',
                                         text: 'Please Update Status Again',
