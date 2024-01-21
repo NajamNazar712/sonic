@@ -152,8 +152,6 @@ class ReturnController extends Controller
             $join->on('sret.shipment_id', '=', 'shipments.id')
                 ->where('sret.shipper_status_id','=',13)
                 ->where('sret.verification','=',1);
-            //                    ->where('sret.id','=',
-            //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
         })
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
         ->leftjoin('crm_requests as crm', function ($join) {
@@ -943,11 +941,13 @@ class ReturnController extends Controller
                             $return_assign_log->assigned_by = Auth::id();
                             $return_assign_log->save();
                         }
-    
+
+                        $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $return_reason)->first()->id ?? null;
                         $rv_shipment_assign_agent_data = [
                             'agent_id' => Auth::id(),
                             'shipment_id' => $shipment,
                             'rv_assign_agent_status_id' => 1, //Return Confirm
+                            'rv_assign_agent_sub_status_id' => $rv_assign_agent_sub_status_id,
                             'updated_by_id' =>  Auth::id(),
                         ];
                         $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);

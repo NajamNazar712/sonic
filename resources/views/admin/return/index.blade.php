@@ -1819,7 +1819,7 @@
                                                                                 setTimeout(function() {
                                                                                     $divElement.addClass('d-none');
                                                                                 }, 10000); // 5 seconds
-
+                                                                                table.rows().deselect();
                                                                                 table.draw();
                                                                             } 
                                                                             else {
