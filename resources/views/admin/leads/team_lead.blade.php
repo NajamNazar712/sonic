@@ -463,6 +463,8 @@
                 // Select all zones in the dropdown
                 $('#search_origin option').prop('selected', true);
                 $('#search_origin').trigger('change');
+
+                $('input[name="unsorted_zones"]').val(selectedCities);
                 $('#unsorted_zones').prop('selected', true);
                 $('#unsorted_zones').trigger('change');
 
