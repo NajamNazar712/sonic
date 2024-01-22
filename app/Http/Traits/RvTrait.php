@@ -580,7 +580,7 @@ trait RvTrait
 
             
             // if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) { old for rv
-            if (in_array($shipment->shipper_status_id, [12, 52, 65]) || $crm == true) {
+            if (in_array($shipment->shipper_status_id, [12, 52, 65, 66]) || $crm == true) {
                 if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name 
                 || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 
                 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email 
