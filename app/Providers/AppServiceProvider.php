@@ -36,15 +36,16 @@ class AppServiceProvider extends ServiceProvider
 
             if (Auth::guard('admin')->check()) {
                 $date = Carbon::now()->toDateString();
-                $settings = GeneralSetting::where('type', 'admin_ticker')->whereDate('start_date', '<=', $date)->whereDate('end_date', '>=', $date);
+                $settings = GeneralSetting::where('type', 'admin_ticker');
                 if (session('role_id') !== 1) {
                     $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id', 'name', 'url');
                 } else {
                     $search_sonic = AdminsScreenList::select('id', 'name', 'url');
                 }
             } else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
-                $date = Carbon::now()->toDateString();
-                $settings = GeneralSetting::where('type', 'shipper_ticker')->whereDate('start_date', '<=', $date)->whereDate('end_date', '>=', $date);
+
+                $settings = GeneralSetting::where('type', 'shipper_ticker');
+              
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
                 $from =  Carbon::now()->startOfDay()->toDateTimeString();
@@ -70,11 +71,38 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($settings && $settings->exists()) {
-                $settings = $settings->first();
+                 $settings = $settings->first();
+                 $date = Carbon::now();
+                
+                 $ticker = $settings->description;
+                    //    dd($settings->start_date,$date);
+               
+                if(!is_null($settings->start_date))
+                {
+                    if($settings->start_date <= $date)
+                    {
+                        $ticker = $settings->description;
 
-                $ticker = $settings->description;
+                    } else{
+                        $ticker = null;
+                    }
+                   
+                }
+             
+                if(!is_null($settings->end_date))
+                {
+                      
+                    if($settings->end_date >= $date)
+                    { 
+                        $ticker = $settings->description;
 
-                if (!empty($ticker)) {
+                    } else{
+                        $ticker = null;
+                    }
+                   
+                }
+               
+                if (!empty($ticker) || !is_null($ticker)) {
                     $view->with('ticker', $ticker);
                 }
             }
