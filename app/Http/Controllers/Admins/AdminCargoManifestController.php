@@ -358,7 +358,7 @@ class AdminCargoManifestController extends Controller
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
             ->leftjoin('misrouted_history as gmhh', function ($join) {
-                $join->on('gmh.shipment_id', '=', 'shipments.id')
+                $join->on('gmhh.shipment_id', '=', 'shipments.id')
                     ->on('shipments.shipper_status_id', '=', DB::raw(66))
                     ->where('gmhh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
@@ -416,6 +416,7 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
             ->select('z.name as zone_name','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status')
             ->whereNotIn('shipments.id', $on_hold_shipments);
+            //->whereIn('shipments.shipper_status_id', [11,66]);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -460,7 +461,7 @@ class AdminCargoManifestController extends Controller
                 $shipments->whereDate('shipments_journey.created_at', $from);
             }
         }
-
+dd($shipments->get());
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
