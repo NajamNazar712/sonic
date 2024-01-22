@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\HandoverShipmentPiece;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\CityArea;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Http\Models\City;
+use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
 use App\Http\Models\Shipment;
+use App\HandoverShipmentPiece;
+use App\Http\Models\Admin\Admin;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\ShipmentPiece;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\ShipmentStatus;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Models\Handover\Handover;
+use App\Http\Models\Handover\HandoverStatus;
+use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Handover\HandoverResponsibilities;
-use App\Http\Models\Handover\HandoverStatus;
 use App\Http\Models\Handover\HandoverShipmentsJourney;
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Yajra\Datatables\Datatables;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -303,10 +304,24 @@ class AdminShipmentHandoverController extends Controller
             $join->on('c_to.id', '=', 'hor.city_area_id');
 //                ->where('c_to.default', 1);
         })
+        ->leftJoin('shipments_journey as sjl', function ($join) {
+          $join->on('sjl.shipment_id', '=', 's.id')
+              ->where(
+                  'sjl.id',
+                  '=',
+                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                );
+        })
+  
+        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+            $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id');
+                // ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+        })
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
-        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
+        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name', 'ssjal.location_status as location_status',
+        'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
         DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
@@ -370,7 +385,31 @@ class AdminShipmentHandoverController extends Controller
         } else {
             return '-';
         }
-        });
+        })->editColumn('location_status', function ($shipment) {
+          if(isset($shipment->location_status)){
+              return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+          }else{
+              return '-';
+          }
+      })
+
+      ->editColumn('latitude', function ($shipment) {
+          if(isset($shipment->shipment_scanning_journey_id)){
+              $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
+              return $lat;
+          }else{
+              return '-';
+          }
+      })
+
+      ->editColumn('longitude', function ($shipment) {
+          if(isset($shipment->shipment_scanning_journey_id)){
+              $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
+              return $long;
+          }else{
+              return '-';
+          }
+      });
 
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->where('s.tracking_number', '=', $tracking_number);

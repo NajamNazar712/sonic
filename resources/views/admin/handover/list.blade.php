@@ -64,6 +64,9 @@
                         <th class="border-primary border-darken-1">To Area</th>
                         <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
                         <th class="border-primary border-darken-1">Received Shipment(s)</th>
@@ -296,6 +299,9 @@
                             head.push('User Type');
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');	
                             head.push('Status');
                             head.push('Shipment(s)');
                             head.push('Received Shipment(s)');
@@ -316,6 +322,9 @@
                                 row.push(values.to_area);
                                 row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.status);
                                 row.push(values.total_shipments);
                                 row.push(values.received_shipments);
@@ -484,6 +493,9 @@
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
                     {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},
                     {data: 'received_shipments', name: 'handovers.received', class: 'align-middle received_shipments'},

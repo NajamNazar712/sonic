@@ -12316,6 +12316,20 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
                     );
             })
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                    );
+            })
+            
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            })
+
             ->select( 
                 'shipments.id as shipment_id', 
                 'shipments.tracking_number',  
@@ -12335,7 +12349,9 @@ class AdminReportsController extends Controller
                 'dcz.name as destination_zone',
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
-                'si.quantity as quantity'
+                'si.quantity as quantity',
+                'ssjal.location_status as location_status',
+                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id'
             );
             
             if ($search_shippers = $request->get('search_shippers')) {
@@ -12406,6 +12422,9 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
+                    $data[$key]['location_status'] = ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                    $data[$key]['longitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude ??'-';
+                    $data[$key]['latitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
                     $data[$key]['current_remarks'] = '-';
@@ -12673,7 +12692,7 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Location Status', 'Longitude', 'Latitude','Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
                 
                 $data = array_merge($data_header, $data);
     
@@ -12719,7 +12738,6 @@ class AdminReportsController extends Controller
     
                 $file_name_without_path = "reports/operation_performance_reports/operations_performance_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/' . $file_name_without_path;
-    
                 $writer->save($file_name);
     
                 return ['status' => 1, 'file_name' => $file_name_without_path];
