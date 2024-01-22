@@ -61,10 +61,14 @@ class GeneralSettingController extends Controller
 
             $settings->type = 'admin_ticker';
         }
+        $start_date = Carbon::parse(($request->admin_start_date_formatted . ' ' . $request->admin_start_time))->format('Y-m-d H:i:s');
+        $end_date =Carbon::parse(( $request->admin_end_date_formatted . ' ' . $request->admin_end_time))->format('Y-m-d H:i:s');
 
+     
         $settings->description = ($request->admin_ticker) ? $request->admin_ticker : '';
         $settings->start_date = $request->admin_start_date_formatted;
         $settings->end_date = $request->admin_end_date_formatted;
+
 
         $settings->save();
 

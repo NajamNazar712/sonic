@@ -18,7 +18,7 @@
 							@include('admin.inc.messages')
 
 							<div class="justify-content-center">
-								{{-- <div class="col-12 col-sm-12 col-md-12 col-lg-12"> --}}
+								{{-- <div class="col-12 col-sm-12 col-md-12 col-lg-12">  value="{{ $admin_ticker->start_date ?? ''}}"--}}
 									<form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.ticker.store') }}" novalidate="novalidate">
 										{{ csrf_field() }}
 										<div class="row">
@@ -27,14 +27,84 @@
 													<input type="text" name="admin_ticker" class="form-control admin_ticker" placeholder="Admin Ticker" value="{{ $admin_ticker->description ?? '' }}">
 												</div>
 											</div>
-											<div class="col-md-4">
+											<div class="col-md-2">
 												<div class="form-group">
-													<input type="text" name="admin_start_date" id="admin_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right"  value="{{ $admin_ticker->start_date ?? ''}}">
+													<input type="text" name="admin_start_date" id="admin_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right"  >
 												</div>
 											</div>
-											<div class="col-md-4">
+											<div class="col-md-2">
 												<div class="form-group">
-													<input type="text" name="admin_end_date" id="admin_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" value="{{ $admin_ticker->end_date ?? '' }}" >
+													<input type="text" name="admin_end_date" id="admin_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" >
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="form-group">
+													<select class="form-control" name="admin_start_time">
+														<option selected>Start Time</option>
+														 <optgroup label="AM">
+															<option value="12:00">12:00 AM</option>
+															<option value="01:00">01:00 AM</option>
+															<option value="02:00">02:00 AM</option>
+															<option value="03:00">03:00 AM</option>
+															<option value="04:00">04:00 AM</option>
+															<option value="05:00">05:00 AM</option>
+															<option value="06:00">06:00 AM</option>
+															<option value="07:00">07:00 AM</option>
+															<option value="08:00">08:00 AM</option>
+															<option value="09:00">09:00 AM</option>
+															<option value="10:00">10:00 AM</option>
+															<option value="11:00">11:00 AM</option>
+														</optgroup>
+														<optgroup label="PM">
+															<option value="12:00">12:00 PM</option>
+															<option value="01:00">01:00 PM</option>
+															<option value="02:00">02:00 PM</option>
+															<option value="03:00">03:00 PM</option>
+															<option value="04:00">04:00 PM</option>
+															<option value="05:00">05:00 PM</option>
+															<option value="06:00">06:00 PM</option>
+															<option value="07:00">07:00 PM</option>
+															<option value="08:00">08:00 PM</option>
+															<option value="09:00">09:00 PM</option>
+															<option value="10:00">10:00 PM</option>
+															<option value="11:00">11:00 PM</option>
+														</optgroup>
+													</select>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="form-group">
+													<select class="form-control" name="admin_end_time">
+														<option selected>End Time</option>
+														 <optgroup label="AM">
+															<option value="12:00">12:00 AM</option>
+															<option value="01:00">01:00 AM</option>
+															<option value="02:00">02:00 AM</option>
+															<option value="03:00">03:00 AM</option>
+															<option value="04:00">04:00 AM</option>
+															<option value="05:00">05:00 AM</option>
+															<option value="06:00">06:00 AM</option>
+															<option value="07:00">07:00 AM</option>
+															<option value="08:00">08:00 AM</option>
+															<option value="09:00">09:00 AM</option>
+															<option value="10:00">10:00 AM</option>
+															<option value="11:00">11:00 AM</option>
+														</optgroup>
+														<optgroup label="PM">
+															<option value="12:00">12:00 PM</option>
+															<option value="01:00">01:00 PM</option>
+															<option value="02:00">02:00 PM</option>
+															<option value="03:00">03:00 PM</option>
+															<option value="04:00">04:00 PM</option>
+															<option value="05:00">05:00 PM</option>
+															<option value="06:00">06:00 PM</option>
+															<option value="07:00">07:00 PM</option>
+															<option value="08:00">08:00 PM</option>
+															<option value="09:00">09:00 PM</option>
+															<option value="10:00">10:00 PM</option>
+															<option value="11:00">11:00 PM</option>
+														</optgroup>
+													</select>
 												</div>
 											</div>
 										</div>
@@ -42,19 +112,90 @@
 										<div class="row">
 											<div class="col-md-4">
 												<div class="form-group">
-													<input type="text" name="shipper_ticker" class="form-control shipper_ticker" placeholder="Shipper Ticker" value="{{ $shipper_ticker->description ?? ''}}">
+													<input type="text" name="shipper_ticker" class="form-control shipper_ticker" placeholder="Shipper Ticker" >
 												</div>
 											</div>
-											<div class="col-md-4">
+											<div class="col-md-2">
 												<div class="form-group">
-													<input type="text" name="shipper_start_date" id="shipper_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right" value="{{ $shipper_ticker->start_date ?? ''}}">
+													<input type="text" name="shipper_start_date" id="shipper_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right">
 												</div>
 											</div>
-											<div class="col-md-4">
+											<div class="col-md-2">
 												<div class="form-group">
-													<input type="text" name="shipper_end_date" id="shipper_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" value="{{ $shipper_ticker->end_date ?? '' }}">
+													<input type="text" name="shipper_end_date" id="shipper_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" >
 												</div>
 											</div>
+											<div class="col-md-2">
+												<div class="form-group">
+													<select class="form-control" name="shipper_start_time">
+														<option selected>Start Time</option>
+														 <optgroup label="AM">
+															<option value="12:00">12:00 AM</option>
+															<option value="01:00">01:00 AM</option>
+															<option value="02:00">02:00 AM</option>
+															<option value="03:00">03:00 AM</option>
+															<option value="04:00">04:00 AM</option>
+															<option value="05:00">05:00 AM</option>
+															<option value="06:00">06:00 AM</option>
+															<option value="07:00">07:00 AM</option>
+															<option value="08:00">08:00 AM</option>
+															<option value="09:00">09:00 AM</option>
+															<option value="10:00">10:00 AM</option>
+															<option value="11:00">11:00 AM</option>
+														</optgroup>
+														<optgroup label="PM">
+															<option value="12:00">12:00 PM</option>
+															<option value="01:00">01:00 PM</option>
+															<option value="02:00">02:00 PM</option>
+															<option value="03:00">03:00 PM</option>
+															<option value="04:00">04:00 PM</option>
+															<option value="05:00">05:00 PM</option>
+															<option value="06:00">06:00 PM</option>
+															<option value="07:00">07:00 PM</option>
+															<option value="08:00">08:00 PM</option>
+															<option value="09:00">09:00 PM</option>
+															<option value="10:00">10:00 PM</option>
+															<option value="11:00">11:00 PM</option>
+														</optgroup>
+													</select>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="form-group">
+													<select class="form-control" name="shipper_end_time">
+														<option selected>End Time</option>
+														 <optgroup label="AM">
+															<option value="12:00">12:00 AM</option>
+															<option value="01:00">01:00 AM</option>
+															<option value="02:00">02:00 AM</option>
+															<option value="03:00">03:00 AM</option>
+															<option value="04:00">04:00 AM</option>
+															<option value="05:00">05:00 AM</option>
+															<option value="06:00">06:00 AM</option>
+															<option value="07:00">07:00 AM</option>
+															<option value="08:00">08:00 AM</option>
+															<option value="09:00">09:00 AM</option>
+															<option value="10:00">10:00 AM</option>
+															<option value="11:00">11:00 AM</option>
+														</optgroup>
+														<optgroup label="PM">
+															<option value="12:00">12:00 PM</option>
+															<option value="01:00">01:00 PM</option>
+															<option value="02:00">02:00 PM</option>
+															<option value="03:00">03:00 PM</option>
+															<option value="04:00">04:00 PM</option>
+															<option value="05:00">05:00 PM</option>
+															<option value="06:00">06:00 PM</option>
+															<option value="07:00">07:00 PM</option>
+															<option value="08:00">08:00 PM</option>
+															<option value="09:00">09:00 PM</option>
+															<option value="10:00">10:00 PM</option>
+															<option value="11:00">11:00 PM</option>
+														</optgroup>
+													</select>
+												</div>
+											</div>
+
 										</div>
 										
 										<button type="submit" class="btn btn-primary">Update</button>
@@ -85,10 +226,10 @@
             firstDay: 1,
             clear: '',
             min: '{{ Carbon\Carbon::now() }}',
-            format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             // onSet: function (context) {
             //     if (context.select) {
@@ -101,10 +242,10 @@
             firstDay: 1,
             clear: '',
             min: '{{ Carbon\Carbon::now() }}',
-            format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             // onSet: function (context) {
             //     if (context.select) {
@@ -117,10 +258,10 @@
             firstDay: 1,
             clear: '',
             min: '{{ Carbon\Carbon::now() }}',
-            format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             // onSet: function (context) {
             //     if (context.select) {
@@ -133,10 +274,10 @@
             firstDay: 1,
             clear: '',
             min: '{{ Carbon\Carbon::now() }}',
-            format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             // onSet: function (context) {
             //     if (context.select) {
