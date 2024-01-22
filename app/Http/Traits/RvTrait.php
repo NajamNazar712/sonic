@@ -405,9 +405,9 @@ trait RvTrait
         }
 
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) { old for rv
-        if (in_array($parcel->shipper_status_id, [12, 52, 65])) { 
+        if (in_array($parcel->shipper_status_id, [12, 52, 65, 66])) { 
             // $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [7, 8, 9, 12, 15, 52, 65])->latest('id')->first(); old for rv
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 65])->latest('id')->first();
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 65, 66])->latest('id')->first();
 
             if ($journey) {
                 if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
