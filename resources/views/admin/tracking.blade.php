@@ -1453,9 +1453,10 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
-                                    var googleMapsUrl = '';
-                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                    var googleMapsUrl = '-';
+                                    if (history.area_log.latitude && history.area_log.longitude ) {
                                         googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                        googleMapsUrl = '<a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>';
                                     }
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
                                     shipment += '<tr>';
@@ -1466,7 +1467,7 @@
                                     shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
-                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + ( (history.area_log.area != '-') ? history.area_log.area : history.area_log.city) + ' | '+ googleMapsUrl + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';
                                     shipment += '<td>' + history.rider + '</td>';
@@ -1584,23 +1585,27 @@
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Location</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '<th><strong>User Created By</strong></th>';
+                                    shipment += '<th><strong>User Received By</strong></th>';
 
                                     shipment += '</tr>';
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
-                                        var googleMapsUrl = '';  // Declare the variable outside the if block
-                                        if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        var googleMapsUrl = '-';  
+                                        if (history.area_log.latitude && history.area_log.longitude ) {
                                             googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                            googleMapsUrl = '<a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>';
                                         }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
-                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | (' + (history.area_log ? history.area_log.area : '') + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a></td>';
-                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + (history.area_log ? history.area_log.area : '') + ' | '+ googleMapsUrl + '</td>';
+                                        shipment += '<td>' + history.user_created_by + '</td>';
+                                        shipment += '<td>' + history.user_received_by + '</td>';
+
                                         shipment += '</tr>';
                                     });
 
