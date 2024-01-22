@@ -464,7 +464,7 @@
                 $('#search_origin option').prop('selected', true);
                 $('#search_origin').trigger('change');
 
-                $('input[name="unsorted_zones"]').val(selectedCities);
+                // $('input[name="unsorted_zones"]').val(search_origin);
                 $('#unsorted_zones').prop('selected', true);
                 $('#unsorted_zones').trigger('change');
 
