@@ -163,13 +163,13 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\BoltUndeliveredReasonAgainstBookingType;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Models\Admin\TraxPayTransaction;
+// use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\NotificationSetting;
-use App\ReturnDeliveredToShipperSms;
-use App\RiderWiseDeliveryNote;
-use App\RiderWiseDeliveryNoteShipment;
-use App\Http\Traits\LastMileAppReportTrait;
-use App\Jobs\LastMileAppReport;
+// use App\ReturnDeliveredToShipperSms;
+// use App\RiderWiseDeliveryNote;
+// use App\RiderWiseDeliveryNoteShipment;
+// use App\Http\Traits\LastMileAppReportTrait;
+// use App\Jobs\LastMileAppReport;
 
 class RiderAPIController extends Controller
 {
