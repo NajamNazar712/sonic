@@ -210,6 +210,21 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                    );
+            })
+            
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            })
+            
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -253,7 +268,9 @@ class AdminReportsController extends Controller
                 'cmb.seal_number as seal_number',
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date'
+                'sjrp.created_at as rider_picked_status_date',
+                'ssjal.location_status as location_status',
+                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
             ]);
 
         $type = $request->get('search_types');
@@ -290,6 +307,31 @@ class AdminReportsController extends Controller
             })
             ->editColumn('order_id', function ($shipment) {
                 return ($shipment->order_id) ? $shipment->order_id : '-';
+            })
+            ->editColumn('location_status', function ($shipment) {
+                if(isset($shipment->location_status)){
+                    return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('latitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
+                    return $lat;
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('longitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
+                    return $long;
+                }else{
+                    return '-';
+                }
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
@@ -12274,6 +12316,20 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
                     );
             })
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                    );
+            })
+            
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            })
+
             ->select( 
                 'shipments.id as shipment_id', 
                 'shipments.tracking_number',  
@@ -12293,7 +12349,9 @@ class AdminReportsController extends Controller
                 'dcz.name as destination_zone',
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
-                'si.quantity as quantity'
+                'si.quantity as quantity',
+                'ssjal.location_status as location_status',
+                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id'
             );
             
             if ($search_shippers = $request->get('search_shippers')) {
@@ -12364,6 +12422,9 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
+                    $data[$key]['location_status'] = ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                    $data[$key]['longitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude ??'-';
+                    $data[$key]['latitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
                     $data[$key]['current_remarks'] = '-';
@@ -12631,7 +12692,7 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Location Status', 'Longitude', 'Latitude','Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
                 
                 $data = array_merge($data_header, $data);
     
@@ -12675,9 +12736,8 @@ class AdminReportsController extends Controller
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 
     
-                $file_name_without_path = "reports/operation_performance_reports/operations_performance_report_" . $date_file_name  . ".xlsx";
+                $file_name_without_path = "reports/operations_performance_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/' . $file_name_without_path;
-    
                 $writer->save($file_name);
     
                 return ['status' => 1, 'file_name' => $file_name_without_path];

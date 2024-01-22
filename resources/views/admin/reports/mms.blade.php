@@ -123,6 +123,9 @@
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+			            <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
@@ -357,6 +360,9 @@
                             head.push('Booking Date');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');	
                             head.push('Zone');
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
@@ -380,6 +386,9 @@
                                 row.push(values.booking_date);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.zone);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
@@ -450,6 +459,9 @@
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
