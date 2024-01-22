@@ -465,9 +465,15 @@
                 $('#search_origin').trigger('change');
 
                 // $('input[name="unsorted_zones"]').val(search_origin);
-                $('#unsorted_zones').prop('selected', true);
-                $('#unsorted_zones').trigger('change');
+                $('#unsorted_zones option').prop('selected', true);
+                var selectedOptions = $('#search_origin option:selected');
 
+                // Get an array of selected values
+                var selectedValues = selectedOptions.map(function() {
+                    return $(this).val();
+                }).get();
+
+                $('input[name="unsorted_zones"]').val(selectedValues);
             });
 
             $("#reference_id").prepend('<option value="" selected></option>').select2({
