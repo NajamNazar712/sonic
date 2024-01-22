@@ -9110,10 +9110,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->tagged_poc;
                     }
                 } else {
-                    return '-';
+                    return $users->tagged_poc;
                 }
 
             })
@@ -9138,15 +9138,18 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
+                        $ref = explode(', ', $users->ref);
+                        $new_array = array_unique(array_merge($array, $ref));
+                        $new_array = implode(', ', $new_array);
+                        
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->ref;
                     }
                 } else {
-                    return '-';
+                    return $users->ref;
                 }
-
             })
             ->editColumn('kam', function ($users) {
                 $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
@@ -9168,15 +9171,18 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
+                        $old_kam = explode(', ', $users->kam);
+                        $new_array = array_unique(array_merge($array, $old_kam));
+                        $new_array = implode(', ', $new_array);
+                        
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
                 } else {
-                    return '-';
+                    return $users->kam;
                 }
-
             })
 
             // ->editColumn('admin_tag_id', function ($users) {
@@ -9696,10 +9702,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->tagged_poc;
                     }
                 } else {
-                    return '-';
+                    return $users->tagged_poc;
                 }
 
             })
@@ -9727,10 +9733,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->ref;
                     }
                 } else {
-                    return '-';
+                    return $users->ref;
                 }
 
             })
@@ -9757,10 +9763,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
                 } else {
-                    return '-';
+                    return $users->kam;
                 }
 
             })
