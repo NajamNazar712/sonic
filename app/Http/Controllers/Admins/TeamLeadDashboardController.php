@@ -452,7 +452,7 @@ class TeamLeadDashboardController extends Controller
                 }
             }
             if ($count > 0) {
-                return redirect()->route('admin.team_lead.index')->with('success', 'Assigned Successfully');
+                return redirect()->route('admin.team_lead.index')->with('success', 'Zone Assigned Successfully');
 
             } else {
                 return redirect()->route('admin.team_lead.index')->with('error', 'Zone Not Assigned');

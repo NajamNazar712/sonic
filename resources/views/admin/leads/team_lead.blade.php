@@ -94,6 +94,10 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
+                            <div class="modal-title text-center justify-content-center" style="margin-bottom: 10px">
+                                <button type="submit" class="btn btn-primary" id="select_all">Select All</button>
+                                <button type="submit" class="btn btn-primary" id="select_none">Select None</button>
+                            </div>
                             <input type="hidden" class="unsorted_zones" name="unsorted_zones">
                             <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple
                                 style="width: 100%;">
@@ -450,6 +454,19 @@
                 $('#select_message_error').text('');
 
             });
+            $("#select_none").on('click', function(e){
+                e.preventDefault(); // Prevent form submission
+                $('#search_origin').val([]).trigger('change');
+            });
+            $("#select_all").on('click', function(e){
+                e.preventDefault(); // Prevent form submission
+                // Select all zones in the dropdown
+                $('#search_origin option').prop('selected', true);
+                $('#search_origin').trigger('change');
+                $('#unsorted_zones').prop('selected', true);
+                $('#unsorted_zones').trigger('change');
+
+            });
 
             $("#reference_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Reference*",
@@ -649,9 +666,7 @@
                         d.search_line_manager = $('#search_line_manager').val();
                         d.filter_line_manager = $('#filter_line_manager').val();
                         d.search_origin = $('#search_origin').val();
-                        d.number_of_available_agents_input = $('#number_of_available_agents_input')
-                            .val();
-
+                        d.number_of_available_agents_input = $('#number_of_available_agents_input').val();
                     }
                 },
                 order: [

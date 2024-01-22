@@ -57,7 +57,7 @@ class ReturnV2Controller extends Controller
         $fake_status_remarks = RvFakeStatus::get();
         $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
         $agent = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->get();
-        $unresponsive_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->count();
+        $unresponsive_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->where('updated_at',Carbon::now())->count();
         $reattempt_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->count();
         $intercept_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 3)->count();
         $hold_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->count();
@@ -288,7 +288,7 @@ class ReturnV2Controller extends Controller
         
         $validations = [
             'rv_assign_agent_status_id' => 'required',
-            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5, 8',
+            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 8',
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
