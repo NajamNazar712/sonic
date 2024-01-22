@@ -250,7 +250,7 @@ trait RvTrait
     {
         return [
             //if user has requested for intercept same conginee set rv_assign_agent_status_id to 4(Intercept Approved) else $request->rv_assign_agent_status_id
-            'rv_assign_agent_status_id' => ($request->intercept_type != 1) ? 4 : $request->rv_assign_agent_status_id,
+            'rv_assign_agent_status_id' => ($request->intercept_type = 2) ? 4 : $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
             // 'rv_state_id' => 2, //unassign
             // 'rv_state_id' => $request->rv_state_id, //unassign
