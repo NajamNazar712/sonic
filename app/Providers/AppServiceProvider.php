@@ -36,11 +36,11 @@ class AppServiceProvider extends ServiceProvider
 
             if (Auth::guard('admin')->check()) {
                 $settings = GlobalSettings::where('type', 'admin_ticker');
-                if (session('role_id') !== 1) {
-                    $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id', 'name', 'url');
-                } else {
-                    $search_sonic = AdminsScreenList::select('id', 'name', 'url');
-                }
+                // if (session('role_id') !== 1) {
+                //     $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id', 'name', 'url');
+                // } else {
+                //     $search_sonic = AdminsScreenList::select('id', 'name', 'url');
+                // }
 
             }
             else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
