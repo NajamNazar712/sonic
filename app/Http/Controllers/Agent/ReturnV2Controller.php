@@ -61,7 +61,7 @@ class ReturnV2Controller extends Controller
         $agent_total_tickets = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->whereBetween('updated_at', [$startOfDay, $endOfDay])->get();
         $unresponsive_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
         $reattempt_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
-        $intercept_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 3)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
+        $intercept_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
         $hold_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
         $refused_on_call = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 1)->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->whereBetween('updated_at', [$startOfDay, $endOfDay])->count();
 
