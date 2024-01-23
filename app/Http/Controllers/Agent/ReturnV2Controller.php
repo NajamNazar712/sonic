@@ -160,7 +160,6 @@ class ReturnV2Controller extends Controller
                                 $hub =  Shipment::join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
                                         ->join('cities as h', 'dc.hub_id', '=', 'h.id')
                                         ->where('shipments.id',$shipment->id)->first();
-                                        // dd($hub->name);
 
                                 foreach ($product_infos as $product_info) {
 

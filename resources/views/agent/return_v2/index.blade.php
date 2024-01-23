@@ -634,7 +634,7 @@
                                 shipment += '<td style="width: 25%;" colspan="1">' + data.shipment
                                     .consignee_address + '</td>';
                                 shipment += '<td><strong>Phone No(s).</strong></td>';
-                                shipment += '<td>' + data.shipment.consignee_phone_number_1 + '</td>';
+                                shipment += '<td>' + data.shipment.consignee_phone_number_1 + (data.shipment.consignee_phone_number_2 ? ' | ' + data.shipment.consignee_phone_number_2 : '') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
