@@ -68,7 +68,7 @@ class AdminShipmentHandoverController extends Controller
         $latest_shipper_status = $shipment->shipment_journey()->latest('id')->first()->shipper_status_id ?? null;
         $shipment_pieces1 = $shipment->pieces;
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
-        if(!in_array($latest_shipper_status, [1,3,5,14,18,21,23,25,26,28,30,31,32,34,36,37,38,51]) && isset($latest_shipper_status)){
+        // if(!in_array($latest_shipper_status, [1,3,5,14,18,21,23,25,26,28,30,31,32,34,36,37,38,51]) && isset($latest_shipper_status)){
           if($handover_shipment->exists()){
             return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
           }
@@ -146,10 +146,10 @@ class AdminShipmentHandoverController extends Controller
           else {
               return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
           }        
-        }else{
-          return ['status' => 1, 'error' => 'Restricted To Scan !!'];
+        // }else{
+        //   return ['status' => 1, 'error' => 'Restricted To Scan !!'];
 
-        }
+        // }
       }
         
     }
@@ -395,7 +395,7 @@ class AdminShipmentHandoverController extends Controller
               $shipment_handover = $shipment_handover->first();
               $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
               ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-  
+              
               if($scanning_status->exists()){
                 $scanning_status = $scanning_status->first();
                 $area_log = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_status->id)->first();
@@ -433,6 +433,7 @@ class AdminShipmentHandoverController extends Controller
 
         ->editColumn('created_longitude', function ($shipment) {
           $time = $shipment->created_at;
+        
           $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
           if($shipment_handover->exists()){
             $shipment_handover = $shipment_handover->first();
