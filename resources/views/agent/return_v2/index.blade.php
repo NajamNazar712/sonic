@@ -564,16 +564,17 @@
                                 shipment += '</div>'
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 mt-2">';
-                                shipment += '<h4 class="text-center"><u>Shipper Information</u></h4>';
+                                    // Agent Screen Shipper Information 
+                                shipment += '<h4 class="text-center"><u><strong>Shipper Information</strong></u></h4>';
                                 shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Name</strong></td>';
-                                shipment += '<td style="width: 45%;">' + ((data.shipper_info != null && data
+                                shipment += '<td style="width: 25%;">' + ((data.shipper_info != null && data
                                     .shipper_info.name !=
                                     null) ? data.shipper_info.name : '----------------') + '</td>';
-                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td style="width: 15%;"><strong>Origin</strong></td>';
                                 shipment += '<td>' + ((data.shipper_city != null && data.shipper_city.name !=
                                     null) ? data.shipper_city.name : '----------------') + '</td>';
                                 shipment += '</tr>';
@@ -584,12 +585,13 @@
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Address</strong></td>';
-                                shipment += '<td style="width: 45%;" colspan="1">' + ((data.shipper_info != null &&
+                                shipment += '<td style="width: 25%;" colspan="1">' + ((data.shipper_info != null &&
                                         data.shipper_info
                                         .address != null) ? data.shipper_info.address : '----------------') +
                                     '</td>';
-                                shipment += '<td><strong>Phone No(s).</strong></td>';
-                                shipment += '<td>' + ((data.shipper_info != null && data.shipper_info.phone !=
+
+                                shipment += '<td ><strong>Phone No(s).</strong></td>';
+                                shipment += '<td >' + ((data.shipper_info != null && data.shipper_info.phone !=
                                     null) ? data.shipper_info.phone : '----------------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
@@ -602,19 +604,25 @@
                                 shipment += '</div>';
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 mt-2">';
-                                shipment += '<h4 class="text-center"><u>Consignee Information</u></h4>';
+
+                             // Agent Screen Consignee Information 
+                                shipment += '<h4 class="text-center"><u><strong>Consignee Information</strong></u></h4>';
                                 shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Name</strong></td>';
-                                shipment += '<td style="width: 45%;">' + ((data.shipment.consignee_name != null &&
+                                shipment += '<td style="width: 25%;">' + ((data.shipment.consignee_name != null &&
                                     data.shipment.consignee_name !=
                                     null) ? data.shipment.consignee_name : '----------------') + '</td>';
-                                shipment += '<td><strong>Destination</strong></td>';
-                                shipment += '<td>' + ((data.consignee_city.name != null &&
+                                shipment += '<td style="width: 15%;" ><strong>Destination</strong></td>';
+                                shipment += '<td style="width: 25%;">' + ((data.consignee_city.name != null &&
                                     data.consignee_city.name !=
                                     null) ? data.consignee_city.name : '----------------') + '</td>';
+                                shipment += '<td style="width: 15%;" ><strong>Destination Hub</strong></td>';
+                                shipment += '<td >' + ((data.hub.name != null &&
+                                    data.hub.name !=
+                                    null) ? data.hub.name : '----------------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';
@@ -623,7 +631,7 @@
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Address</strong></td>';
-                                shipment += '<td style="width: 45%;" colspan="1">' + data.shipment
+                                shipment += '<td style="width: 25%;" colspan="1">' + data.shipment
                                     .consignee_address + '</td>';
                                 shipment += '<td><strong>Phone No(s).</strong></td>';
                                 shipment += '<td>' + data.shipment.consignee_phone_number_1 + '</td>';
@@ -639,7 +647,8 @@
 
 
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4 class="text-center"><u>Order Information</u></h4>';
+                                    // Agent Screen Order Information 
+                                shipment += '<h4 class="text-center"><u><strong>Order Information</strong></u></h4>';
                                 shipment += '<div class="border table-responsive black">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
 
@@ -708,7 +717,8 @@
 
 
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4 class="text-center"><u>Tracking Information</u></h4>'
+                                    // Agent Screen Order Information 
+                                shipment += '<h4 class="text-center"><u><strong>Tracking Information</strong></u></h4>'
                                 shipment += '<div class="border table-responsive gray">';
                                 shipment +=
                                     '<table class="table table-sm table-borderless datatable tracking_history">';
@@ -920,7 +930,7 @@
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<div class="border table-responsive">';
                                 shipment +=
-                                    '<h6 class="text-center" style="text-decoration: underline;" ><strong>Call History</strong></h6>';
+                                    '<h4 class="text-center" style="text-decoration: underline;" ><strong>Call History</strong></h4>';
                                 shipment +=
                                     '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';

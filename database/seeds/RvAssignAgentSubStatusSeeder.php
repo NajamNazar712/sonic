@@ -45,7 +45,7 @@ class RvAssignAgentSubStatusSeeder extends Seeder
             array('name' => 'Issue in the Product','shipment_status_reason_id'=> 47,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Shipment Damage','shipment_status_reason_id'=> 48,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'No such order/consignee','shipment_status_reason_id'=> 49,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'NSA / OSA Parcel','shipment_status_reason_id'=> 50,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'NSA / OSA Parcel','shipment_status_reason_id'=> 50,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Consignee Unavailable','shipment_status_reason_id'=> 52,'rv_assign_agent_status_id'=> 1,'is_active'=> 1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'As per Shipper Request','shipment_status_reason_id'=> 53,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Wants to Open2','shipment_status_reason_id'=> 54,'rv_assign_agent_status_id'=> 1,'is_active'=> 0,'created_at' => $timestamp, 'updated_at' => $timestamp),

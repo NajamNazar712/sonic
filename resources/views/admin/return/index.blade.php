@@ -522,26 +522,17 @@
                         </button>
                     </div>
                     <div class="modal-body text-center">
-                        <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center"
-                            novalidate="novalidate">
-
+                        <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                             <div class="form-group">
-                                <input type="text" name="estimate_charges" id="estimated_charges_input"
-                                    class="form-control decimal" placeholder="Enter Estimate Charges"
-                                    data-rule-required="true" data-msg-required="Estimate Charge is required">
-
+                                <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
                             </div>
                             <input type="hidden" id="eec_shipment_id">
                             <div class="form-group ml-1">
-                                <button type="submit" name="add" class="btn btn-primary update_charges"
-                                    value="Add">Update Charges</button>
+                                <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
                                 <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
                             </div>
                         </form>
-
                     </div>
-
                 </div>
             </div>
         </div>
@@ -3226,7 +3217,6 @@
                         $('#EditEstimateChargesModal').modal('show');
                         $('#eec_shipment_id').val(id);
                     }
-
                 });
                 
                 $('#update_charges_NSAreattempt_form').validate({

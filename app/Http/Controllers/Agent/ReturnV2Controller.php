@@ -157,6 +157,10 @@ class ReturnV2Controller extends Controller
                                 $business_category = $shipment->business_category;
                                 $detail_product_infos = [];
                                 $rider_details = [];
+                                $hub =  Shipment::join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+                                        ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+                                        ->where('shipments.id',$shipment->id)->first();
+                                        // dd($hub->name);
 
                                 foreach ($product_infos as $product_info) {
 
@@ -237,16 +241,10 @@ class ReturnV2Controller extends Controller
                                 else{
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->where('shipment_status_id','!=', 20)->Orwhere('shipment_status_id',null)->get();
                                 }
-
-
-                                // if (isset($shipment_assigned_agents)) {
-                                //     return response()->json(['status' => 1, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
-                                // } 
-                                // else {
-                                //     return response()->json(['status' => 0, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
-                                // }
                                 
-                                return response()->json(['status' => 0, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
+                                return response()->json(['status' => 0, 'call_history' => $call_history ,'shipment_statuses' => $shipment_statuses,'rider_details' => $rider_details, 'image_location' => $image_location, 
+                                'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 
+                                'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned', 'hub' => $hub]);
                             } catch (Exception $ex) {
                                 return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
                             }

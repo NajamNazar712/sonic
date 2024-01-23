@@ -381,7 +381,7 @@ class TeamLeadDashboardController extends Controller
 
                                 
                                 $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_zone . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
-                                $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
@@ -472,12 +472,13 @@ class TeamLeadDashboardController extends Controller
         if ($get_employee->exists()) {
             $get_employee->update([
                 'status_id' => '2',
+                'remarks' => $request->deactivate_reason,
             ]);
         }
 
         $role = Admin::whereIn('role_id', [6, 63, 70])->pluck('email')->toArray();
         $employee = Employee::where('id', $request->employee_id)->first();
-        NotificationsController::send(218, $employee, $role);
+        NotificationsController::send(228, $employee, $role);
     }
 
 

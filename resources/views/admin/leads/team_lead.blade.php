@@ -116,6 +116,29 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="EditDisableAgentModal" role="dialog" aria-labelledby="EditDisableAgentModal" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Remarks</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_deactivate_agent_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="form-group">
+                            <input type="text" name="deactivate_reason" id="deactivate_reason_input" class="form-control decimal" placeholder="Enter Deactivate Reason" data-rule-required="true" data-msg-required="Deactivate Reason is required">
+                        </div>
+                        <input type="hidden" id="employee_id">
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -951,35 +974,89 @@
                     dangerMode: true
                 }).then(function(confirm) {
                     if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Employee is being De Activate',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                        // swal({
+                        //     title: 'Please Wait!',
+                        //     text: 'Employee is being De Activate',
+                        //     icon: 'info',
+                        //     buttons: false,
+                        //     closeOnClickOutside: false,
+                        //     closeOnEsc: false
+                        // });
+                        // $('#datatable').on('click', '.editEstimateCharges', function() {
+                        //     var id = $(this).parents('tr').attr('id');
+                        //     if (id) {
+                        $('#EditDisableAgentModal').modal('show');
+                        $('#employee_id').val(employeeId);
+                        //     }
+                        // });
 
-                        $.ajax({
-                                url: '{{ route('admin.team_lead.deactivate_staff') }}',
+                        // $.ajax({
+                        //         url: '{{ route('admin.team_lead.deactivate_staff') }}',
 
-                                method: 'POST',
-                                data: {
-                                    'employee_id': employeeId,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                            .done(function(data) {
+                        //         method: 'POST',
+                        //         data: {
+                        //             'employee_id': employeeId,
+                        //             '_token': '{{ csrf_token() }}'
+                        //         }
+                        //     })
+                        //     .done(function(data) {
 
-                                swal.close();
-                                table.draw();
-                            });
+                        //         swal.close();
+                        //         table.draw();
+                        //     });
                     }
                 });
-                // var id = $(this).data('target-id');
-                // $('#employee_id').val(id);
-                // $('#approveRiderModal').modal('show');
             });
+
+            $('#EditDisableAgentModal').on('hide.bs.modal', function(e) {
+                    $('#employee_id').text(''); //clearing error message when modal is close
+                    $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
+                    $('#deactivate_reason_input').text(''); //clearing error message when modal is close
+            });
+
+            $('#update_deactivate_agent_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    submitHandler: function(form) {
+                        blockPagePermanently();
+                        var deactivate_reason = $('#deactivate_reason_input').val();
+                        var employee_id = $('#employee_id').val();
+                        $.ajax({
+                            // url: '{!! route('admin.return.edit.estimated_charges') !!}',
+                            url: '{!! route('admin.team_lead.deactivate_staff') !!}',
+                            method: 'POST',
+                            data: {
+                                'deactivate_reason': deactivate_reason,
+                                'employee_id': employee_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function(data) {
+                            UnblockPagePermanently();
+                            $('#EditDisableAgentModal').modal('hide');
+
+                            if (data.status) {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                table.draw(false);
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            $('#deactivate_reason_input').val('');
+                            $('#employee_id').val('');
+                        });
+                    }
+                });
 
             var employeeId = null;
 
