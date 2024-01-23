@@ -400,19 +400,51 @@
             });
 
 
-            $('#assign_agent_hubs').on('submit', function(event) {
+            $('#assign_agent_hubs').on('submit', function (event) {
                 event.preventDefault();
-
                 var selectedValue = $('#search_origin').val();
+                var form = this; // Store the reference to the form element
 
                 if (selectedValue == '') {
                     $('#select_message_error').text('Please select at least one zone');
                 } else {
-                    this.submit();
+                    swal({
+                        title: 'Assign Zones !',
+                        text: 'Are You Sure To Assign Zone!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Zones are being Assigned',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                    });
                 }
-
-
             });
+
 
 
             $('body').on('click', '#save_additional_days', function(e) {
