@@ -23,6 +23,7 @@ use App\Http\Models\Handover\HandoverShipmentsJourney;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\ShipmentScanningJourneyAreaLog;
 
 class AdminShipmentHandoverController extends Controller
 {
@@ -321,8 +322,7 @@ class AdminShipmentHandoverController extends Controller
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
-        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name','ssjal.id as shipment_scanning_journey_id',
-        'shipment_scanning_journey_area_logs.location_status as location_status',
+        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
         DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
@@ -380,36 +380,135 @@ class AdminShipmentHandoverController extends Controller
             }
         })
 
-        ->editColumn('shipment_pieces', function($handover_list) {
-          if ($handover_list->shipment_pieces > 0) {
-            return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">' . $handover_list->shipment_pieces . '</button>';
-        } else {
+          ->editColumn('shipment_pieces', function($handover_list) {
+            if ($handover_list->shipment_pieces > 0) {
+              return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">' . $handover_list->shipment_pieces . '</button>';
+          } else {
+              return '-';
+          }
+          })
+        
+          ->editColumn('created_location_status', function ($shipment) {
+            $time = $shipment->created_at;
+            $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
+            if($shipment_handover->exists()){
+              $shipment_handover = $shipment_handover->first();
+              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+              ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+  
+              if($scanning_status->exists()){
+                $scanning_status = $scanning_status->first();
+                $area_log = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_status->id)->first();
+                $location_status = $area_log->location_status;
+                return ($location_status == 1) ? 'On-site' : 'Off-site';
+              }else{
+                return '-';
+              }
+            }else{
+              return '-';
+            }
+           
+
+          })
+
+        ->editColumn('created_latitude', function ($shipment) {
+            $time = $shipment->created_at;
+            $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
+            if($shipment_handover->exists()){
+              $shipment_handover = $shipment_handover->first();
+              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+              ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+  
+              if($scanning_status->exists()){
+                $scanning_status = $scanning_status->first();
+                return $scanning_status->latitude;
+              }else{
+                return '-';
+              }
+            }else{
+              return '-';
+            }
+         
+        })
+
+        ->editColumn('created_longitude', function ($shipment) {
+          $time = $shipment->created_at;
+          $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
+          if($shipment_handover->exists()){
+            $shipment_handover = $shipment_handover->first();
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+  
+            if($scanning_status->exists()){
+              $scanning_status = $scanning_status->first();
+              return $scanning_status->longitude;
+            }else{
+              return '-';
+            }
+          }else{
             return '-';
+          }
+         
+        }) 
+        ->editColumn('received_location_status', function ($shipment) {
+          $time = $shipment->received_at;
+          $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
+
+          if($shipment_handover->exists()){
+            $shipment_handover = $shipment_handover->first();
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+  
+            if($scanning_status->exists()){
+              $scanning_status = $scanning_status->first();
+              $area_log = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_status->id)->first();
+              $location_status = $area_log->location_status;
+              return ($location_status == 1) ? 'On-site' : 'Off-site';
+            }else{
+              return '-';
+            }
+
+          }else{
+            return '-';
+          }
+
+        })
+
+      ->editColumn('received_latitude', function ($shipment) {
+          $time = $shipment->received_at;
+          $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
+          if($shipment_handover->exists()){
+            $shipment_handover = $shipment_handover->first();
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+
+            if($scanning_status->exists()){
+              $scanning_status = $scanning_status->first();
+              return $scanning_status->latitude;
+            }else{
+              return '-';
+            }
+          }else{
+            return '-';
+          }
+      })
+
+      ->editColumn('received_longitude', function ($shipment) {
+        $time = $shipment->received_at;
+        $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
+        if($shipment_handover->exists()){
+            $shipment_handover = $shipment_handover->first();
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
+            if($scanning_status->exists()){
+              $scanning_status = $scanning_status->first();
+              return $scanning_status->longitude;
+            }else{
+              return '-';
+            }
+        }else{
+          return '-';
         }
-        })->editColumn('location_status', function ($shipment) {
-          if(isset($shipment->location_status)){
-              return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
-          }else{
-              return '-';
-          }
-      })
-
-      ->editColumn('latitude', function ($shipment) {
-          if(isset($shipment->shipment_scanning_journey_id)){
-              $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
-              return $lat;
-          }else{
-              return '-';
-          }
-      })
-
-      ->editColumn('longitude', function ($shipment) {
-          if(isset($shipment->shipment_scanning_journey_id)){
-              $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
-              return $long;
-          }else{
-              return '-';
-          }
       });
 
         if ($tracking_number = $request->get('search_tracking')) {
