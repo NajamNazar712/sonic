@@ -319,7 +319,7 @@ class AdminShipmentHandoverController extends Controller
                 ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
         })
         ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
-        ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
+        ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
@@ -393,7 +393,7 @@ class AdminShipmentHandoverController extends Controller
             $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
             if($shipment_handover->exists()){
               $shipment_handover = $shipment_handover->first();
-              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
               ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
               
               if ($scanning_status->exists()) {
@@ -404,8 +404,8 @@ class AdminShipmentHandoverController extends Controller
                     $area_log = $area_log->first();
                     $location_status = $area_log->location_status ?? '-';
                     return ($location_status != '-') ? (($location_status == 1) ? 'On-site' : 'Off-site') : '-';
-                  } else {
-                    return '-';
+                } else {
+                  return '-';
                 }
               } else {
                   return '-';
@@ -420,7 +420,7 @@ class AdminShipmentHandoverController extends Controller
             $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
             if($shipment_handover->exists()){
               $shipment_handover = $shipment_handover->first();
-              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
               ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
   
               if($scanning_status->exists()){
@@ -440,7 +440,7 @@ class AdminShipmentHandoverController extends Controller
           $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
           if($shipment_handover->exists()){
             $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id])
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
   
             if($scanning_status->exists()){
@@ -460,7 +460,7 @@ class AdminShipmentHandoverController extends Controller
 
           if($shipment_handover->exists()){
             $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
 
             if($scanning_status->exists()) {
@@ -487,7 +487,7 @@ class AdminShipmentHandoverController extends Controller
           $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
           if($shipment_handover->exists()){
             $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
 
             if($scanning_status->exists()){
@@ -506,7 +506,7 @@ class AdminShipmentHandoverController extends Controller
         $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
         if($shipment_handover->exists()){
             $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id])
+            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
             if($scanning_status->exists()){
               $scanning_status = $scanning_status->first();
