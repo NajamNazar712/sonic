@@ -230,14 +230,15 @@ class DeliveryController extends Controller
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                        DB::raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                     );
             })
             
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+            ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                     ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
             })
+            ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',
@@ -273,16 +274,15 @@ class DeliveryController extends Controller
                 'r.name as last_rider',
                 'z.name as d_zone',
                 'r.trax_id as rider_trax_id',
-                'ssjal.location_status as location_status',
-                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id'
+                'ssjal.id as shipment_scanning_journey_id',
+                'shipment_scanning_journey_area_logs.location_status as location_status',
             )
 
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id', $status);
-            // ->groupBy('r.id');
-
+            ->whereIn('shipments.shipper_status_id', $status)
+            ->groupBy('shipments.id');
 
 
         if (session('role_id') != 1) {

@@ -216,15 +216,17 @@ class AdminReportsController extends Controller
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                        DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                     );
             })
             
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+            
+            ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                     ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
             })
-            
+            ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
+
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -269,8 +271,9 @@ class AdminReportsController extends Controller
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
                 'sjrp.created_at as rider_picked_status_date',
-                'ssjal.location_status as location_status',
-                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
+                'ssjal.id as shipment_scanning_journey_id',
+                'shipment_scanning_journey_area_logs.location_status as location_status',
+
             ])
             ->groupBy('ssjal.shipment_id');
 
@@ -12322,14 +12325,15 @@ class AdminReportsController extends Controller
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                        DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                     );
             })
             
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+            ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                     ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
             })
+            ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
 
             ->select( 
                 'shipments.id as shipment_id', 
@@ -12351,9 +12355,9 @@ class AdminReportsController extends Controller
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
                 'si.quantity as quantity',
-                'ssjal.location_status as location_status',
-                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id'
-            );
+                'ssjal.id as shipment_scanning_journey_id',
+                'shipment_scanning_journey_area_logs.location_status as location_status'
+            )->groupBy('shipments.id');
             
             if ($search_shippers = $request->get('search_shippers')) {
                 $shipments->whereIn('u.id', $search_shippers);
@@ -12423,7 +12427,7 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
-                    $data[$key]['location_status'] = ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                    $data[$key]['location_status'] = isset($shipment->location_status) ? ($shipment->location_status == 1 ? 'On-site' : 'Off-site') : '-';
                     $data[$key]['longitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude ??'-';
                     $data[$key]['latitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';

@@ -207,15 +207,16 @@ class ReturnController extends Controller
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                        DB::raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                     );
             })
             
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+            
+            ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                     ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
             })
-			
+            ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
             
             ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
             'u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
@@ -232,8 +233,8 @@ class ReturnController extends Controller
              'raa.admin_id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name','ssjal.location_status as location_status',
-             'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id')
+             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name', 'ssjal.id as shipment_scanning_journey_id',
+             'shipment_scanning_journey_area_logs.location_status as location_status')
 
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');

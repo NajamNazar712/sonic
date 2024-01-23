@@ -309,19 +309,20 @@ class AdminShipmentHandoverController extends Controller
               ->where(
                   'sjl.id',
                   '=',
-                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
-                );
+                  DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
+              );
         })
-  
-        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+      
+        ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
             $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                 ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
         })
+        ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
-        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name', 'ssjal.location_status as location_status',
-        'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
+        'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name','ssjal.id as shipment_scanning_journey_id',
+        'shipment_scanning_journey_area_logs.location_status as location_status',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
         DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
