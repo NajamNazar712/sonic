@@ -29,13 +29,27 @@
 											</div>
 											<div class="col-md-3">
 												<div class="form-group">
-													<input type="text" name="admin_start_date" id="admin_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right" >
+													    <div class="form-group input-group">
+															<div class="input-group-prepend">
+																<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																	<span class="la la-calendar-o"></span>
+																</span>
+															</div>
+															<input type="text" name="admin_start_date" id="admin_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right" >
+													    </div>
 												</div>
 											</div>
 											<div class="col-md-3">
-												<div class="form-group">
-													<input type="text" name="admin_end_date" id="admin_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" >
-												</div>
+													<div class="form-group">
+														<div class="form-group input-group">
+															<div class="input-group-prepend">
+																<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																	<span class="la la-calendar-o"></span>
+																</span>
+															</div>
+															<input type="text" name="admin_end_date" id="admin_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date">
+													</div>
+											</div>
 											</div>
 											<div class="col-md-3">
 												<div class="form-group">
@@ -62,12 +76,26 @@
 											</div>
 											<div class="col-md-3">
 												<div class="form-group">
-													<input type="text" name="shipper_start_date" id="shipper_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right"  >
+														<div class="form-group input-group">
+															<div class="input-group-prepend">
+																<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																	<span class="la la-calendar-o"></span>
+																</span>
+															</div>
+															<input type="text" name="shipper_start_date" id="shipper_start_date" placeholder="Start Date" class="form-control bg-primary border-primary white rounded-right">
+													    </div>
 												</div>
 											</div>
 											<div class="col-md-3">
 												<div class="form-group">
-													<input type="text" name="shipper_end_date" id="shipper_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date" >
+													<div class="form-group input-group">
+														<div class="input-group-prepend">
+															<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																<span class="la la-calendar-o"></span>
+															</span>
+														</div>
+														<input type="text" name="shipper_end_date" id="shipper_end_date" class="form-control bg-primary border-primary white rounded-right" placeholder="End Date">
+													</div> 	
 												</div>
 											</div>
 											<div class="col-md-3">
