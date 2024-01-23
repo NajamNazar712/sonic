@@ -170,11 +170,19 @@
 			$("#shipper_end_date").val(shipper_end_date).trigger('change');
 		
 			  	$('.summernote').summernote({
+					 colors: [
+						['white', 'black', 'gray', 'red', 'green', 'blue', 'yellow', 'purple', 'cyan'],
+						['#c4b540', '#1dd381', '#ba1cd2', '#ff5733', '#33ff57', '#3344ff', '#ffff33', '#cc33ff', '#33ffff']
+					],
 					toolbar: [
 						['style', ['bold', 'italic', 'underline', 'clear']],
+						['font', ['strikethrough', 'superscript', 'subscript']],
+						['fontsize', ['fontsize']],
+						['color', ['forecolor', 'backcolor']],
 						['para', ['ul', 'ol', 'paragraph']],
 					],
 					styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // This is to include headings in the style dropdown
+					fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'], // Add the desired font names
 					defaultParagraphSeparator: 'p', // Set the default paragraph separator to 'p'
 					tooltip: false, // Disable tooltips for the toolbar buttons
 					disableDragAndDrop: true, // Disable drag and drop of files
@@ -219,10 +227,13 @@
 					if (current_date.getMinutes() > 0) {
 						currentHour++;
 					}
-					
+					console.log(current_start_time);
 				
 					populateTimeOptions(currentHour, 24,admin_start_time,current_start_time);
-					$("#admin_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+					if(current_start_time!=null)
+					{
+						$("#admin_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+					}
 				}
 				else
 				{
@@ -278,7 +289,11 @@
 						}
 
 						populateTimeOptions(currentHour, 24,admin_end_time,current_end_time);
-						$("#admin_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
+						if(current_end_time!=null)
+						{
+							$("#admin_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
+
+						}
 
 					}
 					else
@@ -328,7 +343,11 @@
 						}
 
 						populateTimeOptions(currentHour, 24,shipper_start_time,current_start_time);
-						$("#shipper_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+						if(current_start_time!=null)
+						{
+							$("#shipper_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+
+						}
 					}
 					else
 					{
@@ -376,13 +395,17 @@
 						currentHour++;
 					}
 
-					populateTimeOptions(currentHour, 24,shipper_end_time);
-					$("#shipper_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
+					populateTimeOptions(currentHour, 24,shipper_end_time,current_end_time);
+					if(current_end_time!=null)
+					{
+						$("#shipper_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
+
+					}
 
 				}
 				else
 				{
-					populateTimeOptions(0, 24,shipper_end_time);
+					populateTimeOptions(0, 24,shipper_end_time,current_end_time);
 					$("#shipper_end_time").val(current_end_time).trigger('change');;
 
 				}
