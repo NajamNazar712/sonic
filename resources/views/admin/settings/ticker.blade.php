@@ -52,18 +52,23 @@
 													</div>
 											</div>
 											</div>
-											<div class="col-md-3">
+											<div class="col-md-2">
 												<div class="form-group">
 													<select class="select2 form-control textleft" name="admin_start_time" id="admin_start_time">
 													
 													</select>
 												</div>
 											</div>
-											<div class="col-md-3">
+											<div class="col-md-2">
 												<div class="form-group">
 													<select class="form-control" name="admin_end_time" id="admin_end_time">
 													
 													</select>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="form-group">
+													<span class="sm btn btn-primary" id="admin_reset"> Reset</span>
 												</div>
 											</div>
 										</div>
@@ -100,21 +105,25 @@
 													</div> 	
 												</div>
 											</div>
-											<div class="col-md-3">
+											<div class="col-md-2">
 												<div class="form-group">
 													<select class="form-control" name="shipper_start_time" id="shipper_start_time">
 														
 													</select>
 												</div>
 											</div>
-											<div class="col-md-3">
+											<div class="col-md-2">
 												<div class="form-group">
 													<select class="form-control" name="shipper_end_time" id="shipper_end_time">
 													
 													</select>
 												</div>
 											</div>
-
+											<div class="col-md-2">
+												<div class="form-group">
+													<span class="sm btn btn-primary" id="shipper_reset"> Reset</span>
+												</div>
+											</div>
 										</div>
 										
 										<button type="submit" class="btn btn-primary" style="margin-left: 50%">Update</button>
@@ -227,7 +236,6 @@
 					if (current_date.getMinutes() > 0) {
 						currentHour++;
 					}
-					console.log(current_start_time);
 				
 					populateTimeOptions(currentHour, 24,admin_start_time,current_start_time);
 					if(current_start_time!=null)
@@ -423,6 +431,28 @@
 		var shipper_end_time= $('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
             width:'100%'
         });
+		
+		$("#admin_reset").on('click',function()
+		{
+			$("#admin_start_date").val('').trigger('change');
+			$("#admin_end_date").val('').trigger('change');
+			$("#admin_start_time").val('').change();
+			$("#admin_end_time").val('').change();
+			$("#admin_start_time").removeAttr('data-rule-required data-msg-required');
+			$("#admin_end_time").removeAttr('data-rule-required data-msg-required');
+
+		});
+
+		$("#shipper_reset").on('click',function()
+		{
+			$("#shipper_start_date").val('').trigger('change');
+			$("#shipper_end_date").val('').trigger('change');
+			$("#shipper_start_time").val('').change();
+			$("#shipper_end_time").val('').change();
+			$("#shipper_start_time").removeAttr('data-rule-required data-msg-required');
+			$("#shipper_end_time").removeAttr('data-rule-required data-msg-required');
+
+		});
 
 
 				function populateTimeOptions(startHour, endHour,select,current_time=null) {
