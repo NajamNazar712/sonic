@@ -679,7 +679,7 @@ class AdminCargoManifestController extends Controller
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('ohc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dhc.name, IF (shipments.shipper_status_id = 49, olddhc.name, IF (shipments.shipper_status_id = 55, olddhci.name, oc.name)))') . ' $1')
             ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
-        
+
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
@@ -805,9 +805,14 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
+            $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id',49)->count();
+
+            if ($misroute_history_count == 0) //for support screen misroute
             {
-                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
+                if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
+                {
+                    return ['status' => 1, 'error' => 'Shipment`s origin and destination are same !'];
+                }
             }
 
             /*  if($shipment->shipper_status_id == 49){
@@ -3590,9 +3595,13 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
-                return ['status' => 1, 'error' => 'Shipment`s origin and destination are same ! '];
+            $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id',49)->count();
 
+            if ($misroute_history_count == 0) //for support screen misroute
+            {
+                if(($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
+                    return ['status' => 1, 'error' => 'Shipment`s origin and destination are same ! '];
+            }
 
             if( in_array($shipment->shipper_status_id,[5,14,25,31,36,38])) // all delivered statuses
                 return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
