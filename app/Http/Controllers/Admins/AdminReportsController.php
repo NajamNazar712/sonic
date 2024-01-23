@@ -271,7 +271,8 @@ class AdminReportsController extends Controller
                 'sjrp.created_at as rider_picked_status_date',
                 'ssjal.location_status as location_status',
                 'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
-            ]);
+            ])
+            ->groupBy('ssjal.shipment_id');
 
         $type = $request->get('search_types');
 
