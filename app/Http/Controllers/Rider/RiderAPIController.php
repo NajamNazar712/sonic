@@ -153,6 +153,7 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
@@ -8953,6 +8954,16 @@ RiderAPIController extends Controller
                 //code...
                 DB::beginTransaction();
 
+                $payload = md5(json_encode($request));
+                $temp_data = TempRiderDelivery::where('payload', $payload);
+                if($temp_data->exists()){
+                    return response()->json(['status' => 1, 'message' => 'Request already in process!']);
+                }
+
+                $temp_data = new TempRiderDelivery();
+                $temp_data->payload = $payload;
+                $temp_data->save();
+
                 $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
                 ->join('notification_settings as ns', 'nss.notification_setting_id', 'ns.id')
@@ -9222,6 +9233,7 @@ RiderAPIController extends Controller
                     $delivery_note_data->status_updated_at = Carbon::now();
                     $delivery_note_data->save();
                 }
+                $temp_data->delete();
                 DB::commit();
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
             } catch (\Throwable $th) {
@@ -11412,6 +11424,17 @@ RiderAPIController extends Controller
                 //code...
                 DB::beginTransaction();
 
+                $payload = md5(json_encode($request));
+                $temp_data = TempRiderDelivery::where('payload', $payload);
+                if($temp_data->exists()){
+                    return response()->json(['status' => 1, 'message' => 'Request already in process!']);
+                }
+
+                $temp_data = new TempRiderDelivery();
+                $temp_data->payload = $payload;
+                $temp_data->save();
+
+
                 $rc_flag = false;
                 $rider_id = $request->rider_id;
 
@@ -11614,6 +11637,7 @@ RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is not for Out for Delivery';
                 }
+                $temp_data->delete();
                 DB::commit();
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
             }
