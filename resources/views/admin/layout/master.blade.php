@@ -24,7 +24,7 @@
 </div>
 @include('admin.components.modals')
 @include('admin.layout.footer')
-@include('admin.layout.sonic_search')
+{{-- @include('admin.layout.sonic_search') --}}
 <audio id="audio_success" autostart="false">
     <source src="{{asset('file/success_sound.mp3')}}" type="audio/ogg">
     <source src="{{asset('file/success_sound.mp3')}}" type="audio/mpeg">
