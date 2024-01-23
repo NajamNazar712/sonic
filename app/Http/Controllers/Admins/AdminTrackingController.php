@@ -954,6 +954,7 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['tracking_number'] = $tracking_number;
+                        $details['weight_recorded_as'] = DB::table('shipments_weight_types')->leftJoin('weight_types as wt', 'wt.id','=','shipments_weight_types.weight_type')->where('shipments_weight_types.shipment_id', $shipment->id)->pluck('wt.name')->first() ?? '';
                         if ($shipment->pod_image()->exists()) {
                             $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
 

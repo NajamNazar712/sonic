@@ -661,7 +661,7 @@
                     <div class="col text-center">
                         <h1 id="shipper_ids_msg"></h1>
                         <div class="row justify-content-center mt-2" id="commission_div">
-                            <div class="form-group row">
+                            <div class="form-group row d-none">
                                 <label class="col-md-4 label-control" for="commission">Total Commission</label>
                                 <div class="col-md-8">
                                     <div class="input-group">
