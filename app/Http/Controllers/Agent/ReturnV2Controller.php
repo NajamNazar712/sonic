@@ -136,16 +136,16 @@ class ReturnV2Controller extends Controller
 
                         $agent_id = Auth::id();
 
+                        if(session('latitude') != null){
+                            $this->mark_attendance($admin);
+                        }
+
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
 
                         
                         if ($shipment) {
                             try {
-                                if(session('latitude') != null){
-                                    $this->mark_attendance($admin);
-                                }else {
-                                    // return response()->json(['status' => 6]);
-                                }
+                                
                                 
 
                                 $shipper_city = $shipment->pickup_address->city;
