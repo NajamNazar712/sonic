@@ -216,7 +216,7 @@ class ShipmentChargesController extends Controller
                         } else{
                             $range_down = false;
                         }
-                    }
+                    }   
                     if($weight_charge->doesntExist()) {
                         $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                     }
@@ -442,7 +442,7 @@ class ShipmentChargesController extends Controller
                     else {
                         $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
-
+                    
                     if ($weight > 1) {
                         $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
                     }
@@ -902,6 +902,7 @@ class ShipmentChargesController extends Controller
                 $shipments_weight_type = $shipment_weight->first();
             }else{
                 $shipments_weight_type = new ShipmentsWeightType;
+                $shipments_weight_type->shipment_id = $shipment->id;
             }
             $shipments_weight_type->range_down_arrival_weight = $result['range_down'] ? $result['range_down'] : $result['chargeable_weight'];
             $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
