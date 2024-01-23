@@ -12669,7 +12669,7 @@ class AdminReportsController extends Controller
                     {
                         $arrival = Carbon::parse($shipment->arrival_date)->startOfDay(); 
                         $transit = Carbon::parse($transit_journey->created_at)->endOfDay(); 
-                        $transit_lead_days = $arrival->diffInDays($transit)
+                        $transit_lead_days = $arrival->diffInDays($transit);
                         
                         if ($transit_lead_days == 0) {
                             $data[$key]['transit_lead_days'] = "-";
