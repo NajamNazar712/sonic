@@ -404,8 +404,8 @@ class AdminShipmentHandoverController extends Controller
                     $area_log = $area_log->first();
                     $location_status = $area_log->location_status ?? '-';
                     return ($location_status != '-') ? (($location_status == 1) ? 'On-site' : 'Off-site') : '-';
-                  } else {
-                    return '-';
+                } else {
+                  return '-';
                 }
               } else {
                   return '-';
