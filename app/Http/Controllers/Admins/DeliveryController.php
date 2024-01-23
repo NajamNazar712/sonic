@@ -230,7 +230,7 @@ class DeliveryController extends Controller
                     ->where(
                         'sjl.id',
                         '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
                     );
             })
             
@@ -274,7 +274,7 @@ class DeliveryController extends Controller
                 'z.name as d_zone',
                 'r.trax_id as rider_trax_id',
                 'ssjal.location_status as location_status',
-                'ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',
+                'ssjal.shipment_scanning_journey_id as shipment_scanning_journey_id'
             )
 
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
@@ -478,8 +478,8 @@ class DeliveryController extends Controller
                 }else{
                     return '-';
                 }
-            })
-            ;
+            });
+            
         if ($mode = $request->get('search_shipping_mode')) {
 
             $datatables->where('sm.id', '=', $mode);

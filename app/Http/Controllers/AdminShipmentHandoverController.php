@@ -314,8 +314,8 @@ class AdminShipmentHandoverController extends Controller
         })
   
         ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
-            $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id');
-                // ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
         })
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
