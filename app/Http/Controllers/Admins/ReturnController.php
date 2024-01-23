@@ -741,7 +741,7 @@ class ReturnController extends Controller
                             }
                         }
                         if ((session('role_id') == 1 || in_array(245, session('permissions'))) && !$result->consolidation_id) {
-                            if (($result->current_status_id == 12 || $result->current_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
+                            if (($result->current_status_id == 12 || $result->current_status_id == 52 || $result->current_status_id == 66) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
                                 if ($open_intercept) {
                                     $dropdown .= $intercept;
                                 }
