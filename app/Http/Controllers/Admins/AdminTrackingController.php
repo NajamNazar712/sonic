@@ -2360,7 +2360,7 @@ class AdminTrackingController extends Controller
                 ->where(
                     'sjl.id',
                     '=',
-                    DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
+                    DB::raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                 );
         })
         

@@ -12427,7 +12427,7 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
-                    $data[$key]['location_status'] = (isset($shipment->location_status) && $shipment->location_status == 1) ? 'On-site' : 'Off-site' ?? '-';
+                    $data[$key]['location_status'] = isset($shipment->location_status) ? ($shipment->location_status == 1 ? 'On-site' : 'Off-site') : '-';
                     $data[$key]['longitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude ??'-';
                     $data[$key]['latitude'] = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';
