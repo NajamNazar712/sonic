@@ -21,7 +21,7 @@
 								{{-- <div class="col-12 col-sm-12 col-md-12 col-lg-12">  value="{{ $admin_ticker->start_date ?? ''}}"--}}
 									<form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.ticker.store') }}" novalidate="novalidate">
 										{{ csrf_field() }}
-										<h2>Admin Ticker</h2>
+										<h3>Admin Ticker</h3>
 										<div class="row">
 											<div class="col-md-12">
 												<div class="form-group">
@@ -67,8 +67,8 @@
 												</div>
 											</div>
 										</div>
-										<br>
-										<h2>Shipper Ticker</h2>
+										<br>		
+										<h3>Shipper Ticker</h3>
 										<div class="row">
 											<div class="col-md-12">
 												<div class="form-group">													
