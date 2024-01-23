@@ -39,7 +39,6 @@ class GeneralSettingController extends Controller
                 'end_time' => $endformated['time'], 
                 'end_time_formatted'=> $endformated['time_formatted']
             ];  
-            
         }
 
         $settings = GeneralSetting::where('type', 'shipper_ticker');

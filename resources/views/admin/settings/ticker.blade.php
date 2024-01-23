@@ -278,8 +278,8 @@
 					var selected_date = new Date($(this).val() + 'T00:00:00');
 					var current_date = new Date();
 					var admin_end_time=$("#admin_end_time");
-					var current_end_time = @json($admin_ticker['start_time']);
-					var current_end_time_formatted =  @json($admin_ticker['start_time_formatted']);
+					var current_end_time = @json($admin_ticker['end_time']);
+					var current_end_time_formatted =  @json($admin_ticker['end_time_formatted']);
 					if(selected_date.toDateString() === current_date.toDateString())
 					{
 						var currentHour = current_date.getHours();
