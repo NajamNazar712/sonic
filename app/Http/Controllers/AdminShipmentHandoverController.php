@@ -424,7 +424,7 @@ class AdminShipmentHandoverController extends Controller
               ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
   
               if($scanning_status->exists()){
-                $scanning_status = $scanning_status->first();
+                $scanning_status = $scanning_status->first() ?? null;
                 return $scanning_status->latitude ?? '-';
               }else{
                 return '-';
@@ -444,7 +444,7 @@ class AdminShipmentHandoverController extends Controller
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
   
             if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first();
+              $scanning_status = $scanning_status->first() ?? null;
               return $scanning_status->longitude ?? '-';
             }else{
               return '-';
@@ -491,7 +491,7 @@ class AdminShipmentHandoverController extends Controller
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
 
             if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first();
+              $scanning_status = $scanning_status->first() ?? null;
               return $scanning_status->latitude ?? '-';
             }else{
               return '-';
@@ -509,7 +509,7 @@ class AdminShipmentHandoverController extends Controller
             $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
             ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
             if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first();
+              $scanning_status = $scanning_status->first() ?? null;
               return $scanning_status->longitude ?? '-';
             }else{
               return '-';
