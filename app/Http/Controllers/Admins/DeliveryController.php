@@ -275,7 +275,7 @@ class DeliveryController extends Controller
                 'z.name as d_zone',
                 'r.trax_id as rider_trax_id',
                 'ssjal.id as shipment_scanning_journey_id',
-                'shipment_scanning_journey_area_logs.location_status as location_status',
+                'shipment_scanning_journey_area_logs.location_status as location_status'
             )
 
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
