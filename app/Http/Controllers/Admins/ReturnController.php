@@ -1130,7 +1130,7 @@ class ReturnController extends Controller
             if ($parcel->booking_type_id == 5) {
                 return ['status' => 0, 'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
-            if (!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52 || $parcel->shipper_status_id == 66)) {
+            if (!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52 || $parcel->shipper_status_id == 65 || $parcel->shipper_status_id == 66)) {
 
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
 
@@ -1316,7 +1316,7 @@ class ReturnController extends Controller
                 } else {
                 }
             }
-            if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52 || $parcel->shipper_status_id == 66)) {
+            if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52 || $parcel->shipper_status_id == 65 || $parcel->shipper_status_id == 66)) {
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
                 if ($journey) {
