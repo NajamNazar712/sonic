@@ -275,7 +275,7 @@ class AdminReportsController extends Controller
                 'shipment_scanning_journey_area_logs.location_status as location_status',
 
             ])
-            ->groupBy('ssjal.shipment_id');
+            ->groupBy('shipments.id');
 
         $type = $request->get('search_types');
 
