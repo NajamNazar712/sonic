@@ -94,9 +94,8 @@ class AppServiceProvider extends ServiceProvider
                 if(!is_null($settings->end_date))
                 {
                       
-                    if( $settings->end_date >= $date)
+                    if( $settings->start_date <=$date && $settings->end_date >= $date)
                     { 
-                         
                         $ticker = $settings->description;
 
                     } else{
