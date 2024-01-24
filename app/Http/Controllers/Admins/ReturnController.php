@@ -7492,7 +7492,7 @@ class ReturnController extends Controller
             
             //updating status in rv_shipment_sassigned_agent table row and add new row in rv_shipment_assign_agent_details
             else if($open_unresponsive_shipment){
-                dd(1);
+                // dd(1);
                 $open_unresponsive_shipment->shipments_journey_id = $shipments_journey->id;
                 $open_unresponsive_shipment->last_shipments_journey_id = $shipments_journey->id;
                 // $open_unresponsive_shipment->rv_assign_agent_status_id = $request->call_finding_id; //unresponsive
@@ -7517,7 +7517,7 @@ class ReturnController extends Controller
                 }
             }
             else if($sar_unresponsive_shipment){
-                dd(2);
+                // dd(2);
                 $sar_unresponsive_shipment->shipments_journey_id = $shipments_journey->id;
                 $sar_unresponsive_shipment->last_shipments_journey_id = $shipments_journey->id;
                 $sar_unresponsive_shipment->call_to_id = $request->call_to_id;
@@ -7541,7 +7541,7 @@ class ReturnController extends Controller
             }
             //create new row for both RvShipmentAssignAgent and RvShipmentAssignAgentDetails (this will be created on;y if admin is updaing call history)
             else{
-                dd(3);
+                // dd(3);
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
                 $add_call_status->shipment_id = $shipment_id;
