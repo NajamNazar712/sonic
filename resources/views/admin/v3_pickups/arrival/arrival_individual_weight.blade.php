@@ -306,6 +306,8 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
+        <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
 
     <script>
         $(document).ready(function() {

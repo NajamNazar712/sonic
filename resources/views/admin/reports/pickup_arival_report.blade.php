@@ -615,7 +615,7 @@ aria-hidden="true">
                             pickup_request_id=value.pickup_request_id.toString().padStart(6,'0');
                         }
                     
-                        if(value.arrived_status!=2){
+                        if(value.arrived_status==53){
                             $("#RiderdetailModal table tbody").append('<tr id="8" role="row" class="odd pending_pickups"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle tracking_number"><a href="'+tracking_route+'?tracking_number='+value.tracking_number+'" class"tracking" target="_blank">'+value.tracking_number+'</a></td><td class=" align-middle picked_rider">'+(value.picked_rider_id!=null?value.picked_rider_id+'-'+value.picked_rider_name:'')+'</td><td class=" align-middle global_rider_name">'+(value.global_rider_id!=null?value.global_rider_id+'-'+value.global_rider_name:'')+'</td><td class=" align-middle pickup_request_id">'+pickup_request_id+'</td><td class=" align-middle assigned_rider">'+(value.assigned_rider_id!=null?value.assigned_rider_id+'-'+value.assigned_rider_name:'')+'</td><td class=" align-middle pickup_date">'+(value.pickup_date!=null?value.pickup_date:'')+'</td></tr>');
 
                         }else{

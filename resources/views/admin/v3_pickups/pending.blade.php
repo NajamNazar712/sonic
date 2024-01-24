@@ -749,7 +749,7 @@
                                 </button>
                             </div>
                              <div class="col-3">
-                                <button id="AddNewRequest" type="button" data-dismiss="modal" aria-label="Close" class="btn btn-warning btn-block ">Close
+                                <button  type="button" data-dismiss="modal" aria-label="Close" class="btn btn-warning btn-block ">Close
                                 </button>
                             </div>
                         </div>

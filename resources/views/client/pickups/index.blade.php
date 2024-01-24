@@ -412,6 +412,10 @@
                                             <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit
                                             </button>
                                         </div>
+                                        <div class="col-3">
+                                            <button  type="button" data-dismiss="modal" aria-label="Close" class="btn btn-warning btn-block ">Close
+                                            </button>
+                                        </div>
                                     </div>
                         </form>
                     </div>

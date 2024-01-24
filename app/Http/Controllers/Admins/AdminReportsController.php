@@ -11710,32 +11710,43 @@ class AdminReportsController extends Controller
           table('shipments as s')
         ->join('users AS u', 'u.id', '=', 's.user_id')
         ->join('shipments_journey AS sj', 'sj.shipment_id', '=', 's.id')
-        ->leftJoin('shipments AS sq', function ($query) {
-            $query->on('sq.id', '=', 's.id')
+        ->leftJoin('shipments_journey AS sq', function ($query) {
+            $query->on('sq.shipment_id', '=', 's.id')
                 ->where('sq.shipper_status_id', 2);
         })
         ->leftJoin('user_shipping_infos as us', 'us.id', '=', 's.pickup_address_id')
         ->where(function ($query) use ($from, $to) {
-            $query->whereBetween(DB::raw('sj.created_at'), ["{$from} 00:00:01", "{$to} 23:59:59"]);
+            $query->whereBetween(DB::raw('sj.created_at'), ["{$from} 00:00:01", "{$to} 23:59:59"])
+            ->where(function($subquery){
+                $subquery->where('sj.shipper_status_id',53)
+                ->orWhere(function ($query) {
+                    $query->where('sj.rider_id', 151)
+                        ->orWhere('sj.rider_id', 346);
+                 });
+            });
         })
-        ->where('sj.shipper_status_id', 53)
-        ->orWhere(function ($query) {
-            $query->where('sj.rider_id', 151)
-                ->orWhere('sj.rider_id', 346);
-        })->groupBy('u.id')
+        // ->where('sj.shipper_status_id', 53)
+        // ->orWhere(function ($query) {
+        //     $query->where('sj.rider_id', 151)
+        //         ->orWhere('sj.rider_id', 346);
+        // })
+      
+        ->groupBy('u.id')
         ->select(
             'u.id AS shipper_id',
             'u.name AS shipper_name',
             DB::raw('COUNT(sj.shipment_id) AS rider_picked'),
             DB::raw('COUNT(sq.id) AS shipment_arrived')
-        )->get();
+        );
         
         if($city_id){
             $pickup_arival->where('us.city_id',$city_id);
         }
         if($shipper_id)
         {
+           
             $pickup_arival->where('s.user_id',$shipper_id);
+          
         }
 
         $datatables = Datatables::of($pickup_arival)
@@ -11827,7 +11838,6 @@ class AdminReportsController extends Controller
             //     }
             //     return '';
             // });
-            // dd($datatables);
 
         return $datatables->make(true);
 
@@ -11914,7 +11924,10 @@ class AdminReportsController extends Controller
         // ->get();
         
         $rider_detail=Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-        ->leftJoin('riders as r', 'sj.rider_id', '=', 'r.id')
+        ->leftJoin('riders as r', function($query)
+        {
+            $query->on('sj.rider_id', '=', 'r.id')->where('sj.rider_id','!=',151);
+        })
         ->leftJoin('global_settings as gs',function($query){
             $query->on( 'gs.setting_value', '=', 'sj.rider_id')->where('gs.type','global_rider_id');
         })
@@ -11924,8 +11937,15 @@ class AdminReportsController extends Controller
                 ->whereBetween(DB::raw('pr.pickup_date'), [$from_date,$to_date]);
         })
         ->leftJoin('riders as ra', 'pr.current_rider_id', '=', 'ra.id')
-        ->where('sj.shipper_status_id', '=', 53)
-        ->orwhere('sj.rider_id', '=', 151)->orwhere('sj.rider_id','=',346)
+        ->where(function($subquery){
+                $subquery->where('sj.shipper_status_id',53)
+                ->orWhere(function ($query) {
+                    $query->where('sj.rider_id', 151)
+                        ->orWhere('sj.rider_id', 346);
+                 });
+        })
+        // ->where('sj.shipper_status_id', '=', 53)
+        // ->orwhere('sj.rider_id', '=', 151)->orwhere('sj.rider_id','=',346)
         ->where('shipments.user_id', '=', $shipper_id)
         ->whereBetween(DB::raw('sj.created_at'), [$from_date.' 00:00:01',$to_date.' 23:59:59'])
         ->select([
@@ -11941,7 +11961,6 @@ class AdminReportsController extends Controller
             'shipments.shipper_status_id as arrived_status',
         ])
         ->get();
-        // dd($rider_detail);
         return response()->json(['status'=>1,'rider_details'=>$rider_detail]);
     }
     public function get_global_rider_details(Request $request){
@@ -12025,7 +12044,10 @@ class AdminReportsController extends Controller
             $join->on('sj.shipment_id', '=', 'shipments.id')
                 ->where('shipments.shipper_status_id', '=', 2);
         })
-        ->leftJoin('riders', 'riders.id', '=', DB::raw('sj.rider_id'))
+        ->leftJoin('riders', function($query)
+        {
+            $query->on('riders.id', '=', DB::raw('sj.rider_id'))->where('sj.rider_id','!=',151);
+        })
         ->leftJoin('global_settings', function ($join) {
             $join->on('global_settings.setting_value', '=', DB::raw('sj.rider_id'))
                 ->where('global_settings.type', '=', "global_rider_id");
