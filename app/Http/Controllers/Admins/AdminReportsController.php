@@ -9989,8 +9989,12 @@ class AdminReportsController extends Controller
                     return 'Dense';
                 }
             })
+            ->addColumn('range_difference', function ($shipment){
+                $range_difference = round($shipment->range_down_shipper_weight - $shipment->range_down_arrival_weight, 2);
+                return $range_difference;
+            })
             ->addColumn('difference', function ($shipment){
-                $difference = round($shipment->range_down_shipper_weight - $shipment->range_down_arrival_weight, 2);
+                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
             })->addColumn('charges_diff', function ($shipment){
                 $charges_diff = $shipment->shipper_weight_charges - $shipment->arrival_weight_charges;

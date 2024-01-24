@@ -134,6 +134,7 @@
                             <th class="border-primary border-darken-1">Arrival Weight (Systemetic)</th>
                             <th class="border-primary border-darken-1">Arrival Weight (As per shipper/ rate range roundup)</th>
                             <th class="border-primary border-darken-1">Weight Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
+                            <th class="border-primary border-darken-1">Weight Diffrence (Arrival Weight vs Shipper Weight)</th>
                             <th class="border-primary border-darken-1">Charges as per shipper weight</th>
                             <th class="border-primary border-darken-1">Charges as per arrival weight</th>
                             <th class="border-primary border-darken-1">Charges Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
@@ -311,6 +312,7 @@
                             head.push('Arrival Weight');
                             head.push('Arrival Weight (As per shipper/ rate range roundup)');
                             head.push('Weight Diffrence (Shipper Rate Range vs Arrival Rate Range');
+                            head.push('Weight Diffrence (Arrival Weight vs Shipper Weight)');
                             head.push('Charges as per shipper weight');
                             head.push('Charges as per arrival weight');
                             head.push('Charges Diffrence (Shipper Rate Range vs Arrival Rate Range)');
@@ -336,6 +338,7 @@
                                 row.push(values.range_down_shipper_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.range_down_arrival_weight)
+                                row.push(values.range_difference);
                                 row.push(values.difference);
                                 row.push(values.shipper_weight_charges);
                                 row.push(values.arrival_weight_charges);
@@ -405,13 +408,14 @@
                     { data:'range_down_shipper_weight' ,name: 'sw.range_down_shipper_weight', class: 'align-middle text-center range_down_shipper_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'range_down_arrival_weight' ,name: 'sw.range_down_arrival_weight', class: 'align-middle text-center range_down_arrival_weight'},
+                    { data:'range_difference' ,name: 'range_difference', class: 'align-middle text-center range_difference', orderable: false, searchable: false},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
                     { data:'shipper_weight_charges' ,name: 'sw.shipper_weight_charges', class: 'align-middle text-center shipper_weight_charges', orderable: false, searchable: false},
                     { data:'arrival_weight_charges' ,name: 'shipments.arrival_weight_charges', class: 'align-middle text-center arrival_weight_charges', orderable: false, searchable: false},
                     { data:'charges_diff' ,name: 'charges_diff', class: 'align-middle text-center charges_diff', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
                     { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
-                ],
+                                    ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
