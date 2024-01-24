@@ -150,7 +150,7 @@ class ShipmentChargesController extends Controller
                 if($weight_charge_slab->exists()) {
                     $weight_charge_slab = $weight_charge_slab->first();
                     $check_last_slab = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '>', $weight_charge_slab->range_down);
-                    if($check_last_slab->exists()) {
+                    if($check_last_slab->exists() || $weight_charge_slab->weight_addition == 0) {
                         $range_down = $weight_charge_slab->range_down;
                     } else{
                         $range_down = false;
@@ -185,7 +185,7 @@ class ShipmentChargesController extends Controller
                     if($weight_charge_slab->exists()) {
                         $weight_charge_slab = $weight_charge_slab->first();
                         $check_last_slab = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '>', $weight_charge_slab->range_down);
-                        if($check_last_slab->exists()) {
+                        if($check_last_slab->exists() || $weight_charge_slab->base == 0) {
                             $range_down = $weight_charge_slab->range_down;
                         } else{
                             $range_down = false;
@@ -198,7 +198,7 @@ class ShipmentChargesController extends Controller
                     if($weight_charge_slab->exists()) {
                         $weight_charge_slab = $weight_charge_slab->first();
                         $check_last_slab = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '>', $weight_charge_slab->range_down);
-                        if($check_last_slab->exists()) {
+                        if($check_last_slab->exists() || $weight_charge_slab->base == 0) {
                             $range_down = $weight_charge_slab->range_down;
                         } else{
                             $range_down = false;
@@ -211,7 +211,7 @@ class ShipmentChargesController extends Controller
                     if($weight_charge_slab->exists()) {
                         $weight_charge_slab = $weight_charge_slab->first();
                         $check_last_slab = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '>', $weight_charge_slab->range_down);
-                        if($check_last_slab->exists()) {
+                        if($check_last_slab->exists() || $weight_charge_slab->weight_addition == 0) {
                             $range_down = $weight_charge_slab->range_down;
                         } else{
                             $range_down = false;
