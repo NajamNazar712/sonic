@@ -18,7 +18,7 @@
                             @include('client.inc.messages')
 
                             <div class="container">
-                                <div class="row justify-content-center">
+                                <div class="row justify-content-center mb-3">
 
                                     <div class="col">
                                         <div class="form-group input-group">

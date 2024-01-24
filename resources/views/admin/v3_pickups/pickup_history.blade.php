@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <div class="container">
+                            <div class="container mb-2">
                                 <div class="row justify-content-center">
 
                                     <div class="col">
@@ -53,7 +53,7 @@
                                 </div>
                             </div>
 
-                            <div class="container-fluid">
+                            <div class="container-fluid mb-2">
                                 <div class="row justify-content-center">
                                     <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
                                     <input type="hidden" value="0" id="status_filter_input_reason" name="pickup_reason_id">
