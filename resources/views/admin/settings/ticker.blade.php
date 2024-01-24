@@ -212,6 +212,12 @@
                 }
             });		
 	
+		var ad_current_start_time = @json($admin_ticker['start_time']);
+		var ad_current_start_time_formatted =  @json($admin_ticker['start_time_formatted']);
+		var ad_current_end_time = @json($admin_ticker['end_time']);
+		var ad_current_end_time_formatted =  @json($admin_ticker['end_time_formatted']);
+	
+		
 		var admin_start_date = $('#admin_start_date').pickadate({
             firstDay: 1,
             clear: '',
@@ -227,8 +233,7 @@
 				var selected_date = new Date($(this).val() + 'T00:00:00');
 				var current_date = new Date();
 				var admin_start_time=$("#admin_start_time");
-				var current_start_time = @json($admin_ticker['start_time']);
-				var current_start_time_formatted =  @json($admin_ticker['start_time_formatted']);
+			
 				if(selected_date.toDateString() === current_date.toDateString())
 				{
 					var currentHour = current_date.getHours();
@@ -237,34 +242,38 @@
 						currentHour++;
 					}
 				
-					populateTimeOptions(currentHour, 24,admin_start_time,current_start_time);
-					if(current_start_time!=null)
+					populateTimeOptions(currentHour, 24,admin_start_time,ad_current_start_time);
+					if(ad_current_start_time!=null)
 					{
-						$("#admin_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+						$("#admin_start_time").append('<option value='+ad_current_start_time+' selected>'+ad_current_start_time_formatted+'</option>');
+						ad_current_start_time=null;	
 					}
 				}
 				else
 				{
-					populateTimeOptions(0, 24,admin_start_time,current_start_time);
-					$("#admin_start_time").val(current_start_time).trigger('change');
-					// append('<option value='+current_admin_start_time+' selected>'+current_admin_start_time+'</option>');
-
+					populateTimeOptions(0, 24,admin_start_time);
+					if(ad_current_start_time!=null)
+					{
+						$("#admin_start_time").val(ad_current_start_time).trigger('change');
+						ad_current_start_time=null;
+					}else
+					{
+							var admin_start_time= $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
+								width:'100%'
+							});
+					}
+					
+					
 				}
 
-				// $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-				// 	 width:'100%'
-				// });
+				 $("#admin_start_time").attr('data-rule-required',true).attr('data-msg-required','Start Time is Required');
+	
 
-				
-
-				$("#admin_start_time").attr('data-rule-required',true).attr('data-msg-required','Start Time is Required');
 			}
 			
 			
 		});
 
-		
-		
 		
 		var admin_start_time= $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
             width:'100%'
@@ -286,8 +295,7 @@
 					var selected_date = new Date($(this).val() + 'T00:00:00');
 					var current_date = new Date();
 					var admin_end_time=$("#admin_end_time");
-					var current_end_time = @json($admin_ticker['end_time']);
-					var current_end_time_formatted =  @json($admin_ticker['end_time_formatted']);
+				
 					if(selected_date.toDateString() === current_date.toDateString())
 					{
 						var currentHour = current_date.getHours();
@@ -296,35 +304,44 @@
 							currentHour++;
 						}
 
-						populateTimeOptions(currentHour, 24,admin_end_time,current_end_time);
-						if(current_end_time!=null)
+						populateTimeOptions(currentHour, 24,admin_end_time,ad_current_end_time);
+						if(ad_current_end_time!=null)
 						{
-							$("#admin_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
-
+							$("#admin_end_time").append('<option value='+ad_current_end_time+' selected>'+ad_current_end_time_formatted+'</option>');
+							ad_current_end_time=null;
 						}
 
 					}
 					else
 					{
-						populateTimeOptions(0, 24,admin_end_time,current_end_time);
-						$("#admin_end_time").val(current_end_time).trigger('change');
+						populateTimeOptions(0, 24,admin_end_time);
+						if(ad_current_end_time!=null)
+						{
+							$("#admin_end_time").val(ad_current_end_time).trigger('change');
+							ad_current_end_time=null;
+						}else{
+							$('#admin_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
+								width:'100%'
+							});
+						}
 					}
 
-					// $('#admin_end_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-					// 	 width:'100%'
-					// });
+				
 
-					$("#admin_end_time").attr('data-rule-required',true).attr('data-msg-required','End Time is Required');
+				$("#admin_end_time").attr('data-rule-required',true).attr('data-msg-required','End Time is Required');
 			}
 		
 			
-		});;
-
+		});
 		var admin_end_time= $('#admin_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
             width:'100%'
         });
 
-		
+		var sh_current_start_time = @json($shipper_ticker['start_time']);
+		var sh_current_start_time_formatted =  @json($shipper_ticker['start_time_formatted']);
+		var sh_current_end_time = @json($shipper_ticker['end_time']);
+		var sh_current_end_time_formatted =  @json($shipper_ticker['end_time_formatted']);	
+
 		var shipper_start_date = $('#shipper_start_date').pickadate({
             firstDay: 1,
             clear: '',
@@ -340,8 +357,7 @@
 					var selected_date = new Date($(this).val() + 'T00:00:00');
 					var current_date = new Date();
 					var shipper_start_time=$("#shipper_start_time");
-					var current_start_time = @json($shipper_ticker['start_time']);
-					var current_start_time_formatted =  @json($shipper_ticker['start_time_formatted']);
+				
 					if(selected_date.toDateString() === current_date.toDateString())
 					{
 						var currentHour = current_date.getHours();
@@ -350,24 +366,31 @@
 							currentHour++;
 						}
 
-						populateTimeOptions(currentHour, 24,shipper_start_time,current_start_time);
-						if(current_start_time!=null)
+						populateTimeOptions(currentHour, 24,shipper_start_time,sh_current_start_time);
+						if(sh_current_start_time!=null)
 						{
-							$("#shipper_start_time").append('<option value='+current_start_time+' selected>'+current_start_time_formatted+'</option>');
+							$("#shipper_start_time").append('<option value='+sh_current_start_time+' selected>'+sh_current_start_time_formatted+'</option>');
+							sh_current_start_time=null;
 
 						}
 					}
 					else
 					{
-						populateTimeOptions(0, 24,shipper_start_time,current_start_time);
-						$("#shipper_start_time").val(current_start_time).trigger('change');
+						populateTimeOptions(0, 24,shipper_start_time);
+						if(sh_current_start_time!=null)
+						{
+							$("#shipper_start_time").val(sh_current_start_time).trigger('change');
+							sh_current_start_time=null;
+						}else{
+							$('#shipper_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
+								width:'100%'
+							});
+
+						}
 
 					}
 
-					// $('#shipper_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-					// 	width:'100%'
-					// });
-
+				
 					$("#shipper_start_time").attr('data-rule-required',true).attr('data-msg-required','Start Time is Required');
 			}
 	
@@ -393,8 +416,7 @@
 				var selected_date = new Date($(this).val() + 'T00:00:00');
 				var current_date = new Date();
 				var shipper_end_time=$("#shipper_end_time");
-				var current_end_time = @json($shipper_ticker['end_time']);
-				var current_end_time_formatted =  @json($shipper_ticker['end_time_formatted']);
+	
 				if(selected_date.toDateString() === current_date.toDateString())
 				{
 					var currentHour = current_date.getHours();
@@ -403,25 +425,32 @@
 						currentHour++;
 					}
 
-					populateTimeOptions(currentHour, 24,shipper_end_time,current_end_time);
-					if(current_end_time!=null)
+					populateTimeOptions(currentHour, 24,shipper_end_time,sh_current_end_time);
+					if(sh_current_end_time!=null)
 					{
-						$("#shipper_end_time").append('<option value='+current_end_time+' selected>'+current_end_time_formatted+'</option>');
+						$("#shipper_end_time").append('<option value='+sh_current_end_time+' selected>'+sh_current_end_time_formatted+'</option>');
+						sh_current_end_time=null;
 
 					}
 
 				}
 				else
 				{
-					populateTimeOptions(0, 24,shipper_end_time,current_end_time);
-					$("#shipper_end_time").val(current_end_time).trigger('change');;
+					populateTimeOptions(0, 24,shipper_end_time);
+					if(sh_current_end_time!=null)
+					{
+						$("#shipper_end_time").val(sh_current_end_time).trigger('change');
+						sh_current_end_time=null;
+					}else{
+						$('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
+							width:'100%'
+						});
+
+					}
 
 				}
 
-				$('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
-					width:'100%'
-				});
-
+			
 				$("#shipper_end_time").attr('data-rule-required',true).attr('data-msg-required','End Time is Required');
 			}
 			
@@ -462,7 +491,7 @@
 						var amPm = (hour < 12) ? 'AM' : 'PM';
 						var optionValue = ('0' + hour).slice(-2) + ':00';
 						var optionText = formattedHour + ':00 ' + amPm;
-						if(optionText!=current_time)
+						if(optionValue!=current_time)
 						{
 							var option = new Option(optionText, optionValue);
 							select.append(option);
