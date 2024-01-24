@@ -8952,7 +8952,7 @@ RiderAPIController extends Controller
 
             try {
                 //code...
-                Log::channel('code_test_log')->info(json_encode($request));
+                Log::channel('code_test_log')->info(json_encode($request->all()));
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -11421,7 +11421,7 @@ RiderAPIController extends Controller
             try {
                 //code...
                 
-                Log::channel('code_test_log')->info(json_encode($request));
+                Log::channel('code_test_log')->info(json_encode($request->all()));
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
