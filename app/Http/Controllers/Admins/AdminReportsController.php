@@ -219,11 +219,23 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
                     );
             })
-            
             ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                  ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))');
+                    ->whereRaw('CASE 
+                                    WHEN sjl.shipper_status_id = 2 THEN ssjal.screen_location_id = 1 
+                                    WHEN sjl.shipper_status_id = 3 THEN ssjal.screen_location_id = 2 
+                                    WHEN sjl.shipper_status_id = 4 THEN ssjal.screen_location_id IN (20, 21) 
+                                    WHEN sjl.shipper_status_id = 5 THEN ssjal.screen_location_id = 4 
+                                    WHEN sjl.shipper_status_id = 11 THEN ssjal.screen_location_id IN (3, 10, 20, 21) 
+                                    WHEN sjl.shipper_status_id = 23 THEN ssjal.screen_location_id = 7 
+                                    WHEN sjl.shipper_status_id = 53 THEN ssjal.screen_location_id = 31 
+                                    ELSE 1 
+                                END')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))')
+                    ->latest();
             })
+            
+            
             ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
             ->select([
                 'z.name  as zone',
