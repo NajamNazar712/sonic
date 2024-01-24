@@ -1378,6 +1378,9 @@ class AdminCRMController extends Controller
                     });
                 });
         }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
+        }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) && !in_array(session('role_id'), [4,6,44])){
                 $launched_request = $launched_request->where('spt.admin_id', Auth::id());
