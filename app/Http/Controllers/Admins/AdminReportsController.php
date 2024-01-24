@@ -12353,7 +12353,7 @@ class AdminReportsController extends Controller
                                 END')
                     ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))')
                     ->latest();
-            }))
+            })
             ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
 
             ->select( 
