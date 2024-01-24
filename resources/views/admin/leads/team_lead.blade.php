@@ -644,7 +644,7 @@
                 
                 buttons: [
                     {
-                        text: 'Assign Zoni',
+                        text: 'Assign Zone',
                         className: 'btn btn-primary assign',
                         // enabled: false,
                         action: function(e, dt, node, config) {
@@ -871,7 +871,7 @@
 
                 table.draw();
             })
-            
+
 
             $('body').on('click', '.deactivate_staff', function() {
                 var employeeId = $(this).attr('data-id');
