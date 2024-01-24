@@ -641,8 +641,23 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                
                 buttons: [
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action: function(e, dt, node, config) {
+                            dt.rows().select();
+                        }
+                    }, 
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function(e, dt, node, config) {
+                            dt.rows().deselect();
+                        }
+                    },
                     {
                         text: 'Assign Zone',
                         className: 'btn btn-primary assign',
