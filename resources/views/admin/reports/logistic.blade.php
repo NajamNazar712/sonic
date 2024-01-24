@@ -347,6 +347,7 @@
 
                             head.push('S. No.');
                             head.push('Booking Date');
+                            head.push('Arrival Date');
                             head.push('Pickup Address');
                             head.push('Description');
                             head.push('Order ID');
@@ -369,6 +370,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.booking_date);
+                                row.push(values.arrival_date);
                                 row.push(values.shipper_address);
                                 row.push(values.description);
                                 row.push(values.order_id);
