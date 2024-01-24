@@ -2355,15 +2355,7 @@ class AdminTrackingController extends Controller
         ->leftJoin('users as u','u.id','=','s.user_id')
         ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
-        ->leftJoin('shipments_journey as sjl', function ($join) {
-            $join->on('sjl.shipment_id', '=', 's.id')
-                ->where(
-                    'sjl.id',
-                    '=',
-                    DB::raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
-                );
-        })
-        
+        ->leftJoin('shipments_journey as sjl', 'sjl.shipment_id', 's.id')
         ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
             $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
                 ->whereRaw('CASE 
