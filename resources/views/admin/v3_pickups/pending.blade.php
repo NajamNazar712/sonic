@@ -1797,7 +1797,7 @@
                     {data: 'address', name: 'address', class: 'align-middle address'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
                     {data: 'hub', name: 'h.name', class: 'align-middle station'},
-                    {data: 'route_code', name: 'rt.route_code', class: 'align-middle route_code'},
+                    {data: 'route_code', name: 'rt.code', class: 'align-middle route_code'},
                     {data: 'rider_id', name: 'rd.name', class: 'align-middle rider_id',
                     render: function (data, type, row) {
                             if (row.rider_id !== null) {
