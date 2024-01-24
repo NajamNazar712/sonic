@@ -211,22 +211,35 @@ class AdminReportsController extends Controller
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
 
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
-                    );
-            })
-            
-            
+            // ->leftJoin('shipments_journey as sjl', function ($join) {
+            //     $join->on('sjl.shipment_id', '=', 'shipments.id')
+            //         ->where(
+            //             'sjl.id',
+            //             '=',
+            //             DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
+            //         );
+            // })
+
+            ->leftJoin('shipments_journey as sjl', 'sjl.shipment_id', 'shipments.id')
+
             ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+                    ->whereRaw('CASE 
+                                    WHEN sjl.shipper_status_id = 2 THEN ssjal.screen_location_id = 1 
+                                    WHEN sjl.shipper_status_id = 3 THEN ssjal.screen_location_id = 2 
+                                    WHEN sjl.shipper_status_id = 4 THEN ssjal.screen_location_id IN (20, 21) 
+                                    WHEN sjl.shipper_status_id = 5 THEN ssjal.screen_location_id = 4 
+                                    WHEN sjl.shipper_status_id = 11 THEN ssjal.screen_location_id IN (3, 10, 20, 21) 
+                                    WHEN sjl.shipper_status_id = 23 THEN ssjal.screen_location_id = 7 
+                                    WHEN sjl.shipper_status_id = 53 THEN ssjal.screen_location_id = 31 
+                                    ELSE 1 
+                                END')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))')
+                    ->latest();
             })
+            
+            
             ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
-
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -277,7 +290,10 @@ class AdminReportsController extends Controller
             ])
             ->groupBy('shipments.id');
 
-        $type = $request->get('search_types');
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+
+            $type = $request->get('search_types');
 
         if ($type && $type == 2) {
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
@@ -12320,19 +12336,25 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
                     );
             })
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
-                    );
-            })
-            
+            ->leftJoin('shipments_journey as sjl', 'sjl.shipment_id', 'shipments.id')
+
             ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
                 $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+                    ->whereRaw('CASE 
+                                    WHEN sjl.shipper_status_id = 2 THEN ssjal.screen_location_id = 1 
+                                    WHEN sjl.shipper_status_id = 3 THEN ssjal.screen_location_id = 2 
+                                    WHEN sjl.shipper_status_id = 4 THEN ssjal.screen_location_id IN (20, 21) 
+                                    WHEN sjl.shipper_status_id = 5 THEN ssjal.screen_location_id = 4 
+                                    WHEN sjl.shipper_status_id = 11 THEN ssjal.screen_location_id IN (3, 10, 20, 21) 
+                                    WHEN sjl.shipper_status_id = 23 THEN ssjal.screen_location_id = 7 
+                                    WHEN sjl.shipper_status_id = 53 THEN ssjal.screen_location_id = 31 
+                                    ELSE 1 
+                                END')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))')
+                    ->latest();
             })
+            
+            
             ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
 
             ->select( 

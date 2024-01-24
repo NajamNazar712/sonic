@@ -2355,18 +2355,21 @@ class AdminTrackingController extends Controller
         ->leftJoin('users as u','u.id','=','s.user_id')
         ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
         ->leftJoin('admins as a','a.id','=','sj.admin_id')
-        ->leftJoin('shipments_journey as sjl', function ($join) {
-            $join->on('sjl.shipment_id', '=', 's.id')
-                ->where(
-                    'sjl.id',
-                    '=',
-                    DB::raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
-                );
-        })
-        
+        ->leftJoin('shipments_journey as sjl', 'sjl.shipment_id', 's.id')
         ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
             $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+                ->whereRaw('CASE 
+                                WHEN sjl.shipper_status_id = 2 THEN ssjal.screen_location_id = 1 
+                                WHEN sjl.shipper_status_id = 3 THEN ssjal.screen_location_id = 2 
+                                WHEN sjl.shipper_status_id = 4 THEN ssjal.screen_location_id IN (20, 21) 
+                                WHEN sjl.shipper_status_id = 5 THEN ssjal.screen_location_id = 4 
+                                WHEN sjl.shipper_status_id = 11 THEN ssjal.screen_location_id IN (3, 10, 20, 21) 
+                                WHEN sjl.shipper_status_id = 23 THEN ssjal.screen_location_id = 7 
+                                WHEN sjl.shipper_status_id = 53 THEN ssjal.screen_location_id = 31 
+                                ELSE 1 
+                            END')
+                ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at))')
+                ->latest();
         })
         ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','ssjal.id as shipment_scanning_journey_id',
