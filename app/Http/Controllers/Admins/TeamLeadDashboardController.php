@@ -383,7 +383,7 @@ class TeamLeadDashboardController extends Controller
                                 $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_zone . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                             }
-                            if (session('role_id') == 1 || in_array(903, session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(903, session('permissions'))) { 
                                 $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
                             }
                         }
@@ -545,7 +545,7 @@ class TeamLeadDashboardController extends Controller
 
                     $employee_additional_days->save();
 
-                    session()->flash('success', 'Assigned Successfully');
+                    session()->flash('success', 'Additional Days Added Successfully');
 
                     return response()->json(['status' => 0, 'message' => 'Assigned Successfully']);
                 } else {
@@ -562,7 +562,7 @@ class TeamLeadDashboardController extends Controller
 
         $object = EmployeeAdditionalDay::get();
         EmployeeAdditionalDay::whereIn('id', $request->ids)->delete();
-        return response()->json(['status' => 1, 'success' => 'Successfully Deleted', 'object' => $object]);
+        return response()->json(['status' => 1, 'success' => 'Additional Days Deleted Successfully', 'object' => $object]);
     }
 
 
