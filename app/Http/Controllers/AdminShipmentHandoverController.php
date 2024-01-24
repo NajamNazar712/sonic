@@ -402,8 +402,8 @@ class AdminShipmentHandoverController extends Controller
             
                 if ($area_log->exists()) {
                     $area_log = $area_log->first();
-                    $location_status = $area_log->location_status ?? '-';
-                    return ($location_status != '-') ? (($location_status == 1) ? 'On-site' : 'Off-site') : '-';
+                    $location_status = $area_log->location_status;
+                    return $location_status == 1 ? 'On-site' : 'Off-site';
                 } else {
                   return '-';
                 }
@@ -470,8 +470,8 @@ class AdminShipmentHandoverController extends Controller
               if ($area_log->exists()) {
                   $area_log = $area_log->first();
                   $location_status = $area_log->location_status ?? '-';
-                  return ($location_status != '-') ? (($location_status == 1) ? 'On-site' : 'Off-site') : '-';
-              }else {
+                  return $location_status == 1 ? 'On-site' : 'Off-site';
+                }else {
                   return '-';
               }  
             } else {

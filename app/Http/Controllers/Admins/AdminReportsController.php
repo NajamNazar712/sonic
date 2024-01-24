@@ -12581,8 +12581,8 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
                     $data[$key]['location_status'] = isset($scanning_data->location_status) ? ($scanning_data->location_status == 1 ? 'On-site' : 'Off-site') : '-';
-                    $data[$key]['longitude'] = $scanning_data['longitude'] ??'-';
-                    $data[$key]['latitude'] = $scanning_data['latitude ']?? '-';
+                    $data[$key]['longitude'] = $scanning_data->longitude ?? '-';
+                    $data[$key]['latitude'] = $scanning_data->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
                     $data[$key]['current_remarks'] = '-';
