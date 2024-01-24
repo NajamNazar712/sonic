@@ -428,26 +428,43 @@ class TeamLeadDashboardController extends Controller
         $count_zone = max($count_zone);
 
         try {
-            $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id)->get();
-            if ($rvAgentAssignHub->isNotEmpty()) {
-                $rvAgentAssignHub->each(function ($id) {
-                    $id->delete();
-                });
+            $employeeIds = [];
+        
+            // If employee_id is present, add it to the array
+            if ($request->has('employee_id')) {
+                $employeeIds[] = $request->employee_id;
             }
-            
-            $count = 0;
-            foreach ($sorted_zones as $key => $value) {
-                for ($i = 0; $i < $count_zone; $i++) {
-                    if (!isset($zones[$key][$i])) {
-                        break;
-                    } else {
-                        $count = $count + 1;
-                        RvAgentAssignHub::create([
-                            'agent_id' => $request->employee_id,
-                            'city_id' => $zones[$key][$i]['id'],
-                            'zone_id' => $zones[$key][$i]['zone_id'],
-                            'priority' => $count,
-                        ]);
+        
+            // If employee_id_bulk is present, add it to the array
+            if ($request->has('employee_id_bulk')) {
+                foreach ($request->employee_id_bulk as $bulkValue) {
+                    $ids = explode(',', $bulkValue);
+                    $employeeIds = array_merge($employeeIds, $ids);
+                }
+            }
+        
+            foreach ($employeeIds as $employeeId) {
+                $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $employeeId)->get();
+                if ($rvAgentAssignHub->isNotEmpty()) {
+                    $rvAgentAssignHub->each(function ($id) {
+                        $id->delete();
+                    });
+                }
+        
+                $count = 0;
+                foreach ($sorted_zones as $key => $value) {
+                    for ($i = 0; $i < $count_zone; $i++) {
+                        if (!isset($zones[$key][$i])) {
+                            break;
+                        } else {
+                            $count = $count + 1;
+                            RvAgentAssignHub::create([
+                                'agent_id' => $employeeId,
+                                'city_id' => $zones[$key][$i]['id'],
+                                'zone_id' => $zones[$key][$i]['zone_id'],
+                                'priority' => $count,
+                            ]);
+                        }
                     }
                 }
             }

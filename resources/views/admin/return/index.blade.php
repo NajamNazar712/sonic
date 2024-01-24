@@ -1109,11 +1109,6 @@
                     }
                 });
 
-                // $('#assign_agent').empty().append('<option value="" selected></option>').select2({
-                //     placeholder: "Select Agent",
-                //     width: '100%',
-                //     dropdownParent: $('#AssignAgentModal')
-                // });
                 $('#assign_agent').append('<option value="" selected></option>').select2({
                     placeholder: "Select Agent",
                     width: '100%',

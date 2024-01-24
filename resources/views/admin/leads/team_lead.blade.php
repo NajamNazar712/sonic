@@ -59,7 +59,8 @@
 
     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
         <thead>
-            <tr class="bg-primary white">
+            <tr role="row" class="bg-primary white">
+                <th class="border-primary border-darken-1"></th>
                 <th class="border-primary border-darken-1">S No.</th>
                 <th class="border-primary border-darken-1">Employee ID</th>
                 <th class="border-primary border-darken-1">Employee Name</th>
@@ -184,14 +185,14 @@
         }
 
         table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
+                top: 50%;
+                border-color: #64a0d2;
+            }
 
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
+            table.dataTable tbody tr.selected td.select-checkbox:after {
+                top: 50%;
+                text-shadow: none;
+            }
 
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
@@ -346,6 +347,7 @@
 
 
     <script type="text/javascript">
+    var selected_rows = [];
         $(document).ready(function() {
 
 
@@ -359,51 +361,51 @@
                 var deleteDaysContainer = $('#delete_days');
                 var deleteIcon = $(this);
                 $.ajax({
-                        url: '{{ route('admin.team_lead.delete_additional_days') }}',
-                        type: 'GET',
-                        data: {
-                            'ids': Ids,
-                        }
-                    })
-                    .done(function(data) {
+                    url: '{{ route('admin.team_lead.delete_additional_days') }}',
+                    type: 'GET',
+                    data: {
+                        'ids': Ids,
+                    }
+                })
+                .done(function(data) {
 
-                        var object = data.object;
-                        var objectLength = 0;
-                        if (Array.isArray(object)) {
-                            objectLength = object.length; // If 'object' is an array
-                        } else if (typeof object === 'object' && object !== null) {
-                            objectLength = Object.keys(object).length; // If 'object' is an object
-                        }
+                    var object = data.object;
+                    var objectLength = 0;
+                    if (Array.isArray(object)) {
+                        objectLength = object.length; // If 'object' is an array
+                    } else if (typeof object === 'object' && object !== null) {
+                        objectLength = Object.keys(object).length; // If 'object' is an object
+                    }
 
-                        if (objectLength == 1) {
-                            $('.days_show').addClass('d-none')
-                        }
-                        if (data.status == 1) {
-                            toastr.success(data.success,
-                                'Success!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-
-                            deleteIcon.closest('.parent-element').remove();
-
-                        } else {
-                            toastr.error(data.error, 'Error!', {
+                    if (objectLength == 1) {
+                        $('.days_show').addClass('d-none')
+                    }
+                    if (data.status == 1) {
+                        toastr.success(data.success,
+                            'Success!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                        }
 
-                        window.location.href = "{{ route('admin.team_lead.index') }}";
+                        deleteIcon.closest('.parent-element').remove();
 
-                    })
-                    .fail(function(xhr) {
-                        toastr.error('Please Select',
-                            'Error  !', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                    });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                    window.location.href = "{{ route('admin.team_lead.index') }}";
+
+                })
+                .fail(function(xhr) {
+                    toastr.error('Please Select',
+                        'Error  !', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                });
             });
 
 
@@ -492,9 +494,7 @@
                         }
                     })
                     .fail(function(xhr, status, error) {
-                        // Handle the error response from the server
                         alert('Error: ' + error);
-                        // console.log(xhr.responseText); // You can inspect the error response here
                     });
             });
 
@@ -575,8 +575,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $(
-                            '#search_form #to_date').pickadate('picker').get('select'));
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -642,59 +641,35 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all d-none',
-                        action: function(e) {
-                            e.preventDefault();
+                
+                buttons: [
+                    {
+                        text: 'Assign Zoni',
+                        className: 'btn btn-primary assign',
+                        // enabled: false,
+                        action: function(e, dt, node, config) {
+                            // Select all rows with the class 'select-checkbox'
+                             table.rows({ page: 'current' }).select();
 
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.bulk_approve').enable();
-                                    table.button('.bulk_reject').enable();
-                                }
+                            // Iterate over the selected rows
+                            table.rows({ selected: true }).nodes().each(function(row) {
+                                var employee_id = parseInt($(row).attr('id'));
+                                selected_rows.push(employee_id);
                             });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none d-none',
-                        action: function(e) {
-                            e.preventDefault();
 
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
+                            // Deselect all rows
+                            // table.rows().deselect();
 
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.bulk_approve').disable();
-                                        table.button('.bulk_reject').disable();
-                                    }
-                                }
-                            });
+                            if (selected_rows.length > 0) {
+                                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id_bulk[]" value="' + selected_rows + '">');
+                                $('#AssignHubModal').modal('show');
+                            } else {
+                                var error = "Not selected any agent!";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
                         }
                     },
                     'reset'
@@ -737,122 +712,42 @@
                 ],
                 rowId: 'employee_id',
                 columns: [
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
+                    { orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,
                         render: function(data, type, row) {
                             return '';
                         }
                     },
-                    {
-                        data: 'trax_id',
-                        name: 'employees.trax_id',
-                        class: 'align-middle trax_id'
-                    },
-                    {
-                        data: 'employee_name',
-                        name: 'employees.name',
-                        class: 'align-middle employee_name'
-                    },
-                    {
-                        data: 'employee_hub',
-                        name: 'employee_hub',
-                        class: 'align-middle employee_hub',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'city',
-                        name: 'cities.name',
-                        class: 'align-middle city'
-                    },
-                    {
-                        data: 'cnic',
-                        name: 'employees.cnic',
-                        class: 'align-middle cnic'
-                    },
-                    {
-                        data: 'phone_number',
-                        name: 'employees.phone_number',
-                        class: 'align-middle phone_number'
-                    },
-                    {
-                        data: 'employee_type',
-                        name: 'et.id',
-                        class: 'align-middle employee_type'
-                    },
-                    {
-                        data: 'employee_designation',
-                        name: 'ed.name',
-                        class: 'align-middle employee_designation'
-                    },
-                    {
-                        data: 'department_name',
-                        name: 'ads.name',
-                        class: 'align-middle department_name'
-                    },
-                    {
-                        data: 'status',
-                        name: 'es.id',
-                        class: 'align-middle status'
-                    },
-               
-                    {
-                        data: 'confirmation_status',
-                        name: 'employees.confirmation_status',
-                        class: 'align-middle confirmation_status'
-                    },
-                    {
-                        data: 'attendance_date',
-                        name: 'ea.attendance_date',
-                        class: 'align-middle attendance_date'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'align-middle text-center action',
-                        orderable: false,
-                        searchable: false
-                    }
+                    { data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id' },
+                    { data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name' },
+                    { data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false },
+                    { data: 'city', name: 'cities.name', class: 'align-middle city' },
+                    { data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic' },
+                    { data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number' },
+                    { data: 'employee_type', name: 'et.id', class: 'align-middle employee_type' },
+                    { data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation' },
+                    { data: 'department_name', name: 'ads.name', class: 'align-middle department_name' },
+                    { data: 'status', name: 'es.id', class: 'align-middle status' },
+                    { data: 'confirmation_status',name: 'employees.confirmation_status', class: 'align-middle confirmation_status' },
+                    { data: 'attendance_date',name: 'ea.attendance_date', class: 'align-middle attendance_date' },
+                    { data: 'action',name: 'action',class: 'align-middle text-center action',orderable: false, searchable: false }
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).addClass('select-checkbox');
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
                         .appendTo(this.api().table().header());
 
-                    var td =
-                        '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input =
-                        '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon =
-                        '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                        var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">'+
-                            '</select>';
-
-                    var employee_status =
-                        '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
-                        '</select>';
-
-                    var rider_main_categories =
-                        '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
-                        '</select>';
-
-                    var employee_zone =
-                        '<select name="employee_zone_search" id="employee_zone_search" class="select2 form-control">' +
-                        '</select>';
-
-                        var employee_confirmation_status = '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' +
-                        '<option value="2">Probation</option>'+
-                        '<option value="1">Permanent</option>'+
-                    '</select>';
-
-
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">'+ '</select>';
+                    var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' + '</select>';
+                    var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' + '</select>';
+                    var employee_zone = '<select name="employee_zone_search" id="employee_zone_search" class="select2 form-control">' + '</select>';
+                    var employee_confirmation_status = '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' + '<option value="2">Probation</option>'+ '<option value="1">Permanent</option>'+'</select>';
                     var currentTime = new Date();
                     var year = currentTime.getFullYear();
                     var month = String(currentTime.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1 and pad with '0'
@@ -860,10 +755,7 @@
 
                     var formattedDate = year + '-' + month + '-' + day
 
-                    var employee_attendance = '<select name="employee_attendance" id="employee_attendance" class="select2 form-control">' +
-                        '<option value="Offline">Offline</option>'+
-                        `<option value="${formattedDate}">Online</option>`+
-                    '</select>';
+                    var employee_attendance = '<select name="employee_attendance" id="employee_attendance" class="select2 form-control">' + '<option value="Offline">Offline</option>'+ `<option value="${formattedDate}">Online</option>`+'</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -979,7 +871,7 @@
 
                 table.draw();
             })
-
+            
 
             $('body').on('click', '.deactivate_staff', function() {
                 var employeeId = $(this).attr('data-id');
@@ -1006,36 +898,8 @@
                     dangerMode: true
                 }).then(function(confirm) {
                     if (confirm) {
-                        // swal({
-                        //     title: 'Please Wait!',
-                        //     text: 'Employee is being De Activate',
-                        //     icon: 'info',
-                        //     buttons: false,
-                        //     closeOnClickOutside: false,
-                        //     closeOnEsc: false
-                        // });
-                        // $('#datatable').on('click', '.editEstimateCharges', function() {
-                        //     var id = $(this).parents('tr').attr('id');
-                        //     if (id) {
                         $('#EditDisableAgentModal').modal('show');
                         $('#employee_id').val(employeeId);
-                        //     }
-                        // });
-
-                        // $.ajax({
-                        //         url: '{{ route('admin.team_lead.deactivate_staff') }}',
-
-                        //         method: 'POST',
-                        //         data: {
-                        //             'employee_id': employeeId,
-                        //             '_token': '{{ csrf_token() }}'
-                        //         }
-                        //     })
-                        //     .done(function(data) {
-
-                        //         swal.close();
-                        //         table.draw();
-                        //     });
                     }
                 });
             });
