@@ -7470,7 +7470,8 @@ class ReturnController extends Controller
 
     public function update_call_status(Request $request)
     {
-        // dd($request->all());
+        $unresponsive_invalid_shipments = [];
+        $successfull_updated_shipments = [];
         $shipment_ids = explode(',',$request->shipment_id);
 
         foreach ($shipment_ids as $shipment_id) 
@@ -7481,18 +7482,17 @@ class ReturnController extends Controller
                 return response()->json(['status' => 0]);
             }
     
-            $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id',2)->where('unresponsive_count', 1)->latest()->first();
+            $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 2)->where('unresponsive_count', 1)->latest()->first();
             $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 3)->where('unresponsive_count', 1)->latest()->first();
-            // $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id',2)->where('rv_state_id',3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-            $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id',3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
+            $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
             
             if($unresponsive_shipments){
-                return response()->json(['status' => 0, 'message' => 'Status of shipment cannot update to unresponsive right now']);
+                $unresponsive_invalid_shipments[] = $shipment_id;
+                // return response()->json(['status' => 0, 'message' => 'Status of shipment cannot update to unresponsive right now']);
             }
             
             //updating status in rv_shipment_sassigned_agent table row and add new row in rv_shipment_assign_agent_details
             else if($open_unresponsive_shipment){
-                // dd(1);
                 $open_unresponsive_shipment->shipments_journey_id = $shipments_journey->id;
                 $open_unresponsive_shipment->last_shipments_journey_id = $shipments_journey->id;
                 // $open_unresponsive_shipment->rv_assign_agent_status_id = $request->call_finding_id; //unresponsive
@@ -7511,13 +7511,14 @@ class ReturnController extends Controller
                 if($new_call_history){
                     $open_unresponsive_shipment->update(['rv_assign_agent_status_id' => 7, 'rv_state_id' => 2]); //when shipment is open and there is 1 unresposive count and shipment is updated to unresposnvie again it should be unassign and status should set to sar 
                     $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $open_unresponsive_shipment, $shipments_journey);
+                    $successfull_updated_shipments[] = $shipment_id;
                 }
                 else{
-                    return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
+                    $unresponsive_invalid_shipments[] = $shipment_id;
+                    // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                 }
             }
             else if($sar_unresponsive_shipment){
-                // dd(2);
                 $sar_unresponsive_shipment->shipments_journey_id = $shipments_journey->id;
                 $sar_unresponsive_shipment->last_shipments_journey_id = $shipments_journey->id;
                 $sar_unresponsive_shipment->call_to_id = $request->call_to_id;
@@ -7534,14 +7535,15 @@ class ReturnController extends Controller
                 if($new_call_history){
                     $sar_unresponsive_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null, 'rv_state_id' => 4]); //when shipment is open and shipper requested for reattempt call and admin update the status again to unresponsive it should be completed
                     $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $sar_unresponsive_shipment, $shipments_journey);
+                    $successfull_updated_shipments[] = $shipment_id;
                 }
                 else{
-                    return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
+                    $unresponsive_invalid_shipments[] = $shipment_id;
+                    // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                 }
             }
             //create new row for both RvShipmentAssignAgent and RvShipmentAssignAgentDetails (this will be created on;y if admin is updaing call history)
             else{
-                // dd(3);
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
                 $add_call_status->shipment_id = $shipment_id;
@@ -7569,12 +7571,26 @@ class ReturnController extends Controller
                 if($new_call_history){
                     $add_call_status->update(['rv_state_id' => 2]);
                     $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $add_call_status, $shipments_journey);
+                    $successfull_updated_shipments[] = $shipment_id;
                 }
                 else{
-                    return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
+                    $unresponsive_invalid_shipments[] = $shipment_id;
+                    // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                 }
             }
-        return response()->json(['status' => 1]);
+        }
+        if (!empty($unresponsive_invalid_shipments)){
+            if (!empty($unresponsive_invalid_shipments)) {
+                $unresponsive_invalid_shipments_Message = implode(', ', $unresponsive_invalid_shipments);
+                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' And Rest Has Been updated';
+            }
+            return response()->json(['status' => 0, 'message' => $errorMessages]);
+        }
+
+        // When call history of all shipments are updated without any error
+        else{
+            // return response()->json(['status' => 1, 'message' => ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $successfull_updated_shipments]);
+            return response()->json(['status' => 1, 'message' => 'Call History Updated Successfully']);
         }
     }
 

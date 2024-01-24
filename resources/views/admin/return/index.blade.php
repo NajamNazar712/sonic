@@ -1176,7 +1176,8 @@
                             success: function(response) {
                                 if (response.status == 1) {
                                     swal({
-                                        text: 'Call History Updated Successfully',
+                                        // text: 'Call History Updated Successfully',
+                                        text: response.message,
                                         icon: 'success',
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
