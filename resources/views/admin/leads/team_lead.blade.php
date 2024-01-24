@@ -350,65 +350,90 @@
     var selected_rows = [];
         $(document).ready(function() {
 
-
             $('body').on('click', '.delete-icon', function() {
-                var Ids = [];
-                var delId = $(this).data('del-id');
-                $("#multiple_delete:checked").each(function() {
-                    Ids.push($(this).val());
-                });
+            var Ids = [];
+            var delId = $(this).data('del-id');
+            
+            $("#multiple_delete:checked").each(function() {
+                Ids.push($(this).val());
+            });
 
-                var deleteDaysContainer = $('#delete_days');
-                var deleteIcon = $(this);
-                $.ajax({
-                    url: '{{ route('admin.team_lead.delete_additional_days') }}',
-                    type: 'GET',
-                    data: {
-                        'ids': Ids,
-                    }
-                })
-                .done(function(data) {
+            var deleteDaysContainer = $('#delete_days');
+            var deleteIcon = $(this);
 
-                    var object = data.object;
-                    var objectLength = 0;
-                    if (Array.isArray(object)) {
-                        objectLength = object.length; // If 'object' is an array
-                    } else if (typeof object === 'object' && object !== null) {
-                        objectLength = Object.keys(object).length; // If 'object' is an object
+            swal({
+                title: 'Delete Days!',
+                text: 'Are you sure you want to delete these days?',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
                     }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Deleting days...',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
 
-                    if (objectLength == 1) {
-                        $('.days_show').addClass('d-none')
-                    }
-                    if (data.status == 1) {
-                        toastr.success(data.success,
-                            'Success!', {
+                    $.ajax({
+                        url: '{{ route("admin.team_lead.delete_additional_days") }}',
+                        type: 'GET',
+                        data: {
+                            'ids': Ids,
+                        }
+                    })
+                    .done(function(data) {
+                        var objectLength = Array.isArray(data.object) ? data.object.length : Object.keys(data.object).length;
+
+                        if (objectLength === 1) {
+                            $('.days_show').addClass('d-none');
+                        }
+
+                        if (data.status == 1) {
+                            toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
+                            deleteIcon.closest('.parent-element').remove();
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
 
-                        deleteIcon.closest('.parent-element').remove();
+                        setTimeout(function() {
+                            window.location.href = "{{ route('admin.team_lead.index') }}";
+                        }, 3000);
 
-                    } else {
-                        toastr.error(data.error, 'Error!', {
+                    })
+                    .fail(function(xhr) {
+                        toastr.error('Please Select', 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
-                    }
-
-                    window.location.href = "{{ route('admin.team_lead.index') }}";
-
-                })
-                .fail(function(xhr) {
-                    toastr.error('Please Select',
-                        'Error  !', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                });
+                    });
+                }
             });
-
-
+        });
 
 
             var rv_city = null;
@@ -473,29 +498,68 @@
 
 
             $('body').on('click', '#save_additional_days', function(e) {
+                e.preventDefault();
+
                 var id = $('#employee_id_d').val();
                 var dates = $('#add_days_employee').val();
-                e.preventDefault();
-                $.ajax({
-                        url: '{!! route('admin.team_lead.add_additional_days') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            employee_id: id,
-                            add_additional_days: dates,
+                console.log(dates);
+
+                if(dates != ''){
+                    swal({
+                    title: 'Add Days!',
+                    text: 'Are You Sure To Add Additional Days!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
                         },
-                        dataType: 'json',
-                    })
-                    .done(function(response) {
-                        if (response.status == 0) {
-                            window.location.href = "{{ route('admin.team_lead.index') }}";
-                        } else if (response.status == 2) {
-                            $('.error-message').text('Please Select Date');
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
                         }
-                    })
-                    .fail(function(xhr, status, error) {
-                        alert('Error: ' + error);
-                    });
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm ) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Additional Days are being Added',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.team_lead.add_additional_days') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'employee_id': id,
+                                'add_additional_days': dates,
+                            },
+                            dataType: 'json',
+                        })
+                        .done(function(response) {
+                            if (response.status === 0) {
+                                window.location.href = "{{ route('admin.team_lead.index') }}";
+                            } 
+                        })
+                        .fail(function(xhr, status, error) {
+                            console.error('Error: ' + error);
+                        });
+                    }
+                });
+                }else{
+                    $('.error-message').text('Please Select Date');
+                }
             });
 
 
@@ -960,6 +1024,7 @@
             $('body').on('click', '.add_additional_days', function() {
                 var employeeId = $(this).attr('data-id');
                 var employee = $(this).attr('data-ename');
+                console.log(employee);
 
                 // Add the AJAX call here
                 $.ajax({
@@ -1053,7 +1118,7 @@
                     modalContent += `
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id='save_additional_days'>Save</button>
+                    <button type="submit" class="btn btn-primary" id='save_additional_days'>Add</button>
                 </div>
             </form>
         </div>
