@@ -162,7 +162,7 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\Http\Traits\LastMileAppReportTrait;
 use App\Jobs\LastMileAppReport;
-
+use Illuminate\Support\Facades\Log;
 class
 RiderAPIController extends Controller
 {
@@ -8952,7 +8952,7 @@ RiderAPIController extends Controller
 
             try {
                 //code...
-
+                Log::channel('code_test_log')->info(json_encode($request));
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -11420,8 +11420,8 @@ RiderAPIController extends Controller
         else {
             try {
                 //code...
-
-
+                
+                Log::channel('code_test_log')->info(json_encode($request));
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
