@@ -8952,7 +8952,6 @@ RiderAPIController extends Controller
 
             try {
                 //code...
-                DB::beginTransaction();
 
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
@@ -9234,10 +9233,9 @@ RiderAPIController extends Controller
                     $delivery_note_data->save();
                 }
                 $temp_data->delete();
-                DB::commit();
+                
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
             } catch (\Throwable $th) {
-                DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
@@ -11422,7 +11420,7 @@ RiderAPIController extends Controller
         else {
             try {
                 //code...
-                DB::beginTransaction();
+
 
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
@@ -11638,13 +11636,11 @@ RiderAPIController extends Controller
                     $message = 'Shipment is not for Out for Delivery';
                 }
                 $temp_data->delete();
-                DB::commit();
+                
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
             }
             catch (\Throwable $th)
             {
-                DB::rollback();
-
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1,  'message' => 'Something Went Wrong!']);
 
