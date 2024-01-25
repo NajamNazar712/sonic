@@ -247,6 +247,8 @@
 					{
 						$("#admin_start_time").append('<option value='+ad_current_start_time+' selected>'+ad_current_start_time_formatted+'</option>');
 						ad_current_start_time=null;	
+					}else{
+						initializ_admin_start_time();
 					}
 				}
 				else
@@ -258,9 +260,7 @@
 						ad_current_start_time=null;
 					}else
 					{
-							var admin_start_time= $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-								width:'100%'
-							});
+						initializ_admin_start_time();
 					}
 					
 					
@@ -275,10 +275,7 @@
 		});
 
 		
-		var admin_start_time= $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-            width:'100%'
-        });
-
+		
 
 		var admin_end_date = $('#admin_end_date').pickadate({
             firstDay: 1,
@@ -309,6 +306,8 @@
 						{
 							$("#admin_end_time").append('<option value='+ad_current_end_time+' selected>'+ad_current_end_time_formatted+'</option>');
 							ad_current_end_time=null;
+						}else{
+							initializ_admin_end_time();
 						}
 
 					}
@@ -320,9 +319,7 @@
 							$("#admin_end_time").val(ad_current_end_time).trigger('change');
 							ad_current_end_time=null;
 						}else{
-							$('#admin_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
-								width:'100%'
-							});
+							initializ_admin_end_time();
 						}
 					}
 
@@ -333,9 +330,7 @@
 		
 			
 		});
-		var admin_end_time= $('#admin_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
-            width:'100%'
-        });
+		
 
 		var sh_current_start_time = @json($shipper_ticker['start_time']);
 		var sh_current_start_time_formatted =  @json($shipper_ticker['start_time_formatted']);
@@ -372,6 +367,8 @@
 							$("#shipper_start_time").append('<option value='+sh_current_start_time+' selected>'+sh_current_start_time_formatted+'</option>');
 							sh_current_start_time=null;
 
+						}else{
+							initializ_shipper_start_time();
 						}
 					}
 					else
@@ -382,9 +379,7 @@
 							$("#shipper_start_time").val(sh_current_start_time).trigger('change');
 							sh_current_start_time=null;
 						}else{
-							$('#shipper_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-								width:'100%'
-							});
+							initializ_shipper_start_time();
 
 						}
 
@@ -396,10 +391,10 @@
 	
 			
 		});
+
 		
-		var shipper_start_time= $('#shipper_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
-            width:'100%'
-        });
+		
+	
 
 		var shipper_end_date = $('#shipper_end_date').pickadate({
             firstDay: 1,
@@ -430,7 +425,8 @@
 					{
 						$("#shipper_end_time").append('<option value='+sh_current_end_time+' selected>'+sh_current_end_time_formatted+'</option>');
 						sh_current_end_time=null;
-
+					}else{
+						initializ_shipper_end_time();
 					}
 
 				}
@@ -442,33 +438,33 @@
 						$("#shipper_end_time").val(sh_current_end_time).trigger('change');
 						sh_current_end_time=null;
 					}else{
-						$('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
-							width:'100%'
-						});
-
+						initializ_shipper_end_time();
 					}
 
 				}
-
-			
 				$("#shipper_end_time").attr('data-rule-required',true).attr('data-msg-required','End Time is Required');
 			}
 			
 			
 		});
 
-		var shipper_end_time= $('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
-            width:'100%'
-        });
 		
+		initializ_admin_start_time();
+		initializ_admin_end_time();
+		initializ_shipper_start_time();
+		initializ_shipper_end_time();
+
+
 		$("#admin_reset").on('click',function()
 		{
 			$("#admin_start_date").val('').trigger('change');
 			$("#admin_end_date").val('').trigger('change');
-			$("#admin_start_time").val('').change();
-			$("#admin_end_time").val('').change();
+			$("#admin_start_time").empty();
+			$("#admin_end_time").empty();
 			$("#admin_start_time").removeAttr('data-rule-required data-msg-required');
 			$("#admin_end_time").removeAttr('data-rule-required data-msg-required');
+			initializ_admin_start_time();
+			initializ_admin_end_time();
 
 		});
 
@@ -476,31 +472,58 @@
 		{
 			$("#shipper_start_date").val('').trigger('change');
 			$("#shipper_end_date").val('').trigger('change');
-			$("#shipper_start_time").val('').change();
-			$("#shipper_end_time").val('').change();
+			$("#shipper_start_time").empty();
+			$("#shipper_end_time").empty();
 			$("#shipper_start_time").removeAttr('data-rule-required data-msg-required');
 			$("#shipper_end_time").removeAttr('data-rule-required data-msg-required');
-
+			initializ_shipper_start_time();
+			initializ_shipper_end_time();
 		});
 
+	
+		
+	
+		function populateTimeOptions(startHour, endHour,select,current_time=null) {
+			select.empty();
+			for (var hour = startHour; hour < endHour; hour++) {
+				var formattedHour = (hour % 12 === 0) ? 12 : hour % 12;
+				var amPm = (hour < 12) ? 'AM' : 'PM';
+				var optionValue = ('0' + hour).slice(-2) + ':00';
+				var optionText = formattedHour + ':00 ' + amPm;
+				if(optionValue!=current_time)
+				{
+					var option = new Option(optionText, optionValue);
+					select.append(option);
+				}	
+			}	
+			
+   		}
+		function initializ_shipper_start_time(){
+			var shipper_start_time= $('#shipper_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
+					width:'100%'
+			});
+		}
 
-				function populateTimeOptions(startHour, endHour,select,current_time=null) {
-					select.empty();
-					for (var hour = startHour; hour < endHour; hour++) {
-						var formattedHour = (hour % 12 === 0) ? 12 : hour % 12;
-						var amPm = (hour < 12) ? 'AM' : 'PM';
-						var optionValue = ('0' + hour).slice(-2) + ':00';
-						var optionText = formattedHour + ':00 ' + amPm;
-						if(optionValue!=current_time)
-						{
-							var option = new Option(optionText, optionValue);
-							select.append(option);
-						}
+		function initializ_shipper_end_time()
+		{
+			var shipper_end_time= $('#shipper_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
+				width:'100%'
+			});
+		
+		}
+		function initializ_admin_start_time()
+		{
+			var admin_start_time= $('#admin_start_time').prepend('<option value="" selected="selected">Start Time</option>').select2({
+            	width:'100%'
+       	 	});
 
-						
-					}
-
-   				}
+		}
+		function initializ_admin_end_time()
+		{
+			var admin_end_time= $('#admin_end_time').prepend('<option value="" selected="selected">End Time</option>').select2({
+				width:'100%'
+			});
+		}
 		
 	</script>
 @endsection
