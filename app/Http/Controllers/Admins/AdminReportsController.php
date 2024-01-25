@@ -12408,8 +12408,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            // dd($from, $to);
-            $rv_report->whereBetween('rv_shipment_assign_agents.created_at', [$from, $to]);
+            $rv_report->whereBetween('rv_shipment_assign_agents.updated_at', [$from, $to]);
         }   
 
         return $datatable->make(true);
