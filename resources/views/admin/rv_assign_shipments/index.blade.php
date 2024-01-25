@@ -63,7 +63,7 @@
                                                                     <p id="received_leads" class="d-inline">{{ count($online_agents)}}</p>
                                                                     <p id="received_leads" class="d-inline">({{ count($number_of_available_agents) }})</p>
                                                                 </h3>
-                                                                <span>Online/ Available Agents(out of) </span>
+                                                                <span>Online/ Available Agents (out of) </span>
                                                             </div>
                                                         </div>
                                                     </div>
