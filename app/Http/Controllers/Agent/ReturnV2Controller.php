@@ -348,7 +348,7 @@ class ReturnV2Controller extends Controller
                                     else {
                                         // $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
-                                        dd(1,$shipment_assign_agent);
+                                        // dd(1,$shipment_assign_agent);
                                         // //adding logs in rv_shipment_assign_agent_details table
                                         $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                         if($rv_shipment_assign_agent_details != true){
@@ -377,21 +377,30 @@ class ReturnV2Controller extends Controller
                                 // else{
                                     //     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                     // }
-                                    $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
+                                    // $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
                                     // dd(2,$shipment_assign_agent);
-                                $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-                                die();
-                                if($rv_shipment_assign_agent_details != true){
-                                    // DB::rollBack();
-                                    return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
-                                } else {
+                                // $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                                // die();
+                                // if($rv_shipment_assign_agent_details != true){
+                                //     // DB::rollBack();
+                                //     return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
+                                // } 
+                                else {
                                     $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
                                         // DB::rollBack();
+                                        
                                         return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
                                     } else {
                                         // DB::commit();
-                                        return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                                        $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                                        if($rv_shipment_assign_agent_details != true){
+                                            // DB::rollBack();
+                                            return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
+                                        } 
+                                        else{
+                                            return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                                        }
                                     }
                                 }
                             }
