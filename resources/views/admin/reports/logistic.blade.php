@@ -364,7 +364,7 @@
                             head.push('Destination');
                             head.push('Location Status');
                             head.push('Latitude');
-                            head.push('Longitude');	
+                            head.push('Longitude');
                             head.push('Aging (Days)');
                             head.push('Delivered/Returned Date');
                             head.push('Shipment Status');

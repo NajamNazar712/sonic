@@ -126,7 +126,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
         }
 
-        $shipments = DB::connection('reports_2')->table('shipments')
+        $shipments = DB::connection('reports')->table('shipments')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -4972,22 +4972,22 @@ class ReturnController extends Controller
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $paths = ['32', '33', '34'];
+        $paths = ['11', '12', '13', '14'];
         foreach ($paths as $p){
-            $files = File::glob("$path/2023_$p*.*", GLOB_NOSORT);
+            $files = File::glob("$path/2024_$p*.*", GLOB_NOSORT);
             $now = Carbon::now();
             if(count($files) > 0){
                 foreach ($files as $file) {
                     if (is_file($file)) {
-//                        $created = date("F d Y H:i:s.",filemtime($file));
+                       $created = date("F d Y H:i:s.",filemtime($file));
                         $file_name = pathinfo($file);
-//                        if($now->diffInDays($created) > 1){
+                       if($now->diffInDays($created) > 1){
                             Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
                             $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
                             if($exists){
                                 File::delete($file);
                             }
-//                        }
+                       }
                     }
                 }
             }

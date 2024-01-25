@@ -1161,6 +1161,7 @@ otherwise it will be rejected</li>
                                <li>In case any such prohibited/fake product is distributed/transferred/shipped/ couriered via TRAX Online, and TRAX Online or any of its employees face any legal charges in lieu of such shipment, shipper shall be solely and fully responsible for it and shall fully indemnify TRAX Online in this regard. Moreover, such indemnification shall not relinquish the legal and constitutional right of TRAX Online to take legal actions/raise claim against shipper for grievance caused due to said shipment. </li>
                                <li>Any illegal and immodest product (if any) exchange shall be the responsibility of shipper and its consignee and shall not be the responsibility of Trax Online. </li>
                                <li>Shipper and its consignee shall indemnify Trax Online from any legal claims arising against each other in light of such exchange.</li>
+                               <li><strong>TRAX Online (Pvt) Ltd.</strong> applies bank transfer charges whenever a payment is going to be transferred into your bank account for you collected Cash on Delivery. This is charged as the service charges for the direct funds transfer service provided.</li>
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
         if(!$for_shipper_agreement_modal) {
