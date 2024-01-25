@@ -796,11 +796,9 @@
                         enabled:false,
                         // enabled: false,
                         action: function(e, dt, node, config) {
-                            // Select all rows with the class 'select-checkbox'
-                             table.rows({ page: 'current' }).select();
 
-                            // Iterate over the selected rows
-                            table.rows({ selected: true }).nodes().each(function(row) {
+                            // Select all rows with the class 'select-checkbox'
+                            dt.rows({ selected: true }).nodes().each(function(row) {
                                 var employee_id = parseInt($(row).attr('id'));
                                 selected_rows.push(employee_id);
                             });
