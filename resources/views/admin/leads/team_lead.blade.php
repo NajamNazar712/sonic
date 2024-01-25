@@ -95,7 +95,7 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
-                            <input type="text" name="employee_id_bulk" value="">
+                            <input type="hidden" name="employee_id_bulk" value="">
                             <div class="modal-title text-center justify-content-center" style="margin-bottom: 10px">
                                 <button type="submit" class="btn btn-primary" id="select_all">Select All</button>
                                 <button type="submit" class="btn btn-primary" id="select_none">Select None</button>
@@ -803,6 +803,7 @@
                                 selected_rows.push(employee_id);
                             });
 
+                            $('#AssignHubModal #search_origin').empty();
                             // Deselect all rows
                             // table.rows().deselect();
                             if (selected_rows.length > 0) {
