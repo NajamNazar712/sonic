@@ -12272,22 +12272,29 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
-        // ->leftjoin('rv_shipment_assign_agent_details as rsaad','rv_shipment_assign_agents.id','rsaad.rv_shipment_assign_agent_id')
-        // ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
-        //     $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
-        //     ->where('rv_shipment_assign_agent_details.id','=',
-        //     DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id)'));
-        // })
-        ->leftjoin('admins as ad', function($join) {
-            $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')->where('updated_type_id', 2)
-            ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')->where('updated_type_id', 1);
+        ->leftjoin('rv_shipment_assign_agent_details as rsaad', function($join) {
+            $join->on('rsaad.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
+                 ->where('rsaad.id', '=', DB::raw('(SELECT id FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id ORDER BY id DESC LIMIT 1 OFFSET 1)'));
         })
-        ->select('shipments.id as shipment_id','shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 
+        ->leftjoin('admins as add', function($join) {
+            $join->on('rsaad.agent_id', 'add.id')->where('rsaad.updated_type_id', 2);
+        })
+        ->leftjoin('admins as ad', function($join) {
+            $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')
+                 ->where('rv_shipment_assign_agents.updated_type_id', 2)
+                 ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')
+                 ->where('rv_shipment_assign_agents.updated_type_id', 1);
+        })
+        ->leftjoin('shipments_journey as sjj', function($join) {
+            $join->on('sjj.shipment_id', '=', 'shipments.id')
+                 ->where('sjj.shipper_status_id', '=', 2);
+        })
+        ->select('shipments.id as shipment_id','sjj.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
         'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 
         'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 
         'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks',
-        'rv_shipment_assign_agents.updated_at as action_date', /*'ad.name as action_updated_by',*/'ad.name as rcp_agent_updated_by', 
+        'rv_shipment_assign_agents.updated_at as action_date', /*'ad.name as action_updated_by',*/'add.name as rcp_agent_updated_by', 
         'rv_shipment_assign_agents.updated_type_id as updated_type_id','rv_shipment_assign_agents.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count')
