@@ -549,11 +549,13 @@ class TeamLeadDashboardController extends Controller
                         $employee_additional_days->employee_id = $employee_id;
                         $employee_additional_days->working_days = $date;
                         $employee_additional_days->save();
-                        $assigned [] = $employee;
+                        $assigned[] = $employee;
                     }else{
                         $error[] = 1;
                     }
                 }
+
+                dd($assigned);
                 if(count($error) <= 0){
                     session()->flash('success', 'Additional Days Added Successfully');
                     return response()->json(['status' => 0, 'message' => 'Assigned Successfully']);
