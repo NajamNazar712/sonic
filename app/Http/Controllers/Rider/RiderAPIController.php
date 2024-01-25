@@ -8952,7 +8952,7 @@ RiderAPIController extends Controller
 
             try {
                 //code...
-                Log::channel('code_test_log')->info(json_encode($request->all()));
+                $success_flag = false;
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -9208,6 +9208,7 @@ RiderAPIController extends Controller
                                 $shipment_verification->save();
                             }
                             $message = 'Shipment is marked as delivered Successfully';
+                            $success_flag = true;
                         }
                     } else {
                         $message = 'Shipment is marked as delivered already';
@@ -9234,7 +9235,7 @@ RiderAPIController extends Controller
                 }
                 $temp_data->delete();
                 
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             } catch (\Throwable $th) {
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
@@ -11421,7 +11422,7 @@ RiderAPIController extends Controller
             try {
                 //code...
                 
-                Log::channel('code_test_log')->info(json_encode($request->all()));
+                $success_flag = false;
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -11619,6 +11620,7 @@ RiderAPIController extends Controller
                                         }
 
                                         $message = 'Shipment is marked as Undelivered Successfully';
+                                        $success_flag = true;
                                     } else {
                                         $message = 'Shipment is already marked as Undelivered';
                                     }
@@ -11637,7 +11639,7 @@ RiderAPIController extends Controller
                 }
                 $temp_data->delete();
                 
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             }
             catch (\Throwable $th)
             {
