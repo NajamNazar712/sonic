@@ -3009,7 +3009,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })->where('hidden', 0), 'origin_check'],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)->where('status', 1), 'destination_check'],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('booking_enable_status', 1)->where('business_category_id', 1)->where('status', 1), 'destination_check'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -3135,6 +3135,7 @@ class ShipperShipmentBookController extends Controller
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })];
+
                 $service_type_check_id = null;
             } elseif ($excel_type == 2) {
 

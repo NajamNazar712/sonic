@@ -310,6 +310,12 @@
                                                     });
 
                                                     table.draw();
+                                                }else if (res.status == '400'){
+                                                    swal('Already Disabled!', {
+                                                        icon: 'warning',
+                                                    });
+
+                                                    table.draw();
                                                 }
                                             }, 
                                             error: function(xhr, status, error) {

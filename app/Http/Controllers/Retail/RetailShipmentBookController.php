@@ -1905,7 +1905,7 @@ class RetailShipmentBookController extends Controller
             'product_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('products', 'id')],
             'business_category_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('business_categories', 'id')->where('id', 1)],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')->whereNotIn('id', [3])],
-            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('booking_enable_status', 1)->where('business_category_id', 1)],
             'volumetric_weight' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'weight' => ['nullable', 'numeric', 'between:0.1,100000'],
             'length' => ['nullable', 'numeric', 'between:0.1,100000'],

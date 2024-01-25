@@ -13770,7 +13770,13 @@ class AdminDashboardController extends Controller
         }
    
         City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
-        return response()->json(['status' => 200]);
+
+        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 0)->get();
+        if(count($error) > 0){
+            return response()->json(['status' => 400]);
+        }else{
+            return response()->json(['status' => 200]);
+        }
     }
    
     public function enable_booking_status(Request $request){
