@@ -444,22 +444,16 @@ class TeamLeadDashboardController extends Controller
             if ($request->has('employee_id')) {
                 $employeeIds[] = $request->employee_id;
             }
-        
+            $employee_id_bulks = explode(',', $request->employee_id_bulk);
             // If employee_id_bulk is present, add it to the array
             if ($request->has('employee_id_bulk')) {
-                foreach ($request->employee_id_bulk as $bulkValue) {
-                    $ids = explode(',', $bulkValue);
-        
-                    foreach ($ids as $id) {
-                        $admin = Admin::where('employee_id', $id)->first();
-        
-                        if ($admin) {
-                            $employeeIds[] = $admin->id;
-                        }
+                foreach ($employee_id_bulks as $bulkValue) {        
+                    $admin = Admin::where('employee_id', $bulkValue)->first();
+                    if ($admin) {
+                        $employeeIds[] = $admin->id;
                     }
                 }
             }
-        
             foreach ($employeeIds as $employeeId) {
                 $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $employeeId)->get();
                 if ($rvAgentAssignHub->isNotEmpty()) {
@@ -497,6 +491,8 @@ class TeamLeadDashboardController extends Controller
 
             return redirect()->route('admin.team_lead.index')->with('error', $ex->getMessage());
         }
+        
+           
     }
 
 
