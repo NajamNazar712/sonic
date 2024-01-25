@@ -1938,7 +1938,7 @@ trait RvTrait
         $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->latest()->first();
 
         if($rv_shipment_assign_agent){
-            $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+            // $rv_shipment_assign_agent->agent_id = $data['agent_id'];
             $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
             $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
             $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
