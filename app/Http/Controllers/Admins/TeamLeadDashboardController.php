@@ -539,23 +539,33 @@ class TeamLeadDashboardController extends Controller
             } else {
                 $employee_ids = explode(',', $request->employee_id);
                 $error = [];
+                $assigned = [];
                 foreach($employee_ids as $employee_id){
                     $date = date('Y-m-d', strtotime($request->add_additional_days));
                     $is_date_assigned = EmployeeAdditionalDay::where('employee_id', $employee_id)->where('working_days', $date);
+                    $employee = Employee::where('id', $employee_id)->first()->name;
                     if (!$is_date_assigned->exists()) {
                         $employee_additional_days = new EmployeeAdditionalDay();
                         $employee_additional_days->employee_id = $employee_id;
                         $employee_additional_days->working_days = $date;
                         $employee_additional_days->save();
+                        $assigned[] = $employee;
                     }else{
                         $error[] = 1;
                     }
                 }
+
+                dd($assigned);
                 if(count($error) <= 0){
                     session()->flash('success', 'Additional Days Added Successfully');
                     return response()->json(['status' => 0, 'message' => 'Assigned Successfully']);
                 }else {
-                    return response()->json(['status' => 1, 'message' => 'Already Assigned']);
+                    if(count($assigned) > 0){
+                        $assigned = implode(',', $assigned);
+                        return response()->json(['status' => 1, 'message' => 'Already Assigned Apart From '.$assigned]);
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'Already Assigned']);
+                    }
                 }
             }
         } catch (\Throwable $th) {
