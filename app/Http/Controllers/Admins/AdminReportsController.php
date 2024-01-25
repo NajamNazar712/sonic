@@ -12272,6 +12272,12 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
+        // ->leftjoin('rv_shipment_assign_agent_details as rsaad','rv_shipment_assign_agents.id','rsaad.rv_shipment_assign_agent_id')
+        // ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
+        //     $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
+        //     ->where('rv_shipment_assign_agent_details.id','=',
+        //     DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id)'));
+        // })
         ->leftjoin('admins as ad', function($join) {
             $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')->where('updated_type_id', 2)
             ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')->where('updated_type_id', 1);

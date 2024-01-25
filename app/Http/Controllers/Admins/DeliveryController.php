@@ -8026,7 +8026,7 @@ class DeliveryController extends Controller
                     //         $this->data_rv_shipment_assign_agent_details($data);
 
                     $rv_shipment_assign_agent_data = [
-                        'agent_id' => Auth::id(),
+                        // 'agent_id' => Auth::id(),
                         'shipment_id' => $shipment_id,
                         'rv_assign_agent_status_id' => 4, //Intercept Approve
                         'rv_assign_agent_sub_status_id' => Null,
