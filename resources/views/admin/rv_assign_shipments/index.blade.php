@@ -61,9 +61,9 @@
                                                             <div class="media-body text-white text-right">
                                                                 <h3 class="text-white">
                                                                     <p id="received_leads" class="d-inline">{{ count($online_agents)}} /</p>
-                                                                    <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
+                                                                    <p id="received_leads" class="d-inline">({{ count($number_of_available_agents) }})</p>
                                                                 </h3>
-                                                                <span>Online/ Total Agents </span>
+                                                                <span>Online/ Available Agents(out of) </span>
                                                             </div>
                                                         </div>
                                                     </div>
