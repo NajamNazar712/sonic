@@ -13768,15 +13768,16 @@ class AdminDashboardController extends Controller
         if(!is_array($userIDS) || empty($userIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
-   
-        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
-
         $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 0)->get();
-        if(count($error) > 0){
-            return response()->json(['status' => 400]);
-        }else{
-            return response()->json(['status' => 200]);
+
+        if(count($error) > 0 && count($userIDS) === count($error)){
+            return response()->json(['status' => 'Already Disabled !!']);
+        }else if (count($error) > 0 && count($userIDS) != count($error)){
+            return response()->json(['status' => 'Some Of The Selected Cities Are Already Disabled']);
         }
+
+        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
+        return response()->json(['status' => 200]);
     }
    
     public function enable_booking_status(Request $request){
@@ -13785,9 +13786,18 @@ class AdminDashboardController extends Controller
         if(!is_array($userIDS) || empty($userIDS)){
             return response()->json(['status' => 'Invalid IDS'], 400);
         }
+
+        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 1)->get();
+
+        if(count($error) > 0 && count($userIDS) === count($error)){
+            return response()->json(['status' => 'Already Enabled !!']);
+        }else if (count($error) > 0 && count($userIDS) != count($error)){
+            return response()->json(['status' => 'Some Of The Selected Cities Are Already Enabled']);
+        }
    
         City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
         return response()->json(['status' => 200]);
+      
     }
    
 }
