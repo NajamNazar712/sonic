@@ -57,6 +57,9 @@
                         <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -360,6 +363,9 @@
                             head.push('Rider ID');
                             head.push('Rider');
                             head.push('Area');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');	
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -394,6 +400,9 @@
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider);
                                 row.push(values.area);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.rider_type);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -462,6 +471,9 @@
                     { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'area' ,name: 'ca.name', class: 'align-middle area'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},

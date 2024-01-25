@@ -88,6 +88,28 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
+                                            <label>CNIC Issue Date<span class="text-danger">*</span></label>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="cnic_issue_date" data-rule-required="true" data-msg-required="CNIC Issue Date is required" data-value="{{$employee->cnic_issue_date != null ? $employee->cnic_issue_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label>CNIC Expiry Date<span class="text-danger">*</span></label>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="cnic_expiry_date" data-rule-required="true" data-msg-required="CNIC Expiry Date is required" data-value="{{$employee->cnic_expiry_date != null ? $employee->cnic_expiry_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Address<span class="text-danger">*</span></label>
                                                 <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control" id="address" name="address">{{$employee->address}}</textarea>
@@ -305,7 +327,7 @@
                                                 <input type="text" id="sub_department" class="form-control" value="{{$employee->sub_department}}" name="sub_department" >
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
+                                        <div  class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
                                                 <div class="form-group position-relative">
@@ -314,6 +336,20 @@
 {{--                                                        <i class="la la-eye success"></i>--}}
 {{--                                                    </div>--}}
                                                 </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Education<span class="text-danger">*</span></label>
+                                                <select name="education_id" id="education_list" data-rule-required="true"  data-msg-required="Shift is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($education_list as $education)
+                                                        @if ($employee->education_id==$education->id)
+                                                            <option value="{{$education->id}}" selected>{{$education->name}}</option>
+                                                        @else
+                                                            <option value="{{$education->id}}">{{$education->name}}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -2287,7 +2323,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 max: today,
                 onSet: function(context) {
@@ -2322,7 +2358,7 @@
                 clear: '',
                 selectYears: 100,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 min: today,
             });
@@ -2587,6 +2623,13 @@
                 placeholder: "Select Working Shift",
                 width:'100%',
             });
+            $("#education_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Education",
+                width:'100%',
+            })
+            $("#education_list").val("{{ $employee->education_id }}").trigger("change");
+
+            
             $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
             
             $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({

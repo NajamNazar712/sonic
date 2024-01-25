@@ -111,6 +111,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Pickup Address</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -124,6 +125,9 @@
                         <th class="border-primary border-darken-1">Weight</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
+                        <th class="border-primary border-darken-1">Latitude</th>
+                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Aging (Days)</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Shipment Status</th>
@@ -346,6 +350,7 @@
 
                             head.push('S. No.');
                             head.push('Booking Date');
+                            head.push('Arrival Date');
                             head.push('Pickup Address');
                             head.push('Description');
                             head.push('Order ID');
@@ -359,6 +364,9 @@
                             head.push('Weight');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Location Status');
+                            head.push('Latitude');
+                            head.push('Longitude');
                             head.push('Aging (Days)');
                             head.push('Delivered/Returned Date');
                             head.push('Shipment Status');
@@ -368,6 +376,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.booking_date);
+                                row.push(values.arrival_date);
                                 row.push(values.shipper_address);
                                 row.push(values.description);
                                 row.push(values.order_id);
@@ -381,6 +390,9 @@
                                 row.push(values.estimated_weight);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.location_status);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 row.push(values.aging);
                                 row.push(values.delivered_or_returned);
                                 row.push(values.current_status);
@@ -434,7 +446,8 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'}, 
+                    { data:'arrival_date' ,name: 'arrival_date', class: 'align-middle arrival_date'}, 
                     { data:'shipper_address' ,name:'shipments.shipper_address', class: 'align-middle shipper_address'},
                     { data:'description' ,name:'sj.description', class: 'align-middle description'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -448,6 +461,9 @@
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle estimated_weight'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'}, //
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     { data: 'aging' ,name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
