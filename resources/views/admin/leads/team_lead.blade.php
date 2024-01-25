@@ -351,98 +351,101 @@
         $(document).ready(function() {
 
             $('body').on('click', '.delete-icon', function() {
-            var Ids = [];
-            var delId = $(this).data('del-id');
-            
-            $("#multiple_delete:checked").each(function() {
-                Ids.push($(this).val());
-            });
+                var Ids = [];
+                var delId = $(this).data('del-id');
+                
+                $("#multiple_delete:checked").each(function() {
+                    Ids.push($(this).val());
+                });
 
-            var deleteDaysContainer = $('#delete_days');
-            var deleteIcon = $(this);
+                var deleteDaysContainer = $('#delete_days');
+                var deleteIcon = $(this);
 
-            if(Ids.length > 0){
-                    swal({
-                    title: 'Delete Days!',
-                    text: 'Are you sure you want to delete these days?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
+                if(Ids.length > 0){
                         swal({
-                            title: 'Please Wait!',
-                            text: 'Deleting days...',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                        $.ajax({
-                            url: '{{ route("admin.team_lead.delete_additional_days") }}',
-                            type: 'GET',
-                            data: {
-                                'ids': Ids,
+                        title: 'Delete Days!',
+                        text: 'Are you sure you want to delete these days?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        })
-                        .done(function(data) {
-                            var objectLength = Array.isArray(data.object) ? data.object.length : Object.keys(data.object).length;
-
-                            if (objectLength === 1) {
-                                $('.days_show').addClass('d-none');
-                            }
-
-                            if (data.status == 1) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                                deleteIcon.closest('.parent-element').remove();
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-
-                            setTimeout(function() {
-                                window.location.href = "{{ route('admin.team_lead.index') }}";
-                            }, 3000);
-
-                        })
-                        .fail(function(xhr) {
-                            toastr.error('Please Select', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Deleting days...',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
                             });
-                        });
-                    }
-                });
-            }else{
-                toastr.error('Please Select', 'Error!', {
-                    positionClass: 'toast-top-center',
-                    containerId: 'toast-top-center'
-                });
-            }
+
+                            $.ajax({
+                                url: '{{ route("admin.team_lead.delete_additional_days") }}',
+                                type: 'GET',
+                                data: {
+                                    'ids': Ids,
+                                }
+                            })
+                            .done(function(data) {
+                                var objectLength = Array.isArray(data.object) ? data.object.length : Object.keys(data.object).length;
+
+                                if (objectLength === 1) {
+                                    $('.days_show').addClass('d-none');
+                                }
+
+                                if (data.status == 1) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                    deleteIcon.closest('.parent-element').remove();
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+
+                                setTimeout(function() {
+                                    window.location.href = "{{ route('admin.team_lead.index') }}";
+                                }, 3000);
+
+                            })
+                            .fail(function(xhr) {
+                                toastr.error('Please Select', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            });
+                        }
+                    });
+                }else{
+                    toastr.error('Please Select', 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+            
+                
 
          
-        });
+        
 
 
             var rv_city = null;
