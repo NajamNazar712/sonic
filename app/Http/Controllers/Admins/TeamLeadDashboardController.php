@@ -555,14 +555,13 @@ class TeamLeadDashboardController extends Controller
                     }
                 }
 
-                dd($assigned);
                 if(count($error) <= 0){
                     session()->flash('success', 'Additional Days Added Successfully');
                     return response()->json(['status' => 0, 'message' => 'Assigned Successfully']);
                 }else {
                     if(count($assigned) > 0){
                         $assigned = implode(',', $assigned);
-                        return response()->json(['status' => 1, 'message' => 'Already Assigned Apart From '.$assigned]);
+                        return response()->json(['status' => 2, 'message' => 'Already Assigned Apart From '.$assigned]);
                     }else{
                         return response()->json(['status' => 1, 'message' => 'Already Assigned']);
                     }
