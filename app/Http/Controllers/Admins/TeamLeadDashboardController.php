@@ -439,7 +439,14 @@ class TeamLeadDashboardController extends Controller
             if ($request->has('employee_id_bulk')) {
                 foreach ($request->employee_id_bulk as $bulkValue) {
                     $ids = explode(',', $bulkValue);
-                    $employeeIds = array_merge($employeeIds, $ids);
+        
+                    foreach ($ids as $id) {
+                        $admin = Admin::where('employee_id', $id)->first();
+        
+                        if ($admin) {
+                            $employeeIds[] = $admin->id;
+                        }
+                    }
                 }
             }
         
@@ -458,6 +465,7 @@ class TeamLeadDashboardController extends Controller
                             break;
                         } else {
                             $count = $count + 1;
+
                             RvAgentAssignHub::create([
                                 'agent_id' => $employeeId,
                                 'city_id' => $zones[$key][$i]['id'],
