@@ -95,6 +95,7 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
+                            <input type="hidden" name="employee_id_bulk" value="">
                             <div class="modal-title text-center justify-content-center" style="margin-bottom: 10px">
                                 <button type="submit" class="btn btn-primary" id="select_all">Select All</button>
                                 <button type="submit" class="btn btn-primary" id="select_none">Select None</button>
@@ -140,6 +141,53 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="BulkAddDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="LastWorkingDayModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg justify-content-center" role="document">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Add Days</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+        
+                <!-- Modal Body -->
+                <form id="myForm">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="employee_id_bulk" value="">
+
+                                    <input type="text" data-rule-required="true"
+                                    data-msg-required="This Field is required"
+                                    class="form-control bg-primary border-primary white rounded-right pickadate datepicker"
+                                    id="add_days_employee" placeholder="Add Days" name="add_additional_days">
+                                    </fieldset>
+                                    <div class="error-message"></div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="save_additional_days">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
 
 @endsection
 
@@ -347,9 +395,20 @@
 
 
     <script type="text/javascript">
-    var selected_rows = [];
         $(document).ready(function() {
+            var today = new Date();
 
+            var replacement_last_working_day = $('.datepicker').pickadate({
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                min: today,
+                disable: [],
+                onOpen: function() {
+                    var daysToDisable = [2, 3, 4, 5, 6, 7];
+                    this.set('enable', [1]);
+                    this.set('disable', daysToDisable);
+                }
+            });
             $('body').on('click', '.delete-icon', function() {
                 var Ids = [];
                 var delId = $(this).data('del-id');
@@ -514,8 +573,8 @@
 
                 var id = $('#employee_id_d').val();
                 var dates = $('#add_days_employee').val();
-                console.log(dates);
-
+                var bulk_ids = $('input[name="employee_id_bulk').val();
+                
                 if(dates != ''){
                     swal({
                     title: 'Add Days!',
@@ -540,28 +599,27 @@
                     dangerMode: true
                 }).then(function (confirm) {
                     if (confirm ) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Additional Days are being Added',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
                         $.ajax({
                             url: '{!! route('admin.team_lead.add_additional_days') !!}',
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',
-                                'employee_id': id,
+                                'employee_id': id ?? bulk_ids,
                                 'add_additional_days': dates,
                             },
                             dataType: 'json',
                         })
                         .done(function(response) {
+                            console.log(response);
                             if (response.status === 0) {
                                 window.location.href = "{{ route('admin.team_lead.index') }}";
+                            } 
+
+                            if (response.status === 1) {
+                                toastr.error(response.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });                            
                             } 
                         })
                         .fail(function(xhr, status, error) {
@@ -713,8 +771,6 @@
                     };
                 }
             });
-
-            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -737,7 +793,32 @@
                     {
                         text: 'Assign Zone',
                         className: 'btn btn-primary assign',
+                        enabled:false,
                         // enabled: false,
+                        action: function(e, dt, node, config) {
+                            // Select all rows with the class 'select-checkbox'
+                             table.rows({ page: 'current' }).select();
+
+                            // Iterate over the selected rows
+                            table.rows({ selected: true }).nodes().each(function(row) {
+                                var employee_id = parseInt($(row).attr('id'));
+                                selected_rows.push(employee_id);
+                            });
+
+                            // Deselect all rows
+                            // table.rows().deselect();
+                            if (selected_rows.length > 0) {
+                                $('#AssignHubModal').modal('show');
+                                // $('#BulkAddDaysModal').append('<input type="text" name="employee_id_bulk[]" value="' + selected_rows + '">');
+                            }
+                        
+                          
+                        }
+                    },
+                    {
+                        text: 'Add Days',
+                        className: 'btn btn-primary add_days',
+                        enabled:false,
                         action: function(e, dt, node, config) {
                             // Select all rows with the class 'select-checkbox'
                              table.rows({ page: 'current' }).select();
@@ -752,15 +833,16 @@
                             // table.rows().deselect();
 
                             if (selected_rows.length > 0) {
-                                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id_bulk[]" value="' + selected_rows + '">');
-                                $('#AssignHubModal').modal('show');
-                            } else {
-                                var error = "Not selected any agent!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
+                                $('#BulkAddDaysModal').modal('show');
+                                // $('#BulkAddDaysModal').append('<input type="text" name="employee_id_bulk[]" value="' + selected_rows + '">');
                             }
+                            // } else {
+                            //     var error = "Not selected any agent!";
+                            //     toastr.error(error, 'Error!', {
+                            //         positionClass: 'toast-top-center',
+                            //         containerId: 'toast-top-center'
+                            //     });
+                            // }
                         }
                     },
                     'reset'
@@ -954,12 +1036,32 @@
                 table.draw();
             });
 
+            var selected_rows = [];
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var index = $.inArray(id, selected_rows);
 
+                
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+                $('#AssignHubModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
+                $('#BulkAddDaysModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
+                if (selected_rows.length > 0) {
+                    table.button('.assign').enable();
+                    table.button('.add_days').enable();  
+                }
+                else {
+                    table.button('.assign').disable();
+                    table.button('.add_days').disable();
+                }
+            });
 
             $('#number_of_available_agents_div').on('click', function() {
                 $('#number_of_available_agents_input').val(2);
-
-
                 table.draw();
             })
 
@@ -1389,5 +1491,7 @@
 
 
         });
+
+       
     </script>
 @endsection
