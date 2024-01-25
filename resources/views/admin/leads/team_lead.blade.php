@@ -61,7 +61,7 @@
         <thead>
             <tr role="row" class="bg-primary white">
                 <th class="border-primary border-darken-1"></th>
-                <th class="border-primary border-darken-1">S No.</th>
+                <th class="border-primary border-darken-1">S. No.</th>
                 <th class="border-primary border-darken-1">Employee ID</th>
                 <th class="border-primary border-darken-1">Employee Name</th>
                 <th class="border-primary border-darken-1">Hub</th>
@@ -819,10 +819,14 @@
                         enabled:false,
                         action: function(e, dt, node, config) {
                             // Select all rows with the class 'select-checkbox'
-                             table.rows({ page: 'current' }).select();
+                            //  table.rows({ page: 'current' }).select();
 
                             // Iterate over the selected rows
-                            table.rows({ selected: true }).nodes().each(function(row) {
+                            // table.rows({ selected: true }).nodes().each(function(row) {
+                            //     var employee_id = parseInt($(row).attr('id'));
+                            //     selected_rows.push(employee_id);
+                            // });
+                            dt.rows({ selected: true }).nodes().each(function(row) {
                                 var employee_id = parseInt($(row).attr('id'));
                                 selected_rows.push(employee_id);
                             });
@@ -883,12 +887,9 @@
                 ],
                 rowId: 'employee_id',
                 columns: [
-                    { orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,
-                        render: function(data, type, row) {
-                            return '';
-                        }
-                    },
-                    { data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id' },
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data: 'employee_trax_id', name: 'employees.trax_id', class: 'align-middle employee_trax_id' },
                     { data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name' },
                     { data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false },
                     { data: 'city', name: 'cities.name', class: 'align-middle city' },
@@ -908,8 +909,7 @@
                     $('td:eq(0)', row).addClass('select-checkbox');
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
-                        .appendTo(this.api().table().header());
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
