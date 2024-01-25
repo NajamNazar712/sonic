@@ -621,6 +621,13 @@
                                     containerId: 'toast-top-center'
                                 });                            
                             } 
+
+                            if (response.status === 2) {
+                                toastr.error(response.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });                            
+                            } 
                         })
                         .fail(function(xhr, status, error) {
                             console.error('Error: ' + error);
