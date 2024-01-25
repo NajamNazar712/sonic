@@ -111,6 +111,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Pickup Address</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -346,6 +347,7 @@
 
                             head.push('S. No.');
                             head.push('Booking Date');
+                            head.push('Arrival Date');
                             head.push('Pickup Address');
                             head.push('Description');
                             head.push('Order ID');
@@ -368,6 +370,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.booking_date);
+                                row.push(values.arrival_date);
                                 row.push(values.shipper_address);
                                 row.push(values.description);
                                 row.push(values.order_id);
@@ -434,7 +437,8 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'}, 
+                    { data:'arrival_date' ,name: 'arrival_date', class: 'align-middle arrival_date'}, 
                     { data:'shipper_address' ,name:'shipments.shipper_address', class: 'align-middle shipper_address'},
                     { data:'description' ,name:'sj.description', class: 'align-middle description'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
