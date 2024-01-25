@@ -376,7 +376,7 @@ class ReturnV2Controller extends Controller
                                 // else{
                                 //     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                 // }
-
+                                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
                                 $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                 if($rv_shipment_assign_agent_details != true){
                                     DB::rollBack();
