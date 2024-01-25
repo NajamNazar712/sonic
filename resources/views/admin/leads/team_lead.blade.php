@@ -619,14 +619,16 @@
                                 toastr.error(response.message, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
-                                });                            
+                                });               
+                                            
                             } 
 
                             if (response.status === 2) {
-                                toastr.error(response.message, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });                            
+                                toastr.success('Assigned Successfully !!', 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });             
+                                    
                             } 
                         })
                         .fail(function(xhr, status, error) {
@@ -787,6 +789,8 @@
                         className: 'select_all',
                         action: function(e, dt, node, config) {
                             dt.rows().select();
+                            table.button('.assign').enable();
+                            table.button('.tag').enable();
                         }
                     }, 
                     {
