@@ -4217,71 +4217,7 @@
                                 </div>
                             @endif
 
-                            <div class="row justify-content-center mt-2" id="commission_div">
-                                <div class="form-group row">
-                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
-                                    <div class="col-md-8">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Total Commission" id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
-                                        <div class="row justify-content-center">
-                                            <div class="col-2 form-group">
-                                                <select name="sales_tier" class="select2" id="sales_tier_select">
-                                                    @foreach($sales_tiers as $tier)
-                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}" sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <input type="text" id="external_person_name" name="external_person_name" class="form-control" placeholder="External Tier Person Name" disabled data-rule-required="true" data-msg-required="Person Name is required">
-                                            </div>
-                                            <div class="col-2 form-group">
-                                                <select name="user" class="select2" id="user_select" disabled>
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <div class="input-group form-group">
-                                                    <input type="text" id="user_commission" class="form-control commission" placeholder="User Commission" name="user_commission">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-1 form-group">
-                                                <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                        <thead>
-                                        <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">S. No.</th>
-                                            <th class="border-primary border-darken-1">User Name</th>
-                                            <th class="border-primary border-darken-1">Tier</th>
-                                            <th class="border-primary border-darken-1">Commission Percentage</th>
-                                            <th class="border-primary border-darken-1"></th>
-                                        </tr>
-                                        </thead>
-                                        <tfoot>
-                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
-                                        <input type="hidden" value="0" name="edit_commission" id="edit_commission">
-
-                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-
+                            
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
                                     <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
@@ -4315,12 +4251,99 @@
                                 </div>
                             </div>
                         </form>
+                        <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
+                            @csrf
+                            <input type="hidden" name="edit" value="edit">
+                            <div class="modal-body">
+                                <div class="col text-center">
+                                    <h1 id="shipper_ids_msg"></h1>
+                                    <div class="row justify-content-center mt-2" id="commission_div">
+                                        <div class="form-group row">
+                                            <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="Total Commission"
+                                                           id="commission_max" name="commission_max"
+                                                           value="{{$commission_percentage}}" readonly>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+             
+                                        <div class="col-12">
+                                            <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-2 form-group">
+                                                        <select name="sales_tier" class="select2" id="sales_tier_select">
+                                                            @foreach($sales_tiers as $tier)
+                                                                <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                                        sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-3 form-group">
+                                                        <input type="text" id="external_person_name" name="external_person_name"
+                                                               class="form-control" placeholder="External Tier Person Name"
+                                                               disabled >
+                                                    </div>
+                                                    <div class="col-2 form-group">
+                                                        <select name="user" class="select2" id="user_select"
+                                                                
+                                                                disabled>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-3 form-group">
+                                                        <div class="input-group form-group">
+                                                            <input type="text" id="user_commission"
+                                                                   class="form-control commission" placeholder="User Commission"
+                                                                   name="user_commission">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-1 form-group">
+                                                        <button type="button" class="btn btn-primary"
+                                                                id="commission_add_button">Add
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                                <thead>
+                                                <tr role="row" class="bg-primary white">
+                                                    <th class="border-primary border-darken-1">S. No.</th>
+                                                    <th class="border-primary border-darken-1">User Name</th>
+                                                    <th class="border-primary border-darken-1">Tier</th>
+                                                    <th class="border-primary border-darken-1">Commission Percentage</th>
+                                                    <th class="border-primary border-darken-1"></th>
+                                                </tr>
+                                                </thead>
+                                                <tfoot>
+                                                <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                                <tr>
+                                                    <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
+                                                    <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
+                                                </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
 
+                            </div>
+                        </form>
+                
                     </div>
                 </div>
-            </div>
-        </div>
-
+          
     </section>
 
     <div class="modal fade text-left" id="RejectRatesModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RejectRatesModal"
@@ -4690,10 +4713,32 @@
         });
         $('#user_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select User",
-            width:'100%'
+            width:'100%',
+            data: users_data,
         }).bind('change', function () {
+            var th = $(this);
             var id = $(this).val();
 
+            if (id.indexOf('riders') !== -1) {
+                 id = id.replace(/\D/g, '');
+            }
+
+            var group = $(this).find(':selected').closest('optgroup').attr('label');
+            if(group == 'Admins'){
+                if(tier_sales == 1){
+                    th.val(null).trigger('change');
+                    var error = 'Select sales related user!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            }
+            
+            if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
+                $('#user_commission').val(1.8)
+                $('#user_commission').attr('disabled', true)
+            } else {
+                $('#user_commission').val('');
+                $('#user_commission').attr('disabled', false)
+            }
             var index = $.inArray(id, selected_users);
             if (index !== -1) {
                 var error = 'User previously selected!';
@@ -4701,7 +4746,13 @@
                 $('#user_select').val(null).trigger('change');
             }
         });
-        $('#user_select').select2({data:users_data,placeholder:'Select User'});
+
+        var riders_permanents_data = {!! json_encode($riders_permanents) !!};
+        var selectHtml = '';
+        for (var i = 0; i < riders_permanents_data.length; i++) {
+            selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
+        }
+        $('#user_select').append(selectHtml);
 
         $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Tier",

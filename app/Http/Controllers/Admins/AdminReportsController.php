@@ -3404,7 +3404,7 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_payment_journey where shipments_payment_journey.shipment_id = shipments.id and shipments_payment_journey.status_id  = 3)')
                     );
             })
-            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date')
+            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
@@ -9955,7 +9955,10 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight'])
+            ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
+            ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
+            ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name','sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges' ])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -9981,17 +9984,25 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
-            ->addColumn('difference', function ($shipment) {
-                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
-                return $difference;
-            })
             ->addColumn('weighted_as', function ($shipment) {
                 if ($shipment->length != null) {
                     return 'Volumetric';
                 } else {
                     return 'Dense';
                 }
+            })
+            ->addColumn('range_difference', function ($shipment){
+                $range_difference = round($shipment->range_down_shipper_weight - $shipment->range_down_arrival_weight, 2);
+                return $range_difference;
+            })
+            ->addColumn('difference', function ($shipment){
+                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
+                return $difference;
+            })->addColumn('charges_diff', function ($shipment){
+                $charges_diff = $shipment->shipper_weight_charges - $shipment->arrival_weight_charges;
+                return $charges_diff;
             });
+
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
             $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
         }
