@@ -12379,7 +12379,7 @@ class AdminReportsController extends Controller
                     ->addColumn('delivery_attempt_count', function($rv_report) {
                         $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
                         $delivered_status = array_filter($shipper_status, function($value){
-                            return $value === 14;
+                            return $value === 5;
                         });
                         return count($delivered_status);
                     })
