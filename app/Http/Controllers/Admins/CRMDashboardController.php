@@ -368,6 +368,9 @@ class CRMDashboardController extends Controller
                 });
             });
         }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $dashboard_list = $dashboard_list->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+        }
         else if (in_array(session('role_id'), [67, 43])){
             $dashboard_list = $dashboard_list->where('at.id', Auth::id());
         }

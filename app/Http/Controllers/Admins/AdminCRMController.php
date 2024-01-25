@@ -1369,7 +1369,7 @@ class AdminCRMController extends Controller
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-            $launched_request = $launched_request
+                        $launched_request = $launched_request
                 ->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
                     ->orWhere(function ($sub_query) {
@@ -1379,7 +1379,7 @@ class AdminCRMController extends Controller
                 });
         }
         else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
-            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id());
+            $launched_request = $launched_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
         }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) && !in_array(session('role_id'), [4,6,44])){
@@ -1919,6 +1919,7 @@ class AdminCRMController extends Controller
             ->groupBy('crm_requests.id');
 
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
+            //dd(session('permissions'));
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
@@ -1958,6 +1959,9 @@ class AdminCRMController extends Controller
                     }
                 });
             });
+        }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $in_process_request = $in_process_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
         }
         else if (in_array(session('role_id'), [67, 43])){
             $in_process_request = $in_process_request->where('at.id', Auth::id());
@@ -2665,6 +2669,9 @@ class AdminCRMController extends Controller
                 });
             });
         }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $resolved_request = $resolved_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
+        }
         else if (in_array(session('role_id'), [67, 43])){
             $resolved_request = $resolved_request->where('at.id', Auth::id());
         }
@@ -3213,6 +3220,9 @@ class AdminCRMController extends Controller
                             });
                     });
             });
+        }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $closed_request = $closed_request->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
         }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
