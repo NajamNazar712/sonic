@@ -1306,14 +1306,14 @@ class VisionSoftAPIController extends Controller
             ->join('shipments_journey as sj', function($join) use ($startDate,$endDate) {
                 $join->on('sj.shipment_id', '=', 's.id')
                     ->where('sj.id', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (14, 30, 36, 37, 20) and shipments_journey.verification = 1 and shipments_journey.created_at BETWEEN  "' . $startDate . '" AND "' . $endDate . '")'));
-            })
-            ->select('users.id as account_id', 'users.name as account_name', DB::raw('(select sum(s.amount)) as amount'))
+            })->join('cities as c','c.id','=','users.city_id')
+            ->select('users.id as account_id', 'users.name as account_name','c.name as city', DB::raw('(select sum(s.amount)) as amount'))
             ->whereBetween('sj.created_at', [$startDate, $endDate])
             ->groupBy('users.id')
             ->get();
         if(count($shippers) > 0){
 
-            $shipper_array['header'] = ['S. No.','Account ID', 'Account Name', 'Amount'];
+            $shipper_array['header'] = ['S. No.','Account ID', 'Account Name','City', 'Amount'];
             $serial = 1;
 
             foreach ($shippers as $shipper){
