@@ -216,6 +216,7 @@ trait RvTrait
     // Description:
     protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey)
     {   
+        dd($request, $shipment_assign_agent, $shipments_journey);
         try {
             $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
             $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
