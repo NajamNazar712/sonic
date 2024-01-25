@@ -137,6 +137,8 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Order Date</th>
+                        <th class="border-primary border-darken-1">Item Quantity</th>
+                        <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 1</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 2</th>
@@ -435,6 +437,8 @@
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('Order Date');
+                            head.push('Item Quantity');
+                            head.push('Pieces');
                             head.push('Consignee Name');
                             head.push('Consignee Phone No. 1');
                             head.push('Consignee Phone No. 2');
@@ -490,6 +494,8 @@
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.order_date);
+                                row.push(values.item_quantity);
+                                row.push(values.pieces);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.consignee_phone_number_2);
@@ -592,6 +598,8 @@
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'order_date' ,name: 'sod.order_date', class: 'align-middle order_date'},
+                    { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
+                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone_number_1' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     { data:'consignee_phone_number_2' ,name: 'shipments.consignee_phone_number_2', class: 'align-middle consignee_phone_number_2'},
