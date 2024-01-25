@@ -50,6 +50,26 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="col-3" >
+                                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
+                                                <div class="card-content">
+                                                    <div class="card-body">
+                                                        <div class="media d-flex">
+                                                            <div class="align-self-center">
+                                                                <i class="icon-flag text-white font-large-2 float-left"></i>
+                                                            </div>
+                                                            <div class="media-body text-white text-right">
+                                                                <h3 class="text-white">
+                                                                    <p id="received_leads" class="d-inline">{{ count($online_agents)}} /</p>
+                                                                    <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
+                                                                </h3>
+                                                                <span>Online/ Total Agents </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                        
                                         <div class="col-3" id="number_of_pending_tickets_div">
                                             <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">

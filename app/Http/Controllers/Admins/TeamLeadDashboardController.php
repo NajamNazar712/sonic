@@ -106,8 +106,17 @@ class TeamLeadDashboardController extends Controller
         $number_of_intercept_percentage = number_format((count($number_of_intercept_call) / ($number_of_rv_ticket) * 100),2);
         $number_of_self_collection_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 5)->get();
         $number_of_self_collection_percentage = number_format((count($number_of_self_collection_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+            ->whereIn('id', function ($query) {
+                $query->select(DB::raw('MAX(id)'))
+                    ->from('employee_attendances')
+                    ->groupBy('employee_attendances.employee_id');
+            })
+            ->get();
 
-        return view('admin.rv_assign_shipments.index')->with(['number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
+        return view('admin.rv_assign_shipments.index')->with(['online_agents' => $online_agents,'number_of_available_agents' => $number_of_available_agents, 'number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
     }
 
     // Heading: N/A
@@ -178,6 +187,7 @@ class TeamLeadDashboardController extends Controller
             })
             ->editColumn('state', function ($assigned_agent_shipment) {
                 $state = RvState::where('id', $assigned_agent_shipment->state)->first();
+                $completed_state = RvState::where('id', $assigned_agent_shipment->state)->first();
                 if ($state['name']) {
                     return $state['name'];
                 } else {
