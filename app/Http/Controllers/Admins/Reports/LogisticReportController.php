@@ -348,6 +348,47 @@ class LogisticReportController extends Controller
 
                 }
 
+            })->editColumn('status_area_city', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                            
+                        }
+                    return CityArea::where('id',$scanning_data['area_id'])->first()->name ??  City::where('id',$scanning_data['hub_id'])->first()->name ?? '-';
+                }else{
+                    return '-';
+                }            
             });
 
         if ($tracking = $request->get('search_tracking')) {
