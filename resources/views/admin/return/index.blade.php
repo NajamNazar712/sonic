@@ -1847,7 +1847,7 @@
                                                                             setTimeout(function() {
                                                                                 $divElement.addClass('d-none');
                                                                             }, 10000);
-
+                                                                            table.rows().deselect();
                                                                             table.draw();
                                                                         }
                                                                             
@@ -1870,7 +1870,7 @@
                                                                     containerId: 'toast-top-center'
                                                                 });
                                                         }
-                                            }
+                                                    }
                                                 });
                                             });
 

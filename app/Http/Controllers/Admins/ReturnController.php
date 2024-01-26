@@ -5530,6 +5530,7 @@ class ReturnController extends Controller
             ->leftjoin('cities as c','c.id','a.default_hub_id')
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)
+            ->Where('a.trax_id','NOT LIKE','%Trax-C%')
             ->select('a.id as id','a.name as name','a.trax_id as trax_id','c.name as city_name')
             ->get();
             return response()->json(['status'=> 0, 'data'=>$agents]);

@@ -12272,19 +12272,22 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
-        ->leftjoin('rv_shipment_assign_agent_details as rsaad', function($join) {
-            $join->on('rsaad.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
-                 ->where('rsaad.id', '=', DB::raw('(SELECT id FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id ORDER BY id DESC LIMIT 1 OFFSET 1)'));
+        // DB::raw("(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)")
+        //this join is only for fetching agent who have updated the shipment status to intercept request 
+        ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
+            $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
+                //  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_assign_agent_status_id = 3 AND rv_shipment_assign_agent_details.rv_state_id = 2 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
+                 ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id )'))
+                 ->orderBy('id', 'DESC'); // Move ORDER BY outside DB::raw
         })
         ->leftjoin('admins as add', function($join) {
-            $join->on('rsaad.agent_id', 'add.id')->where('rsaad.updated_type_id', 2);
+            $join->on('rv_shipment_assign_agent_details.agent_id', 'add.id');
+            // ->where('rv_shipment_assign_agent_details.updated_type_id', 2);
         })
-        ->leftjoin('admins as ad', function($join) {
-            $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')
-                 ->where('rv_shipment_assign_agents.updated_type_id', 2)
-                 ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')
-                 ->where('rv_shipment_assign_agents.updated_type_id', 1);
-        })
+        // ->leftjoin('admins as ad', function($join) {
+        //     $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')->where('updated_type_id', 2)
+        //     ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')->where('updated_type_id', 1);
+        // })
         ->leftjoin('shipments_journey as sjj', function($join) {
             $join->on('sjj.shipment_id', '=', 'shipments.id')
                  ->where('sjj.shipper_status_id', '=', 2);
@@ -12375,14 +12378,14 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    ->editColumn('rcp_agent_updated_by', function($rv_report) {
-                        if ($rv_report['updated_type_id'] == 2) {
-                            return $rv_report['rcp_agent_updated_by'];
-                        }
-                        else {
-                            return '-';
-                        }
-                    })
+                    // ->editColumn('rcp_agent_updated_by', function($rv_report) {
+                    //     if ($rv_report['updated_type_id'] == 2) {
+                    //         return $rv_report['rcp_agent_updated_by'];
+                    //     }
+                    //     else {
+                    //         return '-';
+                    //     }
+                    // })
                     ->addColumn('delivery_attempt_count', function($rv_report) {
                         $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
                         $delivered_status = array_filter($shipper_status, function($value){
