@@ -1378,7 +1378,7 @@
                                 var length = '';
                                 var breadth = '';
                                 if(details.order_information.height != null){
-                                    weight += '<td ><strong>Weight </strong><small>(Volumetric)</small></td><td>'+details.order_information.weight+'kg</td>';
+                                    weight += '<td ><strong>Weight </strong><small>(Volumetric) - '+details.weight_recorded_as+'</small></td><td>'+details.order_information.weight+'kg</td>';
                                     height += '<td ><strong>Height</strong></td>'+'<td>'+details.order_information.height+'cm</td>';
                                     length += '<td ><strong>Length</strong></td>'+'<td>'+details.order_information.length+'cm</td>';
                                     breadth += '<td><strong>Breadth</strong></td>'+'<td>'+details.order_information.breadth+'cm</td>';
@@ -1386,7 +1386,7 @@
                                 }
                                 else
                                 {
-                                    weight += '<td ><strong>Weight </strong><small>(Dense)</small></td>';
+                                    weight += '<td ><strong>Weight </strong><small>(Dense) - '+details.weight_recorded_as+'</small></td>';
                                     weight +='<td>' + details.order_information.weight + ' kg</td>';
                                 }
                                 shipment += '<tr>';

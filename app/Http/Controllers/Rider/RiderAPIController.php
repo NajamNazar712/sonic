@@ -162,7 +162,7 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\Http\Traits\LastMileAppReportTrait;
 use App\Jobs\LastMileAppReport;
-
+use Illuminate\Support\Facades\Log;
 class
 RiderAPIController extends Controller
 {
@@ -8952,8 +8952,7 @@ RiderAPIController extends Controller
 
             try {
                 //code...
-                DB::beginTransaction();
-
+                $success_flag = false;
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -9209,6 +9208,7 @@ RiderAPIController extends Controller
                                 $shipment_verification->save();
                             }
                             $message = 'Shipment is marked as delivered Successfully';
+                            $success_flag = true;
                         }
                     } else {
                         $message = 'Shipment is marked as delivered already';
@@ -9234,10 +9234,9 @@ RiderAPIController extends Controller
                     $delivery_note_data->save();
                 }
                 $temp_data->delete();
-                DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'v'=>$user_excluded_otp_shippers]);
+                
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             } catch (\Throwable $th) {
-                DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
@@ -11422,8 +11421,8 @@ RiderAPIController extends Controller
         else {
             try {
                 //code...
-                DB::beginTransaction();
-
+                
+                $success_flag = false;
                 $payload = md5(json_encode($request));
                 $temp_data = TempRiderDelivery::where('payload', $payload);
                 if($temp_data->exists()){
@@ -11621,6 +11620,7 @@ RiderAPIController extends Controller
                                         }
 
                                         $message = 'Shipment is marked as Undelivered Successfully';
+                                        $success_flag = true;
                                     } else {
                                         $message = 'Shipment is already marked as Undelivered';
                                     }
@@ -11638,13 +11638,11 @@ RiderAPIController extends Controller
                     $message = 'Shipment is not for Out for Delivery';
                 }
                 $temp_data->delete();
-                DB::commit();
-                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers]);
+                
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             }
             catch (\Throwable $th)
             {
-                DB::rollback();
-
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1,  'message' => 'Something Went Wrong!']);
 

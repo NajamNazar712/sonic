@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 // use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\TempRiderDelivery;
+//use App\Http\Models\Admin\TempRiderDelivery;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +14,7 @@ class EmailTest extends Command
      *
      * @var string
      */
-    protected $signature = 'email:test';
+    protected $signature = 'email:test {name} {gard}';
 
     /**
      * The console command description.
@@ -40,6 +40,12 @@ class EmailTest extends Command
      */
     public function handle()
     {
+        $gard = $this->argument('gard');
+        $id = $this->argument('name');
+
+
+        Log::channel('code_test_log')->info($gard);
+        echo "Noman bhai ka log!";
         // $array = ['added_at' => '2024-01-23 14:17:31', 'delivery_note_id' => 1905813, 'shipment_id' => 33066163, 'rider_id' => 2624, 'start_location_latitude' => '31.474250', 'start_location_longitude' => 74.332263, 'actual_location_latitude' => '31.472445', 'actual_location_longitude' => '74.332773', 'cnic' => '35202-8866544-4', 'rider_status_id' => 14, 'rider_reason_id' => 12, 'image' => 'i'];
 
         // $md5 = md5(json_encode($array));
@@ -58,11 +64,11 @@ class EmailTest extends Command
         //         echo "$i : Unable to insert, already exists";
         //         echo "\n";
         //     }
-            
+
         // }
 
         // Log::channel('code_test_log')->info('Noman bhai ka log in logs!');
-        echo "Noman bhai ka log!";
+
 //        $ref = 'nothing';
 //        NotificationsController::send(219, $ref);
     }
