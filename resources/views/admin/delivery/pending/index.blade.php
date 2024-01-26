@@ -27,8 +27,22 @@
                         </select>
                     </div>
                     <div class="col-3">
+                        <select name="search_concerned_status_hub" id="search_concerned_status_hub" class="form-control select2">
+                            @foreach($hubs as $hub)
+                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-3" >
+                        <select name="search_concerned_status_area" id="search_concerned_status_area" class="form-control select2" >
+                            @foreach($areas as $area)
+                                <option value="{{$area->id}}">{{$area->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-3" style="margin-top: 30px;">
                         <div class="form-group">
-                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
+                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%; margin-top: 50px;">
                                 
                             </select>
                         </div>
@@ -58,6 +72,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Status Area/City</th>
                         <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Latitude</th>
                         <th class="border-primary border-darken-1">Longitude</th>
@@ -218,10 +233,26 @@
         $("#search_area").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Area",
             allowClear: true,
-            width: '100%',
+            // width: '100%',
         }).bind('change', function() {
             table.draw();
-        });;
+        });
+
+        $('#search_concerned_status_area').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Status Area',
+            width:'100%',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
+
+        $('#search_concerned_status_hub').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Status Hub',
+            width:'100%',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -242,6 +273,7 @@
                         head.push('Destination');
                         head.push('Hub');
                         head.push('Area');
+                        head.push('Status Area/City');
                         head.push('Location Status');
                         head.push('Latitude');
                         head.push('Longitude');	
@@ -275,6 +307,7 @@
                             row.push(values.destination);
                             row.push(values.hub);
                             row.push(values.area);
+                            row.push(values.status_area_city);
                             row.push(values.location_status);
                             row.push(values.latitude);
                             row.push(values.longitude);	
@@ -336,6 +369,8 @@
                     d.search_hub = $('#search_hub').val();
                     d.star_shipper_filter = $('#star_shippers_filter').val();
                     d.search_area = $('#search_area').val();
+                    d.search_concerned_status_area = $('#search_concerned_status_area').val();
+                    d.search_concerned_status_hub = $('#search_concerned_status_hub').val();
                 }
             },
             rowId: 'shId',
@@ -348,6 +383,7 @@
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'area', name: 'ca.name', class: 'align-middle area'},
+                {data: 'status_area_city', name: 'status_area_city', class: 'align-middle status_area_city'},
                 {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                 {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
                 {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},

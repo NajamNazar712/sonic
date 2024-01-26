@@ -44,6 +44,24 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_status_hub" id="search_concerned_status_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_status_area" id="search_concerned_status_area" class="form-control select2">
+                                @foreach($areas as $area)
+                                    <option value="{{$area->id}}">{{$area->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -64,6 +82,7 @@
                         <th class="border-primary border-darken-1">To Area</th>
                         <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Status Area/City</th>
 
                         <th class="border-primary border-darken-1">Created Location Status</th>
                         <th class="border-primary border-darken-1">Created Latitude</th>
@@ -244,6 +263,17 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_concerned_status_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status Area',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_concerned_status_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status Hub',
+                width:'100%',
+                allowClear:true
+            });
+
             function print(ids) {
 				$.ajax({
 					url: '{!! route('admin.handover.list.print') !!}',
@@ -305,6 +335,7 @@
                             head.push('User Type');
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
+                            head.push('Status Area/City');
                             head.push('Created Location Status');
                             head.push('Created Latitude');
                             head.push('Created Longitude');	
@@ -331,6 +362,7 @@
                                 row.push(values.to_area);
                                 row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
+                                row.push(values.status_area_city);
                                 row.push(values.created_location_status);
                                 row.push(values.created_latitude);
                                 row.push(values.created_longitude);
@@ -488,6 +520,8 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_from_admin = $('#search_from_admin').val();
                         d.search_to_admin = $('#search_to_admin').val();
+                        d.search_concerned_status_area = $('#search_concerned_status_area').val();
+                        d.search_concerned_status_hub = $('#search_concerned_status_hub').val();
                     }
                 },
                 rowId: 'handover_id',
@@ -505,6 +539,7 @@
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
                     {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
+                    {data: 'status_area_city', name: 'status_area_city', class: 'align-middle status_area_city'},
 
                     {data: 'created_location_status', name: 'created_location_status', class: 'align-middle created_location_status'},
                     {data: 'created_latitude', name: 'created_latitude', class: 'align-middle created_latitude'},
