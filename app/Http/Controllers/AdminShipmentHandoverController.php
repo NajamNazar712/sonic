@@ -323,8 +323,11 @@ class AdminShipmentHandoverController extends Controller
                   DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
               );
       })
-      ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_id', '=', 'sjl.shipment_id')
-
+      ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+        $join->on('ssjal.shipment_id', '=', 's.id')
+             ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = s.id)'));
+      })
+    
         ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',

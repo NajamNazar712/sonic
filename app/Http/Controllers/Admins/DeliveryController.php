@@ -243,8 +243,11 @@ class DeliveryController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_id', '=', 'sjl.shipment_id')
-
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('ssjal.shipment_id', '=', 'shipments.id')
+                     ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = shipments.id)'));
+            })
+            
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',

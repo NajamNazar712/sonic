@@ -222,8 +222,12 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
                     );
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_id', '=', 'shipments.id')
-            ->select([
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('ssjal.shipment_id', '=', 'shipments.id')
+                     ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = shipments.id)'));
+            })
+            
+             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
                 'si.description as description',
