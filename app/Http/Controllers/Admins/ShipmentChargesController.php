@@ -64,6 +64,8 @@ use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Http\Models\ShipmentsWeightType;
+
 
 class ShipmentChargesController extends Controller
 {
@@ -144,6 +146,16 @@ class ShipmentChargesController extends Controller
         if ($rate_status->exists()) {
             if ($account_type_id == 1) {
                 $weight_charge = DiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight)->where('destination_id',$destination_city_id);
+                $weight_charge_slab = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                if($weight_charge_slab->exists()) {
+                    $weight_charge_slab = $weight_charge_slab->first();
+                    $check_last_slab = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '>', $weight_charge_slab->range_down);
+                    if($check_last_slab->exists() || $weight_charge_slab->weight_addition == 0) {
+                        $range_down = $weight_charge_slab->range_down;
+                    } else{
+                        $range_down = false;
+                    }
+                }
                 if($weight_charge->doesntExist()) {
                     $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
@@ -169,12 +181,42 @@ class ShipmentChargesController extends Controller
 
                 if($rate_type_id == 1){
                     $weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    $weight_charge_slab = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    if($weight_charge_slab->exists()) {
+                        $weight_charge_slab = $weight_charge_slab->first();
+                        $check_last_slab = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '>', $weight_charge_slab->range_down);
+                        if($check_last_slab->exists() || $weight_charge_slab->base == 0) {
+                            $range_down = $weight_charge_slab->range_down;
+                        } else{
+                            $range_down = false;
+                        }
+                    }
                 }
                 else if($rate_type_id == 2){
                     $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    $weight_charge_slab = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    if($weight_charge_slab->exists()) {
+                        $weight_charge_slab = $weight_charge_slab->first();
+                        $check_last_slab = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '>', $weight_charge_slab->range_down);
+                        if($check_last_slab->exists() || $weight_charge_slab->base == 0) {
+                            $range_down = $weight_charge_slab->range_down;
+                        } else{
+                            $range_down = false;
+                        }
+                    }
                 }
                 else{
                     $weight_charge = CorporateDefaultDiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight)->where('destination_id',$destination_city_id);
+                    $weight_charge_slab = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    if($weight_charge_slab->exists()) {
+                        $weight_charge_slab = $weight_charge_slab->first();
+                        $check_last_slab = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '>', $weight_charge_slab->range_down);
+                        if($check_last_slab->exists() || $weight_charge_slab->weight_addition == 0) {
+                            $range_down = $weight_charge_slab->range_down;
+                        } else{
+                            $range_down = false;
+                        }
+                    }   
                     if($weight_charge->doesntExist()) {
                         $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                     }
@@ -400,14 +442,14 @@ class ShipmentChargesController extends Controller
                     else {
                         $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
-
+                    
                     if ($weight > 1) {
                         $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
                     }
                     else {
                         $result['chargeable_weight'] = $weight;
                     }
-
+                    $result['range_down'] = $range_down;
                     return $result;
                 }
                 else {
@@ -564,7 +606,7 @@ class ShipmentChargesController extends Controller
                     else {
                         $result['weight_charges'] = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
                     }
-
+                    $result['range_down'] = $range_down;
                     return $result;
                 }
             }
@@ -748,6 +790,15 @@ class ShipmentChargesController extends Controller
         $shipment = Shipment::find($id);
         if($shipment->business_category_id == 1){
             $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+            //calculation with shipper weight ..for weight qc report purpose
+            $shipper_weight_charges = false;
+            if($shipment->actual_weight != $shipment->estimated_weight ) {
+                $result_shipper_weight = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->estimated_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+                $shipper_weight_charges = true;
+
+            }
+            
         }
         else{
             $dhl_check = true;
@@ -846,6 +897,18 @@ class ShipmentChargesController extends Controller
                 $shipment->chargeable_weight = $result['chargeable_weight'];
             }
             $shipment->save();
+            $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+            if($shipment_weight->exists()){
+                $shipments_weight_type = $shipment_weight->first();
+            }else{
+                $shipments_weight_type = new ShipmentsWeightType;
+                $shipments_weight_type->shipment_id = $shipment->id;
+            }
+            $shipments_weight_type->range_down_arrival_weight = $result['range_down'] ? $result['range_down'] : $result['chargeable_weight'];
+            $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
+            $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
+            $shipments_weight_type->save();
+            
         }
     }
 
