@@ -174,6 +174,8 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">First Attempt Date</th>
+                        <th class="border-primary border-darken-1">Item Quantity</th>
+                        <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remark</th>
@@ -470,6 +472,8 @@
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('First Attempt Date');
+                            head.push('Item Quantity');
+                            head.push('Pieces');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
@@ -528,6 +532,8 @@
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.first_attempt_date);
+                                row.push(values.item_quantity);
+                                row.push(values.pieces);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
@@ -639,6 +645,8 @@
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
+                    { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
+                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason' ,name:'reason', class: 'align-middle reason'},
                     { data: 'remark' ,name:'remark', class: 'align-middle remark'},

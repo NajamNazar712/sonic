@@ -52,7 +52,7 @@ class RetailCancelShipmentsController extends Controller
                 $data['mode'] = $shipment->shipping_mode->mode;
                 $data['service_type'] = $shipment->booking_type->booking_type;
 
-                ShipmentScanningJourneyController::add($shipment->id, 19, 4, Auth::id(), null,null);
+                ShipmentScanningJourneyController::add($shipment->id ,19,4,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return response()->json(['status' => 1, 'details' => $data]);
 
             } else {

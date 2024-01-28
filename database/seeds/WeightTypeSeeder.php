@@ -17,6 +17,7 @@ class WeightTypeSeeder extends Seeder
             array('id' => 1,'name' => 'Partially Manual'),
             array('id' => 2,'name' => 'Manual'),
             array('id' => 3,'name' => 'Automatic'),
+            array('id' => 4, 'name' => 'Bulk Arrival')
         ));
 
     }

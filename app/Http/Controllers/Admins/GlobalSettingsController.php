@@ -135,7 +135,6 @@ use App\Http\Models\SubCategorySegment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
-use App\Http\Models\Shipment;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
@@ -146,11 +145,7 @@ use App\Http\Models\ServiceList;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
-use App\Http\Models\Admin\UserFintectCharges;
-use App\Jobs\SwichPaymentGatewayApi;
 use App\RiderAssignedHubForDeliveryNote;
-use Session;
-//End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -159,11 +154,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\BackgroundImage;
-use App\Http\Models\BookingType;
-use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
 use App\Http\Models\UserIbftCharge;
@@ -9264,53 +9256,54 @@ class GlobalSettingsController extends Controller
         $shippers = $request->shippers;
         $Ibft_charges = $request->Ibft_charges;
         $updated_by = Auth::id();
-        foreach ($shippers as $shipper) {
-            UserIbftCharge::updateOrCreate(
-                ['user_id' => $shipper],
-                ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
-            );
-            $ibft_charges_log = new UserIbftChargeDetail();
-            $ibft_charges_log->charges = $Ibft_charges;
-            $ibft_charges_log->user_id = $shipper;
-            $ibft_charges_log->updated_by = $updated_by;
-            $ibft_charges_log->save();
+            foreach ($shippers as $shipper){
+                UserIbftCharge::updateOrCreate(
+                    ['user_id' => $shipper],
+                    ['current_charges' => $Ibft_charges, 'updated_by' => $updated_by]
+                );
+                $ibft_charges_log = new UserIbftChargeDetail();
+                $ibft_charges_log->charges = $Ibft_charges;
+                $ibft_charges_log->user_id = $shipper;
+                $ibft_charges_log->updated_by = $updated_by;
+                $ibft_charges_log->save();
+            }
+            
+         return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
         }
-
-        return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
-    }
 
     public function logistic_report_index()
-    {
-        $users = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $settings = GlobalSettings::where('type', 'logistic_setting');
-        $logistic_setting_tags = array();
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            $logistic_setting_tags = array_map('intval', explode(',', $settings->text));
+        {
+            $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+            $settings = GlobalSettings::where('type', 'logistic_setting');
+            $logistic_setting_tags = array();
+            if ($settings->exists())
+            {
+                $settings = $settings->first();
+                $logistic_setting_tags = array_map('intval',explode(',' , $settings->text));
+            }
+            return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
         }
-        return view('admin.settings.logistic_setting')->with(['users' => $users, 'logistic_setting_tags' => $logistic_setting_tags]);
-    }
-
+    
     public function logistic_report_store(Request $request)
-    {
-        if ($request->has('users') && count($request->users) > 0) {
-            $users = implode(',', $request->users);
-        } else {
-            $users = null;
+        {
+                if ($request->has('users') && count($request->users) > 0) {
+                    $users = implode(',', $request->users);
+                } else{
+                    $users = null;
+                }
+                $settings = GlobalSettings::where('type', 'logistic_setting');
+    
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+    
+                    $settings->type = 'logistic_setting';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $users;
+                $settings->save();
+            
+            return redirect()->back()->with('success', 'Settings Updated!');
         }
-        $settings = GlobalSettings::where('type', 'logistic_setting');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-        } else {
-            $settings = new GlobalSettings();
-
-            $settings->type = 'logistic_setting';
-            $settings->setting_value = 0;
-        }
-        $settings->text = $users;
-        $settings->save();
-
-        return redirect()->back()->with('success', 'Settings Updated!');
-    }
 }

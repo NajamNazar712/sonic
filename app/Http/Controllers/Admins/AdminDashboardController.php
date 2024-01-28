@@ -63,7 +63,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\SalesTierTypeTag;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\Rates\RateHistory;
@@ -217,310 +216,9 @@ class AdminDashboardController extends Controller
         6 => 'Saturday',
     ];
 
-    public function payfast_payment_details(){
-        return view('payfast-payment-view');
-    }
     public function index()
     {
-        /*$stats = array();
-        $graph = array();
-        $sales=array();
-        $leads = array();
-        $graph_dates = array();
-        $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
-        $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['arrived'] = Shipment::where('shipper_status_id',2)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['destination'] = Shipment::where('shipper_status_id',4)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['out_for_delivery'] = Shipment::where('shipper_status_id',5)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['return_confirm'] = Shipment::where('shipper_status_id',20)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['return_delivered'] = Shipment::where('shipper_status_id',25)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending_shipments'] = Shipment::whereIn('shipper_status_id',[6,7,8,9,13,15,18,51,52,56])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending_return'] = Shipment::whereIn('shipper_status_id',[21,22,23,24,26,27,28,29,57,60])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['confirmation_pending'] = Shipment::whereIn('shipper_status_id',[12,54,55])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['in_transit'] = Shipment::where('shipper_status_id',3)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[4, 5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['complaints_launched'] = CrmRequestStatusHistory::where('status_id', 1)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['complaints_in_process'] = CrmRequestStatusHistory::where('status_id', 2)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['complaints_closed'] = CrmRequestStatusHistory::where('status_id', 4)->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['complaints_rejected'] = CrmRequestStatusHistory::where('status_id', 7)->whereBetween('created_at',[$thirtyDays,$today]);
-        $sales['total_accounts']=DB::table('users')->select('name')->get();
-        $sales['active_accounts']=User::where('status',3);
-        $sales['inactive_accounts']=User::where('status',4)->where('blacklist',0);
-        $sales['pending_accounts']=User::whereIn('status',[0,1,2]);
-        $sales['blocked_accounts']=User::where('blacklist',1);
-
-        if (session('role_id') != 1) {
-            $stats['total'] = $stats['total']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['booked'] = $stats['booked']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-
-            $stats['canceled'] = $stats['canceled']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-
-            $stats['arrived'] = $stats['arrived']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-
-            $stats['in_transit'] = $stats['in_transit']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-
-            $stats['delivered'] = $stats['delivered']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-
-            $stats['destination'] = $stats['destination']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['out_for_delivery'] = $stats['out_for_delivery']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['return_confirm'] = $stats['return_confirm']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['return_delivered'] = $stats['return_delivered']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['pending_shipments'] = $stats['pending_shipments']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['confirmation_pending'] = $stats['confirmation_pending']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-            $stats['pending_return'] = $stats['pending_return']->where(function($query) {
-                $query->whereHas('pickup_address.city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                })->orWhereHas('consignee_city', function ($sub_query) {
-                    $sub_query->whereIn('hub_id', session('hubs'));
-                });
-            });
-        }
-
-
-
-        $stats['total'] = number_format($stats['total']->count());
-        $stats['booked'] = number_format($stats['booked']->count());
-        $stats['canceled'] = number_format($stats['canceled']->count());
-        $stats['arrived'] = number_format($stats['arrived']->count());
-        $stats['in_transit'] = number_format($stats['in_transit']->count());
-        $stats['delivered'] = number_format($stats['delivered']->count());
-        $stats['destination'] = number_format($stats['destination']->count());
-        $stats['out_for_delivery'] = number_format($stats['out_for_delivery']->count());
-        $stats['return_confirm'] = number_format($stats['return_confirm']->count());
-        $stats['return_delivered'] = number_format($stats['return_delivered']->count());
-        $stats['pending_shipments'] = number_format($stats['pending_shipments']->count());
-        $stats['confirmation_pending'] = number_format($stats['confirmation_pending']->count());
-        $stats['pending_return'] = number_format($stats['pending_return']->count());
-        $stats['complaints_launched'] =  number_format($stats['complaints_launched']->count());
-        $stats['complaints_in_process'] =  number_format($stats['complaints_in_process']->count());
-        $stats['complaints_closed'] =  number_format($stats['complaints_closed']->count());
-        $stats['complaints_rejected'] =  number_format($stats['complaints_rejected']->count());
-        $sales['total_accounts']=number_format($sales['total_accounts']->count());
-        $sales['active_accounts']=number_format($sales['active_accounts']->count());
-        $sales['inactive_accounts']=number_format($sales['inactive_accounts']->count());
-        $sales['pending_accounts']=number_format($sales['pending_accounts']->count());
-        $sales['blocked_accounts']=number_format( $sales['blocked_accounts']->count());
-
-        $graph_dates['current'] = Carbon::now();
-        $graph_dates['old_date'] = Carbon::now()->subDays(29);
-
-        if (session('department_id') == 7 && (in_array(session('id'), session('sale_users_bypass')))) {
-            $shippers = User::whereIn('id', session('tagged_shippers'))->where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        }
-        else {
-            $shippers = User::where('status', 3)->where('blacklist', 0)->select('id','name')->get();
-        }
-
-        $cities = City::select('id','name')->get();
-        $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();*/
-
-//        $admin = Admin::where('id', Auth::id())->first();
-//        //incoming
-//        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $doughnut_chart_shipments_count['total'] = $doughnut_chart_shipments_count['booked'] + $doughnut_chart_shipments_count['arrived_at_origin'] + $doughnut_chart_shipments_count['in_transit'] + $doughnut_chart_shipments_count['arrived_at_destination'] + $doughnut_chart_shipments_count['not_attempted'] + $doughnut_chart_shipments_count['delivery_unsuccessful'] + $doughnut_chart_shipments_count['on_hold'];
-//
-//        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//
-//        $riders_count = Rider::where('status', 1)->where('city_id', $admin->default_hub_id)->count();
-//        $sixtyDays = Carbon::now()->subDays(58)->startOfDay();
-//        if($riders_count == 0){
-//            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']));
-//        }
-//        else{
-//            $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']) / $riders_count);
-//        }
-//
-//        $light_deliveries = ($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two']);
-//        $heavy_deliveries = ($incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']);
-//
-//        $day_wise_growth_thirty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-//        $day_wise_growth_sixty = OperationForecast::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operation_forecasts.count');
-//        if($day_wise_growth_sixty == 0){
-//            $day_wise_growth_percentage = 0;
-//        }
-//        else{
-//            $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
-//            $day_wise_growth_percentage = number_format($day_wise_growth * 100,1);
-//        }
-//        $operation_incoming['per_rider_loads'] = $per_rider_loads;
-//        $operation_incoming['day_wise_growth'] = $day_wise_growth_percentage . '%';
-//        $operation_incoming['heavy_deliveries'] = $heavy_deliveries;
-//        $operation_incoming['light_deliveries'] = $light_deliveries;
-//
-//
-//
-//        $operation_dates['from'] = $graph_dates['old_date'];
-//        $operation_dates['to'] = $graph_dates['current'];
-//
-//        //outgoing
-//        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-//        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
-//        $operation_outgoing_pickups['pickups'] = 0;
-//        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
-//            $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
-//        }
-//
-//        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $thirtyDays .'" AND "'. $today .'") AS count'))
-//            ->whereBetween('operations_outgoing_top_customers.created_at',[$thirtyDays,$today])
-//            ->orderBy('count', 'desc')
-//            ->groupBy('u.id')
-//            ->take(5)->get()->toArray();
-//        if(array_key_exists(0, $outgoing_top_five_customers)){
-//            $outgoing_doughnut_top_five_customers['first'] = $outgoing_top_five_customers[0];
-//        }
-//        else{
-//            $outgoing_doughnut_top_five_customers['first']['name'] = '-';
-//            $outgoing_doughnut_top_five_customers['first']['count'] = 0;
-//        }
-//        if(array_key_exists(1, $outgoing_top_five_customers)){
-//            $outgoing_doughnut_top_five_customers['second'] = $outgoing_top_five_customers[1];
-//        }
-//        else{
-//            $outgoing_doughnut_top_five_customers['second']['name'] = '-';
-//            $outgoing_doughnut_top_five_customers['second']['count'] = 0;
-//        }
-//        if(array_key_exists(2, $outgoing_top_five_customers)){
-//            $outgoing_doughnut_top_five_customers['third'] = $outgoing_top_five_customers[2];
-//        }
-//        else{
-//            $outgoing_doughnut_top_five_customers['third']['name'] = '-';
-//            $outgoing_doughnut_top_five_customers['third']['count'] = 0;
-//        }
-//        if(array_key_exists(3, $outgoing_top_five_customers)){
-//            $outgoing_doughnut_top_five_customers['fourth'] = $outgoing_top_five_customers[3];
-//        }
-//        else{
-//            $outgoing_doughnut_top_five_customers['fourth']['name'] = '-';
-//            $outgoing_doughnut_top_five_customers['fourth']['count'] = 0;
-//        }
-//        if(array_key_exists(4, $outgoing_top_five_customers)){
-//            $outgoing_doughnut_top_five_customers['fifth'] = $outgoing_top_five_customers[4];
-//        }
-//        else{
-//            $outgoing_doughnut_top_five_customers['fifth']['name'] = '-';
-//            $outgoing_doughnut_top_five_customers['fifth']['count'] = 0;
-//        }
-//        $outgoing_doughnut_top_five_customers['total'] = $outgoing_doughnut_top_five_customers['first']['count'] + $outgoing_doughnut_top_five_customers['second']['count'] + $outgoing_doughnut_top_five_customers['third']['count'] + $outgoing_doughnut_top_five_customers['fourth']['count'] + $outgoing_doughnut_top_five_customers['fifth']['count'];
-//
-//        $outgoing_bar_chart_shipments['one'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',1)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $outgoing_bar_chart_shipments['two'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',2)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $outgoing_bar_chart_shipments['three'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',3)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//        $outgoing_bar_chart_shipments['four'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',4)->where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->count();
-//
-//
-//        if($riders_count == 0){
-//            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']));
-//        }
-//        else{
-//            $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']) / $riders_count);
-//        }
-//        $outgoing_light_deliveries = ($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two']);
-//        $outgoing_heavy_deliveries = ($outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']);
-//
-//        $outgoing_day_wise_growth_thirty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-//        $outgoing_day_wise_growth_sixty = OperationsOutgoingPickupRequests::where('hub_id', $admin->default_hub_id)->where('booking_type_id', 1)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operations_outgoing_pickup_requests.shipments_count');
-//        if($outgoing_day_wise_growth_sixty == 0){
-//            $outgoing_day_wise_growth_percentage = 0;
-//        }
-//        else{
-//            $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
-//            $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
-//        }
-//        $operation_outgoing['per_rider_loads'] = $outgoing_per_rider_loads;
-//        $operation_outgoing['day_wise_growth'] = $outgoing_day_wise_growth_percentage . '%';
-//        $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
-//        $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
-//
-//        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
-
-//        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-//        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
-        return view('admin.simple_dashboard');
+         return view('admin.simple_dashboard');
     }
 
     public function user_fintech_charges(Request $req){
@@ -9412,10 +9110,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->tagged_poc;
                     }
                 } else {
-                    return '-';
+                    return $users->tagged_poc;
                 }
 
             })
@@ -9440,15 +9138,18 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
+                        $ref = explode(', ', $users->ref);
+                        $new_array = array_unique(array_merge($array, $ref));
+                        $new_array = implode(', ', $new_array);
+                        
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->ref;
                     }
                 } else {
-                    return '-';
+                    return $users->ref;
                 }
-
             })
             ->editColumn('kam', function ($users) {
                 $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
@@ -9470,47 +9171,50 @@ class AdminDashboardController extends Controller
                                 return '-';
                             }
                         }
+                        $old_kam = explode(', ', $users->kam);
+                        $new_array = array_unique(array_merge($array, $old_kam));
+                        $new_array = implode(', ', $new_array);
+                        
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
                 } else {
-                    return '-';
+                    return $users->kam;
                 }
-
             })
 
-            ->editColumn('admin_tag_id', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+            // ->editColumn('admin_tag_id', function ($users) {
+            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
+            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
+            //     if (isset($shipper, $sales_tiers)) {
+            //         $sales_commission_users = DB::table('sales_commission_users')
+            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+            //         ->get();
                     
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
+            //         if ($sales_commission_users->isNotEmpty()) {
+            //             $array = [];
+            //             foreach ($sales_commission_users as $sales_commission_user) {
+            //                 $type = $sales_commission_user->user_type;
+            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
+            //                 if ($admins) {
+            //                     $array[] = $admins->name;
+            //                 } else {
+            //                     return '-';
+            //                 }
+            //             }
+            //             $array = implode(', ', $array);
+            //             return $array;
+            //         } else {
+            //             return '-';
+            //         }
+            //     } else {
+            //         return '-';
+            //     }
 
-            })
+            // })
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword == 3 || $keyword == 4) {
                     $query->where('users.status', '=', $keyword);
@@ -9998,10 +9702,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->tagged_poc;
                     }
                 } else {
-                    return '-';
+                    return $users->tagged_poc;
                 }
 
             })
@@ -10029,10 +9733,10 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->ref;
                     }
                 } else {
-                    return '-';
+                    return $users->ref;
                 }
 
             })
@@ -10059,45 +9763,45 @@ class AdminDashboardController extends Controller
                         $array = implode(', ', $array);
                         return $array;
                     } else {
-                        return '-';
+                        return $users->kam;
                     }
                 } else {
-                    return '-';
+                    return $users->kam;
                 }
 
             })
 
 
-            ->editColumn('admin_tag_id', function ($users) {
-                $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-                $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
+            // ->editColumn('admin_tag_id', function ($users) {
+            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
+            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
                 
-                if (isset($shipper, $sales_tiers)) {
-                    $sales_commission_users = DB::table('sales_commission_users')
-                    ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-                    ->get();
+            //     if (isset($shipper, $sales_tiers)) {
+            //         $sales_commission_users = DB::table('sales_commission_users')
+            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
+            //         ->get();
                     
-                    if ($sales_commission_users->isNotEmpty()) {
-                        $array = [];
-                        foreach ($sales_commission_users as $sales_commission_user) {
-                            $type = $sales_commission_user->user_type;
-                            $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-                            if ($admins) {
-                                $array[] = $admins->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        $array = implode(', ', $array);
-                        return $array;
-                    } else {
-                        return '-';
-                    }
-                } else {
-                    return '-';
-                }
+            //         if ($sales_commission_users->isNotEmpty()) {
+            //             $array = [];
+            //             foreach ($sales_commission_users as $sales_commission_user) {
+            //                 $type = $sales_commission_user->user_type;
+            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
+            //                 if ($admins) {
+            //                     $array[] = $admins->name;
+            //                 } else {
+            //                     return '-';
+            //                 }
+            //             }
+            //             $array = implode(', ', $array);
+            //             return $array;
+            //         } else {
+            //             return '-';
+            //         }
+            //     } else {
+            //         return '-';
+            //     }
 
-            })
+            // })
             ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -14138,19 +13842,9 @@ class AdminDashboardController extends Controller
         foreach($shipper_ids as $shipper_id)
         {
             if($request->has('user_id')){
-                
-                $user = User::find($shipper_id);
-                $action = $user->status;
 
-                if($action == 0){
-                    $user->status = 1;
-                    $user->rates_added_by = Auth::id();
-                    $user->save();
-                }
-                
                 $total_commission = $request->total_commission;
                 $users_count = count($request->user_id);
-                $user = User::find($shipper_id);
 
                 //when shipper register
                 $sales_commission_register = SalesCommission::where('shipper_id', $shipper_id);
@@ -14163,13 +13857,15 @@ class AdminDashboardController extends Controller
 
                 $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
                 if($sales_commission->exists()){
-                    
+                    $user_type = [];
                     $sales_commission = $sales_commission->first();
                     $sales_commission_user = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('commission')->toArray();
                     $sales_commission_user_count = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_id')->toArray();
                     $types = SalesCommissionUser::where('sales_commission_id', $sales_commission->id)->pluck('user_type')->toArray();
                     foreach($types as $key => $user_type_value){
-                        $user_type[$key+1] = $user_type_value;
+                        if(isset($sales_commission_user_count[$key])){
+                            $user_type[$sales_commission_user_count[$key]] = $user_type_value ;
+                        }
                     }
                     if(count($sales_commission_user) > 0){
                         $total_commission = array_sum($sales_commission_user) + $total_commission;
@@ -14184,9 +13880,7 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    if($action == 0){
-                        SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                    }else if ($request->has('edit')){
+                    if ($request->has('edit')){
                         SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
                     }
 
@@ -14213,13 +13907,14 @@ class AdminDashboardController extends Controller
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
                             if($sales_tier->tier_type == 1){
+                                $index = intval($request->user_id[$row_id]);
                                 if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
                                     $sales_commission_user->user_type = "2";
                                 }  
 
-                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                if(isset($user_type[$index]) && $user_type[$index] == "2"){
                                     $sales_commission_user->user_type = "2";
-                                } 
+                                }
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
                               
                             }else if($sales_tier->tier_type == 2){
@@ -14257,6 +13952,11 @@ class AdminDashboardController extends Controller
                                 if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
                                     $sales_commission_user->user_type = "2";
                                 }  
+
+                                
+                                if(isset($user_type[$row_id]) && $user_type[$row_id] == "2"){
+                                    $sales_commission_user->user_type = "2";
+                                }
                         
                                 $sales_commission_user->user_id = $request->user_id[$row_id]; 
                             }else if($sales_tier->tier_type == 2){
