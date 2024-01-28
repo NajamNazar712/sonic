@@ -260,16 +260,16 @@
 
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Shipment ID</th>
-                                    <th class="border-primary border-darken-1">Tracking Number</th>
-                                    <th class="border-primary border-darken-1">Assign Agent</th>
-                                    <th class="border-primary border-darken-1">Assign Agent Shipment Status</th>
-                                    <th class="border-primary border-darken-1">Assign Agent Shipment Sub Status</th>
-                                    <th class="border-primary border-darken-1">Assign Shipment State</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
-                                </tr>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Shipment ID</th>
+                                        <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Assign Agent</th>
+                                        <th class="border-primary border-darken-1">Assign Agent Shipment Status</th>
+                                        <th class="border-primary border-darken-1">Assign Agent Shipment Sub Status</th>
+                                        <th class="border-primary border-darken-1">Assign Shipment State</th>
+                                        <th class="border-primary border-darken-1">Updated By</th>
+                                    </tr>
                                 </thead>
                             </table>
                         </div>
@@ -638,46 +638,6 @@
             })
 
 
-
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         params.excel = true;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.assigned_shipment.list')}}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
-            //                 head.push('S.No');
-            //                 head.push('Employee ID');
-            //                 head.push('Name');
-            //                 head.push('Phone Number');
-            //                 head.push('Email');
-            //                 head.push('City');
-            //                 head.push('Designation');
-            //                 head.push('Department');
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
-            //                     row.push(index + 1);
-            //                     row.push(values.trax_id);
-            //                     row.push(values.name);
-            //                     row.push(values.phone_number);
-            //                     row.push(values.email);
-            //                     row.push(values.city);
-            //                     row.push(values.designation);
-            //                     row.push(values.department_name);
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
-            //         return {body: body, header: head};
-            //     }
-            // });
-           /* var selected_rows = [];*/
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
@@ -695,38 +655,22 @@
                 language: {
                     processing: data_table_loader
                 },
-               /* select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },*/
                 serverSide: true,
         
                 ajax: {
                     url: '{{ route('admin.assigned_shipment.list')}}',
                     data: function (d) {
-
+                        
                         d.number_of_tickets_input = $('#number_of_tickets_input').val();
-                        d.number_of_available_agents_input = $('#number_of_available_agents_input')
-                            .val();
+                        d.number_of_available_agents_input = $('#number_of_available_agents_input').val();
                         d.number_of_pending_tickets_input = $('#number_of_pending_tickets_input').val();
                         d.number_of_closed_tickets_input = $('#number_of_closed_tickets_input').val();
                         d.number_of_connected_calls_input = $('#number_of_connected_calls_input').val();
-                        d.number_of_unresponsive_calls_input = $('#number_of_unresponsive_calls_input')
-                            .val();
-                        d.number_of_reattempt_calls_input = $('#number_of_reattempt_calls_input')
-                            .val();
-                        d.number_of_return_confirm_calls_input = $(
-                                '#number_of_return_confirm_calls_input')
-                            .val();
-                        d.number_of_intercepted_calls_input = $('#number_of_intercepted_calls_input')
-                            .val();
-                        d.number_of_self_collection_calls_input = $(
-                                '#number_of_self_collection_calls_input')
-                            .val();
-
-
+                        d.number_of_unresponsive_calls_input = $('#number_of_unresponsive_calls_input').val();
+                        d.number_of_reattempt_calls_input = $('#number_of_reattempt_calls_input').val();
+                        d.number_of_return_confirm_calls_input = $('#number_of_return_confirm_calls_input').val();
+                        d.number_of_intercepted_calls_input = $('#number_of_intercepted_calls_input').val();
+                        d.number_of_self_collection_calls_input = $('#number_of_self_collection_calls_input').val();
                     }
                 },
                 rowId: 'id',
@@ -745,10 +689,6 @@
 
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                  /*  $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }*/
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

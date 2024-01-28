@@ -791,6 +791,7 @@
                             dt.rows().select();
                             table.button('.assign').enable();
                             table.button('.tag').enable();
+                            table.button('.add_days').enable();
                         }
                     }, 
                     {
@@ -799,6 +800,9 @@
                         className: 'select_none',
                         action: function(e, dt, node, config) {
                             dt.rows().deselect();
+                            table.button('.assign').disable();
+                            table.button('.tag').disable();
+                            table.button('.add_days').disable();
                         }
                     },
                     {
@@ -821,8 +825,8 @@
                                 $('#AssignHubModal').modal('show');
                                 // $('#BulkAddDaysModal').append('<input type="text" name="employee_id_bulk[]" value="' + selected_rows + '">');
                             }
+                            
                         
-                          
                         }
                     },
                     {

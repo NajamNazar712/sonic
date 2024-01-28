@@ -50,23 +50,10 @@ class TeamLeadDashboardController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 703);
 
-        $zones = Zone::where('status', '1')
-            ->where('business_category_id', '1')
-            ->select('id', 'name')
-            ->get();
-
-
-        // $sortedHubs = $hubs->sortBy(function ($hub) {
-        //     $agentAssignHub = $hub->agentAssignHub->first();
-        //     return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
-        // });
-
+        $zones = Zone::where('status', '1')->where('business_category_id', '1')->select('id', 'name')->get();
         $employee_additional_days = EmployeeAdditionalDay::get();
-
         $empid = Admin::find(Auth::id())->employee_id;
-
         $employee_statuses = EmployeeStatus::all();
-
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
@@ -78,11 +65,7 @@ class TeamLeadDashboardController extends Controller
             })
             ->get();
 
-
         $employee_types = EmployeeType::all();
-
-
-
         return view('admin.leads.team_lead')->with(['employee_types' => $employee_types, 'employee_statuses' => $employee_statuses, 'zones' => $zones, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
 

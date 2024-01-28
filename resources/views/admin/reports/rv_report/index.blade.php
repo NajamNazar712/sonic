@@ -32,6 +32,16 @@
                                             </select>
                                         </div>
                                     </div>
+                                {{-- Search by agent name --}}
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <select name="search_agent_name" id="search_agent_name" class="form-control select2">
+                                                @foreach($agents as $agent)
+                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
 
                                     {{-- Search date from filter --}}
                                     <div class="col-4">
@@ -91,8 +101,8 @@
                                     <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action Updated By</th>
                                     <th class="border-primary border-darken-1">RCP Agent Updated By</th>
-                                    <th class="border-primary border-darken-1">Current Status</th>
-                                    <th class="border-primary border-darken-1">Current Status Date</th>
+                                    <th class="border-primary border-darken-1">RV Status</th>
+                                    <th class="border-primary border-darken-1">RV Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
                                     <th class="border-primary border-darken-1">Delivery Attempt Count</th>
                                     <th class="border-primary border-darken-1">Re-Attempt Count</th>
@@ -355,7 +365,13 @@
                 width: '100%',
                 placeholder: 'Select Shippers',
                 allowClear: true,
-            }); 
+        });
+        $('#search_agent_name').prepend('<option value="" selected="selected"></option>')
+            .select2({
+                width: '100%',
+                placeholder: 'Select Agent',
+                allowClear: true,
+        });
             $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -440,8 +456,8 @@
                             head.push('Action Date');
                             head.push('Action Updated By');
                             head.push('RCP Agent Updated By');
-                            head.push('Current Status');
-                            head.push('Current Status Date');
+                            head.push('Rv Status');
+                            head.push('Rv Status Date');
                             head.push('Fake Status');
                             head.push('Delivery Attempt Count');
                             head.push('Re Attempt Count');
@@ -471,8 +487,8 @@
                                 row.push(values.action_date);
                                 row.push(values.action_updated_by);
                                 row.push(values.rcp_agent_updated_by);
-                                row.push(values.current_status);
-                                row.push(values.current_status_date);
+                                row.push(values.rv_current_status);
+                                row.push(values.rv_current_status_date);
                                 row.push(values.fake_status);
                                 row.push(values.delivery_attempt_count);
                                 row.push(values.re_attempt_count);
@@ -518,6 +534,7 @@
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_shipper_name = $('#search_shipper_name').val();
+                        d.search_agent_name = $('#search_agent_name').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -526,60 +543,49 @@
                 order: [[18, 'desc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle trax_id',searchable: false},
-                    {data: 'shipper_name', name: 'shipper_name', class: 'align-middle serial_number',searchable: false},
-                    {data: 'origin', name: 'origin', class: 'text-center align-middle trax_id',searchable: false},
-                    {data: 'destination', name: 'destination', class: 'align-middle name',searchable: false},
-                    {data: 'hub', name: 'hub', class: 'align-middle name',searchable: false},
-                    {data: 'area', name: 'area', class: 'align-middle name',searchable: false},
-                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle phone_number',searchable: false},
-                    {data: 'number', name: 'number', class: 'align-middle email',searchable: false},
-                    {data: 'address', name: 'address', class: 'align-middle email',searchable: false},
-                    {data: 'cod_amount', name: 'cod_amount', class: 'align-middle city',searchable: false},
-                    {data: 'weight', name: 'weight', class: 'align-middle designation',searchable: false},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle designation',searchable: false},
-                    {data: 'service_type', name: 'service_type', class: 'align-middle designation',searchable: false},
-                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle designation',searchable: false},
-                    {data: 'rv_status', name: 'rv_status', class: 'align-middle designation',searchable: false},
+                    {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
+                    {data: 'shipper_name', name: 'shipper_name', class: 'align-middle shipper_name',searchable: false},
+                    {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
+                    {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
+                    {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
+                    {data: 'area', name: 'area', class: 'align-middle area',searchable: false},
+                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable: false},
+                    {data: 'number', name: 'number', class: 'align-middle number',searchable: false},
+                    {data: 'address', name: 'address', class: 'align-middle address',searchable: false},
+                    {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
+                    {data: 'weight', name: 'weight', class: 'align-middle dweightesignation',searchable: false},
+                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
+                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
+                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
+                    {data: 'rv_status', name: 'rv_status', class: 'align-middle rv_status',searchable: false},
                     {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
-                    {data: 'remarks', name: 'remarks', class: 'align-middle designation',searchable: false},
-                    {data: 'action_date', name: 'action_date', class: 'align-middle designation',searchable: false},
-                    {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle designation',searchable: false},
-                    {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle designation',searchable: false},
-                    {data: 'current_status', name: 'current_status', class: 'align-middle designation',searchable: false},
-                    {data: 'current_status_date', name: 'current_status_date', class: 'align-middle designation',searchable: false},
-                    {data: 'fake_status', name: 'fake_status', class: 'align-middle designation',searchable: false},
-                    {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle designation',searchable: false},
-                    {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle designation',searchable: false},
+                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
+                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
+                    {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
+                    {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
+                    {data: 'rv_current_status', name: 's_status.name', class: 'align-middle rv_current_status',searchable: false},
+                    {data: 'rv_current_status_date', name: 'shipments.updated_at', class: 'align-middle rv_current_status_date',searchable: false},
+                    {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false},
+                    {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false},
+                    {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false},
                     {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false},
-                    {data: 'call_count', name: 'call_count', class: 'align-middle designation',searchable: false},
+                    {data: 'call_count', name: 'call_count', class: 'align-middle call_count',searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-            });
-
-            // $('#search_filter_btn').on('click',function () {
-            //     var trackingNo = $('#search_tracking_no').val();
-            //     var shipperName = $('#search_shipper_name').val();
-            //     var dateFrom = $('input[name="search_date_from_formatted"]').val();
-            //     var dateTo = $('input[name="search_date_to_formatted"]').val();
-
-            //     if (shipperName !== '' || trackingNo !== '' || (dateFrom !== '' && dateTo !== '')) {
-            //         table.draw();
-            //     }
-
-            // });
+        });
 
             $('#search_form').bind('submit', function (e) {
                 e.preventDefault();
                 var tracking_number = $('#search_form #search_tracking_no').val();
                 var shipper_name = $('#search_form #search_shipper_name').val();
+                var agent_name = $('#search_form #search_agent_name').val();
                 var search_date_from = $('#search_form #search_date_from').val();
                 var search_date_to = $('#search_form #search_date_to').val();
 
-                if (shipper_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
+                if (shipper_name !== '' || agent_name !== '' || tracking_number != ''  || (search_date_from != '' && search_date_to != '' )) {
                     table.draw();
                 }
 

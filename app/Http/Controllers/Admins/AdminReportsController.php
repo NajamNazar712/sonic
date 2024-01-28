@@ -12246,9 +12246,13 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
 
         $shippers = User::where('status', 3)->select('id', 'name')->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        // ->where('admin_roles.department_id',3)
+                        ->where('a.status',1)
+                        ->select('a.id', 'a.name')->get();
 
         return view('admin.reports.rv_report.index', [
-            'shippers' => $shippers
+            'shippers' => $shippers, 'agents' => $agents,
         ]);
     }
 
@@ -12280,10 +12284,11 @@ class AdminReportsController extends Controller
                  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id )'))
                  ->orderBy('id', 'DESC'); // Move ORDER BY outside DB::raw
         })
-        ->leftjoin('admins as add', function($join) {
-            $join->on('rv_shipment_assign_agent_details.agent_id', 'add.id');
-            // ->where('rv_shipment_assign_agent_details.updated_type_id', 2);
-        })
+        ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
+        // ->leftjoin('admins as add', function($join) {
+        //     $join->on('rv_shipment_assign_agent_details.agent_id', 'add.id');
+        //     // ->where('rv_shipment_assign_agent_details.updated_type_id', 2);
+        // })
         // ->leftjoin('admins as ad', function($join) {
         //     $join->on('rv_shipment_assign_agents.agent_id', 'ad.id')->where('updated_type_id', 2)
         //     ->orOn('rv_shipment_assign_agents.updated_by_id', 'ad.id')->where('updated_type_id', 1);
@@ -12299,7 +12304,7 @@ class AdminReportsController extends Controller
         'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks',
         'rv_shipment_assign_agents.updated_at as action_date', /*'ad.name as action_updated_by',*/'add.name as rcp_agent_updated_by', 
         'rv_shipment_assign_agents.updated_type_id as updated_type_id','rv_shipment_assign_agents.updated_by_id as updated_by_id',
-        'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
+        'rv_fakes.name as fake_status', 's_status.name as rv_current_status', 'shipments.updated_at as rv_current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count')
 
         ->groupBy('shipments.id');
@@ -12420,6 +12425,10 @@ class AdminReportsController extends Controller
         if ($shipper_id = $request->get('search_shipper_name')) {
             $shipper_name = User::where('id', $shipper_id)->value('name');
             $rv_report->where('users.name', '=', $shipper_name);
+        }
+        if ($agent_id = $request->get('search_agent_name')) {
+            $agent_name = Admin::where('id', $agent_id)->value('name');
+            $rv_report->where('add.name', '=', $agent_name);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
