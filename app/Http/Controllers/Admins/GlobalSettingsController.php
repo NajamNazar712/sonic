@@ -135,7 +135,6 @@ use App\Http\Models\SubCategorySegment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
-use App\Http\Models\Shipment;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
@@ -146,11 +145,7 @@ use App\Http\Models\ServiceList;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
-use App\Http\Models\Admin\UserFintectCharges;
-use App\Jobs\SwichPaymentGatewayApi;
 use App\RiderAssignedHubForDeliveryNote;
-use Session;
-//End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -159,11 +154,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\BackgroundImage;
-use App\Http\Models\BookingType;
-use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Product;
 use App\Http\Models\UserIbftCharge;
@@ -9315,8 +9307,8 @@ class GlobalSettingsController extends Controller
             
          return response()->json(['status' => 1, 'success' => 'Ibft Charges successfully updated']);
         }
-        
-        public function logistic_report_index()
+
+    public function logistic_report_index()
         {
             $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
             $settings = GlobalSettings::where('type', 'logistic_setting');
@@ -9329,7 +9321,7 @@ class GlobalSettingsController extends Controller
             return view('admin.settings.logistic_setting')->with(['users' => $users , 'logistic_setting_tags' =>$logistic_setting_tags]);
         }
     
-        public function logistic_report_store(Request $request)
+    public function logistic_report_store(Request $request)
         {
                 if ($request->has('users') && count($request->users) > 0) {
                     $users = implode(',', $request->users);

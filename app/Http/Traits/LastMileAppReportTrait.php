@@ -66,7 +66,7 @@ trait LastMileAppReportTrait
 
                      $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                      $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
-
+                     $check_summary->save();
 
                      if ($time <= '10:59:59') {
                          $check_summary->before_11_count = $check_summary->before_11_count + 1;
@@ -97,7 +97,7 @@ trait LastMileAppReportTrait
                      } elseif ($time > '22:59:59' && $time <= '23:59:59') {
                          $check_summary->after_23_count = $check_summary->after_23_count + 1;
                      }
-
+                    $check_summary->save();
 
                      $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
                      if (!$check_existing_note->exists())
