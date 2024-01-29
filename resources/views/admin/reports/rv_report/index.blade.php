@@ -103,6 +103,8 @@
                                     <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">RV Status</th>
                                     <th class="border-primary border-darken-1">RV Status Date</th>
+                                    <th class="border-primary border-darken-1">Current Status</th>
+                                    <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
                                     <th class="border-primary border-darken-1">Delivery Attempt Count</th>
                                     <th class="border-primary border-darken-1">Re-Attempt Count</th>
@@ -456,8 +458,10 @@
                             head.push('Action Date');
                             head.push('Action Updated By');
                             head.push('RCP Agent Updated By');
-                            head.push('Rv Status');
-                            head.push('Rv Status Date');
+                            head.push('RV Status');
+                            head.push('RV Status Date');
+                            head.push('Current Status');
+                            head.push('Current Status Date');
                             head.push('Fake Status');
                             head.push('Delivery Attempt Count');
                             head.push('Re Attempt Count');
@@ -487,8 +491,10 @@
                                 row.push(values.action_date);
                                 row.push(values.action_updated_by);
                                 row.push(values.rcp_agent_updated_by);
-                                row.push(values.rv_current_status);
-                                row.push(values.rv_current_status_date);
+                                row.push(values.rv_status_name);
+                                row.push(values.rv_status_date);
+                                row.push(values.current_status);
+                                row.push(values.current_status_date);
                                 row.push(values.fake_status);
                                 row.push(values.delivery_attempt_count);
                                 row.push(values.re_attempt_count);
@@ -563,8 +569,10 @@
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
                     {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
-                    {data: 'rv_current_status', name: 's_status.name', class: 'align-middle rv_current_status',searchable: false},
-                    {data: 'rv_current_status_date', name: 'shipments.updated_at', class: 'align-middle rv_current_status_date',searchable: false},
+                    {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
+                    {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},
+                    {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
+                    {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
                     {data: 'fake_status', name: 'fake_status', class: 'align-middle fake_status',searchable: false},
                     {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle delivery_attempt_count',searchable: false},
                     {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle re_attempt_count',searchable: false},

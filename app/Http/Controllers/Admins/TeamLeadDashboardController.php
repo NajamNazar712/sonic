@@ -490,9 +490,9 @@ class TeamLeadDashboardController extends Controller
             ]);
         }
 
-        $role = Admin::whereIn('role_id', [6, 63, 70])->pluck('email')->toArray();
+        $role = Admin::whereIn('role_id', [104, 63, 70])->pluck('email')->toArray();
         $employee = Employee::where('id', $request->employee_id)->first();
-        NotificationsController::send(228, $employee, $role);
+        NotificationsController::send(228, $employee, $role); //sending email to hr
     }
 
 

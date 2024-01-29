@@ -660,7 +660,7 @@
                 ajax: {
                     url: '{{ route('admin.assigned_shipment.list')}}',
                     data: function (d) {
-                        
+
                         d.number_of_tickets_input = $('#number_of_tickets_input').val();
                         d.number_of_available_agents_input = $('#number_of_available_agents_input').val();
                         d.number_of_pending_tickets_input = $('#number_of_pending_tickets_input').val();
@@ -695,28 +695,28 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var rider_status_select = '<select name="rider_status_select" id="rider_status_select" class="select2 form-control"></select>';
+                    // this.api().columns().every(function(column_id) {
+                    //     var column = this;
+                    //     var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox') || $(header).is('.trax_id') || $(header).is('.name') || $(header).is('.phone_number') || $(header).is('.email') || $(header).is('.city') || $(header).is('.designation') || $(header).is('.department_name') ||  $(header).is('.select-checkbox')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                    //     if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.serial_number') || $(header).is('.serial_number')) {
+                    //         $(td).appendTo($(search));
+                    //     }
+                    //     else {
+                    //         var current = $(input).appendTo($(search)).on('change', function() {
+                    //             column.search($(this).val(), false, false, true).draw();
+                    //         }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
+                    //         if (column.search()) {
+                    //             current.val(column.search());
+                    //         }
+                    //     }
+                    // });
                     this.api().table().columns.adjust();
                 }
             });
-
-      
         });
     </script>
     @endsection
