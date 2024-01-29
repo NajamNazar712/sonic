@@ -1369,7 +1369,7 @@ class AdminCRMController extends Controller
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
-                        $launched_request = $launched_request
+            $launched_request = $launched_request
                 ->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
                     ->orWhere(function ($sub_query) {
@@ -1919,7 +1919,6 @@ class AdminCRMController extends Controller
             ->groupBy('crm_requests.id');
 
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
-            //dd(session('permissions'));
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
