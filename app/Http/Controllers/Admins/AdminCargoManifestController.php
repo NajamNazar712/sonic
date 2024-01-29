@@ -4849,8 +4849,8 @@ class AdminCargoManifestController extends Controller
         }
 
         //remove misrouted shipment ids from $short_received_shipments_array
-            $exclude_from_misroute = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,66])->pluck('tracking_number')->toArray();
-            $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_misroute);
+            $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,66])->pluck('tracking_number')->toArray();
+            $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
         //remove misrouted shipment ids from $short_received_shipments_array end
 
         $received_html = '';
