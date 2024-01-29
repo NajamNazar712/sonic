@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\models\admin\settings\GeneralSetting;
+use App\Http\Models\Admin\Settings\GeneralSetting;
 use Auth;
 
 class AppServiceProvider extends ServiceProvider
