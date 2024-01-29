@@ -216,7 +216,7 @@
                     console.log('row',row.childNodes[7].innerText);
                     if(misroute == 1)
                     {
-                        $(row).addClass('alert-danger');
+                        // $(row).addClass('alert-danger');
                     }
                 },
                 initComplete: function() {

@@ -4255,7 +4255,6 @@ class AdminCargoManifestController extends Controller
         try{
             DB::beginTransaction();
 
-
         $shipment_status_array = [3, 11,21, 26, 32, 49,66];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
@@ -4847,8 +4846,12 @@ class AdminCargoManifestController extends Controller
                     array_push($short_received_shipments_array, $shipment->tracking_number);
                 }
             }
-
         }
+
+        //remove misrouted shipment ids from $short_received_shipments_array
+            $exclude_from_misroute = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,66])->pluck('tracking_number')->toArray();
+            $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_misroute);
+        //remove misrouted shipment ids from $short_received_shipments_array end
 
         $received_html = '';
         $sr_html = '';
@@ -4880,7 +4883,7 @@ class AdminCargoManifestController extends Controller
         }
 
         if (count($shipment_ids_array_misrouted) > 0) {
-            $misrouted_html = "Following Shipments(s) are marked as misrouted. .<br><ul>";
+            $misrouted_html = "Following Shipments(s) are marked as misrouted.<br><ul>";
             foreach ($shipment_ids_array_misrouted as $m) {
                 $misrouted_html .= "<li>" . $m . "</li>";
             }
