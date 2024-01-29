@@ -101,8 +101,7 @@
                                 <button type="submit" class="btn btn-primary" id="select_none">Select None</button>
                             </div>
                             <input type="hidden" class="unsorted_zones" name="unsorted_zones">
-                            <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple
-                                style="width: 100%;">
+                            <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple style="width: 100%;">
                                 @foreach ($zones as $zone)
                                     <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                                 @endforeach
@@ -818,14 +817,15 @@
                                 selected_rows.push(employee_id);
                             });
 
-                            $('#AssignHubModal #search_origin').empty();
+                            // $('#AssignHubModal #search_origin').empty();
+                            
                             // Deselect all rows
                             // table.rows().deselect();
                             if (selected_rows.length > 0) {
                                 $('#AssignHubModal').modal('show');
                                 // $('#BulkAddDaysModal').append('<input type="text" name="employee_id_bulk[]" value="' + selected_rows + '">');
                             }
-                            
+
                         
                         }
                     },
