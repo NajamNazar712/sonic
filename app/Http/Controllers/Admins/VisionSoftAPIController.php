@@ -1317,7 +1317,7 @@ class VisionSoftAPIController extends Controller
             $serial = 1;
 
             foreach ($shippers as $shipper){
-                $shipper_array[] = ['serial' => $serial, 'Account ID' => $shipper->account_id, 'Account Name' => $shipper->account_name, 'Amount' => number_format($shipper->amount)];
+                $shipper_array[] = ['serial' => $serial, 'Account ID' => $shipper->account_id, 'Account Name' => $shipper->account_name,'City' => $shipper->city ,'Amount' => number_format($shipper->amount)];
                 $serial++;
             }
 
