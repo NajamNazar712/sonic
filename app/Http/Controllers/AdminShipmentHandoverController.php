@@ -280,8 +280,9 @@ class AdminShipmentHandoverController extends Controller
             ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
 
         $handover_admins = HandoverResponsibilities::select('id', 'name')->get();
+        $areas = DB::table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
-        return view('admin.handover.list')->with(['hubs'=>$hubs, 'handover_admins'=>$handover_admins]);
+        return view('admin.handover.list')->with(['hubs'=>$hubs, 'handover_admins'=>$handover_admins,'areas'=> $areas]);
     }
 
     public function handover_list(Request $request){
@@ -302,7 +303,7 @@ class AdminShipmentHandoverController extends Controller
 //                ->where('c_from.default', 1);
         })
         ->leftjoin('city_areas as c_to', function ($join) {
-            $join->on('c_to.id', '=', 'hor.city_area_id');
+            $join->on('c_to.id',   '=', 'hor.city_area_id');
 //                ->where('c_to.default', 1);
         })
         ->leftJoin('shipments_journey as sjl', function ($join) {
@@ -310,14 +311,23 @@ class AdminShipmentHandoverController extends Controller
               ->where(
                   'sjl.id',
                   '=',
-                  DB::connection('reports')->raw('(select id from shipments_journey where id = (select max(id) from shipments_journey) and shipments_journey.shipper_status_id In(2,53,3,4,5,11,23))')
+                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
               );
-        })
-      
-        ->leftJoin('shipment_scanning_journeys as ssjal', function ($join) {
-            $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
-        })
+      })
+
+      ->leftJoin('shipments_journey as journey', function ($join) {
+          $join->on('journey.shipment_id', '=', 's.id')
+              ->where(
+                  'journey.id',
+                  '=',
+                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
+              );
+      })
+      ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+        $join->on('ssjal.shipment_id', '=', 's.id')
+             ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = s.id)'));
+      })
+    
         ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
@@ -325,7 +335,10 @@ class AdminShipmentHandoverController extends Controller
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area','journey.shipper_status_id as shipper_status_id',
+        'sjl.shipment_id as journey_latest_id',
+        'sjl.updated_at as journey_latest_updated_at',
+        'sjl.shipper_status_id as latest_shipper_status_id'
       ])
       ->orderBy('handovers.id', 'DESC')
       ->groupBy('hss.handover_id');
@@ -517,7 +530,48 @@ class AdminShipmentHandoverController extends Controller
         }else{
           return '-';
         }
-      });
+      })->editColumn('status_area_city', function ($shipment) {
+        if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+            $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                     ->where('sj.id', '=', $shipment->journey_latest_id);
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+            //check for cases
+            switch ($shipment->latest_shipper_status_id) {
+                case 2:
+                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                    break;
+                case 3:
+                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                    break;
+                case 4:
+                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                    break;
+                case 5:
+                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                    break;
+                case 11:
+                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                    break;
+                case 23:
+                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                    break;
+                case 53:
+                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                    break;
+                default:
+                    $scanning_data = null;
+                    break;
+                    
+                }
+            return CityArea::where('id',$scanning_data['area_id'])->first()->name ??  City::where('id',$scanning_data['hub_id'])->first()->name ?? '-';
+        }else{
+            return '-';
+        }            
+    });
 
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->where('s.tracking_number', '=', $tracking_number);
@@ -535,6 +589,14 @@ class AdminShipmentHandoverController extends Controller
             $datatable->where('handovers.to', '=', $to_admin);
         }
 
+        if ($search_concerned_status_area = $request->get('search_concerned_status_area')) {
+          $datatable->where('ssjal.area_id', '=', $search_concerned_status_area)->whereIn('s.shipper_status_id',[2,3,4,5,11,23,53]);
+        }
+
+        if ($search_concerned_status_hub = $request->get('search_concerned_status_hub')) {
+            $datatable->where('ssjal.hub_id', '=', $search_concerned_status_hub)->whereIn('s.shipper_status_id',[2,3,4,5,11,23,53]);
+        }
+  
         return  $datatable->make(true);
 
     }

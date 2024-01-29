@@ -59,6 +59,26 @@
                     </div>
 
                     <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_status_hub" id="search_concerned_status_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_concerned_status_area" id="search_concerned_status_area" class="form-control select2">
+                                @foreach($areas as $area)
+                                    <option value="{{$area->id}}">{{$area->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -124,6 +144,7 @@
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Status Area/City</th>
 			            <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Latitude</th>
                         <th class="border-primary border-darken-1">Longitude</th>
@@ -240,7 +261,21 @@
                 placeholder:'Select Status',
                 width:'100%',
                 allowClear:true
+            });    
+            
+            $('#search_concerned_status_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status Area',
+                width:'100%',
+                allowClear:true
             });
+            $('#search_concerned_status_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status Hub',
+                width:'100%',
+                allowClear:true
+            });
+
+
+
 
           /*  $('.arrival_time_from').pickatime({
                 clear: '',
@@ -362,6 +397,7 @@
                             head.push('Booking Date');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Status Area/City');
                             head.push('Location Status');
                             head.push('Latitude');
                             head.push('Longitude');	
@@ -389,6 +425,7 @@
                                 row.push(values.booking_date);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.status_area_city);
                                 row.push(values.location_status);
                                 row.push(values.latitude);
                                 row.push(values.longitude);
@@ -444,6 +481,8 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
+                        d.search_concerned_status_area = $('#search_concerned_status_area').val();
+                        d.search_concerned_status_hub = $('#search_concerned_status_hub').val();
                     }
                 },
                 order: [[11, 'desc']],
@@ -463,6 +502,7 @@
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    {data: 'status_area_city', name: 'status_area_city', class: 'align-middle status_area_city'},
                     {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
                     {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},

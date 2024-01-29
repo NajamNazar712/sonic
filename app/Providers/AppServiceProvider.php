@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 
 use App\Http\Models\Admin\GlobalSettings;
-
+use App\http\models\admin\settings\GeneralSetting;
 use Auth;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,33 +35,33 @@ class AppServiceProvider extends ServiceProvider
             $return_notes = array();
 
             if (Auth::guard('admin')->check()) {
-                $settings = GlobalSettings::where('type', 'admin_ticker');
+                $date = Carbon::now()->toDateString();
+                $settings = GeneralSetting::where('type', 'admin_ticker');
                 if (session('role_id') !== 1) {
                     $search_sonic = AdminsScreenList::whereIn('permission_id', session('permissions'))->select('id', 'name', 'url');
                 } else {
                     $search_sonic = AdminsScreenList::select('id', 'name', 'url');
                 }
+            } else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
 
-            }
-            else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
-                $settings = GlobalSettings::where('type', 'shipper_ticker');
+                $settings = GeneralSetting::where('type', 'shipper_ticker');
+              
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
                 $from =  Carbon::now()->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
-                $shipper_return_notes = ReturnDeliveredToShipperTicker::where('user_id',session('user_id'))->where('status',1)
-                ->whereBetween('return_delivered_to_shipper_tickers.created_at',[$from,$to]);
-                if($shipper_return_notes->exists()){
+                $shipper_return_notes = ReturnDeliveredToShipperTicker::where('user_id', session('user_id'))->where('status', 1)
+                    ->whereBetween('return_delivered_to_shipper_tickers.created_at', [$from, $to]);
+                if ($shipper_return_notes->exists()) {
                     $shipper_return_notes = $shipper_return_notes->get();
 
-                    foreach($shipper_return_notes as $value){
+                    foreach ($shipper_return_notes as $value) {
 
-                        if(!isset($return_notes[$value->return_note_id]['count'])){
+                        if (!isset($return_notes[$value->return_note_id]['count'])) {
                             $return_notes[$value->return_note_id]['count'] = 1;
-                        } 
-                        else{
-                            $return_notes[$value->return_note_id]['count'] += 1; 
+                        } else {
+                            $return_notes[$value->return_note_id]['count'] += 1;
                         }
                     }
                 }
@@ -71,14 +71,42 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($settings && $settings->exists()) {
-                $settings = $settings->first();
+                 $settings = $settings->first();
+                 $date = Carbon::now();
+                
+                 $ticker = $settings->description;
+                    //    dd($settings->start_date,$date);
+               
+                if(!is_null($settings->start_date))
+                {
+                  
+                    if($settings->start_date <= $date)
+                    {
+                         
+                        $ticker = $settings->description;
 
-                $ticker = $settings->text;
-
-                 if (!empty($ticker)) {
-                    $view->with('ticker',$ticker);
+                    } else{
+                        $ticker = null;
+                    }
+                   
                 }
+             
+                if(!is_null($settings->end_date))
+                {
+                      
+                    if( $settings->start_date <=$date && $settings->end_date >= $date)
+                    { 
+                        $ticker = $settings->description;
 
+                    } else{
+                        $ticker = null;
+                    }
+                   
+                }
+               
+                if (!empty($ticker) || !is_null($ticker)) {
+                    $view->with('ticker', $ticker);
+                }
             }
 
             if ($search_sonic && $search_sonic->exists()) {
@@ -99,15 +127,14 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
 
-             if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
+            if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
                 if (count($return_notes) > 0) {
-                      foreach($return_notes as $key => $note){
-                        if(isset($key)){
-                            $shipper_return_note_ticker .= ' '.PHP_EOL.PHP_EOL."(Total Shipments " . $note['count'] . " are returned back to you in safe and sound condition today under Return Note Number " . $key . ", In case of any query regarding these shipments you may respond us back in 48 hours)." .PHP_EOL.PHP_EOL;
-                        }  
+                    foreach ($return_notes as $key => $note) {
+                        if (isset($key)) {
+                            $shipper_return_note_ticker .= ' ' . PHP_EOL . PHP_EOL . "(Total Shipments " . $note['count'] . " are returned back to you in safe and sound condition today under Return Note Number " . $key . ", In case of any query regarding these shipments you may respond us back in 48 hours)." . PHP_EOL . PHP_EOL;
+                        }
                     }
                     $view->with('shipper_return_note_ticker', $shipper_return_note_ticker);
-  
                 }
             }
         });
