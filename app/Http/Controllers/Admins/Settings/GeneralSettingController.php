@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admins\settings;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\http\models\admin\settings\GeneralSetting;
+use App\Http\Models\Admin\Settings\GeneralSetting;
 use Carbon\Carbon;
 
 class GeneralSettingController extends Controller
