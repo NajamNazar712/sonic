@@ -138,6 +138,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
+                        <th class="border-primary border-darken-1">Item Description</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
@@ -390,6 +391,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Consignee Address');
+                            head.push('Item Description');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Booking Date');
@@ -417,6 +419,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_excel);
                                 row.push(values.consignee_address);
+                                row.push(values.item_description);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.booking_date);
@@ -493,6 +496,7 @@
                     { data:'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone' ,name:'consignee_phone', class: 'align-middle consignee_phone'},
                     { data:'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    { data:'item_description' ,name:'item_description', class: 'align-middle item_description'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'reason' ,name: 'ssr.name', class: 'align-middle reason'},
                     { data:'booking_date' ,name: 'shipments.created_at', class: 'align-middle booking_date'},
