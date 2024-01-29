@@ -10,10 +10,12 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
 use App\RiderWiseDeliveryNote;
+use App\Http\Models\WeightType;
 use App\Http\Models\Admin\Admin;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\CRM\CRMCount;
@@ -86,7 +88,6 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\WeightType;
 
 
 class AdminReportsController extends Controller
@@ -109,11 +110,13 @@ class AdminReportsController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
+
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
     }
 
     public function qsr_list(Request $request)
@@ -210,7 +213,21 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-            ->select([
+
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('ssjal.shipment_id', '=', 'shipments.id')
+                     ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = shipments.id)'));
+            })
+            
+             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
                 'si.description as description',
@@ -253,10 +270,14 @@ class AdminReportsController extends Controller
                 'cmb.seal_number as seal_number',
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date'
-            ]);
-
-        $type = $request->get('search_types');
+                'sjrp.created_at as rider_picked_status_date',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id'
+            ])
+            ->groupBy('shipments.id');
+            
+            $type = $request->get('search_types');
 
         if ($type && $type == 2) {
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
@@ -290,6 +311,182 @@ class AdminReportsController extends Controller
             })
             ->editColumn('order_id', function ($shipment) {
                 return ($shipment->order_id) ? $shipment->order_id : '-';
+            })
+            ->editColumn('location_status', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                            default:
+                        $scanning_data = null;
+                        break;
+                    }
+    
+                    return ($scanning_data['location_status'] === 1) ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+
+            })
+
+            ->editColumn('latitude', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                    }
+    
+                    return $scanning_data['latitude'] ?? '-';
+                }else{
+                    return '-';
+
+                }
+             
+
+            })
+
+            ->editColumn('longitude', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                            
+                        }
+                    return $scanning_data['longitude'] ?? '-';
+                }else{
+                    return '-';
+                }
+               
+            })
+
+            ->editColumn('status_area_city', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                            
+                        }
+                    return CityArea::where('id',$scanning_data['area_id'])->first()->name ?? City::where('id', $scanning_data['hub_id'])->first()->name ?? '-';
+                }else{
+                    return '-';
+                }            
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
@@ -398,6 +595,12 @@ class AdminReportsController extends Controller
         }
         if ($shipping_mode = $request->get('search_shipping_mode')) {
             $datatable->where('sm.id', '=', $shipping_mode);
+        }
+        if ($search_concerned_status_area = $request->get('search_concerned_status_area')) {
+            $datatable->where('ssjal.area_id', '=', $search_concerned_status_area)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
+        }
+        if ($search_concerned_status_hub = $request->get('search_concerned_status_hub')) {
+            $datatable->where('ssjal.hub_id', '=', $search_concerned_status_hub)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
         }
         if ($search_qsr = $request->get('search_qsr')) {
             if ($search_qsr != 3) {
@@ -3402,7 +3605,7 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_payment_journey where shipments_payment_journey.shipment_id = shipments.id and shipments_payment_journey.status_id  = 3)')
                     );
             })
-            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date')
+            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.fintech_charges as fintech_charges', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment', 'sjfa.created_at as first_attempt_date', 'spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
@@ -9964,7 +10167,10 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftJoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as arv_date', 'arv_date.shipment_id', '=', 'shipments.id')
-            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight'])
+            ->leftJoin('admins as user', 'user.id', '=', 'arv_date.admin_id')
+            ->leftJoin('cities as hub', 'hub.id', '=', 'user.default_hub_id')
+            ->leftJoin('city_areas as area', 'area.id', '=', 'user.area_id')
+            ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name','sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges' ])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
 
@@ -9990,17 +10196,25 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
-            ->addColumn('difference', function ($shipment) {
-                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
-                return $difference;
-            })
             ->addColumn('weighted_as', function ($shipment) {
                 if ($shipment->length != null) {
                     return 'Volumetric';
                 } else {
                     return 'Dense';
                 }
+            })
+            ->addColumn('range_difference', function ($shipment){
+                $range_difference = round($shipment->range_down_shipper_weight - $shipment->range_down_arrival_weight, 2);
+                return $range_difference;
+            })
+            ->addColumn('difference', function ($shipment){
+                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
+                return $difference;
+            })->addColumn('charges_diff', function ($shipment){
+                $charges_diff = $shipment->shipper_weight_charges - $shipment->arrival_weight_charges;
+                return $charges_diff;
             });
+
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
             $datatable->where('shipments.shipping_mode_id', $search_shipping_mode);
         }
@@ -12310,6 +12524,26 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
                     );
             })
+
+            
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+
             ->select( 
                 'shipments.id as shipment_id', 
                 'shipments.tracking_number',  
@@ -12329,8 +12563,12 @@ class AdminReportsController extends Controller
                 'dcz.name as destination_zone',
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
-                'si.quantity as quantity'
-            );
+                'si.quantity as quantity',
+                'shipments.shipper_status_id as shipper_status_id',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id'
+            )->groupBy('shipments.id');
             
             if ($search_shippers = $request->get('search_shippers')) {
                 $shipments->whereIn('u.id', $search_shippers);
@@ -12362,11 +12600,51 @@ class AdminReportsController extends Controller
 
             $shipments = $shipments->get();
 
+            
+
             $data = [];
 
             if(count($shipments) > 0)
             {
                 foreach ($shipments as $key => $shipment) {
+                    if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                        $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                            $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                 ->where('sj.id', '=', $shipment->journey_latest_id);
+                        })
+                        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                        ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                        ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                        //check for cases
+                        switch ($shipment->latest_shipper_status_id) {
+                            case 2:
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                                break;
+                            case 3:
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                break;
+                            case 4:
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                                break;
+                            case 5:
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                                break;
+                            case 11:
+                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                                break;
+                            case 23:
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                break;
+                            case 53:
+                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                                break;
+                                default:
+                            $scanning_data = null;
+                            break;
+                        }
+                    }else{
+                        $scanning_data = '-';
+                    }
 
                     $data[$key]['s_no'] =$key+1;
                     $data[$key]['tracking_number'] = $shipment->tracking_number;
@@ -12400,6 +12678,18 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
+                    $data[$key]['status_area_city'] = '-';
+                    $cityArea = CityArea::where('id', optional($scanning_data)->area_id)->first();
+                    $city = City::where('id', optional($scanning_data)->hub_id)->first();
+                    
+                    if ($cityArea !== null) {
+                        $data[$key]['status_area_city'] = $cityArea->name;
+                    } elseif ($city !== null) {
+                        $data[$key]['status_area_city'] = $city->name;
+                    }                    
+                    $data[$key]['location_status'] = isset($scanning_data->location_status) ? ($scanning_data->location_status == 1 ? 'On-site' : 'Off-site') : '-';
+                    $data[$key]['longitude'] = $scanning_data->longitude ?? '-';
+                    $data[$key]['latitude'] = $scanning_data->latitude ?? '-';
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
                     $data[$key]['current_remarks'] = '-';
@@ -12667,7 +12957,7 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub','Status Area/City', 'Location Status', 'Longitude', 'Latitude','Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
                 
                 $data = array_merge($data_header, $data);
     
@@ -12711,9 +13001,8 @@ class AdminReportsController extends Controller
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 
     
-                $file_name_without_path = "reports/operation_performance_reports/operations_performance_report_" . $date_file_name  . ".xlsx";
+                $file_name_without_path = "reports/operations_performance_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/' . $file_name_without_path;
-    
                 $writer->save($file_name);
     
                 return ['status' => 1, 'file_name' => $file_name_without_path];

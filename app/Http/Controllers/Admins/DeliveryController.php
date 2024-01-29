@@ -2,124 +2,126 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\EmployeeAttendanceController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentOpenBoxJourneyController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\Shippers\ShipperShipmentBookController;
-use App\Http\Controllers\Webhook\FinalChargesWebhookController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\DeliveryRelation;
-use App\Http\Models\Admin\RcpAssignedAgent;
-use App\Http\Models\Admin\RcpAssignedShipment;
-use App\Http\Models\Admin\RcpAssignedShipmentLog;
-use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
-use App\Http\Models\Admin\AgentCallMonitoring;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
-use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
-use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
-use App\Http\Models\Admin\OperationRidersCategory;
-use App\Http\Models\Admin\PettyCashStatement;
-use App\Http\Models\Admin\PickupNoteStationDepositNote;
-use App\Http\Models\Admin\PODImage;
-use App\Http\Models\Admin\ReplacementToRegularLog;
-use App\Http\Models\Admin\Retail\RetailCashDeposit;
-use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\Http\Models\Admin\RetailPickupNote;
-use App\Http\Models\Admin\RetailPickupNoteShipment;
-use App\Http\Models\Admin\RiderCategoryByPass;
-use App\Http\Models\Admin\ShipmentOnHold;
-use App\Http\Models\Admin\StationDepositNote;
-use App\Http\Models\Admin\StationDepositNoteAdjustment;
-use App\Http\Models\Admin\StationDepositNoteLog;
-use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\Http\Models\Admin\TraxPayTransaction;
-use App\Http\Models\Admin\Vigilance\VigilanceVerification;
-use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
-use App\Http\Models\BanksList;
-use App\Http\Models\BookingType;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\CargoConsignmentShipment;
+use Carbon\Carbon;
 use App\Http\Models\City;
-use App\Http\Models\CityArea;
-use App\Http\Models\ConsigneeLocation;
-use App\Http\Models\ConsigneeRefusedReason;
-use App\Http\Models\ConsigneeShipmentLocation;
-use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\DeliveryCallVerificationRatio;
-use App\Http\Models\DeliveryNoteRequests;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\InterceptReBookRequest;
-use App\Http\Models\InterceptReBookRequestHistory;
-use App\Http\Models\MisroutedHistory;
-use App\Http\Models\Notification;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestHistory;
-use App\Http\Models\RestrictedCityIntercept;
-use App\Http\Models\RestrictParcelsAttempt;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderDeliveryNoteRequest;
+use App\Http\Models\Route;
+use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Helpers\PayfastApiCall;
+use App\Jobs\RCPSmsToConsignee;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\ShipmentOtp;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Notification;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShippingMode;
+use App\Jobs\CountFintechCharges;
+use App\Http\Models\Consolidation;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\Route;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentDistributionProduct;
-use App\Http\Models\ShipmentInformationLog;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\WarehouseStock;
-use App\Http\Models\WarehouseStockRequest;
-use App\Http\Models\WarehouseStockRequestHistory;
-use App\Http\Models\Zone;
-use App\Jobs\ProcessAgentCallMonitoring;
-use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
-use App\Jobs\ProcessOneLinkExpireDeliveryNote;
-use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
-use App\Jobs\ProcessTraxPayExpireDeliveryNote;
-use App\Jobs\RCPSmsToConsignee;
-use App\Jobs\CountFintechCharges;
-use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
-use App\RiderAssignedHubForDeliveryNote;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\PODImage;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WarehouseStock;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Jobs\SwichPaymentGatewayApi;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\MisroutedHistory;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Admin\DeliveryNote;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessAgentCallMonitoring;
+use App\RiderAssignedHubForDeliveryNote;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\DeliveryNoteRequests;
+use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Yajra\Datatables\Datatables;
-use App\Jobs\SwichPaymentGatewayApi;
-use App\Helpers\PayfastApiCall;
-use Illuminate\Support\Facades\Log;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\Admin\DeliveryRelation;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\ConsigneeRefusedReason;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\RestrictParcelsAttempt;
+use App\Http\Models\ShipmentInformationLog;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\CargoConsignmentShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RiderCategoryByPass;
+use App\Http\Models\ConsigneeShipmentLocation;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\StationDepositNoteLog;
+use App\Http\Models\ShipmentDistributionProduct;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
+use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\WarehouseStockRequestHistory;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequest;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
+use App\Http\Models\Admin\PickupNoteStationDepositNote;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Models\Admin\Vigilance\VigilanceVerification;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
+use App\Http\Controllers\Webhook\FinalChargesWebhookController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
+use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+
 class DeliveryController extends Controller
 {
 
@@ -144,6 +146,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
+    
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
@@ -222,7 +225,29 @@ class DeliveryController extends Controller
             })
             ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
+        
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
 
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('ssjal.shipment_id', '=', 'shipments.id')
+                     ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = shipments.id)'));
+            })
+            
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',
@@ -257,15 +282,19 @@ class DeliveryController extends Controller
                 'ca.name as area',
                 'r.name as last_rider',
                 'z.name as d_zone',
-                'r.trax_id as rider_trax_id'
+                'r.trax_id as rider_trax_id',
+                'shipments.shipper_status_id as shipper_status_id',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id'
+
             )
 
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id', $status);
-            // ->groupBy('r.id');
-
+            ->whereIn('shipments.shipper_status_id', $status)
+            ->groupBy('shipments.id');
 
 
         if (session('role_id') != 1) {
@@ -436,7 +465,183 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
+            }) 
+            ->editColumn('location_status', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                            default:
+                        $scanning_data = null;
+                        break;
+                    }
+    
+                    return ($scanning_data['location_status'] === 1) ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+
+            })
+
+            ->editColumn('latitude', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                    }
+    
+                    return $scanning_data['latitude'] ?? '-';
+                }else{
+                    return '-';
+
+                }
+             
+
+            })
+
+            ->editColumn('longitude', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                            
+                        }
+                    return $scanning_data['longitude'] ?? '-';
+                }else{
+                    return '-';
+
+                }
+               
+            })->editColumn('status_area_city', function ($shipment) {
+                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
+                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
+                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                             ->where('sj.id', '=', $shipment->journey_latest_id);
+                    })
+                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
+                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
+                    //check for cases
+                    switch ($shipment->latest_shipper_status_id) {
+                        case 2:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                            break;
+                        case 3:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                            break;
+                        case 4:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                            break;
+                        case 5:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                            break;
+                        case 11:
+                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                            break;
+                        case 23:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                            break;
+                        case 53:
+                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                            break;
+                        default:
+                            $scanning_data = null;
+                            break;
+                            
+                        }
+                    return CityArea::where('id',$scanning_data['area_id'])->first()->name ??  City::where('id',$scanning_data['hub_id'])->first()->name ?? '-';
+                }else{
+                    return '-';
+                }            
             });
+            
         if ($mode = $request->get('search_shipping_mode')) {
 
             $datatables->where('sm.id', '=', $mode);
@@ -444,6 +649,13 @@ class DeliveryController extends Controller
 
         if ($request->get('star_shipper_filter') == 1) {
             $datatables->where('sts.status', 1);
+        }
+
+        if ($search_concerned_status_area = $request->get('search_concerned_status_area')) {
+            $datatables->where('ssjal.area_id', '=', $search_concerned_status_area)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
+        }
+        if ($search_concerned_status_hub = $request->get('search_concerned_status_hub')) {
+            $datatables->where('ssjal.hub_id', '=', $search_concerned_status_hub)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
         }
 
         return $datatables->make(true);
@@ -795,7 +1007,7 @@ class DeliveryController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $class = 'complaint_row';
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                         $consolidation_details = self::check_consolidation($shipment->id);
                                         $consolidation_flag = FALSE;
 
@@ -875,7 +1087,7 @@ class DeliveryController extends Controller
                                     if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                         $class = 'complaint_row';
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
+                                    ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                     $consolidation_details = self::check_consolidation($shipment->id);
 
                                     $consolidation_flag = FALSE;
@@ -947,7 +1159,7 @@ class DeliveryController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 4, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment->id ,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -7280,6 +7492,7 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('delivery_note_shipments', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
@@ -7293,6 +7506,19 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'delivery_note_shipments.shipment_id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
+                    );
+            })
+            
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
+                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
+            })
             
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 
             'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 
@@ -7302,7 +7528,8 @@ class DeliveryController extends Controller
             'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
             'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type', 
             'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 
-            'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
+            'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount',
+            'ssjal.location_status as location_status','ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->groupBy('delivery_notes.id');
@@ -7546,6 +7773,31 @@ class DeliveryController extends Controller
                 } else {
                     return $query->where('riders.operation_rider_id', 2);
                 }
+            })
+            ->editColumn('location_status', function ($shipment) {
+                if(isset($shipment->location_status)){
+                    return ($shipment->location_status == 1) ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('latitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $lat = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->latitude;
+                    return $lat;
+                }else{
+                    return '-';
+                }
+            })
+
+            ->editColumn('longitude', function ($shipment) {
+                if(isset($shipment->shipment_scanning_journey_id)){
+                    $long = ShipmentScanningJourney::where('id',$shipment->shipment_scanning_journey_id)->first()->longitude;
+                    return $long;
+                }else{
+                    return '-';
+                }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -7699,7 +7951,7 @@ class DeliveryController extends Controller
                     $data['amount'] = number_format($shipment->amount);
 
 
-                    ShipmentScanningJourneyController::add($shipment->id, 10, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,10,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                     return response()->json(['status' => 1, 'details' => $data, 'overland_cities' => $consignee_cities]);
                 } else {
@@ -8219,7 +8471,7 @@ class DeliveryController extends Controller
                     'fake_status_updated_at' => Carbon::now()
                 ]);
             }
-            ShipmentScanningJourneyController::add($shipment['id'], 5, 1, Auth::id(), null, null);
+            ShipmentScanningJourneyController::add($shipment['id'] ,5,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
             return ['status' => 1, 'success' => 'Fake Status has been removed'];
         }
         return ['status' => 0, 'error' => 'Something went wrong'];
@@ -8418,7 +8670,7 @@ class DeliveryController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,12,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                         return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
                     } else {
@@ -8670,7 +8922,7 @@ class DeliveryController extends Controller
                 $delivery_note_shipment->save();
 
 
-                ShipmentScanningJourneyController::add($shipment->id, 6, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id ,6,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return redirect()->back()->with(['success' => 'Shipment successfully marked as Fake Status!']);
             } else {
                 return redirect()->back()->with(['error' => 'Shipment with given Tracking Number not found in Delivery Note!']);
@@ -9091,7 +9343,7 @@ class DeliveryController extends Controller
             $class = '';
         }
 
-        ShipmentScanningJourneyController::add($shipment->id, 21, 1, Auth::id(), null . null);
+        ShipmentScanningJourneyController::add($shipment->id ,21,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
         return response()->json(['status' => 0, 'details' => ['row_id' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'status' => $journey->shipment_status_shipper->name, 'reason' => $journey->shipment_status_reason->name ?? null, 'remarks' => $journey->remarks, 'status_date' => date('Y-m-d H:i:s', strtotime($journey->created_at)), 'origin' => $shipment->pickup_address->city->name, 'destination' => $shipment->consignee_city->name, 'amount' => $shipment->amount, 'shipper_name' => $shipment->user->name, 'class' => $class]]);
     }
 

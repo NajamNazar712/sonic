@@ -1378,7 +1378,7 @@
                                 var length = '';
                                 var breadth = '';
                                 if(details.order_information.height != null){
-                                    weight += '<td ><strong>Weight </strong><small>(Volumetric)</small></td><td>'+details.order_information.weight+'kg</td>';
+                                    weight += '<td ><strong>Weight </strong><small>(Volumetric) - '+details.weight_recorded_as+'</small></td><td>'+details.order_information.weight+'kg</td>';
                                     height += '<td ><strong>Height</strong></td>'+'<td>'+details.order_information.height+'cm</td>';
                                     length += '<td ><strong>Length</strong></td>'+'<td>'+details.order_information.length+'cm</td>';
                                     breadth += '<td><strong>Breadth</strong></td>'+'<td>'+details.order_information.breadth+'cm</td>';
@@ -1386,7 +1386,7 @@
                                 }
                                 else
                                 {
-                                    weight += '<td ><strong>Weight </strong><small>(Dense)</small></td>';
+                                    weight += '<td ><strong>Weight </strong><small>(Dense) - '+details.weight_recorded_as+'</small></td>';
                                     weight +='<td>' + details.order_information.weight + ' kg</td>';
                                 }
                                 shipment += '<tr>';
@@ -1445,6 +1445,7 @@
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Location</strong></th>'
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
                                 shipment += '<th><strong>Rider</strong></th>';
@@ -1452,22 +1453,27 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        if(history.image_audio_location == undefined) {
-                                            shipment += '<td>-</td>';}
-                                        else
-                                            shipment += '<td>' + history.image_audio_location + '</td>';
-                                        shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                        shipment += '<td>' + history.remarks + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '<td>' + history.city + '</td>';
-                                        shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                        shipment += '<td>' + history.ip + '</td>';
-                                        shipment += '<td>' + history.rider + '</td>';
-                                        shipment += '</tr>';
+                                    var googleMapsUrl = '-';
+                                    if (history.area_log.latitude && history.area_log.longitude ) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                        googleMapsUrl = '<a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>';
+                                    }
+                                    var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + formattedDateTime + '</td>';
+                                    shipment += '<td>' + history.status + '</td>';
+                                    shipment += '<td>' + (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '</td>'; 
+                                    shipment += '<td>' + (history.status_reason || '') + '</td>';
+                                    shipment += '<td>' + history.remarks + '</td>';
+                                    shipment += '<td>' + history.user + '</td>';
+                                    shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + ( (history.area_log.area != '-') ? history.area_log.area : history.area_log.city) + ' | '+ googleMapsUrl + '</td>';
+                                    shipment += '<td>' + history.received_or_refused_by + '</td>';
+                                    shipment += '<td>' + history.ip + '</td>';
+                                    shipment += '<td>' + history.rider + '</td>';
+                                    shipment += '</tr>';
                                 });
+
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -1578,17 +1584,31 @@
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Location</strong></th>';
+                                    shipment += '<th><strong>User Created By</strong></th>';
+                                    shipment += '<th><strong>User Received By</strong></th>';
+
                                     shipment += '</tr>';
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
+                                        var googleMapsUrl = '-';  
+                                        if (history.area_log.latitude && history.area_log.longitude ) {
+                                            googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                            googleMapsUrl = '<a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>';
+                                        }
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
+                                        shipment += '<td>' + (history.area_log ? history.area_log.location_status : '') + ' | ' + (history.area_log ? history.area_log.area : '') + ' | '+ googleMapsUrl + '</td>';
+                                        shipment += '<td>' + history.user_created_by + '</td>';
+                                        shipment += '<td>' + history.user_received_by + '</td>';
+
                                         shipment += '</tr>';
                                     });
+
 
                                     shipment += '</tbody>';
                                     shipment += '</table>';

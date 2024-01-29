@@ -3021,7 +3021,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,13,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
@@ -3135,8 +3135,7 @@ class AdminFinanceController extends Controller
                 if ($shipment->booking_type_id == 2) {
                     $details['items'] = $shipment->items;
                 }
-
-                ShipmentScanningJourneyController::add($shipment->id, 14, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id ,14,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'warning' => $message, 'details' => $details];
             } else {
                 return ['status' => 1, 'error' => 'Shipment has already been Delivered'];
@@ -4594,7 +4593,7 @@ class AdminFinanceController extends Controller
         }
 
 //        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-        $pending_payments = DB::connection('reports')->table('pending_payments')
+        $pending_payments = DB::connection('mysql')->table('pending_payments')
             ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
@@ -5292,7 +5291,7 @@ class AdminFinanceController extends Controller
 
     public function make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;
@@ -13246,7 +13245,7 @@ class AdminFinanceController extends Controller
 
     public function retail_make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;

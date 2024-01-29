@@ -393,22 +393,22 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(13, '01:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(11, '01:00')->runInBackground();
         $schedule->command('email:revenuereportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(13, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
-        $schedule->command('email:retailsalesreport')->monthlyOn(13, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreport')->monthlyOn(11, '01:00')->runInBackground();
         $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
 
-        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(13, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
         $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();

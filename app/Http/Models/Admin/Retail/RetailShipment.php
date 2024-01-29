@@ -18,4 +18,7 @@ class RetailShipment extends Model
     public function shipper() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipperInfo', 'shipper_account_no', 'id');
     }
+    public function retail_user() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailUser', 'retail_user_id', 'id');
+    }
 }

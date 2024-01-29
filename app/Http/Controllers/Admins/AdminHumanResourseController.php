@@ -81,6 +81,7 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocationDeliveryNote;
+use App\Http\Models\HR\EducationList;
 use App\Http\Traits\CommonTrait;
 
 class AdminHumanResourseController extends Controller
@@ -454,7 +455,8 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_marital_statuses as ems', 'ems.id', '=', 'employees.marital_status_id')
             ->leftjoin('employee_shifts as ess', 'ess.id', '=', 'employees.shift_id')
 			->leftjoin('city_areas as ca', 'ca.id', '=', 'employees.area_id')
-            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd', 
+            ->leftjoin('education_lists as el','el.id','=','employees.education_id')
+            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd',
             'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 
             'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 
             'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 
@@ -465,9 +467,9 @@ class AdminHumanResourseController extends Controller
             'rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 
             'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id',
             'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name',
-            'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth',
+            'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth','employees.cnic_issue_date' ,'employees.cnic_expiry_date',
             'employees.emergency_contact_person as emergency_contact_person','employees.emergency_contact as emergency_contact','er.name as religion', 'ems.name as martial_status', 
-            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name'])
+            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name','el.name as education_name'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -1367,6 +1369,7 @@ class AdminHumanResourseController extends Controller
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
+        $education_list = EducationList::select('id','name')->where('status',1)->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
   		 $areas_list = CityArea::where('city_id',$employee->city_id)->where('status',1)->get();
            $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
@@ -1375,7 +1378,7 @@ class AdminHumanResourseController extends Controller
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
-        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','intended_url','areas_list'));
+        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','intended_url','areas_list','education_list'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
@@ -1390,6 +1393,7 @@ class AdminHumanResourseController extends Controller
             'email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
             'personal_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
             'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
+            'education_id' => 'bail|required|integer|digits_between:1,10|exists:education_lists,id'
         ]);
 
         $super_admins = [3, 5, 7, 665];
@@ -1425,6 +1429,7 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+        $employee->education_id=$request->education_id;
         if ($role_flag == true) {
             if ($designation_toggle_val == 'true') {
                 if ($employee->designation_id != $request->designation) {
