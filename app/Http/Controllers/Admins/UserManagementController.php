@@ -384,7 +384,7 @@ class UserManagementController extends Controller
     {
         $user_ids = explode(',', $request->id);
         foreach ($user_ids as $user_id) {
-
+            $update_user = false; 
             foreach ($request->input('hubs') as $hub_id) {
                 $admin_hub_exist = AdminHub::where('admin_id', $user_id)->where('hub_id', $hub_id)->first();
 
@@ -395,7 +395,14 @@ class UserManagementController extends Controller
                     $admin_hub->admin_id = $user_id;
 
                     $admin_hub->save();
+                    $update_user = true;
                 }
+            }
+            if($update_user){
+                $admin = Admin::find($user_id);
+                $admin->updated_by = Auth::id();
+                $admin->updated_at = Carbon::now();
+                $admin->save();
             }
         }
         return redirect()->back()->with(['status' => 1, 'success' => "Hubs has been Assigned successfully!"]);
