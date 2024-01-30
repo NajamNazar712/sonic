@@ -417,6 +417,7 @@ class TeamLeadDashboardController extends Controller
         try {
             $employeeIds = [];
         
+            //since we are getting employee id and we have to save admin id in table 
             // If employee_id is present, add it to the array
             if ($request->has('employee_id')) {
                 $employeeIds[] = $request->employee_id;
@@ -505,7 +506,8 @@ class TeamLeadDashboardController extends Controller
     {
         try {
             $validations = [
-                'employee_id' => 'required',
+                'employee_id' => 'required_without:employee_id_bulk',
+                'employee_id_bulk' => 'required_without:employee_id',
                 'add_additional_days' => 'required',
             ];
 
@@ -514,16 +516,34 @@ class TeamLeadDashboardController extends Controller
             if ($validate->fails()) {
                 return response()->json(['status' => 2, 'errors' => $validate->errors()]);
             } else {
-                $employee_ids = explode(',', $request->employee_id);
                 $error = [];
                 $assigned = [];
-                foreach($employee_ids as $employee_id){
+                $AdminIds = [];
+        
+            //since we are getting employee id and we have to save employee id as admin id in EmployeeAdditionalDay table 
+            if ($request->has('employee_id')) {
+                $admin = Admin::where('employee_id', $request->employee_id)->first();
+                    if ($admin) {
+                        $AdminIds[] = $admin->id;
+                    }
+            }
+            $employee_id_bulks = explode(',', $request->employee_id_bulk);
+            // If employee_id_bulk is present, add it to the array
+            if ($request->has('employee_id_bulk')) {
+                foreach ($employee_id_bulks as $bulkValue) {        
+                    $admin = Admin::where('employee_id', $bulkValue)->first();
+                    if ($admin) {
+                        $AdminIds[] = $admin->id;
+                    }
+                }
+            }
+            foreach ($AdminIds as $adminid) {
                     $date = date('Y-m-d', strtotime($request->add_additional_days));
-                    $is_date_assigned = EmployeeAdditionalDay::where('employee_id', $employee_id)->where('working_days', $date);
-                    $employee = Employee::where('id', $employee_id)->first()->name;
+                    $is_date_assigned = EmployeeAdditionalDay::where('employee_id', $adminid)->where('working_days', $date);
+                    $employee = Admin::where('id', $adminid)->first()->name;
                     if (!$is_date_assigned->exists()) {
                         $employee_additional_days = new EmployeeAdditionalDay();
-                        $employee_additional_days->employee_id = $employee_id;
+                        $employee_additional_days->employee_id = $adminid;
                         $employee_additional_days->working_days = $date;
                         $employee_additional_days->save();
                         $assigned[] = $employee;
