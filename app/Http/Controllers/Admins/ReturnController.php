@@ -115,8 +115,6 @@ class ReturnController extends Controller
     }
 
     private function shipments(){
-
-
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
         ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
         // ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')

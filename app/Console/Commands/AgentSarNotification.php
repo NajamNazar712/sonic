@@ -117,6 +117,44 @@ class AgentSarNotification extends Command
                     $this->data_rv_shipment_assign_agent_details($data);
                 }
             }
+
+            // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
+            // the system will automatically update the shipment status to "Return Confirm."
+            $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
+                ->where('rv_state_id', 2)
+                ->where('updated_at', '>', $currentDateTime->subHours(24))
+                ->get();
+
+            if ($refusal_call_shipment_update->isNotEmpty()) {
+                foreach ($refusal_call_shipment_update as $shipment) {
+                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+
+                    $request = $shipment->request->add([
+                        'shipment_id' => $shipment->shipment_id, 
+                        'remarks' => $shipment->remarks, 
+                        'rv_assign_agent_sub_status_id' => null,
+                    ]);
+                    $this->return_confirm($request);
+
+                    $data = [
+                        'rv_shipment_assign_agent_id' => $shipment->id,
+                        'agent_id' => $shipment->agent_id,
+                        'shipments_journey_id' => $shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
+                        'shipment_id' => $shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id,
+                        'rv_state_id' => $shipment->rv_state_id,
+                        'updated_type_id' => 1,
+                        'updated_by_id' =>  Null,
+                        'is_fake_status' => $shipment->is_fake_status,
+                        'rv_fake_status_id' => $shipment->rv_fake_status_id,
+                        'remarks' => $shipment->remarks,
+                        'call_to_id' => $shipment->call_to_id,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($data);
+                }
+            }
         } catch (\Throwable $th) {
             $this->createRvCronLog($th->getMessage());
         }
