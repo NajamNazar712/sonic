@@ -2964,6 +2964,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ibft_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ibft_report_list')->name('list');
         });
+
+        Route::prefix('rv_action_count_report')->name('rv_action_count_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_action_count_report_index')->name('index');
+        });
     });
 
     //Reports end

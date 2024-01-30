@@ -13465,5 +13465,19 @@ class AdminReportsController extends Controller
 
         return $ibft_report->make(true);
     }
+    public function rv_action_count_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 733);
+
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        // ->where('admin_roles.department_id',3)
+                        ->where('a.status',1)
+                        ->select('a.id', 'a.name')->get();
+
+        return view('admin.reports.rv_report.index', [
+            'shippers' => $shippers, 'agents' => $agents,
+        ]);
+    }
 
 }
