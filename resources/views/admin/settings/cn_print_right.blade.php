@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'CN Print Rights')
+@section('title', 'CN Print Rights Restriction')
 
 @section('content')
     <div class="app-content content">
@@ -8,7 +8,7 @@
 
             <div class="content-body">
                 <h1 class="mb-1">
-                    CN Print Rights
+                    CN Print Rights Restriction 
                 </h1>
 
                 <div class="card">
