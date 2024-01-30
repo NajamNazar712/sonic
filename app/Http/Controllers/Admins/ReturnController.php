@@ -487,7 +487,8 @@ class ReturnController extends Controller
 
             ->editColumn('assigned_agent', function ($shipment) {
                 if(isset($shipment->shId) && $shipment->rv_state_id == 1){
-                    $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
+                    // $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
+                    $latest_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment->shId)->latest()->first();
                     if(isset($latest_shipment)){
                         $agent_name = Admin::where('id', $latest_shipment->agent_id)->first()->name;
                         return $agent_name;
@@ -495,8 +496,14 @@ class ReturnController extends Controller
                         return '-';
                     }
                 }
-            }) 
-
+            })
+            ->filterColumn('assigned_agent.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('assigned_agent.name', 'like', '%' . $keyword . '%')
+                    ->where('new_ras.rv_state_id', 1);
+                });
+            })
+            
             ->editColumn('last_agent_name', function ($shipment) {
                 if(isset($shipment->last_agent_name)){
                     $agent_name = Admin::where('id', $shipment->last_agent_name)->first()->name;
@@ -504,6 +511,17 @@ class ReturnController extends Controller
                 }else{
                     return '-';
                 }
+            })
+            //last agent name filter
+            ->filterColumn('rvsaad.agent_id', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('assigned_agent.name', 'like', '%' . $keyword . '%')
+                               ->whereIn('rvsaad.rv_state_id', [2, 3])
+                               ->where(function ($nested_sub_query) {
+                                   $nested_sub_query->where('rvsaad.rv_assign_agent_status_id', '!=', 7)
+                                                   ->orWhereNull('rvsaad.rv_assign_agent_status_id');
+                               });
+                });
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {

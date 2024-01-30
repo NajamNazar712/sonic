@@ -354,7 +354,6 @@
                                 <th class="border-primary border-darken-1">Address</th>
                                 <th class="border-primary border-darken-1">Sub Station</th>
                                 <th class="border-primary border-darken-1">Collection Amount</th>
-                                {{--   <th class="border-primary border-darken-1">RCP SMS Count</th> --}}
                                 <th class="border-primary border-darken-1">Shipping Mode</th>
                                 <th class="border-primary border-darken-1">Service Type</th>
                                 <th class="border-primary border-darken-1">Status</th>
@@ -2324,14 +2323,14 @@
                         {data: 'confirmation_on',name: '',class: 'align-middle confirmation_on', orderable: false,searchable: false},
                         {data: 'delivery_attempt',name: '',class: 'align-middle reattempts', orderable: false,searchable: false},
                         {data: 'reattempts',name: 'sret.created_at',class: 'align-middle reattempts', orderable: false,searchable: false},
-                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent', orderable: false,searchable: false},
+                        {data: 'assigned_agent',name: 'assigned_agent.name',class: 'align-middle assigned_agent'},
                         {data: 'assigned_at',name: 'new_ras.created_at',class: 'align-middle assigned_at'},
                         {data: 'assigned_by',name: 'asadby.name',class: 'align-middle assigned_by'},
                         {data: 'consolidation',name: 'consolidation',class: 'align-middle consolidation', orderable: false,searchable: false},
                         {data: 'consolidated_id',name: 'consolidations.consolidation_id',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'rvsaa_unresponsive_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'unresponsive_attempt_time',name: 'rvsaa.unresponsive_attempt_time',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'last_agent_name',name: 'rvsaad.agent_id',class: 'align-middle assigned_agent' },
+                        {data: 'unresponsive_attempt_time',name: 'rvsaa.unresponsive_attempt_time',class: 'align-middle consolidated_id'},
+                        {data: 'last_agent_name',name: 'rvsaad.agent_id',class: 'align-middle assigned_agent'},
                         {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
 
                     ],
