@@ -89,8 +89,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="assign_agent_hubs" novalidate="novalidate" method="post"
-                    action="{{ route('admin.team_lead.assign_zone_agent') }}">
+                <form id="assign_agent_hubs" novalidate="novalidate" method="post" action="{{ route('admin.team_lead.assign_zone_agent') }}">
                     @csrf
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
@@ -744,6 +743,7 @@
                             // employee ids are saving in selected_rows
                             if (selected_rows.length > 0) {
                                 $('#search_origin').val('').trigger('change'); //empty field opening on modal
+                                $('#AssignHubModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
                                 $('#AssignHubModal').modal('show');
                             }
                         }

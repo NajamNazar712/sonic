@@ -91,10 +91,75 @@
                                         </div>
                                     </div>
                                 </div>
-            
-            
+
                                 <div class="col-3">
-                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
+                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        {{-- <h3 class="text-white">
+                                                            <p id="total_sar" class="d-inline">
+                                                                {{ ($total_of_shipments) }}</p>
+                                                        </h3> --}}
+                                                        <span>Intercepted</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-3" >
+                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                            <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p
+                                                                id="in_process_percentage" class="d-inline">
+                                                                {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)
+                                                        </h3>
+                                                        <span>Reattempted</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-3" >
+                                    <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-check text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white">
+                                                            <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (
+                                                            <p id="in_process_for_activation_percentage" class="d-inline">
+                                                                {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>
+                                                            %)
+                                                        </h3>
+                                                        <span>Returned</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-3" >
+                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
@@ -103,11 +168,9 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
-                                                            <p id="total_sar" class="d-inline">
-                                                                {{ count($shipper_advised_requested) }}</p>
-                                                            ({{ round($percentage_shipper_advised_requested) }}%)
+                                                            <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
                                                         </h3>
-                                                        <span>Shipper Advised Requested </span>
+                                                        <span>On Hold</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -135,22 +198,21 @@
                                         </div>
                                     </div>
                                 </div>
-            
-                                <div class="col-3" >
-                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
+                                <div class="col-3">
+                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                        <i class="icon-flag text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
-                                                            <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p
-                                                                id="in_process_percentage" class="d-inline">
-                                                                {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)
+                                                            <p id="total_sar" class="d-inline">
+                                                                {{ count($shipper_advised_requested) }}</p>
+                                                            ({{ round($percentage_shipper_advised_requested) }}%)
                                                         </h3>
-                                                        <span>Pending Tickets</span>
+                                                        <span>Shipper Advised Requested </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -158,50 +220,7 @@
                                     </div>
                                 </div>
             
-                                <div class="col-3" >
-                                    <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-check text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                            <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (
-                                                            <p id="in_process_for_activation_percentage" class="d-inline">
-                                                                {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>
-                                                            %)
-                                                        </h3>
-                                                        <span>No. of Inprocess Ticket</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-            
-                                    <div class="col-3" >
-                                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
-                                            <div class="card-content">
-                                                <div class="card-body">
-                                                    <div class="media d-flex">
-                                                        <div class="align-self-center">
-                                                            <i class="icon-flag text-white font-large-2 float-left"></i>
-                                                        </div>
-                                                        <div class="media-body text-white text-right">
-                                                            <h3 class="text-white">
-                                                                <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
-                                                            </h3>
-                                                            <span>Online/ Available Agents </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-            
-                                    <div class="col-3" >
+                                    {{-- <div class="col-3" >
                                         <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
                                             <div class="card-content">
                                                 <div class="card-body">
@@ -221,9 +240,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
             
-                                    <div class="col-3" >
+                                    {{-- <div class="col-3" >
                                         <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
                                             <div class="card-content">
                                                 <div class="card-body">
@@ -243,9 +262,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
             
-                                    <div class="col-3" >
+                                    {{-- <div class="col-3" >
                                         <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
                                             <div class="card-content">
                                                 <div class="card-body">
@@ -263,7 +282,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
                             </div>
                         </div>
                     </div>
