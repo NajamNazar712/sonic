@@ -219,10 +219,14 @@ class ReturnV2Controller extends Controller
                                 }
 
                                 $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
-                                ->where('delivery_note_shipments.shipment_id', $shipment->id)
+                                ->where('delivery_note_shipments.shipment_id', '=', function ($query) use ($shipment) {
+                                    $query->select(DB::raw('max(id)'))
+                                        ->from('delivery_note_shipments')
+                                        ->where('delivery_note_shipments.shipment_id', $shipment->id);
+                                })
                                 ->where('dn.pending_status', 0)
-                                ->orderBy('delivery_note_shipments.id', 'desc')
                                 ->first();
+        
                                 
                                 //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
                                 if($shipment_status){
