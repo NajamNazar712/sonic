@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Last Mile App Report')
+@section('title', 'Cargo Manifest Report')
 
 @section('content')
     <h1 class="mb-1">
@@ -16,7 +16,7 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="search_rider" id="search_rider" class="form-control select2">
+                                    <select name="select_origin" id="select_origin" class="form-control select2">
                                         @foreach($riders as $rider)
                                             <option value="{{$rider->id}}">{{$rider->name}}</option>
                                         @endforeach
@@ -25,7 +25,7 @@
                             </div>
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="search_hub" id="search_hub" class="form-control select2">
+                                    <select name="select_destination" id="select_destination" class="form-control select2">
                                         @foreach($hubs as $city)
                                             <option value="{{$city->id}}">{{$city->name}}</option>
                                         @endforeach
@@ -34,7 +34,7 @@
                             </div>
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="search_zone" id="search_zone" class="form-control select2">
+                                    <select name="select_sub_segment" id="select_sub_segment" class="form-control select2">
                                         @foreach($zones as $zone)
                                             <option value="{{$zone->id}}">{{$zone->name}}</option>
                                         @endforeach
@@ -42,16 +42,6 @@
                                 </fieldset>
                             </div>
 
-                            <div class="col-4 mt-1">
-                                <fieldset class="form-group input-group">
-                                    <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
-                                </fieldset>
-                            </div>
-                            <div class="col-4 mt-1">
-                                <fieldset class="form-group input-group">
-                                    <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                                </fieldset>
-                            </div>
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
@@ -61,7 +51,7 @@
                                     </div>
                                     <input type="text" name="search_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_from" placeholder="Delivery Note Created Date (From)" title="Delivery Note Created Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                                           id="search_date_from" placeholder="Delivery Note Created Date (From)" title="Arrival Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
@@ -73,7 +63,7 @@
                                     </div>
                                     <input type="text" name="search_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_to" placeholder="Delivery Note Created Date (To)" title="Delivery Note Created Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                                           id="search_date_to" placeholder="Delivery Note Created Date (To)" title="Arrival Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
 
@@ -90,39 +80,24 @@
                 </div>
 
 
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                <table class="table table-bordered datatable" id="datatable" style="width: 100%;z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1 align-middle" rowspan="2">S.No.</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Trax IDs</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Name</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Zone</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Updated Delivery Date</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Total Shipments</th>
-                        <th class="border-primary border-darken-1 align-middle" colspan="16">
-                            <div class="text-center">Update Via App</div>
+                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Arrived (Up City)</th>
+                        <th class="border-primary border-darken-1 align-middle" colspan="2">
+                            <div class="text-center">Manifested</div>
                         </th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Rider</th>
-                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Admin</th>
+                        <th class="border-primary border-darken-1 align-middle" colspan="2">Without Manifest</th>
+                        <th class="border-primary border-darken-1 align-middle" colspan="2">Misroute</th>
                     </tr>
                     <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">Before 11 AM</th>
-                        <th class="border-primary border-darken-1">11:00</th>
-                        <th class="border-primary border-darken-1">12:00</th>
-                        <th class="border-primary border-darken-1">13:00</th>
-                        <th class="border-primary border-darken-1">14:00</th>
-                        <th class="border-primary border-darken-1">15:00</th>
-                        <th class="border-primary border-darken-1">16:00</th>
-                        <th class="border-primary border-darken-1">17:00</th>
-                        <th class="border-primary border-darken-1">18:00</th>
-                        <th class="border-primary border-darken-1">19:00</th>
-                        <th class="border-primary border-darken-1">20:00</th>
-                        <th class="border-primary border-darken-1">21:00</th>
-                        <th class="border-primary border-darken-1">22:00</th>
-                        <th class="border-primary border-darken-1">23:00</th>
-                        <th class="border-primary border-darken-1">After 23:00</th>
-                        <th class="border-primary border-darken-1">Total Updated Shipments</th>
+                        <th class="border-primary border-darken-1"># of Shipments</th>
+                        <th class="border-primary border-darken-1">%age</th>
+                        <th class="border-primary border-darken-1"># of Shipments</th>
+                        <th class="border-primary border-darken-1">%age</th>
+                        <th class="border-primary border-darken-1"># of Shipments</th>
+                        <th class="border-primary border-darken-1">%age</th>
                     </tr>
                     </thead>
                 </table>
@@ -331,31 +306,22 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+            $('#select_sub_segment').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Zone',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#select_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Hub',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
+            $('#select_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Origin',
                 width:'100%',
                 allowClear:true
             });
-            // $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Search Rider Category',
-            //     width:'100%',
-            //     allowClear:true
-            // })
-            // $('#search_dn_no,#search_tracking_no').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false
-            // });
+           
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -487,15 +453,14 @@
                 ajax: {
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
-                        d.search_rider = $('#search_rider').val();
-                        d.search_rider_cat = $('#search_rider_cat').val();
-                        d.search_zone = $('#search_zone').val();
-                        d.search_hub = $('#search_hub').val();
+                        d.select_origin = $('#select_origin').val();
+                        d.select_origin_cat = $('#select_origin_cat').val();
+                        d.select_sub_segment = $('#select_sub_segment').val();
+                        d.select_destination = $('#select_destination').val();
                         d.search_dn_no = $('#search_dn_no').val();
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-
                     }
                 },
                 rowId: 'id',
@@ -503,29 +468,13 @@
                 columns: [
                     {data: 'id',orderable: false, searchable: false, class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'trax_id', name: 'rider_wise_delivery_note_summaries.trax_id', class: 'align-middle text-center trax_id'},
-                    {data: 'rider_name', name: 'r.name', class: 'align-middle text-center rider'},
-                    {data: 'hub',name:'h.name', class: 'align-middle text-center rider_cat'},
-                    {data: 'zone', name:'z.name', class: 'align-middle text-center total_shipments_link'},
-                    {data: 'delivery_date', name: 'rider_wise_delivery_note_summaries.delivery_date', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'total_shipments_link', class: 'align-middle text-center total_shipments_link', orderable: false, searchable: false},
                     {data: 'before_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'at_11_count',  name:'rider_wise_delivery_note_summaries.at_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_12_count',  name:'rider_wise_delivery_note_summaries.at_12_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_13_count',  name:'rider_wise_delivery_note_summaries.at_13_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_14_count',  name:'rider_wise_delivery_note_summaries.at_14_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_15_count',  name:'rider_wise_delivery_note_summaries.at_15_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_16_count',  name:'rider_wise_delivery_note_summaries.at_16_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_17_count',  name:'rider_wise_delivery_note_summaries.at_17_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_18_count',  name:'rider_wise_delivery_note_summaries.at_18_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_19_count',  name:'rider_wise_delivery_note_summaries.at_19_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_20_count',  name:'rider_wise_delivery_note_summaries.at_20_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_21_count',  name:'rider_wise_delivery_note_summaries.at_21_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_22_count',  name:'rider_wise_delivery_note_summaries.at_22_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_23_count',  name:'rider_wise_delivery_note_summaries.at_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'after_23_count', name:'rider_wise_delivery_note_summaries.after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'total_updated_shipments', name:'rider_wise_delivery_note_summaries.shipment_update_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'before_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_11_count',  name:'rider_wise_delivery_note_summaries.at_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'updated_via_rider', name:'updated_via_rider', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
                     {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
+                    // {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
