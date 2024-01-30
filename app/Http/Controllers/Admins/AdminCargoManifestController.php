@@ -369,18 +369,7 @@ class AdminCargoManifestController extends Controller
                     ->where('gmhh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
-            ->leftjoin('misrouted_history as gmh', function ($join) {
-                $join->on('gmh.shipment_id', '=', 'shipments.id')
-                    ->on('shipments.shipper_status_id', '=', DB::raw(11))
-                    ->where('gmh.id', '=',
-                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
-            })
-            ->leftjoin('misrouted_history as gmhh', function ($join) {
-                $join->on('gmhh.shipment_id', '=', 'shipments.id')
-                    ->on('shipments.shipper_status_id', '=', DB::raw(66))
-                    ->where('gmhh.id', '=',
-                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
-            })
+        
             ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
             ->leftjoin('cities as olddhc', 'olddc.hub_id', '=', 'olddhc.id')
             ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
