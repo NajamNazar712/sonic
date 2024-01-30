@@ -28,6 +28,11 @@ class UpdateCargoManifestBagsTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('cargo_manifest_bags', function (Blueprint $table) {
+            $table->dropColumn('sack_bag_id');
+            $table->dropColumn('is_sack_bag');
+            $table->dropColumn('cmb_1');
+            $table->dropColumn('cmb_2');
+        });
     }
 }

@@ -54,10 +54,13 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            {{-- <th class="border-primary border-darken-1">Date</th>  --}}
-                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Sack Bag No#</th> 
+                            <th class="border-primary border-darken-1">Issue Origin</th>
+                            <th class="border-primary border-darken-1">Last Destination</th>
                             {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Stock Sack Bag</th>
+                            <th class="border-primary border-darken-1">Sack Bag Count</th>
+                            <th class="border-primary border-darken-1">Status</th>
+
                             {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
@@ -292,11 +295,19 @@
                     order: [[1, 'desc']],
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                        // { data:'address_btn', class: 'align-middle text-center shipper_address', orderable: false, searchable: false},
-                        
+                        { data:'sack_bag_no',class: 'align-middle text-center sack_bag_no', orderable: false, searchable: false},
+                        { data:'origin_name',class: 'align-middle text-center origin_name', orderable: false, searchable: false},
                         { data:'destination_name',class: 'align-middle text-center destination_name', orderable: false, searchable: false},
-                        // { data:'stock_sack_bag_btn',class: 'align-middle text-center stock_sack_bag', orderable: false, searchable: false},
-                        { data:'sack_bag_count_btn',class: 'align-middle text-center sack_bag_count', orderable: false, searchable: false},
+                        { data:'bag_count',class: 'align-middle text-center bag_count', orderable: false, searchable: false},
+                        { data:'status',class: 'align-middle text-center status', orderable: false, searchable: false,render:function(data,type,row){
+                            if(row.status==1)
+                            {
+                                return 'Active';
+                            }else{
+                                return 'Inactive';
+                            }
+                        }},
+
                         // { data:'re_used_sack_bag_btn',class: 'align-middle text-center re_used_sack_bag', orderable: false, searchable: false}
                         // { data:'total_sack_bag',class: 'align-middle text-center total_sack_bag', orderable: false, searchable: false},
         

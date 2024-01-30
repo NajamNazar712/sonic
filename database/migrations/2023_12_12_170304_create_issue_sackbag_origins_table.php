@@ -17,13 +17,13 @@ class CreateIssueSackbagOriginsTable extends Migration
             $table->increments('id');
             $table->string('sack_bag_no');
             $table->integer('origin');
-            $table->integer('user_id');
             $table->string('remarks')->nullable();
+            $table->integer('user_id');
             $table->tinyInteger('status')->default(1); //1 active
             $table->tinyInteger('action')->default(0);
             $table->tinyInteger('type')->nullable(); //1 admin
-            $table->integer('created_by')->nullable();
-            $table->integer('udpated_by')->nullable();
+            // $table->integer('created_by')->nullable();
+            // $table->integer('udpated_by')->nullable();
             $table->timestamps();
         });
     }

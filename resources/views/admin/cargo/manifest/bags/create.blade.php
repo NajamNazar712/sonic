@@ -117,10 +117,21 @@
                                                     </div>
                                                 </div>
                                                 <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group ml-lg-2">
+                                                            <input class="form-check-input" type="checkbox" value="" id="is_not_sack_bag_check">
+                                                            <label class="form-check-label" for="flexCheckDefault">
+                                                                Is Not Sack Bag
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" id="sackbag_row">
                                                     <div class="col-6">
                                                         <div class="form-group">
                                                             <label for="origin">Sack Bag</label>
-                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no">
+                                                            <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no" data-rule-required="true" data-msg-required="Sack Bag No is Required">
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -475,45 +486,62 @@
 
                     blockPagePermanently();
 
-                    swal({
-                        text: 'Are you sure you want to submit?',
-                        icon: 'info',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                    }).then(function(confirm) {
-                        if(confirm) {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Your Bag is being created!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            $('#cargo_consignment form .transport_mode').prop("disabled", false);
-                            $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
-                            form.submit();
-                        }
-                        else {
-                            $(form).find('button[type=submit]').prop('disabled', false);
+                    if($("#sack_bag_no").val()!='')
+                    {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your Bag is being created!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                                $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                form.submit();
 
-                            UnblockPagePermanently();
-                        }
-                    });
+                    }else{
+                         swal({
+                            text: 'Are you sure you want to submit without SackBag No#?',
+                            icon: 'info',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            }).then(function(confirm) {
+                            if(confirm) {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'Your Bag is being created!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                                $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                form.submit();
+                            }
+                            else {
+                                $(form).find('button[type=submit]').prop('disabled', false);
+
+                                UnblockPagePermanently();
+                            }
+                        });
+                    }
+                    
                 }
             });
 
@@ -728,6 +756,20 @@
                 $('#scan_piece_tracking_number').val('');
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
+            });
+
+            $("#is_not_sack_bag_check").on('change',function(){
+                if($("#is_not_sack_bag_check").is(":checked")) {
+                      $("#sack_bag_no").removeAttr('data-rule-required data-msg-required');
+                      $("#sack_bag_no-error").remove();
+                      $("#sackbag_row").css('display','none');
+                }else{
+                      $("#sackbag_row").css('display','block');
+                    $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
+                  
+                
+
+                }
             });
         });
 

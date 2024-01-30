@@ -39,7 +39,7 @@
 
     <div class="modal fade" id="AddSackBagModal" data-backdrop="static" role="dialog" aria-labelledby="AddSackBagModal"
         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Add Sack Bag</h4>
@@ -49,18 +49,17 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+                    
                     <form method="post" id="add_sack_bag_form"
                         action="{{ route('admin.cargo_manifest.bags.sack_bag.store') }}"
-                        class="form-horizontal mb-1" novalidate="novalidate">
+                        class="form-horizontal mb-1" novalidate="novalidate" onkeydown="return event.key != 'Enter';">
                         @csrf
+                        <input type="hidden" id="sack_bag_no_check">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    {{-- <label>Sack Bag No#</label> --}}
-                                    <input type="text"  name="sack_bag_no" class="form-control" placeholder="Sack Bag No" data-rule-required="true" data-msg-required="Sack Bag No is required">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="form-group">
                                     <select name="origin" id="origin_select" class="form-control select2"
                                       data-rule-required="true" data-msg-required="Origin is required">
@@ -73,16 +72,33 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <input type="text"  name="remarks" class="form-control" placeholder="Remarks">
-                                </div>
-                            </div>
+                           <div class="col-md-12">
+                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
+                                    <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                            <th class="border-primary border-darken-1">Remark</th>
+                                            <th class="border-primary border-darken-1">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sackbag_detail">
+                                        <tr>
+                                            <td><input id="sack_bag_no_id" type="text" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)" ></td>
+                                            <td><input type="text" name="remarks[]" class="form-control" ></td>
+                                            <td><span class="btn btn-danger" id="remove_row">x</span></td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+                                
+                           </div>
                         </div>
-                   
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary">Submit</button>
+                            <button type="button" id="addrow" class="btn btn-success ">Add Row</button>
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
 
                         </div>
                     </form>
@@ -277,9 +293,13 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script>
-
+ 
 
         $(document).ready(function () {
+
+             
+
+         
             $('#estimated_weight').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -416,6 +436,7 @@
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
                             $("#add_sack_bag_form")[0].reset();
+                            $("#sackbag_detail tr:not(:first-child)").empty();
                             $("#add_sack_bag_form select").val(null).trigger('change.select2');
                             $('#AddSackBagModal').modal('show');
                          
@@ -512,90 +533,107 @@
                     this.api().table().columns.adjust();
                 }
 
+               
+
             });
 
- 
 
-         
 
           
             
-            // $('#AddRemarksModal').on('hidden.bs.modal', function () {
-            //     $('#add_remark').val('');
-            //     $("#remark_pickup_request_id").val('');
-            // });
-            $("#add_sack_bag_form").validate({
-                errorClass: "danger",
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function (form) {
-                    form.submit();
-                }
-            });
-
-
-          
-        
            
-            // increment and decrement buttons
+               $("#add_sack_bag_form").validate({
+                            errorClass: "danger",
+                            successClass: 'success',
+                            errorPlacement: function (error, element) {
+                                error.addClass('w-100').appendTo(element.parent('.form-group'));
+                            },
+                            submitHandler: function (form) {
+                                if($("#sack_bag_no_check").val()!=1)
+                                {
+                                    form.submit();
+                                }else{
+                                    alert("Sack Bag No# already exist");
+                                }
+                            }
+                });
+          
 
-            $('.quantity').TouchSpin({
-                min: 0,
-                max: 1000,
-                buttondown_class: 'btn btn-primary rounded-left',
-                buttonup_class: 'btn btn-primary rounded-right',
-                buttondown_txt: '<i class="ft-minus"></i>',
-                buttonup_txt: '<i class="ft-plus"></i>'
-            }).bind('input change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-            });
+            
+                // Check Sack Bag No#
+                $("#add_sack_bag_form").on("keydown", function(e) {
+                    if(e.which == 13 || e.keyCode == 13) {
+                        $(".errormessage").empty();
+                       var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                       if(sack_bag_no!='')
+                       {
 
-            $('#add_pickup_request').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-              
-                submitHandler: function(form) {
-                    $('#add_pickup_request button#add').prop('disabled', true);
-                    // $('#product_select').attr('disabled', false);
-                    if($('.apply-checked:checked').length>0 || $("#regular_pickup").val()==1){
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Pickup request is being added!',
-                            icon: 'info',
-                        buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        form.submit();
-                    }else{
-                        toastr.error('Select Days in Schedule', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                         sack_bag_no_check(sack_bag_no);
+                          
 
+                       }else{
+                         alert('Please fill Sack Bag No#');
+                       }
+                       
                     }
-                  
-               
-                }
+                });
+                $("#addrow").click(function(){
+                    var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                    if(sack_bag_no!='')
+                    {
+                        
+                        sack_bag_no_check(sack_bag_no);
+                    }else{
+                         alert('Please fill Sack Bag No#');
+                    }
+                // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                // $("#sackbag_detail").append(row);
             });
-
-            $('.apply-checked').change(function() {
-
-                if ($(this).is(':checked')) {
-
-                    $(this).attr('checked', 'checked');
-
-                } else {
-
-                    $(this).removeAttr('checked');
-                }
+          
+            $('body').on('click','#remove_row',function(){
+                $(this).closest('tr').remove();
             });
 
         });
+
+        function sack_bag_check_zero(sack_bag_no)
+        {     var sack_bag_no=$(sack_bag_no).val();
+              sack_bag_no_check(sack_bag_no,'change');
+        }
         
+
+        function sack_bag_no_check(sack_bag_no,type='click')
+        {
+                 $.ajax({
+                            url: '{!! route('admin.cargo_manifest.bags.sack_bag.sack_bag_check') !!}',
+                            method: 'POST',
+                            data: {
+                                'sack_bag_no': sack_bag_no,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function(data){
+                            if(data.error)
+                            {
+                                setTimeout(() => {
+                                     $(".errormessage").empty();
+                                }, 2500);
+                                $(".errormessage").append('<div class="alert alert-danger">'+data.error+'</div>');
+                                $(".errormessage").show();
+                                $("#sack_bag_no_check").val(1);
+                            }else{
+                                    
+                                    if(type!='change')
+                                    {
+                                        var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                                        $("#sackbag_detail").append(row);
+                                    }
+                                    $("#sack_bag_no_check").val(0);
+                            }
+                });
+                          
+        }
+
+      
   
     </script>
 @endsection

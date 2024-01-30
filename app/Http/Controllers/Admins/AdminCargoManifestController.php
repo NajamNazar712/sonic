@@ -342,13 +342,31 @@ class AdminCargoManifestController extends Controller
             })
             ->leftJoin('shipments_journey as csj', function ($join) {
                 $join->on('csj.shipment_id', '=', 'shipments.id')
-                    ->where('csj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                    ->where(
+                        'csj.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
             })
             ->leftjoin('misrouted_history as mh', function ($join) {
                 $join->on('mh.shipment_id', '=', 'shipments.id')
                     ->on('shipments.shipper_status_id', '=', DB::raw(49))
-                    ->where('mh.id', '=',
+                    ->where(
+                        'mh.id',
+                        '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('misrouted_history as gmh', function ($join) {
+                $join->on('gmh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(11))
+                    ->where('gmh.id', '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('misrouted_history as gmhh', function ($join) {
+                $join->on('gmhh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(66))
+                    ->where('gmhh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
             ->leftjoin('misrouted_history as gmh', function ($join) {
@@ -414,7 +432,7 @@ class AdminCargoManifestController extends Controller
                     ->where('crm.case_nature_id', 1);
             })
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
-            ->select('z.name as zone_name','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status')
+            ->select('z.name as zone_name', 'shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status')
             ->whereNotIn('shipments.id', $on_hold_shipments);
 
         if (session('role_id') != 1) {
@@ -496,19 +514,19 @@ class AdminCargoManifestController extends Controller
                     }
                 }
 
-//                 $delivery_area = null;
-//                 if ($msg_string != null) {
-//                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-//                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
-//                         ->where('dlm.city_id', $shipments->destination_city_id)
-// //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
-//                         ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
+                //                 $delivery_area = null;
+                //                 if ($msg_string != null) {
+                //                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                //                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+                //                         ->where('dlm.city_id', $shipments->destination_city_id)
+                // //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+                //                         ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
 
-//                     if ($found->exists()) {
-//                         $found = $found->first();
-//                         $delivery_area = $found->area_name;
-//                     }
-//                 }
+                //                     if ($found->exists()) {
+                //                         $found = $found->first();
+                //                         $delivery_area = $found->area_name;
+                //                     }
+                //                 }
                 return isset($delivery_area) ? $delivery_area : '-';
             })
             ->editColumn('tracking_number', function ($shipments) {
@@ -642,9 +660,8 @@ class AdminCargoManifestController extends Controller
             ->filterColumn('z.name', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    $query->where('z.name', 'like', '%'.$keyword.'%');
-                }
-                else {
+                    $query->where('z.name', 'like', '%' . $keyword . '%');
+                } else {
                     $query->whereRaw('false');
                 }
             })
@@ -669,7 +686,6 @@ class AdminCargoManifestController extends Controller
                                     $sub_sub_query->whereNotNull('shipments.return_address_id')
                                         ->where('rc.name', 'like', '%' . $keyword . '%');
                                 });
-
                         });
                     })
                     ->orWhere(function ($sub_query) use ($keyword) {
@@ -844,7 +860,6 @@ class AdminCargoManifestController extends Controller
                         return ['status' => 1, 'error' => 'Cannot create bag for same hub'];
                     }
                 }
-
             }
 
             if ($shipment->shipper_status_id == 49) {
@@ -987,7 +1002,6 @@ class AdminCargoManifestController extends Controller
                                     } else {
                                         $destination = $shipment->pickup_address->city;
                                     }
-
                                 }
                                 if (!$request->has('pieces_confirm')) {
                                     if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
@@ -1066,7 +1080,6 @@ class AdminCargoManifestController extends Controller
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('shipments.shipping_mode_id', $shipping_mode_id);
-
                                     }
 
                                     if (session('role_id') != 1) {
@@ -1108,31 +1121,31 @@ class AdminCargoManifestController extends Controller
     public function create_store(Request $request)//create bag -> store
     {
 
-        $sack_bag_no=$request->input('sack_bag_no');
+        $sack_bag_no = $request->input('sack_bag_no');
         // $origin_hub_id=$request->input('origin_hub_id');
-        $sack_bag=IssueSackBagOrigin::where('sack_bag_no',$sack_bag_no)->where('status',1);
+        $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no)->where('status', 1);
         // ->where('origin',$origin_hub_id)
         // if($sack_bag->exists()){
-            $shipments = 0;
-            $quantity = 0;
-            $shipments_weight = 0;
+        $shipments = 0;
+        $quantity = 0;
+        $shipments_weight = 0;
 
-            $shipment_ids = explode(',', $request->input('shipment_ids'));
-            $open_box_ids = explode(',', $request->input('open_box_ids'));
-            foreach ($shipment_ids as $key => $shipment_id) {
-                $shipment = Shipment::find($shipment_id);
+        $shipment_ids = explode(',', $request->input('shipment_ids'));
+        $open_box_ids = explode(',', $request->input('open_box_ids'));
+        foreach ($shipment_ids as $key => $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
 
-                if ($shipment->shipper_status_id == 20) {
-                    $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
-                    if ($lost_shipment) {
-                        $bag = CargoManifestBag::find($lost_shipment->bag_id);
-                        if ($bag->lost_shipments > 0) {
-                            $bag->lost_shipments--;
-                            $bag->save();
-                            $lost_shipment->delete();
-                        }
+            if ($shipment->shipper_status_id == 20) {
+                $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
+                if ($lost_shipment) {
+                    $bag = CargoManifestBag::find($lost_shipment->bag_id);
+                    if ($bag->lost_shipments > 0) {
+                        $bag->lost_shipments--;
+                        $bag->save();
+                        $lost_shipment->delete();
                     }
                 }
+            }
 
 
                 if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 66])) {
@@ -1145,96 +1158,95 @@ class AdminCargoManifestController extends Controller
             }
             if (!empty($shipment_ids)) {
 
-                $bag = new CargoManifestBag();
-                $bag->seal_number = $request->input('seal_number');
-                $bag->origin_hub_id = $request->input('origin_hub_id');
-                $bag->destination_hub_id = $request->input('destination_hub_id');
-                $bag->shipments = $shipments;
-                $bag->quantity = $quantity;
-                $bag->shipments_weight = $shipments_weight;
-                $bag->actual_weight = $request->input('actual_weight');
-                $bag->created_by = Auth::id();
-                $bag->type = $request->input('bag_type');
-                $bag->transport_mode_id = 2;
-                $bag->status_id = 1;
-                $bag->completed = 0;
-                $bag->current_hub_id = Auth::user()->default_hub_id;
-                if($sack_bag->exists()){
-                    $sack_bag=$sack_bag->first();
-                    $bag->sack_bag_id=$sack_bag->id;
-                    $bag->is_sack_bag=1;
+            $bag = new CargoManifestBag();
+            $bag->seal_number = $request->input('seal_number');
+            $bag->origin_hub_id = $request->input('origin_hub_id');
+            $bag->destination_hub_id = $request->input('destination_hub_id');
+            $bag->shipments = $shipments;
+            $bag->quantity = $quantity;
+            $bag->shipments_weight = $shipments_weight;
+            $bag->actual_weight = $request->input('actual_weight');
+            $bag->created_by = Auth::id();
+            $bag->type = $request->input('bag_type');
+            $bag->transport_mode_id = 2;
+            $bag->status_id = 1;
+            $bag->completed = 0;
+            $bag->current_hub_id = Auth::user()->default_hub_id;
+            if ($sack_bag->exists()) {
+                $sack_bag = $sack_bag->first();
+                $bag->sack_bag_id = $sack_bag->id;
+                $bag->is_sack_bag = 1;
 
-                    $sack_bag->sack_destination_id=$request->input('destination_hub_id');
-                    $sack_bag->save();
+                $sack_bag->sack_destination_id = $request->input('destination_hub_id');
+                $sack_bag->save();
+            } else {
+                $bag->is_sack_bag = 0;
+            }
 
-                }else{
-                    $bag->is_sack_bag=0;
-                }
-                
-                $bag->save();
+            $bag->save();
 
-             
-                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
 
-                $id = $bag->id;
+            CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL, 1);
 
-                foreach ($shipment_ids as $shipment_id) {
+            $id = $bag->id;
 
-                    $bag_shipment = new CargoManifestBagShipments();
+            foreach ($shipment_ids as $shipment_id) {
 
-                    $bag_shipment->cargo_manifest_bag_id = $id;
-                    $bag_shipment->shipment_id = $shipment_id;
+                $bag_shipment = new CargoManifestBagShipments();
 
-                    $bag_shipment->save();
+                $bag_shipment->cargo_manifest_bag_id = $id;
+                $bag_shipment->shipment_id = $shipment_id;
 
-                    $shipment = Shipment::find($shipment_id);
+                $bag_shipment->save();
 
-                    $shipper_status_id = NULL;
-                    $consignee_status_id = NULL;
+                $shipment = Shipment::find($shipment_id);
 
-                    if ($request->input('bag_type') == 1) {
-                        $shipper_status_id = 3;
-                        $consignee_status_id = 3;
-                    } else {
-                        $shipper_status_id = 21;
-                        $consignee_status_id = 21;
+                $shipper_status_id = NULL;
+                $consignee_status_id = NULL;
 
-                        if ($shipment->shipper_status_id != 20) {
-                            if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
-                                $shipper_status_id = 21;
-                                $consignee_status_id = 21;
-                            } else if ($shipment->booking_type_id == 2) {
-                                $shipper_status_id = 26;
-                                $consignee_status_id = 26;
-                            } else if ($shipment->booking_type_id == 3) {
-                                $shipper_status_id = 32;
-                                $consignee_status_id = 32;
-                            } else {
-                                $shipper_status_id = 21;
-                                $consignee_status_id = 21;
-                            }
+                if ($request->input('bag_type') == 1) {
+                    $shipper_status_id = 3;
+                    $consignee_status_id = 3;
+                } else {
+                    $shipper_status_id = 21;
+                    $consignee_status_id = 21;
+
+                    if ($shipment->shipper_status_id != 20) {
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
+                        } else if ($shipment->booking_type_id == 2) {
+                            $shipper_status_id = 26;
+                            $consignee_status_id = 26;
+                        } else if ($shipment->booking_type_id == 3) {
+                            $shipper_status_id = 32;
+                            $consignee_status_id = 32;
+                        } else {
+                            $shipper_status_id = 21;
+                            $consignee_status_id = 21;
                         }
                     }
-
-                    $shipment->shipper_status_id = $shipper_status_id;
-                    $shipment->consignee_status_id = $consignee_status_id;
-
-                    $shipment->save();
-
-
-                    if (in_array($shipment_id, $open_box_ids)) {
-                        $shipment->open_box = 1;
-                        $shipment->save();
-                        ShipmentOpenBoxJourneyController::add($shipment_id, 1, Auth::id());
-                    }
-
-                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
                 }
 
-                return redirect()->route('admin.cargo_manifest.bags.create.index')->with(['success' => 'Bag Created with Bag Number: ' . $bag->seal_number]);
-            } else {
-                return back()->withErrors('All Shipments have already been added to another Bag!');
+                $shipment->shipper_status_id = $shipper_status_id;
+                $shipment->consignee_status_id = $consignee_status_id;
+
+                $shipment->save();
+
+
+                if (in_array($shipment_id, $open_box_ids)) {
+                    $shipment->open_box = 1;
+                    $shipment->save();
+                    ShipmentOpenBoxJourneyController::add($shipment_id, 1, Auth::id());
+                }
+
+                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $bag->id);
             }
+
+            return redirect()->route('admin.cargo_manifest.bags.create.index')->with(['success' => 'Bag Created with Bag Number: ' . $bag->seal_number]);
+        } else {
+            return back()->withErrors('All Shipments have already been added to another Bag!');
+        }
         // }else{
         //     return back()->withErrors('No Sack Bag Available');
         // }
@@ -1260,7 +1272,7 @@ class AdminCargoManifestController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if(!$shipment->actual_weight){
+            if (!$shipment->actual_weight) {
                 return back()->withErrors('Shipment actual weight is missing');
             }
 
@@ -1393,8 +1405,11 @@ class AdminCargoManifestController extends Controller
         $bags = CargoManifestBag::join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->Leftjoin('manifest_bags as mcb', function ($join) {
                 $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
-                    ->where('mcb.id', '=',
-                        DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
+                    ->where(
+                        'mcb.id',
+                        '=',
+                        DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)')
+                    );
             })
             ->leftjoin('cargo_manifests as cm', 'cm.id', '=', 'mcb.cargo_manifest_id')
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cm.shipping_mode_id')
@@ -1425,7 +1440,6 @@ class AdminCargoManifestController extends Controller
                 if ($bag->manifest_id) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
-
             })
             ->addColumn('short_received_shipments', function ($bag) {
                 if ($bag->short_received_shipments > 0) {
@@ -1452,7 +1466,6 @@ class AdminCargoManifestController extends Controller
                 foreach ($junctions as $junction) {
                     $city = City::find($junction->junction_id);
                     $junction_data .= "<a href='https://www.google.com/maps/?q=" . $city->hub_location_latitude . "," . $city->hub_location_longitude . "' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> " . $city->name . "<br><br>";
-
                 }
                 return $junction_data;
                 // return $route_management->id;
@@ -1527,7 +1540,7 @@ class AdminCargoManifestController extends Controller
 
     public function bag_details(Request $request)// create manifest -> fetch bag details
     {
-        $bag = CargoManifestBag::with('shipment','shipment.shipment')->where('seal_number', $request->bag_number);
+        $bag = CargoManifestBag::with('shipment', 'shipment.shipment')->where('seal_number', $request->bag_number);
         $bag_destinations = $request->bag_destinations;
 
         if ($bag->exists()) {
@@ -1564,7 +1577,7 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
-                        $pieces_sum= collect($bag->shipment->pluck('shipment')->toArray())->sum('pieces');
+                        $pieces_sum = collect($bag->shipment->pluck('shipment')->toArray())->sum('pieces');
                         $details['pieces_count'] = $pieces_sum;
 
                         $draft_bags = CargoManifestDraftBags::where('added_by', Auth::id())->get();
@@ -1588,7 +1601,7 @@ class AdminCargoManifestController extends Controller
                         $details['total_bags'] = $total_bags;
 
 
-                        CargoManifestDraftBags::create(['bag_id' => $bag->id, 'seal_number' => $bag->seal_number, 'shipments_count' => $bag->shipments, 'origin_id' => $origin->id, 'destination_id' => $destination->id, 'added_by' => Auth::id(), 'weight' => $bag->shipments_weight,'pieces_count'=>$pieces_sum]);
+                        CargoManifestDraftBags::create(['bag_id' => $bag->id, 'seal_number' => $bag->seal_number, 'shipments_count' => $bag->shipments, 'origin_id' => $origin->id, 'destination_id' => $destination->id, 'added_by' => Auth::id(), 'weight' => $bag->shipments_weight, 'pieces_count' => $pieces_sum]);
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                     } else {
@@ -1631,14 +1644,13 @@ class AdminCargoManifestController extends Controller
             } else {
                 $details[$total_bag->id]['class'] = '';
             }
-
         }
         return ['status' => 0, 'details' => $details];
     }
 
     public function cargo_details(Request $request)// create manifest -> on popup fetch cargo details
     {
-        $bags = CargoManifestBag::with('shipment','shipment.shipment')->whereIn('id', $request->bag_ids);
+        $bags = CargoManifestBag::with('shipment', 'shipment.shipment')->whereIn('id', $request->bag_ids);
 
         if ($bags->exists() && $bags->count() == count($request->bag_ids)) {
             $bags = $bags->get();
@@ -1648,27 +1660,27 @@ class AdminCargoManifestController extends Controller
             $remarks = $request->remarks;
             foreach ($bags as $bag) {
                 $cargo_draft_bag = CargoManifestDraftBags::where('bag_id', $bag->id);
-                if($cargo_draft_bag->exists()){
+                if ($cargo_draft_bag->exists()) {
                     $cargo_draft_bag = $cargo_draft_bag->first();
                     $remark = isset($remarks[$bag->id]) ? $remarks[$bag->id] : null;
-                    $pieces_sum+= $cargo_draft_bag->pieces_count;
+                    $pieces_sum += $cargo_draft_bag->pieces_count;
                     $cargo_draft_bag->remarks_created_at = !empty($cargo_draft_bag->created_at) ? $cargo_draft_bag->created_at  : Carbon::now();
                     $cargo_draft_bag->remarks_added_by = !empty($cargo_draft_bag->remarks_added_by) ? $cargo_draft_bag->remarks_added_by  : Auth::id();
-                    if($cargo_draft_bag->remarks != $remark) {
+                    if ($cargo_draft_bag->remarks != $remark) {
                         $cargo_draft_bag->remarks_updated_at = Carbon::now();
                         $cargo_draft_bag->remarks_added_by = Auth::id();
                     }
                     $cargo_draft_bag->remarks = $remark;
                     $cargo_draft_bag->save();
                 }
-//                $details[$bag->destination_hub_id]['origin_id'] = $origin_id;
+                //                $details[$bag->destination_hub_id]['origin_id'] = $origin_id;
                 if (!isset($details[$bag->destination_hub_id]["bag_ids"])) {
                     $details[$bag->destination_hub_id]["bag_ids"] = array();
                 }
                 array_push($details[$bag->destination_hub_id]["bag_ids"], $bag->id);
                 $details[$bag->destination_hub_id]["number_of_bags"] = isset($details[$bag->destination_hub_id]["number_of_bags"]) ? $details[$bag->destination_hub_id]["number_of_bags"] + 1 : 1;
-//                $details[$bag->destination_hub_id]['shipments'] = isset($details[$bag->destination_hub_id]["shipments"]) ? $details[$bag->destination_hub_id]["shipments"] + $bag->shipments : $bag->shipments;
-//                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
+                //                $details[$bag->destination_hub_id]['shipments'] = isset($details[$bag->destination_hub_id]["shipments"]) ? $details[$bag->destination_hub_id]["shipments"] + $bag->shipments : $bag->shipments;
+                //                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
                 $details[$bag->destination_hub_id]["destination"] = $bag->destination_hub->name;
 
                 $mapping = V2JunctionMapping::where([['origin_id', $origin_id], ['destination_id', $bag->destination_hub_id], ['status', 1]]);
@@ -1691,7 +1703,6 @@ class AdminCargoManifestController extends Controller
                         array_push($details[$bag->destination_hub_id]['vehicles'], $vehicles->vehicle_id);
                     }
                 }
-
             }
             $previous_flag = false;
             $previous_array = array();
@@ -1715,7 +1726,6 @@ class AdminCargoManifestController extends Controller
             $data['pieces'] = $pieces_sum;
 
             return ['status' => 0, 'details' => $data];
-
         } else {
             return ['status' => 1, 'error' => 'Bag Not Found..'];
         }
@@ -1733,8 +1743,8 @@ class AdminCargoManifestController extends Controller
             $bag_ids = explode(',', $bag_ids_array);
             foreach ($bag_ids as $key => $bag_id) {
                 $bag = CargoManifestBag::find($bag_id);
-                $cargo_manifest_draft_bag = CargoManifestDraftBags::where('bag_id',$bag_id);
-                if($cargo_manifest_draft_bag->exists()){
+                $cargo_manifest_draft_bag = CargoManifestDraftBags::where('bag_id', $bag_id);
+                if ($cargo_manifest_draft_bag->exists()) {
                     $cargo_manifest_draft_bag = $cargo_manifest_draft_bag->latest()->first();
 
                     $cargo_manifest_bag_remarks = new CargoManifestBagRemarks();
@@ -1752,7 +1762,6 @@ class AdminCargoManifestController extends Controller
                     $bags_weight += $bag->shipments_weight;
                     $actual_weight += $bag->shipments_weight;
                     $shipments += $bag->shipments;
-
                 } else {
                     unset($bag_ids[$key]);
                 }
@@ -1810,7 +1819,7 @@ class AdminCargoManifestController extends Controller
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
                             $shipment_table = Shipment::find($shipment->shipment_id);
-                            if(in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11])){
+                            if (in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11])) {
                                 ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
                                 $shipment_table->shipper_status_id = 49;
                                 $shipment_table->consignee_status_id = 49;
@@ -1852,7 +1861,6 @@ class AdminCargoManifestController extends Controller
                 }
 
                 $success_cargo_ids[$hub_id] = $master_cargo_id;
-
             } else {
                 array_push($error_hubs, $hub_id);
             }
@@ -1890,7 +1898,6 @@ class AdminCargoManifestController extends Controller
         if ($request->filled('submit_and_print_form')) {
 
             $print = implode(',', $success_cargo_ids);
-
         } else {
             $print = FALSE;
         }
@@ -2206,7 +2213,6 @@ class AdminCargoManifestController extends Controller
                 </html>
       ';
         return $html;
-
     }
 
     public function manifest_index()
@@ -2227,8 +2233,11 @@ class AdminCargoManifestController extends Controller
         }
         $bags = DB::connection('reports')->table('cargo_manifest_bags')->leftjoin('manifest_bags as mcb', function ($join) {
             $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
-                ->where('mcb.id', '=',
-                    DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
+                ->where(
+                    'mcb.id',
+                    '=',
+                    DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)')
+                );
         })
             ->leftjoin('cargo_manifests as cm', 'cm.id', '=', 'mcb.cargo_manifest_id')
             ->leftjoin('cargo_manifest_bag_journeys as cmbj', function ($join) {
@@ -2244,7 +2253,40 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('admins as ah', 'cargo_manifest_bags.updated_by', '=', 'ah.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity', 'tm.name as transport_mode', 'cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type', 'cargo_manifest_bags.seal_number', 'bs.name as status', 'sm.mode as shipping_mode', 'cm.id as manifest_id', 'cargo_manifest_bags.seal_number', 'cm.created_at as manifest_created_at', 'cargo_manifest_bags.origin_hub_id as origin_hub_id', 'cargo_manifest_bags.destination_hub_id as destination_hub_id', 'cm.id as manifest', 'ah.name as updated_by', 'cargo_manifest_bags.created_at as transitted_date', 'cargo_manifest_bags.short_received_shipments as short_received_shipments', 'cargo_manifest_bags.short_received_shipments as short_shipments', 'cargo_manifest_bags.received_shipments', 'cmbj.created_at as status_updated_at', 'status_editor.name as status_updated_by', 'sedh.name as status_location',
+            ->select(
+                'cargo_manifest_bags.id',
+                'cargo_manifest_bags.status_id as status_id',
+                'oh.id as origin_id',
+                'oh.name as origin',
+                'dh.id as destination_id',
+                'dh.name as destination',
+                'cargo_manifest_bags.shipments',
+                'cargo_manifest_bags.quantity',
+                'tm.name as transport_mode',
+                'cargo_manifest_bags.shipments_weight',
+                'cargo_manifest_bags.actual_weight',
+                'cargo_manifest_bags.shipments as bag_shipments',
+                'a.name as transitted_by',
+                'oh.hub_id as origin_hub_id',
+                'dh.hub_id as destination_hub_id',
+                'cargo_manifest_bags.type as bag_type',
+                'cargo_manifest_bags.seal_number',
+                'bs.name as status',
+                'sm.mode as shipping_mode',
+                'cm.id as manifest_id',
+                'cargo_manifest_bags.seal_number',
+                'cm.created_at as manifest_created_at',
+                'cargo_manifest_bags.origin_hub_id as origin_hub_id',
+                'cargo_manifest_bags.destination_hub_id as destination_hub_id',
+                'cm.id as manifest',
+                'ah.name as updated_by',
+                'cargo_manifest_bags.created_at as transitted_date',
+                'cargo_manifest_bags.short_received_shipments as short_received_shipments',
+                'cargo_manifest_bags.short_received_shipments as short_shipments',
+                'cargo_manifest_bags.received_shipments',
+                'cmbj.created_at as status_updated_at',
+                'status_editor.name as status_updated_by',
+                'sedh.name as status_location',
                 DB::raw('(select count(id) from cargo_manifest_bag_remarks where bag_id = cargo_manifest_bags.id) as remarks')
             )
             ->where(function ($query) {
@@ -2274,7 +2316,6 @@ class AdminCargoManifestController extends Controller
                 if ($bag->manifest_id) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
-
             })
             ->addColumn('action', function ($bag) {
                 if ((session('role_id') == 1 || in_array(453, session('permissions'))) && $bag->status_id == 1) {
@@ -2319,7 +2360,6 @@ class AdminCargoManifestController extends Controller
                     $junction_data = 0;
                 }
                 return $junction_data;
-
             })
             ->addColumn('vehicles', function ($bag) {
                 $vehicle_data = '';
@@ -2337,12 +2377,11 @@ class AdminCargoManifestController extends Controller
                 return $vehicle_data;
             })
             ->editColumn('remarks', function ($remarks) {
-                if(!empty($remarks->remarks)) {
+                if (!empty($remarks->remarks)) {
                     return "<button ref='$remarks->id' class='btn btn-sm btn-outline-info align-middle remarks'>" . $remarks->remarks . "</button>";
-                }else{
+                } else {
                     return  '-';
                 }
-
             })
             ->filterColumn('vehicles', function ($query, $keyword) {
                 $fleet = Fleet::where('reg_number', $keyword)->first();
@@ -2727,7 +2766,6 @@ class AdminCargoManifestController extends Controller
         } else {
             return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
         }
-
     }
 
     public function receive_bag_store(Request $request)// receive bag -> store
@@ -3363,7 +3401,7 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_history_list(Request $request)
     {
-//        dd($request->get('transit_from_date') , $request->get('transit_to_date') , $request->get('search_filter_origin') , $request->get('search_filter_destination'));
+        //        dd($request->get('transit_from_date') , $request->get('transit_to_date') , $request->get('search_filter_origin') , $request->get('search_filter_destination'));
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
         }
@@ -3376,7 +3414,7 @@ class AdminCargoManifestController extends Controller
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
-//            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
+            //            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
             ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags');
 
 
@@ -3395,7 +3433,6 @@ class AdminCargoManifestController extends Controller
                 if ($bag->manifest_id) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
-
             })
             ->addColumn('bags_count', function ($master_cargo) {
                 return $master_cargo->bags;
@@ -4065,7 +4102,6 @@ class AdminCargoManifestController extends Controller
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
             }
-
         } else {
             return ['status' => 1, 'error' => 'No Shipment Item with given Item ID is present'];
         }
@@ -4254,7 +4290,7 @@ class AdminCargoManifestController extends Controller
         //        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
 
         // new code without restriction
-        try{
+    try{
             DB::beginTransaction();
 
         $shipment_status_array = [3, 11,21, 26, 32, 49,66];
@@ -4286,9 +4322,7 @@ class AdminCargoManifestController extends Controller
 
                     ShipmentOpenBoxJourneyController::add($shipment, 2, Auth::id());
                 }
-
             }
-
         }
         //todo : open box-work end
 
@@ -4366,44 +4400,44 @@ class AdminCargoManifestController extends Controller
                                             $consignee_city = $shipment->consignee_city_id;
                                             $user_city = $shipment->user->city_id;
 
-                                            if ($consignee_city == '202' || $consignee_city == '223') {
-                                                NotificationsController::send(178, $shipment_id);
-                                            } else {
-                                                $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id', 'address')->first();
-                                                if ($city_id) {
-                                                    NotificationsController::send(75, $shipment_id, $city_id->address);
-                                                }
-                                            }
-                                        }
+                                if ($consignee_city == '202' || $consignee_city == '223') {
+                                    NotificationsController::send(178, $shipment_id);
+                                } else {
+                                    $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id', 'address')->first();
+                                    if ($city_id) {
+                                        NotificationsController::send(75, $shipment_id, $city_id->address);
                                     }
                                 }
-                                else {
-                                    if ($shipment->booking_type_id == 1) {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
-                                    } else if ($shipment->booking_type_id == 2) {
-                                        if ($shipment->shipper_status_id == 21) {
-                                            $shipper_status_id = 22;
-                                            $consignee_status_id = 22;
-                                        } else {
-                                            $shipper_status_id = 27;
-                                            $consignee_status_id = 27;
-                                        }
+                            }
+                        }
+                    } 
+                    else {
+                        if ($shipment->booking_type_id == 1) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else if ($shipment->booking_type_id == 2) {
+                            if ($shipment->shipper_status_id == 21) {
+                                $shipper_status_id = 22;
+                                $consignee_status_id = 22;
+                            } else {
+                                $shipper_status_id = 27;
+                                $consignee_status_id = 27;
+                            }
 
-                                    } else if ($shipment->booking_type_id == 3) {
-                                        $shipper_status_id = 33;
-                                        $consignee_status_id = 33;
-                                    } else if ($shipment->booking_type_id == 4) {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
-                                    } else {
-                                        $shipper_status_id = 22;
-                                        $consignee_status_id = 22;
-                                    }
-                                }
-                                $shipment->shipper_status_id = $shipper_status_id;
-                                $shipment->consignee_status_id = $consignee_status_id;
-                                $shipment->save();
+                        } else if ($shipment->booking_type_id == 3) {
+                            $shipper_status_id = 33;
+                            $consignee_status_id = 33;
+                        } else if ($shipment->booking_type_id == 4) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        }
+                    }
+                    $shipment->shipper_status_id = $shipper_status_id;
+                    $shipment->consignee_status_id = $consignee_status_id;
+                    $shipment->save();
 
                                 ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
@@ -4895,11 +4929,12 @@ class AdminCargoManifestController extends Controller
         DB::commit();
         //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
         return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html,'misrouted_html' => $misrouted_html]);
-        }
-        catch (\Throwable $th){
+    }
+    catch (\Throwable $th){
             DB::rollBack();
             return back()->with(['went_wrong' => 'Something Went Wrong']);
-        }
+    }
+
     }
 
     public function manifest_bags(Request $request)
@@ -4985,19 +5020,18 @@ class AdminCargoManifestController extends Controller
     {
         $draft = CargoManifestDraftBags::join('cities as c', 'c.id', '=', 'cargo_manifest_draft_bags.origin_id')
             ->join('cities as d', 'd.id', '=', 'cargo_manifest_draft_bags.destination_id')
-            ->select('cargo_manifest_draft_bags.bag_id as bag_id', 'cargo_manifest_draft_bags.seal_number as bag_number', 'cargo_manifest_draft_bags.shipments_count', 'd.name as destination', 'c.name as origin','cargo_manifest_draft_bags.pieces_count','cargo_manifest_draft_bags.remarks')
+            ->select('cargo_manifest_draft_bags.bag_id as bag_id', 'cargo_manifest_draft_bags.seal_number as bag_number', 'cargo_manifest_draft_bags.shipments_count', 'd.name as destination', 'c.name as origin', 'cargo_manifest_draft_bags.pieces_count', 'cargo_manifest_draft_bags.remarks')
             ->where('cargo_manifest_draft_bags.added_by', Auth::id())
             ->orderby('cargo_manifest_draft_bags.created_at', 'desc');
 
         return Datatables::of($draft)
-            ->editColumn('remarks',function ($shipments){
-                $remarks = '<textarea maxlength="250" type="text" id="remarks" ref="'.$shipments->bag_id.'" class="form-control form-control-sm remarks">'.$shipments->remarks.'</textarea>';
+            ->editColumn('remarks', function ($shipments) {
+                $remarks = '<textarea maxlength="250" type="text" id="remarks" ref="' . $shipments->bag_id . '" class="form-control form-control-sm remarks">' . $shipments->remarks . '</textarea>';
                 return $remarks;
             })
             ->addColumn('action', function ($shipments) {
                 $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
                 return $dropdown;
-
             })
             ->make(true);
     }
@@ -5074,54 +5108,86 @@ class AdminCargoManifestController extends Controller
     public function remarks_info(Request $request)
     {
         if ($request->bag_id) {
-            $remarks = CargoManifestBagRemarks::join('admins as a','a.id','cargo_manifest_bag_remarks.added_by')
-                ->leftjoin('cargo_manifest_bags as cmb','cmb.id','cargo_manifest_bag_remarks.bag_id')
-                ->where('cargo_manifest_bag_remarks.bag_id',$request->bag_id)
+            $remarks = CargoManifestBagRemarks::join('admins as a', 'a.id', 'cargo_manifest_bag_remarks.added_by')
+                ->leftjoin('cargo_manifest_bags as cmb', 'cmb.id', 'cargo_manifest_bag_remarks.bag_id')
+                ->where('cargo_manifest_bag_remarks.bag_id', $request->bag_id)
                 ->select(['cargo_manifest_bag_remarks.*', 'a.name as added_by_name', 'cmb.seal_number'])
-                ->orderby('cargo_manifest_bag_remarks.id','desc');
+                ->orderby('cargo_manifest_bag_remarks.id', 'desc');
             if ($remarks->exists()) {
                 $remarks = $remarks->get();
                 return $remarks;
-            }else{
+            } else {
                 return [];
             }
-        }else{
+        } else {
             return [];
         }
     }
 
-    public function sack_bag_index(){
-        $origins=City::where('status','=',1)->get();
-        return view('admin.cargo.manifest.bags.sack_bag',compact('origins'));
+    public function sack_bag_index()
+    {
+        $origins = City::where('status', '=', 1)->get();
+        return view('admin.cargo.manifest.bags.sack_bag', compact('origins'));
     }
 
-    public function sack_bag_list(){
-            $issuebag =IssueSackBagOrigin::join('cities as c','c.id','=','issue_sack_bag_origins.origin')
-            ->join('admins as ad','ad.id','=','issue_sack_bag_origins.user_id')
-            ->select('issue_sack_bag_origins.sack_bag_no as sack_bag_no','c.name as origin','ad.name as user_id','issue_sack_bag_origins.remarks');
-            
-            // if (session('role_id') != 1) {
-            //     $cargo->where('cargo_manifest_draft_bags.origin_id', Auth::user()->default_hub_id);
-            // }
+    public function sack_bag_list()
+    {
+        $issuebag = IssueSackBagOrigin::join('cities as c', 'c.id', '=', 'issue_sack_bag_origins.origin')
+            ->join('admins as ad', 'ad.id', '=', 'issue_sack_bag_origins.user_id')
+            ->select('issue_sack_bag_origins.sack_bag_no as sack_bag_no', 'c.name as origin', 'ad.name as user_id', 'issue_sack_bag_origins.remarks');
 
-            $datatables = Datatables::of($issuebag);
+        // if (session('role_id') != 1) {
+        //     $cargo->where('cargo_manifest_draft_bags.origin_id', Auth::user()->default_hub_id);
+        // }
 
-            return $datatables->make(true);
+        $datatables = Datatables::of($issuebag);
+
+        return $datatables->make(true);
     }
 
-    public function add_sack_bag(Request $request){
-        $user_id=session('id');
-        $sack_bag=new IssueSackBagOrigin();
-        $sack_bag->sack_bag_no=$request->sack_bag_no;
-        $sack_bag->origin=$request->origin;
-        $sack_bag->user_id=$user_id;
-        $sack_bag->remarks=$request->remarks;
-        $sack_bag->type=1;
-        if($sack_bag->save()){
-            return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['success' => 'Sack Bag Added Successfully']);
+    public function sack_bag_no_check(Request $request)
+    {
+        if ($sack_bag_no = $request->get('sack_bag_no')) {
 
+            $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no);
+            if ($sack_bag->exists()) {
+                return response()->json(['error' => 'Sack-Bag No: ' . $sack_bag_no . ' already exist ']);
+            }
+            return response()->json(['success' => 'Sack-Bag No# available']);
+        } else {
+            return response()->json(['error' => 'Sack-Bag No# not found ']);
         }
-        return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Add']);
     }
 
+    public function add_sack_bag(Request $request)
+    {
+        $user_id = session('id');
+        $sackbag_array = array();
+
+        if (is_array($request->sack_bag_no)) {
+
+            $timestamp = Carbon::now();
+            foreach ($request->sack_bag_no  as  $key => $data) {
+                if (!is_null($data)) {
+                    $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $data);
+                    if (!$sack_bag->exists()) {
+                        array_push($sackbag_array, ['sack_bag_no' => $data, 'origin' => $request->origin, 'sack_destination_id' => $request->origin, 'remarks' => $request->remarks[$key], 'user_id' => $user_id, 'type' => 1, 'created_at' =>  $timestamp, 'updated_at' =>  $timestamp, 'reporting_date' =>  $timestamp]);
+                    }
+                }
+            }
+
+            try {
+                if (!empty($sackbag_array)) {
+                    IssueSackBagOrigin::insert($sackbag_array);
+                    return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['success' => 'Sack Bag Added Successfully']);
+                }
+                return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added']);
+            } catch (\Exception $e) {
+                return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added']);
+            }
+        } else {
+            return redirect()->route('admin.cargo_manifest.bags.sack_bag.index')->with(['error' => 'Sack Bag Not Added: Empty Data']);
+        }
+    }
 }
+
