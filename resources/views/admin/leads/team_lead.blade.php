@@ -483,15 +483,16 @@
 
                             })
                             .fail(function(xhr) {
-                                toastr.error('Please Select', 'Error!', {
+                                toastr.error('Please Select Working Day!', 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
                             });
                         }
                     });
-                }else{
-                    toastr.error('Please Select', 'Error!', {
+                }
+                else{
+                    toastr.error('Please Select Working Day!', 'Error!', {
                         positionClass: 'toast-top-center',
                         containerId: 'toast-top-center'
                     });
