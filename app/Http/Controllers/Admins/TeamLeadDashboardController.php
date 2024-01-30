@@ -69,127 +69,6 @@ class TeamLeadDashboardController extends Controller
         return view('admin.leads.team_lead')->with(['employee_types' => $employee_types, 'employee_statuses' => $employee_statuses, 'zones' => $zones, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
 
-    public function shipment_assign_index()
-    {
-        $number_of_rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 0;
-        $number_of_rv_ticket = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
-        $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
-        $number_of_pending_ticket_percentage = number_format((count($number_of_pending_tickets) / ($number_of_rv_ticket) * 100),2);
-        $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
-        $number_of_closed_ticket_percentage = number_format((count($number_of_closed_tickets) / ($number_of_rv_ticket) * 100),2);
-        $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
-        $number_of_connected_calls_percentage = number_format((count($number_of_connected_calls) / ($number_of_rv_ticket) * 100),2);
-        $number_of_unresponsive_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
-        $number_of_unresponsive_percentage = number_format((count($number_of_unresponsive_call) / ($number_of_rv_ticket) * 100),2);
-        $number_of_reattempt_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 2)->get();
-        $number_of_reattempt_percentage = number_format((count($number_of_reattempt_call) / ($number_of_rv_ticket) * 100),2);
-        $number_of_return_confirm_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 1)->get();
-        $number_of_return_confirm_percentage = number_format((count($number_of_return_confirm_call) / ($number_of_rv_ticket) * 100),2);
-        $number_of_intercept_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 3)->get();
-        $number_of_intercept_percentage = number_format((count($number_of_intercept_call) / ($number_of_rv_ticket) * 100),2);
-        $number_of_self_collection_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 5)->get();
-        $number_of_self_collection_percentage = number_format((count($number_of_self_collection_call) / ($number_of_rv_ticket) * 100),2);
-        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
-        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
-            ->whereIn('id', function ($query) {
-                $query->select(DB::raw('MAX(id)'))
-                    ->from('employee_attendances')
-                    ->groupBy('employee_attendances.employee_id');
-            })
-            ->get();
-
-        return view('admin.rv_assign_shipments.index')->with(['online_agents' => $online_agents,'number_of_available_agents' => $number_of_available_agents, 'number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
-    }
-
-    // Heading: N/A
-    // Sidebar: N/A
-    // URL: assigned_shipment/list
-    // Description: this method is used for Listing Shipment Assign.
-    public function shipment_assign_list(Request $request)
-    {
-        $assigned_agent_shipment = RvShipmentAssignAgent::join('admins as staff', 'staff.id', 'rv_shipment_assign_agents.agent_id')
-            ->leftjoin('shipments as shipment', 'shipment.id', 'rv_shipment_assign_agents.shipment_id')
-            ->select(['shipment.tracking_number as tracking_number', 'rv_shipment_assign_agents.shipment_id as shipment_id', 'staff.name as agent_name', 'rv_shipment_assign_agents.rv_assign_agent_status_id as status', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id as sub_status', 'rv_shipment_assign_agents.rv_state_id as state', 'rv_shipment_assign_agents.updated_by_id as updated_by'])
-            ->groupBy('rv_shipment_assign_agents.id');
-
-
-        if ($request->get('number_of_tickets_input') == '1') {
-
-            $assigned_agent_shipment;
-        }
-        if ($request->get('number_of_pending_tickets_input') == '3') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_state_id', 3);
-        }
-
-        if ($request->get('number_of_closed_tickets_input') == '4') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_state_id', 4);
-        }
-
-        if ($request->get('number_of_connected_calls_input') == '5') {
-            $assigned_agent_shipment = $assigned_agent_shipment->whereIn('rv_shipment_assign_agents.rv_assign_agent_status_id', [1, 2, 3, 5]);
-        }
-
-        if ($request->get('number_of_unresponsive_calls_input') == '6') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 6);
-        }
-
-        if ($request->get('number_of_reattempt_calls_input') == '7') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 2);
-        }
-
-        if ($request->get('number_of_return_confirm_calls_input') == '8') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 1);
-        }
-
-        if ($request->get('number_of_intercepted_calls_input') == '9') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 3);
-        }
-
-        if ($request->get('number_of_self_collection_calls_input') == '10') {
-            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 5);
-        }
-
-        $datatable = Datatables::of($assigned_agent_shipment)
-            ->editColumn('status', function ($assigned_agent_shipment) {
-                $status = RvAssignAgentStatus::where('id', $assigned_agent_shipment->status)->first();
-                if ($status['name']) {
-                    return $status['name'];
-                } else {
-                    return '-----';
-                }
-            })
-
-            ->editColumn('sub_status', function ($assigned_agent_shipment) {
-                $sub_status = RvAssignAgentSubStatus::where('id', $assigned_agent_shipment->sub_status)->first();
-                if ($sub_status['name']) {
-                    return $sub_status['name'];
-                } else {
-                    return '-----';
-                }
-            })
-            ->editColumn('state', function ($assigned_agent_shipment) {
-                $state = RvState::where('id', $assigned_agent_shipment->state)->first();
-                $completed_state = RvState::where('id', $assigned_agent_shipment->state)->first();
-                if ($state['name']) {
-                    return $state['name'];
-                } else {
-                    return '-----';
-                }
-            })
-
-            ->editColumn('updated_by', function ($assigned_agent_shipment) {
-                $admin = Admin::where('id', $assigned_agent_shipment->updated_by)->first();
-                return ($admin['name']);
-            })
-
-            ->editColumn('tracking_number', function ($assigned_agent_shipment) {
-                $route = route('admin.tracking.index');
-                return '<p><a href="' . $route . '?tracking_number=' . $assigned_agent_shipment->tracking_number . '" style="text-decoration: underline;">' . $assigned_agent_shipment->tracking_number . '</a></p>';
-            });
-
-        return $datatable->make(true);
-    }
     // Heading: N/A
     // Sidebar: N/A
     // URL: team_lead/list
@@ -346,7 +225,6 @@ class TeamLeadDashboardController extends Controller
             })
 
             ->editColumn('attendance_date', function ($user) {
-                // dd($user);
                 $date = Carbon::parse($user->attendance_date);
                 if ($date->isToday() && isset($user->attendance_date)) {
                     return 'Online';
@@ -357,22 +235,18 @@ class TeamLeadDashboardController extends Controller
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || in_array(903, session('permissions'))) {
                     $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
                     if ($result->staff_category_id == 3) {
-
-
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
-
                                 $rv_zone = RvAgentAssignHub::where('agent_id', $result->sid)->orderBy('priority', 'ASC')->get();
                                 $rv_zone = $rv_zone->pluck('zone_id')->toArray();
                                 $rv_zone = array_unique( $rv_zone);
                                 $rv_zone = implode(',', $rv_zone);
 
-                                
                                 $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_zone . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                             }
@@ -388,16 +262,136 @@ class TeamLeadDashboardController extends Controller
                             }
                         }
                     }
-
-
-                    $dropdown .= '
-                </div>
-              </div>
-            ';
+                            $dropdown .= '
+                        </div>
+                    </div>
+                    ';
                     return $dropdown;
                 } else {
                     return '';
                 }
+            });
+
+        return $datatable->make(true);
+    }
+
+    public function shipment_assign_index()
+    {
+        $number_of_rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 0;
+        $number_of_rv_ticket = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
+        $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
+        $number_of_pending_ticket_percentage = number_format((count($number_of_pending_tickets) / ($number_of_rv_ticket) * 100),2);
+        $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
+        $number_of_closed_ticket_percentage = number_format((count($number_of_closed_tickets) / ($number_of_rv_ticket) * 100),2);
+        $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
+        $number_of_connected_calls_percentage = number_format((count($number_of_connected_calls) / ($number_of_rv_ticket) * 100),2);
+        $number_of_unresponsive_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
+        $number_of_unresponsive_percentage = number_format((count($number_of_unresponsive_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_reattempt_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 2)->get();
+        $number_of_reattempt_percentage = number_format((count($number_of_reattempt_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_return_confirm_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 1)->get();
+        $number_of_return_confirm_percentage = number_format((count($number_of_return_confirm_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_intercept_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 3)->get();
+        $number_of_intercept_percentage = number_format((count($number_of_intercept_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_self_collection_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 5)->get();
+        $number_of_self_collection_percentage = number_format((count($number_of_self_collection_call) / ($number_of_rv_ticket) * 100),2);
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+            ->whereIn('id', function ($query) {
+                $query->select(DB::raw('MAX(id)'))
+                    ->from('employee_attendances')
+                    ->groupBy('employee_attendances.employee_id');
+            })
+            ->get();
+
+        return view('admin.rv_assign_shipments.index')->with(['online_agents' => $online_agents,'number_of_available_agents' => $number_of_available_agents, 'number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
+    }
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: assigned_shipment/list
+    // Description: this method is used for Listing Shipment Assign.
+    public function shipment_assign_list(Request $request)
+    {
+        $assigned_agent_shipment = RvShipmentAssignAgent::join('admins as staff', 'staff.id', 'rv_shipment_assign_agents.agent_id')
+            ->leftjoin('shipments as shipment', 'shipment.id', 'rv_shipment_assign_agents.shipment_id')
+            ->select(['shipment.tracking_number as tracking_number', 'rv_shipment_assign_agents.shipment_id as shipment_id', 'staff.name as agent_name', 'rv_shipment_assign_agents.rv_assign_agent_status_id as status', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id as sub_status', 'rv_shipment_assign_agents.rv_state_id as state', 'rv_shipment_assign_agents.updated_by_id as updated_by'])
+            ->groupBy('rv_shipment_assign_agents.id');
+
+
+        if ($request->get('number_of_tickets_input') == '1') {
+
+            $assigned_agent_shipment;
+        }
+        if ($request->get('number_of_pending_tickets_input') == '3') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_state_id', 3);
+        }
+
+        if ($request->get('number_of_closed_tickets_input') == '4') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_state_id', 4);
+        }
+
+        if ($request->get('number_of_connected_calls_input') == '5') {
+            $assigned_agent_shipment = $assigned_agent_shipment->whereIn('rv_shipment_assign_agents.rv_assign_agent_status_id', [1, 2, 3, 5]);
+        }
+
+        if ($request->get('number_of_unresponsive_calls_input') == '6') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 6);
+        }
+
+        if ($request->get('number_of_reattempt_calls_input') == '7') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 2);
+        }
+
+        if ($request->get('number_of_return_confirm_calls_input') == '8') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 1);
+        }
+
+        if ($request->get('number_of_intercepted_calls_input') == '9') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 3);
+        }
+
+        if ($request->get('number_of_self_collection_calls_input') == '10') {
+            $assigned_agent_shipment = $assigned_agent_shipment->where('rv_shipment_assign_agents.rv_assign_agent_status_id', 5);
+        }
+
+        $datatable = Datatables::of($assigned_agent_shipment)
+            ->editColumn('status', function ($assigned_agent_shipment) {
+                $status = RvAssignAgentStatus::where('id', $assigned_agent_shipment->status)->first();
+                if ($status['name']) {
+                    return $status['name'];
+                } else {
+                    return '-----';
+                }
+            })
+
+            ->editColumn('sub_status', function ($assigned_agent_shipment) {
+                $sub_status = RvAssignAgentSubStatus::where('id', $assigned_agent_shipment->sub_status)->first();
+                if ($sub_status['name']) {
+                    return $sub_status['name'];
+                } else {
+                    return '-----';
+                }
+            })
+            ->editColumn('state', function ($assigned_agent_shipment) {
+                $state = RvState::where('id', $assigned_agent_shipment->state)->first();
+                $completed_state = RvState::where('id', $assigned_agent_shipment->state)->first();
+                if ($state['name']) {
+                    return $state['name'];
+                } else {
+                    return '-----';
+                }
+            })
+
+            ->editColumn('updated_by', function ($assigned_agent_shipment) {
+                $admin = Admin::where('id', $assigned_agent_shipment->updated_by)->first();
+                return ($admin['name']);
+            })
+
+            ->editColumn('tracking_number', function ($assigned_agent_shipment) {
+                $route = route('admin.tracking.index');
+                return '<p><a href="' . $route . '?tracking_number=' . $assigned_agent_shipment->tracking_number . '" style="text-decoration: underline;">' . $assigned_agent_shipment->tracking_number . '</a></p>';
             });
 
         return $datatable->make(true);

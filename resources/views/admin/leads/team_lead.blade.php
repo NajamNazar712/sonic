@@ -817,16 +817,12 @@
                                 selected_rows.push(employee_id);
                             });
 
-                            // $('#AssignHubModal #search_origin').empty();
-                            
                             // Deselect all rows
                             // table.rows().deselect();
                             if (selected_rows.length > 0) {
+                                $('#search_origin').val('').trigger('change'); //empty field opening on modal
                                 $('#AssignHubModal').modal('show');
-                                // $('#BulkAddDaysModal').append('<input type="text" name="employee_id_bulk[]" value="' + selected_rows + '">');
                             }
-
-                        
                         }
                     },
                     {
@@ -1116,6 +1112,10 @@
                     $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
                     $('#deactivate_reason_input').text(''); //clearing error message when modal is close
             });
+            // $('#AssignHubModal').on('hide.bs.modal', function(e) {
+            //         // $('#search_origin').text('');
+            //         $('#search_origin').empty();
+            // });
 
             $('#update_deactivate_agent_form').validate({
                     errorClass: 'danger',
