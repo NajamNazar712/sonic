@@ -13475,7 +13475,7 @@ class AdminReportsController extends Controller
                         ->where('a.status',1)
                         ->select('a.id', 'a.name')->get();
 
-        return view('admin.reports.rv_report.index', [
+        return view('admin.reports.rv_report.count', [
             'shippers' => $shippers, 'agents' => $agents,
         ]);
     }
