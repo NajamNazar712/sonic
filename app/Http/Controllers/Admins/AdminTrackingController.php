@@ -88,7 +88,7 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55,56,13])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         $sub_status_call_finding = SubStatusCallFinding::all();
@@ -954,6 +954,7 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['tracking_number'] = $tracking_number;
+                        $details['weight_recorded_as'] = DB::table('shipments_weight_types')->leftJoin('weight_types as wt', 'wt.id','=','shipments_weight_types.weight_type')->where('shipments_weight_types.shipment_id', $shipment->id)->pluck('wt.name')->first() ?? '';
                         if ($shipment->pod_image()->exists()) {
                             $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
 

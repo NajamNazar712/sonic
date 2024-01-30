@@ -524,18 +524,16 @@
                 var parent = $(this).parent('.form-group').prev('.form-group');
 
                 if (this.checked) {
+                    $('#add_shipment_form input.manual_weight').prop('checked', true)
                     $('#add_shipment_form input.weight').val('').prop('readonly', false);
                     $('#add_shipment_form input.weight').val('').prop('disabled', true);
 
                     $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', false);
                 }
                 else {  
-                    if ($('#add_shipment_form input.manual_weight').is(':checked')) {
-                        $('#add_shipment_form input.weight').val('').prop('disabled', false);
-                    }else{
-                        $('#add_shipment_form input.weight').val('').prop('readonly', true);
-                        $('#add_shipment_form input.weight').val('').prop('disabled', false);
-                    }
+                    $('#add_shipment_form input.manual_weight').prop('checked', false)
+                    $('#add_shipment_form input.weight').val('').prop('disabled', false);
+                    $('#add_shipment_form input.weight').val('').prop('readonly', true);
                     $('#add_shipment_form .volumetric_weights input').val('').prop('disabled', true);
                 }
             });
@@ -730,7 +728,7 @@
                                             //form.reset();
                                             
                                             $('#add_shipment_form :input').val('');
-                                            $('#add_shipment_form input.volumetric_weight').prop('checked',false);
+                                            //$('#add_shipment_form input.volumetric_weight').prop('checked',false);
                                             $('#add_shipment_form input.tracking_number').val('').focus();
             
                                             remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
@@ -910,7 +908,7 @@
                                 success: function(data) {
                                     //form.reset();
                                     $('#add_shipment_form :input').val('');
-                                    $('#add_shipment_form input.volumetric_weight').prop('checked',false);
+                                    //$('#add_shipment_form input.volumetric_weight').prop('checked',false);
                                     $('#add_shipment_form input.tracking_number').val('').focus();
     
                                     remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';

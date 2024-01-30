@@ -112,7 +112,7 @@ class V2AdminPickupsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }
         $today = Carbon::now()->startOfDay();
-        $pickup_requests = DB::connection('reports_2')->table('v2_pickup_requests')
+        $pickup_requests = DB::connection('reports')->table('v2_pickup_requests')
             ->join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
             ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
@@ -1129,6 +1129,15 @@ class V2AdminPickupsController extends Controller
                     $shipment->consignee_status_id = 2;
 
                     $shipment->save();
+                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                    if($shipment_weight->exists()){
+                        $shipments_weight_type = $shipment_weight->first();
+                    }else{
+                        $shipments_weight_type = new ShipmentsWeightType;
+                    }
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                    $shipments_weight_type->weight_type = 4; //ID 4 stands for bulk arrival
+                    $shipments_weight_type->save();
                     $reference_2_id = null;
 
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id);
@@ -1496,6 +1505,15 @@ class V2AdminPickupsController extends Controller
                     $shipment->consignee_status_id = 2;
                     
                     $shipment->save();
+                    $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                    if($shipment_weight->exists()){
+                        $shipments_weight_type = $shipment_weight->first();
+                    }else{
+                        $shipments_weight_type = new ShipmentsWeightType;
+                    }
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                    $shipments_weight_type->weight_type = 4; //ID 4 stands for bulk arrival
+                    $shipments_weight_type->save();
                     $reference_2_id = null;
                     
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id, 1, null, $rider_id);

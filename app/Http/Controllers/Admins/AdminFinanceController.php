@@ -4594,7 +4594,7 @@ class AdminFinanceController extends Controller
         }
 
 //        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-        $pending_payments = DB::connection('reports_2')->table('pending_payments')
+        $pending_payments = DB::connection('mysql')->table('pending_payments')
             ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
@@ -5292,7 +5292,7 @@ class AdminFinanceController extends Controller
 
     public function make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;
@@ -13246,7 +13246,7 @@ class AdminFinanceController extends Controller
 
     public function retail_make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;
