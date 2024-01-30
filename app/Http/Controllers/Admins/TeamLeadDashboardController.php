@@ -484,6 +484,15 @@ class TeamLeadDashboardController extends Controller
                 'remarks' => $request->deactivate_reason,
             ]);
         }
+        $staff = Admin::where('employee_id', $request->employee_id)->where('trax_id', '!=', null);
+        if ($staff->doesntExist()) {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 0;
+        $staff->updated_by = Auth::id();
+        $staff->save();
 
         $role = Admin::whereIn('role_id', [104, 63, 70])->pluck('email')->toArray();
         $employee = Employee::where('id', $request->employee_id)->first();

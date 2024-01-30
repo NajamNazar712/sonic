@@ -13683,11 +13683,6 @@ class AdminReportsController extends Controller
             })
             ->get();
 
-        $shippers = User::where('status', 3)->select('id', 'name')->get();
-        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('a.status',1)
-                        ->select('a.id', 'a.name')->get();
-
         return view('admin.reports.rv_report.count')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 
         'return_confirm_reasons' => $return_confirm_reasons, 'agents_and_contractual_agents' => $agents_and_contractual_agents,
         'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 

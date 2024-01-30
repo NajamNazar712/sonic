@@ -49,26 +49,6 @@
 
                             {{-- Cards Section --}}
                             <div class="row justify-content-center">
-                                {{-- <div class="col-3">
-                                    <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">
-                                                            <p id="total_sar" class="d-inline">
-                                                                {{ ($total_of_shipments) }}</p>
-                                                        </h3>
-                                                        <span>Total Of Shipments</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> --}}
                                 
                                 <div class="col-3" id="search_rvr_div">
                                     <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
