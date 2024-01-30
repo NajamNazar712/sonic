@@ -27,6 +27,10 @@ class UpdateShipmentsWeightTypesTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('shipments_weight_types', function (Blueprint $table) {
+            $table->dropColumn('shipper_weight_charges');
+            $table->dropColumn('range_down_arrival_weight');
+            $table->dropColumn('range_down_shipper_weight');
+        });
     }
 }
