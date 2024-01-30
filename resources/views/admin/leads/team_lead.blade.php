@@ -1007,6 +1007,7 @@
 
                             if (response.status === 2) {
                                 $('#BulkAddDaysModal').modal('hide');
+                                table.rows().deselect();
                                 toastr.success('Additional Days Added Successfully !!', 'Success!', {
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
