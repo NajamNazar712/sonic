@@ -2375,6 +2375,10 @@
                                             <li><a class="menu-item"
                                                     href="{{ route('admin.settings.ticker.index') }}">Ticker</a></li>
                                         @endif
+                                        @if (session('role_id') == 1 || in_array(152, session('permissions')))
+                                            <li><a class="menu-item"
+                                                    href="{{ route('admin.settings.shipper.cap.index') }}">Shipper Cap</a></li>
+                                        @endif
                                         @if (session('role_id') == 1 || in_array(891, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.background_image.index') }}">Background Image</a></li>

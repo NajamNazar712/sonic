@@ -157,6 +157,15 @@ class GeneralSettingController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    function shipper_cap_index()
+    {
+        return view('admin.settings.shipper_cap');
+    }
+
+    function shipper_cap_list()
+    {
+
+    }
 
     
 }

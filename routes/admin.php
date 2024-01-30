@@ -2489,6 +2489,13 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('', 'Admins\Settings\GeneralSettingController@ticker_store')->name('store');
         });
 
+        Route::prefix('shipper')->name('shipper.')->group(function () {
+            Route::prefix('cap')->name('cap.')->group(function () {
+                Route::get('', 'Admins\Settings\GeneralSettingController@shipper_cap_index')->name('index');
+                Route::post('', 'Admins\Settings\GeneralSettingController@tshipper_cap_store')->name('store');
+            });
+        });
+
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
