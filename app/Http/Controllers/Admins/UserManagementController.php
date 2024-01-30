@@ -237,7 +237,7 @@ class UserManagementController extends Controller
 
         if ($admin) {
             $admin->status = $request->status;
-
+            $admin->updated_by = Auth::id();
             $admin->save();
 
             $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
@@ -609,9 +609,11 @@ class UserManagementController extends Controller
 
             if ($admin_role->is_active == 1) {
                 $admin_role->is_active = 0;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             } else {
                 $admin_role->is_active = 1;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             }
 
@@ -997,6 +999,7 @@ class UserManagementController extends Controller
             $admin = Admin::find($admin_id);
             if ($admin) {
                 $admin->phone_number = $phone;
+                $admin->updated_by = Auth::id();
                 $admin->save();
 
                 $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
