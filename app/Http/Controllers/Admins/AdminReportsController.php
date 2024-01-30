@@ -13734,4 +13734,17 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
         
     }
+
+    public function cargo_manifest_index()
+    {
+        $riders = array();
+        $hubs = array();
+        $zones  = array();
+        return view('admin.reports.cargo_manifest.index')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
+    }
+
+    public function cargo_manifest_list()
+    {
+        dd('cargo manifest report !');
+    }
 }
