@@ -497,6 +497,7 @@ class UserManagementController extends Controller
         }
         $admin->default_hub_id = $request->input('default_hub');
         $admin->updated_by = Auth::id();
+        $admin->updated_at = Carbon::now();
         $admin->shift_id = $request->input('shift_id');
 
         if ($request->filled('pin')) {
