@@ -479,6 +479,7 @@
                 },
                 submitHandler: function(form) {
                     var pressed_button = $(this.submitButton);
+                    $("#sack_bag_no_check").remove();
 
                     $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
 
@@ -488,18 +489,35 @@
 
                     if($("#sack_bag_no").val()!='')
                     {
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'Your Bag is being created!',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
-                                $('#cargo_consignment form .transport_mode').prop("disabled", false);
-                                $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
-                                form.submit();
+                        $.ajax({
+                            url:'{!! route('admin.cargo_manifest.bags.sack_bag.no_check_for_cb') !!}',
+                            type: 'POST',
+                             data: {
+                                'sack_bag_no':$("#sack_bag_no").val(),
+                                '_token': '{{ csrf_token() }}'
+                             },
+                            success: function(data){
+                                if(data.error) {
+                                    $(form).find('button[type=submit]').prop('disabled', false);
+                                    UnblockPagePermanently();
+                                    $('#sackbag_row .col-6 .form-group').append('<label id="sack_bag_no_check" class="danger w-100" for="seal_number">Sack Bag Not exists</label>');
+                                }else{
+                                        
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Your Bag is being created!',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                    $('#cargo_consignment form .transport_mode').prop("disabled", false);
+                                    $('#cargo_consignment form .transport_mode_vendor').prop("disabled", false);
+                                    form.submit();
 
+                                }
+                            }
+                        });
                     }else{
                          swal({
                             text: 'Are you sure you want to submit without SackBag No#?',

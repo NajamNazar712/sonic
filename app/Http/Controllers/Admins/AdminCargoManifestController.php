@@ -1109,6 +1109,7 @@ class AdminCargoManifestController extends Controller
 
     public function create_store(Request $request)//create bag -> store
     {
+       
 
         $sack_bag_no = $request->input('sack_bag_no');
         // $origin_hub_id=$request->input('origin_hub_id');
@@ -5143,6 +5144,23 @@ class AdminCargoManifestController extends Controller
                 return response()->json(['error' => 'Sack-Bag No: ' . $sack_bag_no . ' already exist ']);
             }
             return response()->json(['success' => 'Sack-Bag No# available']);
+        } else {
+            return response()->json(['error' => 'Sack-Bag No# not found ']);
+        }
+    }
+
+    //sack_bag_no check during bag creation
+    
+    public function sack_bag_no_check_for_cb(Request $request)
+    {
+        if ($sack_bag_no = $request->get('sack_bag_no')) {
+
+            $sack_bag = IssueSackBagOrigin::where('sack_bag_no', $sack_bag_no);
+            if ($sack_bag->exists()) {
+                return response()->json(['success' => 'Sack-Bag No# available']);
+            }else{
+                return response()->json(['error' => 'Sack-Bag not found ']);
+            }
         } else {
             return response()->json(['error' => 'Sack-Bag No# not found ']);
         }

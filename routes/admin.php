@@ -1368,6 +1368,8 @@ Route::prefix('admin')->name('admin.')->group(function(){
                 Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
                 Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
                 Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
+                Route::post('no_check_for_cb', 'Admins\AdminCargoManifestController@sack_bag_no_check_for_cb')->name('no_check_for_cb');
+                
             });
         });
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
