@@ -769,12 +769,12 @@ trait RvTrait
             try {
                 
                 //update shipment to sar when agent set the status to refusal on call
-                $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
-                $shipment_assign_agent->rv_assign_agent_status_id = 8;
-                $shipment_assign_agent->rv_state_id = 2;
-                $shipment_assign_agent->remarks = $request->remarks;
-                $shipment_assign_agent->call_to_id  = $request->call_to_id;
-                $shipment_assign_agent->save();
+                // $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
+                // $shipment_assign_agent->rv_assign_agent_status_id = 8;
+                // $shipment_assign_agent->rv_state_id = 2;
+                // $shipment_assign_agent->remarks = $request->remarks;
+                // $shipment_assign_agent->call_to_id  = $request->call_to_id;
+                // $shipment_assign_agent->save();
 
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
