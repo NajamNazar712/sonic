@@ -21,9 +21,9 @@ class CreateActivityTrailAndPermissionForSchedulePickups extends Seeder
 
         ));
 
-        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Pickup > V3 Schedule Pickups', 'url'=>'admin.v3_pickups.pending.schedule.index', 'permission_id' => 919),           
-        ));
+        // $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        // DB::table('admins_screen_list')->insert(array(
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Pickup > V3 Schedule Pickups', 'url'=>'admin.v3_pickups.pending.schedule.index', 'permission_id' => 919),           
+        // ));
     }
 }

@@ -21,9 +21,9 @@ class CreateActivityTrailAndPermissionForRiderPickedArrivalReportSeeder extends 
 
         ));
 
-        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Rider Picked Vs Arrival Shipments', 'url'=>'admin.reports.pickup_arival.index', 'permission_id' => 923),           
-        ));
+        // $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        // DB::table('admins_screen_list')->insert(array(
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Rider Picked Vs Arrival Shipments', 'url'=>'admin.reports.pickup_arival.index', 'permission_id' => 923),           
+        // ));
     }
 }

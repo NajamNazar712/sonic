@@ -21,10 +21,10 @@ class CreateActivityTrailAndPermissionForV3PickupRequest extends Seeder
 
         ));
 
-        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Pickup > V3 Pickup Request', 'url'=>'admin.v3_pickups.pending.index', 'permission_id' => 920),           
-        ));
+        // $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        // DB::table('admins_screen_list')->insert(array(
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Pickup > V3 Pickup Request', 'url'=>'admin.v3_pickups.pending.index', 'permission_id' => 920),           
+        // ));
 
 
         

@@ -21,9 +21,9 @@ class CreateActivityTrailAndPermissionForCreatedShipmentReportSeeder extends See
 
         ));
 
-        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Created Shipment vs Unpicked Shipment', 'url'=>'admin.reports.created_shipment.index', 'permission_id' => 922),           
-        ));
+        // $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        // DB::table('admins_screen_list')->insert(array(
+        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Created Shipment vs Unpicked Shipment', 'url'=>'admin.reports.created_shipment.index', 'permission_id' => 922),           
+        // ));
     }
 }
