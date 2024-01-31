@@ -218,12 +218,17 @@ class ReturnV2Controller extends Controller
                                     }
                                 }
 
-                                $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
-                                ->where('delivery_note_shipments.shipment_id', '=', function ($query) use ($shipment) {
-                                    $query->select(DB::raw('max(id)'))
-                                        ->from('delivery_note_shipments')
-                                        ->where('delivery_note_shipments.shipment_id', $shipment->id);
-                                })
+                                // $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
+                                // ->where('delivery_note_shipments.shipment_id', '=', function ($query) use ($shipment) {
+                                //     $query->select(DB::raw('max(id)'))
+                                //         ->from('delivery_note_shipments')
+                                //         ->where('delivery_note_shipments.shipment_id', $shipment->id);
+                                // })
+                                // ->where('dn.pending_status', 1)
+                                // ->first();
+
+                                $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')
+                                ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(id) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
                                 ->where('dn.pending_status', 1)
                                 ->first();
         
