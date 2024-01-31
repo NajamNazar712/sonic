@@ -509,6 +509,15 @@ class TeamLeadDashboardController extends Controller
                 'status_id' => '1',
             ]);
         }
+        $staff = Admin::where('employee_id', $request->employee_id)->where('trax_id', '!=', null);
+        if ($staff->doesntExist()) {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->save();
     }
 
     public function add_additional_days(Request $request)
