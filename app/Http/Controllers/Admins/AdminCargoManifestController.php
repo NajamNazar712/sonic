@@ -1167,7 +1167,7 @@ class AdminCargoManifestController extends Controller
                 $bag->sack_bag_id = $sack_bag->id;
                 $bag->is_sack_bag = 1;
 
-                $sack_bag->sack_destination_id = $request->input('destination_hub_id');
+                // $sack_bag->sack_destination_id = $request->input('destination_hub_id');
                 $sack_bag->save();
             } else {
                 $bag->is_sack_bag = 0;
