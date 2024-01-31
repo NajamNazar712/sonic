@@ -756,7 +756,7 @@ class AdminHumanResourseController extends Controller
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
                     $admin->dummy_pin = $employee->pin;
-                    $admin->updated_by = Auth::id();
+                    //$admin->updated_by = Auth::id();
                     $admin->update();
                 }
             } else {
@@ -1536,7 +1536,7 @@ class AdminHumanResourseController extends Controller
                 $admin->default_hub_id = $employee->city->hub_city->id;
                 $admin->password = bcrypt($employee->pin);
                 $admin->dummy_pin = $employee->pin;
-                $admin->updated_by = Auth::id();
+                //$admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
                 $admin->area_id = $employee->area_id;
                 $admin->update();
