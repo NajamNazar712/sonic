@@ -1708,10 +1708,10 @@
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.issuance_sack_bag.index') }}">Issuance of Sack Bag</a></li>
                         @endif
-
+{{-- 
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.reused_sack_bag.index') }}">Reused Sack Bag's</a></li>
-                        @endif
+                        @endif --}}
 
                          @if (session('role_id') == 1 || in_array(925, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.cargo_manifest.index') }}">Cargo Manifest Report</a></li>
