@@ -227,17 +227,23 @@ class ReturnV2Controller extends Controller
                                 // ->where('dn.pending_status', 1)
                                 // ->first();
 
-                                $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')
-                                ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(created_at) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
-                                ->where('dn.pending_status', 1)
-                                ->first();
-
-
-                                // $shipment_status = Shipment::leftJoin('shipments_journey.shipment_id', '=', 'shipments.id')
-                                //     ->where('shipments_journey.id','=',
-                                //     DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
+                                // $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')
+                                // ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(created_at) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
                                 // ->where('dn.pending_status', 1)
                                 // ->first();
+
+
+                                $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) { // only fetch max arrival
+                                    $join->on('sja.shipment_id', 'shipments.id')
+                                        ->where(
+                                            'sja.id',
+                                            '=',
+                                            DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)")
+                                        );
+                                })
+                                ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
+                                ->where('dn.pending_status', 1)
+                                ->first();
                                 dd($shipment_status);
         
                                 
