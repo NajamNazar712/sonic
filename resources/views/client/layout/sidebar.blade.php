@@ -21,6 +21,8 @@
                                         <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
                                         @if(session('user_id') == 10354)
                                             <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
+                                        @elseif (session('user_id') == 10357)
+                                            <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_mms_index') }}">MMS Excel Sheet</a></li>
                                         @else
                                             <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                                         @endif

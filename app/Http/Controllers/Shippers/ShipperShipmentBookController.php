@@ -4811,6 +4811,76 @@ class ShipperShipmentBookController extends Controller
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights, 'distribution_products' => $distribution_products, 'omni_user' => $omni_user]);
     }
 
+    public function mms_corporate_excel_index()
+    {
+
+        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
+        $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
+            $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
+        })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
+        if (in_array(session('user_id'), [5982, 3324, 10104, 14110, 16292])) {
+            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        } else {
+            $cities = City::where('id', '!=', 1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
+        }
+        $products = Product::all();
+        $distribution_products = DistributionProduct::all();
+        $user = User::find(session('user_id'));
+        $delivery_types = DeliveryType::all();
+        $charges_modes = ChargesModes::whereIn('id', [3])->get();
+        $min_chargeable_weights = CorporateMinChargeableWeight::where('user_id', session('user_id'))->get();
+
+        if (session('rate_type_id') != 3) {
+            $user_shipping_modes = CorporateRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+        } else {
+            $user_shipping_modes = CorporateDefaultRateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+        }
+        $shipping_modes = ShippingMode::whereIn('id', $user_shipping_modes)->get();
+
+
+        if (in_array(4, $user_shipping_modes)) {
+            $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+        } else {
+            $shipping_mode_same_day_timings = NULL;
+        }
+
+        if (session('user_id') == 10354) {
+            $payment_modes = PaymentMode::whereIn('id', [1])->get();
+        } else {
+            $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if ($ccd_booking->exists()) {
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if (!in_array(session('user_id'), $ccd_account_tags)) {
+                    $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+                } else {
+                    $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+                }
+            } else {
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+            }
+        }
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $omni_accounts)) {
+                    $omni_user = 1;
+                }
+            }
+        }
+
+        return view('client.shipment.book.corporate.mms_excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights, 'distribution_products' => $distribution_products, 'omni_user' => $omni_user]);
+
+    }
+
+    public function mms_corporate_excel_store()
+    {
+        
+    }
+
     public function corporate_excel_distribution_index()
     {
         if (session('user_id') != 10354) {
