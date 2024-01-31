@@ -231,6 +231,7 @@ class ReturnV2Controller extends Controller
                                 ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(id) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
                                 ->where('dn.pending_status', 1)
                                 ->first();
+                                dd(1,$shipment_status);
         
                                 
                                 //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
