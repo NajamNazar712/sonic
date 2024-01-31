@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Segment;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use PHPExcel_Cell;
 use App\DailyVisit;
@@ -9961,7 +9963,7 @@ class AdminReportsController extends Controller
             ->select(['shipments.id as shId', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'shipments.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height', 'scs.name as sub_segment', 'sw.weight_type', 'wt.name as weight_type_name','shipments.chargeable_weight', 'hub.name as hub_name','area.name as area_name','sw.range_down_arrival_weight','sw.range_down_shipper_weight' ,'sw.shipper_weight_charges','shipments.weight_charges as arrival_weight_charges' ])
             ->where('arv_date.shipper_status_id', '=', 2)
             ->whereNotNull('shipments.actual_weight');
-
+dd($shipments->get());
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $shipments->where('arv_date.created_at', '>=', $from)
@@ -13459,14 +13461,113 @@ class AdminReportsController extends Controller
 
     public function cargo_manifest_index()
     {
-        $riders = array();
-        $hubs = array();
-        $zones  = array();
-        return view('admin.reports.cargo_manifest.index')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
+        $segments = Segment::join('sub_category_segments as scs','segments.id','scs.segment_id')
+            ->select('segments.id as segment_id','segments.name as segment_name','scs.id as sub_segment_id','scs.name as sub_segment_name')
+            ->get();
+
+        $cities = DB::connection('reports')->table('cities')->get(['id', 'name']);
+        $zones = DB::connection('reports')->table('zones')->get(['id', 'name']);
+
+        return view('admin.reports.cargo_manifest.index')->with(['origins' => $zones, 'destinations' => $zones, 'segments' => $segments]);
     }
 
-    public function cargo_manifest_list()
+    public function cargo_manifest_list(Request $request)
     {
-        dd('cargo manifest report !');
+        //dd('cargo manifest report !', $request->all(),$request->select_sub_segment_value);
+        $origin = $request->select_origin;
+        $destination = $request->select_destination;
+        $segment = $request->select_segment_value;
+        $sub_segment = $request->select_sub_segment_value;
+        $date_from = $request->search_date_from;
+        $date_to = $request->search_date_to;
+
+        $date_from = Carbon::parse($date_from);
+        $date_from = $date_from->format('Y-m-d');
+
+        $date_to = Carbon::parse($date_to);
+        $date_to = $date_to->format('Y-m-d');
+
+        $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
+
+        $bindings = [
+            'origin_value' => $origin,
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+        ];
+
+        if (!empty($destination)) {
+            $Query .= " AND desination_zonecode = :destination_value";
+            $bindings['destination_value'] = $destination;
+        }
+
+        if (!empty($segment)) {
+            $Query .= " AND parent_prod_name = :segment AND sub_prod_name = :sub_segment ";
+            $bindings['segment'] = $segment;
+            $bindings['sub_segment'] = $sub_segment;
+        }
+
+        $results = DB::select($Query,$bindings);
+
+        $transformedData = collect($results)->map(function ($item) {
+            return [
+                'origin' => $item->origin_zonecode,
+                'destination' => $item->desination_zonecode,
+                'booking_date' => $item->booking_date,
+                'segment' => $item->parent_prod_name,
+                'sub_segment' => $item->sub_prod_name,
+                'arrival' => $item->arrival,
+                'manisfest' => $item->manisfest,
+                'misroute' => $item->misroute,
+                'withoutmanisfest' => $item->withoutmanisfest,
+            ];
+        });
+
+        $datatable = Datatables::of($transformedData)
+            ->editColumn('manisfest', function ($transformedData) {
+                if ($transformedData['manisfest'] == null) {
+                    return '-';
+                } else {
+                    return $transformedData['manisfest'];
+                }
+            })
+            ->editColumn('manisfest_percentage', function ($transformedData) {
+                if ($transformedData['manisfest'] == null) {
+                    return '-';
+                } else {
+                    $result = ($transformedData['manisfest']/$transformedData['arrival'])*100;
+                    return '%'.number_format($result,2);
+                }
+            })
+            ->editColumn('withoutmanisfest', function ($transformedData) {
+                if ($transformedData['withoutmanisfest'] == null) {
+                    return '-';
+                } else {
+                    return $transformedData['withoutmanisfest'];
+                }
+            })
+            ->editColumn('withoutmanisfest_percentage', function ($transformedData) {
+                if ($transformedData['withoutmanisfest'] == null) {
+                    return '-';
+                } else {
+                    $result = ($transformedData['withoutmanisfest']/$transformedData['arrival'])*100;
+                    return '%'.number_format($result,2);
+                }
+            })
+            ->editColumn('misroute', function ($transformedData) {
+                if ($transformedData['misroute'] == null) {
+                    return '-';
+                } else {
+                    return $transformedData['misroute'];
+                }
+            })
+            ->editColumn('misroute_percentage', function ($transformedData) {
+                if ($transformedData['misroute'] == null) {
+                    return '-';
+                } else {
+                    $result = ($transformedData['misroute']/$transformedData['arrival'])*100;
+                    return '%'.number_format($result,2);
+                }
+            });
+        return $datatable->make(true);
     }
 }
