@@ -30,7 +30,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('test:command')->everyMinute();
         $schedule->command('auto:regular_pickup')->dailyAt('06:00')->runInBackground();
     }
     /**
