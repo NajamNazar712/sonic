@@ -224,7 +224,7 @@ class ReturnV2Controller extends Controller
                                         ->from('delivery_note_shipments')
                                         ->where('delivery_note_shipments.shipment_id', $shipment->id);
                                 })
-                                ->where('dn.pending_status', 0)
+                                ->where('dn.pending_status', 1)
                                 ->first();
         
                                 
