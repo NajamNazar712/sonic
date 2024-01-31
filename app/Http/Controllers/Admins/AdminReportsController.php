@@ -13686,6 +13686,20 @@ class AdminReportsController extends Controller
             // return $datatable->make(true);
         }
     }
+    
+
+    public function get_issuance_sack_bag_list(Request $request)
+    {
+        $origin_id = $request->origin_id;
+        $sack_bag_list = IssueSackBagOrigin::where('origin', $origin_id)->where('status', 1)->select('issue_sack_bag_origins.sack_bag_no', 'issue_sack_bag_origins.id as sack_bag_id','created_at');
+        if ($sack_bag_list->exists()) {
+            $sack_bag_list = $sack_bag_list->get();
+            return response()->json(['status' => 1, 'sack_bag_list' => $sack_bag_list]);
+            // $datatable = Datatables::of($sack_bag_list);
+            // return $datatable->make(true);
+        }
+    }
+
 
     public function get_reused_sack_bag_list()
     {
