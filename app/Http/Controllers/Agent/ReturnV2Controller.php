@@ -244,7 +244,7 @@ class ReturnV2Controller extends Controller
                                 ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
                                 ->where('dn.pending_status', 1)
                                 ->first();
-                                // dd($shipment_status);
+                                dd($shipment_status);
         
                                 
                                 //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
