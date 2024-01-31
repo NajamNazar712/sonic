@@ -228,9 +228,16 @@ class ReturnV2Controller extends Controller
                                 // ->first();
 
                                 $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')
-                                ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(id) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
+                                ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(created_at) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
                                 ->where('dn.pending_status', 1)
                                 ->first();
+
+
+                                // $shipment_status = Shipment::leftJoin('shipments_journey.shipment_id', '=', 'shipments.id')
+                                //     ->where('shipments_journey.id','=',
+                                //     DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
+                                // ->where('dn.pending_status', 1)
+                                // ->first();
                                 dd($shipment_status);
         
                                 
