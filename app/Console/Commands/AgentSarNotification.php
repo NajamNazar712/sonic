@@ -68,6 +68,7 @@ class AgentSarNotification extends Command
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
+            ->where('updated_at', '>', $currentDateTime->subHours(24))
             ->where('rv_state_id', 2);
             // ->get();
 
