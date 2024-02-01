@@ -104,11 +104,16 @@ class AgentSarNotification extends Command
                     // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => 4]);
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-                    $request = $shipment->request->add([
-                        'shipment_id' => $shipment->shipment_id, 
-                        'remarks' => $shipment->remarks, 
+                    // $request = $shipment->request->add([
+                    //     'shipment_id' => $shipment->shipment_id, 
+                    //     'remarks' => $shipment->remarks, 
+                    //     'rv_assign_agent_sub_status_id' => null,
+                    // ]);
+                    $request = [
+                        'shipment_id' => $shipment->shipment_id,
+                        'remarks' => $shipment->remarks,
                         'rv_assign_agent_sub_status_id' => null,
-                    ]);
+                    ];
                     $this->return_confirm($request);
 
                     $data = [
@@ -143,11 +148,16 @@ class AgentSarNotification extends Command
                 foreach ($refusal_call_shipment_update as $shipment) {
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-                    $request = $shipment->request->add([
-                        'shipment_id' => $shipment->shipment_id, 
-                        'remarks' => $shipment->remarks, 
+                    // $request = $shipment->request->add([
+                    //     'shipment_id' => $shipment->shipment_id, 
+                    //     'remarks' => $shipment->remarks, 
+                    //     'rv_assign_agent_sub_status_id' => null,
+                    // ]);
+                    $request = [
+                        'shipment_id' => $shipment->shipment_id,
+                        'remarks' => $shipment->remarks,
                         'rv_assign_agent_sub_status_id' => null,
-                    ]);
+                    ];
                     $this->return_confirm($request);
 
                     $data = [
