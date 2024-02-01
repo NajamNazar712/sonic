@@ -1587,8 +1587,6 @@
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
-                                        shipment += '<td>' + history.user_created_by + '</td>';
-                                        shipment += '<td>' + history.user_received_by + '</td>';
 
                                         shipment += '</tr>';
                                     });
