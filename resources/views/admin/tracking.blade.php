@@ -1576,8 +1576,6 @@
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>User Created By</strong></th>';
-                                    shipment += '<th><strong>User Received By</strong></th>';
 
                                     shipment += '</tr>';
                                     shipment += '</thead>';
