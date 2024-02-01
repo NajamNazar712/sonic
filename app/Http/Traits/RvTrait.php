@@ -458,8 +458,7 @@ trait RvTrait
     {   
         // dd($request);
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
-        // $parcel = Shipment::find($request->shipment_id);
-        $parcel = Shipment::where('id', $request->shipment_id)->first();
+        $parcel = Shipment::find($request->shipment_id);
         dd($parcel);
         
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
