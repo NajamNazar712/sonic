@@ -60,13 +60,13 @@ class AgentSarNotification extends Command
                 ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 12 hours ago.            
                 ->where('updated_at', '<', $currentDateTime->subHours(16))
-                ->where('unresponsive_email_count', '<', 1)
-                ->get();
+                ->where('unresponsive_email_count', '<', 1);
+                // ->get();
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('rv_state_id', 2)
-            ->get();
+            ->where('rv_state_id', 2);
+            // ->get();
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
