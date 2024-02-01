@@ -51,7 +51,6 @@ class AgentSarNotification extends Command
      */
     public function handle()
     {
-        dd(1);
         // try {
             $currentDateTime = Carbon::now();
 
@@ -71,7 +70,7 @@ class AgentSarNotification extends Command
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
-            dd($sendEmail);
+            dd($sendEmails, $sendEmailofRefusalShipments, $sendEmail);
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
 
