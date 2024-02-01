@@ -53,16 +53,9 @@ class AgentSarNotification extends Command
     {
         // try {
             $currentDateTime1 = Carbon::now()->toDateTimeString();
-
             // Create a Carbon instance from the formatted string
-            $currentDateTimeCarbon = Carbon::parse($currentDateTime1);
-
-            $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-                ->where('rv_state_id', 2)
-                ->where('updated_at', '>', $currentDateTimeCarbon->subHours(24))
-                ->get();
-
-            dd($currentDateTime1, $refusal_call_shipment_update, $currentDateTimeCarbon->subHours(24));
+            $currentDateTime = Carbon::parse($currentDateTime1);
+            
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
@@ -141,9 +134,9 @@ class AgentSarNotification extends Command
             // the system will automatically update the shipment status to "Return Confirm."
             
             $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('rv_state_id', 2)
-            ->where('updated_at', '>', $currentDateTime->subHours(24))
-            ->get();
+                ->where('rv_state_id', 2)
+                ->where('updated_at', '<', $currentDateTime->subHours(24))
+                ->get();
 
             if ($refusal_call_shipment_update->isNotEmpty()) {
                 foreach ($refusal_call_shipment_update as $shipment) {
