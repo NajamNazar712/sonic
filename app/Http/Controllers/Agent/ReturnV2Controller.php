@@ -233,18 +233,25 @@ class ReturnV2Controller extends Controller
                                 // ->first();
 
 
-                                $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) { // only fetch max arrival
-                                    $join->on('sja.shipment_id', 'shipments.id')
-                                        ->where(
-                                            'sja.id',
-                                            '=',
-                                            DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)")
-                                        );
+                                // $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) { // only fetch max arrival
+                                //     $join->on('sja.shipment_id', 'shipments.id')
+                                //         ->where(
+                                //             'sja.id',
+                                //             '=',
+                                //             DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)")
+                                //         );
+                                // })
+                                // ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
+                                // ->where('dn.pending_status', 1)
+                                // ->first();
+                                $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) use ($shipment) {
+                                    $join->on('sja.shipment_id', '=', $shipment->id)
+                                        ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
                                 })
-                                ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
+                                ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'sja.reference_1_id')
                                 ->where('dn.pending_status', 1)
                                 ->first();
-                                dd($shipment_status);
+                                // dd($shipment_status);
         
                                 
                                 //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
