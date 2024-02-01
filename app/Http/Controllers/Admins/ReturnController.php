@@ -186,7 +186,6 @@ class ReturnController extends Controller
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
-            ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
 
             // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
@@ -226,7 +225,6 @@ class ReturnController extends Controller
              'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
              'dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 
              'new_ras.created_at as assigned_at',
-             'asadby.name as assigned_by','consolidations.consolidation_id',
              'raa.admin_id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',

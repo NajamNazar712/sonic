@@ -1773,7 +1773,7 @@
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(
                                 header).is('.action') || $(header).is('.shipment_remarks') || $(
-                                header).is('.reattempts') || $(header).is('.consolidation') ||
+                                header).is('.reattempts') ||
                             $(header).is('.reattemp_status_remarks')) {
                             $(td).appendTo($(search) || $(header).is('sub_station'));
                         } else if ($(header).is('.status')) {
@@ -1865,7 +1865,6 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
-                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
                 var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
                 var tat = table.row($(this).parents('tr')).data().confirmation_on;
 
@@ -1880,38 +1879,6 @@
                         });
                         return false;
                     }
-                    table.rows().nodes().each(function(index) {
-                        var row = table.row(index);
-                        if ($(row.node()).attr('consolidation_id') == con_id) {
-                            var rid = parseInt($(row.node()).attr('id'));
-                            var rindex = $.inArray(rid, selected_rows);
-
-                            if (rindex === -1) {
-                                selected_rows.push(rid);
-                                if (id != rid) {
-
-                                    table.row(row).select();
-                                }
-                            } else {
-                                if (id != rid) {
-
-                                    row.deselect();
-                                }
-                                selected_rows.splice(rindex, 1);
-                            }
-                            if (selected_rows.length > 0) {
-                                table.button('.confirm').enable();
-                                table.button('.assign').enable();
-                                table.button('.re-attempt').enable();
-                                table.button('.un-assign').enable();
-                            } else {
-                                table.button('.confirm').disable();
-                                table.button('.assign').disable();
-                                table.button('.re-attempt').disable();
-                                table.button('.un-assign').disable();
-                            }
-                        }
-                    });
                 } else {
                     if (hub_ids.length == 0) {
                         hub_ids.push(hub_id);
