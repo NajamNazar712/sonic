@@ -70,7 +70,6 @@ class AgentSarNotification extends Command
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
-            dd($sendEmail);
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
 
@@ -78,11 +77,12 @@ class AgentSarNotification extends Command
                 NotificationsController::send(220, $sendEmail);
 
                 foreach ($sendEmail as $shipment) {
-
-                    // Increment the unresponsive_email_count for each shipment after sending the email
-                    $shipment->increment('unresponsive_email_count');
-                    $shipment->unresponsive_email_time = $currentDateTime;
-                    $shipment->save();
+                    // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
+                    if($shipment->rv_assign_agent_status_id == 6){
+                        $shipment->increment('unresponsive_email_count');
+                        $shipment->unresponsive_email_time = $currentDateTime;
+                        $shipment->save();
+                    }
                 }
             }
 
