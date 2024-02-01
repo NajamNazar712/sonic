@@ -160,6 +160,7 @@ class AgentSarNotification extends Command
                     ];
                     
                     $request = request()->merge($requestData);
+                    $this->return_confirm($request);
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $shipment->id,
