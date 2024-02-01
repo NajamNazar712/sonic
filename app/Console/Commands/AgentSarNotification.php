@@ -55,6 +55,13 @@ class AgentSarNotification extends Command
             // $currentDateTime = Carbon::now();
             $currentDateTime = Carbon::now('UTC');
 
+            $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
+            ->where('rv_state_id', 2)
+            ->where('updated_at', '>', $currentDateTime->subHours(24))
+            ->get();
+
+            dd($refusal_call_shipment_update);
+
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
@@ -135,7 +142,7 @@ class AgentSarNotification extends Command
             ->where('rv_state_id', 2)
             ->where('updated_at', '>', $currentDateTime->subHours(24))
             ->get();
-            
+
             if ($refusal_call_shipment_update->isNotEmpty()) {
                 foreach ($refusal_call_shipment_update as $shipment) {
                     $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
