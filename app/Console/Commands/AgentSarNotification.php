@@ -60,7 +60,7 @@ class AgentSarNotification extends Command
             ->where('updated_at', '>', $currentDateTime->subHours(24))
             ->get();
 
-            dd($currentDateTime, $refusal_call_shipment_update);
+            dd($currentDateTime, $refusal_call_shipment_update, $currentDateTime->subHours(24));
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
