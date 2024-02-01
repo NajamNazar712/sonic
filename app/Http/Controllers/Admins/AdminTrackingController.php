@@ -1553,34 +1553,6 @@ class AdminTrackingController extends Controller
                                 $journey_details['handover_id'] = $journey->handover_id;
                                 $journey_details['status'] = $journey->my_status->name;
                                 $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                                $shipment_scanning_query = ShipmentScanningJourney::leftjoin('handover_shipments_journeys as hsj', function ($join) use ($journey) {
-                                    $join->on('hsj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                                    ->where('hsj.shipment_id', '=', $journey->id);
-                                })
-                                ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                                ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                                ->select('shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude','shipment_scanning_journeys.created_at','hsj.status');
-                                $admin_id = Handover::where('id', $journey_details['handover_id']);
-                                
-                                if($shipment_scanning_query->exists()){
-                                    $journey_details['user_created_by'] = Admin::find($admin_id->first()->created_by)->name ?? '-';
-                                    $journey_details['user_received_by'] = Admin::find($admin_id->first()->received_by)->name ?? '-';
-
-                                    switch ($journey->status) {
-                                        case 1:
-                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 26)->latest()->first();
-                                            break;
-                                        case 2:
-                                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 27)->latest()->first();
-                                            break;
-                                        default:
-                                            $scanning_data = null;
-                                            break;
-                                    }
-                                }else{
-                                    $scanning_data = null;
-                                }
-                                $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                                 $details['handover_history'][] = $journey_details;
                             }
                         }

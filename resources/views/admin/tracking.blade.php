@@ -1559,7 +1559,6 @@
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '</tr>';
                                     });
-
                                     shipment += '</tbody>';
                                     shipment += '</table>';
 
