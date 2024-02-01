@@ -186,9 +186,15 @@ class ReturnController extends Controller
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
+            ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
 
             // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
+			->leftjoin('consolidation_shipments as consolidations', function ($join){
+                $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                    ->where('consolidations.consolidation_id','=',
+                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+            })
            /* ->leftjoin('return_confirmation_pending_sms_attempts as rcps','rcps.shipment_id','=','shipments.id')*/
            ->leftJoin('rider_deliveries', function ($join) {
                $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
@@ -225,6 +231,7 @@ class ReturnController extends Controller
              'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
              'dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 
              'new_ras.created_at as assigned_at',
+             'asadby.name as assigned_by','consolidations.consolidation_id',
              'raa.admin_id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
@@ -281,6 +288,13 @@ class ReturnController extends Controller
                     }
                     if ($shipments->star_status == 1) {
                         return 'star_sippers';
+                    }
+                },
+				'consolidation_id' => function($shipments){
+                    if($shipments->consolidation_id != null){
+                        return $shipments->consolidation_id;
+                    } else {
+                        return '';
                     }
                 }
             ])
@@ -450,6 +464,25 @@ class ReturnController extends Controller
                 }
                 else {
                     $query->whereRaw('false');
+                }
+            })
+
+			->addColumn('consolidation', function($shipments){
+                $consolidations = DeliveryController::check_consolidation($shipments->shId);
+                $consol = '';
+                if($consolidations){
+                    $consol = $consolidations['order'] . '/'. $consolidations['count'];
+                }
+                else{
+                    $consol = '-';
+                }
+                return $consol;
+            })
+            ->addColumn('consolidated_id', function ($shipments){
+                if($shipments->consolidation_id){
+                    return $shipments->consolidation_id;
+                }else{
+                    return '-';
                 }
             })
             ->addColumn('OsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable

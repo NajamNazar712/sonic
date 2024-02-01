@@ -134,6 +134,8 @@
                             <th class="border-primary border-darken-1">Assigned Agent</th>
                             <th class="border-primary border-darken-1">Assigned At</th>
                             <th class="border-primary border-darken-1">Assigned By</th>
+                            <th class="border-primary border-darken-1">Consolidation</th>
+                            <th class="border-primary border-darken-1">Consolidated IDs</th>
                             <th class="border-primary border-darken-1">Actions</th>
                         </tr>
                     </thead>
@@ -1161,6 +1163,8 @@
                             head.push('Assigned Agent');
                             head.push('Assigned At');
                             head.push('Assigned By');
+                            head.push('Consolidation');
+                            head.push('Consolidation IDs');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -1199,6 +1203,8 @@
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
                                 row.push(values.assigned_by);
+                                row.push(values.consolidation);
+                                row.push(values.consolidated_id);
                                 body.push(row);
                             });
                         },
@@ -1735,6 +1741,8 @@
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
+                    { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
+                    { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
                     { data: 'action',name: 'action',class: 'text-center align-middle action p-1',orderable: false,searchable: false}
 
                 ],
@@ -1773,7 +1781,7 @@
 
                         if ($(header).is('.select') || $(header).is('.serial_number') || $(
                                 header).is('.action') || $(header).is('.shipment_remarks') || $(
-                                header).is('.reattempts') ||
+                                header).is('.reattempts') || $(header).is('.consolidation') ||
                             $(header).is('.reattemp_status_remarks')) {
                             $(td).appendTo($(search) || $(header).is('sub_station'));
                         } else if ($(header).is('.status')) {
@@ -1865,6 +1873,7 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
+                var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
                 var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
                 var tat = table.row($(this).parents('tr')).data().confirmation_on;
 
@@ -1879,6 +1888,38 @@
                         });
                         return false;
                     }
+                    table.rows().nodes().each(function(index) {
+                        var row = table.row(index);
+                        if ($(row.node()).attr('consolidation_id') == con_id) {
+                            var rid = parseInt($(row.node()).attr('id'));
+                            var rindex = $.inArray(rid, selected_rows);
+
+                            if (rindex === -1) {
+                                selected_rows.push(rid);
+                                if (id != rid) {
+
+                                    table.row(row).select();
+                                }
+                            } else {
+                                if (id != rid) {
+
+                                    row.deselect();
+                                }
+                                selected_rows.splice(rindex, 1);
+                            }
+                            if (selected_rows.length > 0) {
+                                table.button('.confirm').enable();
+                                table.button('.assign').enable();
+                                table.button('.re-attempt').enable();
+                                table.button('.un-assign').enable();
+                            } else {
+                                table.button('.confirm').disable();
+                                table.button('.assign').disable();
+                                table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
+                            }
+                        }
+                    });
                 } else {
                     if (hub_ids.length == 0) {
                         hub_ids.push(hub_id);
