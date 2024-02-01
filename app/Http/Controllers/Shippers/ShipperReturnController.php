@@ -91,6 +91,7 @@ class ShipperReturnController extends Controller
             ->orWhere('rsaa.unresponsive_count','>', 0) //Unresponsive Count
             // ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
+            dd($shipments->get());
 
             if(session('user_type') == 2){
                 if(session('restriction') == 1){
