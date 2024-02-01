@@ -53,8 +53,8 @@ class AgentSarNotification extends Command
     {
         // try {
             $currentDateTime = Carbon::now();
-            $currentDateTime1 = Carbon::now();
-            $currentDateTime = Carbon::parse($currentDateTime);
+            $currentDateTime1 = Carbon::now()->toDateTimeString();
+            // $currentDateTime = Carbon::parse($currentDateTime);
 
             $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
             ->where('rv_state_id', 2)
