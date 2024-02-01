@@ -53,7 +53,7 @@
                                     </div>
                                     <input type="text" name="search_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_from" placeholder="Arrival Date (From)" title="Arrival Date (From)" data-value="{{ Carbon\Carbon::today() }}" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_from" placeholder="Arrival Date (From)" title="Arrival Date (From)" data-rule-required="true" data-msg-required="Date is required">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
@@ -65,7 +65,7 @@
                                     </div>
                                     <input type="text" name="search_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_to" placeholder="Arrival Date (To)" title="Arrival Date (To)" data-value="{{ Carbon\Carbon::today() }}" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_to" placeholder="Arrival Date (To)" title="Arrival Date (To)" data-rule-required="true" data-msg-required="Date is required">
                                 </div>
                             </div>
 
@@ -210,9 +210,9 @@
                         toDatePicker.set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
-                        // var maxDate = new Date(context.select);
-                        // maxDate.setDate(maxDate.getDate() + 30);
-                        // toDatePicker.set('max', maxDate);
+                        var maxDate = new Date(context.select);
+                        maxDate.setDate(maxDate.getDate() + 30);
+                        toDatePicker.set('max', maxDate);
                     }
                 }
             });
@@ -229,9 +229,9 @@
                         fromDatePicker.set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
-                        // var minDate = new Date(context.select);
-                        // minDate.setDate(minDate.getDate() - 30);
-                        // fromDatePicker.set('min', minDate);
+                        var minDate = new Date(context.select);
+                        minDate.setDate(minDate.getDate() - 30);
+                        fromDatePicker.set('min', minDate);
                     }
                 }
             });
@@ -351,7 +351,7 @@
                 columns: [
                     {data: 'id',orderable: false, searchable: false, class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle text-center arrived'},
-                    {data: 'arrival', name: 'arrived', class: 'align-middle text-center arrived'},
+                    {data: 'arrival', name: 'arrived', class: 'align-middle text-center arrived' ,orderable: false,},
                     {data: 'manisfest', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'manisfest_percentage',  name:'manisfest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'withoutmanisfest', class: 'align-middle text-center', orderable: false, searchable: false},

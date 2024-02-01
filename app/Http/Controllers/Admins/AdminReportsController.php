@@ -13473,7 +13473,6 @@ dd($shipments->get());
 
     public function cargo_manifest_list(Request $request)
     {
-        //dd('cargo manifest report !', $request->all(),$request->select_sub_segment_value);
         $origin = $request->select_origin;
         $destination = $request->select_destination;
         $segment = $request->select_segment_value;
