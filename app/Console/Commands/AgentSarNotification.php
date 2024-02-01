@@ -70,7 +70,7 @@ class AgentSarNotification extends Command
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
-            dd($sendEmails);
+            dd($sendEmail);
 
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
 
