@@ -26,20 +26,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-3">
-                        <select name="search_concerned_status_hub" id="search_concerned_status_hub" class="form-control select2">
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-3" >
-                        <select name="search_concerned_status_area" id="search_concerned_status_area" class="form-control select2" >
-                            @foreach($areas as $area)
-                                <option value="{{$area->id}}">{{$area->name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="col-3" style="margin-top: 30px;">
                         <div class="form-group">
                             <select name="area" id="search_area" class="select2 form-control " style="width: 100%; margin-top: 50px;">
@@ -233,22 +219,7 @@
         }).bind('change', function() {
             table.draw();
         });
-
-        $('#search_concerned_status_area').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Status Area',
-            width:'100%',
-            allowClear:true
-        }).bind('change', function() {
-            table.draw();
-        });
-
-        $('#search_concerned_status_hub').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Status Hub',
-            width:'100%',
-            allowClear:true
-        }).bind('change', function() {
-            table.draw();
-        });
+        
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
