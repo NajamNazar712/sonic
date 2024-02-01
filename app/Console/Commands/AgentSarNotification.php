@@ -159,7 +159,7 @@ class AgentSarNotification extends Command
                     $request = [
                         'remarks' => $shipment->remarks,
                     ];
-                    $this->return_confirm($requestData, $request);
+                    $this->return_confirm($request, $requestData);
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $shipment->id,
