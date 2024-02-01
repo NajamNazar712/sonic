@@ -52,16 +52,17 @@ class AgentSarNotification extends Command
     public function handle()
     {
         // try {
-            $currentDateTime = Carbon::now();
             $currentDateTime1 = Carbon::now()->toDateTimeString();
-            // $currentDateTime = Carbon::parse($currentDateTime);
+
+            // Create a Carbon instance from the formatted string
+            $currentDateTimeCarbon = Carbon::parse($currentDateTime1);
 
             $refusal_call_shipment_update = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('rv_state_id', 2)
-            ->where('updated_at', '>', $currentDateTime->subHours(24))
-            ->get();
+                ->where('rv_state_id', 2)
+                ->where('updated_at', '>', $currentDateTimeCarbon->subHours(24))
+                ->get();
 
-            dd($currentDateTime1, $currentDateTime, $refusal_call_shipment_update, $currentDateTime->subHours(24));
+            dd($currentDateTime1, $refusal_call_shipment_update, $currentDateTimeCarbon->subHours(24));
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
