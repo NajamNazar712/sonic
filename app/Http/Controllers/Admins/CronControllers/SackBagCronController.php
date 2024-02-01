@@ -26,7 +26,9 @@ class SackBagCronController extends Controller
             ->where('cmb.status_id', 1)
             ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
-            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
+            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->Orderby('cmb.updated_at');
+
 
        
 
@@ -61,6 +63,7 @@ class SackBagCronController extends Controller
             ->where('cmb.status_id', 2)
             ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->Orderby('cmb.updated_at')
             ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
 
@@ -92,6 +95,7 @@ class SackBagCronController extends Controller
             ->where('cmb.status_id', 7)
             ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->Orderby('cmb.updated_at')
             ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
                  
@@ -139,6 +143,7 @@ class SackBagCronController extends Controller
             ->where('sj.shipper_status_id', 4)
             ->whereBetween('sj.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->groupBy('cmb.sack_bag_id', 'isbo.sack_bag_no', 'sj.city_id', 'sj.created_at')
+             ->Orderby('sj.created_at')
             ->get();
 
 
@@ -156,6 +161,7 @@ class SackBagCronController extends Controller
             ->where('sj.shipper_status_id', 11)
             ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
             ->groupBy('cmb.sack_bag_id', 'isbo.sack_bag_no', 'sj.city_id')
+            ->Orderby('sj.created_at')
             ->get();
 
 
