@@ -159,7 +159,7 @@ class AgentSarNotification extends Command
                         'rv_assign_agent_sub_status_id' => null,
                     ];
                     
-                    $request = request()->merge($requestData);
+                    $request = request()->$requestData;
                     $this->return_confirm($request);
 
                     $data = [
