@@ -52,7 +52,7 @@ class AgentSarNotification extends Command
     public function handle()
     {
         dd(1);
-        try {
+        // try {
             $currentDateTime = Carbon::now();
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
@@ -166,8 +166,8 @@ class AgentSarNotification extends Command
                 }
             }
 
-        } catch (\Throwable $th) {
-            $this->createRvCronLog($th->getMessage());
-        }
+        // } catch (\Throwable $th) {
+        //     $this->createRvCronLog($th->getMessage());
+        // }
     }
 }
