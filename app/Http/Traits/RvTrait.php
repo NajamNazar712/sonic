@@ -456,6 +456,7 @@ trait RvTrait
     // Description:
     protected function return_confirm($request)
     {   
+        dd($request);
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
         dd($parcel);

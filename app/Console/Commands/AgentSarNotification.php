@@ -159,8 +159,8 @@ class AgentSarNotification extends Command
                         'rv_assign_agent_sub_status_id' => null,
                     ];
                     
-                    $request = request()->$requestData;
-                    $this->return_confirm($request);
+                    // $request = request()->$requestData;
+                    $this->return_confirm($requestData);
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $shipment->id,
