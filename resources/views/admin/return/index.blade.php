@@ -113,9 +113,6 @@
                             <th class="border-primary border-darken-1">Consignee Phone</th>
                             <th class="border-primary border-darken-1">Address</th>
   							<th class="border-primary border-darken-1">Area</th>
-                            <th class="border-primary border-darken-1">Location Status</th>
-                            <th class="border-primary border-darken-1">Latitude</th>
-                            <th class="border-primary border-darken-1">Longitude</th>
                             <th class="border-primary border-darken-1">Sub Station</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             {{--   <th class="border-primary border-darken-1">RCP SMS Count</th> --}}
@@ -137,8 +134,6 @@
                             <th class="border-primary border-darken-1">Assigned Agent</th>
                             <th class="border-primary border-darken-1">Assigned At</th>
                             <th class="border-primary border-darken-1">Assigned By</th>
-                            <th class="border-primary border-darken-1">Consolidation</th>
-                            <th class="border-primary border-darken-1">Consolidated IDs</th>
                             <th class="border-primary border-darken-1">Actions</th>
                         </tr>
                     </thead>
@@ -1145,9 +1140,6 @@
                             head.push('Consignee Phone');
                             head.push('Address');
                             head.push('Area');
-                            head.push('Location Status');
-                            head.push('Latitude');
-                            head.push('Longitude');	
                             head.push('Collection Amount');
                             /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -1169,8 +1161,6 @@
                             head.push('Assigned Agent');
                             head.push('Assigned At');
                             head.push('Assigned By');
-                            head.push('Consolidation');
-                            head.push('Consolidation IDs');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -1189,9 +1179,6 @@
                                     .consignee_phone_number_2);
                                 row.push(values.consignee_address);
                                 row.push(values.area_name);
-                                row.push(values.location_status);
-                                row.push(values.latitude);
-                                row.push(values.longitude);
                                 row.push(values.amount);
                                 /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1212,8 +1199,6 @@
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
                                 row.push(values.assigned_by);
-                                row.push(values.consolidation);
-                                row.push(values.consolidated_id);
                                 body.push(row);
                             });
                         },
@@ -1729,9 +1714,6 @@
                     { data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
 	                {data: 'area_name', name: 'ca.name', class: 'align-middle area_name',orderable: false,searchable:false},
-                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
-                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
-                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     { data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', orderable: false, searchable: false},
                     { data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
@@ -1753,8 +1735,6 @@
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
-                    { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
-                    { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
                     { data: 'action',name: 'action',class: 'text-center align-middle action p-1',orderable: false,searchable: false}
 
                 ],
