@@ -1593,7 +1593,7 @@ class AdminTrackingController extends Controller
                                 })
                                 ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                                 ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$journey->updated_at])
-                                ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','ssjal.admin_id','ssjal.rider_id','shipment_scanning_journeys.created_at','hsj.status');    
+                                ->select('shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude','shipment_scanning_journeys.created_at','hsj.status');
                                 $admin_id = Handover::where('id', $journey_details['handover_id']);
                                 
                                 if($shipment_scanning_query->exists()){
