@@ -220,7 +220,7 @@ class ReturnController extends Controller
          'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time','rach.created_at as call_time', 'rvsaa.rv_state_id as rv_state_id', 'rvsaad.agent_id as last_agent_name', 'delivery_notes.pending_status as delivery_note_pending_status', 'rvsaa.shipment_id as rv_shipment_id',
          'z.name as zone')
         // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
-        ->whereIn('shipments.shipper_status_id', [12,65,66])
+        ->whereIn('shipments.shipper_status_id', [12,65,66,52])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
         
@@ -296,7 +296,7 @@ class ReturnController extends Controller
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         // $sub_status_call_finding = SubStatusCallFinding::all();
         $unresponsive_sub_status_call_finding = RvAssignAgentSubStatus::where('rv_assign_agent_status_id',6)->get();
-        $number_of_pending_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 3)->whereIn('sh.shipper_status_id', [12,65,66])->get();
+        $number_of_pending_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 3)->whereIn('sh.shipper_status_id', [12,65,66,52])->get();
         $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / ($rv_tickets) * 100);
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
         if ($total_of_shipments === 0) {
@@ -310,9 +310,9 @@ class ReturnController extends Controller
         } else {
             $percentage_shipper_advised_requested = (count($shipper_advised_requested) / $total_of_shipments) * 100;
         }
-        $unresponsive_count = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
+        $unresponsive_count = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66,52])->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->get();
 
-        $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66])->get();
+        $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66,52])->get();
         $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
 
         $agents_and_contractual_agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
@@ -797,7 +797,7 @@ class ReturnController extends Controller
         }
 
         if ($request->get('search_total_value_div') === "3") {
-            $datatable->whereIn('shipments.shipper_status_id',[12,65,66]);
+            $datatable->whereIn('shipments.shipper_status_id',[12,65,66,52]);
         }
 
         if ($request->get('search_unresponsive_value_div') === "4") {
@@ -908,7 +908,7 @@ class ReturnController extends Controller
                 else{
 
                     // 12 = Shipment - Reason Validation Required
-                    // 52 = Shipment - Re-Attempt Requested
+                    // 52 = Shipment - Shipment Re-Attempt Requested
                     // 65 = Shipment - Shipper Advise Requested 
                     // 66 = Shipment - Re-Attempt Call Requested (from shipper)
 
@@ -1304,23 +1304,6 @@ class ReturnController extends Controller
 
         //Action Button reattempt With Charges
         }
-        // else if($request->action == 'reattempt'){
-
-        //     $parcel = Shipment::find($request->shipment_id);
-        //     if($request->has('charges'))
-        //     {
-        //         if($request->charges != null){
-        //             $check= $this->update_estimatecharges($request->shipment_id, $request->charges);
-        //             if($check != 0)
-        //             {
-        //                 return ['status'=>0,'error'=>"Shipment not found on Estimation Charges"];
-        //             }
-        //         }
-
-        //         return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
-        //     }
-        //     return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
-        // }
         else if ($request->action == 'reattempt') {
             $parcel = Shipment::find($request->shipment_id);
             if ($request->has('charges')) {
@@ -5444,7 +5427,7 @@ class ReturnController extends Controller
                     
                         foreach($shipment_ids as $shipment_id)
                         {
-                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,65,66])->first();
+                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->first();
                             $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                             if($already_assigned_state->exists()){
                                 $already_assigned_state =  $already_assigned_state->first();
@@ -5886,8 +5869,6 @@ class ReturnController extends Controller
                 ->join('users as u', 'u.id', '=', 's.user_id')
                 ->where('return_note_shipments.return_note_id', $return_note_id)
                 ->select('u.id as id', 'u.name as name')->distinct()->get();
-
-            // SELECT DISTINCT u.name FROM return_note_shipments rs, shipments s,users u WHERE rs.shipment_id=s.id AND u.id=s.user_id  AND rs.return_note_id=66
 
             $return = ReturnNote::find($return_note_id);
 

@@ -91,6 +91,7 @@ class ShipperReturnController extends Controller
             ->orWhere('rsaa.unresponsive_count','>', 1) //Unresponsive Count
             ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
+            dd(session('user_id'),Auth::id());
 
             if(session('user_type') == 2){
                 if(session('restriction') == 1){
@@ -186,7 +187,7 @@ class ShipperReturnController extends Controller
                             <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 			if (!$result->consolidation_id) {
-                if($result->shipper_status_id != 52){
+                if($result->shipper_status_id != 52 || $result->shipper_status_id != 66){
                     $dropdown .= $confirm_button;
                     $dropdown .= $reattempt_button;
                 }
@@ -401,7 +402,8 @@ class ShipperReturnController extends Controller
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
-                if (($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id == 65)) {
+                // if (($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id == 65)) {
+                if (($parcel->shipper_status_id != 52) && ($parcel->shipper_status_id != 66)) {
                     $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
 
 
@@ -423,7 +425,8 @@ class ShipperReturnController extends Controller
                     } else {
                         $last_reason_id = NULL;
                     }
-                    ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
+                    // ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
+                    ShipmentsJourneyController::add($shipment, 66, 66, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                     // request()->request->add(['shipment_id' => $shipment]);
@@ -461,7 +464,7 @@ class ShipperReturnController extends Controller
     {
         $parcel = Shipment::find($request->shipment_id);
         if ($parcel) {
-            if ($parcel->shipper_status_id != 52) {
+            if ($parcel->shipper_status_id != 52 || $parcel->shipper_status_id != 66) {
                 if ($parcel->shipper_status_id == 65) {
                     $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 65)->where('status_reason_id', 12)->latest('id')->first();
                     // Shipment::where('id',$request->shipment_id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
@@ -685,7 +688,7 @@ class ShipperReturnController extends Controller
                     if($shipments->reason_id == 12){
                         return 'nsa_osa_reason';
                     }
-                    if ($shipments->current_status_id == 52) {
+                    if ($shipments->current_status_id == 52 || $shipments->current_status_id == 66) {
                         return 'goldClass';
                     }else if($shipments->booking_type_id == 3){
                         return "tnb_row";
@@ -796,14 +799,14 @@ class ShipperReturnController extends Controller
 
                 $dropdown .= $re_attempt_button;
 
-                if($result->reason_id == 12 || $result->current_status_id == 52){
+                if($result->reason_id == 12 || $result->current_status_id == 52 || $result->current_status_id == 66){
                     $dropdown .= $self_collection_button;
                 }
 
-                if($result->reason_id == 12 || $result->current_status_id == 52){
+                if($result->reason_id == 12 || $result->current_status_id == 52 || $result->current_status_id == 66){
                     $dropdown .= $edit_estimate_charges;
                 }
-                if(($result->current_status_id == 12 || $result->current_status_id == 52) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0){
+                if(($result->current_status_id == 12 || $result->current_status_id == 52 || $result->current_status_id == 66) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0){
                     if($open_intercept){
                         $dropdown .= $intercept;
                     }

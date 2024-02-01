@@ -2948,7 +2948,7 @@ class APIController extends Controller
                     );
             })
             ->select('shipments.tracking_number', 'oc.name as origin', 'dc.name as destination', 'shipments.order_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'ssr.name as reason', 'shipments_journey.created_at as status_date', 'sj.created_at as arrival_date', 'shipments.nsa_osa_estimated_charges')
-            ->whereIn('shipments.shipper_status_id', [12, 52])
+            ->whereIn('shipments.shipper_status_id', [12, 52, 66])
             ->where('shipments.user_id', $request->user_id)
             ->groupBy('shipments.id')
             ->get();
@@ -2993,8 +2993,8 @@ class APIController extends Controller
                     if ($shipment->shipper_status_id == 20) {
                         return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Return Confirm!']);
                     }
-                    if ($shipment->shipper_status_id == 52) {
-                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    if ($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 66) {
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt Call Requested!']);
                     }
 
                     if ($shipment->shipper_status_id == 12) {
@@ -3011,17 +3011,20 @@ class APIController extends Controller
                         return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
                     }
                 } else {
-                    if ($shipment->shipper_status_id == 52) {
-                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt requested!']);
+                    if ($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 66) {
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already marked as Re-attempt Call Requested!']);
                     }
                     if ($shipment->shipper_status_id != 12) {
                         return response()->json(['status' => 1, 'message' => 'Shipment is not ready for Re-attempt!']);
                     }
                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                    $shipment->shipper_status_id = 52;
-                    $shipment->consignee_status_id = 52;
+                    // $shipment->shipper_status_id = 52;
+                    // $shipment->consignee_status_id = 52;
+                    $shipment->shipper_status_id = 66;
+                    $shipment->consignee_status_id = 66;
                     $shipment->save();
-                    ShipmentsJourneyController::add($shipment->id, 52, 52, null, $remarks, $user_id, null);
+                    // ShipmentsJourneyController::add($shipment->id, 52, 52, null, $remarks, $user_id, null);
+                    ShipmentsJourneyController::add($shipment->id, 66, 66, null, $remarks, $user_id, null);
                     if ($journey) {
                         NotificationsController::send(33, $shipment->id);
                     }
@@ -4897,7 +4900,7 @@ class APIController extends Controller
                     } else {
                         $remark = null;
                     }
-                    if ($shipment->shipper_status_id != 52) {
+                    if ($shipment->shipper_status_id != 52 || $shipment->shipper_status_id != 66) {
                         if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                             // Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
@@ -5397,7 +5400,7 @@ class APIController extends Controller
                             $rcp = $rcp->first();
 
                             if (in_array($res, $response_yes)) {
-                                if (in_array($shipment->shipper_status_id, [12, 52])) {
+                                if (in_array($shipment->shipper_status_id, [12, 52, 66])) {
                                     $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
 
                                     if ($journey) {
@@ -5409,7 +5412,9 @@ class APIController extends Controller
                                             ShipmentChargesController::nsa_osa_charges($shipment->id);
 
                                             NotificationsController::send(33, $shipment->id);
-                                        } else if ($shipment->shipper_status_id == 52) {
+                                        } 
+                                        // else if ($shipment->shipper_status_id == 52) {
+                                        else if ($shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 66) {
                                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
 
                                             if ($journey && ($journey->status_reason_id == 12)) {
@@ -5455,7 +5460,8 @@ class APIController extends Controller
 
                                 return ['status' => 1, 'message' => 'Message Received'];
                             } elseif (in_array($res, $response_no)) {
-                                if (in_array($shipment->shipper_status_id, [12, 52])) {
+                                // if (in_array($shipment->shipper_status_id, [12, 52])) {
+                                if (in_array($shipment->shipper_status_id, [12, 52, 66])) {
                                     $shipment->shipper_status_id = 20;
                                     $shipment->consignee_status_id = 20;
                                     $shipment->save();

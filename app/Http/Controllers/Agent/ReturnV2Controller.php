@@ -145,9 +145,6 @@ class ReturnV2Controller extends Controller
                         
                         if ($shipment) {
                             try {
-                                
-                                
-
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
                                 $service_type = $shipment->booking_type;
@@ -218,42 +215,6 @@ class ReturnV2Controller extends Controller
                                     }
                                 }
 
-                                // $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn','delivery_note_shipments.delivery_note_id','dn.id')
-                                // ->where('delivery_note_shipments.shipment_id', '=', function ($query) use ($shipment) {
-                                //     $query->select(DB::raw('max(id)'))
-                                //         ->from('delivery_note_shipments')
-                                //         ->where('delivery_note_shipments.shipment_id', $shipment->id);
-                                // })
-                                // ->where('dn.pending_status', 1)
-                                // ->first();
-
-                                // $shipment_status = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')
-                                // ->where('delivery_note_shipments.shipment_id', '=', DB::raw('(select max(created_at) from delivery_note_shipments where delivery_note_shipments.shipment_id = ' . $shipment->id . ')'))
-                                // ->where('dn.pending_status', 1)
-                                // ->first();
-
-
-                                // $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) { // only fetch max arrival
-                                //     $join->on('sja.shipment_id', 'shipments.id')
-                                //         ->where(
-                                //             'sja.id',
-                                //             '=',
-                                //             DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)")
-                                //         );
-                                // })
-                                // ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
-                                // ->where('dn.pending_status', 1)
-                                // ->first();
-
-
-                                // $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) use ($shipment) {
-                                //     $join->on('sja.shipment_id', '=', $shipment->id)
-                                //         ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
-                                // })
-                                // ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'sja.reference_1_id')
-                                // ->where('dn.pending_status', 1)
-                                // ->first();
-
                                 $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) use ($shipment) {
                                         $join->on('sja.shipment_id', '=', DB::raw($shipment->id))
                                             ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
@@ -261,12 +222,8 @@ class ReturnV2Controller extends Controller
                                 ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'sja.reference_1_id')
                                 ->where('dn.pending_status', 1)
                                 ->first();
-
-
-                                // dd($shipment_status);
-        
                                 
-                                //agar pending status 1 mila to return confirm dekhae aur refusal on call na dekhae
+                                //If pending status is 1, show 'Return Confirm' option in dropdown on the Virtual Rv Agent Screen
                                 if($shipment_status){
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)
                                     ->where(function ($query) {
@@ -279,7 +236,7 @@ class ReturnV2Controller extends Controller
                                     })
                                     ->get();
                                 }
-                                //agar pending status 0 mila to refusal on call dekha return confirm na dekhae
+                                //else pending status is 0, show 'Refusal on Call' option in dropdown on the Virtual Rv Agent Screen
                                 else{
                                     $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->where('shipment_status_id','!=', 20)->Orwhere('shipment_status_id',null)->get();
                                 }

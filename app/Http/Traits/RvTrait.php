@@ -1524,8 +1524,7 @@ trait RvTrait
                 }   
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                // ->whereIn('shipper_status_id', [7,8,9,15,12,65,66]) old for rv
-                ->whereIn('shipper_status_id', [12,65,66])
+                ->whereIn('shipper_status_id', [12,65,66,52])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
@@ -1573,8 +1572,7 @@ trait RvTrait
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    // ->whereIn('shipper_status_id', [7,8,9,15,12,65,66]) old for rv
-                    ->whereIn('shipper_status_id', [12,65,66])
+                    ->whereIn('shipper_status_id', [12,65,66,52])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
                         SELECT sj.id
