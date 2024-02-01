@@ -456,11 +456,10 @@ trait RvTrait
     // Description:
     protected function return_confirm($request)
     {   
-        dd($request);
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
-        // dd($remarks);
         $parcel = Shipment::find($request->shipment_id);
-        // $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
+        dd($parcel);
+        
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
         $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id ?? null;
         
