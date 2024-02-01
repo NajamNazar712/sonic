@@ -51,6 +51,7 @@ class AgentSarNotification extends Command
      */
     public function handle()
     {
+        dd(1);
         try {
             $currentDateTime = Carbon::now();
 
