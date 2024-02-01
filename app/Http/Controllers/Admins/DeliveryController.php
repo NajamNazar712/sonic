@@ -243,11 +243,6 @@ class DeliveryController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
-                $join->on('ssjal.shipment_id', '=', 'shipments.id')
-                     ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = shipments.id)'));
-            })
-            
             ->select(
                 'agent.name as agent',
                 'shipments.id as shId',
@@ -465,181 +460,6 @@ class DeliveryController extends Controller
                 } else {
                     return '';
                 }
-            }) 
-            ->editColumn('location_status', function ($shipment) {
-                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
-                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
-                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                             ->where('sj.id', '=', $shipment->journey_latest_id);
-                    })
-                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
-                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
-                    //check for cases
-                    switch ($shipment->latest_shipper_status_id) {
-                        case 2:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                            break;
-                        case 3:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                            break;
-                        case 4:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                            break;
-                        case 5:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                            break;
-                        case 11:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                            break;
-                        case 23:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                            break;
-                        case 53:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                            break;
-                            default:
-                        $scanning_data = null;
-                        break;
-                    }
-    
-                    return ($scanning_data['location_status'] === 1) ? 'On-site' : 'Off-site';
-                }else{
-                    return '-';
-                }
-
-            })
-
-            ->editColumn('latitude', function ($shipment) {
-                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
-                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
-                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                             ->where('sj.id', '=', $shipment->journey_latest_id);
-                    })
-                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
-                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
-                    //check for cases
-                    switch ($shipment->latest_shipper_status_id) {
-                        case 2:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                            break;
-                        case 3:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                            break;
-                        case 4:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                            break;
-                        case 5:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                            break;
-                        case 11:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                            break;
-                        case 23:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                            break;
-                        case 53:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                            break;
-                        default:
-                            $scanning_data = null;
-                            break;
-                    }
-    
-                    return $scanning_data['latitude'] ?? '-';
-                }else{
-                    return '-';
-
-                }
-             
-
-            })
-
-            ->editColumn('longitude', function ($shipment) {
-                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
-                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
-                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                             ->where('sj.id', '=', $shipment->journey_latest_id);
-                    })
-                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
-                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
-                    //check for cases
-                    switch ($shipment->latest_shipper_status_id) {
-                        case 2:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                            break;
-                        case 3:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                            break;
-                        case 4:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                            break;
-                        case 5:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                            break;
-                        case 11:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                            break;
-                        case 23:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                            break;
-                        case 53:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                            break;
-                        default:
-                            $scanning_data = null;
-                            break;
-                            
-                        }
-                    return $scanning_data['longitude'] ?? '-';
-                }else{
-                    return '-';
-
-                }
-               
-            })->editColumn('status_area_city', function ($shipment) {
-                if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
-                    $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
-                        $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                             ->where('sj.id', '=', $shipment->journey_latest_id);
-                    })
-                    ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                    ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
-                    ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
-                    //check for cases
-                    switch ($shipment->latest_shipper_status_id) {
-                        case 2:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                            break;
-                        case 3:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                            break;
-                        case 4:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                            break;
-                        case 5:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                            break;
-                        case 11:
-                            $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                            break;
-                        case 23:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                            break;
-                        case 53:
-                            $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                            break;
-                        default:
-                            $scanning_data = null;
-                            break;
-                            
-                        }
-                    return CityArea::where('id',$scanning_data['area_id'])->first()->name ??  City::where('id',$scanning_data['hub_id'])->first()->name ?? '-';
-                }else{
-                    return '-';
-                }            
             });
             
         if ($mode = $request->get('search_shipping_mode')) {
@@ -649,13 +469,6 @@ class DeliveryController extends Controller
 
         if ($request->get('star_shipper_filter') == 1) {
             $datatables->where('sts.status', 1);
-        }
-
-        if ($search_concerned_status_area = $request->get('search_concerned_status_area')) {
-            $datatables->where('ssjal.area_id', '=', $search_concerned_status_area)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
-        }
-        if ($search_concerned_status_hub = $request->get('search_concerned_status_hub')) {
-            $datatables->where('ssjal.hub_id', '=', $search_concerned_status_hub)->whereIn('shipments.shipper_status_id',[2,3,4,5,11,23,53]);
         }
 
         return $datatables->make(true);
@@ -7515,11 +7328,6 @@ class DeliveryController extends Controller
                     );
             })
             
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'ssjal.shipment_id')
-                    ->whereRaw('TIMESTAMPDIFF(SECOND, sjl.updated_at, ssjal.updated_at) < ?', [0]);
-            })
-            
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 
             'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 
             'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 
@@ -7528,8 +7336,7 @@ class DeliveryController extends Controller
             'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
             'rdns.status as updated_via_app', 'rd.id as rider_delivery_id', 'rd.delivered_status as delivered_status', 'rd.picture_path as picture_path', 'rt.name as rider_type', 
             'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 
-            'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount',
-            'ssjal.location_status as location_status','ssjal.shipment_scanning_journey_id  as shipment_scanning_journey_id',])
+            'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
             ->groupBy('delivery_notes.id');
