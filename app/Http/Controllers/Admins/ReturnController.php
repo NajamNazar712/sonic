@@ -5830,9 +5830,6 @@ class ReturnController extends Controller
                         } else {
                             $errorMessages[] = 'Zone not assigned to agent '. $zonenotassignedcontractualagentMessage;
                         }
-
-                        // $zonenotassignedcontractualagentMessage = implode(', ', $zone_not_assigned_contractual_agent);
-                        // $errorMessages[] = 'Zone not assigned to agent '. $zonenotassignedcontractualagentMessage . ' And Rest Shipments Has Been Assigned';
                     }
 
                     return redirect()->back()->with('error', implode(' | ', $errorMessages));
@@ -7580,7 +7577,7 @@ class ReturnController extends Controller
         if (!empty($unresponsive_invalid_shipments)){
             if (!empty($unresponsive_invalid_shipments)) {
                 $unresponsive_invalid_shipments_Message = implode(', ', $unresponsive_invalid_shipments);
-                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' And Rest Has Been updated';
+                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' try to update the shipments within 24 hours And Rest Has Been updated';
             }
             return response()->json(['status' => 0, 'message' => $errorMessages]);
         }
