@@ -282,13 +282,6 @@ class ReturnController extends Controller
                     if ($shipments->star_status == 1) {
                         return 'star_sippers';
                     }
-                },
-				'consolidation_id' => function($shipments){
-                    if($shipments->consolidation_id != null){
-                        return $shipments->consolidation_id;
-                    } else {
-                        return '';
-                    }
                 }
             ])
             ->editColumn('tracking_number',function ($shipments){
