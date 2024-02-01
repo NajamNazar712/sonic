@@ -244,13 +244,25 @@ class ReturnV2Controller extends Controller
                                 // ->leftjoin('delivery_notes as dn','dn.id','=','sja.reference_1_id')
                                 // ->where('dn.pending_status', 1)
                                 // ->first();
+
+
+                                // $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) use ($shipment) {
+                                //     $join->on('sja.shipment_id', '=', $shipment->id)
+                                //         ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
+                                // })
+                                // ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'sja.reference_1_id')
+                                // ->where('dn.pending_status', 1)
+                                // ->first();
+
                                 $shipment_status = Shipment::leftJoin('shipments_journey as sja', function ($join) use ($shipment) {
-                                    $join->on('sja.shipment_id', '=', $shipment->id)
-                                        ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
+                                        $join->on('sja.shipment_id', '=', DB::raw($shipment->id))
+                                            ->where('sja.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = $shipment->id and shipments_journey.shipper_status_id = 5)"));
                                 })
                                 ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'sja.reference_1_id')
                                 ->where('dn.pending_status', 1)
                                 ->first();
+
+
                                 // dd($shipment_status);
         
                                 

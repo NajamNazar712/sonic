@@ -7559,7 +7559,7 @@ class ReturnController extends Controller
                     // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                 }
             }
-            //create new row for both RvShipmentAssignAgent and RvShipmentAssignAgentDetails (this will be created on;y if admin is updaing call history)
+            //create new row for both RvShipmentAssignAgent and RvShipmentAssignAgentDetails($this->rv_shipment_assign_agent_details) (this will be created only when admin is updaing call history)
             else{
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
@@ -7568,7 +7568,7 @@ class ReturnController extends Controller
                 $add_call_status->last_shipments_journey_id = $shipments_journey->id;
                 $add_call_status->rv_assign_agent_status_id = $request->call_finding_id;
                 $add_call_status->rv_assign_agent_sub_status_id = $request->sub_status_call_finding_id;
-                $add_call_status->rv_state_id = 1; //because unresponsive status only update for rv state id 1 or 3
+                $add_call_status->rv_state_id = 1; //because unresponsive ($this->unresponsive) status only update of rv state id 1 or 3
                 $add_call_status->is_fake_status = 0;
                 $add_call_status->rv_fake_status_id = null;
                 $add_call_status->rv_shipment_agent_id = 0;
