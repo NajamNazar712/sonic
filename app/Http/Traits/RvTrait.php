@@ -461,7 +461,7 @@ trait RvTrait
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         // $parcel = Shipment::find($request->shipment_id);
         $parcel = Shipment::find($shipmentId);
-        dd($parcel, $remarks);
+        // dd($parcel, $remarks);
         
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
         $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id ?? null;

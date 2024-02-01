@@ -146,13 +146,8 @@ class AgentSarNotification extends Command
 
             if ($refusal_call_shipment_update->isNotEmpty()) {
                 foreach ($refusal_call_shipment_update as $shipment) {
-                    // $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
+                    $shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null,'rv_state_id' => 4]);
 
-                    // $request = $shipment->request()->add([
-                    //     'shipment_id' => $shipment->shipment_id, 
-                    //     'remarks' => $shipment->remarks, 
-                    //     'rv_assign_agent_sub_status_id' => null,
-                    // ]);
                     $requestData = (object) [
                         'shipment_id' => $shipment->shipment_id,
                     ];
@@ -168,7 +163,7 @@ class AgentSarNotification extends Command
                         'last_shipments_journey_id' => $shipment->last_shipments_journey_id,
                         'shipment_id' => $shipment->shipment_id,
                         'rv_assign_agent_status_id' => $shipment->rv_assign_agent_status_id,
-                        'rv_assign_agent_sub_status_id' => $shipment->rv_assign_agent_sub_status_id,
+                        'rv_assign_agent_sub_status_id' => Null,
                         'rv_state_id' => $shipment->rv_state_id,
                         'updated_type_id' => 1,
                         'updated_by_id' =>  Null,
