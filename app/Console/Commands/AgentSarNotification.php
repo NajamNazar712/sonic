@@ -95,7 +95,7 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 ->where('unresponsive_email_count', '>', 0)
-                ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48))
+                ->where('unresponsive_email_time', '<', $currentDateTime->subHours(48))
                 ->get();
 
             if ($shipmentsToUpdate->isNotEmpty()) {
