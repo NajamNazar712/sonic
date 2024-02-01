@@ -26,9 +26,9 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-3">
+                    <div class="col-3" style="margin-top: 30px;">
                         <div class="form-group">
-                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
+                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%; margin-top: 50px;">
                                 
                             </select>
                         </div>
@@ -215,10 +215,11 @@
         $("#search_area").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Area",
             allowClear: true,
-            width: '100%',
+            // width: '100%',
         }).bind('change', function() {
             table.draw();
-        });;
+        });
+        
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];

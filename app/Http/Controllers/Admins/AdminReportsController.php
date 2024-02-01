@@ -10,10 +10,12 @@ use App\Http\Models\City;
 use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
 use App\RiderWiseDeliveryNote;
+use App\Http\Models\WeightType;
 use App\Http\Models\Admin\Admin;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\CRM\CRMCount;
@@ -86,7 +88,6 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\WeightType;
 
 
 class AdminReportsController extends Controller
@@ -109,11 +110,13 @@ class AdminReportsController extends Controller
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
+
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
     }
 
     public function qsr_list(Request $request)
@@ -210,6 +213,15 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
+
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -253,10 +265,14 @@ class AdminReportsController extends Controller
                 'cmb.seal_number as seal_number',
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date'
-            ]);
-
-        $type = $request->get('search_types');
+                'sjrp.created_at as rider_picked_status_date',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id'
+            ])
+            ->groupBy('shipments.id');
+            
+            $type = $request->get('search_types');
 
         if ($type && $type == 2) {
             $shipments = $shipments->whereNotIn('shipments.shipper_status_id', [1, 14, 17, 25, 31, 36, 38]);
@@ -291,6 +307,7 @@ class AdminReportsController extends Controller
             ->editColumn('order_id', function ($shipment) {
                 return ($shipment->order_id) ? $shipment->order_id : '-';
             })
+
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
@@ -6328,8 +6345,19 @@ class AdminReportsController extends Controller
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $zones = DB::connection('reports')->table('zones')->get();
-        $agents = DB::connection('reports')->table('admin_roles')->leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-            ->where('admin_roles.department_id', 3)->get();
+        $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        ->whereIn('admin_roles.department_id', [3, 7])
+        ->where(function ($query) {
+            // Select all admins from department ID 3
+            $query->where('admin_roles.department_id', 3);
+
+            // Select specific admins from department ID 7 based on role ID
+            $query->orWhere(function ($innerQuery) {
+                $innerQuery->where('admin_roles.department_id', 7)
+                            ->whereIn('a.role_id', [115, 43, 75]); // Replace with the specific role ID
+            });
+        })
+        ->get();
         $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
         $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
@@ -9990,14 +10018,14 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('range_difference', function ($shipment){
-                $range_difference = round($shipment->range_down_shipper_weight - $shipment->range_down_arrival_weight, 2);
+                $range_difference = round($shipment->range_down_arrival_weight - $shipment->range_down_shipper_weight, 2);
                 return $range_difference;
             })
             ->addColumn('difference', function ($shipment){
                 $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
             })->addColumn('charges_diff', function ($shipment){
-                $charges_diff = $shipment->shipper_weight_charges - $shipment->arrival_weight_charges;
+                $charges_diff = $shipment->arrival_weight_charges - $shipment->shipper_weight_charges;
                 return $charges_diff;
             });
 
@@ -12310,6 +12338,26 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)")
                     );
             })
+
+            
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+
             ->select( 
                 'shipments.id as shipment_id', 
                 'shipments.tracking_number',  
@@ -12329,8 +12377,12 @@ class AdminReportsController extends Controller
                 'dcz.name as destination_zone',
                 'sja.created_at as arrival_date',
                 'shipments.actual_weight as weight',
-                'si.quantity as quantity'
-            );
+                'si.quantity as quantity',
+                'shipments.shipper_status_id as shipper_status_id',
+                'sjl.shipment_id as journey_latest_id',
+                'sjl.updated_at as journey_latest_updated_at',
+                'sjl.shipper_status_id as latest_shipper_status_id'
+            )->groupBy('shipments.id');
             
             if ($search_shippers = $request->get('search_shippers')) {
                 $shipments->whereIn('u.id', $search_shippers);
@@ -12362,12 +12414,14 @@ class AdminReportsController extends Controller
 
             $shipments = $shipments->get();
 
+            
+
             $data = [];
 
             if(count($shipments) > 0)
             {
                 foreach ($shipments as $key => $shipment) {
-
+                    $scanning_data = '-';
                     $data[$key]['s_no'] =$key+1;
                     $data[$key]['tracking_number'] = $shipment->tracking_number;
                     $data[$key]['account_no'] = $shipment->account_no;
@@ -12400,6 +12454,7 @@ class AdminReportsController extends Controller
                     $data[$key]['current_rider_trax_id'] = '-';
                     $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
+
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
                     $data[$key]['current_remarks'] = '-';
@@ -12667,7 +12722,7 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub','Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
                 
                 $data = array_merge($data_header, $data);
     
@@ -12711,9 +12766,8 @@ class AdminReportsController extends Controller
                 $time_string = Carbon::parse($time_string)->format('h_i_s');
                 
     
-                $file_name_without_path = "reports/operation_performance_reports/operations_performance_report_" . $date_file_name  . ".xlsx";
+                $file_name_without_path = "reports/operations_performance_report_" . $date_file_name  . ".xlsx";
                 $file_name = public_path() . '/' . $file_name_without_path;
-    
                 $writer->save($file_name);
     
                 return ['status' => 1, 'file_name' => $file_name_without_path];

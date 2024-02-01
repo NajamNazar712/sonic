@@ -2,95 +2,96 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\EmployeeAttendanceController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentOpenBoxJourneyController;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\RcpAssignedAgent;
-use App\Http\Models\Admin\RcpAssignedShipment;
-use App\Http\Models\Admin\RcpAssignedShipmentLog;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteImage;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\ReturnReattemptRatio;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\Admin\SubStatusCallFinding;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\BookingType;
+use Carbon\Carbon;
+use function foo\func;
 use App\Http\Models\City;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestDetail;
-use App\Http\Models\PackagingMaterialRequestHistory;
-use App\Http\Models\PendingPayment;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\ReturnSheet;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\Http\Models\WarehouseStock;
+use App\Jobs\RCPSmsToConsignee;
+use App\Http\Models\BookingType;
+use App\Http\Models\ShipmentOtp;
+use Yajra\Datatables\Datatables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\RcpManualSms;
-use App\Http\Models\Zone;
-use App\Jobs\RCPSmsToConsignee;
-use App\ReturnDeliveredToShipperSms;
-use App\ReturnDeliveredToShipperTicker;
-use Carbon\Carbon;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\AgentReturnConfirmation;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentPiece;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use Yajra\Datatables\Services\DataTable;
-use function foo\func;
-use App\Http\Models\Shipper\UserShippingInfo;
-use Illuminate\Support\Str;
-use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\OsaChargesLog;
-use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
-use App\Http\Models\Admin\ReturnRevertLog;
-use App\Http\Models\Admin\RiderCategoryByPass;
-use App\Http\Models\ConsigneeRefusedReason;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\Rider\RiderDeliveryNoteRequest;
-use App\Http\Models\Rider\RiderReturnNoteRequest;
-use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentOtp;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WarehouseStock;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\ReturnDeliveredToShipperSms;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\ShipmentsJourney;
+use Illuminate\Filesystem\Filesystem;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Admin\StatusRemark;
+use App\ReturnDeliveredToShipperTicker;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\Shipper\ReturnSheet;
+use Yajra\Datatables\Services\DataTable;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\ConsigneeRefusedReason;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\AgentReturnConfirmation;
+use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RiderCategoryByPass;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
+use App\Http\Models\Admin\SubStatusCallFinding;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
+use App\Http\Models\Rider\RiderReturnNoteRequest;
+use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\Rider\RiderDeliveryNoteRequest;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 class ReturnController extends Controller
 {
@@ -120,7 +121,6 @@ class ReturnController extends Controller
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
-
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
@@ -202,6 +202,23 @@ class ReturnController extends Controller
                        DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
            })
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
             
             ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
             'u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
@@ -218,7 +235,11 @@ class ReturnController extends Controller
              'raa.admin_id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name')
+             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name', 'sjl.shipment_id as journey_latest_id',
+             'sjl.updated_at as journey_latest_updated_at',
+             'sjl.shipper_status_id as latest_shipper_status_id','shipments.shipper_status_id as shipper_status_id'
+
+             )
 
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
@@ -2260,7 +2281,7 @@ class ReturnController extends Controller
                 if(!$dispute_check){
                     return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
+                ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if($request->shipper_id != null){
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if($request->shipper_id != $shipment->user_id){
@@ -2643,7 +2664,7 @@ class ReturnController extends Controller
             $shipment_piece = $shipment_piece->first();
             if ($shipment_piece->shipment_id == $shipment_id) {
                 $scanned_shipment_piece = $shipment_piece->tracking_number;
-                ShipmentScanningJourneyController::add($shipment_id, 7, 1, Auth::id(), null, null, $shipment_piece->id);
+                ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
             } else {
                 return ['status' => 1, 'error' => 'Given Item ID does not belong here'];
@@ -4801,38 +4822,37 @@ class ReturnController extends Controller
     static public function archive_directory(){
         $files = File::glob(public_path() . '/uploads/return_notes/*.*');
         $now = Carbon::now();
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                $created = date("F d Y H:i:s.",filemtime($file));
-                $file_name = pathinfo($file);
-                if($now->diffInDays($created) > 1){
-                    Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                    $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
-                    if($exists){
-                        File::delete($file);
+        if(count($files) > 0){
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $created = date("F d Y H:i:s.",filemtime($file));
+                    $file_name = pathinfo($file);
+                    if($now->diffInDays($created) > 1){
+                        Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                        if($exists){
+                            File::delete($file);
+                        }
                     }
                 }
             }
         }
 
         $path = storage_path('app/public/uploads/return_notes');
-        $paths = ['11', '12', '13', '14', '15', '16', '17', '18'];
-        foreach ($paths as $p){
-            $files = File::glob("$path/2024_$p*.*", GLOB_NOSORT);
-            $now = Carbon::now();
-            if(count($files) > 0){
-                foreach ($files as $file) {
-                    if (is_file($file)) {
-                       $created = date("F d Y H:i:s.",filemtime($file));
-                        $file_name = pathinfo($file);
-                       if($now->diffInDays($created) > 1){
-                            Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
-                            $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
-                            if($exists){
-                                File::delete($file);
-                            }
-                       }
-                    }
+        $sfiles = File::glob("$path/*.*", GLOB_NOSORT);
+        $now = Carbon::now();
+        if(count($sfiles) > 0){
+            foreach ($sfiles as $file) {
+                if (is_file($file)) {
+                   $created = date("F d Y H:i:s.",filemtime($file));
+                    $file_name = pathinfo($file);
+                   if($now->diffInDays($created) > 1){
+                        Storage::disk('s3')->put( 'return_note_images/'.$file_name['basename'], file_get_contents($file));
+                        $exists = Storage::disk('s3')->exists('return_note_images/'.$file_name['basename']);
+                        if($exists){
+                            File::delete($file);
+                        }
+                   }
                 }
             }
         }
@@ -6278,7 +6298,7 @@ class ReturnController extends Controller
                 $details[$key]['shipper'] = isset($shipment->user->name) ? $shipment->user->name : '';
                 $details[$key]['return_note'] = $return_note_id->return_note_id;
 
-                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id,29,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
             } else {
                 $tr_e[] = $t_n;

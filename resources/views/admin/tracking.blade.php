@@ -1452,22 +1452,21 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        if(history.image_audio_location == undefined) {
-                                            shipment += '<td>-</td>';}
-                                        else
-                                            shipment += '<td>' + history.image_audio_location + '</td>';
-                                        shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                        shipment += '<td>' + history.remarks + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '<td>' + history.city + '</td>';
-                                        shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                        shipment += '<td>' + history.ip + '</td>';
-                                        shipment += '<td>' + history.rider + '</td>';
-                                        shipment += '</tr>';
+                                    var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + formattedDateTime + '</td>';
+                                    shipment += '<td>' + history.status + '</td>';
+                                    shipment += '<td>' + (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '</td>'; 
+                                    shipment += '<td>' + (history.status_reason || '') + '</td>';
+                                    shipment += '<td>' + history.remarks + '</td>';
+                                    shipment += '<td>' + history.user + '</td>';
+                                    shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + history.received_or_refused_by + '</td>';
+                                    shipment += '<td>' + history.ip + '</td>';
+                                    shipment += '<td>' + history.rider + '</td>';
+                                    shipment += '</tr>';
                                 });
+
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -1560,7 +1559,6 @@
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '</tr>';
                                     });
-
                                     shipment += '</tbody>';
                                     shipment += '</table>';
 
@@ -1578,17 +1576,21 @@
                                     shipment += '<th><strong>Handover Id</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
                                     shipment += '<th><strong>Date / Time</strong></th>';
+
                                     shipment += '</tr>';
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
                                     $.each(details.handover_history, function (index, history) {
+
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.handover_id + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
                                         shipment += '<td>' + history.created_at + '</td>';
+
                                         shipment += '</tr>';
                                     });
+
 
                                     shipment += '</tbody>';
                                     shipment += '</table>';

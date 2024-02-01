@@ -97,7 +97,7 @@ class CoordinatesController extends Controller
             $details['consignee']['destination'] = $shipment->consignee_city->name;
             $details['consignee']['address'] = $shipment->consignee_address;
 
-            ShipmentScanningJourneyController::add($shipment->id, 15, 1, Auth::id(), null,null);
+            ShipmentScanningJourneyController::add($shipment->id ,15,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
             return ['status' => 0, 'success' => 'Shipment Found', 'details' => $details];
         }
         else {
