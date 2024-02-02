@@ -319,7 +319,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        className: 'btn btn-primary',
+                        className: 'btn btn-primary d-none',
                         title: 'Cargo Manifest Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

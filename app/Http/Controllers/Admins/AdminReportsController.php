@@ -13534,7 +13534,7 @@ dd($shipments->get());
                     return '-';
                 } else {
                     $result = ($transformedData['manisfest']/$transformedData['arrival'])*100;
-                    return '%'.number_format($result,2);
+                    return number_format($result,2).' %';
                 }
             })
             ->editColumn('withoutmanisfest', function ($transformedData) {
@@ -13549,7 +13549,7 @@ dd($shipments->get());
                     return '-';
                 } else {
                     $result = ($transformedData['withoutmanisfest']/$transformedData['arrival'])*100;
-                    return '%'.number_format($result,2);
+                    return number_format($result,2).' %';
                 }
             })
             ->editColumn('misroute', function ($transformedData) {
@@ -13564,7 +13564,7 @@ dd($shipments->get());
                     return '-';
                 } else {
                     $result = ($transformedData['misroute']/$transformedData['arrival'])*100;
-                    return '%'.number_format($result,2);
+                    return number_format($result,2).' %';
                 }
             });
         return $datatable->make(true);
