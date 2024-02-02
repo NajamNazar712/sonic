@@ -12278,7 +12278,7 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
-        //this join is only for fetching agent who have updated the shipment status to intercept request 
+        //this join is only for agents who have updated the shipment status
         ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
             $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
                 //  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_assign_agent_status_id = 3 AND rv_shipment_assign_agent_details.rv_state_id = 2 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
@@ -12317,7 +12317,7 @@ class AdminReportsController extends Controller
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
                     })
                     ->editColumn('rv_status', function($rv_report) {
-                        if ($rv_report['rv_status']=="") {
+                        if ($rv_report['rv_status'] == "" || $rv_report['rv_status'] == 'Intercept Approved') { //we dont have to show intercept approved in action column
                             return '-';
                         }
                         else {
