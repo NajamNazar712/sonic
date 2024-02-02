@@ -267,11 +267,18 @@ trait RvTrait
     {
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
         $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count', 3)->latest()->first();
+        $reattempt_requested_shipment = Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 52)->latest()->first();
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
 
         //if shipment delivery count is 3 and again status is updated to unresponsive set the shipment to return confirm
         if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
+            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
+            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
+            $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
+        } 
+        // if current status of shipment is 52 (shipment reattempt requested) and agent has updated the status to unresponsive set the status to return confirm
+        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count > 0 && $reattempt_requested_shipment) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 1; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
             $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
@@ -750,6 +757,17 @@ trait RvTrait
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
                 else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
+                    
+                   request()->request->add([
+                        'shipment_id'=>$rv_shipment_assign_agent->shipment_id, 
+                        'remarks'=>$request->remarks,
+                        'rv_assign_agent_sub_status_id' => null
+                    ]);
+                    $this->return_confirm($request);
+                }
+
+                //if unresponsive and current status of shipment is 52 (shipment reattempt requested) then shipment status will be auto return confirm
+                else if ($shipment->shipper_status_id == 52) {
                     
                    request()->request->add([
                         'shipment_id'=>$rv_shipment_assign_agent->shipment_id, 
