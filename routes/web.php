@@ -584,6 +584,30 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('nps_skip', 'Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
     });
 });
+
+Route::prefix('agent')->name('agent.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('agent.login');
+    });
+
+    Route::get('/login', 'Auth\AgentLoginController@showLoginForm')->name('login');
+    Route::post('/login', 'Auth\AgentLoginController@login')->name('login.submit');
+    Route::get('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/credentials', 'Auth\AgentLoginController@credentials')->name('login.credentials');
+    Route::post('/verify_otp', 'Auth\AgentLoginController@verify_otp')->name('login.verify_otp');
+
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('', 'Agent\ReturnV2Controller@index')->name('index');
+        Route::post('get_shipment_reason', 'Agent\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
+        Route::post('get_ticket', 'Agent\ReturnV2Controller@get_ticket')->name('get_ticket');
+        Route::get('intercepted_shipment', 'Agent\ReturnV2Controller@get_intercepted_shipment')->name('get_intercepted_shipment');
+        Route::post('submit', 'Agent\ReturnV2Controller@submit_ticket')->name('submit_ticket');
+    });
+    Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
+});
+
 //For Admin Routes
 require __DIR__ . '/admin.php';
 
