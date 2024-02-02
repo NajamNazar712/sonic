@@ -25,6 +25,7 @@ class ShipmentReportingAreaStatusJob implements ShouldQueue
      */
     public function __construct($latest_shipment_scanning_id)
     {
+        $this->queue = 'shipment_reporting_area_status';
         $this->latest_shipment_scanning_id = $latest_shipment_scanning_id;
     }
 
