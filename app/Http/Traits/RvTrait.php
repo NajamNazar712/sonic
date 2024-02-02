@@ -454,14 +454,11 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function return_confirm($request, $requestData = null)
+    protected function return_confirm($request)
     {   
-        $shipmentId = ($requestData != null) ? $requestData->shipment_id : $request->shipment_id;
-
-        $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
-        // $parcel = Shipment::find($request->shipment_id);
-        $parcel = Shipment::find($shipmentId);
-        // dd($parcel, $remarks);
+        // $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
+        $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
+        $parcel = Shipment::find($request->shipment_id);
         
         $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
         $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id ?? null;
