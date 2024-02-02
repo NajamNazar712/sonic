@@ -12352,7 +12352,8 @@ class AdminReportsController extends Controller
                     })
                     ->addColumn('action_updated_by', function($rv_report) {
                         //admin or agent
-                        if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {
+                        // if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {
+                        if (($rv_report['updated_type_id'] == 1)) {
                             $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
                                 $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
                             })
