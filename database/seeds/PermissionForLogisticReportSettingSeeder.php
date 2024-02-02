@@ -21,6 +21,7 @@ class PermissionForLogisticReportSettingSeeder extends Seeder
         // if new screen or excel
         DB::table('activity_trail_actions')->insert([
             ['id' => 735, 'screen_name' => 'Logistic Setting', 'action' => 'View'],
+            ['id' => 736, 'screen_name' => 'Logistic Setting', 'action' => 'Submit'],
         ]);
 
         // if new screen
