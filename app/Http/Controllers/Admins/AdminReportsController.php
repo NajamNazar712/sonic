@@ -12307,7 +12307,7 @@ class AdminReportsController extends Controller
         'rv_shipment_assign_agents.updated_at as action_date', 'add.name as rcp_agent_updated_by', 
         'rv_shipment_assign_agents.updated_type_id as updated_type_id','rv_shipment_assign_agents.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
-        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date')
+        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agents.rv_state_id as rv_state_id')
 
         ->groupBy('shipments.id');
 
@@ -12353,7 +12353,7 @@ class AdminReportsController extends Controller
                     ->addColumn('action_updated_by', function($rv_report) {
                         //admin or agent
                         // if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {
-                        if (($rv_report['updated_type_id'] == 1)) {
+                        if (($rv_report['updated_type_id'] == 1) && ($rv_report['rv_state_id'] != 1)) {
                             $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
                                 $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
                             })
