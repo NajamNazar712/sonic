@@ -327,8 +327,17 @@ class ReturnController extends Controller
 
         $staff_types = StaffCategory::where('id','!=','2')->get();
 
-        $empid = Admin::find(Auth::id())->employee_id;
-        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        // $empid = Admin::find(Auth::id())->employee_id;
+        // $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        // $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+        //     ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+        //     ->whereIn('id', function ($query) {
+        //         $query->select(DB::raw('MAX(id)'))
+        //             ->from('employee_attendances')
+        //             ->groupBy('employee_attendances.employee_id');
+        //     })
+        //     ->get();
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
             ->whereIn('id', function ($query) {
@@ -1560,14 +1569,22 @@ class ReturnController extends Controller
                         }
 
 
+                        // $rv_shipment_assign_agent_data = [
+                        //     'agent_id' => Auth::id(),
+                        //     'shipment_id' => $request->shipment_id,
+                        //     'rv_assign_agent_status_id' => 5, //on hold for self collection
+                        //     'rv_assign_agent_sub_status_id' => Null,
+                        //     'updated_by_id' =>  Auth::id(),
+                        //     'remarks' => Null,
+                        // ];
+
                         $rv_shipment_assign_agent_data = [
                             'agent_id' => Auth::id(),
                             'shipment_id' => $request->shipment_id,
                             'rv_assign_agent_status_id' => 5, //on hold for self collection
-                            'rv_assign_agent_sub_status_id' => Null,
                             'updated_by_id' =>  Auth::id(),
-                            'remarks' => Null,
                         ];
+                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
                 }
 
                 return ['status' => 0, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
