@@ -13465,10 +13465,13 @@ dd($shipments->get());
             ->select('segments.id as segment_id','segments.name as segment_name','scs.id as sub_segment_id','scs.name as sub_segment_name')
             ->get();
 
-        $cities = DB::connection('reports')->table('cities')->get(['id', 'name']);
-        $zones = DB::connection('reports')->table('zones')->get(['id', 'name']);
+        $origin_name = "SELECT origin_zonecode As origin_name FROM manifest_report2 GROUP BY origin_name";
+        $origin_name = DB::select($origin_name);
 
-        return view('admin.reports.cargo_manifest.index')->with(['origins' => $zones, 'destinations' => $zones, 'segments' => $segments]);
+        $destination_name = "SELECT destination_zonecode As destination_name FROM manifest_report2 GROUP BY destination_name";
+        $destination_name = DB::select($destination_name);
+
+        return view('admin.reports.cargo_manifest.index')->with(['origins' => $origin_name, 'destinations' => $destination_name, 'segments' => $segments]);
     }
 
     public function cargo_manifest_list(Request $request)
@@ -13495,7 +13498,7 @@ dd($shipments->get());
         ];
 
         if (!empty($destination)) {
-            $Query .= " AND desination_zonecode = :destination_value";
+            $Query .= " AND destination_zonecode = :destination_value";
             $bindings['destination_value'] = $destination;
         }
 
@@ -13506,49 +13509,49 @@ dd($shipments->get());
         }
 
         $results = DB::select($Query,$bindings);
-
+//dd($results);
         $transformedData = collect($results)->map(function ($item) {
             return [
                 'origin' => $item->origin_zonecode,
-                'destination' => $item->desination_zonecode,
+                'destination' => $item->destination_zonecode,
                 'booking_date' => $item->booking_date,
                 'segment' => $item->parent_prod_name,
                 'sub_segment' => $item->sub_prod_name,
                 'arrival' => $item->arrival,
-                'manisfest' => $item->manisfest,
+                'manifest' => $item->manifest,
                 'misroute' => $item->misroute,
-                'withoutmanisfest' => $item->withoutmanisfest,
+                'withoutmanifest' => $item->withoutmanifest,
             ];
         });
 
         $datatable = Datatables::of($transformedData)
-            ->editColumn('manisfest', function ($transformedData) {
-                if ($transformedData['manisfest'] == null) {
+            ->editColumn('manifest', function ($transformedData) {
+                if ($transformedData['manifest'] == null) {
                     return '-';
                 } else {
-                    return $transformedData['manisfest'];
+                    return $transformedData['manifest'];
                 }
             })
-            ->editColumn('manisfest_percentage', function ($transformedData) {
-                if ($transformedData['manisfest'] == null) {
+            ->editColumn('manifest_percentage', function ($transformedData) {
+                if ($transformedData['manifest'] == null) {
                     return '-';
                 } else {
-                    $result = ($transformedData['manisfest']/$transformedData['arrival'])*100;
+                    $result = ($transformedData['manifest']/$transformedData['arrival'])*100;
                     return number_format($result,2).' %';
                 }
             })
-            ->editColumn('withoutmanisfest', function ($transformedData) {
-                if ($transformedData['withoutmanisfest'] == null) {
+            ->editColumn('withoutmanifest', function ($transformedData) {
+                if ($transformedData['withoutmanifest'] == null) {
                     return '-';
                 } else {
-                    return $transformedData['withoutmanisfest'];
+                    return $transformedData['withoutmanifest'];
                 }
             })
-            ->editColumn('withoutmanisfest_percentage', function ($transformedData) {
-                if ($transformedData['withoutmanisfest'] == null) {
+            ->editColumn('withoutmanifest_percentage', function ($transformedData) {
+                if ($transformedData['withoutmanifest'] == null) {
                     return '-';
                 } else {
-                    $result = ($transformedData['withoutmanisfest']/$transformedData['arrival'])*100;
+                    $result = ($transformedData['withoutmanifest']/$transformedData['arrival'])*100;
                     return number_format($result,2).' %';
                 }
             })

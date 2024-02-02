@@ -18,7 +18,7 @@
                                 <fieldset class="form-group">
                                     <select name="select_origin" id="select_origin" class="form-control select2" data-rule-required="true" data-msg-required="Origin is required">
                                             @foreach($origins as $origin)
-                                            <option value="{{$origin->name}}">{{$origin->name}}</option>
+                                            <option value="{{$origin->origin_name}}">{{$origin->origin_name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -27,7 +27,7 @@
                                 <fieldset class="form-group">
                                     <select name="select_destination" id="select_destination" class="form-control select2">
                                         @foreach($destinations as $destination)
-                                            <option value="{{$destination->name}}">{{$destination->name}}</option>
+                                            <option value="{{$destination->destination_name}}">{{$destination->destination_name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -174,6 +174,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
             $('#select_sub_segment').on('change', function () {
                 var selectedOption = $(this).find(':selected');
                 $('#selected_segment_name').val(selectedOption.data('value'));
@@ -181,12 +182,12 @@
             });
 
             $('#select_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Origin Zone',
+                placeholder:'Select Origin',
                 width:'100%',
                 allowClear:true
             });
             $('#select_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination Zone',
+                placeholder:'Select Destination',
                 width:'100%',
                 allowClear:true
             });
@@ -352,10 +353,10 @@
                     {data: 'id',orderable: false, searchable: false, class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle text-center arrived'},
                     {data: 'arrival', name: 'arrived', class: 'align-middle text-center arrived' ,orderable: false,},
-                    {data: 'manisfest', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'manisfest_percentage',  name:'manisfest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'withoutmanisfest', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'withoutmanisfest_percentage',  name:'withoutmanisfest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'manifest', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'manifest_percentage',  name:'manifest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'withoutmanifest', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'withoutmanifest_percentage',  name:'withoutmanifest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'misroute', name:'misroute', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
                     {data: 'misroute_percentage', name:'misroute_percentage', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
                 ],
@@ -396,34 +397,6 @@
                     table.draw(true);
                 }
             });
-
-            {{--var route = '{!! route('admin.tracking.index') !!}';--}}
-            {{--$('#datatable tbody').on('click','tr td.total_shipments_link button',function () {--}}
-            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
-            {{--    $('#shipments_modal .modal-body').html('');--}}
-            {{--    $('#shipments_modal').modal('show');--}}
-
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.reports.last_mile_app.shipment_list') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            '_token': '{{ csrf_token() }}',--}}
-            {{--            'id': id--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--        .done(function(data) {--}}
-            {{--            if (data) {--}}
-            {{--                var html = '';--}}
-
-            {{--                if (data.shipments) {--}}
-            {{--                    $.each(data.shipments, function(index, tracking_number) {--}}
-            {{--                        html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';--}}
-            {{--                    });--}}
-            {{--                }--}}
-            {{--                $('#shipments_modal .modal-body').html(html);--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--});--}}
 
         });
     </script>
