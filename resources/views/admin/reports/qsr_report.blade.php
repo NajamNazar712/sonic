@@ -59,15 +59,6 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
-                                @foreach($hubs as $concerned_hub)
-                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -591,9 +582,6 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
-                        d.search_concerned_hub = $('#search_concerned_hub').val();
-
-
                     }
                 },
                 rowId: 'shId',

@@ -469,8 +469,6 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_from_admin = $('#search_from_admin').val();
                         d.search_to_admin = $('#search_to_admin').val();
-                        d.search_concerned_status_area = $('#search_concerned_status_area').val();
-                        d.search_concerned_status_hub = $('#search_concerned_status_hub').val();
                     }
                 },
                 rowId: 'handover_id',
