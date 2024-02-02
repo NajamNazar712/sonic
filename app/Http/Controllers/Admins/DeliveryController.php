@@ -8074,14 +8074,14 @@ class DeliveryController extends Controller
                         $return_assign_log->save();
                     }
 
-                    $rv_shipment_assign_agent_data = [
-                        'shipment_id' => $shipment_id,
-                        'rv_assign_agent_status_id' => 1, //Return Confirm when intercept is rejected
-                        'rv_assign_agent_sub_status_id' => Null,
-                        'updated_by_id' =>  Auth::id(),
-                        'remarks' => Null,
-                    ];
-                    $this->update_rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+                    // $rv_shipment_assign_agent_data = [
+                    //     'shipment_id' => $shipment_id,
+                    //     'rv_assign_agent_status_id' => 1, //Return Confirm when intercept is rejected
+                    //     'rv_assign_agent_sub_status_id' => Null,
+                    //     'updated_by_id' =>  Auth::id(),
+                    //     'remarks' => Null,
+                    // ];
+                    // $this->update_rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
                 }
             }
