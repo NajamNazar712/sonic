@@ -24,28 +24,30 @@ class SackBagCronController extends Controller
             ->join('issue_sack_bag_origins as isb', 'isb.id', '=', 'cmb.sack_bag_id')
             ->where('cmb.is_sack_bag', 1)
             ->where('cmb.status_id', 1)
-            ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
-            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at')
-            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at');
+            ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
-
+      
 
         if ($cbs->exists()) {
 
             $cbs = $cbs->get();
-
+           
+       
             foreach ($cbs as $cb) {
 
                 // $sackbag = DB::table('issue_sack_bag_origins as isb')->where('isb.id', '=', $cb->sack_bag_id);
-                $sackbag = IssueSackBagOrigin::find($cb->sack_bag_id);
-
+                $sackbag = IssueSackBagOrigin::find(13);
+                
                 if ($sackbag) {
-
-                    if ($cb->created_at > $sackbag->reporting_date || $cb->created_at = $sackbag->reporting_date) {
+                   
+                    if ($cb->updated_at >=  $sackbag->reporting_date) {
                         $sackbag->sack_status_id = 2;
-                        $sackbag->reporting_date = $cb->created_at;
+                        $sackbag->reporting_date = $cb->updated_at;
                         $sackbag->sack_destination_id = $cb->destination_hub_id;
                         $sackbag->save();
+                     
                     }
                 }
             }
@@ -58,9 +60,9 @@ class SackBagCronController extends Controller
             ->join('issue_sack_bag_origins as isb', 'isb.id', '=', 'cmb.sack_bag_id')
             ->where('cmb.is_sack_bag', 1)
             ->where('cmb.status_id', 2)
-            ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
-            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at')
-            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at');
+            ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
 
         if ($tms->exists()) {
@@ -73,9 +75,9 @@ class SackBagCronController extends Controller
 
                 if ($sackbag) {
 
-                    if ($tm->created_at >= $sackbag->reporting_date) {
+                    if ($tm->updated_at >= $sackbag->reporting_date) {
                         $sackbag->sack_status_id = 3;
-                        $sackbag->reporting_date = $tm->created_at;
+                        $sackbag->reporting_date = $tm->updated_at;
                         $sackbag->sack_destination_id = $tm->destination_hub_id;
                         $sackbag->save();
                     }
@@ -89,10 +91,11 @@ class SackBagCronController extends Controller
             ->join('issue_sack_bag_origins as isb', 'isb.id', '=', 'cmb.sack_bag_id')
             ->where('cmb.is_sack_bag', 1)
             ->where('cmb.status_id', 7)
-            ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
-            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at')
-            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.created_at');
+            ->whereBetween('cmb.updated_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+            ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
+            ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
+                 
         if ($brs->exists()) {
 
             $brs = $brs->get();
@@ -103,10 +106,10 @@ class SackBagCronController extends Controller
 
                 if ($sackbag) {
 
-                    if ($br->created_at >= $sackbag->reporting_date) {
+                    if ($br->updated_at >= $sackbag->reporting_date) {
 
                         $sackbag->sack_status_id = 4;
-                        $sackbag->reporting_date = $br->created_at;
+                        $sackbag->reporting_date = $br->updated_at;
                         $sackbag->sack_destination_id = $br->destination_hub_id;
                         $sackbag->save();
                     }
@@ -135,11 +138,9 @@ class SackBagCronController extends Controller
                 'cmb.id'
             )
             ->where('sj.shipper_status_id', 4)
-            ->whereBetween('cmb.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
-            ->groupBy('cmb.sack_bag_id', 'isbo.sack_bag_no', 'sj.city_id', 'cmb.created_at')
+            ->whereBetween('sj.created_at', [$previous_day_date . ' 00:00:01', $previous_day_date . ' 23:59:59'])
+            ->groupBy('cmb.sack_bag_id', 'isbo.sack_bag_no', 'sj.city_id', 'sj.created_at')
             ->get();
-
-
 
 
         //misrouted shipments
@@ -226,9 +227,11 @@ class SackBagCronController extends Controller
                     $sackbag = IssueSackBagOrigin::find($rev_shipment->sack_bag_id);
 
                     if ($sackbag) {
+                    
                         if ($rev_shipment->received_created >= $sackbag->reporting_date) {
 
 
+                             
                             $sackbag->sack_status_id = 5;
                             $sackbag->reporting_date = $rev_shipment->received_created;
                             $sackbag->sack_destination_id = $rev_shipment->received_city;

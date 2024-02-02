@@ -13801,10 +13801,10 @@ class AdminReportsController extends Controller
             ->select(
                 'cities.name as destination_name',
                 // DB::raw('COUNT(isu.sack_bag_no) as isu'),
-                DB::raw('COUNT(cb.sack_bag_no) as cb'),
-                DB::raw('COUNT(tm.sack_bag_no) as tm'),
-                DB::raw('COUNT(br.sack_bag_no) as br'),
-                DB::raw('COUNT(sdm.sack_bag_no) as sdm')
+                DB::raw('COUNT(DISTINCT cb.sack_bag_no) as cb'),
+                DB::raw('COUNT(DISTINCT tm.sack_bag_no) as tm'),
+                DB::raw('COUNT(DISTINCT br.sack_bag_no) as br'),
+                DB::raw('COUNT(DISTINCT sdm.sack_bag_no) as sdm')
             );
 
         if ($destination_id = $request->get('destination_id')) {
