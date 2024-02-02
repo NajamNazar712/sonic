@@ -7984,47 +7984,6 @@ class DeliveryController extends Controller
 
                     }
 
-                     // $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                    //         $rv_shipment_assign_agent_data = [
-                    //                 'agent_id' => Auth::id(),
-                    //                 'shipment_id' => $shipment_id,
-                    //                 'shipments_journey_id' => $shipments_journey->id,
-                    //                 'last_shipments_journey_id' => $shipments_journey->id,
-                    //                 'rv_assign_agent_status_id' => 4, //Intercept Approved
-                    //                 'rv_assign_agent_sub_status_id' => Null,
-                    //                 'rv_state_id' => 4,
-                    //                 'is_fake_status' => 0,
-                    //                 'rv_fake_status_id' => 0,
-                    //                 'rv_shipment_agent_id' => 0,
-                    //                 'updated_type_id' => 1,
-                    //                 'updated_by_id' =>  Auth::id(),
-                    //                 'remarks' => Null,
-                    //                 'call_to_id' => 1,//consignee
-                    //                 'assigned_by' => 0,
-                    //                 'unresponsive_count' => 0,
-                    //                 'unresponsive_email_count' => 0,
-                    //                 'unresponsive_attempt_time' => Null,
-                    //             ];
-                    //         $this->data_rv_shipment_assign_agent($rv_shipment_assign_agent_data);
-
-                    //         $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('agent_id',Auth::id())->latest()->first();
-                    //         $data = ['rv_shipment_assign_agent_id' => $rv_shipment_assign_agents->id,
-                    //                 'agent_id' => Auth::id(),
-                    //                 'shipments_journey_id' => $shipments_journey->id,
-                    //                 'last_shipments_journey_id' => $shipments_journey->id,
-                    //                 'shipment_id' => $shipment_id,
-                    //                 'rv_assign_agent_status_id' => 4, //Intercept Approved
-                    //                 'rv_assign_agent_sub_status_id' => Null,
-                    //                 'rv_state_id' => 4,
-                    //                 'updated_type_id' => 1,
-                    //                 'updated_by_id' =>  Auth::id(),
-                    //                 'is_fake_status' => 0,
-                    //                 'rv_fake_status_id' => 0,
-                    //                 'remarks' => Null,
-                    //                 'call_to_id' => 1,
-                    //             ];
-                    //         $this->data_rv_shipment_assign_agent_details($data);
-
                     $rv_shipment_assign_agent_data = [
                         // 'agent_id' => Auth::id(),
                         'shipment_id' => $shipment_id,
@@ -8114,6 +8073,16 @@ class DeliveryController extends Controller
                         $return_assign_log->admin_id = Auth::id();
                         $return_assign_log->save();
                     }
+
+                    $rv_shipment_assign_agent_data = [
+                        'shipment_id' => $shipment_id,
+                        'rv_assign_agent_status_id' => 1, //Return Confirm when intercept is rejected
+                        'rv_assign_agent_sub_status_id' => Null,
+                        'updated_by_id' =>  Auth::id(),
+                        'remarks' => Null,
+                    ];
+                    $this->update_rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+
                 }
             }
 

@@ -12282,7 +12282,7 @@ class AdminReportsController extends Controller
         ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
             $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
                 //  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_assign_agent_status_id = 3 AND rv_shipment_assign_agent_details.rv_state_id = 2 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
-                 ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id )'))
+                 ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_state_id = 2 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
                  ->orderBy('id', 'DESC');
         })
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')

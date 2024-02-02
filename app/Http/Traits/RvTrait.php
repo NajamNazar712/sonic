@@ -1941,7 +1941,7 @@ trait RvTrait
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
-    // Description: this function is updating table rows of rv_shipment_assign_agents requested to approve intercept request
+    // Description: this function is updating table rows of rv_shipment_assign_agents requested to approve or reject intercept request
     protected function update_rv_shipment_assign_agent_by_admin($data){
 
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
