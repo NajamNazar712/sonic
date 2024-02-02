@@ -12317,7 +12317,8 @@ class AdminReportsController extends Controller
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
                     })
                     ->editColumn('rv_status', function($rv_report) {
-                        if ($rv_report['rv_status'] == "" || $rv_report['rv_status'] == 'Intercept Approved') { //we dont have to show intercept approved in action column
+                        // if ($rv_report['rv_status'] == "" || $rv_report['rv_status'] == 'Intercept Approved') { //we dont have to show intercept approved in action column
+                        if ($rv_report['rv_status'] == "") { 
                             return '-';
                         }
                         else {
