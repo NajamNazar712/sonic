@@ -65,7 +65,7 @@ class OrderManagementController extends Controller
     }
     public function orders_list(Request $request)
     {
-        $connection = 'mysql';
+        $connection = 'reports_2';
         $shipments = DB::connection($connection)->table('shipments')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
