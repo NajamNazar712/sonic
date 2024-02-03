@@ -195,16 +195,7 @@ class TeamLeadDashboardController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle assigned_shipment"  data-assigned=' . implode(',', $tracking_number) . '>' . count($tracking_number) . '</button>';
                 }
             })
-            ->filterColumn('ea.attendance_date', function ($query, $keyword) {
-
-                if ($keyword != '' && $keyword != "Offline") {
-                    $query->where('ea.attendance_date', "like", "%" . $keyword . "%");
-
-                } else if($keyword == "Offline") {
-
-                    $query->whereDate('ea.created_at', '!=', Carbon::Today());
-                }
-            })
+            
 
             ->filterColumn('ads.name', function ($query, $keyword) {
 
@@ -230,6 +221,14 @@ class TeamLeadDashboardController extends Controller
                     return 'Online';
                 } else {
                     return 'Offline';
+                }
+            })
+            ->filterColumn('ea.attendance_date', function ($query, $keyword) {
+                if ($keyword != '' && $keyword != "Offline") {
+                    $query->where('ea.attendance_date', "like", "%" . $keyword . "%");
+
+                } else if($keyword == "Offline") {
+                    $query->whereDate('ea.created_at', '!=', Carbon::Today());
                 }
             })
             ->addColumn("action", function ($result) {

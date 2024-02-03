@@ -37,7 +37,7 @@
                                         <div class="form-group">
                                             <select name="search_agent_name" id="search_agent_name" class="form-control select2">
                                                 @foreach($agents as $agent)
-                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                    <option value="{{$agent->id}}">{{$agent->name}} - {{$agent->trax_id}} - {{$agent->city_name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>

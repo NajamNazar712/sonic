@@ -12250,9 +12250,11 @@ class AdminReportsController extends Controller
 
         $shippers = User::where('status', 3)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                        ->leftjoin('cities as c','c.id','a.default_hub_id')
                         // ->where('admin_roles.department_id',3)
+                        
                         ->where('a.status',1)
-                        ->select('a.id', 'a.name')->get();
+                        ->select('a.id', 'a.name','a.trax_id', 'c.name as city_name')->get();
 
         return view('admin.reports.rv_report.index', [
             'shippers' => $shippers, 'agents' => $agents,
