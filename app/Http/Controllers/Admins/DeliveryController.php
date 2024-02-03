@@ -7307,7 +7307,9 @@ class DeliveryController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
-        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $connection = 'mysql';
+        $deliveries = DB::connection($connection)->table('delivery_notes')
+            ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('delivery_note_shipments', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
