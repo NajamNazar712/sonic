@@ -28,7 +28,7 @@ class SackBagCronController extends Controller
             ->select('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at')
             ->groupBy('cmb.sack_bag_id', 'cmb.destination_hub_id', 'cmb.updated_at');
 
-      
+       
 
         if ($cbs->exists()) {
 
@@ -38,7 +38,7 @@ class SackBagCronController extends Controller
             foreach ($cbs as $cb) {
 
                 // $sackbag = DB::table('issue_sack_bag_origins as isb')->where('isb.id', '=', $cb->sack_bag_id);
-                $sackbag = IssueSackBagOrigin::find(13);
+                $sackbag = IssueSackBagOrigin::find($cb->sack_bag_id);
                 
                 if ($sackbag) {
                    
@@ -47,7 +47,6 @@ class SackBagCronController extends Controller
                         $sackbag->reporting_date = $cb->updated_at;
                         $sackbag->sack_destination_id = $cb->destination_hub_id;
                         $sackbag->save();
-                     
                     }
                 }
             }
