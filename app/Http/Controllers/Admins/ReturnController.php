@@ -338,7 +338,7 @@ class ReturnController extends Controller
         //     })
         //     ->get();
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
-        $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
             ->whereIn('id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
@@ -354,7 +354,7 @@ class ReturnController extends Controller
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
         'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 
         'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage , 'number_of_inprocess_tickets'=> $number_of_inprocess_tickets, 
-        'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'number_of_available_agents' => $Attendance, 
+        'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'online_agents' => $online_agents,'number_of_available_agents' => $number_of_available_agents, 
         'average_aging' => $averageHours,'average_response_time' => $averageResponseTimeInHours, 'oldest_shipments' => $oldest_shipments, 'staff_types'=>$staff_types]);
     }
 
