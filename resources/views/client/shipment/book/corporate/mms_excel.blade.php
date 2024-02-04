@@ -19,115 +19,67 @@
 
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate_excel_mms.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                                 {{ csrf_field() }}
-                                <div class="row align-items-center justify-content-center mb-2">
-                                    <div class="col">
-                                        <div class="form-group">
-                                            <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row p-1 border-primary">
-                                            <div class="col-12">
-                                                <h5 class="form-section text-center">Template Type</h5>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="row justify-content-center">
-                                                    {{-- <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            @if($omni_user != 1)
-                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
-                                                                <label class="custom-control-label" for="excel_type_1">Overall</label>
-                                                            @else
-                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_7" value="7">
-                                                                <label class="custom-control-label" for="excel_type_7">Overall</label>
-                                                            @endif
-                                                        </div>
-                                                    </fieldset> --}}
-                                                    <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_2" value="2" checked>
-                                                            <label class="custom-control-label" for="excel_type_2">Regular</label>
-                                                        </div>
-                                                    </fieldset>
-                                                    {{-- <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_3" value="3">
-                                                            <label class="custom-control-label" for="excel_type_3">Replacement</label>
-                                                        </div>
-                                                    </fieldset>
-                                                    <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_4" value="4">
-                                                            <label class="custom-control-label" for="excel_type_4">Try And Buy</label>
-                                                        </div>
-                                                    </fieldset>
-                                                    <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_5" value="5">
-                                                            <label class="custom-control-label" for="excel_type_5">Reverse Pickup</label>
-                                                        </div>
-                                                    </fieldset> --}}
-                                                    @if($omni_user == 1)
-                                                        <fieldset>
-                                                            <div class="custom-control custom-radio col">
-                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_6" value="6">
-                                                                <label class="custom-control-label" for="excel_type_6">Omni</label>
-                                                            </div>
-                                                        </fieldset>
-                                                    @endif
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                                <div class="form-group m-0 mb-1">
+                                                    <select name="pickup_address_id" id="pickup_address_select" class="select2 pickup_address_id" data-rule-required="true" data-msg-required="Pickup Address is required">
+                                                        @foreach($pickup_addresses as $pickup_address)
+                                                            <option value="{{ $pickup_address->id }}">{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                                <div class="form-group m-0 mb-1">
+                                                    <select name="delivery_type" id="delivery_type_select" class="select2 delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
+                                                        @foreach($delivery_types as $delivery_type)
+                                                            <option value="{{ $delivery_type->id }}">{{ $delivery_type->delivery_type }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                        </div>
+                                         <div class="col-md-3">
+                                                <div class="form-group m-0 mb-1">
+                                                    <select name="product_type" id="product_type_select" class="select2 product_type" data-rule-required="true" data-msg-required="Product Type is required">
+                                                        @foreach($products as $product)
+                                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                        </div>
+                                         <div class="col-md-3">
+                                                <div class="form-group m-0 mb-1">
+                                                    <select name="shipping_mode" id="shipping_mode_select" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                                                        @foreach($shipping_modes as $shipping_mode)
+                                                            <option value="{{ $shipping_mode->id }}">{{ $shipping_mode->mode }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                        </div>
+                                        
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 mt-3">
+                                            <div class="form-group">
+                                                <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="form-group text-left">
-                                            <button type="submit" name="upload" class="btn btn-primary">Upload</button>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <h5 class="form-section mt-2 mb-2 text-center">Template Download</h5>
-
-                                        <div class="row">
-                                            <div class="col">
-                                                <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+                                            <div class="col-md-4 mt-4">
+                                                <div class="form-group text-left">
+                                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
                                                 </div>
                                             </div>
-                                            {{-- <div class="col">
-                                                <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Replacement Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Try And Buy Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Reverse Pickup Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
-                                                </div>
-                                            </div> --}}
-                                            <div class="col">
-                                                <div class="form-group text-right">
-                                                    @if($omni_user != 1)
-                                                        <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
-                                                        @else
-                                                        <a href="{{ asset('file/Trax Book Omni Corporate Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            @if($omni_user == 1)
-                                                <div class="col">
+                                         <div class="col-4">
+                                            <h5 class="form-section text-center">Template Download</h5>
+                                            {{-- <div class="row">
+                                                <div class="col"> --}}
                                                     <div class="form-group text-right">
-                                                        <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+                                                        <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}?v=23_03_2023" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
                                                     </div>
-                                                </div>
-                                            @endif
+                                                {{-- </div>
+                                            </div> --}}
                                         </div>
                                     </div>
-                                </div>
                             </form>
 
                             <div class="row">
@@ -488,15 +440,47 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+        <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
 
     <script>
         $(document).ready(function() {
+
+            $('#pickup_address_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Pickup Address',
+                width:'100%',
+                allowClear:false
+
+            });
+
+             $('#delivery_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Delivery Types',
+                width:'100%',
+                allowClear:false
+
+            });
+
+            $('#product_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Product Types',
+                width:'100%',
+                allowClear:false
+
+            });
+            $('#shipping_mode_select').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Shipping Modes ',
+                width:'100%',
+                allowClear:false
+
+            });
+
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {

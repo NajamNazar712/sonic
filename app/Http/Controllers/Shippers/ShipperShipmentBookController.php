@@ -4811,7 +4811,7 @@ class ShipperShipmentBookController extends Controller
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights, 'distribution_products' => $distribution_products, 'omni_user' => $omni_user]);
     }
 
-    public function mms_corporate_excel_index()
+    public function corporate_excel_mms_index()
     {
 
         $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
@@ -4876,7 +4876,7 @@ class ShipperShipmentBookController extends Controller
 
     }
 
-    public function mms_corporate_excel_store()
+    public function corporate_excel_mms_store()
     {
         
     }
