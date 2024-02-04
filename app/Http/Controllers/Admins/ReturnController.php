@@ -5308,7 +5308,7 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         try{
-            DB::beginTransaction();
+            // DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
             $no_zone_shipment = [];
             $assigned_shipment = [];
@@ -5377,7 +5377,7 @@ class ReturnController extends Controller
                         if($shipment->exists()){
                             if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
                             $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
-                                DB::commit();
+                                // DB::commit();
                                 $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
                                 $assigned_shipment[] = $shipment->tracking_number;
                                 if($already_assigned_state != null){
@@ -5420,10 +5420,12 @@ class ReturnController extends Controller
                                     : 'Already Assigned' 
                             ]);
                         } 
-                    }else{
+                    }
+                    else{
                         return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Contractual Agent Successfully']);
                     }
-                }else{
+                }
+                else{
                     return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
                 }
             }
@@ -5454,7 +5456,7 @@ class ReturnController extends Controller
                                 // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
                                 if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
                                 {
-                                    DB::commit();
+                                    // DB::commit();
 
                                     // if agent shipment is assigned - not assigned to same agent only 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
@@ -5482,35 +5484,37 @@ class ReturnController extends Controller
                                     
                                     // creating a new record
                                     $this->rv_shipment_assign($data);
-                                    return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                                    // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                                 }
                                 else{
                                     $no_zone_shipment[] = $shipment->tracking_number;
                                 }
-                                if(!empty($no_zone_shipment) || !empty($already_assigned)){
-                                    $no_zone_shipment = implode(',', $no_zone_shipment);
-                                    $already_assigned = implode(',', $already_assigned);
-                                    $assigned_shipment = implode(',', $assigned_shipment);
-                                    $assigned_to_new_user = implode(',', $assigned_to_new_user);
-                                    
-                                    if ($already_assigned == '') {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
-                                                    (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                                        ]);
-                                    } else {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => ($assigned_to_new_user != null)
-                                                ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
-                                                (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
-                                                : 'Already Assigned' 
-                                        ]);
-                                    } 
-                                }
-                                return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                             }
+                        }
+                        if(!empty($no_zone_shipment) || !empty($already_assigned)){
+                            $no_zone_shipment = implode(',', $no_zone_shipment);
+                            $already_assigned = implode(',', $already_assigned);
+                            $assigned_shipment = implode(',', $assigned_shipment);
+                            $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                            
+                            if ($already_assigned == '') {
+                                return response()->json([
+                                    'status' => 1,
+                                    'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
+                                            (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                ]);
+                            } else {
+                                return response()->json([
+                                    'status' => 1,
+                                    'error' => ($assigned_to_new_user != null)
+                                        ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
+                                        (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                                        : 'Already Assigned' 
+                                ]);
+                            } 
+                        }
+                        else{
+                            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                         }
                     }
                     else{
@@ -5519,7 +5523,7 @@ class ReturnController extends Controller
                 }
             }
             catch(Exception $th){
-                DB::rollBack();
+                // DB::rollBack();
                 return response()->json(['error'=> $th->getMessage()]);
             } 
     }
