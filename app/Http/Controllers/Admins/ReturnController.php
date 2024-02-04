@@ -5422,10 +5422,12 @@ class ReturnController extends Controller
                                     : 'Already Assigned' 
                             ]);
                         } 
-                    }else{
+                    }
+                    else{
                         return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Contractual Agent Successfully']);
                     }
-                }else{
+                }
+                else{
                     return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
                 }
             }
@@ -5484,35 +5486,37 @@ class ReturnController extends Controller
                                     
                                     // creating a new record
                                     $this->rv_shipment_assign($data);
-                                    return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                                    // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                                 }
                                 else{
                                     $no_zone_shipment[] = $shipment->tracking_number;
                                 }
-                                if(!empty($no_zone_shipment) || !empty($already_assigned)){
-                                    $no_zone_shipment = implode(',', $no_zone_shipment);
-                                    $already_assigned = implode(',', $already_assigned);
-                                    $assigned_shipment = implode(',', $assigned_shipment);
-                                    $assigned_to_new_user = implode(',', $assigned_to_new_user);
-                                    
-                                    if ($already_assigned == '') {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
-                                                    (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                                        ]);
-                                    } else {
-                                        return response()->json([
-                                            'status' => 1,
-                                            'error' => ($assigned_to_new_user != null)
-                                                ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
-                                                (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
-                                                : 'Already Assigned' 
-                                        ]);
-                                    } 
-                                }
-                                return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                             }
+                        }
+                        if(!empty($no_zone_shipment) || !empty($already_assigned)){
+                            $no_zone_shipment = implode(',', $no_zone_shipment);
+                            $already_assigned = implode(',', $already_assigned);
+                            $assigned_shipment = implode(',', $assigned_shipment);
+                            $assigned_to_new_user = implode(',', $assigned_to_new_user);
+                            
+                            if ($already_assigned == '') {
+                                return response()->json([
+                                    'status' => 1,
+                                    'error' => 'Tracking Numbers Are Not Assigned: ' . $no_zone_shipment . ' its already Assigned to an agent' .
+                                            (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                                ]);
+                            } else {
+                                return response()->json([
+                                    'status' => 1,
+                                    'error' => ($assigned_to_new_user != null)
+                                        ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
+                                        (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '')
+                                        : 'Already Assigned' 
+                                ]);
+                            } 
+                        }
+                        else{
+                            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Agent Successfully']);
                         }
                     }
                     else{
