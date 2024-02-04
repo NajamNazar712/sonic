@@ -5310,7 +5310,7 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         try{
-            DB::beginTransaction();
+            // DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
             $no_zone_shipment = [];
             $assigned_shipment = [];
@@ -5379,7 +5379,7 @@ class ReturnController extends Controller
                         if($shipment->exists()){
                             if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
                             $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
-                                DB::commit();
+                                // DB::commit();
                                 $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
                                 $assigned_shipment[] = $shipment->tracking_number;
                                 if($already_assigned_state != null){
@@ -5456,7 +5456,7 @@ class ReturnController extends Controller
                                 // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
                                 if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
                                 {
-                                    DB::commit();
+                                    // DB::commit();
 
                                     // if agent shipment is assigned - not assigned to same agent only 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
@@ -5521,7 +5521,7 @@ class ReturnController extends Controller
                 }
             }
             catch(Exception $th){
-                DB::rollBack();
+                // DB::rollBack();
                 return response()->json(['error'=> $th->getMessage()]);
             } 
     }
