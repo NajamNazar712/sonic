@@ -14,7 +14,7 @@ class RVActionCountReportSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 926, 'name' => 'Rv Action Count Report - View', 'module_id' => 9),
+            array('id' => 930, 'name' => 'Rv Action Count Report - View', 'module_id' => 9),
         ));
 
 
@@ -24,7 +24,7 @@ class RVActionCountReportSeeder extends Seeder
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Rv Action Count Report', 'url'=>'admin.reports.rv_action_count_report.index', 'permission_id' => 926),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Rv Action Count Report', 'url'=>'admin.reports.rv_action_count_report.index', 'permission_id' => 930),
         ));
     }
 }
