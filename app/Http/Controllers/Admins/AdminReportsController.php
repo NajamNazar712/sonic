@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
-
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\HR\Employee;
 use Carbon\Carbon;
 use App\DailyVisit;
@@ -12289,9 +12287,12 @@ class AdminReportsController extends Controller
 
         $shippers = User::where('status', 3)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        // ->where('admin_roles.department_id',3)
+                        ->leftjoin('cities as c','c.id','a.default_hub_id')
+
+                        ->where('a.trax_id','like','%Trax-C%')
+                        
                         ->where('a.status',1)
-                        ->select('a.id', 'a.name')->get();
+                        ->select('a.id', 'a.name','a.trax_id', 'c.name as city_name')->get();
 
         return view('admin.reports.rv_report.index', [
             'shippers' => $shippers, 'agents' => $agents,
@@ -12324,7 +12325,8 @@ class AdminReportsController extends Controller
                  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_state_id != 1 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
                  ->orderBy('id', 'DESC');
         })
-        ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
+        // ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
+        ->leftjoin('admins as add', 'rv_shipment_assign_agents.agent_id','add.id')
 
 
         ->leftjoin('shipments_journey as sj', function($join) {
@@ -12426,14 +12428,6 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    // ->editColumn('rcp_agent_updated_by', function($rv_report) {
-                    //     if ($rv_report['updated_type_id'] == 2) {
-                    //         return $rv_report['rcp_agent_updated_by'];
-                    //     }
-                    //     else {
-                    //         return '-';
-                    //     }
-                    // })
                     ->addColumn('delivery_attempt_count', function($rv_report) {
                         $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
                         $delivered_status = array_filter($shipper_status, function($value){
@@ -12470,8 +12464,11 @@ class AdminReportsController extends Controller
             $rv_report->where('users.name', '=', $shipper_name);
         }
         if ($agent_id = $request->get('search_agent_name')) {
-            $agent_name = Admin::where('id', $agent_id)->value('name');
-            $rv_report->where('add.name', '=', $agent_name);
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            // $agent_name = Admin::where('id', $agent_id)->value('name');
+            $rv_report->where('add.id', '=', $agent_id);
+            // $rv_report->where('add.id', '=', $agent_id)->whereBetween('rv_shipment_assign_agents.updated_at', [$from, $to]);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

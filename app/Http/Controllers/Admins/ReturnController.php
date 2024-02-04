@@ -327,9 +327,18 @@ class ReturnController extends Controller
 
         $staff_types = StaffCategory::where('id','!=','2')->get();
 
-        $empid = Admin::find(Auth::id())->employee_id;
-        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
-        $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+        // $empid = Admin::find(Auth::id())->employee_id;
+        // $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        // $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
+        //     ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+        //     ->whereIn('id', function ($query) {
+        //         $query->select(DB::raw('MAX(id)'))
+        //             ->from('employee_attendances')
+        //             ->groupBy('employee_attendances.employee_id');
+        //     })
+        //     ->get();
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
             ->whereIn('id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
@@ -345,7 +354,7 @@ class ReturnController extends Controller
         'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 
         'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'number_of_pending_tickets'=> $number_of_pending_tickets, 
         'number_of_pending_ticket_percentage'=>$number_of_pending_ticket_percentage , 'number_of_inprocess_tickets'=> $number_of_inprocess_tickets, 
-        'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'number_of_available_agents' => $Attendance, 
+        'number_of_inprocess_tickets_percentage'=>$number_of_inprocess_tickets_percentage, 'online_agents' => $online_agents,'number_of_available_agents' => $number_of_available_agents, 
         'average_aging' => $averageHours,'average_response_time' => $averageResponseTimeInHours, 'oldest_shipments' => $oldest_shipments, 'staff_types'=>$staff_types]);
     }
 
@@ -726,9 +735,8 @@ class ReturnController extends Controller
                 $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
-                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->first();
-                // $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->where('agent_id',Auth::id())->first();
-                if( !$rv_shipment_assign_agents && (session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions'))))) {
+                $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $result->shId)->where('rv_state_id', 1)->where('agent_id', '!=',Auth::id())->first();
+                if( !$rv_shipment_assign_agents && (session("role_id") == 1 || $diff_days < 1 || (in_array(490, session('permissions'))))) {
                     if (session('role_id') == 1 || count(array_intersect([45, 46, 211, 212, 245], session('permissions'))) !== 0) {
                         $dropdown = "
                         <div class='btn-group'>
@@ -1559,14 +1567,22 @@ class ReturnController extends Controller
                         }
 
 
+                        // $rv_shipment_assign_agent_data = [
+                        //     'agent_id' => Auth::id(),
+                        //     'shipment_id' => $request->shipment_id,
+                        //     'rv_assign_agent_status_id' => 5, //on hold for self collection
+                        //     'rv_assign_agent_sub_status_id' => Null,
+                        //     'updated_by_id' =>  Auth::id(),
+                        //     'remarks' => Null,
+                        // ];
+
                         $rv_shipment_assign_agent_data = [
                             'agent_id' => Auth::id(),
                             'shipment_id' => $request->shipment_id,
                             'rv_assign_agent_status_id' => 5, //on hold for self collection
-                            'rv_assign_agent_sub_status_id' => Null,
                             'updated_by_id' =>  Auth::id(),
-                            'remarks' => Null,
                         ];
+                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
                 }
 
                 return ['status' => 0, 'success' => "Shipment status successfully updated to Shipment - On Hold for Self Collection"];
