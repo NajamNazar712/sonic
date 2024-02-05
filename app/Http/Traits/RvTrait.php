@@ -165,8 +165,8 @@ trait RvTrait
                     if ($rv_unassign_agent->exists()) {
                         
                         $rv_unassign_agent = $rv_unassign_agent->latest()->first();
-                        // $rv_unassign_agent->rv_state_id = 3; // we are setting status to open because in future any agent can get the shipment automatically from Virtual RCP Agent Screen
-                        $rv_unassign_agent->rv_state_id = 2;
+                        $rv_unassign_agent->rv_state_id = 3; // we are setting status to open because in future any agent can get the shipment automatically from Virtual RCP Agent Screen
+                        // $rv_unassign_agent->rv_state_id = 2;
                         $rv_unassign_agent->updated_by_id = Auth::id();
                         $rv_unassign_agent->assigned_to_type_id = 0;
                         $rv_unassign_agent->assigned_by = 0;
