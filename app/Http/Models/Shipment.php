@@ -147,4 +147,8 @@ class Shipment extends Model
     public function packaging_material() {
         return $this->belongsTo('App\Http\Models\PackagingMaterialRequest', 'id', 'shipment_id');
     }
+    
+    public function shipment_assign_agent() {
+        return $this->hasOne('App\Http\Models\ShipmentAssignAgent');
+    }
 }
