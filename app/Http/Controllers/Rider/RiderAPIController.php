@@ -165,7 +165,6 @@ use App\Http\Models\Admin\BoltUndeliveredReasonAgainstBookingType;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
-use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
 // use App\ReturnDeliveredToShipperSms;
