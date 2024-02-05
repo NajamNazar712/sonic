@@ -1970,13 +1970,14 @@ class ReturnController extends Controller
                         // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
                         // $this->return_confirm($request);
                         // }
-                        $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
+                        // $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
                         $rv_shipment_assign_agent_data = [
                             'agent_id' => Auth::id(),
                             'shipment_id' => $shipment_details->id,
                             'rv_assign_agent_status_id' => 1, //Return Confirm
-                            'rv_assign_agent_sub_status_id' => $rv_assign_agent_sub_status_id,
+                            // 'rv_assign_agent_sub_status_id' => Null, since there is no sub status in excel upload return confirm 
                             'updated_by_id' =>  Auth::id(),
+                            'remarks' =>  $remarks,
                         ];
                         $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
                     }
