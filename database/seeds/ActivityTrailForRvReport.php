@@ -12,8 +12,8 @@ class ActivityTrailForRvReport extends Seeder
     public function run()
     {
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 704, 'screen_name' => 'Rv Report', 'action'=> 'View'),
-            array('id' => 705, 'screen_name' => 'Rv Report', 'action'=> 'Excel Download'),
+            array('id' => 704, 'screen_name' => 'Overall Rv Action Report', 'action'=> 'View'),
+            array('id' => 705, 'screen_name' => 'Overall Rv Action Report', 'action'=> 'Excel Download'),
           
         ));
 
