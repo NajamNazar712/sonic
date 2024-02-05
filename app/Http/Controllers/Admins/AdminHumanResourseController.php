@@ -5314,6 +5314,7 @@ class AdminHumanResourseController extends Controller
                     }
                     $employee->staff_category_id = 3;
                     $employee->trax_id = $trax_id;
+                    $employee->shift_id = 8; //Contractual Shift A update into employees table
                     $employee->save();
 
                     $admin->trax_id = $employee->trax_id;
