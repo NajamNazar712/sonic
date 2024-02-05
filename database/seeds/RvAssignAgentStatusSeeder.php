@@ -11,8 +11,6 @@ class RvAssignAgentStatusSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('rv_assign_agent_statuses')->truncate();
-
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('rv_assign_agent_statuses')->insert(array(
             array('id'=> 1, 'shipment_status_id'=> 20,'name' => 'Return', 'shipment_status_name' => 'Return - Confirm', 'call_finding_id'=> NULL, 'created_at' => $timestamp, 'updated_at'=>$timestamp, 'is_visible'=> 1 ),
