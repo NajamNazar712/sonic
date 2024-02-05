@@ -5322,7 +5322,7 @@ class AdminHumanResourseController extends Controller
 
                     $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
 
-                    $this->assign_zones_to_user($request->employee_id);
+                    // $this->assign_zones_to_user($request->employee_id);
 
                     return response()->json(['status' => 0, 'success' => 'Staff Converted To Contractual Successfully']);
                 }
