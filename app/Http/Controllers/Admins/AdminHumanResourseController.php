@@ -338,7 +338,7 @@ class AdminHumanResourseController extends Controller
                         
                         $admin->save();
                         
-                        // $this->assign_zones_to_user($employee->id); //asigning hubs to agent rv_agent_assign_hubs
+                        $this->assign_zones_to_user($employee->id); //asigning hubs to agent rv_agent_assign_hubs
 
                         if (count($employee->designation->hubs) == 0) {
                             $admin_hub = new AdminHub();
@@ -5322,7 +5322,7 @@ class AdminHumanResourseController extends Controller
 
                     $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
 
-                    // $this->assign_zones_to_user($request->employee_id);
+                    $this->assign_zones_to_user($request->employee_id);
 
                     return response()->json(['status' => 0, 'success' => 'Staff Converted To Contractual Successfully']);
                 }
