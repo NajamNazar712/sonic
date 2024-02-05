@@ -338,7 +338,7 @@ class AdminHumanResourseController extends Controller
                         
                         $admin->save();
                         
-                        $this->assign_zones_to_user($employee->id);
+                        // $this->assign_zones_to_user($employee->id); //asigning hubs to agent rv_agent_assign_hubs
 
                         if (count($employee->designation->hubs) == 0) {
                             $admin_hub = new AdminHub();
