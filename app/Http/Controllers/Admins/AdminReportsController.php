@@ -12325,7 +12325,7 @@ class AdminReportsController extends Controller
                  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_state_id != 1 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
                  ->orderBy('id', 'DESC');
         })
-        // ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
+        ->leftjoin('admins as ad', 'rv_shipment_assign_agent_details.agent_id','ad.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agents.agent_id','add.id')
 
 
@@ -12345,7 +12345,7 @@ class AdminReportsController extends Controller
         'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 
         'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 
         'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks',
-        'rv_shipment_assign_agents.updated_at as action_date', 'add.name as rcp_agent_updated_by', 
+        'rv_shipment_assign_agents.updated_at as action_date', 'ad.name as rcp_agent_updated_by', 
         'rv_shipment_assign_agents.updated_type_id as updated_type_id','rv_shipment_assign_agents.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agents.rv_state_id as rv_state_id')
