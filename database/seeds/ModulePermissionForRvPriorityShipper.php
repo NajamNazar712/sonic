@@ -15,6 +15,12 @@ class ModulePermissionForRvPriorityShipper extends Seeder
             array('id' => 904, 'name' => 'Setting - RV Priority Shipper', 'module_id' => 14),
         ));
 
+        DB::table('activity_trail_actions')->insert(array(
+            array('id' => 737, 'screen_name' => 'RV Priority Shipper', 'action'=> 'View'),
+            array('id' => 738, 'screen_name' => 'RV Priority Shipper', 'action'=> 'Update'),
+          
+        ));
+
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
