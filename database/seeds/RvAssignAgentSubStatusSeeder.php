@@ -12,8 +12,6 @@ class RvAssignAgentSubStatusSeeder extends Seeder
     public function run()
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-
-        DB::table('rv_assign_agent_sub_statuses')->truncate();
         
         DB::table('rv_assign_agent_sub_statuses')->insert(array(
 

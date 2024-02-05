@@ -12,8 +12,6 @@ class BoltUndeliveredReasonMapSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('bolt_undelivered_reason_maps')->truncate();
-
         $data = [
             ['reason_id' => 23, 'status_attempt_count_1' => 7, 'status_attempt_count_2' => 7],
             ['reason_id' => 14, 'status_attempt_count_1' => 7, 'status_attempt_count_2' => 7],
