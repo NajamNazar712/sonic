@@ -27,6 +27,7 @@ class Permission
             'dispute.update.submit' => 3,
             'dispute.shipments.index' => 702,
             'team_lead.index' => 903,
+            'assigned_shipment.index' => 927,
             'accounts.pending' => 5,
             'accounts.pending.ajax' => 5,
             'accounts.active' => 11,

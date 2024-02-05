@@ -24,7 +24,7 @@
                         <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(416, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(927, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}">Rv Assigned Agent Shipments</a></li>
                     @endif
 
