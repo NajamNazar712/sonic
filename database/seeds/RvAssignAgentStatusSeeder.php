@@ -7,7 +7,7 @@ class RvAssignAgentStatusSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return voidp
+     * @return void
      */
     public function run()
     {
