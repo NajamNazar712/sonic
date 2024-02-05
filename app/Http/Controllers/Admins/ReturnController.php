@@ -1827,6 +1827,8 @@ class ReturnController extends Controller
         ];
         $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks', 3 => 'estimation_charges'];
 
+        $already_assigned_shipments = [];
+
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -1934,108 +1936,127 @@ class ReturnController extends Controller
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
 
-                    //return confirm
-                    if($status == 0){ 
-                        if($shipment_details->booking_type_id == 5){
-                            continue;
-                        }
-                        $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                        $shipment_details->consignee_status_id = 20; //Confirmation Pending
-                        NotificationsController::send(15, 0, $shipment_details->id);
-                        NotificationsController::send(16, 0, $shipment_details->id);
-
-                        if ($shipment_details->shipment_type == 1) {
-                            if ($shipment_details->booking_type_id != 4) {
-                                ShipmentChargesController::return($shipment_details->id);
-
-                                if ($shipment_details->packaging_material_request != 1) {
-
-                                    AdminFinanceController::add_payment($shipment_details->id, 1);
-                                }
-                            } else {
-                                ShipmentChargesController::walk_in_return($shipment_details->id);
-
-                                $shipment_details->walk_in_status = 2;
-
-                                AdminFinanceController::done_payment($shipment_details->id, 1);
-                            }
-                        }
-
-                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-
-
-                        //updating rows in RvShipmentAssignAgent as Return Confirm
-                        // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
-                        // if($rcp_assigned_shipment->exists()){
-                        // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
-                        // $this->return_confirm($request);
-                        // }
-                        // $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
-                        $rv_shipment_assign_agent_data = [
-                            'agent_id' => Auth::id(),
-                            'shipment_id' => $shipment_details->id,
-                            'rv_assign_agent_status_id' => 1, //Return Confirm
-                            // 'rv_assign_agent_sub_status_id' => Null, since there is no sub status in excel upload return confirm 
-                            'updated_by_id' =>  Auth::id(),
-                            'remarks' =>  $remarks,
-                        ];
-                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+                    $already_assigned_shipment =  RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_state_id', 1)->latest()->first();
+                    if($already_assigned_shipment){
+                        $already_assigned_shipments[] = $tracking;
                     }
-
-                    // Reattempt
-                    else if($status == 1){
-                        $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
-                        if ($journey) {
-                            if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
-                                $shipment_details->nsa_osa_status = 1;
-                                $shipment_details->save();
-                                ShipmentChargesController::nsa_osa_charges($shipment_details->id);
-
-                                $check = $this->update_estimatecharges($shipment_details->id, $estimation_charges);
-
-                                NotificationsController::send(33, $shipment_details->id);
-                            } else if ($shipment_details->shipper_status_id == 52) {
-                                $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
-
-                                if ($journey && ($journey->status_reason_id == 12)) {
+                    else
+                    {
+                        //return confirm
+                        if($status == 0){ 
+                            if($shipment_details->booking_type_id == 5){
+                                continue;
+                            }
+                            $shipment_details->shipper_status_id = 20; //Confirmation Pending
+                            $shipment_details->consignee_status_id = 20; //Confirmation Pending
+                            NotificationsController::send(15, 0, $shipment_details->id);
+                            NotificationsController::send(16, 0, $shipment_details->id);
+    
+                            if ($shipment_details->shipment_type == 1) {
+                                if ($shipment_details->booking_type_id != 4) {
+                                    ShipmentChargesController::return($shipment_details->id);
+    
+                                    if ($shipment_details->packaging_material_request != 1) {
+    
+                                        AdminFinanceController::add_payment($shipment_details->id, 1);
+                                    }
+                                } else {
+                                    ShipmentChargesController::walk_in_return($shipment_details->id);
+    
+                                    $shipment_details->walk_in_status = 2;
+    
+                                    AdminFinanceController::done_payment($shipment_details->id, 1);
+                                }
+                            }
+    
+                            ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+    
+    
+                            //updating rows in RvShipmentAssignAgent as Return Confirm
+                            // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
+                            // if($rcp_assigned_shipment->exists()){
+                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
+                            // $this->return_confirm($request);
+                            // }
+                            // $rv_assign_agent_sub_status_id = RvAssignAgentSubStatus::where('shipment_status_reason_id', $shipment_history->status_reason_id)->first()->id ?? null;
+                            $rv_shipment_assign_agent_data = [
+                                'agent_id' => Auth::id(),
+                                'shipment_id' => $shipment_details->id,
+                                'rv_assign_agent_status_id' => 1, //Return Confirm
+                                // 'rv_assign_agent_sub_status_id' => Null, since there is no sub status in excel upload return confirm 
+                                'updated_by_id' =>  Auth::id(),
+                                'remarks' =>  $remarks,
+                            ];
+                            $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+                        }
+    
+                        // Reattempt
+                        else if($status == 1){
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+                            if ($journey) {
+                                if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
                                     $shipment_details->nsa_osa_status = 1;
-
                                     $shipment_details->save();
-
                                     ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+    
+                                    $check = $this->update_estimatecharges($shipment_details->id, $estimation_charges);
+    
+                                    NotificationsController::send(33, $shipment_details->id);
+                                } else if ($shipment_details->shipper_status_id == 52) {
+                                    $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+    
+                                    if ($journey && ($journey->status_reason_id == 12)) {
+                                        $shipment_details->nsa_osa_status = 1;
+    
+                                        $shipment_details->save();
+    
+                                        ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+                                    }
                                 }
                             }
+                            $shipment_details->shipper_status_id = 13; //Re-Attempt
+                            $shipment_details->consignee_status_id = 13;
+                            ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+    
+                            //updating rows in RvShipmentAssignAgent as Return Confirm
+                            // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
+                            // if($rcp_assigned_shipment->exists()){
+                            // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
+                            // $this->reattempt($request);
+                            // }
+                            $rv_shipment_assign_agent_data = [
+                                'agent_id' => Auth::id(),
+                                'shipment_id' => $shipment_details->id,
+                                'rv_assign_agent_status_id' => 2, //Reattempt
+                                'updated_by_id' =>  Auth::id(),
+                                'remarks' =>  $remarks,
+                            ];
+                            $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+    
+                            NotificationsController::send(15, 0, $shipment_details->id);
+                            NotificationsController::send(16, 0, $shipment_details->id);
                         }
-                        $shipment_details->shipper_status_id = 13; //Re-Attempt
-                        $shipment_details->consignee_status_id = 13;
-                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-
-                        //updating rows in RvShipmentAssignAgent as Return Confirm
-                        // $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
-                        // if($rcp_assigned_shipment->exists()){
-                        // request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
-                        // $this->reattempt($request);
-                        // }
-                        $rv_shipment_assign_agent_data = [
-                            'agent_id' => Auth::id(),
-                            'shipment_id' => $shipment_details->id,
-                            'rv_assign_agent_status_id' => 2, //Reattempt
-                            'updated_by_id' =>  Auth::id(),
-                            'remarks' =>  $remarks,
-                        ];
-                        $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
-
-                        NotificationsController::send(15, 0, $shipment_details->id);
-                        NotificationsController::send(16, 0, $shipment_details->id);
+                        $shipment_details->save();
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
                     }
-                    $shipment_details->save();
-                    $tracking_numbers['Row #' . $row_id] = $tracking;
+                }// foreach loop ends
+                
+                if(!empty($already_assigned_shipments)){
+                    $assigned_shipments = implode(',', $already_assigned_shipments);
+                    return redirect()->back()->with('error', 'Tracking Numbers Are Not Updated: ' . $assigned_shipments . ' because these are already assigned to agents And Rest Has Been Updated');
                 }
-                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                    return $row . ': ' . $tracking_number;
-                }, array_keys($tracking_numbers), $tracking_numbers));
+                else{
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+    
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                }
+                // $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                //     return $row . ': ' . $tracking_number;
+                // }, array_keys($tracking_numbers), $tracking_numbers));
 
-                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                // return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
             } else {
                 $errors = array_map(function ($row, $errors) {
                     return $row . ':' . PHP_EOL . implode(' | ', $errors);
