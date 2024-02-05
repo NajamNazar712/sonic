@@ -1936,7 +1936,7 @@ class ReturnController extends Controller
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
 
-                    $already_assigned_shipment =  RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_state_id', 1)->latest()->first();
+                    $already_assigned_shipment =  RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_state_id', 1)->where('agent_id', '!=', Auth::id())->latest()->first();
                     if($already_assigned_shipment){
                         $already_assigned_shipments[] = $tracking;
                     }
