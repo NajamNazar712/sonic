@@ -5378,7 +5378,8 @@ class ReturnController extends Controller
                             return abs($item->created_at->diffInSeconds($currentDateTime));
                         })->first();
                         if($shipment->exists()){
-                            if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
+                            // if(($already_assigned_state === null || $already_assigned_state->rv_state_id == 3) && in_array($shipment->destination_city['zone_id'], 
+                            if(($already_assigned_state === null || ($already_assigned_state->rv_state_id == 2 && $already_assigned_state->unresponsive_count == 0)) && in_array($shipment->destination_city['zone_id'], 
                             $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                                 // DB::commit();
                                 $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
@@ -5456,8 +5457,9 @@ class ReturnController extends Controller
                             }
 
                             if($shipment){
-                                // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
-                                if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
+                                // if(($already_assigned_state === null || $already_assigned_state->rv_state_id == 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
+                                // if(($already_assigned_state === null || $already_assigned_state->rv_state_id == 3))
+                                if($already_assigned_state === null || ($already_assigned_state->rv_state_id == 2 && $already_assigned_state->unresponsive_count == 0))
                                 {
                                     // DB::commit();
 
@@ -5746,7 +5748,8 @@ class ReturnController extends Controller
                                     $already_assigned_shipment = null;
                                 }
 
-                                if(($already_assigned_shipment === null) || ($already_assigned_shipment->rv_state_id == 3) || ($already_assigned_shipment->rv_state_id != 1 ))
+                                // if(($already_assigned_shipment === null) || ($already_assigned_shipment->rv_state_id == 3) || ($already_assigned_shipment->rv_state_id != 1 ))
+                                if(($already_assigned_shipment === null) || ($already_assigned_shipment->rv_state_id == 2 && $already_assigned_shipment->unresponsive_count == 0) || ($already_assigned_shipment->rv_state_id != 1 ))
                                 {
                                     $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                                     $data = [
