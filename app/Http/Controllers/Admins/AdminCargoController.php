@@ -476,7 +476,8 @@ class AdminCargoController extends Controller
 
                                     $details['total'] = $shipments->count;
                                 }
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
+                                ShipmentScanningJourneyController::add($shipment->id,2,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 //                            }
 //                            else {
@@ -1951,8 +1952,7 @@ class AdminCargoController extends Controller
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
-
-                        ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
+                        ShipmentScanningJourneyController::add($shipment->id ,3,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                     else {
@@ -2215,7 +2215,7 @@ class AdminCargoController extends Controller
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
+                    ShipmentScanningJourneyController::add($shipment->id,3,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
                 else {

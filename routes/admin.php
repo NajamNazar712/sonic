@@ -969,6 +969,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
         Route::post('confirmed/search', 'Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store', 'Admins\ReturnController@excel_store')->name('excel.store');
         Route::post('excel/assign_agent_excel', 'Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
+        Route::get('fetch/agent', 'Admins\ReturnController@fetch_agent')->name('fetch.agent');
         Route::post('assign/agent', 'Admins\ReturnController@assign_agent')->name('assign.agent');
         Route::post('unassign/agent', 'Admins\ReturnController@unassign_agent')->name('unassign.agent');
         Route::get('/confirmation_pending/sms', 'Admins\ReturnController@confirmation_pending_sms_index')->name('confirmation_pending_sms');
@@ -2373,6 +2374,12 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
         });
 
+        Route::prefix('rv_report')->name('rv_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
+            Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
+            });
+
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
@@ -2384,7 +2391,10 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@ibft_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ibft_report_list')->name('list');
         });
-
+		Route::prefix('rv_action_count_report')->name('rv_action_count_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_action_count_report_index')->name('index');
+            Route::post('', 'Admins\AdminReportsController@fetch_rv_action_count_report')->name('fetch');
+        })
         Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
@@ -2523,9 +2533,14 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('', 'Admins\GlobalSettingsController@non_service_area_store')->name('store');
         });
 
+        Route::prefix('rv_disable_shippers')->name('rv_disable_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rv_disable_shippers_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rv_disable_shippers_store')->name('store');
+        });            
+
         Route::prefix('ticker')->name('ticker.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
+            Route::get('', 'Admins\Settings\GeneralSettingController@ticker_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@ticker_store')->name('store');
         });
 
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
@@ -2681,6 +2696,11 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::get('', 'Admins\GlobalSettingsController@foc_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
+
+        Route::prefix('rv_shipper_priority')->name('rv_shipper_priority.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rv_shipper_priority_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@rv_shipper_priority_store')->name('store');
+            });
 
         Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
@@ -3643,6 +3663,22 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_return_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_return_submit')->name('submit');
         });
+    });
+
+    Route::prefix('team_lead')->name('team_lead.')->group(function () {
+        Route::get('', 'Admins\TeamLeadDashboardController@team_lead_index')->name('index');
+        Route::get('list', 'Admins\TeamLeadDashboardController@team_lead_list')->name('list');
+        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_zone_agent')->name('assign_zone_agent');
+        Route::post('deactivate_staff', 'Admins\TeamLeadDashboardController@deactivate_staff')->name('deactivate_staff');
+        Route::post('activate_staff', 'Admins\TeamLeadDashboardController@activate_staff')->name('activate_staff');
+        Route::post('add_additional_days', 'Admins\TeamLeadDashboardController@add_additional_days')->name('add_additional_days');
+        Route::get('delete_additional_days', 'Admins\TeamLeadDashboardController@delete_additional_days')->name('delete_additional_days');
+        Route::get('get_updated_day', 'Admins\TeamLeadDashboardController@get_updated_day')->name('get_updated_day');
+    });
+    
+    Route::prefix('assigned_shipment')->name('assigned_shipment.')->group(function () {
+        Route::get('', 'Admins\TeamLeadDashboardController@shipment_assign_index')->name('index');
+        Route::get('list', 'Admins\TeamLeadDashboardController@shipment_assign_list')->name('list');
     });
 
     Route::prefix('leads')->name('leads.')->group(function () {

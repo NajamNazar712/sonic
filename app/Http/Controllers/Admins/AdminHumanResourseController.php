@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\ShiftType;
 use Auth;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -81,6 +82,8 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocationDeliveryNote;
+use App\Http\Models\RvAgentAssignHub;
+use App\Http\Models\HR\EducationList;
 use App\Http\Traits\CommonTrait;
 
 class AdminHumanResourseController extends Controller
@@ -232,6 +235,30 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public static function assign_zones_to_user($employee_id)
+    {
+        $cities = City::where('status', '1')
+        ->where('business_category_id', '1')
+        ->get();
+        
+        $admin = Admin::where('employee_id', $employee_id);
+
+        if($admin->exists()){
+            $admin = $admin->first();
+            if($admin->employee->staff_category_id == 3){
+                foreach($cities as $key => $city)
+                {
+                    RvAgentAssignHub::create([
+                        'agent_id'=>$admin->id,
+                        'city_id'=>$city->id,
+                        'zone_id'=>$city->zone_id,
+                        'priority'=>$key+1,
+                    ]);
+                }
+            }
+        }
+    }
+
     public function employee_approve_individual_function(Request $request)
     {
         $employee_id = $request->employee_id;
@@ -277,16 +304,15 @@ class AdminHumanResourseController extends Controller
                 if ($request->has('joining_date_formatted')) {
                     $employee->joining_date = $request->joining_date_formatted;
                 }
-
+                
                 $employee->save();
-
+                
                 if ($employee->employee_type_id == 1) {
-
+                    
                     $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
 
                     if ($admin->doesntExist()) {
                         $admin = new Admin();
-
                         $admin->name = $employee->name;
                         $admin->email = $employee->official_email;
                         $admin->phone_number = $employee->phone_number;
@@ -309,7 +335,10 @@ class AdminHumanResourseController extends Controller
                         $admin->trax_id = $employee->trax_id;
                         $admin->employee_id = $employee->id;
 
+                        
                         $admin->save();
+                        
+                        $this->assign_zones_to_user($employee->id); //asigning hubs to agent rv_agent_assign_hubs
 
                         if (count($employee->designation->hubs) == 0) {
                             $admin_hub = new AdminHub();
@@ -454,7 +483,8 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('employee_marital_statuses as ems', 'ems.id', '=', 'employees.marital_status_id')
             ->leftjoin('employee_shifts as ess', 'ess.id', '=', 'employees.shift_id')
 			->leftjoin('city_areas as ca', 'ca.id', '=', 'employees.area_id')
-            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd', 
+            ->leftjoin('education_lists as el','el.id','=','employees.education_id')
+            ->select(['employees.official_phone_number as official_phone_number','r.name as check_if_rider_present_bit','r.ccd as ccd',
             'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 
             'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 
             'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 
@@ -465,9 +495,9 @@ class AdminHumanResourseController extends Controller
             'rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id','eb.iban as iban', 
             'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount','employees.is_line_manager','lm.name as line_manager','employees.line_manager_id',
             'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name',
-            'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth',
+            'employees.confirmation_status','employees.old_trax_id as old_trax_id','employees.remarks as remarks','employees.date_of_birth as date_of_birth','employees.cnic_issue_date' ,'employees.cnic_expiry_date',
             'employees.emergency_contact_person as emergency_contact_person','employees.emergency_contact as emergency_contact','er.name as religion', 'ems.name as martial_status', 
-            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name'])
+            'ess.start_time as start_time', 'ess.end_time as end_time','ca.id as area_id','ca.name as area', 'employees.sub_department as sub_department_name', 'employees.mother_name','el.name as education_name'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -626,8 +656,8 @@ class AdminHumanResourseController extends Controller
 
                         }
                     }
-                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) { // employee request status should be approved and should be staff not rider
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) { //employee should be active state and sould contain admin role
                             $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                             
                             if ($result->staff_category_id == 1) {
@@ -754,7 +784,7 @@ class AdminHumanResourseController extends Controller
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
                     $admin->dummy_pin = $employee->pin;
-                    $admin->updated_by = Auth::id();
+                    //$admin->updated_by = Auth::id();
                     $admin->update();
                 }
             } else {
@@ -1166,7 +1196,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_approve(Request $request)
-    {
+    {  
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
@@ -1206,6 +1236,7 @@ class AdminHumanResourseController extends Controller
                     if($employee->staff_category_id == 3){
                         $employee->status_id = 3; // Set "Active No info" when contractual
                         $employee->confirmation_status = 2; //Set probation intially
+
                     }
                     $employee->save();
 
@@ -1367,6 +1398,7 @@ class AdminHumanResourseController extends Controller
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
+        $education_list = EducationList::select('id','name')->where('status',1)->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
   		 $areas_list = CityArea::where('city_id',$employee->city_id)->where('status',1)->get();
            $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
@@ -1375,7 +1407,7 @@ class AdminHumanResourseController extends Controller
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
-        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','intended_url','areas_list'));
+        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','intended_url','areas_list','education_list'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
@@ -1390,6 +1422,7 @@ class AdminHumanResourseController extends Controller
             'email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
             'personal_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
             'official_email' => 'bail|nullable|' . Rule::unique('employees', 'personal_email')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_email')->ignore($employee->id) . '',
+            'education_id' => 'bail|required|integer|digits_between:1,10|exists:education_lists,id'
         ]);
 
         $super_admins = [3, 5, 7, 665];
@@ -1425,6 +1458,7 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+        $employee->education_id=$request->education_id;
         if ($role_flag == true) {
             if ($designation_toggle_val == 'true') {
                 if ($employee->designation_id != $request->designation) {
@@ -1531,7 +1565,7 @@ class AdminHumanResourseController extends Controller
                 $admin->default_hub_id = $employee->city->hub_city->id;
                 $admin->password = bcrypt($employee->pin);
                 $admin->dummy_pin = $employee->pin;
-                $admin->updated_by = Auth::id();
+                //$admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
                 $admin->area_id = $employee->area_id;
                 $admin->update();
@@ -3161,7 +3195,9 @@ class AdminHumanResourseController extends Controller
     public function employee_shift_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 433);
-        return view('admin.human_resource.employee_shift');
+
+        $shifts = ShiftType::all();
+        return view('admin.human_resource.employee_shift')->with(['shifts'=>$shifts]);
     }
 
     public function employee_shift_list(Request $request)
@@ -3171,6 +3207,7 @@ class AdminHumanResourseController extends Controller
         }
 
         $shifts = EmployeeShift::all();
+    
         return Datatables::of($shifts)
             ->editColumn('status', function ($data) {
                 if ($data->status == 0) {
@@ -3179,6 +3216,7 @@ class AdminHumanResourseController extends Controller
                     return 'Active';
                 }
             })
+    
             ->editColumn('start_time_formatted', function ($data) {
                 return Carbon::parse($data->start_time)->format("g:i A");
             })
@@ -3235,6 +3273,7 @@ class AdminHumanResourseController extends Controller
         $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
         $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
         $shift->extension_minutes = $request->extension_minutes;
+        $shift->shift_type_id = $request->shift_select;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Added Successfully!');
     }
@@ -3246,6 +3285,7 @@ class AdminHumanResourseController extends Controller
         $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
         $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
         $shift->extension_minutes = $request->extension_minutes;
+        $shift->shift_type_id = $request->shift_select;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Updated Successfully!');
     }
@@ -5274,12 +5314,15 @@ class AdminHumanResourseController extends Controller
                     }
                     $employee->staff_category_id = 3;
                     $employee->trax_id = $trax_id;
+                    $employee->shift_id = 8; //Contractual Shift A update into employees table
                     $employee->save();
 
                     $admin->trax_id = $employee->trax_id;
                     $admin->save();
 
                     $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
+                    $this->assign_zones_to_user($request->employee_id);
 
                     return response()->json(['status' => 0, 'success' => 'Staff Converted To Contractual Successfully']);
                 }
@@ -5322,6 +5365,8 @@ class AdminHumanResourseController extends Controller
                 else if ($employee->staff_category_id == 3) { //For contractual into staff
                     $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                     $trax_id_prefix = 'Trax';
+
+
                     if ($global_setting->exists()) {
                         $global_setting = $global_setting->first();
                         $trax_id = $global_setting->setting_value + 1;

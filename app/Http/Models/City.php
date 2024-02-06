@@ -32,6 +32,10 @@ class City extends Model
     public function admins(){
         return $this->hasMany('App\Http\Models\Admin\Admin');
     }
+
+    public function responsible_admins(){
+        return $this->hasMany('App\Http\Models\Admin\Admin','default_hub_id','id');
+    }
     public function disputes(){
         return $this->hasMany('App\Http\Models\Dispute');
     }
@@ -43,4 +47,8 @@ class City extends Model
     public function zone() {
        return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
     }
+    public function agentAssignHub() {
+        return $this->hasMany('App\Http\Models\RvAgentAssignHub');
+    }
+
 }
