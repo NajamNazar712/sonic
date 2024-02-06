@@ -15,7 +15,7 @@ class PermissionForLogisticReportSettingSeeder extends Seeder
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert([
-            ['id' => 928, 'name' => 'Logistic Setting - View', 'module_id' => 14],
+            ['id' => 932, 'name' => 'Logistic Setting - View', 'module_id' => 14],
         ]);
 
         // if new screen or excel
@@ -31,7 +31,7 @@ class PermissionForLogisticReportSettingSeeder extends Seeder
                 'updated_at' => $timestamp,
                 'name' => 'Setting > Shippers > Logistic Report Setting',
                 'url' => 'admin.settings.logistic_report.index',
-                'permission_id' => 928
+                'permission_id' => 932
             ],
         ]);
     }

@@ -1418,7 +1418,7 @@ class Permission
             'reports.operations_performance.index' => 892,
             'reports.operations_performance.export_to_excel' => 892,
             'settings.parcel_value_bypass.index' => 910,
-            'settings.logistic_report.index' =>928,
+            'settings.logistic_report.index' =>932,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
