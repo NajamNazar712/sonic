@@ -3571,12 +3571,42 @@ class RiderAPIController extends Controller
             $rider_pickups = ShipmentsJourney::leftjoin('shipments_journey as sq', function ($query) {
                 $query->on('sq.shipment_id', '=', 'shipments_journey.shipment_id')
                     ->where('sq.shipper_status_id', 2);
-            })->where('shipments_journey.shipper_status_id', 53)->where('shipments_journey.rider_id', $rider_id)
-                ->select(DB::raw('COUNT(sj.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment'))
+            })->where('shipments_journey.shipper_status_id', 53)
+                ->where('shipments_journey.rider_id', $rider_id)
+                ->whereBetween('shipments_journey.created_at', [$from_date . ' 00:00:01', $to_date . ' 23:59:59'])
+                ->select(DB::raw('COUNT(shipments_journey.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment'))
                 ->groupBy('shipments_journey.rider_id');
             if ($rider_pickups->exists()) {
                 $rider_pickups = $rider_pickups->get();
                 return response()->json(["status" => 0, "pickups" => $rider_pickups]);
+            }
+            return response()->json(["status" => 1, "message" => "No pickups found!"]);
+        }
+    }
+    public function history_details_v3(Request $request)
+    {
+
+        $rider_id  = $request->rider_id;
+        $from_date = $request->get('from_date');
+        $to_date = $request->get('to_date');
+        if ($from_date == null && $to_date == null) {
+            return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
+        } else {
+
+            $pickup_history_details = Shipment::join('users as u', 'u.id', '=', 'shipments.user_id')
+                ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                ->leftjoin('shipments_journey as sq', function ($query) {
+                    $query->on('sq.shipment_id', '=', 'sj.shipment_id')
+                        ->where('sq.shipper_status_id', 2);
+                })->where('sj.shipper_status_id', 53)->where('sj.rider_id', $rider_id)
+                ->whereBetween('sj.created_at', [$from_date . ' 00:00:01', $to_date . ' 23:59:59'])
+                ->select('u.id as shipper_id', 'u.name as shipper_name', DB::raw('COUNT(sj.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment'))
+                ->groupBy('u.id', 'u.name');
+
+
+            if ($pickup_history_details->exists()) {
+                $pickup_history_details = $pickup_history_details->get();
+                return response()->json(["status" => 0, "pickup_history_details" => $pickup_history_details]);
             }
             return response()->json(["status" => 1, "message" => "No pickups found!"]);
         }
