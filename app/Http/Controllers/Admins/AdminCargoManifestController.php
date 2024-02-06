@@ -4255,6 +4255,12 @@ class AdminCargoManifestController extends Controller
         return view('admin.cargo.manifest.receive_shipments');
     }
 
+    public function receive_bag_shipments_index_old()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 411);
+        return view('admin.cargo.manifest.receive_shipments_old');
+    }
+
     public function receive_bag_shipments_details(Request $request)// receive normal bag shipment
     {
 
