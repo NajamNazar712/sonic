@@ -391,8 +391,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('mms')->name('mms.')->group(function () {
             Route::get('', 'Shippers\ShipperReportsController@mms_index')->name('index');
             Route::post('list', 'Shippers\ShipperReportsController@mms_list')->name('list');
-
-
         });
         Route::prefix('special_dashboard')->name('special_dashboard.')->group(function () {
             Route::get('mms', 'Shippers\ShipperReportsController@special_dashboard_mms_index')->name('index');
@@ -406,13 +404,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('scanned_shipments', 'Shippers\ShipperReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
             Route::post('arrived_shipments', 'Shippers\ShipperReportsController@rider_pickup_arrived_shipments')->name('arrived_shipments');
             Route::post('without_scan_shipments', 'Shippers\ShipperReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
-
         });
         Route::prefix('project_arrival')->name('project_arrival.')->group(function () {
             Route::get('', 'Shippers\ShipperReportsController@project_arrival_index')->name('index');
             Route::get('list', 'Shippers\ShipperReportsController@project_arrival_list')->name('list');
         });
-
     });
 
     Route::prefix('rates')->name('rates.')->group(function () {
@@ -588,6 +584,30 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('nps_skip', 'Shippers\NpsSurveyShipperController@nps_skip')->name('nps_skip');
     });
 });
+
+Route::prefix('agent')->name('agent.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('agent.login');
+    });
+
+    Route::get('/login', 'Auth\AgentLoginController@showLoginForm')->name('login');
+    Route::post('/login', 'Auth\AgentLoginController@login')->name('login.submit');
+    Route::get('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/credentials', 'Auth\AgentLoginController@credentials')->name('login.credentials');
+    Route::post('/verify_otp', 'Auth\AgentLoginController@verify_otp')->name('login.verify_otp');
+
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('', 'Agent\ReturnV2Controller@index')->name('index');
+        Route::post('get_shipment_reason', 'Agent\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
+        Route::post('get_ticket', 'Agent\ReturnV2Controller@get_ticket')->name('get_ticket');
+        Route::get('intercepted_shipment', 'Agent\ReturnV2Controller@get_intercepted_shipment')->name('get_intercepted_shipment');
+        Route::post('submit', 'Agent\ReturnV2Controller@submit_ticket')->name('submit_ticket');
+    });
+    Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
+});
+
 //For Admin Routes
 require __DIR__ . '/admin.php';
 

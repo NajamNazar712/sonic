@@ -140,7 +140,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-        
+
         $information_display = self::information_display_check($user_id);
 
         $shipment = new Shipment();
@@ -1082,7 +1082,7 @@ class ShipperShipmentBookController extends Controller
             $sub_shipper = SubstituteUser::where('user_id', $user_id)->where('id', Auth::id())->select('name')->first();
             $user_name = $sub_shipper->name . ' (Sub-Shipper)';
         } else if ($user_type == 4) {
-            
+
             $user_name = User::find($user_id)->name . ' (API)';
         } else {
             $user_name = 'Unknown';
@@ -1886,7 +1886,7 @@ class ShipperShipmentBookController extends Controller
                         }
                         $shipment_type .= ' <td colspan="4" class="border twice-top twice-bottom twice-right prominent">'. $service_type .'</td>';
 
-                    } 
+                    }
                     else if ($shipment->booking_type_id == 2) {
                         if ($type != 'pdf') {
                             $shipment_type .= '<td  colspan="4" class="replacement border twice-top twice-bottom twice-right prominent"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
@@ -1900,11 +1900,11 @@ class ShipperShipmentBookController extends Controller
 
                     if ($shipment->business_category->id == 1) {
                             $shipment_mode .= '<td colspan="2" class="border twice-top twice-bottom twice-right prominent">' . $shipment->shipping_mode->mode . '</td>';
-                    } 
+                    }
                     else {
                             $shipment_mode .= '<td colspan="2" class="border twice-top twice-bottom twice-right prominent">International</td>';
                     }
-                    //HERE 
+                    //HERE
                     $table_end .= '
                     <tr>
                         <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-right"><strong>Shipping Mode</strong></td>
@@ -1914,7 +1914,7 @@ class ShipperShipmentBookController extends Controller
                     </tr>
                     
                     ';
-                    
+
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_end .= '
                               </tr>
@@ -2547,15 +2547,15 @@ class ShipperShipmentBookController extends Controller
                                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                                   </div>';
                                 }
-                                
+
                             }
-                            
+
                             //delivery location watermark end
 
-                            
+
                             //receiving_sheet_print
                             if($print_status == 1){
-                                
+
                                 if($page_break){
                                     $shipment_details .= '
                                     <div id="watermark_" class="watermark_">
@@ -2593,7 +2593,7 @@ class ShipperShipmentBookController extends Controller
                                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                                   </div>';
                                 }
-                                
+
                             }
             }
             if ($user_type == 3) {
@@ -2611,7 +2611,7 @@ class ShipperShipmentBookController extends Controller
             $shipment_details = '';
             //a
             // $overall_shipment_details .=$delivery_area_watermark;
-            
+
         }
 
         $html .= $overall_shipment_details;
@@ -2630,7 +2630,7 @@ class ShipperShipmentBookController extends Controller
                 </script>
                 ';
             }
-            
+
 
             if ($watermark_flag) {
 
@@ -3122,7 +3122,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
-            $spreadsheet[1][1] = 'Yes'; //Added Forcefully yes while the shipper insert no, 
+            $spreadsheet[1][1] = 'Yes'; //Added Forcefully yes while the shipper insert no,
             $excel_type = $request->excel_type;
 
             $column_count = null;
@@ -3182,7 +3182,7 @@ class ShipperShipmentBookController extends Controller
             }
             unset($spreadsheet[0]);
         }
-     
+
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
             $rows = array();
 
@@ -3475,7 +3475,7 @@ class ShipperShipmentBookController extends Controller
                         };
                         if(!$request->excel_bdmk) {
                             $bdmk_result[$row_id] = $this->check_bdmk($consignee_city->id, $row['consignee_address'], $check_bdmk);
-//                        dd($bdmk_result[$row_id]);
+
                             if (isset($bdmk_result[$row_id]['invalid_cities'])) {
                                 $bdmk_error[$row_id]['msg'] = $bdmk_result[$row_id]['invalid_cities'];
                             }
@@ -3601,10 +3601,10 @@ class ShipperShipmentBookController extends Controller
                                         $row['amount'] = 0;
                                     }
                                 }
-                                if ($user_id != 3324) {
-                                    dispatch(new ProcessShipmentBookingDB($row));
-                                } else {
+                                if (in_array($user_id, [32722, 3324])) {
                                     dispatch(new ProcessShipmentBookingDBPriority($row));
+                                } else {
+                                    dispatch(new ProcessShipmentBookingDB($row));
                                 }
                             }
 
@@ -3666,7 +3666,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
-        
+
         $information_display = self::information_display_check($user_id);
 
         $shipment = new Shipment();
@@ -5713,10 +5713,10 @@ class ShipperShipmentBookController extends Controller
                                 if ($row['payment_mode_id'] == 4) {
                                     $row['amount'] = 0;
                                 }
-                                if ($user_id != 3324) {
-                                    dispatch(new ProcessShipmentBookingDB($row));
-                                } else {
+                                if (in_array($user_id, [32722, 3324])) {
                                     dispatch(new ProcessShipmentBookingDBPriority($row));
+                                } else {
+                                    dispatch(new ProcessShipmentBookingDB($row));
                                 }
                             }
 
@@ -7381,10 +7381,10 @@ class ShipperShipmentBookController extends Controller
                                 $row['amount'] = 0;
                             }
 
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            } else {
+                            if (in_array($user_id, [32722, 3324])) {
                                 dispatch(new ProcessShipmentBookingDBPriority($row));
+                            } else {
+                                dispatch(new ProcessShipmentBookingDB($row));
                             }
                         }
 

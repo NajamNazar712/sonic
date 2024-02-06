@@ -323,12 +323,6 @@ class AdminShipmentHandoverController extends Controller
                   DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
               );
       })
-      ->leftJoin('shipment_scanning_journey_area_logs as ssjal', function ($join) {
-        $join->on('ssjal.shipment_id', '=', 's.id')
-             ->where('ssjal.id', '=', DB::raw('(SELECT MAX(id) FROM shipment_scanning_journey_area_logs WHERE shipment_scanning_journey_area_logs.shipment_id = s.id)'));
-      })
-    
-        ->leftjoin('shipment_scanning_journey_area_logs', 'ssjal.id', '=', 'shipment_scanning_journey_area_logs.shipment_scanning_journey_id')
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
@@ -399,179 +393,7 @@ class AdminShipmentHandoverController extends Controller
           } else {
               return '-';
           }
-          })
-        
-          ->editColumn('created_location_status', function ($shipment) {
-            $time = $shipment->created_at;
-            $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
-            if($shipment_handover->exists()){
-              $shipment_handover = $shipment_handover->first();
-              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
-              ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-              
-              if ($scanning_status->exists()) {
-                $scanning_status = $scanning_status->first();
-                $area_log = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_status->id);
-            
-                if ($area_log->exists()) {
-                    $area_log = $area_log->first();
-                    $location_status = $area_log->location_status;
-                    return $location_status == 1 ? 'On-site' : 'Off-site';
-                } else {
-                  return '-';
-                }
-              } else {
-                  return '-';
-              }
-            }else {
-              return '-';
-            }
-          })
-
-        ->editColumn('created_latitude', function ($shipment) {
-            $time = $shipment->created_at;
-            $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
-            if($shipment_handover->exists()){
-              $shipment_handover = $shipment_handover->first();
-              $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
-              ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-  
-              if($scanning_status->exists()){
-                $scanning_status = $scanning_status->first() ?? null;
-                return $scanning_status->latitude ?? '-';
-              }else{
-                return '-';
-              }
-            }else{
-              return '-';
-            }
-         
-        })
-
-        ->editColumn('created_longitude', function ($shipment) {
-          $time = $shipment->created_at;
-          $shipment_handover = HandoverShipmentsJourney::where(['handover_id' => $shipment->handover_id, 'status' => 1]);
-          if($shipment_handover->exists()){
-            $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '26', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->created_by_id])
-            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-  
-            if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first() ?? null;
-              return $scanning_status->longitude ?? '-';
-            }else{
-              return '-';
-            }
-          }else{
-            return '-';
-          }
-         
-        }) 
-        ->editColumn('received_location_status', function ($shipment) {
-          $time = $shipment->received_at;
-          $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
-
-          if($shipment_handover->exists()){
-            $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
-            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-
-            if($scanning_status->exists()) {
-              $scanning_status = $scanning_status->first();
-              $area_log = ShipmentScanningJourneyAreaLog::where('shipment_scanning_journey_id', $scanning_status->id);
-          
-              if ($area_log->exists()) {
-                  $area_log = $area_log->first();
-                  $location_status = $area_log->location_status ?? '-';
-                  return $location_status == 1 ? 'On-site' : 'Off-site';
-                }else {
-                  return '-';
-              }  
-            } else {
-                return '-';
-            }
-          }else{
-            return '-';
-          }
-        })
-
-      ->editColumn('received_latitude', function ($shipment) {
-          $time = $shipment->received_at;
-          $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
-          if($shipment_handover->exists()){
-            $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
-            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-
-            if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first() ?? null;
-              return $scanning_status->latitude ?? '-';
-            }else{
-              return '-';
-            }
-          }else{
-            return '-';
-          }
-      })
-
-      ->editColumn('received_longitude', function ($shipment) {
-        $time = $shipment->received_at;
-        $shipment_handover = HandoverShipmentsJourney::where(['handover_id'=> $shipment->handover_id, 'status'=> 2]);
-        if($shipment_handover->exists()){
-            $shipment_handover = $shipment_handover->first();
-            $scanning_status = ShipmentScanningJourney::where(['screen_location_id' => '27', 'shipment_id' => $shipment_handover->shipment_id,'admin_id'=> $shipment->received_by_id])
-            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, ?))', [$time]);
-            if($scanning_status->exists()){
-              $scanning_status = $scanning_status->first() ?? null;
-              return $scanning_status->longitude ?? '-';
-            }else{
-              return '-';
-            }
-        }else{
-          return '-';
-        }
-      })->editColumn('status_area_city', function ($shipment) {
-        if(in_array($shipment->shipper_status_id, [2,3,4,5,11,23,53])){
-            $shipment_scanning_query = ShipmentScanningJourney::leftJoin('shipments_journey as sj', function ($join) use ($shipment) {
-                $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                     ->where('sj.id', '=', $shipment->journey_latest_id);
-            })
-            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-            ->orderByRaw('ABS(TIMESTAMPDIFF(SECOND, shipment_scanning_journeys.updated_at, ?))', [$shipment->journey_latest_updated_at])
-            ->select('ssjal.location_status','shipment_scanning_journeys.latitude','shipment_scanning_journeys.longitude', 'ssjal.area_id','shipment_scanning_journeys.created_at','ssjal.hub_id');     
-            //check for cases
-            switch ($shipment->latest_shipper_status_id) {
-                case 2:
-                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                    break;
-                case 3:
-                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                    break;
-                case 4:
-                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                    break;
-                case 5:
-                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                    break;
-                case 11:
-                    $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                    break;
-                case 23:
-                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                    break;
-                case 53:
-                    $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                    break;
-                default:
-                    $scanning_data = null;
-                    break;
-                    
-                }
-            return CityArea::where('id',$scanning_data['area_id'])->first()->name ??  City::where('id',$scanning_data['hub_id'])->first()->name ?? '-';
-        }else{
-            return '-';
-        }            
-    });
+          });
 
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->where('s.tracking_number', '=', $tracking_number);
@@ -587,14 +409,6 @@ class AdminShipmentHandoverController extends Controller
 
         if ($to_admin = $request->get('search_to_admin')) {
             $datatable->where('handovers.to', '=', $to_admin);
-        }
-
-        if ($search_concerned_status_area = $request->get('search_concerned_status_area')) {
-          $datatable->where('ssjal.area_id', '=', $search_concerned_status_area)->whereIn('s.shipper_status_id',[2,3,4,5,11,23,53]);
-        }
-
-        if ($search_concerned_status_hub = $request->get('search_concerned_status_hub')) {
-            $datatable->where('ssjal.hub_id', '=', $search_concerned_status_hub)->whereIn('s.shipper_status_id',[2,3,4,5,11,23,53]);
         }
   
         return  $datatable->make(true);
