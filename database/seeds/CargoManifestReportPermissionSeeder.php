@@ -18,8 +18,8 @@ class CargoManifestReportPermissionSeeder extends Seeder
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 732, 'screen_name' => 'Cargo Manifest Report', 'action' => 'View'),
         ));
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Cargo Manifest Report', 'url' => 'admin.reports.cargo_manifest.index', 'permission_id' => 925),
-        ));
+        //DB::table('admins_screen_list')->insert(array(
+        //    array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Cargo Manifest Report', 'url' => 'admin.reports.cargo_manifest.index', 'permission_id' => 925),
+        //));
     }
 }
