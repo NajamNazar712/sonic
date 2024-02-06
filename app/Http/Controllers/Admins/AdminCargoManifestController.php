@@ -4561,6 +4561,97 @@ class AdminCargoManifestController extends Controller
         }
     }
 
+    public function receive_bag_shipment_details_old(Request $request)
+    {
+
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+            if (!$dispute_check) {
+                return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+            }
+
+            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21 && $shipment->shipper_status_id != 26 && $shipment->shipper_status_id != 32 && $shipment->shipper_status_id != 49) {
+                return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
+            }
+            $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+
+            if ($bag_shipment->exists()) {
+                $bag_shipment = $bag_shipment->where('status', 0);
+
+                if ($bag_shipment->exists()) {
+                    $bag_shipment = $bag_shipment->latest()->first();
+                    $bag = $bag_shipment->bag;
+                    if ($bag) {
+
+                        if ($bag->type != $request->bag_type) {
+                            return ['status' => 1, 'error' => 'Shipment bag type is not same as selected bag type'];
+                        }
+
+                        $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
+                        if (!$cargo_manifest_bag) {
+                            return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
+                        }
+                    }
+
+                    if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
+                        return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
+                    }
+
+                    if (!$request->has('pieces_confirm')) {
+                        if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                            $details = array();
+                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                            $details['id'] = $shipment->id;
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['pieces_count'] = $shipment->pieces;
+                            $details['pieces_tracking_numbers'] = $shipment_pieces;
+                            ShipmentScanningJourneyController::add($shipment->id,20,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                            return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                        }
+                    }
+                    $details = array();
+
+                    $details['id'] = $shipment->id;
+                    $details['tracking_number'] = $shipment->tracking_number;
+                    $details['bag_number'] = $bag->seal_number;
+
+                    if ($shipment->shipper_status_id == 21) {
+                        $details['origin'] = $shipment->consignee_city->name;
+                        if ($shipment->return_address_id != NULL) {
+                            $details['destination'] = $shipment->return_address->city->name;
+                            $details['hub'] = $shipment->return_address->city->hub_city->name;
+                        } else {
+                            $details['destination'] = $shipment->pickup_address->city->name;
+                            $details['hub'] = $shipment->pickup_address->city->hub_city->name;
+                        }
+                    } else {
+                        $details['origin'] = $shipment->pickup_address->city->name;
+                        $details['destination'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    }
+
+                    $details['consignee'] = $shipment->consignee_name;
+                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                    $details['amount'] = number_format($shipment->amount);
+                    $details['service_type'] = $shipment->booking_type->booking_type;
+                    ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                    return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
+                } else {
+                    return ['status' => 1, 'error' => 'Given Bag Number\'s has already been Received'];
+                }
+            } else {
+                return ['status' => 1, 'error' => 'Given Tracking Number is not in any Bag'];
+            }
+        } else {
+            return ['status' => 1, 'error' => 'Invalid Tracking Number'];
+        }
+    }
+
     public  function receive_bag_shipments_details_return(Request $request)// receive return bag shipment
     {
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
