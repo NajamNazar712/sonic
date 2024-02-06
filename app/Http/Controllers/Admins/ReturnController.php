@@ -229,9 +229,6 @@ class ReturnController extends Controller
 
     public function return_view()
     {
-        if(session('id') !== 6){
-            return view('errors.404');
-        }
 //        ActivityTrailController::createActivityTrailLog(Auth::id(), 26);
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
