@@ -49,228 +49,228 @@
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 <div class="row justify-content-center" >
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-clock text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="total_sar" class="d-inline">
-                                                    {{ ($total_of_shipments) }}</p>
-                                                {{-- ({{ round($percentage_total_of_shipment) }}%) --}}
-                                            </h3>
-                                            <span>Total Of Shipments</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-3" id="search_rvr_div">
-                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-grid text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="total_rvr" class="d-inline">
-                                                    {{ count($reason_validation_required) }}</p>
-                                                ({{ round($percantage_reason_validation_required) }}%)
-                                            </h3>
-                                            <span>Reason Validation Required </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{{--                    <div class="col-3">--}}
+{{--                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="icon-clock text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="total_sar" class="d-inline">--}}
+{{--                                                    {{ ($total_of_shipments) }}</p>--}}
+{{--                                                --}}{{-- ({{ round($percentage_total_of_shipment) }}%) --}}
+{{--                                            </h3>--}}
+{{--                                            <span>Total Of Shipments</span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                    --}}
+{{--                    <div class="col-3" id="search_rvr_div">--}}
+{{--                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="icon-grid text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="total_rvr" class="d-inline">--}}
+{{--                                                    {{ count($reason_validation_required) }}</p>--}}
+{{--                                                ({{ round($percantage_reason_validation_required) }}%)--}}
+{{--                                            </h3>--}}
+{{--                                            <span>Reason Validation Required </span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
 
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-flag text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="total_sar" class="d-inline">
-                                                    {{ count($shipper_advised_requested) }}</p>
-                                                ({{ round($percentage_shipper_advised_requested) }}%)
-                                            </h3>
-                                            <span>Shipper Advised Requested </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{{--                    <div class="col-3">--}}
+{{--                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="icon-flag text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="total_sar" class="d-inline">--}}
+{{--                                                    {{ count($shipper_advised_requested) }}</p>--}}
+{{--                                                ({{ round($percentage_shipper_advised_requested) }}%)--}}
+{{--                                            </h3>--}}
+{{--                                            <span>Shipper Advised Requested </span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                    
 
-                    <div class="col-3">
-                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="la la-calculator text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="total_sar" class="d-inline">
-                                                    {{ count($unresponsive_count) }}</p>
-                                               
-                                            </h3>
-                                            <span>Unresponsive Count</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-3" >
-                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-clock text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p
-                                                    id="in_process_percentage" class="d-inline">
-                                                    {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)
-                                            </h3>
-                                            <span>Pending Tickets</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{{--                    <div class="col-3">--}}
+{{--                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="total_sar" class="d-inline">--}}
+{{--                                                    {{ count($unresponsive_count) }}</p>--}}
 
-                    <div class="col-3" >
-                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
-                            <div class="card-content">
-                                <div class="card-body">
-                                    <div class="media d-flex">
-                                        <div class="align-self-center">
-                                            <i class="icon-check text-white font-large-2 float-left"></i>
-                                        </div>
-                                        <div class="media-body text-white text-right">
-                                            <h3 class="text-white">
-                                                <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (
-                                                <p id="in_process_for_activation_percentage" class="d-inline">
-                                                    {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>
-                                                %)
-                                            </h3>
-                                            <span>No. of Inprocess Ticket</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{{--                                            </h3>--}}
+{{--                                            <span>Unresponsive Count</span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-flag text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <p id="online_agents" class="d-inline">{{ count($online_agents) }}</p>
-                                                    <p id="number_of_available_agents" class="d-inline">({{ count($number_of_available_agents) }})</p>
-                                                </h3>
-                                                <span>Online/ Available Agents </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                    <div class="col-3" >--}}
+{{--                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="icon-clock text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p--}}
+{{--                                                    id="in_process_percentage" class="d-inline">--}}
+{{--                                                    {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)--}}
+{{--                                            </h3>--}}
+{{--                                            <span>Pending Tickets</span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">
-                                                        {{ $average_aging > 24 ? (round($average_aging / 60, 2)) . ' days' : round($average_aging, 2) . ' hrs' }}
-                                                    </p>                                                    
-                                                </h3>
-                                                <span>Average Aging.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                    <div class="col-3" >--}}
+{{--                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">--}}
+{{--                            <div class="card-content">--}}
+{{--                                <div class="card-body">--}}
+{{--                                    <div class="media d-flex">--}}
+{{--                                        <div class="align-self-center">--}}
+{{--                                            <i class="icon-check text-white font-large-2 float-left"></i>--}}
+{{--                                        </div>--}}
+{{--                                        <div class="media-body text-white text-right">--}}
+{{--                                            <h3 class="text-white">--}}
+{{--                                                <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (--}}
+{{--                                                <p id="in_process_for_activation_percentage" class="d-inline">--}}
+{{--                                                    {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>--}}
+{{--                                                %)--}}
+{{--                                            </h3>--}}
+{{--                                            <span>No. of Inprocess Ticket</span>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">
-                                                        {{ $average_response_time > 24 ? (round($average_response_time / 60, 2)) . ' days' : round($average_response_time, 2) . ' hrs' }}
-                                                    </p>
-                                                                                                        
-                                                </h3>
-                                                <span>Average Response Time.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                        <div class="col-3" >--}}
+{{--                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">--}}
+{{--                                <div class="card-content">--}}
+{{--                                    <div class="card-body">--}}
+{{--                                        <div class="media d-flex">--}}
+{{--                                            <div class="align-self-center">--}}
+{{--                                                <i class="icon-flag text-white font-large-2 float-left"></i>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="media-body text-white text-right">--}}
+{{--                                                <h3 class="text-white">--}}
+{{--                                                    <p id="online_agents" class="d-inline">{{ count($online_agents) }}</p>--}}
+{{--                                                    <p id="number_of_available_agents" class="d-inline">({{ count($number_of_available_agents) }})</p>--}}
+{{--                                                </h3>--}}
+{{--                                                <span>Online/ Available Agents </span>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <p id="dead_leads" class="d-inline">{{ $oldest_shipments }} </p>
-                                                    
-                                                </h3>
-                                                <span>Oldest Shipment Count.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                        <div class="col-3" >--}}
+{{--                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">--}}
+{{--                                <div class="card-content">--}}
+{{--                                    <div class="card-body">--}}
+{{--                                        <div class="media d-flex">--}}
+{{--                                            <div class="align-self-center">--}}
+{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="media-body text-white text-right">--}}
+{{--                                                <h3 class="text-white">--}}
+{{--                                                    <p id="dead_leads" class="d-inline">--}}
+{{--                                                        {{ $average_aging > 24 ? (round($average_aging / 60, 2)) . ' days' : round($average_aging, 2) . ' hrs' }}--}}
+{{--                                                    </p>--}}
+{{--                                                </h3>--}}
+{{--                                                <span>Average Aging.</span>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+
+{{--                        <div class="col-3" >--}}
+{{--                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">--}}
+{{--                                <div class="card-content">--}}
+{{--                                    <div class="card-body">--}}
+{{--                                        <div class="media d-flex">--}}
+{{--                                            <div class="align-self-center">--}}
+{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="media-body text-white text-right">--}}
+{{--                                                <h3 class="text-white">--}}
+{{--                                                    <p id="dead_leads" class="d-inline">--}}
+{{--                                                        {{ $average_response_time > 24 ? (round($average_response_time / 60, 2)) . ' days' : round($average_response_time, 2) . ' hrs' }}--}}
+{{--                                                    </p>--}}
+
+{{--                                                </h3>--}}
+{{--                                                <span>Average Response Time.</span>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+
+{{--                        <div class="col-3" >--}}
+{{--                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">--}}
+{{--                                <div class="card-content">--}}
+{{--                                    <div class="card-body">--}}
+{{--                                        <div class="media d-flex">--}}
+{{--                                            <div class="align-self-center">--}}
+{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="media-body text-white text-right">--}}
+{{--                                                <h3 class="text-white">--}}
+{{--                                                    <p id="dead_leads" class="d-inline">{{ $oldest_shipments }} </p>--}}
+
+{{--                                                </h3>--}}
+{{--                                                <span>Oldest Shipment Count.</span>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
 
                     
                     <div class="col justify-content-end mb-3">
