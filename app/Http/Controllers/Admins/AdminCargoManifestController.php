@@ -3214,7 +3214,6 @@ class AdminCargoManifestController extends Controller
 
     }
 
-
     public function receive_bag_store(Request $request)// receive bag -> store
     {
         //        $bag_exists = array();
