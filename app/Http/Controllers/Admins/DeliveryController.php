@@ -7262,14 +7262,7 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('one_link_out_for_delivery_shipment_payments as one_link_cash', 'delivery_notes.id', '=', 'one_link_cash.delivery_note_id')
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'delivery_note_shipments.shipment_id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and shipments_journey.shipper_status_id BETWEEN 1 AND 66)')
-                    );
-            })
+            
             
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.trax_id as rider_trax_id', 
             'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 
