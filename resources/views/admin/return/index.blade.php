@@ -49,228 +49,207 @@
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 <div class="row justify-content-center" >
-{{--                    <div class="col-3">--}}
-{{--                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="icon-clock text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="total_sar" class="d-inline">--}}
-{{--                                                    {{ ($total_of_shipments) }}</p>--}}
-{{--                                                --}}{{-- ({{ round($percentage_total_of_shipment) }}%) --}}
-{{--                                            </h3>--}}
-{{--                                            <span>Total Of Shipments</span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                    --}}
-{{--                    <div class="col-3" id="search_rvr_div">--}}
-{{--                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="icon-grid text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="total_rvr" class="d-inline">--}}
-{{--                                                    {{ count($reason_validation_required) }}</p>--}}
-{{--                                                ({{ round($percantage_reason_validation_required) }}%)--}}
-{{--                                            </h3>--}}
-{{--                                            <span>Reason Validation Required </span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                   <div class="col-3">
+                       <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                           <div class="card-content">
+                               <div class="card-body">
+                                   <div class="media d-flex">
+                                       <div class="align-self-center">
+                                           <i class="icon-clock text-white font-large-2 float-left"></i>
+                                       </div>
+                                       <div class="media-body text-white text-right">
+                                           <h3 class="text-white" id="total_of_shipments">
+                                               0
+                                           </h3>
+                                           <span>Total Of Shipments</span>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-3" id="search_rvr_div">
+                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-grid text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
+                                            </h3>
+                                            <span>Reason Validation Required</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
-{{--                    <div class="col-3">--}}
-{{--                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="icon-flag text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="total_sar" class="d-inline">--}}
-{{--                                                    {{ count($shipper_advised_requested) }}</p>--}}
-{{--                                                ({{ round($percentage_shipper_advised_requested) }}%)--}}
-{{--                                            </h3>--}}
-{{--                                            <span>Shipper Advised Requested </span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-flag text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
+                                            </h3>
+                                            <span>Shipper Advised Requested </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
 
 
 
-{{--                    <div class="col-3">--}}
-{{--                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="la la-calculator text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="total_sar" class="d-inline">--}}
-{{--                                                    {{ count($unresponsive_count) }}</p>--}}
+                   <div class="col-3">
+                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="unresponsive_count">
+                                                0
+                                            </h3>
+                                            <span>Unresponsive Count</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-{{--                                            </h3>--}}
-{{--                                            <span>Unresponsive Count</span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-clock text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="number_of_pending_tickets"></span> / <span id="number_of_pending_ticket_percentage"></span>%
+                                            </h3>
+                                            <span>Pending Tickets</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-{{--                    <div class="col-3" >--}}
-{{--                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="icon-clock text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="in_process" class="d-inline">{{ count($number_of_pending_tickets) }}</p> (<p--}}
-{{--                                                    id="in_process_percentage" class="d-inline">--}}
-{{--                                                    {{ round($number_of_pending_ticket_percentage, 2) }}</p>%)--}}
-{{--                                            </h3>--}}
-{{--                                            <span>Pending Tickets</span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="number_of_inprocess_tickets"></span> / <span id="number_of_inprocess_tickets_percentage"></span>%
+                                            </h3>
+                                            <span>No. of Inprocess Ticket</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-{{--                    <div class="col-3" >--}}
-{{--                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">--}}
-{{--                            <div class="card-content">--}}
-{{--                                <div class="card-body">--}}
-{{--                                    <div class="media d-flex">--}}
-{{--                                        <div class="align-self-center">--}}
-{{--                                            <i class="icon-check text-white font-large-2 float-left"></i>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="media-body text-white text-right">--}}
-{{--                                            <h3 class="text-white">--}}
-{{--                                                <p id="dead_leads" class="d-inline">{{ count($number_of_inprocess_tickets) }}</p> (--}}
-{{--                                                <p id="in_process_for_activation_percentage" class="d-inline">--}}
-{{--                                                    {{ round($number_of_inprocess_tickets_percentage, 2) }}</p>--}}
-{{--                                                %)--}}
-{{--                                            </h3>--}}
-{{--                                            <span>No. of Inprocess Ticket</span>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-flag text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="online_agents"></span> / <span id="number_of_available_agents"></span>
+                                                </h3>
+                                                <span>Online/ Available Agents </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-{{--                        <div class="col-3" >--}}
-{{--                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">--}}
-{{--                                <div class="card-content">--}}
-{{--                                    <div class="card-body">--}}
-{{--                                        <div class="media d-flex">--}}
-{{--                                            <div class="align-self-center">--}}
-{{--                                                <i class="icon-flag text-white font-large-2 float-left"></i>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="media-body text-white text-right">--}}
-{{--                                                <h3 class="text-white">--}}
-{{--                                                    <p id="online_agents" class="d-inline">{{ count($online_agents) }}</p>--}}
-{{--                                                    <p id="number_of_available_agents" class="d-inline">({{ count($number_of_available_agents) }})</p>--}}
-{{--                                                </h3>--}}
-{{--                                                <span>Online/ Available Agents </span>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="average_aging"></span>
+                                                </h3>
+                                                <span>Average Aging.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-{{--                        <div class="col-3" >--}}
-{{--                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">--}}
-{{--                                <div class="card-content">--}}
-{{--                                    <div class="card-body">--}}
-{{--                                        <div class="media d-flex">--}}
-{{--                                            <div class="align-self-center">--}}
-{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="media-body text-white text-right">--}}
-{{--                                                <h3 class="text-white">--}}
-{{--                                                    <p id="dead_leads" class="d-inline">--}}
-{{--                                                        {{ $average_aging > 24 ? (round($average_aging / 60, 2)) . ' days' : round($average_aging, 2) . ' hrs' }}--}}
-{{--                                                    </p>--}}
-{{--                                                </h3>--}}
-{{--                                                <span>Average Aging.</span>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="average_response_time"></span>
+                                                </h3>
+                                                <span>Average Response Time.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-{{--                        <div class="col-3" >--}}
-{{--                            <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">--}}
-{{--                                <div class="card-content">--}}
-{{--                                    <div class="card-body">--}}
-{{--                                        <div class="media d-flex">--}}
-{{--                                            <div class="align-self-center">--}}
-{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="media-body text-white text-right">--}}
-{{--                                                <h3 class="text-white">--}}
-{{--                                                    <p id="dead_leads" class="d-inline">--}}
-{{--                                                        {{ $average_response_time > 24 ? (round($average_response_time / 60, 2)) . ' days' : round($average_response_time, 2) . ' hrs' }}--}}
-{{--                                                    </p>--}}
-
-{{--                                                </h3>--}}
-{{--                                                <span>Average Response Time.</span>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-
-{{--                        <div class="col-3" >--}}
-{{--                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">--}}
-{{--                                <div class="card-content">--}}
-{{--                                    <div class="card-body">--}}
-{{--                                        <div class="media d-flex">--}}
-{{--                                            <div class="align-self-center">--}}
-{{--                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="media-body text-white text-right">--}}
-{{--                                                <h3 class="text-white">--}}
-{{--                                                    <p id="dead_leads" class="d-inline">{{ $oldest_shipments }} </p>--}}
-
-{{--                                                </h3>--}}
-{{--                                                <span>Oldest Shipment Count.</span>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="oldest_shipments">
+                                                    0
+                                                </h3>
+                                                <span>Oldest Shipment Count.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     
                     <div class="col justify-content-end mb-3">
@@ -338,7 +317,6 @@
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                             <tr role="row" class="bg-primary white">
-
                                 <th class="border-primary border-darken-1"></th>
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Tracking No.</th>
@@ -908,16 +886,12 @@
             </div>
         </div>
 
-       
-
-
     @endsection
 
     @section('css')
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
-
         <style>
             table.dataTable {
                 font-size: 12px;
@@ -962,7 +936,7 @@
             .bg-gradient-directional-delivered {
             background-image: linear-gradient(45deg, #653800, #11f1ea);
             background-repeat: repeat-x;
-        }
+            }
             .bg-gradient-directional-booked_shipments {
                 background-image: linear-gradient(45deg, #5e187b, #ed86ff);
                 background-repeat: repeat-x;
@@ -976,30 +950,30 @@
             .bg-gradient-directional-in_transit {
             background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
             background-repeat: repeat-x;
-        }
+            }
 
-        .bg-gradient-directional-destination {
+            .bg-gradient-directional-destination {
             background-image: linear-gradient(45deg, #027d8a, #01e4e4);
             background-repeat: repeat-x;
-        }
-        .bg-gradient-directional-return_delivered {
+            }
+            .bg-gradient-directional-return_delivered {
             background-image: linear-gradient(45deg, #02c123, #99ff12d1);
             background-repeat: repeat-x;
-        }
-        .bg-gradient-directional-pending_confirmation {
+            }
+            .bg-gradient-directional-pending_confirmation {
             background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
             background-repeat: repeat-x;
-        }
+            }
 
-        .bg-gradient-directional-complaints_launched {
+            .bg-gradient-directional-complaints_launched {
             background-image: linear-gradient(45deg, #074077, #2FBEF5);
             background-repeat: repeat-x;
-        }
+            }
 
-        .bg-gradient-directional-oldest_shipment {
+            .bg-gradient-directional-oldest_shipment {
             background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
             background-repeat: repeat-x;
-        }
+            }
             #toast-bottom-center.toast-container {
                 text-align: center;
             }
@@ -1055,7 +1029,35 @@
             @endphp
             $(document).ready(function() {
 
-                
+                $.ajax({
+                        url: '{!! route('admin.return.data') !!}',
+                        method: 'GET'
+                    }).done(function (data) {
+                       if(data.status){
+                            $('#total_of_shipments').text(data.stats.total_of_shipments);
+                            $('#total_rvr').text(data.stats.reason_validation_required);
+                            $('#percentage_reason_validation_required').text(data.stats.percentage_reason_validation_required);
+                            $('#shipper_advised_requested').text(data.stats.shipper_advised_requested);
+                            $('#percentage_shipper_advised_requested').text(data.stats.percentage_shipper_advised_requested);
+                            $('#unresponsive_count').text(data.stats.unresponsive_count);
+                            $('#number_of_pending_tickets').text(data.stats.number_of_pending_tickets);
+                            $('#number_of_pending_ticket_percentage').text(data.stats.number_of_pending_ticket_percentage);
+                            $('#number_of_inprocess_tickets').text(data.stats.number_of_inprocess_tickets);
+                            $('#number_of_inprocess_tickets_percentage').text(data.stats.number_of_inprocess_tickets_percentage);
+                            $('#online_agents').text(data.stats.online_agents);
+                            $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+
+                            var averageAging = parseFloat(data.stats.average_aging);
+                            var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
+                            $('#average_aging').text(content);
+
+                            var average_response_time = parseFloat(data.stats.average_response_time);
+                            var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
+                            $('#average_response_time').text(average_response_time_content);
+
+                            $('#oldest_shipments').text(data.stats.oldest_shipments);
+                       }
+                    });
 
                 // update_AssignAgentModal function
                 $('#AssignAgentModal').on('shown.bs.modal', function() {
