@@ -5714,6 +5714,231 @@ class AdminCargoManifestController extends Controller
         }
     }
 
+    public function receive_bag_shipments_store_old(Request $request)
+    {
+
+        $shipment_status_array = [3, 21, 26, 32, 49];
+        $shipment_ids = array_unique(explode(',', $request->shipment_ids));
+        $open_box_ids = explode(',', $request->open_box_ids);
+        $bag_ids = array();
+        $shipment_ids_array = array();
+        $short_received_shipments_array = array();
+        $shipments_already_marked_received_array = array();
+//        todo : open box-work
+        if (count($open_box_ids) > 0) {
+
+            foreach ($shipment_ids as $index => $shipment) {
+                if (in_array($shipment, $open_box_ids)) {
+
+                    $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                    if ($shipment_detail) {
+                        $shipment_detail->is_open = 1;
+                        $shipment_detail->save();
+                    }
+
+                    $shipment_data = Shipment::find($shipment);
+                    $shipment_data->open_box = 1;
+                    $shipment_data->save();
+
+                    ShipmentOpenBoxJourneyController::add($shipment, 2, Auth::id());
+                }
+
+            }
+
+        }
+//        todo : open box-work end
+
+        foreach ($shipment_ids as $shipment_id) {
+            $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/
+            ;
+
+            if ($bag_shipment->exists()) {
+                $bag_shipment = $bag_shipment->latest()->first();
+
+                $shipment = Shipment::find($shipment_id);
+                if (in_array($shipment->shipper_status_id, $shipment_status_array)) {
+
+                    if ($bag_shipment->status == 0) {
+                        $bag_shipment->status = 1;
+                        $bag_shipment->save();
+                    }
+
+                    $bag = $bag_shipment->bag;
+
+                    array_push($shipment_ids_array, $shipment->tracking_number);
+
+                    $shipper_status_id = NULL;
+                    $consignee_status_id = NULL;
+
+                    if ($bag->type == 1) {
+                        if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+                            //ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                            $shipper_status_id = 15;
+                            $consignee_status_id = 15;
+                        } else {
+                            $shipper_status_id = 4;
+                            $consignee_status_id = 4;
+
+                            $self_collection = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
+
+                            if ($self_collection) {
+                                $consignee_city = $shipment->consignee_city_id;
+                                $user_city = $shipment->user->city_id;
+
+                                if ($consignee_city == '202' || $consignee_city == '223') {
+                                    NotificationsController::send(178, $shipment_id);
+                                } else {
+                                    $city_id = SelfCollectionCities::where('city_id', $consignee_city)->select('city_id', 'address')->first();
+                                    if ($city_id) {
+                                        NotificationsController::send(75, $shipment_id, $city_id->address);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if ($shipment->booking_type_id == 1) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else if ($shipment->booking_type_id == 2) {
+                            if ($shipment->shipper_status_id == 21) {
+                                $shipper_status_id = 22;
+                                $consignee_status_id = 22;
+                            } else {
+                                $shipper_status_id = 27;
+                                $consignee_status_id = 27;
+                            }
+
+                        } else if ($shipment->booking_type_id == 3) {
+                            $shipper_status_id = 33;
+                            $consignee_status_id = 33;
+                        } else if ($shipment->booking_type_id == 4) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        }
+                    }
+                    $shipment->shipper_status_id = $shipper_status_id;
+                    $shipment->consignee_status_id = $consignee_status_id;
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
+
+                    if (!in_array($bag->id, $bag_ids)) {
+                        $bag_ids[] = $bag->id;
+                    }
+                } else {
+                    array_push($shipments_already_marked_received_array, $shipment->tracking_number);
+                }
+            }
+        }
+
+
+        foreach ($bag_ids as $bag_id) {
+            $bag = CargoManifestBag::find($bag_id);
+            $bag->received_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 1)->count();
+
+            $short_received = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 0)->count();
+
+            if ($short_received > 0) {
+                $bag->short_received_shipments = $short_received;
+                $status_id = 8;
+            } else {
+                $bag->short_received_shipments = 0;
+                $status_id = 7;
+                $bag->completed = 1;
+            }
+            $bag->status_id = $status_id;
+            $bag->received_at = Carbon::now();
+            $bag->receiver_id = Auth::id();
+            $bag->current_hub_id = Auth::user()->default_hub_id;
+            $bag->save();
+
+            ManifestBag::where('cargo_manifest_bag_id', $bag->id)->update(['status' => 1]);
+
+            //dispute for short received
+            if ($bag->status_id == 8) {
+                $bag_short_received_shipments = CargoManifestBagShipments::where(['cargo_manifest_bag_id' => $bag_id, 'status' => 0])->pluck('shipment_id')->toArray();
+
+                if (!empty($bag_short_received_shipments)) {
+                    DisputeController::add_cargo_short_received($bag->seal_number, $bag_short_received_shipments, null, 2);
+                }
+            }
+
+//        end dispute short received
+            /* if($all_bag_ids == ''){
+                 $all_bag_ids = $all_bag_ids . $bag->seal_number;
+             }
+             else{
+                 $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
+             }*/
+        }
+
+        foreach ($bag_ids as $bag_id) {
+            $bag = CargoManifestBag::find($bag_id);
+            $manifest_id = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first()->cargo_manifest_id;
+            $manifest = CargoManifest::find($manifest_id);
+            $manifest->received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 1)->count();
+            $short_received_bags = ManifestBag::where('cargo_manifest_id', $manifest_id)->where('status', 0)->count();
+
+            if ($short_received_bags > 0) {
+                $manifest->short_received_bags = $short_received_bags;
+            } else {
+                $manifest->short_received_bags = 0;
+                $manifest->status_id = 2;
+            }
+
+            $manifest->update();
+        }
+
+        $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id', $bag_ids)->where('status', 0);
+        if ($bag_shipments->exists()) {
+            $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+                if (!in_array($shipment->tracking_number, $short_received_shipments_array)) {
+                    array_push($short_received_shipments_array, $shipment->tracking_number);
+                }
+            }
+
+        }
+
+        $received_html = '';
+        $sr_html = '';
+        $already_received_shipments_html = '';
+
+        if (count($short_received_shipments_array) > 0) {
+            $sr_html = "Following Shipments(s) are marked as short received.<br><ul>";
+            foreach ($short_received_shipments_array as $v) {
+                $sr_html .= "<li>" . $v . "</li>";
+            }
+            $sr_html .= "</ul>";
+        }
+
+        if (count($shipments_already_marked_received_array) > 0) {
+            $already_received_shipments_html = "Following Shipments(s) are already marked as received or processed .<br><ul>";
+            foreach ($shipments_already_marked_received_array as $v) {
+                $already_received_shipments_html .= "<li>" . $v . "</li>";
+            }
+            $already_received_shipments_html .= "</ul>";
+        }
+
+        if (count($shipment_ids_array) > 0) {
+            $received_html = "Following Shipments(s) are marked as received. .<br><ul>";
+            foreach ($shipment_ids_array as $v) {
+                $received_html .= "<li>" . $v . "</li>";
+            }
+            $received_html .= "</ul>";
+        }
+
+
+        //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
+        return back()->with(['sr_html' => $sr_html, 'received_html' => $received_html, 'already_received_shipments_html' => $already_received_shipments_html]);
+
+
+    }
+
     public function manifest_bags(Request $request)
     {
         $cargo = CargoManifest::find($request->manifest_id);
