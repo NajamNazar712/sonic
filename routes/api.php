@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 
 Route::name('api.')->group(function () {
-    
+
     Route::post('shipment/track/public/crm/request', 'APIController@add_request')->name('crm.track.public');
     Route::post('login', 'APIController@login')->name('login');
     Route::post('user_login', 'APIController@bolt_login')->name('user_login');
@@ -62,7 +62,6 @@ Route::name('api.')->group(function () {
         Route::prefix('request')->name('request.')->group(function () {
             Route::post('crm', 'APIController@crm_request_create')->name('crm');
             Route::post('rcp', 'APIController@rcp_request_create')->name('rcp');
-
         });
 
         Route::post('pickup_address/add', 'APIController@pickup_address_add')->name('pickup_address.add');
@@ -75,7 +74,6 @@ Route::name('api.')->group(function () {
             Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
             Route::post('list', 'APIController@receiving_sheet_list')->name('list');
             Route::get('print', 'APIController@receiving_sheet_print')->name('print');
-                        
         });
 
         Route::get('cities', 'APIController@cities')->name('cities');
@@ -85,7 +83,6 @@ Route::name('api.')->group(function () {
         Route::prefix('return')->name('return.')->group(function () {
             Route::get('pending', 'APIController@return_confirmation_pending')->name('pending');
             Route::post('pending', 'APIController@return_confirmation_pending_update')->name('pending');
-
         });
 
 
@@ -112,7 +109,7 @@ Route::name('api.')->group(function () {
             });
         });
     });
-    
+
 
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
@@ -183,8 +180,8 @@ Route::name('api.')->group(function () {
                 Route::get('summary_v2', 'Rider\RiderAPIController@pickup_summary_v2')->name('pickup_summary_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
                 Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
-                Route::post('not_pick_v4','Rider\RiderAPIController@pickup_not_pick_v4')->name('pickup_not_pick_v4');
-                Route::post('not_pick_without_v4','Rider\RiderAPIController@pickup_not_pick_without_picture_v4')->name('pickup_not_pick_without_picture_v4');
+                Route::post('not_pick_v4', 'Rider\RiderAPIController@pickup_not_pick_v4')->name('pickup_not_pick_v4');
+                Route::post('not_pick_without_v4', 'Rider\RiderAPIController@pickup_not_pick_without_picture_v4')->name('pickup_not_pick_without_picture_v4');
                 Route::post('pick_v3', 'Rider\RiderAPIController@pickup_pick_v3')->name('pickup_pick_v3');
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
@@ -193,12 +190,11 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_detail_v3', 'Rider\RiderAPIController@scan_shipment_detail_v3')->name('scan_shipment_detail_v3');
                 Route::post('scan_shipment_assign_v3', 'Rider\RiderAPIController@scan_shipment_assign_v3')->name('scan_shipment_assign_v3');
                 Route::post('scan_rider_picked_shipment_v3', 'Rider\RiderAPIController@scan_rider_picked_shipment_v3')->name('scan_rider_picked_shipment_v3');
-                
-                Route::prefix('v3')->name('v3.')->group(function (){
+
+                Route::prefix('v3')->name('v3.')->group(function () {
                     Route::get('summary', 'Rider\RiderAPIController@pickup_summary_v3')->name('pickup_summary');
                     Route::post('acknowledge', 'Rider\RiderAPIController@pickup_Accept_Reject_v3')->name('pickup_Accept_Reject_v3');
                     Route::post('pick', 'Rider\RiderAPIController@pickup_pick_v4')->name('pickup_pick_v4');
-                    
                 });
             });
 
@@ -210,10 +206,9 @@ Route::name('api.')->group(function () {
             Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@rider_remarks')->name('add');
                 Route::get('get', 'Rider\RiderAPIController@rider_remark_list')->name('list');
-
             });
 
-      
+
             //Current
             Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
@@ -256,6 +251,10 @@ Route::name('api.')->group(function () {
                 Route::post('delivery_v2', 'Rider\RiderAPIController@delivery_history_v2')->name('delivery_v2');
                 Route::post('return_v2', 'Rider\RiderAPIController@return_history_v2')->name('return_v2');
                 Route::post('history_details', 'Rider\RiderAPIController@history_details')->name('history_details');
+
+                //V3 Routes
+                Route::post('pickup_v3', 'Rider\RiderAPIController@pickups_history_v3')->name('pickup_v3');
+                Route::post('history_details_v3', 'Rider\RiderAPIController@history_details_v3')->name('history_details_v3');
             });
 
             Route::prefix('return')->name('return.')->group(function () {
@@ -279,7 +278,7 @@ Route::name('api.')->group(function () {
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
             Route::get('rider_profile', 'Rider\RiderAPIController@rider_profile')->name('rider_profile');
-            Route::get('profile_v3','Rider\RiderAPIController@rider_profile_V3')->name('rider_profile_v3');
+            Route::get('profile_v3', 'Rider\RiderAPIController@rider_profile_V3')->name('rider_profile_v3');
             Route::get('profile', 'Rider\RiderAPIController@rider_profile')->name('profile');
             Route::get('notification_history', 'Rider\RiderAPIController@notification_history')->name('notification_history');
 
@@ -347,7 +346,6 @@ Route::name('api.')->group(function () {
                 Route::post('apply_v2', 'Rider\RiderAPIController@leave_apply_v2')->name('apply_v2');
                 Route::get('list_v2', 'Rider\RiderAPIController@employee_leave_list_v2')->name('list_v2');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
-
             });
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
 
@@ -364,7 +362,6 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
         });
-
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -579,9 +576,7 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store_v2', 'Retail\RetailAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
                 Route::post('retail_shipment_store_v3', 'Retail\RetailAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
             });
-
         });
-
     });
 
     Route::prefix('consignee')->name('consignee.')->group(function () {
@@ -603,7 +598,6 @@ Route::name('api.')->group(function () {
             Route::post('update_address', 'ConsigneeAPIController@address_change_request')->name('update_address');
             Route::get('notification_history', 'ConsigneeAPIController@notification_history')->name('notification_history');
         });
-
     });
 
     Route::prefix('shipper')->name('shipper.')->group(function () {
@@ -649,7 +643,6 @@ Route::name('api.')->group(function () {
                 Route::post('submit', 'APIController@shipment_book')->name('submit');
             });
         });
-
     });
 
     Route::prefix('botsify')->name('botsify.')->group(function () {
@@ -657,7 +650,6 @@ Route::name('api.')->group(function () {
         Route::post('shipment/tracking', 'APIController@whatsapp_shipper_tracking')->name('shipment.tracking');
         Route::post('crm/launch', 'APIController@whatsapp_crm_request_create')->name('crm.launch');
         Route::post('crm/tracking', 'APIController@whatsapp_shipper_crm_tracking')->name('crm.tracking');
-
     });
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
@@ -696,5 +688,4 @@ Route::name('api.')->group(function () {
         Route::post('forget_pin', 'APIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'APIController@reset_pin')->name('reset_pin');
     });
-
 });
