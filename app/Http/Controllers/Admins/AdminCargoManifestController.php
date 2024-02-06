@@ -1539,7 +1539,7 @@ class AdminCargoManifestController extends Controller
 
     }
 
-    public function create_store_old()
+    public function create_store_old(Request $request)
     {
 
         $shipments = 0;
