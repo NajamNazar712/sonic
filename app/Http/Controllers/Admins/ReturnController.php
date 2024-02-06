@@ -157,8 +157,6 @@ class ReturnController extends Controller
             ->where('crm.id','=',
             DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
-        
-
         ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
@@ -388,7 +386,6 @@ class ReturnController extends Controller
                 });
             });
             if (in_array(317, session('permissions'))) {
-                $shipments = $this->shipments();
                 $shipments = $shipments->where('new_ras.agent_id', Auth::id());
             }
         }
