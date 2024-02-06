@@ -707,6 +707,361 @@ class AdminCargoManifestController extends Controller
     public function pending_bag_list_old(Request $request)
     {
 
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 399);
+        }
+        $today = Carbon::today();
+        $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
+        $shipments = DB::connection('reports')->table('shipments')->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
+            ->join('zones as z', 'ohc.zone_id', '=', 'z.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftjoin('user_shipping_infos as rsi', function ($join) {
+                $join->on('shipments.return_address_id', '=', 'rsi.id')
+                    ->whereNotNull('shipments.return_address_id')
+                    ->where('shipments.shipper_status_id', '!=', 30);
+            })
+            ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
+            })
+            ->leftJoin('shipments_journey as csj', function ($join) {
+                $join->on('csj.shipment_id', '=', 'shipments.id')
+                    ->where('csj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('misrouted_history as mh', function ($join) {
+                $join->on('mh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(49))
+                    ->where('mh.id', '=',
+                        DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cities as olddc', 'olddc.id', '=', 'mh.old_consignee_city_id')
+            ->leftjoin('cities as olddhc', 'olddc.hub_id', '=', 'olddhc.id')
+            ->leftjoin('intercept_re_book_request_histories as irbrh', function ($join) {
+                $join->on('irbrh.shipment_id', '=', 'shipments.id')
+                    ->on('shipments.shipper_status_id', '=', DB::raw(55));
+            })
+            ->leftjoin('cities as olddci', 'olddci.id', '=', 'irbrh.old_consignee_city_id')
+            ->leftjoin('cities as olddhci', 'olddci.hub_id', '=', 'olddhci.id')
+            ->join('cities as dc', function ($join) {
+                $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                    ->where(function ($query) {
+                        $query->where(function ($sub_query) {
+                            $sub_query->where('shipments.shipper_status_id', 20)
+                                ->where(function ($sub_sub_query) {
+                                    $sub_sub_query->whereNull('shipments.return_address_id')
+                                        ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
+                                })
+                                ->orWhere(function ($sub_sub_query) {
+                                    $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                        ->where('rc.hub_id', '!=', DB::raw('dc.hub_id'));
+                                });
+                        })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->whereIn('shipments.shipper_status_id', [2, 30, 37])
+                                    ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 49)
+                                    ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', '=', 55)
+                                    ->where('irbrh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
+                            });
+                    });
+            })
+            ->join('cities as dhc', 'dc.hub_id', '=', 'dhc.id')
+            ->leftjoin('crm_requests as crm', function ($join) {
+                $join->on('crm.shipment_id', '=', 'shipments.id')
+                    ->whereIn('crm.status_id', [2, 3, 5])
+                    ->where('crm.case_nature_id', 1);
+            })
+            ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
+            ->select('z.name as zone_name','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub', 'shipments.consignee_address', 'dc.id as destination_city_id', 'sts.status as star_status')
+            ->whereNotIn('shipments.id', $on_hold_shipments);
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                        ->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 2)
+                            ->whereIn('oc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 49)
+                            ->whereIn('olddc.hub_id', session('hubs'));
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('shipments.shipper_status_id', 55)
+                            ->whereIn('olddci.hub_id', session('hubs'));
+                    });
+            });
+        }
+
+        if (session('department_id') == 8) {
+            $shipments = $shipments->where('shipments.shipment_type', 2);
+        }
+
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $shipments->whereDate('shipments_journey.created_at', $from);
+            }
+        }
+
+        $datatables = Datatables::of($shipments)
+            ->setRowAttr([
+                'class' => function ($shipments) {
+                    if ($shipments->complaint != null) {
+                        return 'complaint_row';
+                    } else if ($shipments->booking_type_id == 3) {
+                        return "tnb_row";
+                    } else {
+                        return '';
+                    }
+                },
+            ])
+            ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                    ->where('dlm.city_id', $shipments->destination_city_id)
+                    ->select('dlm.city_id', 'delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name');
+
+                if ($check->exists()) {
+                    $check = $check->get();
+                    $delivery_area = null;
+                    $msg_string = null;
+                    $str_arr = null;
+                    $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
+                    foreach ($check as $nsa) {
+                        foreach ($str_arr as $arr_value) {
+                            if (strtolower($nsa->keyword) == strtolower($arr_value)) {
+                                $msg_string = $arr_value;
+                                $delivery_area = $nsa->area_name;
+                            }
+                        }
+                    }
+                }
+
+//                 $delivery_area = null;
+//                 if ($msg_string != null) {
+//                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+//                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+//                         ->where('dlm.city_id', $shipments->destination_city_id)
+// //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+//                         ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
+
+//                     if ($found->exists()) {
+//                         $found = $found->first();
+//                         $delivery_area = $found->area_name;
+//                     }
+//                 }
+                return isset($delivery_area) ? $delivery_area : '-';
+            })
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('admin.tracking.index');
+                if ($shipments->star_status) {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
+                } else {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                }
+            })
+            ->editColumn('origin', function ($shipments) {
+                if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
+                    return $shipments->destination;
+                } else if ($shipments->shipper_status_id == 49) {
+                    return $shipments->old_destination;
+                } else if ($shipments->shipper_status_id == 55) {
+                    return $shipments->old_destination_intercept;
+                } else {
+                    return $shipments->origin;
+                }
+            })
+            ->editColumn('origin_hub', function ($shipments) {
+                if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
+                    return $shipments->destination_hub;
+                } else if ($shipments->shipper_status_id == 49) {
+                    return $shipments->old_destination_hub;
+                } else if ($shipments->shipper_status_id == 55) {
+                    return $shipments->old_destination_intercept_hub;
+                } else {
+                    return $shipments->origin_hub;
+                }
+            })
+            ->editColumn('destination', function ($shipments) {
+                if (in_array($shipments->shipper_status_id, [30, 37])) {
+                    return $shipments->origin;
+                } else if ($shipments->shipper_status_id == 20) {
+                    if ($shipments->return_address_id != NULL) {
+                        return $shipments->return_city_name;
+                    } else {
+                        return $shipments->origin;
+                    }
+                } else {
+                    return $shipments->destination;
+                }
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper . ' (' . $shipment->poc . ')';
+                } else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->editColumn('amount', function ($shipment) {
+                return number_format($shipment->amount);
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->filterColumn('status', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('ss.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('bt.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('shipping_mode', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('sm.id', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('oc.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                        ->where('dc.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 2)
+                            ->where('oc.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 49)
+                            ->where('olddc.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 55)
+                            ->where('olddci.name', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->filterColumn('ohc.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                        ->where('dhc.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 2)
+                            ->where('ohc.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 49)
+                            ->where('olddhc.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.shipper_status_id', 55)
+                            ->where('olddhci.name', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->filterColumn('z.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('z.name', 'like', '%'.$keyword.'%');
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('dc.name', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $query->where(function ($sub_query) use ($keyword) {
+
+                    $sub_query->whereIn('shipments.shipper_status_id', [30, 37])
+                        ->where('oc.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+
+                        $sub_query->where(function ($sub_query) use ($keyword) {
+
+                            $sub_query->where('shipments.shipper_status_id', 20)
+                                ->where(function ($sub_sub_query) use ($keyword) {
+                                    $sub_sub_query->whereNull('shipments.return_address_id')
+                                        ->where('oc.name', 'like', '%' . $keyword . '%');
+                                })
+                                ->orWhere(function ($sub_sub_query) use ($keyword) {
+                                    $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                        ->where('rc.name', 'like', '%' . $keyword . '%');
+                                });
+
+                        });
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                            ->where('dc.name', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
+            ->orderColumn('ohc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dhc.name, IF (shipments.shipper_status_id = 49, olddhc.name, IF (shipments.shipper_status_id = 55, olddhci.name, oc.name)))') . ' $1')
+            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
+
+
+        if ($shipment_type = $request->get('shipment_type')) {
+            if ($shipment_type == 0) {
+                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55]);
+            } else if ($shipment_type == 1) {
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55]);
+            } else if ($shipment_type == 2) {
+                $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37]);
+            }
+        } else {
+            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55]);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $datatables->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('star_shipper_filter') == 1) {
+            $datatables->where('sts.status', 1);
+        }
+
+        return $datatables->make(true);
     }
 
     public function create_index()
