@@ -41,14 +41,15 @@
                         </fieldset>
                     </div>
                 </div>
-                <div class="row mb-2 justify-content-between">
+                <div class="row mb-2">
+                    <div class="col-4"></div>
                     <div class="col-4">
                         <div class="form-group">
-                            <input type="text" name="delivery_note_numbers" class="delivery_note_numbers" placeholder="Delivery Note Number(s)" data-tags-input-name="delivery_note_number">
+                            <input type="text" name="delivery_note_numbers" class="delivery_note_numbers form-control" placeholder="Delivery Note Number(s)" data-tags-input-name="delivery_note_number">
                         </div>
                     </div>
                     <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mb-1 btn btn-outline-primary btn-min-width float-right"><i class="la la-search"></i> Search</button>
+                        <button type="button" id="search_filter_btn" class="mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
 
@@ -302,9 +303,6 @@
             text-align: left;
         }
 
-        .selectize-control {
-            width: 300px !important;
-        }
     </style>
 @endsection
 
@@ -382,6 +380,9 @@
 					}
 				}
 			});
+
+
+            $('.selectize-input').css('padding','0.75rem 1rem');
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
