@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Segment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
@@ -84,7 +85,6 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -13461,6 +13461,7 @@ dd($shipments->get());
 
     public function cargo_manifest_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 933);
         $segments = Segment::join('sub_category_segments as scs','segments.id','scs.segment_id')
             ->select('segments.id as segment_id','segments.name as segment_name','scs.id as sub_segment_id','scs.name as sub_segment_name')
             ->get();
@@ -13509,8 +13510,8 @@ dd($shipments->get());
         }
 
         $results = DB::select($Query,$bindings);
-//dd($results);
-        $transformedData = collect($results)->map(function ($item) {
+
+        $transformedData = collect($results)->map(function ($item) { // mapping for datatable
             return [
                 'origin' => $item->origin_zonecode,
                 'destination' => $item->destination_zonecode,
