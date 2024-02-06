@@ -14,7 +14,7 @@ class UpdateModulePermissionTeamLeadManagementBulkAssignZoneAddDaysSeeder extend
         DB::table('module_permissions')->insert(array(
             array('id' => 925, 'name' => 'Bulk Assign Zone For Agent', 'module_id' => 25),
             array('id' => 926, 'name' => 'Bulk Add Days For Agent', 'module_id' => 25),
-            array('id' => 9225, 'name' => 'Assign Zone For Agent - Action', 'module_id' => 25),
+            array('id' => 931, 'name' => 'Assign Zone For Agent - Action', 'module_id' => 25),
             array('id' => 928, 'name' => 'Add Days For Agent - Action', 'module_id' => 25),
             array('id' => 929, 'name' => 'Deactivate Staff For Agent - Action', 'module_id' => 25),
         ));
