@@ -704,6 +704,11 @@ class AdminCargoManifestController extends Controller
         return $datatables->make(true);
     }
 
+    public function pending_bag_list_old(Request $request)
+    {
+        
+    }
+
     public function create_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 400);
