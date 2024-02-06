@@ -1388,6 +1388,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'Admins\AdminCargoManifestController@receive_bag_index')->name('index');
             Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
+            Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details_old')->name('bag_details'); // old one
             Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_store')->name('store');
 
             Route::prefix('bag')->name('bag.')->group(function () {
