@@ -40,8 +40,15 @@
                             <div class="danger d-none" id="operation_rider_error">This field is required</div>
                         </fieldset>
                     </div>
+                </div>
+                <div class="row mb-2 justify-content-between">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" name="delivery_note_numbers" class="delivery_note_numbers" placeholder="Delivery Note Number(s)" data-tags-input-name="delivery_note_number">
+                        </div>
+                    </div>
                     <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        <button type="button" id="search_filter_btn" class="mb-1 btn btn-outline-primary btn-min-width float-right"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
 
@@ -246,6 +253,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -293,6 +301,10 @@
             width: auto !important;
             text-align: left;
         }
+
+        .selectize-control {
+            width: 300px !important;
+        }
     </style>
 @endsection
 
@@ -301,7 +313,9 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -339,6 +353,36 @@
             $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Category*',
             });
+
+            var select = $('.delivery_note_numbers').selectize({
+				placeholder: 'Delivery Note Number(s)',
+				delimiter: ',',
+				createOnBlur: true,
+				persist: false,
+				plugins: ['remove_button'],
+				onDropdownOpen: function(dropdown) {
+					dropdown.remove();
+				},
+				onType: function(str) {
+					var regex = /^[0-9,]+$/;
+
+					if (!regex.test(str)) {
+						select[0].selectize.setTextboxValue('');
+					}
+				},
+				create: function(input) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+						return {
+							value: input,
+							text: input
+						}
+					}
+					else {
+						return false;
+					}
+				}
+			});
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -449,6 +493,7 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.operation_rider_id=$('#operation_rider_id').val();
+                        d.delivery_note_numbers=$('.delivery_note_numbers').val();
                     }
                 },
                 rowId: 'delivery_note_id',
