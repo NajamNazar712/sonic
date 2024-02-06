@@ -706,7 +706,7 @@ class AdminCargoManifestController extends Controller
 
     public function pending_bag_list_old(Request $request)
     {
-        
+
     }
 
     public function create_index()
