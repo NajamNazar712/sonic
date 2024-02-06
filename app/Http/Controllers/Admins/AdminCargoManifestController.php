@@ -2938,6 +2938,38 @@ class AdminCargoManifestController extends Controller
         return view('admin.cargo.manifest.receive', compact('total'));
     }
 
+    public function receive_bag_index_old()
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 408);
+        if (Auth::user()->default_hub_id == null) {
+            return back()->with(['error' => 'Default Hub not set for this admin.']);
+        }
+
+        $total = 0;
+        $bags = CargoManifestBag::leftjoin('v2_junction_mappings as vjm', 'vjm.id', 'cargo_manifest_bags.junction_mapping_id')
+            ->leftjoin('v2_junctions as vj', 'vj.junction_mapping_id', 'vjm.id')
+            ->select(['vjm.destination_id as destination', 'vj.junction_id as junction', 'cargo_manifest_bags.status_id as status', 'cargo_manifest_bags.id as id'])
+            ->whereIn('cargo_manifest_bags.status_id', $this->bag_can_be_received_statuses)
+            ->get()
+            ->groupBy('id');
+
+        foreach ($bags as $key => $bag) {
+            $flag = false;
+            foreach ($bag as $locations) {
+                if ($locations->destination == Auth::user()->default_hub_id || $locations->junction == Auth::user()->default_hub_id) {
+                    $flag = true;
+                }
+            }
+
+            if ($flag) {
+                $total++;
+            }
+        }
+
+        return view('admin.cargo.manifest.receive_old', compact('total'));
+    }
+
     public function receive_bag_details(Request $request)// receive bag -> scanne bag no
     {
         //        $bag = CargoManifestBag::where('seal_number', $request->bag_number);
