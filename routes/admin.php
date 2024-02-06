@@ -1350,6 +1350,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
                 Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
                 Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminCargoManifestController@create_store')->name('store');
+                Route::post('', 'Admins\AdminCargoManifestController@create_store_old')->name('store'); // old one
 
                 Route::prefix('open_bag')->name('open_bag.')->group(function () {
                     Route::get('', 'Admins\AdminCargoManifestController@create_open_bag_index')->name('index');
