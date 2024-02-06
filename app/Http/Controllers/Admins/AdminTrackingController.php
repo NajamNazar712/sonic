@@ -916,6 +916,7 @@ class AdminTrackingController extends Controller
                 'longitude' => '-',
                 'area' => '-',
                 'city' => '-',
+                'location_status' => '-',
 
 
             ];
