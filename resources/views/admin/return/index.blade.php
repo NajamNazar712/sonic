@@ -1029,10 +1029,12 @@
             @endphp
             $(document).ready(function() {
 
+                function fetchData() {
                 $.ajax({
                         url: '{!! route('admin.return.data') !!}',
                         method: 'GET'
-                    }).done(function (data) {
+                    }).done(function (data) 
+                    {
                        if(data.status){
                             $('#total_of_shipments').text(data.stats.total_of_shipments);
                             $('#total_rvr').text(data.stats.reason_validation_required);
@@ -1058,6 +1060,9 @@
                             $('#oldest_shipments').text(data.stats.oldest_shipments);
                        }
                     });
+                }
+
+                fetchData();
 
                 // update_AssignAgentModal function
                 $('#AssignAgentModal').on('shown.bs.modal', function() {
