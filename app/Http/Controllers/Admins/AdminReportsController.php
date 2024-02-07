@@ -13551,7 +13551,7 @@ class AdminReportsController extends Controller
             $reason_validation_required = count(ShipmentsJourney::where('shipper_status_id', 12)->where('verification', 1)->whereBetween('updated_at' ,[$from, $to])->get());
             $reattempted = count(ShipmentsJourney::where('shipper_status_id', 13)->whereBetween('updated_at' ,[$from, $to])->get());
             $returned = count(ShipmentsJourney::where('shipper_status_id', 20)->whereBetween('updated_at' ,[$from, $to])->get());
-            $on_hold = count(ShipmentsJourney::where('shipper_status_id', 9)->whereBetween('updated_at' ,[$from, $to])->get());
+            $on_hold = count(ShipmentsJourney::where('shipper_status_id', 15)->whereBetween('updated_at' ,[$from, $to])->get());
             $unresponsive = count(RvShipmentAssignAgentDetails::join('rv_shipment_assign_agents as rsaa','rsaa.id','rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')->leftJoin('shipments as sh','rv_shipment_assign_agent_details.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', 6)->where('rsaa.unresponsive_count','>',0)->whereBetween('rv_shipment_assign_agent_details.updated_at' ,[$from, $to])->get());
             return response()->json(['unresponsive' => $unresponsive, 'shipper_advised_requested' => $shipper_advised_requested, 'reason_validation_required' => $reason_validation_required,
             'reattempted' => $reattempted, 'intercepted' => $intercepted,'returned' => $returned, 'on_hold' => $on_hold ]);
