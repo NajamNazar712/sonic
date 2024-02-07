@@ -901,7 +901,6 @@ class AdminTrackingController extends Controller
 
     function setJourneyDetails($scanning_data) {
        if (isset($scanning_data)) {
-        // dd($scanning_data,  City::where('id', $scanning_data['hub_id'])->first()->name ?? '-');
             return [
                 'latitude' => $scanning_data->latitude,
                 'longitude' => $scanning_data->longitude,
@@ -917,8 +916,6 @@ class AdminTrackingController extends Controller
                 'area' => '-',
                 'city' => '-',
                 'location_status' => '-',
-
-
             ];
         }
     }
@@ -1417,8 +1414,7 @@ class AdminTrackingController extends Controller
                                 }
                             }
 
-                            $shipment_scanning_query = DB::table('shipment_scanning_journeys')
-                            ->select(
+                            $shipment_scanning_query = ShipmentScanningJourney::select(
                                 'shipment_scanning_journeys.id',
                                 'ssjal.shipment_id',
                                 'ssjal.location_status',
@@ -1435,7 +1431,7 @@ class AdminTrackingController extends Controller
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->whereNotIn('shipment_scanning_journeys.id', $processed_scanning_ids);    
-
+                        
                         switch ($journey->shipper_status_id) {
                             case 2:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
