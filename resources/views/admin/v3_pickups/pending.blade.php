@@ -1876,7 +1876,7 @@
                             $(pickup_status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                            } ).wrap(td);
+                            }).wrap(td);
                         } 
                         
                         else {

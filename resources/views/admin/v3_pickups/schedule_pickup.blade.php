@@ -75,7 +75,7 @@
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Update by</th>
+                                    <th class="border-primary border-darken-1">Updated by</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -921,12 +921,12 @@
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
 
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
-                    {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
+                    {data: 'time_range', name: 'ptr.name', class: 'align-middle ask_time'},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'product', name: 'product', class: 'align-middle product'},
-                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
+                    {data: 'product', name: 'seg.name', class: 'align-middle product'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
                     {data: 'days', name: 'days', class: 'align-middle text-center days',orderable: false,render:function(data,type,row){
@@ -935,9 +935,9 @@
                         return days_string;
                     }},
                     
-                    {data: 'hub', name: 'hub', class: 'align-middle station'},
-                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
+                    {data: 'hub', name: 'h.name', class: 'align-middle station'},
+                    {data: 'route_code', name: 'rt.code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rd.name', class: 'align-middle rider_id',
                     render: function (data, type, row) {
                             if (row.rider_id !== null) {
                                 return row.rider_id + ' - ' + row.rider_name;
@@ -946,15 +946,15 @@
                             }
                         }
                     },
-                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
+                    {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
-                    {data: 'approval', name: 'approval', class: 'align-middle approval',render:function(data,type,row){
+                    {data: 'approval', name: 'rp.approval', class: 'align-middle approval',render:function(data,type,row){
                         if(row.approval==1)
                         {
-                            return'Approved';
+                            return 'Approved';
                         }else if(row.approval==2)
                         {
-                            return'Rejected';
+                            return 'Rejected';
                         }else{
                             return 'Pending'
                         }
@@ -985,7 +985,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.days') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.pickup_date') || $(header).is('.approval') ||  $(header).is('.updated_by') || $(header).is('.services_count') || $(header).is('.special_request') ||  $(header).is('.pickup_request_id') ||  $(header).is('.serial_number') || $(header).is('.days') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {

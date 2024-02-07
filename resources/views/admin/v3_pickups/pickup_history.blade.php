@@ -630,29 +630,26 @@
                         }
                     },
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
-                    {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date',render:function(data,type,row){
-                        console.log(row.pickup_date);
-                        return row.pickup_date;
-                    }},
-                    {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
+                    {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
+                    {data: 'time_range', name: 'ptr.name', class: 'align-middle ask_time'},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
-                    {data: 'product', name: 'product', class: 'align-middle product'},
+                    {data: 'status', name: 'prs.name', class: 'align-middle text-center status', orderable: false},
+                    {data: 'product', name: 'seg.name', class: 'align-middle product'},
                     {data: 'service', name: 'service', class: 'align-middle service'},
-                    {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
+                    {data: 'shippment_type', name: 'pst.name', class: 'align-middle text-center shippment_type'},
                     {data: 'shipments_picked_btn',name:'shipments_picked_btn',class: 'align-middle shipments_picked'},
-                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
                     
                     {data: 'address', name: 'address', class: 'align-middle address'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
 
-                    {data: 'hub', name: 'hub', class: 'align-middle station'},
-                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
+                    {data: 'hub', name: 'h.name', class: 'align-middle station'},
+                    {data: 'route_code', name: 'rt.code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rd.name', class: 'align-middle rider_id',
                     render: function (data, type, row) {
                             if (row.rider_id !== null) {
                                 return row.rider_id + ' - ' + row.rider_name;
@@ -662,7 +659,7 @@
                         }
                     },
                     {data: 'rider_phone', name: 'rider_phone', class: 'align-middle rider_phone'},
-                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider',
+                    {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider',
                       render:function(data,type,row){
                         if(row.current_rider_id!==null){
                             return row.current_rider_id + ' - ' + row.current_rider;
@@ -706,24 +703,53 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    
+                    var pickup_status_select = '<select name="pickup_status_select" id="pickup_status_select" class="select2 form-control"></select>';
+
 
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
-
                         
-                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                        //     $(td).appendTo($(search));
-                        // } else {
-                        //     var current = $(input).appendTo($(search)).on('change', function () {
-                        //         column.search($(this).val(), false, false, true).draw();
-                        //     }).wrap(td).after(icon);
+                        
+                       
+                        if ($(header).is('.action') || $(header).is('.select') ||  $(header).is('.pickup_request_id') ||  $(header).is('.pickup_date')  || $(header).is('.services_count') || $(header).is('.service') || $(header).is('.address') || $(header).is('.shipments_picked') || $(header).is('.special_request') || $(header).is('.rider_phone') || $(header).is('.current_rider_phone') || $(header).is('.assigned_by') || $(header).is('.adminname') || $(header).is('.username') ||  $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                            $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(pickup_status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                        } 
+                        
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                        //     if (column.search()) {
-                        //         current.val(column.search());
-                        //     }
-                        // }
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+
                     });
+
+                    var statuses = @json($statuses)
+                   
+                    var status_data = $.map(statuses, function (obj,key) {
+                        obj.id = obj.name;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#pickup_status_select").prepend('<option value="" selected></option>').select2({
+                                data: status_data,
+                                placeholder: "Select Status",
+                                width: '100%',
+                                containerCssClass: 'select-xs',
+                                dropdownCssClass: 'form-control-sm p-0'
+                    });
+
 
                     this.api().table().columns.adjust();
                 }
