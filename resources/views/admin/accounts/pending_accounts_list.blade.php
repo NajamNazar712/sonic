@@ -55,6 +55,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Lead ID</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company</th>
@@ -975,6 +976,7 @@
                         head = [];
 
                         head.push('S.No');
+                        head.push('Lead ID');
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
@@ -1019,6 +1021,7 @@
 
 
                             row.push(index + 1);
+                            row.push(values.lead_id);
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
@@ -1475,6 +1478,7 @@
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'lead_id_link', name: 'users.lead_id', class: 'align-middle lead_id'},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},

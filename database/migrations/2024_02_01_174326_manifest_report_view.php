@@ -22,7 +22,7 @@ class ManifestReportView extends Migration
         DB::statement($manifest_report);
         DB::statement($manifest_report2);
     }
-
+ 
     /**
      * Reverse the migrations.
      *

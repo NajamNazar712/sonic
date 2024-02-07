@@ -833,6 +833,14 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['date_time', 'link'];
         }
+        else if($id == 220)
+        {
+            $details['fields'] = ['preview', 'link'];
+        }
+        else if($id == 228)
+        {
+            $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
+        }
         return $details;
     }
 
