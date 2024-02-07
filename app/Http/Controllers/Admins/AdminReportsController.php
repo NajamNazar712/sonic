@@ -13546,8 +13546,8 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             
-            $intercepted = count(ShipmentsJourney::whereIn('shipper_status_id', [54,55])->whereBetween('updated_at' ,[$from, $to])->get());
-            $shipper_advised_requested = count(ShipmentsJourney::where('shipper_status_id', 62)->whereBetween('updated_at' ,[$from, $to])->get());
+            $intercepted = count(ShipmentsJourney::whereIn('shipper_status_id', [54,55])->whereBetween('updated_at' ,[$from, $to])->groupby('shipment_id')->get());
+            $shipper_advised_requested = count(ShipmentsJourney::where('shipper_status_id', 62)->whereBetween('updated_at' ,[$from, $to])->groupby('shipment_id')->get());
             $reason_validation_required = count(ShipmentsJourney::where('shipper_status_id', 12)->where('verification', 1)->whereBetween('updated_at' ,[$from, $to])->get());
             $reattempted = count(ShipmentsJourney::where('shipper_status_id', 13)->whereBetween('updated_at' ,[$from, $to])->get());
             $returned = count(ShipmentsJourney::where('shipper_status_id', 20)->whereBetween('updated_at' ,[$from, $to])->get());
