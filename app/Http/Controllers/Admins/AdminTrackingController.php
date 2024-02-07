@@ -1427,7 +1427,7 @@ class AdminTrackingController extends Controller
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                                     ->where('sj.shipment_id', '=', $journey->shipment_id);
+                                        ->where('sj.id', '=', $journey->id);
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->whereNotIn('shipment_scanning_journeys.id', $processed_scanning_ids);    
