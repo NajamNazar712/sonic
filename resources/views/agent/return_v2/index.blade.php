@@ -205,7 +205,7 @@
 
         <input type="hidden" value="" id="shipment_id_val">
 
-        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        <div class="modal fade" id="interceptModal" tabindex="-1" role="dialog" aria-labelledby="interceptModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -442,7 +442,8 @@
 
                 $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
-                    placeholder: 'City*'
+                    placeholder: 'City*',
+                    dropdownParent: $('#interceptModal')
                 });
                 $('#consignee').select2({
                     width: '100%',
@@ -1185,7 +1186,7 @@
                                                 .consignee_address);
                                             $('#shipment_reason').hide();
 
-                                            $('#myModal').modal('show');
+                                            $('#interceptModal').modal('show');
                                         }
                                     });
 
@@ -1239,7 +1240,7 @@
                     }
 
 
-                    $('#myModal').modal('toggle');
+                    $('#interceptModal').modal('toggle');
                     $('#shipment_status').prop('disabled', true);
                 });
 
