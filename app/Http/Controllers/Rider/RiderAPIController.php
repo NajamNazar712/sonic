@@ -3574,7 +3574,7 @@ class RiderAPIController extends Controller
             })->where('shipments_journey.shipper_status_id', 53)
                 ->where('shipments_journey.rider_id', $rider_id)
                 ->whereBetween('shipments_journey.created_at', [$from_date . ' 00:00:01', $to_date . ' 23:59:59'])
-                ->select(DB::raw('COUNT(shipments_journey.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment', 'shipments_journey.created_at AS rider_pick_date'))
+                ->select(DB::raw('COUNT(shipments_journey.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment'), 'shipments_journey.created_at AS rider_pick_date')
                 ->groupBy('shipments_journey.rider_id', 'shipments_journey.created_at');
             if ($rider_pickups->exists()) {
                 $rider_pickups = $rider_pickups->get();
