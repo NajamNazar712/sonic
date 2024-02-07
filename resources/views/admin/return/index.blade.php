@@ -1029,40 +1029,9 @@
             @endphp
             $(document).ready(function() {
 
-                function fetchData() {
-                $.ajax({
-                        url: '{!! route('admin.return.data') !!}',
-                        method: 'GET'
-                    }).done(function (data) 
-                    {
-                       if(data.status){
-                            $('#total_of_shipments').text(data.stats.total_of_shipments);
-                            $('#total_rvr').text(data.stats.reason_validation_required);
-                            $('#percentage_reason_validation_required').text(data.stats.percentage_reason_validation_required);
-                            $('#shipper_advised_requested').text(data.stats.shipper_advised_requested);
-                            $('#percentage_shipper_advised_requested').text(data.stats.percentage_shipper_advised_requested);
-                            $('#unresponsive_count').text(data.stats.unresponsive_count);
-                            $('#number_of_pending_tickets').text(data.stats.number_of_pending_tickets);
-                            $('#number_of_pending_ticket_percentage').text(data.stats.number_of_pending_ticket_percentage);
-                            $('#number_of_inprocess_tickets').text(data.stats.number_of_inprocess_tickets);
-                            $('#number_of_inprocess_tickets_percentage').text(data.stats.number_of_inprocess_tickets_percentage);
-                            $('#online_agents').text(data.stats.online_agents);
-                            $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+               
 
-                            var averageAging = parseFloat(data.stats.average_aging);
-                            var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
-                            $('#average_aging').text(content);
-
-                            var average_response_time = parseFloat(data.stats.average_response_time);
-                            var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
-                            $('#average_response_time').text(average_response_time_content);
-
-                            $('#oldest_shipments').text(data.stats.oldest_shipments);
-                       }
-                    });
-                }
-
-                fetchData();
+                
 
                 // update_AssignAgentModal function
                 $('#AssignAgentModal').on('shown.bs.modal', function() {
@@ -3514,6 +3483,41 @@
                     table.draw(true);
                     $('#return_confirmation_pending_filter').val(0);
                 });
+
+                function fetchData() {
+                $.ajax({
+                        url: '{!! route('admin.return.data') !!}',
+                        method: 'GET'
+                    }).done(function (data) 
+                    {
+                       if(data.status){
+                            $('#total_of_shipments').text(data.stats.total_of_shipments);
+                            $('#total_rvr').text(data.stats.reason_validation_required);
+                            $('#percentage_reason_validation_required').text(data.stats.percentage_reason_validation_required);
+                            $('#shipper_advised_requested').text(data.stats.shipper_advised_requested);
+                            $('#percentage_shipper_advised_requested').text(data.stats.percentage_shipper_advised_requested);
+                            $('#unresponsive_count').text(data.stats.unresponsive_count);
+                            $('#number_of_pending_tickets').text(data.stats.number_of_pending_tickets);
+                            $('#number_of_pending_ticket_percentage').text(data.stats.number_of_pending_ticket_percentage);
+                            $('#number_of_inprocess_tickets').text(data.stats.number_of_inprocess_tickets);
+                            $('#number_of_inprocess_tickets_percentage').text(data.stats.number_of_inprocess_tickets_percentage);
+                            $('#online_agents').text(data.stats.online_agents);
+                            $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+
+                            var averageAging = parseFloat(data.stats.average_aging);
+                            var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
+                            $('#average_aging').text(content);
+
+                            var average_response_time = parseFloat(data.stats.average_response_time);
+                            var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
+                            $('#average_response_time').text(average_response_time_content);
+
+                            $('#oldest_shipments').text(data.stats.oldest_shipments);
+                       }
+                    });
+                }
+
+                fetchData();
                 
             });
         </script>
