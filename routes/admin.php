@@ -2394,7 +2394,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
 		Route::prefix('rv_action_count_report')->name('rv_action_count_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rv_action_count_report_index')->name('index');
             Route::post('', 'Admins\AdminReportsController@fetch_rv_action_count_report')->name('fetch');
-        })
+        });
         Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
