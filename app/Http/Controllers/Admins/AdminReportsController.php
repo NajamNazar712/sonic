@@ -13840,10 +13840,10 @@ dd($shipments->get());
             ->select('segments.id as segment_id','segments.name as segment_name','scs.id as sub_segment_id','scs.name as sub_segment_name')
             ->get();
 
-        $origin_name = "SELECT origin_zonecode As origin_name FROM manifest_report2 GROUP BY origin_name";
+        $origin_name = "SELECT name As origin_name FROM zones";
         $origin_name = DB::select($origin_name);
 
-        $destination_name = "SELECT destination_zonecode As destination_name FROM manifest_report2 GROUP BY destination_name";
+        $destination_name = "SELECT name As destination_name FROM zones";
         $destination_name = DB::select($destination_name);
 
         return view('admin.reports.cargo_manifest.index')->with(['origins' => $origin_name, 'destinations' => $destination_name, 'segments' => $segments]);
