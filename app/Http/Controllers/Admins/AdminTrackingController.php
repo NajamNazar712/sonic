@@ -1201,7 +1201,7 @@ class AdminTrackingController extends Controller
                         } else {
                             $machine_name = '';
                         }
-                        $check = array();
+                        $processed_scanning_ids = array();
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
                             $journey_details['image_audio_location'] = '';
@@ -1434,35 +1434,36 @@ class AdminTrackingController extends Controller
                                      ->where('sj.shipment_id', '=', $journey->shipment_id);
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                            ->whereNotIn('shipment_scanning_journeys.id', $check);    
+                            ->whereNotIn('shipment_scanning_journeys.id', $processed_scanning_ids);    
+                            
                         switch ($journey->shipper_status_id) {
                             case 2:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 3:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 4:
                                 $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 5:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 11:
                                 $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 23:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             case 53:
                                 $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                                $check[] = $scanning_data->id;
+                                $processed_scanning_ids[] = $scanning_data->id;
                                 break;
                             default:
                                 $scanning_data = null;
