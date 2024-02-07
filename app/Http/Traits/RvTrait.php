@@ -1548,7 +1548,7 @@ trait RvTrait
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
                     FROM shipments_journey AS sj
-                    WHERE sj.status_reason_id = 12
+                    WHERE sj.status_reason_id IN (12, 27, 35)
                     AND sj.shipment_id = shipments.id
                     AND sj.id = (
                         SELECT MAX(id)
@@ -1596,7 +1596,7 @@ trait RvTrait
                     ->whereRaw('NOT EXISTS (
                         SELECT sj.id
                         FROM shipments_journey AS sj
-                        WHERE sj.status_reason_id = 12
+                        WHERE sj.status_reason_id IN (12, 27, 35)
                         AND sj.shipment_id = shipments.id
                         AND sj.id = (
                             SELECT MAX(id)
