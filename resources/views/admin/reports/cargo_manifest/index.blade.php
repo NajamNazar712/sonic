@@ -246,69 +246,69 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.last_mile_app.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
+                    {{--    url: '{{ route('admin.reports.last_mile_app.list') }}',--}}
+                    {{--    data: params,--}}
+                    {{--    success: function (result) {--}}
+                    {{--        head = [];--}}
 
-                            head.push('S. No');
-                            head.push('Trax IDs');
-                            head.push('Rider Name');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Delivery Date');
-                            head.push('Total Shipments');
-                            head.push('Before 11');
-                            head.push('At 11');
-                            head.push('At 12');
-                            head.push('At 13');
-                            head.push('At 14');
-                            head.push('At 15');
-                            head.push('At 16');
-                            head.push('At 17');
-                            head.push('At 18');
-                            head.push('At 19');
-                            head.push('At 20');
-                            head.push('At 21');
-                            head.push('At 22');
-                            head.push('At 23');
-                            head.push('After 23');
-                            head.push('Total Updated Shipments');
-                            head.push('Update Via App');
-                            head.push('Update Via Admin');
-                            $.each(result.data, function(index, values) {
-                                row = [];
+                    {{--        head.push('S. No');--}}
+                    {{--        head.push('Trax IDs');--}}
+                    {{--        head.push('Rider Name');--}}
+                    {{--        head.push('Hub');--}}
+                    {{--        head.push('Zone');--}}
+                    {{--        head.push('Delivery Date');--}}
+                    {{--        head.push('Total Shipments');--}}
+                    {{--        head.push('Before 11');--}}
+                    {{--        head.push('At 11');--}}
+                    {{--        head.push('At 12');--}}
+                    {{--        head.push('At 13');--}}
+                    {{--        head.push('At 14');--}}
+                    {{--        head.push('At 15');--}}
+                    {{--        head.push('At 16');--}}
+                    {{--        head.push('At 17');--}}
+                    {{--        head.push('At 18');--}}
+                    {{--        head.push('At 19');--}}
+                    {{--        head.push('At 20');--}}
+                    {{--        head.push('At 21');--}}
+                    {{--        head.push('At 22');--}}
+                    {{--        head.push('At 23');--}}
+                    {{--        head.push('After 23');--}}
+                    {{--        head.push('Total Updated Shipments');--}}
+                    {{--        head.push('Update Via App');--}}
+                    {{--        head.push('Update Via Admin');--}}
+                    {{--        $.each(result.data, function(index, values) {--}}
+                    {{--            row = [];--}}
 
-                                row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.rider_name);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.delivery_date);
-                                row.push(values.total_shipments_excel);
-                                row.push(values.before_11_count);
-                                row.push(values.at_11_count);
-                                row.push(values.at_12_count);
-                                row.push(values.at_13_count);
-                                row.push(values.at_14_count);
-                                row.push(values.at_15_count);
-                                row.push(values.at_16_count);
-                                row.push(values.at_17_count);
-                                row.push(values.at_18_count);
-                                row.push(values.at_19_count);
-                                row.push(values.at_20_count);
-                                row.push(values.at_21_count);
-                                row.push(values.at_22_count);
-                                row.push(values.at_23_count);
-                                row.push(values.after_23_count);
-                                row.push(values.total_updated_shipments);
-                                row.push(values.updated_via_rider1);
-                                row.push(values.updated_via_admin1);
+                    {{--            row.push(index + 1);--}}
+                    {{--            row.push(values.trax_id);--}}
+                    {{--            row.push(values.rider_name);--}}
+                    {{--            row.push(values.hub);--}}
+                    {{--            row.push(values.zone);--}}
+                    {{--            row.push(values.delivery_date);--}}
+                    {{--            row.push(values.total_shipments_excel);--}}
+                    {{--            row.push(values.before_11_count);--}}
+                    {{--            row.push(values.at_11_count);--}}
+                    {{--            row.push(values.at_12_count);--}}
+                    {{--            row.push(values.at_13_count);--}}
+                    {{--            row.push(values.at_14_count);--}}
+                    {{--            row.push(values.at_15_count);--}}
+                    {{--            row.push(values.at_16_count);--}}
+                    {{--            row.push(values.at_17_count);--}}
+                    {{--            row.push(values.at_18_count);--}}
+                    {{--            row.push(values.at_19_count);--}}
+                    {{--            row.push(values.at_20_count);--}}
+                    {{--            row.push(values.at_21_count);--}}
+                    {{--            row.push(values.at_22_count);--}}
+                    {{--            row.push(values.at_23_count);--}}
+                    {{--            row.push(values.after_23_count);--}}
+                    {{--            row.push(values.total_updated_shipments);--}}
+                    {{--            row.push(values.updated_via_rider1);--}}
+                    {{--            row.push(values.updated_via_admin1);--}}
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
+                    {{--            body.push(row);--}}
+                    {{--        });--}}
+                    {{--    },--}}
+                    {{--    async: false--}}
                     });
                     return {body: body, header: head,};
                 }
@@ -369,13 +369,7 @@
                 drawCallback: function () {
                     var api = this.api();
 
-                    var update_via_app_count = 0;
-                    var update_via_dbf_count = 0;
-                    var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        update_via_app_count+=this.data().updated_via_rider1;
-                        update_via_dbf_count+=this.data().updated_via_admin1;
-                        total_shipment_count+=this.data().total_shipments;
                     } );
                 },
 
