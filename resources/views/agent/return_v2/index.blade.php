@@ -224,9 +224,7 @@
                             <div class="col-md-4 mr-5 pl-0">
                                 <h4 class="form-section mb-2 text-center">Consignee Information</h4>
                                 <div class="form-group">
-                                    <select name="consignee_city" class="select2" value="" id="consignee_city"
-                                        data-rule-required="true" data-msg-required="City is required">
-
+                                    <select name="consignee_city" class="select2" value="" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -442,7 +440,7 @@
                 // });
 
 
-                $('#consignee_city').select2({
+                $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'City*'
                 });
