@@ -423,23 +423,6 @@
         <script type="text/javascript">
             $(document).ready(function() {
 
-                // $(document).on('change', '#tswitch', function() {
-                //     if ($("#tswitch").is(":checked")) {
-                //         $('#tmsg').removeClass('d-none');
-                //         $('#switch2').removeClass('d-none');
-                //         $('#scswitch').removeClass('d-none');
-                //         $('#scswitch1').removeClass('d-none');
-
-
-                //     } else {
-                //         $('#tmsg').addClass('d-none');
-                //         $('#switch2').addClass('d-none');
-                //         $('#scswitch').addClass('d-none');
-                //         $('#scswitch1').addClass('d-none')
-                //     }
-                // });
-
-
                 $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'City*',
@@ -678,11 +661,7 @@
                                 shipment += '</table';
                                 shipment += '</tr>';
 
-
-
                                 shipment += '<tbody>';
-
-
 
                                 shipment += '<tr>';
 
