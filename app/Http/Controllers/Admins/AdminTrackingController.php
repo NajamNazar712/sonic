@@ -1198,7 +1198,6 @@ class AdminTrackingController extends Controller
                         } else {
                             $machine_name = '';
                         }
-                        $processed_scanning_ids = array();
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
                             $journey_details['image_audio_location'] = '';
@@ -1413,7 +1412,6 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
-
                             $shipment_scanning_query = ShipmentScanningJourney::select(
                                 'shipment_scanning_journeys.id',
                                 'ssjal.shipment_id',
@@ -1421,51 +1419,47 @@ class AdminTrackingController extends Controller
                                 'shipment_scanning_journeys.latitude',
                                 'shipment_scanning_journeys.longitude',
                                 'ssjal.area_id',
+                                'ssjal.admin_id',
                                 'shipment_scanning_journeys.created_at',
                                 'ssjal.hub_id',
                                 'sj.shipper_status_id'
                             )
                             ->join('shipments_journey as sj', function($join) use ($journey) {
                                 $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
-                                        ->where('sj.id', '=', $journey->id);
+                                    ->where('sj.id', '=', $journey->id);
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
-                            ->whereNotIn('shipment_scanning_journeys.id', $processed_scanning_ids);    
-                        
-                        switch ($journey->shipper_status_id) {
-                            case 2:
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 3:
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 4:
-                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 5:
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 11:
-                                $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 23:
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            case 53:
-                                $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
-                                $processed_scanning_ids[] = $scanning_data['id'];
-                                break;
-                            default:
+                            ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+                            if($journey->admin['role_id'] != 1){
+                                switch ($journey->shipper_status_id) {
+                                    case 2:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                                        break;
+                                    case 3:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 4:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                                        break;
+                                    case 5:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                                        break;
+                                    case 11:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                                        break;
+                                    case 23:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 53:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                                        break;
+                                    default:
+                                        $scanning_data = null;
+                                        break;
+                                }
+                            }else{
                                 $scanning_data = null;
-                                break;
-                        }
-
+                            }
                             $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
