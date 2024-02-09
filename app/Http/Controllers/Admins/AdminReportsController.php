@@ -13543,15 +13543,15 @@ class AdminReportsController extends Controller
             
             $intercepted = count(RvShipmentAssignAgentDetails::whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('updated_at' ,[$from, $to])->groupBy('shipment_id')->get());
             $shipper_advised_requested = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 7)->whereBetween('updated_at' ,[$from, $to])->groupBy('shipment_id')->get());
-            $reason_validation_required = count(Shipment::join('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                     ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipper_status_id = 12)'));
-            })
-            // ->where('shipments.shipper_status_id', 12)
-            ->where('sj.verification', 0)
-            ->whereBetween('sj.created_at', [$from, $to])
-            ->get());
-            // $reason_validation_required = count(Shipment::join('shipments_journey as sj', 'shipment.id', '',where('shipper_status_id', 12)->where('verification', 0)->whereBetween('updated_at' ,[$from, $to])->get());
+            $reason_validation_required = count(ShipmentsJourney::where('shipper_status_id', 12)->where('verification', 0)->whereBetween('updated_at' ,[$from, $to])->get());
+            // $reason_validation_required = count(Shipment::join('shipments_journey as sj', function ($join) {
+            //     $join->on('sj.shipment_id', '=', 'shipments.id')
+            //          ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipper_status_id = 12)'));
+            // })
+            // // ->where('shipments.shipper_status_id', 12)
+            // ->where('sj.verification', 0)
+            // ->whereBetween('sj.created_at', [$from, $to])
+            // ->get());
             $reattempted = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 2)->whereBetween('updated_at' ,[$from, $to])->get());
             $returned = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 1)->whereBetween('updated_at' ,[$from, $to])->get());
             $on_hold = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 5)->whereBetween('updated_at' ,[$from, $to])->get());
