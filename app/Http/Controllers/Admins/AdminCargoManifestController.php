@@ -6134,7 +6134,7 @@ class AdminCargoManifestController extends Controller
     catch (\Throwable $th){
             DB::rollBack();
             return back()->with(['went_wrong' => 'Something Went Wrong']);
-    }
+    }}
 
     public function receive_bag_shipments_store_old(Request $request)
     {
