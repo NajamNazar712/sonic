@@ -8,7 +8,7 @@ use Closure;
 
 class APIToken
 {
-    public $blockIps = ['216.48.189.213'];
+    public $blockIps = ['170.187.230.212'];
     /**
      * Handle an incoming request.
      *
