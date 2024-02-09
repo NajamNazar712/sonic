@@ -120,6 +120,8 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    <th class="border-primary border-darken-1">Rush Shipment Count</th>
+                                    <th class="border-primary border-darken-1">Rush Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total Weight</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -396,7 +398,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[14, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {
                         data: 'serial_number',
@@ -420,6 +422,8 @@
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
+                    {data: 'rush_shipment_count', name: 'rush_shipment_count', class: 'align-middle'},
+                    {data: 'rush_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle'},
                     {data: 'actual_weight', name: 'cargo_manifests.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},

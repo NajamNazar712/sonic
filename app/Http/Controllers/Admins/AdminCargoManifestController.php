@@ -2866,6 +2866,12 @@ class AdminCargoManifestController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->addColumn('rush_shipment_count', function ($master_cargo) {
+                return '--';
+            })
+            ->addColumn('rush_shipment_weight', function ($master_cargo) {
+                return '--';
+            })
             ->filterColumn('vehicles', function ($query, $keyword) {
                 $fleet = Fleet::where('reg_number', $keyword)->first();
                 if ($fleet) {
