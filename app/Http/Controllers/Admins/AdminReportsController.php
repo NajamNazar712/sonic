@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\RvShipmentAssignAgentDetails;
 use Carbon\Carbon;
 use App\DailyVisit;
 use PHPExcel_Style_Fill;
@@ -12318,10 +12319,10 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
+
         //this join is only for agents who have updated the shipment status
         ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
             $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
-                //  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_assign_agent_status_id = 3 AND rv_shipment_assign_agent_details.rv_state_id = 2 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
                  ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_state_id != 1 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
                  ->orderBy('id', 'DESC');
         })
@@ -12358,7 +12359,6 @@ class AdminReportsController extends Controller
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
                     })
                     ->editColumn('rv_status', function($rv_report) {
-                        // if ($rv_report['rv_status'] == "" || $rv_report['rv_status'] == 'Intercept Approved') { //we dont have to show intercept approved in action column
                         if ($rv_report['rv_status'] == "") { 
                             return '-';
                         }
@@ -12393,15 +12393,13 @@ class AdminReportsController extends Controller
                         }
                     })
                     ->addColumn('action_updated_by', function($rv_report) {
-                        //admin or agent
-                        // if (($rv_report['updated_type_id'] == 1) || ($rv_report['updated_type_id'] == 2)) {
+                        //admin or customer_experience
                         if (($rv_report['updated_type_id'] == 1) && ($rv_report['rv_state_id'] != 1)) {
                             $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
                                 $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
                             })
                             ->select('ad.name')
                             ->first();
-                        
                             return $query->name;
                         }
                         //shipper or retail user
@@ -12466,9 +12464,7 @@ class AdminReportsController extends Controller
         if ($agent_id = $request->get('search_agent_name')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            // $agent_name = Admin::where('id', $agent_id)->value('name');
             $rv_report->where('add.id', '=', $agent_id);
-            // $rv_report->where('add.id', '=', $agent_id)->whereBetween('rv_shipment_assign_agents.updated_at', [$from, $to]);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -13545,13 +13541,21 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             
-            $intercepted = count(Shipment::whereIn('shipper_status_id', [54,55])->whereBetween('updated_at' ,[$from, $to])->get());
-            $shipper_advised_requested = count(Shipment::where('shipper_status_id', 62)->whereBetween('updated_at' ,[$from, $to])->get());
-            $reason_validation_required = count(Shipment::where('shipper_status_id', 12)->whereBetween('updated_at' ,[$from, $to])->get());
-            $reattempted = count(ShipmentsJourney::where('shipper_status_id', 13)->whereBetween('updated_at' ,[$from, $to])->get());
-            $returned = count(Shipment::where('shipper_status_id', 20)->whereBetween('updated_at' ,[$from, $to])->get());
-            $on_hold = count(Shipment::where('shipper_status_id', 9)->whereBetween('updated_at' ,[$from, $to])->get());
-            $unresponsive = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_assign_agent_status_id', 6)->where('unresponsive_count','>',0)->whereBetween('rv_shipment_assign_agents.updated_at' ,[$from, $to])->get();
+            $intercepted = count(RvShipmentAssignAgentDetails::whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('updated_at' ,[$from, $to])->groupBy('shipment_id')->get());
+            $shipper_advised_requested = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 7)->whereBetween('updated_at' ,[$from, $to])->groupBy('shipment_id')->get());
+            $reason_validation_required = count(ShipmentsJourney::where('shipper_status_id', 12)->where('verification', 0)->whereBetween('created_at' ,[$from, $to])->get());
+            // $reason_validation_required = count(Shipment::join('shipments_journey as sj', function ($join) {
+            //     $join->on('sj.shipment_id', '=', 'shipments.id')
+            //          ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipper_status_id = 12)'));
+            // })
+            // // ->where('shipments.shipper_status_id', 12)
+            // ->where('sj.verification', 0)
+            // ->whereBetween('sj.created_at', [$from, $to])
+            // ->get());
+            $reattempted = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 2)->whereBetween('updated_at' ,[$from, $to])->get());
+            $returned = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 1)->whereBetween('updated_at' ,[$from, $to])->get());
+            $on_hold = count(RvShipmentAssignAgentDetails::where('rv_assign_agent_status_id', 5)->whereBetween('updated_at' ,[$from, $to])->get());
+            $unresponsive = count(RvShipmentAssignAgentDetails::join('rv_shipment_assign_agents as rsaa','rsaa.id','rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')->leftJoin('shipments as sh','rv_shipment_assign_agent_details.shipment_id','sh.id')->whereIn('sh.shipper_status_id', [12,65,66])->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', 6)->where('rsaa.unresponsive_count','>',0)->whereBetween('rv_shipment_assign_agent_details.updated_at' ,[$from, $to])->get());
             return response()->json(['unresponsive' => $unresponsive, 'shipper_advised_requested' => $shipper_advised_requested, 'reason_validation_required' => $reason_validation_required,
             'reattempted' => $reattempted, 'intercepted' => $intercepted,'returned' => $returned, 'on_hold' => $on_hold ]);
         }
