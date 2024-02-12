@@ -1046,7 +1046,7 @@ trait RvTrait
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                         $shipment_assigned_unassigned_agent = $rv_shipments->where('rv_state_id', 3)->first();
                         if ($shipment_assigned_unassigned_agent) {
-                            $shipment_assigned_unassigned_agent->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
+                            $shipment_assigned_unassigned_agent->update(['rv_state_id'=> 1, 'agent_id'=> $agent_id, 'assigned_by' => 0]);
                             
                             $shipment_assign_agent = $shipment_assigned_unassigned_agent->latest()->first();
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
@@ -1072,15 +1072,14 @@ trait RvTrait
                         }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
-                        $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                        if ($shipment_assigned_assigned_agent->exists()) {
-                            $shipment_assigned_assigned_agent->first();
+                        $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
+                        if ($shipment_assigned_assigned_agent) {
                             break 2;
                         }
                         
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = $rv_shipments->first();
-                        if ($find_shipment_assigned_agent ) {
+                        if ($find_shipment_assigned_agent) {
                             $shipment = null;
                             continue;
                         }
@@ -1106,7 +1105,6 @@ trait RvTrait
             }
             else {
                 //No Shipment Found in Assigned Hub
-                // return false;
                 return response()->json(['status' => 1, 'error' => 'No zone assigned or shipment not found']);
             }
         }
