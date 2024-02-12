@@ -148,9 +148,14 @@ class ReturnController extends Controller
         })
         ->leftJoin('shipments_journey as sret', function ($join) {
             $join->on('sret.shipment_id', '=', 'shipments.id')
-                ->where('sret.shipper_status_id','=',13)
-                ->where('sret.verification','=',1);
+            ->where('sret.id','=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13 and verification = 1)'));
         })
+        // ->leftJoin('shipments_journey as sret', function ($join) {
+        //     $join->on('sret.shipment_id', '=', 'shipments.id')
+        //         ->where('sret.shipper_status_id','=',13)
+        //         ->where('sret.verification','=',1);
+        // })
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
         ->leftjoin('crm_requests as crm', function ($join) {
             $join->on('crm.shipment_id', '=', 'shipments.id')
@@ -180,7 +185,7 @@ class ReturnController extends Controller
         
         ->leftjoin('employee_attendances as ea', function ($join) {
             $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
-                ->where('ea.id', '=', \Illuminate\Support\Facades\DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
+                ->where('ea.id', '=', DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
         })
 
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
@@ -219,10 +224,9 @@ class ReturnController extends Controller
                 'z.name as zone');
         }
         else{
-            $shipments = $shipments->select('shipments.id');
+            // $shipments = $shipments->select('shipments.id');
+            $shipments = $shipments->select('rvsaa.shipment_id');
         }
-
-        // ->whereIn('shipments.shipper_status_id', [7, 8, 9, 15, 12, 65, 66])
         $shipments = $shipments->whereIn('shipments.shipper_status_id', [12,65,66,52])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
@@ -264,9 +268,9 @@ class ReturnController extends Controller
     {
        $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
 
-       $total_of_shipments = $this->shipments(2)->get()->count();
        $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
-
+        $total_of_shipments = count($this->total_of_shipments_exclude);
+        
        //Average Hours
        $aging = RvShipmentAssignAgent::select('created_at')->get();
        $totalSeconds = 0;
