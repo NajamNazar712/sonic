@@ -296,7 +296,7 @@ class ReturnController extends Controller
        $number_of_inprocess_tickets = RvShipmentAssignAgent::leftJoin('shipments as sh','rv_shipment_assign_agents.shipment_id','sh.id')->where('rv_shipment_assign_agents.rv_state_id', 1)->whereIn('sh.shipper_status_id', [12,65,66,52])->get();
        $number_of_inprocess_tickets_percentage = (count($number_of_inprocess_tickets) / ($rv_tickets) * 100);
 
-       $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+       $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->where('status_id', '!=', 2)->pluck('id')->toArray();
        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
            ->whereIn('id', function ($query) {
