@@ -314,9 +314,8 @@ class TeamLeadDashboardController extends Controller
     public function shipment_assign_list(Request $request)
     {
         $assigned_agent_shipment = RvShipmentAssignAgent::join('admins as staff', 'staff.id', 'rv_shipment_assign_agents.agent_id')
-            ->leftjoin('shipments as shipment', 'shipment.id', 'rv_shipment_assign_agents.shipment_id')
-            ->select(['shipment.tracking_number as tracking_number', 'rv_shipment_assign_agents.shipment_id as shipment_id', 'staff.name as agent_name', 'rv_shipment_assign_agents.rv_assign_agent_status_id as status', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id as sub_status', 'rv_shipment_assign_agents.rv_state_id as state', 'rv_shipment_assign_agents.updated_by_id as updated_by'])
-            ->groupBy('rv_shipment_assign_agents.id');
+            ->join('shipments as shipment', 'shipment.id', 'rv_shipment_assign_agents.shipment_id')
+            ->select(['shipment.tracking_number as tracking_number', 'rv_shipment_assign_agents.shipment_id as shipment_id', 'staff.name as agent_name', 'rv_shipment_assign_agents.rv_assign_agent_status_id as status', 'rv_shipment_assign_agents.rv_assign_agent_sub_status_id as sub_status', 'rv_shipment_assign_agents.rv_state_id as state', 'rv_shipment_assign_agents.updated_by_id as updated_by']);
 
 
         if ($request->get('number_of_tickets_input') == '1') {
@@ -375,7 +374,6 @@ class TeamLeadDashboardController extends Controller
             })
             ->editColumn('state', function ($assigned_agent_shipment) {
                 $state = RvState::where('id', $assigned_agent_shipment->state)->first();
-                $completed_state = RvState::where('id', $assigned_agent_shipment->state)->first();
                 if ($state['name']) {
                     return $state['name'];
                 } else {

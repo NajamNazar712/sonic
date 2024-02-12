@@ -1205,9 +1205,9 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment_id);
 
                 }
-                $process_one_link['shipment_ids'] = $valid_shipments;
-                $process_one_link['delivery_note_id'] = $note->id;
-                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+//                $process_one_link['shipment_ids'] = $valid_shipments;
+//                $process_one_link['delivery_note_id'] = $note->id;
+//                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
@@ -1604,14 +1604,14 @@ class DeliveryController extends Controller
                     }
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+//                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
 
                         $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
                         if (count($unique_codes) > 0) {
                             dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
                         }
                     } else {
-                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+//                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
 
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
@@ -1633,7 +1633,7 @@ class DeliveryController extends Controller
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
 
-                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+//                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
 
                         $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
                         if (count($unique_codes) > 0) {
@@ -2688,7 +2688,7 @@ class DeliveryController extends Controller
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
 
-            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+//            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
             if (count($unique_codes) > 0) {
@@ -2949,7 +2949,7 @@ class DeliveryController extends Controller
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
 
-            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+//            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
             if (count($unique_codes) > 0) {
@@ -9841,9 +9841,9 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    $process_one_link['shipment_ids'] = $valid_shipments;
-                    $process_one_link['delivery_note_id'] = $note->id;
-                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+//                    $process_one_link['shipment_ids'] = $valid_shipments;
+//                    $process_one_link['delivery_note_id'] = $note->id;
+//                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
