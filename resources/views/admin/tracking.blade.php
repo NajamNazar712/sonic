@@ -801,7 +801,7 @@
 
             $("#sub_status_call_finding").change(function() {
                 var selectedValue = $(this).val();
-                if (selectedValue === '32') {
+                if (selectedValue === '1') {
                     $('.custom_remark_container').removeClass('d-none');
                     $('#custom_remark').attr('data-rule-required', true);
                     $('#custom_remark').attr('data-msg-required', 'Other Remarks is required');
