@@ -2650,13 +2650,13 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-                    if ($selected_status != 14) {
-                        //auto agent assigning
-                        $data = array();
-                        $data['delivery_note_id'] = $delivery_note_id;
-                        $data['shipment_id'] = $shipment;
-                        dispatch(new ProcessAgentCallMonitoring($data));
-                    }
+//                    if ($selected_status != 14) {
+//                        //auto agent assigning
+//                        $data = array();
+//                        $data['delivery_note_id'] = $delivery_note_id;
+//                        $data['shipment_id'] = $shipment;
+//                        dispatch(new ProcessAgentCallMonitoring($data));
+//                    }
                 }
             }
 
@@ -2911,10 +2911,10 @@ class DeliveryController extends Controller
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
                         }
-                        $data = array();
-                        $data['delivery_note_id'] = $delivery_note_id;
-                        $data['shipment_id'] = $shipment;
-                        dispatch(new ProcessAgentCallMonitoring($data));
+//                        $data = array();
+//                        $data['delivery_note_id'] = $delivery_note_id;
+//                        $data['shipment_id'] = $shipment;
+//                        dispatch(new ProcessAgentCallMonitoring($data));
                     }
                 }
                 //                ShipmentsJourney::where('shipment_id', $shipment)->update(['cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
