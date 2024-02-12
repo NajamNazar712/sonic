@@ -278,7 +278,7 @@ class ReturnV2Controller extends Controller
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
-                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 19 || $request->rv_assign_agent_status_id == 5;
+                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 1 || $request->rv_assign_agent_status_id == 5;
             }), //if unresponsive and other is selected remark is required
         ];
 
@@ -288,7 +288,6 @@ class ReturnV2Controller extends Controller
             'is_fake_status' => $request->input('is_fake_status'),
             'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
             'remarks' => $request->input('remarks') ?? null,
-
         ];
 
         $validate = Validator::make($data, $validations);
