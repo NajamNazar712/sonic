@@ -1096,10 +1096,9 @@
                     $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
                     $('#deactivate_reason_input').text(''); //clearing error message when modal is close
             });
-            // $('#AssignHubModal').on('hide.bs.modal', function(e) {
-            //         // $('#search_origin').text('');
-            //         $('#search_origin').empty();
-            // });
+            $('#AssignHubModal').on('hide.bs.modal', function(e) {
+                table.rows().deselect();
+            });
             $('#BulkAddDaysModal').on('hide.bs.modal', function(e) {
                 selected_rows = [];
                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val('');
