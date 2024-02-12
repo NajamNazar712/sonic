@@ -491,7 +491,7 @@ class TeamLeadDashboardController extends Controller
         $staff->updated_by = Auth::id();
         $staff->save();
 
-        $role = Admin::whereIn('role_id', [104, 63, 70])->pluck('email')->toArray();
+        $role = Admin::whereIn('role_id', [104, 63, 70])->pluck('email')->where('status', 1)->toArray();
         $employee = Employee::where('id', $request->employee_id)->first();
         NotificationsController::send(228, $employee, $role); //sending email to hr
     }

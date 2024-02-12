@@ -9417,6 +9417,7 @@ class GlobalSettingsController extends Controller
 
     public function logistic_report_index()
         {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 735);
             $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
             $settings = GlobalSettings::where('type', 'logistic_setting');
             $logistic_setting_tags = array();
@@ -9430,6 +9431,7 @@ class GlobalSettingsController extends Controller
     
     public function logistic_report_store(Request $request)
         {
+                ActivityTrailController::createActivityTrailLog(Auth::id(), 736);
                 if ($request->has('users') && count($request->users) > 0) {
                     $users = implode(',', $request->users);
                 } else{
