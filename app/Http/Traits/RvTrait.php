@@ -897,43 +897,74 @@ trait RvTrait
         foreach ($sorted_agents as $key => $agent) {
             $shipments = [];
             
+            //this wont be null if admin is assigning shipment to an agent
             if($agent_shipment_id)
             $agent_shipment_id;
             
-            else if (!empty($included_shippers)) {              
-                $flag = false;                
-                if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
+            // else if (!empty($included_shippers)) {              
+            //     $flag = false;                
+            //     if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
+            //         $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
+            //         $mergeArr = array_merge($rv_priority_value, $included_shippers);
+            //         $mergeArr = array_unique($mergeArr);
+            //         $result = array_filter($mergeArr, function($value){
+            //             return $value != '';
+            //         });
+            //         $exploded_result = implode(',', $result);                    
+            //         $flag = true;
+            //     }   
+
+            //     $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
+            //     ->whereIn('shipper_status_id', [12,65,66,52])
+            //     ->where('consignee_city_id', $agent['city_id'])  
+            //     ->whereRaw('NOT EXISTS (
+            //         SELECT sj.id
+            //         FROM shipments_journey AS sj
+            //         WHERE sj.status_reason_id IN (12, 27, 35)
+            //         AND sj.shipment_id = shipments.id
+            //         AND sj.id = (
+            //             SELECT MAX(id)
+            //             FROM shipments_journey
+            //             WHERE shipment_id = shipments.id
+            //         )
+            //     )');
+
+            //     if ($flag == true){
+            //         $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+            //     } else {
+            //         $shipments->orderBy('id', 'ASC');
+            //     } 
+
+            //     $shipments = $shipments->get();
+            //     if($shipments->isEmpty()){
+            //         continue;
+            //     }  
+            // }
+            else if (!empty($included_shippers)) {   
+                $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
+                    ->whereIn('shipper_status_id', [12, 65, 66, 52])
+                    ->where('consignee_city_id', $agent['city_id'])  
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('shipments_journey')
+                            ->whereRaw('shipments_journey.status_reason_id IN (12, 27, 35)')
+                            ->whereRaw('shipments_journey.shipment_id = shipments.id')
+                            ->whereRaw('shipments_journey.id = (SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id)');
+                    });
+            
+                if (!empty($rv_priority_shippers) && !$only_shipper->exists()) {
                     $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
                     $mergeArr = array_merge($rv_priority_value, $included_shippers);
                     $mergeArr = array_unique($mergeArr);
                     $result = array_filter($mergeArr, function($value){
                         return $value != '';
                     });
-                    $exploded_result = implode(',', $result);                    
-                    $flag = true;
-                }   
-
-                $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                ->whereIn('shipper_status_id', [12,65,66,52])
-                ->where('consignee_city_id', $agent['city_id'])  
-                ->whereRaw('NOT EXISTS (
-                    SELECT sj.id
-                    FROM shipments_journey AS sj
-                    WHERE sj.status_reason_id IN (12, 27, 35)
-                    AND sj.shipment_id = shipments.id
-                    AND sj.id = (
-                        SELECT MAX(id)
-                        FROM shipments_journey
-                        WHERE shipment_id = shipments.id
-                    )
-                )');
-
-                if ($flag == true){
-                    $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+                    $shipments->orderByRaw("FIELD(user_id, '" . implode(',', $result) . "')");
                 } else {
-                    $shipments->orderBy('id', 'ASC');
-                } 
-
+                    // $shipments->orderBy('id', 'ASC');
+                    $shipments->orderBy('updated_at', 'ASC'); // Order by updated_at in ascending order (oldest first)
+                }
+            
                 $shipments = $shipments->get();
                 if($shipments->isEmpty()){
                     continue;
@@ -942,55 +973,91 @@ trait RvTrait
 
             
             // Check if only_shippers exists (1 && 0)
+            // else if (!empty($only_shippers) && !($all_shipper_exists)) {
+            //     $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+
+            //     $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+            //         return !in_array($value, $only_shippers);
+            //     });
+            //     $rv_priority_shippers = array_filter($rv_priority_shippers, function($value)  use ($only_shippers) {
+            //         return !in_array($value, $only_shippers);
+            //     });
+
+            //     $mergeArr = array_merge($rv_priority_shippers, $all_shippers);
+            //     $mergeArr = array_unique($mergeArr);
+            //     $result = array_filter($mergeArr, function($value){ 
+            //         return $value != '';
+            //     });
+                
+            //     if (!empty($result)){
+            //         $exploded_result = implode(',', $result);
+            //         $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
+            //         ->whereIn('shipper_status_id', [12,65,66,52])
+            //         ->whereIn('user_id', $result)
+            //         ->whereRaw('NOT EXISTS (
+            //             SELECT sj.id
+            //             FROM shipments_journey AS sj
+            //             WHERE sj.status_reason_id IN (12, 27, 35)
+            //             AND sj.shipment_id = shipments.id
+            //             AND sj.id = (
+            //                 SELECT MAX(id)
+            //                 FROM shipments_journey
+            //                 WHERE shipment_id = shipments.id
+            //             )
+            //         )');
+            //         if(!empty($rv_priority_shippers)){
+            //             $flag = true;
+            //         }else{
+            //             $flag = false;
+            //         }
+                    
+            //         if ($flag == true){
+            //             $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+            //         } else {
+            //             $shipments->orderBy('id', 'ASC');
+            //         } 
+                    
+            //         $shipments = $shipments->get();
+                    
+            //         if($shipments->isEmpty()){
+            //             continue;
+            //         }  
+            //     }
+            // }
+
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
                 $all_shippers = User::where('status', 3)->pluck('id')->toArray();
-
-                $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
-                    return !in_array($value, $only_shippers);
-                });
-                $rv_priority_shippers = array_filter($rv_priority_shippers, function($value)  use ($only_shippers) {
-                    return !in_array($value, $only_shippers);
-                });
-
-                $mergeArr = array_merge($rv_priority_shippers, $all_shippers);
-                $mergeArr = array_unique($mergeArr);
-                $result = array_filter($mergeArr, function($value){ 
-                    return $value != '';
-                });
-                
-                if (!empty($result)){
-                    $exploded_result = implode(',', $result);
+            
+                $result = array_diff($all_shippers, $only_shippers);
+                $result = array_merge(array_diff($rv_priority_shippers, $only_shippers), $result);
+                $result = array_filter(array_unique($result));
+            
+                if (!empty($result)) {
                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    ->whereIn('shipper_status_id', [12,65,66,52])
-                    ->whereIn('user_id', $result)
-                    ->whereRaw('NOT EXISTS (
-                        SELECT sj.id
-                        FROM shipments_journey AS sj
-                        WHERE sj.status_reason_id IN (12, 27, 35)
-                        AND sj.shipment_id = shipments.id
-                        AND sj.id = (
-                            SELECT MAX(id)
-                            FROM shipments_journey
-                            WHERE shipment_id = shipments.id
-                        )
-                    )');
-                    if(!empty($rv_priority_shippers)){
-                        $flag = true;
-                    }else{
-                        $flag = false;
+                        ->whereIn('shipper_status_id', [12, 65, 66, 52])
+                        ->whereIn('user_id', $result)
+                        ->whereNotExists(function ($query) {
+                            $query->select(DB::raw(1))
+                                ->from('shipments_journey as sj')
+                                ->whereRaw('sj.status_reason_id IN (12, 27, 35)')
+                                ->whereRaw('sj.shipment_id = shipments.id')
+                                ->whereRaw('sj.id = (SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id)');
+                        });
+            
+                    $flag = !empty($rv_priority_shippers);
+                    
+                    if ($flag) {
+                        $shipments->orderByRaw("FIELD(user_id, '" . implode(',', $result) . "')");
+                    } else {
+                        // $shipments->orderBy('id', 'ASC');
+                        $shipments->orderBy('updated_at', 'ASC'); // Order by updated_at in ascending order (oldest first)
                     }
                     
-                    if ($flag == true){
-                        $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-                    } else {
-                        $shipments->orderBy('id', 'ASC');
-                    } 
-                    
                     $shipments = $shipments->get();
-                    
+            
                     if($shipments->isEmpty()){
                         continue;
-                    }  
+                    }
                 }
             }
                 
@@ -998,9 +1065,9 @@ trait RvTrait
                 $shipments = [];
             }
             
-            // check if shipments exist
+            // check if shipments exist or if admin is assign shipment to agent
             if (count($shipments) || $agent_shipment_id) {
-                
+
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
                     // if agent shipment is assigned - not assigned to same agent only 
