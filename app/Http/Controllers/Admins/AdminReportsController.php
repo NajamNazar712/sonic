@@ -7096,7 +7096,7 @@ class AdminReportsController extends Controller
         $to_id = null;
         $sj_from_id = 168982787;
         $sj_to_id = 908982787;
-        
+        $arrived_sj_to_id = 908982787;
 
         if ($from != null && $to != null) {
 
@@ -7119,13 +7119,17 @@ class AdminReportsController extends Controller
                
 
                 $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+                $arrived_sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '>', $to);
 
                 if ($sj_to_id->exists()) {
                     $sj_to_id = $sj_to_id->first()->id;
+                    $arrived_sj_to_id = $arrived_sj_to_id->first()->id;
+
                 }
             }else{
                 $sj_from_id=0;
                 $sj_to_id=0; 
+                $arrived_sj_to_id=0; 
             }
             
         }
@@ -7136,7 +7140,6 @@ class AdminReportsController extends Controller
 //            return $shipments;
 //        }
         
-
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -7145,13 +7148,14 @@ class AdminReportsController extends Controller
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
-            ->leftJoin('shipments_journey as sj', function ($join) use ($sj_from_id, $sj_to_id) {
+            ->leftJoin('shipments_journey as sj', function ($join) use ($sj_from_id, $arrived_sj_to_id) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where(
                         'sj.id',
                         '=',
-                        DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $sj_to_id)"));
+                        DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id and shipments_journey.id <= $arrived_sj_to_id)"));
             })
             ->leftJoin('shipments_journey as sju', function ($join) use ($sj_from_id, $sj_to_id) {
                 $join->on('sju.shipment_id', '=', 'shipments.id')
@@ -7193,8 +7197,9 @@ class AdminReportsController extends Controller
                 $join->on('st.user_id','=','shipments.user_id')->where('st.status',0);
 
             })->join('admins as sd','sd.id','=','st.admin_id')
+            ->join('shipment_items as siq', 'siq.shipment_id', '=', 'shipments.id')
 
-            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper','u.id as shipper_id', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment','shipments.pieces','shipments.actual_weight','sm.mode as shipping_mode','sd.name as sales_person_name']);
+            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper','u.id as shipper_id', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date', 'u.sub_segment_id as sub_segment','shipments.pieces','shipments.actual_weight','sm.mode as shipping_mode','sd.name as sales_person_name','siq.quantity as shipment_quantity']);
         /*  if( $request->get('search_shipper')){
               $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
           }else{
