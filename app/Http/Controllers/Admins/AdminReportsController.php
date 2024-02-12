@@ -7119,7 +7119,7 @@ class AdminReportsController extends Controller
                
 
                 $sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
-                $arrived_sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '>', $to);
+                $arrived_sj_to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->orWhere('created_at', '>=', $to);
 
                 if ($sj_to_id->exists()) {
                     $sj_to_id = $sj_to_id->first()->id;
