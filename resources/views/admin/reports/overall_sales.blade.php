@@ -116,6 +116,16 @@
                     </div>
 
                     <div class="col-3">
+                        <div class="form-group">
+                            <select name="ref_name_select" id="ref_name_select" class="select2">
+                                @foreach($referral_names as $referral_name)
+                                    <option value="{{$referral_name->id}}">{{$referral_name->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -357,7 +367,13 @@
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Sub Segment*'
+                placeholder: 'Sub Segment',
+                allowClear:true
+            });
+             $('#ref_name_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Referral Name',
+                allowClear:true
             });
             $('.arrival_time_from').pickatime({
                 clear: '',
@@ -627,6 +643,7 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
                         d.sub_segment = $('#sub_segment_select').val();
+                        d.referral_name = $('#ref_name_select').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_business_category = $('#search_business_category').val();
