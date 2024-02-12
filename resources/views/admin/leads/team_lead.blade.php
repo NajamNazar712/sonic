@@ -758,8 +758,6 @@
                                 selected_rows.push(employee_id);
                             });
 
-                            // Deselect all rows
-                            // table.rows().deselect();
                             // employee ids are saving in selected_rows
                             if (selected_rows.length > 0) {
                                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
@@ -1097,8 +1095,12 @@
             });
             $('#AssignZoneModal').on('hide.bs.modal', function(e) {
                 table.rows().deselect();
+                selected_rows = [];
+                $('#AssignZoneModal input[name="employee_id_bulk"]').val('');
+                $('#AssignZoneModal input[name="employee_id"]').val('');
             });
             $('#BulkAddDaysModal').on('hide.bs.modal', function(e) {
+                table.rows().deselect();
                 selected_rows = [];
                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val('');
             });
