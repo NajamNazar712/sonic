@@ -51,11 +51,9 @@ class AgentSarNotification extends Command
      */
     public function handle()
     {
-        // try {
+        try {
             $currentDateTime1 = Carbon::now()->toDateTimeString();
-            // Create a Carbon instance from the formatted string
             $currentDateTime = Carbon::parse($currentDateTime1);
-            
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
@@ -64,13 +62,11 @@ class AgentSarNotification extends Command
                 //selects older records, i.e., records that were updated more than 12 hours ago.            
                 ->where('updated_at', '<', $currentDateTime->subHours(16))
                 ->where('unresponsive_email_count', '<', 1);
-                // ->get();
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
             ->where('updated_at', '<', $currentDateTime->subHours(24))
             ->where('rv_state_id', 2);
-            // ->get();
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
@@ -176,8 +172,8 @@ class AgentSarNotification extends Command
                 }
             }
 
-        // } catch (\Throwable $th) {
-        //     $this->createRvCronLog($th->getMessage());
-        // }
+        } catch (\Throwable $th) {
+            $this->createRvCronLog($th->getMessage());
+        }
     }
 }
