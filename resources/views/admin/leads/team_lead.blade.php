@@ -1031,7 +1031,7 @@
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var index = $.inArray(id, selected_rows);
-
+                
                 
                 if (index === -1) {
                     selected_rows.push(id);
@@ -1088,10 +1088,14 @@
                 });
             });
 
+            $('body').on('click', '.action', function() {
+                $('#AssignZoneModal input[name="employee_id_bulk"]').val('');
+            });
+
             $('#EditDisableAgentModal').on('hide.bs.modal', function(e) {
-                    $('#employee_id').text(''); //clearing error message when modal is close
-                    $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
-                    $('#deactivate_reason_input').text(''); //clearing error message when modal is close
+                $('#employee_id').text(''); //clearing error message when modal is close
+                $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
+                $('#deactivate_reason_input').text(''); //clearing error message when modal is close
             });
             $('#AssignZoneModal').on('hide.bs.modal', function(e) {
                 table.rows().deselect();
