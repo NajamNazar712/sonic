@@ -122,6 +122,10 @@
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Rush Shipment Count</th>
                                     <th class="border-primary border-darken-1">Rush Shipment Weight</th>
+                                    <th class="border-primary border-darken-1">Swift Shipment Count</th>
+                                    <th class="border-primary border-darken-1">Swift Shipment Weight</th>
+                                    <th class="border-primary border-darken-1">Saver Shipment Count</th>
+                                    <th class="border-primary border-darken-1">Saver Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total Weight</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -322,6 +326,12 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipping Mode');
+                            head.push('Rush Shipment Count');
+                            head.push('Rush Shipment Weight');
+                            head.push('Swift Shipment Count');
+                            head.push('Swift Shipment Weight');
+                            head.push('Saver Shipment Count');
+                            head.push('Saver Shipment Weight');
                             head.push('Total Weight');
                             head.push('Transport Mode');
                             head.push('Vendor');
@@ -345,6 +355,12 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipping_mode);
+                                row.push(values.rush_shipment_count);
+                                row.push(values.rush_shipment_weight);
+                                row.push(values.swift_shipment_count);
+                                row.push(values.swift_shipment_count);
+                                row.push(values.saver_shipment_count);
+                                row.push(values.saver_shipment_count);
                                 row.push(values.actual_weight);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
@@ -398,7 +414,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[16, 'desc']],
+                order: [[20, 'desc']],
                 columns: [
                     {
                         data: 'serial_number',
@@ -422,8 +438,12 @@
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
-                    {data: 'rush_shipment_count', name: 'rush_shipment_count', class: 'align-middle'},
-                    {data: 'rush_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle'},
+                    {data: 'rush_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
+                    {data: 'rush_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
+                    {data: 'swift_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
+                    {data: 'swift_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
+                    {data: 'saver_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
+                    {data: 'saver_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
                     {data: 'actual_weight', name: 'cargo_manifests.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},
@@ -455,7 +475,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.junctions')) {
+                        if ($(header).is('.serial_number') || $(header).is('.rush_shipment_count')|| $(header).is('.rush_shipment_weight') || $(header).is('.swift_shipment_count')|| $(header).is('.swift_shipment_weight') || $(header).is('.saver_shipment_count') || $(header).is('.saver_shipment_weight') || $(header).is('.aging') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.shipping_mode')) {
                             $(mode_drop_select).appendTo($(search))

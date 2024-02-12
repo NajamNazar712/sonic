@@ -2800,7 +2800,6 @@ class AdminCargoManifestController extends Controller
 //            ->select('cargo_manifests.id as manifest_id','cargo_manifests.route_name', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest','cargo_manifests.short_received_bags as short_received_bags');
             ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifests.vendor_name as vendor', 'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status', 'cargo_manifests.id as manifest', 'cargo_manifests.short_received_bags as short_received_bags');
 
-
         $datatables = Datatables::of($receive_cargo)
             ->editColumn('status', function ($master_cargo) {
                 if ($master_cargo->status == 1) {
@@ -2866,12 +2865,6 @@ class AdminCargoManifestController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('rush_shipment_count', function ($master_cargo) {
-                return '--';
-            })
-            ->addColumn('rush_shipment_weight', function ($master_cargo) {
-                return '--';
-            })
             ->filterColumn('vehicles', function ($query, $keyword) {
                 $fleet = Fleet::where('reg_number', $keyword)->first();
                 if ($fleet) {
@@ -2879,6 +2872,93 @@ class AdminCargoManifestController extends Controller
                 } else {
                     $query->where('cargo_manifests.vehicle_number', 'like', '%' . $keyword . '%');
                 }
+            })
+            ->addColumn('rush_shipment_count', function ($master_cargo) {
+                $shipping_mode = 1; // rush
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->count();
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
+            })
+            ->addColumn('rush_shipment_weight', function ($master_cargo) {
+                $shipping_mode = 1; // rush
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->sum('actual_weight');
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
+            })
+            ->addColumn('swift_shipment_count', function ($master_cargo) {
+                $shipping_mode = 3; // swift
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->count();
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
+            })
+            ->addColumn('swift_shipment_weight', function ($master_cargo) {
+                $shipping_mode = 3; // Swift
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->sum('actual_weight');
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
+            })
+            ->addColumn('saver_shipment_count', function ($master_cargo) {
+                $shipping_mode = 2; // saver
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->count();
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
+            })
+            ->addColumn('saver_shipment_weight', function ($master_cargo) {
+                $shipping_mode = 2; // saver
+                $manifest_id = $master_cargo->manifest_id;
+                $manifest_bag = CargoManifest::find($manifest_id);
+                $all_bags = $manifest_bag->manifest_bags->pluck('cargo_manifest_bag_id');
+
+                $shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$all_bags)->pluck('shipment_id');
+
+                $shipment_mode_count = Shipment::whereIn('id',$shipments)->where('shipping_mode_id',$shipping_mode)->sum('actual_weight');
+
+                if($shipment_mode_count > 0)
+                    return $shipment_mode_count;
+                else
+                    return '--';
             });
 
         if (($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != '') {
