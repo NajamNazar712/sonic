@@ -241,7 +241,6 @@ class ShipperShipmentBookController extends Controller
 //            }
 //        }
 
-        self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
         return $shipment_id;
     }
 
@@ -3766,7 +3765,6 @@ class ShipperShipmentBookController extends Controller
 //            }
 //        }
 
-        self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
         return $shipment_id;
     }

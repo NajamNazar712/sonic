@@ -297,6 +297,7 @@ class ShipperInternationalShipmentBookController extends Controller
                 NotificationsController::send(153, $shipment_id);
             }
         }
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
     }
     public function excel_index() {

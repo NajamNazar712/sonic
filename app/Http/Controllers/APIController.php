@@ -1461,6 +1461,8 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+            ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -1732,6 +1734,8 @@ class APIController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
             }
+            ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }

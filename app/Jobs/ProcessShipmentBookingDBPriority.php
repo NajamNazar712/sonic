@@ -489,5 +489,7 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             NotificationsController::send(152, $shipment_id);
             NotificationsController::send(153, $shipment_id);
         }
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
     }
 }
