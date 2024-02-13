@@ -171,6 +171,7 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\Http\Traits\LastMileAppReportTrait;
 use App\Jobs\LastMileAppReport;
+use App\User;
 
 class RiderAPIController extends Controller
 {
@@ -3593,16 +3594,26 @@ class RiderAPIController extends Controller
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
 
-            $pickup_history_details = Shipment::join('users as u', 'u.id', '=', 'shipments.user_id')
-                ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-                ->leftjoin('shipments_journey as sq', function ($query) {
-                    $query->on('sq.shipment_id', '=', 'sj.shipment_id')
-                        ->where('sq.shipper_status_id', 2);
-                })->where('sj.shipper_status_id', 53)->where('sj.rider_id', $rider_id)
+            //Important Not: rider_picked and arrived_shipment count show based on rider Id
+            $pickup_history_details = User::join('shipments as s', 'users.id', '=', 's.user_id')
+                ->join('shipments_journey as sj', function ($join) use ($rider_id) {
+                    $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.shipper_status_id', '=', 53)
+                        ->where('sj.rider_id', '=', $rider_id);
+                })
+                ->leftJoin('shipments_journey as sq', function ($join) {
+                    $join->on('sj.shipment_id', '=', 'sq.shipment_id')
+                        ->where('sq.shipper_status_id', '=', 2);
+                })
                 ->whereBetween('sj.created_at', [$from_date . ' 00:00:01', $to_date . ' 23:59:59'])
-                ->select('u.id as shipper_id', 'u.name as shipper_name', DB::raw('COUNT(sj.id) AS rider_picked'), DB::raw('COUNT(sq.id) AS arrived_shipment'))
-                ->groupBy('u.id', 'u.name');
-
+                ->select(
+                    'users.id',
+                    'users.name',
+                    DB::raw('(SELECT COUNT(bs.shipment_id) FROM shipments as sm JOIN shipments_journey as bs ON sm.id=bs.shipment_id AND bs.shipper_status_id=1 WHERE sm.user_id = s.user_id) AS book_shipments'),
+                    DB::raw('COUNT(sj.id) AS rider_picked'),
+                    DB::raw('COUNT(sq.id) AS arrived_shipment')
+                )
+                ->groupBy('users.id', 'users.name');
 
             if ($pickup_history_details->exists()) {
                 $pickup_history_details = $pickup_history_details->get();
@@ -15360,6 +15371,7 @@ class RiderAPIController extends Controller
     public function pickup_summary_v3(Request $request)
     {
         $rider_id = $request->rider_id;
+        $current_date = Carbon::now()->toDateString();
         $pickup_note = V3PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
 
         if ($pickup_note->exists()) {
@@ -15393,32 +15405,37 @@ class RiderAPIController extends Controller
             $information['pickups'] = array();
 
             foreach ($pickup_note_requests as $pickup_note_request) {
-                $information['summary']['pickups']++;
+
 
                 $pickup_request = $pickup_note_request->pickup_request;
-                $pickup_address = $pickup_request->pickup_address;
-                $pickup = array();
+                if ($pickup_request->pickup_date == $current_date) {
+                    $information['summary']['pickups']++;
 
-                $pickup['pickup_request_id'] = $pickup_request->id;
-                $pickup['status'] = $pickup_note_request->status;
-                $pickup['ordering'] = $pickup_note_request->ordering;
+                    $pickup_address = $pickup_request->pickup_address;
+                    $pickup = array();
 
-                $booked_shipments = $pickup_request->booked;
+                    $pickup['pickup_request_id'] = $pickup_request->id;
+                    $pickup['status'] = $pickup_note_request->status;
+                    $pickup['ordering'] = $pickup_note_request->ordering;
 
-                $pickup['shipments'] = $booked_shipments;
+                    $booked_shipments = $pickup_request->booked;
 
-                if ($pickup_note_request->status) {
-                    $information['summary']['received']['pickups']++;
+                    $pickup['shipments'] = $booked_shipments;
+
+                    if ($pickup_note_request->status) {
+                        $information['summary']['received']['pickups']++;
+                    }
+
+                    $pickup['shipper_name'] = $pickup_address->user->name;
+                    $pickup['person_of_contact'] = $pickup_address->poc;
+                    $pickup['phone_number'] = $pickup_address->phone;
+                    $pickup['address'] = $pickup_address->pickup_address;
+                    $pickup['location_latitude'] = $pickup_address->location_latitude;
+                    $pickup['location_longitude'] = $pickup_address->location_longitude;
+
+                    $information['pickups'][] = $pickup;
                 }
 
-                $pickup['shipper_name'] = $pickup_address->user->name;
-                $pickup['person_of_contact'] = $pickup_address->poc;
-                $pickup['phone_number'] = $pickup_address->phone;
-                $pickup['address'] = $pickup_address->pickup_address;
-                $pickup['location_latitude'] = $pickup_address->location_latitude;
-                $pickup['location_longitude'] = $pickup_address->location_longitude;
-
-                $information['pickups'][] = $pickup;
 
                 // $pickup_request = V3PickupRequest::find($pickup_request->id);
                 // if ($pickup_request->status_id == 2) {
