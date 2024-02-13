@@ -895,8 +895,7 @@ trait RvTrait
                     $flag = true;
                 }   
 
-                // $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
-                $shipments = DB::connection('reports_2')->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
+                $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                 ->whereIn('shipper_status_id', [12,65,66,52])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->whereRaw('NOT EXISTS (
@@ -943,8 +942,7 @@ trait RvTrait
                 
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
-                    // $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    $shipments = DB::connection('reports_2')->table('shipments')->where('consignee_city_id', $agent['city_id'])
+                    $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
                     ->whereIn('shipper_status_id', [12,65,66,52])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
