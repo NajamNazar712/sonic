@@ -57,6 +57,14 @@
                                             </div>
                                         </div>
                                     </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Aging (Days)</h4>
+                                                <p class="card-text track aging">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
                                 <div class="col-3"><div class="card text-center" id="status_card">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -160,6 +168,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Aging (Days)</th>
                                         <th class="border-primary border-darken-1">Delivery Note ID</th>
                                         <th class="border-primary border-darken-1">Case Nature ID</th>
                                         <th class="border-primary border-darken-1">Status</th>
@@ -570,7 +579,8 @@
                         {name: 'amount', class: 'align-middle amount', orderable: false},
                         {name: 'shipper', class: 'align-middle shipper', orderable: false},
                         {name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
-                        {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false}
+                        {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false},
+                        {name: '', class: '', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
                         var complaint_id = $(row).find("td:eq(3)").html();
@@ -749,7 +759,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
                                     updateRemarks(tracking, 'multiple')
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.aging,data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -803,7 +813,7 @@
                                 '_token': '{!! csrf_token() !!}'
                             }
                         }).done(function (data) {
-
+                            console.log(data.details);
                             if(data.status == 0){
                                 $('#single_div').addClass('d-none');
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -834,6 +844,7 @@
                                 $('#single_div p.amount').text(data.details.amount);
                                 $('#single_div p.shipper').text(data.details.shipper);
                                 $('#single_div p.consignee_name').text(data.details.consignee_name);
+                                $('#single_div p.aging').text(data.details.aging);
                                 $('#single_div p.consignee_address').text(data.details.consignee_address);
                                 if(data.details.reason == null){
                                     $('#single_div p.reason').text('No Reason');

@@ -122,6 +122,7 @@ use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
 class DeliveryController extends Controller
@@ -5384,6 +5385,9 @@ class DeliveryController extends Controller
                     $delivery_note->dncc_status = 1;
                     $delivery_note->update();
 
+                    //StationDepositeNoteActionLog
+                    self::sdn_action_logs($request->sdn_id, 1, Auth::id());
+
                     return back()->with(['success' => 'DNCC added to SDN']);
                 } else {
                     return back()->with(['error' => 'Can not add DNCC to SDN']);
@@ -5892,6 +5896,8 @@ class DeliveryController extends Controller
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
+                $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -5948,6 +5954,7 @@ class DeliveryController extends Controller
                     }
                 }
                 $dropdown .= $view_logs;
+                $dropdown .= $sdn_action_log;
                 $dropdown .= '
                     </div>
                   </div>
@@ -6248,6 +6255,9 @@ class DeliveryController extends Controller
                     }
 
                     self::add_sdn_logs($station_deposit_note->id, 1, Auth::id());
+
+                    //StationDepositeNoteActionLog
+                    self::sdn_action_logs($station_deposit_note->id, 5, Auth::id());
                     return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Deposited']);
                 } else {
                 }
@@ -8607,7 +8617,8 @@ class DeliveryController extends Controller
                     }
                 }
 
-
+                //StationDepositeNoteActionLog
+                self::sdn_action_logs($sdn_id, 3, Auth::user()->id);
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
             } else {
                 return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
@@ -9399,6 +9410,45 @@ class DeliveryController extends Controller
                 }
 
                 return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
+            }
+            return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
+    public function sdn_actions(Request $request)
+    {
+        $sdn_id = $request->sdn_id;
+        if ($sdn_id) {
+            $sdn_actions_logs = array();
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id);
+            if ($logs->exists()) {
+                $logs = $logs->get();
+                foreach ($logs as $log) {
+                    if ($log->status_id == 1) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN amount';
+                    } else if ($log->status_id == 2) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited deposit slips';
+                    } else if ($log->status_id == 3) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Added SDN adjustment';
+                    } else if ($log->status_id == 4) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN adjustment';
+                    } else if ($log->status_id == 5) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
+                    }
+                    $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
+                }
+
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $sdn_actions_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
         }

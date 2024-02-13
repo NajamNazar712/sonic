@@ -663,8 +663,20 @@ class AdminTrackingController extends Controller
                 }
                 if ((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
 
-                    $details = array();
+                    $arrive_at_origin_statuses = ShipmentsJourney::where('shipment_id', $shipment->id)
+                        ->where('shipper_status_id', 2)
+                        ->pluck('created_at');
+                        $aging = '-';
+                        if ($arrive_at_origin_statuses->isNotEmpty()) {
+                            $origin = Carbon::parse($arrive_at_origin_statuses->first());
+                            $aging = Carbon::now()->diffInDays($origin);
+                            if ($aging >= 90) {
+                                $aging = '90+';
+                            }
+                        }
 
+                    $details = array();
+                    $details['aging'] = $aging;
                     $details['complaint'] = '-';
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
