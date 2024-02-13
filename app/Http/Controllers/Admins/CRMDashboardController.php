@@ -52,8 +52,21 @@ class CRMDashboardController extends Controller
         $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
         $crm_request_statuses = CrmRequestStatus::whereNotIn('id',[5])->select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
-        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-            ->where('admin_roles.department_id',3)->get();
+        // $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        //     ->where('admin_roles.department_id',3)->get();
+        $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        ->whereIn('admin_roles.department_id', [3, 7])
+        ->where(function ($query) {
+            // Select all admins from department ID 3
+            $query->where('admin_roles.department_id', 3);
+
+            // Select specific admins from department ID 7 based on role ID
+            $query->orWhere(function ($innerQuery) {
+                $innerQuery->where('admin_roles.department_id', 7)
+                            ->whereIn('a.role_id', [115, 43, 75]);
+            });
+        })
+        ->get();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
             ->where('a.status', 1)
@@ -354,6 +367,9 @@ class CRMDashboardController extends Controller
                     }
                 });
             });
+        }
+        else if(session('department_id') == 7 && in_array(session('role_id'), [43,75,115])){
+            $dashboard_list = $dashboard_list->where('crm_requests.agent_id', Auth::id())->orWhere('spt.admin_id', Auth::id());
         }
         else if (in_array(session('role_id'), [67, 43])){
             $dashboard_list = $dashboard_list->where('at.id', Auth::id());

@@ -825,7 +825,8 @@ class V2AdminPickupsController extends Controller
                         $details['city'] = $shipment->consignee_city->name;
                         $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                     } else if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                         $details = array();
@@ -837,7 +838,8 @@ class V2AdminPickupsController extends Controller
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
                         $details['city'] = $shipment->consignee_city->name;
                         $details['hub'] = $shipment->consignee_city->hub_city->name;
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
                         if ($shipment->shipper_status_id == 17) {
@@ -890,7 +892,8 @@ class V2AdminPickupsController extends Controller
                         $details['rider_assigned'] = $rider_assigned_flag;
 
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                 } else {
@@ -918,7 +921,8 @@ class V2AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -1969,7 +1973,8 @@ class V2AdminPickupsController extends Controller
 
 
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 } else if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                     $details = array();
@@ -1984,7 +1989,8 @@ class V2AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                 } else {
                     if ($shipment->shipper_status_id == 17) {
@@ -2170,7 +2176,8 @@ class V2AdminPickupsController extends Controller
 
                     $id = Auth::user();
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
             } else {
@@ -2194,7 +2201,8 @@ class V2AdminPickupsController extends Controller
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -2321,7 +2329,8 @@ class V2AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Tracking Number\'s is not try and buy'];
@@ -3274,7 +3283,8 @@ class V2AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Tracking Number\'s is not try and buy'];
@@ -4246,7 +4256,8 @@ class V2AdminPickupsController extends Controller
                         $details['shipment_items'] = $shipment_items;
                         $details['shipment_items_count'] = $shipment_items_count;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                     } else if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                         $details = array();
@@ -4298,7 +4309,8 @@ class V2AdminPickupsController extends Controller
 
 
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                 } else {
@@ -4324,7 +4336,8 @@ class V2AdminPickupsController extends Controller
                         $details['shipment_items_count'] = $shipment_items_count;
                         $details['scanned_shipment_item'] = $shipment_item->id;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -4392,7 +4405,8 @@ class V2AdminPickupsController extends Controller
                         $details['shipper'] = $shipment->user->name;
                         $details['weight'] = floatval($shipment->actual_weight);
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Tracking Number\'s is not try and buy'];
@@ -4439,7 +4453,8 @@ class V2AdminPickupsController extends Controller
                         $details['amount'] = $shipment->amount;
                         $details['weight'] = floatval($shipment->actual_weight);
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Tracking Number\'s does not have pieces'];
