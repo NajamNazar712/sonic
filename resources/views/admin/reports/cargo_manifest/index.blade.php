@@ -209,6 +209,7 @@
                 onSet: function(context) {
                     if (context.select) {
                         var toDatePicker = $('#search_form #search_date_to').pickadate('picker');
+                        toDatePicker.clear();
                         toDatePicker.set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
