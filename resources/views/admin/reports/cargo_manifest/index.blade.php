@@ -53,7 +53,7 @@
                                     </div>
                                     <input type="text" name="search_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_from" placeholder="Arrival Date (From)" title="Arrival Date (From)" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_from" placeholder="Booking Date (From)" title="Booking Date (From)" data-rule-required="true" data-msg-required="Booking Date is required">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
@@ -65,7 +65,7 @@
                                     </div>
                                     <input type="text" name="search_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_to" placeholder="Arrival Date (To)" title="Arrival Date (To)" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_to" placeholder="Booking Date (To)" title="Booking Date (To)" data-rule-required="true" data-msg-required="Booking Date is required">
                                 </div>
                             </div>
 
@@ -203,6 +203,7 @@
                 clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
+                max: '{{ Carbon\Carbon::now() }}',
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
@@ -222,17 +223,18 @@
                 clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
+                max: '{{ Carbon\Carbon::now() }}',
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
                         var fromDatePicker = $('#search_form #search_date_from').pickadate('picker');
-                        fromDatePicker.set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        // fromDatePicker.set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
                         var minDate = new Date(context.select);
                         minDate.setDate(minDate.getDate() - 30);
-                        fromDatePicker.set('min', minDate);
+                        // fromDatePicker.set('min', minDate);
                     }
                 }
             });
