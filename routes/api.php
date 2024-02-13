@@ -349,6 +349,15 @@ Route::name('api.')->group(function () {
             Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
                 Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
+
+             Route::prefix('lead')->name('lead.')->group(function () {
+                Route::get('', 'LeadAPIController@index')->name('index');
+                Route::post('', 'LeadAPIController@store')->name('store');
+                Route::get('{id}', 'LeadAPIController@show')->name('show');
+                Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
+                Route::get('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
+                Route::get('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
+            });
         });
     });
 
@@ -542,14 +551,7 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment', 'AdminAPIController@scan_shipment')->name('index');
             });
 
-            Route::prefix('lead')->name('lead.')->group(function () {
-                Route::get('', 'LeadAPIController@index')->name('index');
-                Route::post('', 'LeadAPIController@store')->name('store');
-                Route::get('{id}', 'LeadAPIController@show')->name('show');
-                Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
-                Route::get('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
-                Route::get('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
-            });
+           
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
