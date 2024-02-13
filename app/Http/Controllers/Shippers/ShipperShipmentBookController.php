@@ -878,6 +878,7 @@ class ShipperShipmentBookController extends Controller
                     $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
                     $shipment_try_and_buy->save();
                 }
+                self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
                 NotificationsController::send(2, $shipment_id);
 
@@ -4273,6 +4274,8 @@ class ShipperShipmentBookController extends Controller
                 $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
             }
 
+            self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+            
             NotificationsController::send(2, $shipment_id);
             $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
             $now = Carbon::now()->format('H:i:s');

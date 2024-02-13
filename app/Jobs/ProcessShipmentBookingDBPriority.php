@@ -458,6 +458,8 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $shipment_try_and_buy->save();
         }
 
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
         if(!empty($this->booking['nsas']) && $this->booking['nsa']) {
             $present = '';
             $address_array = preg_split("/[ ,]+/", $this->booking['consignee_address']);
@@ -489,7 +491,6 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             NotificationsController::send(152, $shipment_id);
             NotificationsController::send(153, $shipment_id);
         }
-        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
     }
 }
