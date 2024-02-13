@@ -567,9 +567,7 @@
                        var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
                        if(sack_bag_no!='')
                        {
-
                          sack_bag_no_check(sack_bag_no);
-                          
 
                        }else{
                          alert('Please fill Sack Bag No#');
@@ -577,6 +575,7 @@
                        
                     }
                 });
+
                 $("#addrow").click(function(){
                     var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
                     if(sack_bag_no!='')
@@ -596,9 +595,29 @@
 
         });
 
+        var current_sack_bag_no=0;
         function sack_bag_check_zero(sack_bag_no)
-        {     var sack_bag_no=$(sack_bag_no).val();
-              sack_bag_no_check(sack_bag_no,'change');
+        {   
+              var sackbag_no =$(sack_bag_no).val();
+              sack_bag_no_check(sackbag_no,'change');
+             
+                    $("#sackbag_detail tr").each(function(){
+                        if(current_sack_bag_no == $(this).find('#sack_bag_no_id').val())
+                        {
+                            alert("Sack Bag Already Add");
+                            $(sack_bag_no).val('');
+                            return false;
+                        }
+                    })
+                    if($(sack_bag_no).val()!='')
+                    {
+                         current_sack_bag_no=$(sack_bag_no).val();
+                    }
+                    console.log(current_sack_bag_no);
+              
+             
+             
+            // 
         }
         
 
@@ -624,7 +643,7 @@
                                     
                                     if(type!='change')
                                     {
-                                        var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                                        var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
                                         $("#sackbag_detail").append(row);
                                     }
                                     $("#sack_bag_no_check").val(0);
