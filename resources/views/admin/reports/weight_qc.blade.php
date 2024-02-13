@@ -351,7 +351,7 @@
                                 row.push(values.charges_diff);
                                 row.push(values.shipper_range_weight_charges);
                                 row.push(values.arrival_range_weight_charges);
-                                row.push(values.range_charges_diff);
+                                row.push(values.weight_range_charges_diff);
                                 row.push(values.weighted_as);
                                 row.push(values.weight_type_name)
                                 body.push(row);
