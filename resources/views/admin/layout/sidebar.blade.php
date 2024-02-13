@@ -362,7 +362,7 @@
                                                         Bag</a></li>
                                             @endif
 
-                                            @if (session('role_id') == 1 || in_array(547, session('permissions')))
+                                            @if (session('role_id') == 1 || in_array(934, session('permissions')))
                                                 <li><a class="menu-item"
                                                         href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Sack Bag</a>
                                                 </li>
@@ -1697,15 +1697,15 @@
                         <li><a class="menu-item" href="{{ route('admin.reports.logistic.index') }}">Logistic Report</a></li>
                         @endif
 
-						@if (session('role_id') == 1 || in_array(899, session('permissions')))
+						@if (session('role_id') == 1 || in_array(935, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_utilization.index') }}">Utilization of Sack Bag</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(936, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_status.index') }}"> Sack Bag Status</a></li>
                         @endif
                         
-                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(937, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.issuance_sack_bag.index') }}">Issuance of Sack Bag</a></li>
                         @endif
 {{-- 
