@@ -19,7 +19,7 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" novalidate="novalidate" action="{{ route('admin.settings.logistic_report.store') }}">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" novalidate="novalidate" action="{{ route('admin.settings.mms_excel_booking_setting.store') }}">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
@@ -74,8 +74,8 @@
             //     }
             // });
 
-                    @if(count($logistic_setting_tags) > 0)
-            var ids = @json($logistic_setting_tags);
+                    @if(count($mms_excel_booking_setting) > 0)
+            var ids = @json($mms_excel_booking_setting);
             $('#shippers_select').val(ids).trigger('change');
             @endif
 
