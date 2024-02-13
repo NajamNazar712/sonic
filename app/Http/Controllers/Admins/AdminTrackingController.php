@@ -1469,7 +1469,7 @@ class AdminTrackingController extends Controller
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
                                         break;
                                     case 33:
-                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 3)->latest()->first();
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
                                         break;
                                     case 34:
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
