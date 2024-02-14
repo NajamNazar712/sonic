@@ -1909,9 +1909,12 @@
             // Function to calculate shipper totals and disable buttons if any shipper's total payable is negative
             function calculateShipperTotal() {
                 shipperTotal = {}; // Reset shipperTotal object
+                total_payable=0;
                 payable_list.forEach(entry => {
                     const shipperId = entry.shipper_id;
                     const payable = parseFloat(entry.payable.replace(/,/g, ''));
+                        total_payable+=payable;
+                        console.log(total_payable);
                     if (shipperTotal[shipperId]) {
                         shipperTotal[shipperId] += payable;
                     } else {
