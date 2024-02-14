@@ -1252,6 +1252,7 @@ class AdminDashboardController extends Controller
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
+        $block_disable_reasons = DB::table('block_disable_reason_users')->select('id', 'name')->get();
         $commission_percentage = '';
         $settings = GlobalSettings::where('type', 'commission_percentage');
         if ($settings->exists()) {
@@ -1280,7 +1281,7 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['text'] = 'Riders';
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users]);
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users,'block_disable_reasons'=> $block_disable_reasons]);
     }
 
     public function blockAccountsList()
@@ -1451,8 +1452,10 @@ class AdminDashboardController extends Controller
     public function UserStatusBlock(Request $request)
     {
         $user_id = $request->id;
-        $reason = $request->reason;
+        $remarks = $request->remarks;
         $status = $request->status;
+        $reason = $request->reason;
+
         $user = User::where('id', $user_id);
         if ($user->exists()) {
             $user = $user->first();
@@ -1483,10 +1486,13 @@ class AdminDashboardController extends Controller
                     }
                 }
                 if ($negative_balance_status == false) {
-                    if ($user->blacklist == 0) {
+                    if ($user->blacklist == 0) {                        
                         $user->blacklist = 1;
-                        $user->blacklist_reason = $reason;
+                        $user->blacklist_reason = $remarks;
+                        $user->blacklist_reason_1 = $reason;
                         $user->save();
+
+                        
                         return response()->json(['status' => 1, 'success' => "User added to the blacklist!"]);
                     } else {
                         return response()->json(['status' => 0, 'error' => "User is already in blacklist!"]);
@@ -9433,7 +9439,7 @@ class AdminDashboardController extends Controller
                     }
 
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-id="' . $result->id . '" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x"></i></div><div class="col-9 offset-1">Block</div></div></button>';
                     }
 
                     if (session('role_id') == 1 || in_array(13, session('permissions'))) {
@@ -10114,7 +10120,9 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'st.poc')
             ->leftjoin('admins as d', 'd.id', '=', 'st.kam')
             ->leftjoin('admins as h', 'h.id', '=', 'st.ref')
-            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as reason', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref'])->where('blacklist', 1);
+            ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.blacklist_reason_1')
+
+            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as remarks', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref', 'bdru.name as reason'])->where('blacklist', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));

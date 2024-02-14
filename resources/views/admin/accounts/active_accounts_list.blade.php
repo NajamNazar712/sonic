@@ -740,6 +740,31 @@
 </div>
 {{-- End --}}
 
+<div class="modal fade text-left" id="BlockDisableReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BlockDisableReasonModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="">Block Disable Reason Remarks</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-1" placeholder="Enter Remarks" name="block_disable_remarks" id="block_disable_remarks">
+                <div class="text-danger d-none blocked_remarks" style="margin-top: -12px; margin-bottom: 15px;" id="blocked_remarks">Remarks Are Required</div>
+                <select name="block_disable_reason" id="block_disable_reason" class="form-control select2">
+                    @foreach($block_disable_reasons as $block_disable_reason)
+                        <option value="{{ $block_disable_reason->id }}" > {{ $block_disable_reason->name }} </option>
+                    @endforeach
+                </select>
+                <span class="text-danger d-none blocked_reasons">Reasons Are Required</span>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BlockDisableReasonSubmit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -954,6 +979,15 @@ function checkboxStatus() {
             placeholder:"Select Shipper",
             allowClear:true,
          });
+
+         $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
+            width: '100%',
+            placeholder: "Select Reasons",
+            allowClear: true,
+            dropdownParent: $('#BlockDisableReasonModal')
+        }).on('change', function() {
+            $('.blocked_reasons').addClass('d-none');
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -1867,79 +1901,63 @@ function checkboxStatus() {
             $(this).val($(this).val().trim());
         });
         $('body').on('click','button.blacklist',function () {
-            var id = $(this).parents('tr').attr('id');
-            var status = $(this).attr('rel');
-            swal({
-                // title: 'Are You Sure?',
-                text: 'Write a reason to blacklist this account!',
-                content: {
-                    element: "input",
-                    attributes: {
-                        placeholder: "Write a reason",
-                        class: "form-control blacklist_reason",
-                    },
-                },
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: false,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: false
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then((value) => {
-                    if (value) {
-                        if (value === '') {
-                            swal("You have not selected any reason!", {
-                                icon: "warning",
+            $('#BlockDisableReasonModal').modal('show');
+            var id = $(this).data('id');
+			var status = $(this).attr('rel');
+            if(id){
+                $('#BlockDisableReasonSubmit').click(function () {
+                    var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
+                    var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
+                    if(remarks == ''){
+                        $('.blocked_remarks').removeClass('d-none');
+                    }else if (reasons == ''){
+                        $('.blocked_reasons').removeClass('d-none');
+                    }else{
+                        $.ajax({
+                        url: '{!! route('admin.accounts.status.block') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            'reason': reasons,
+                            'remarks': remarks,
+                            'status' : status,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status === 1) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
                             });
+                            // $('#blocked_remarks').addClass('d-none');
+                            // $('#blocked_reasons').addClass('d-none');
+                            $('#BlockDisableReasonModal').modal('hide');
+                            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+                            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
+                            table.draw()
                         } else {
-                        if (id) {
-                            $.ajax({
-                                url: '{!! route('admin.accounts.status.block') !!}',
-                                method: 'POST',
-                                data: {
-                                    'id': id,
-                                    'reason': value,
-                                    'status': status,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                swal.close();
-                                if (data.status === 1) {
-                                    table.draw('false');
-                                    swal.close();
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
                             });
                         }
+                        });
                     }
-                    }else{
-                        swal.close();
-                    }
-
-            });
-
-
+                });
+            }
         });
+
+        $('input[name="block_disable_remarks"]').keyup(function() {
+            $('#blocked_remarks').addClass('d-none');
+        });
+
+        $('#BlockDisableReasonModal').on('hide.bs.modal',function (e) {
+            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change'); 
+            $('#blocked_remarks').addClass('d-none');
+            $('#blocked_reasons').addClass('d-none');
+        });
+		
         $("#saletag").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1981,6 +1999,7 @@ function checkboxStatus() {
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
 
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
