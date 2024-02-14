@@ -922,7 +922,10 @@ trait RvTrait
 
                 // $shipments = $shipments->get();
                 $shipments = $shipments->first();
-                if($shipments->isEmpty()){
+                // if($shipments->isEmpty()){
+                //     continue;
+                // }  
+                if(!$shipments){
                     continue;
                 }  
             }
@@ -977,7 +980,10 @@ trait RvTrait
                     // $shipments = $shipments->get();
                     $shipments = $shipments->first();
                     
-                    if($shipments->isEmpty()){
+                    // if($shipments->isEmpty()){
+                    //     continue;
+                    // }  
+                    if(!$shipments){
                         continue;
                     }  
                 }
