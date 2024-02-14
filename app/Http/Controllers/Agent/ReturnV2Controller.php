@@ -111,7 +111,7 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
+        $agent_sorted_hubs = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->select('city_id')->get();
         $admin = Admin::where('id', Auth::id());
 
         if ($admin->exists()) {
@@ -134,8 +134,13 @@ class ReturnV2Controller extends Controller
                         if(session('latitude') != null){
                             $this->mark_attendance($admin);
                         }
-
-                        $shipment = $this->included_shippers($sorted_agents, $agent_id);
+                        $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->first();
+                        if($assigned_shipment){
+                            $shipment = Shipment::find($assigned_shipment->shipment_id);
+                        }
+                        else{
+                            $shipment = $this->included_shippers($agent_sorted_hubs, $agent_id);
+                        }
                         if ($shipment) {
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
