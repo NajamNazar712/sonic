@@ -29,10 +29,10 @@ class LeadAPIController extends Controller
         'service_id'          => ['required', 'integer', 'exists:service_list,id'],
         'reference_person_id' => ['required', 'integer', 'exists:riders,id'],
         'territory_id'        => ['required', 'integer', 'exists:territories,id'],
-        'territory_area_id'   => ['required', 'integer', 'exists:area_territories,id'],
-        'brand'               => ['required', 'max:255'],
-        'company'             => ['required', 'max:255'],
-        'reference_id'        => ['required', 'integer', 'exists:lead_references,id'],
+        // 'territory_area_id'   => ['required', 'integer', 'exists:area_territories,id'],
+        // 'brand'               => ['required', 'max:255'],
+        // 'company'             => ['required', 'max:255'],
+        // 'reference_id'        => ['required', 'integer', 'exists:lead_references,id'],
 
     ];
 
