@@ -1020,8 +1020,8 @@ trait RvTrait
                         if(in_array($shipment_assigned_assigned_agent->rv_state_id, [1, 2, 4])){
                             continue;
                         }
+                        
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
-                    
                         $shipment_assigned_assigned_agent->update(['rv_state_id'=> 1, 'agent_id'=> $agent_id, 'assigned_by' => 0]);
                         
                         // $shipment_assign_agent = $shipment_assigned_unassigned_agent->first();
@@ -1061,10 +1061,10 @@ trait RvTrait
                     }
                     
                     // Shipment is found and already in working state or return is completed, will not assigned to agent
-                    $find_shipment_assigned_agent = $rv_shipment->first();
-                    if ($find_shipment_assigned_agent->agent_id == $agent_id) {
-                        return response()->json(['status' => 1, 'error' => 'Shipment is already assigned to this agent']);
-                    }
+                    // $find_shipment_assigned_agent = $rv_shipment->first();
+                    // if ($find_shipment_assigned_agent->agent_id == $agent_id) {
+                    //     return response()->json(['status' => 1, 'error' => 'Shipment is already assigned to this agent']);
+                    // }
 
                     $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->latest()->first();
                     $data = [

@@ -5427,7 +5427,7 @@ class ReturnController extends Controller
                         if($shipment->exists()){
                             if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
                             $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
-                                // DB::commit();
+                                
                                 $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
                                 $assigned_shipment[] = $shipment->tracking_number;
                                 if($already_assigned_state != null){
