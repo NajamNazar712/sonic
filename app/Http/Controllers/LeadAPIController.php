@@ -113,9 +113,9 @@ class LeadAPIController extends Controller
     public function show($id)
     {
         if ($id) {
-            $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy', 'status')->find($id);
+            $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy','lead_reference', 'status')->find($id);
             if ($lead) {
-
+              
                 $lead = [
                     'contact_person' =>  $lead->contact_person,
                     'phone_number' => $lead->phone_number,
@@ -134,6 +134,8 @@ class LeadAPIController extends Controller
                     'territory_id' => $lead->territory->id,
                     'area_name' => $lead->area_territoy->name,
                     'area_id' => $lead->area_territoy->id,
+                    'lead_reference_id'=>$lead->lead_reference->id,
+                    'lead_reference_name'=>$lead->lead_reference->name,
                     'status_id' => $lead->status->id,
                     'status_name' => $lead->status->name
 

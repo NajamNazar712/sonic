@@ -12,8 +12,7 @@ class Lead extends Model
     }
     public function reference_person()
     {
-        // return $this->belongsTo('App\Http\Models\Admin\Admin', 'reference_person_id', 'id');
-        return $this->belongsTo('App\Http\Models\Admin\Admin', 'reference_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\Admin', 'reference_person_id', 'id');
     }
     public function admin()
     {
@@ -40,5 +39,10 @@ class Lead extends Model
     public function service()
     {
         return $this->belongsTo('App\Http\Models\ServiceList', 'service_id', 'id');
+    }
+
+    public function lead_reference()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\LeadReference', 'reference_id', 'id');
     }
 }

@@ -353,10 +353,10 @@ Route::name('api.')->group(function () {
              Route::prefix('lead')->name('lead.')->group(function () {
                 Route::get('', 'LeadAPIController@index')->name('index');
                 Route::post('', 'LeadAPIController@store')->name('store');
-                Route::get('{id}', 'LeadAPIController@show')->name('show');
+                Route::post('{id}', 'LeadAPIController@show')->name('show');
                 Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
-                Route::get('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
-                Route::get('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
+                Route::post('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
+                Route::post('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
             });
         });
     });
