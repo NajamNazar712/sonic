@@ -831,70 +831,43 @@ trait RvTrait
         $nsa_charges_log->save();
     }
 
-    protected function included_shippers($sorted_agents, $agent_id, $agent_shipment_id = null)
+    protected function included_shippers($agent_sorted_hubs, $agent_id, $agent_shipment_id = null)
     {
         $shipment = null;
 
-        // $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority')->first();
+        $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority')->first();
 
-        // if($rv_priority_shipper){
-        //     $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
-        // }
-
-        // $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
-        //     return $value != "";
-        // });
-
-
-        // $included_shippers = [];
-        // $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->first();
-        // if ($all_shipper_exists) {
-        //     $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1)->first();
-        //     if ($included_shipper) {
-        //         $included_shippers = explode(',', $included_shipper['text']);
-        //     }
-        // }
-        // $included_shippers = array_filter($included_shippers, function($value){
-        //     return $value != "";
-        // });
-
-        // $only_shippers = [];
-        // $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1)->first();
-        // if ($only_shipper) {
-        //     $only_shippers = explode(',', $only_shipper['text']);
-        // }
-        // $only_shippers = array_filter($only_shippers, function($value){
-        //     return $value != "";
-        // });
-
-        $rv_priority_shippers = [];
-        $rv_priority_shipper = GlobalSettings::where('type', 'rv_shipper_priority')->value('text');
-        if (!empty($rv_priority_shipper)) {
-            $rv_priority_shippers = array_filter(explode(',', $rv_priority_shipper), function($value) {
-                return $value != "";
-            });
+        if($rv_priority_shipper){
+            $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
         }
+
+        $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
+            return $value != "";
+        });
+
 
         $included_shippers = [];
-        $all_shipper_exists = GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
-        if (!empty($all_shipper_exists)) {
-            $included_shipper = GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1)->value('text');
+        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->first();
+        if ($all_shipper_exists) {
+            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1)->first();
             if ($included_shipper) {
-                $included_shippers = array_filter(explode(',', $included_shipper), function($value) {
-                    return $value != "";
-                });
+                $included_shippers = explode(',', $included_shipper['text']);
             }
         }
-        
-        $only_shippers = [];
-        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1)->value('text');
-        if (!empty($only_shipper)) {
-            $only_shippers = array_filter(explode(',', $only_shipper), function($value) {
-                return $value != "";
-            });
-        }
+        $included_shippers = array_filter($included_shippers, function($value){
+            return $value != "";
+        });
 
-        foreach ($sorted_agents as $key => $agent) {
+        $only_shippers = [];
+        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1)->first();
+        if ($only_shipper) {
+            $only_shippers = explode(',', $only_shipper['text']);
+        }
+        $only_shippers = array_filter($only_shippers, function($value){
+            return $value != "";
+        });
+
+        foreach ($agent_sorted_hubs as $key => $agent) {
             $shipments = [];
             
             //this wont be null if admin is assigning shipment to an agent
@@ -918,7 +891,7 @@ trait RvTrait
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                 ->whereIn('shipper_status_id', [12,65,66,52])
-                ->where('consignee_city_id', $agent['city_id'])  
+                ->where('consignee_city_id', $agent->city_id)  
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
                     FROM shipments_journey AS sj
@@ -964,7 +937,7 @@ trait RvTrait
                 
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
-                    $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
+                    $shipments = Shipment::where('consignee_city_id', $agent->city_id)
                     ->whereIn('shipper_status_id', [12,65,66,52])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
