@@ -3281,13 +3281,21 @@ class AdminReportsController extends Controller
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
+
+        $new_referral_names = DB::connection('reports')->table('admins')
+        ->join('sales_commission_users as scu', 'scu.user_id', '=', 'admins.id')
+        ->where('scu.tier_id','=',4)
+        ->where('scu.user_type','=',1)
+        ->select(['admins.id','admins.name']);
+
         $referral_names = DB::connection('reports')->table('users')
         ->join('referrals as ref', 'ref.id', '=', 'users.referral_id')
         ->join('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
         ->join('admins as r', 'r.id', '=', 'st.ref')
         ->select(['r.id','r.name'])
+        ->union($new_referral_names)
         ->get();
-
+        
         return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments, 'referral_names' => $referral_names]);
     }
     public function overall_sales_list(Request $request)
