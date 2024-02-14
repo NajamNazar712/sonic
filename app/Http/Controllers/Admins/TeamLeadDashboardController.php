@@ -418,7 +418,7 @@ class TeamLeadDashboardController extends Controller
         
             //since we are getting employee id and we have to save admin id in table 
             // If employee_id is present, add it to the array
-            if ($request->has('employee_id')) {
+            if ($request->has('employee_id') && $request->employee_id !== null) {
                 $employeeIds[] = $request->employee_id;
             }
             $employee_id_bulks = explode(',', $request->employee_id_bulk);
@@ -431,7 +431,6 @@ class TeamLeadDashboardController extends Controller
                     }
                 }
             }
-            // dd($employeeIds);
             foreach ($employeeIds as $employeeId) {
                 $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $employeeId)->get();
                 if ($rvAgentAssignHub->isNotEmpty()) {
