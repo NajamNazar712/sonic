@@ -134,7 +134,7 @@ class ReturnV2Controller extends Controller
                         if(session('latitude') != null){
                             $this->mark_attendance($admin);
                         }
-                        $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->first();
+                        $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->where('rv_assign_agent_status_id', null)->where('rv_assign_agent_sub_status_id', null)->where('assigned_to_type_id', '!=', 0)->where('assigned_by_id', '!=', 0) ->first();
                         if($assigned_shipment){
                             $shipment = Shipment::find($assigned_shipment->shipment_id);
                         }
