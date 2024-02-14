@@ -921,11 +921,8 @@ trait RvTrait
                 } 
 
                 // $shipments = $shipments->get();
-                $shipments = $shipments->first();
-                // if($shipments->isEmpty()){
-                //     continue;
-                // }  
-                if(!$shipments){
+                $shipments = $shipments->get();
+                if($shipments->isEmpty()){
                     continue;
                 }  
             }
@@ -978,12 +975,9 @@ trait RvTrait
                     } 
                     
                     // $shipments = $shipments->get();
-                    $shipments = $shipments->first();
+                    $shipments = $shipments->get();
                     
-                    // if($shipments->isEmpty()){
-                    //     continue;
-                    // }  
-                    if(!$shipments){
+                    if($shipments->isEmpty()){
                         continue;
                     }  
                 }
@@ -994,8 +988,7 @@ trait RvTrait
             }
             
             // check if shipments exist or if admin is assign shipment to agent
-            // if (count($shipments) || $agent_shipment_id) {
-            if ($shipments || count($shipments) || $agent_shipment_id) {
+            if (count($shipments) || $agent_shipment_id) {
 
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                 if ($shipments)
