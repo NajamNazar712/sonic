@@ -1203,14 +1203,13 @@ trait RvTrait
     {
         try 
         {
-            DB::beginTransaction();
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->latest()->first();
+            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->first();
 
             if($shipments_journey){
-                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('shipment_id',$data['shipment_id'])->where('agent_id',$data['agent_id'])->latest()->first();
+                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->first();
                 
                 //if shipment row in rv_shipment_assign_agent is not found it means that admin is udating the status itself
-                if(!$rv_shipment_assign_agent){
+                if(!(($rv_shipment_assign_agent->rv_state_id == 1) && ($rv_shipment_assign_agent->assigned_to_type_id == 1) && ($rv_shipment_assign_agent->assigned_to_type_id == 1) && ($rv_shipment_assign_agent->where('agent_id',$data['agent_id'])))){
                     $rv_shipment_assign_agent = new RvShipmentAssignAgent();
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
@@ -1234,6 +1233,40 @@ trait RvTrait
                     $rv_shipment_assign_agent->save();
 
                     
+                    $updated_data = [   
+                        'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
+                        'agent_id' => $rv_shipment_assign_agent->agent_id,
+                        'shipments_journey_id' => $rv_shipment_assign_agent->shipments_journey_id,
+                        'last_shipments_journey_id' => $rv_shipment_assign_agent->last_shipments_journey_id,
+                        'shipment_id' => $rv_shipment_assign_agent->shipment_id,
+                        'rv_assign_agent_status_id' => $rv_shipment_assign_agent->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $rv_shipment_assign_agent->rv_assign_agent_sub_status_id,
+                        'rv_state_id' => $rv_shipment_assign_agent->rv_state_id,
+                        'updated_type_id' => $rv_shipment_assign_agent->updated_type_id,
+                        'updated_by_id' =>  $rv_shipment_assign_agent->updated_by_id,
+                        'is_fake_status' => $rv_shipment_assign_agent->is_fake_status,
+                        'rv_fake_status_id' => $rv_shipment_assign_agent->rv_fake_status_id,
+                        'remarks' => $rv_shipment_assign_agent->remarks,
+                        'call_to_id' => $rv_shipment_assign_agent->call_to_id,
+                        'assigned_by' => $rv_shipment_assign_agent->assigned_by,
+                        'assigned_to_type_id' => $rv_shipment_assign_agent->assigned_to_type_id,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($updated_data);
+                }
+                // $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', null)->first();
+                if(($rv_shipment_assign_agent->rv_state_id == 3) && ($rv_shipment_assign_agent->rv_assign_agent_status_id = null)){
+                    $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+                    $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
+                    $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
+                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
+                    $rv_shipment_assign_agent->rv_state_id = 4;
+                    $rv_shipment_assign_agent->updated_type_id = 1; 
+                    $rv_shipment_assign_agent->updated_by_id = $data['updated_by_id'];
+                    $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
+                    $rv_shipment_assign_agent->call_to_id  = 1;
+                    $rv_shipment_assign_agent->save();
+
                     $updated_data = [   
                         'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
                         'agent_id' => $rv_shipment_assign_agent->agent_id,
@@ -1294,10 +1327,8 @@ trait RvTrait
             else{
                 return false;
             }
-            DB::commit();
         } 
         catch (\Exception $e) {
-            DB::rollBack();
             return false;
         }
         return true;
