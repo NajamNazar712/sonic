@@ -3607,8 +3607,8 @@ class RiderAPIController extends Controller
                 })
                 ->whereBetween('sj.created_at', [$from_date . ' 00:00:01', $to_date . ' 23:59:59'])
                 ->select(
-                    'users.id',
-                    'users.name',
+                    'users.id as shipper_id',
+                    'users.name as shipper_name',
                     DB::raw('(SELECT COUNT(bs.shipment_id) FROM shipments as sm JOIN shipments_journey as bs ON sm.id=bs.shipment_id AND bs.shipper_status_id=1 WHERE sm.user_id = s.user_id) AS book_shipments'),
                     DB::raw('COUNT(sj.id) AS rider_picked'),
                     DB::raw('COUNT(sq.id) AS arrived_shipment')
