@@ -1206,10 +1206,11 @@ trait RvTrait
             $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->first();
 
             if($shipments_journey){
-                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('shipment_id',$data['shipment_id'])->where('agent_id',$data['agent_id'])->first();
                 $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', null)->first();
+                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('shipment_id',$data['shipment_id'])->where('agent_id',$data['agent_id'])->first();
 
                 if($agent_unassign_shipment){
+                    dd(1);
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
                     $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
@@ -1221,7 +1222,7 @@ trait RvTrait
                     $rv_shipment_assign_agent->remarks = isset($data['remarks']) ? $data['remarks'] : null;
                     $rv_shipment_assign_agent->call_to_id  = 1;
                     $rv_shipment_assign_agent->save();
-
+                    
                     $updated_data = [   
                         'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
                         'agent_id' => $rv_shipment_assign_agent->agent_id,
@@ -1242,9 +1243,10 @@ trait RvTrait
                     ];
                     $this->data_rv_shipment_assign_agent_details($updated_data);
                 }
-
+                
                 //if shipment row in rv_shipment_assign_agent is not found it means that admin is udating the status itself
                 else if(!$rv_shipment_assign_agent){
+                    dd(2);
                     $rv_shipment_assign_agent = new RvShipmentAssignAgent();
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
@@ -1293,6 +1295,7 @@ trait RvTrait
                 //if shipment row in rv_shipment_assign_agent is found it means that admin has already assign the shipment to customer experince & customer experice 
                 //agent is udating the status
                 else{
+                    dd(3);
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
                     $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
