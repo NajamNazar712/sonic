@@ -115,7 +115,10 @@ class ReturnController extends Controller
     }
 
     private function shipments($type = 1){
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+
+        $connection = 'reports_2';
+       
+        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
         ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
         // ->leftJoin('bolt_undelivered_reason_map_counts as burmc','burmc.shipment_id','=','shipments.id')
         ->leftJoin('delivery_note_shipments','delivery_note_shipments.shipment_id','=','shipments.id')
@@ -131,20 +134,20 @@ class ReturnController extends Controller
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
         ->leftjoin('consignee_address_areas as cas', 'cas.shipment_id','=','shipments.id')
         ->leftjoin('city_areas as ca','ca.id','=','cas.city_area_id')
-        ->leftJoin('shipments_journey', function ($join) {
+        ->leftJoin('shipments_journey', function ($join) use ($connection) {
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
             ->where('shipments_journey.id','=',
-            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
-        ->leftJoin('shipments_journey as admin_journey', function ($join) {
+        ->leftJoin('shipments_journey as admin_journey', function ($join) use ($connection) {
             $join->on('admin_journey.shipment_id', '=', 'shipments.id')
             ->where('admin_journey.id','=',
-            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
+            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
         })
-        ->leftJoin('shipments_journey as sj', function ($join) {
+        ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
             ->where('sj.id','=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
         })
         ->leftJoin('shipments_journey as sret', function ($join) {
             $join->on('sret.shipment_id', '=', 'shipments.id')
@@ -157,15 +160,15 @@ class ReturnController extends Controller
         //         ->where('sret.verification','=',1);
         // })
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-        ->leftjoin('crm_requests as crm', function ($join) {
+        ->leftjoin('crm_requests as crm', function ($join) use ($connection) {
             $join->on('crm.shipment_id', '=', 'shipments.id')
             ->where('crm.id','=',
-            DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
+            DB::connection($connection)->raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
         })
-        ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
+        ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) use ($connection) {
             $join->on('new_ras.shipment_id', '=', 'shipments.id')
             ->where('new_ras.id','=',
-            DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+            DB::connection($connection)->raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
             and rv_shipment_assign_agents.rv_state_id = 1)'));  
         })
         
@@ -178,12 +181,12 @@ class ReturnController extends Controller
         ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'rvsaa.agent_id')
 
         //for assigned_agent
-        ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) {
+        ->leftJoin('rv_shipment_assign_agent_details as rvsaad', function($join) use ($connection) {
             $join->on('rvsaad.shipment_id', '=', 'shipments.id')
-                 ->where('rvsaad.id', '=', DB::raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
+                 ->where('rvsaad.id', '=', DB::connection($connection)->raw('(select max(id) from rv_shipment_assign_agent_details where rv_shipment_assign_agent_details.shipment_id = shipments.id and rv_shipment_assign_agent_details.rv_state_id IN (2, 3) and (rv_shipment_assign_agent_details.rv_assign_agent_status_id != 7 or  rv_shipment_assign_agent_details.rv_assign_agent_status_id is null))'));
         })
         
-        ->leftjoin('employee_attendances as ea', function ($join) {
+        ->leftjoin('employee_attendances as ea', function ($join) use ($connection) {
             $join->on('ea.employee_id', '=', 'assigned_agent.employee_id')
                 ->where('ea.id', '=', DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = assigned_agent.employee_id)'));
         })
@@ -191,16 +194,16 @@ class ReturnController extends Controller
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
         ->leftJoin('rv_agent_call_histories as rach','rach.rv_shipment_assign_agent_id','=','rvsaa.id')
         
-        ->leftjoin('consolidation_shipments as consolidations', function ($join){
+        ->leftjoin('consolidation_shipments as consolidations', function ($join) use ($connection) {
             $join->on('consolidations.shipment_id', '=', 'shipments.id')
                 ->where('consolidations.consolidation_id','=',
-                    DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+                    DB::connection($connection)->raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
         })
 
-       ->leftJoin('rider_deliveries', function ($join) {
+       ->leftJoin('rider_deliveries', function ($join) use ($connection) {
            $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
                ->where('rider_deliveries.id','=',
-                   DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
+                   DB::connection($connection)->raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
        })
         ->leftjoin('star_shippers as sts','sts.user_id','=','u.id');
         if($type == 1){
@@ -209,7 +212,7 @@ class ReturnController extends Controller
                 'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
                 'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
                 'shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id',
-                'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), DB::raw('count(rvsaa.shipment_id) as rvsaa_count'),
+                'usi.vendor as vendor_name', 'usi.poc', DB::connection($connection)->raw('count(sret.shipment_id) as reattempts'), DB::connection($connection)->raw('count(rvsaa.shipment_id) as rvsaa_count'),
                 'shipments_journey.remarks as shipper_remarks',
                 'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
                 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
@@ -7174,7 +7177,7 @@ class ReturnController extends Controller
 
                         $process_one_link['shipment_ids'] = $valid_shipments;
                         $process_one_link['delivery_note_id'] = $note->id;
-                        dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+//                        dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                     }
                     NotificationsController::send(40, $note->id);
                     if ($normal_rider) {
