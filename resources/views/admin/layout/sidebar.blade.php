@@ -1910,7 +1910,7 @@
                                         @if (session('role_id') == 1 || in_array(938, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.mms_excel_booking_setting.index') }}">
-                                                MMS Excel Booking Shippers
+                                                MMS Shipper Excel Booking Setting
                                             </a>
                                         </li>
                                         @endif
