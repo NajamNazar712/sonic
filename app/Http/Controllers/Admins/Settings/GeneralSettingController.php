@@ -162,7 +162,7 @@ class GeneralSettingController extends Controller
     public function mms_excel_booking_setting_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 747);
-        $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+        $users= User::where('status',3)->where('blacklist' ,0 )->where('account_type_id',2)->select('id' , 'name')->get();
         $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
         $mms_excel_booking_setting = array();
         if ($settings->exists())
