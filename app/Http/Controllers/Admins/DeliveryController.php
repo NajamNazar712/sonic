@@ -2415,7 +2415,7 @@ class DeliveryController extends Controller
                 $rider = $rider->first();
                 $rider_type = Rider::where('id', $rider->rider_id)->select('operation_rider_id','allow_delivered_status');
                 $rider_type = $rider_type->first();
-                if ($rider_type->operation_rider_id == 2) {
+                if ($rider_type->operation_rider_id == 2 && ($rider_type->allow_delivered_status == 0 || $rider_type->allow_delivered_status == NULL)) {
                     return ['status' => 2, 'error' => 'Cannot mark shipment(s) as delivered because of hold in operation delivery note !'];
                 }
             }
