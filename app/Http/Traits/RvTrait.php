@@ -1254,7 +1254,7 @@ trait RvTrait
                     $this->data_rv_shipment_assign_agent_details($updated_data);
                 }
                 // $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', null)->first();
-                if(($rv_shipment_assign_agent->rv_state_id == 3) && ($rv_shipment_assign_agent->rv_assign_agent_status_id = null)){
+                if(($rv_shipment_assign_agent->rv_state_id == 3) && ($rv_shipment_assign_agent->rv_assign_agent_status_id == null)){
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipments_journey_id = $shipments_journey->id;
                     $rv_shipment_assign_agent->last_shipments_journey_id = $shipments_journey->id;
