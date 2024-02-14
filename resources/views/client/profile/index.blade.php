@@ -1509,7 +1509,7 @@
                             var code    = $('#code').val();
                             if(pincode == code)
                             {
-                                $('#AddBankModal').modal('show');
+                                //$('#AddBankModal').modal('show');
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Your bank is being added!',
