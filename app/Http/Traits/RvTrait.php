@@ -994,7 +994,8 @@ trait RvTrait
             }
             
             // check if shipments exist or if admin is assign shipment to agent
-            if (count($shipments) || $agent_shipment_id) {
+            // if (count($shipments) || $agent_shipment_id) {
+            if ($shipments || count($shipments) || $agent_shipment_id) {
 
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                 if ($shipments)
