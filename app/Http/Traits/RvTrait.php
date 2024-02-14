@@ -1056,7 +1056,7 @@ trait RvTrait
 
                     $rv_shipment = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->where('rv_state_id', 1);
                     // $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_s->where('agent_id', Auth::id())hipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                    if ($shipment_assigned_assigned_agent->exists()) {
+                    if ($rv_shipment->exists()) {
                         return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                     }
                     
