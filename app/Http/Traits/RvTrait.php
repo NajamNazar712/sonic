@@ -835,9 +835,11 @@ trait RvTrait
     {
         $shipment = null;
 
-        $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority')->first();
+       
+        $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority');
 
-        if($rv_priority_shipper){
+        if($rv_priority_shipper->exists()){
+            $rv_priority_shipper = $rv_priority_shipper->first();
             $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
         }
 
@@ -845,24 +847,32 @@ trait RvTrait
             return $value != "";
         });
 
-
+        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
+        // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
-        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->first();
+
         if ($all_shipper_exists) {
-            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1)->first();
-            if ($included_shipper) {
+            $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+            // Check if excluded_shippers exists and process it
+            if ($included_shipper->exists()) {
+                $included_shipper = $included_shipper->first();
                 $included_shippers = explode(',', $included_shipper['text']);
             }
         }
+        
         $included_shippers = array_filter($included_shippers, function($value){
             return $value != "";
         });
 
+        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+        // If only_shippers setting is not found, initialize as an empty array
         $only_shippers = [];
-        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1)->first();
-        if ($only_shipper) {
+        // Check if only_shippers exists and process it
+        if ($only_shipper->exists()) {
+            $only_shipper = $only_shipper->first();
             $only_shippers = explode(',', $only_shipper['text']);
         }
+
         $only_shippers = array_filter($only_shippers, function($value){
             return $value != "";
         });
