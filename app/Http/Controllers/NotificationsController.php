@@ -10950,9 +10950,12 @@ class NotificationsController extends Controller
                     $sale_commission_users = SalesCommission::with('users')->where('shipper_id', $user_id->id)->latest()->first();
                     foreach($sale_commission_users->users as $sale_commission_user){
                         if($sale_commission_user->user_type == 1){
-                            dd($sale_commission_user->sales_person->email);
+                            $email[] = $sale_commission_user->sales_person->email;
                         }
                     }
+
+                    dd($email);
+
                 } 
             }
         }
