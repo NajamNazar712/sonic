@@ -142,12 +142,9 @@ class ReturnV2Controller extends Controller
                         else{
                             // $shipment = $this->included_shippers($agent_sorted_hubs, $agent_sorted_hubs, $agent_id);
                             $shipment = $this->included_shippers($agent_id);
-                            
-                            $shipment = Shipment::find($shipment->shipment_id);
                         }
                         if ($shipment) {
                             try {
-                                // dd($shipment);
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
                                 $service_type = $shipment->booking_type;
