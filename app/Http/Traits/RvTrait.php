@@ -994,6 +994,7 @@ trait RvTrait
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                 if ($shipments)
                 {
+                    dd($shipments);
                     foreach ($shipments as $key => $shipment) {
                         // $rv_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
@@ -1031,14 +1032,14 @@ trait RvTrait
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
-                        else if ($rv_shipments = RvShipmentAssignAgent::where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
+                        if ($rv_shipments = RvShipmentAssignAgent::where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
                             // dd(2);
                             // break 2;
                             break;
                         }
 
                         // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
-                        else if($shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
+                        if($shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
                             // dd(222);
                             continue;
                         }
