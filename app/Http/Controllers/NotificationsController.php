@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 use App\Http\Models\Shipment;
 use App\Jobs\ProcessOTPSMSITS;
+use App\BlockDisableReasonUser;
 use App\Http\Models\PickupNote;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\DonePayment;
@@ -47,6 +48,7 @@ use App\Http\Models\AppNotification;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\DailyFakeStatus;
 use App\Jobs\ProcessOTPSMSForBotSMS;
+use App\ReturnDeliveredToShipperSms;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -60,9 +62,6 @@ use App\Http\Models\ReturnNoteRequest;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\DeliveryNoteOtpSms;
-use App\Http\Models\NotificationSetting;
-use App\Http\Models\NotificationSettingShipper;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\FnfSectionEmployee;
 use App\Jobs\ProcessDeliveryNoteOtpSms;
 use Illuminate\Support\Facades\Storage;
@@ -70,15 +69,17 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeRequisition;
+use App\Http\Models\MultipleSaleTagging;
+use App\Http\Models\NotificationSetting;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\V2Pickup\V2PickupNote;
-use App\ReturnDeliveredToShipperSms;
 use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\ActivityTrailLog;
@@ -97,6 +98,7 @@ use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\OvernightOverlandReportData;
@@ -119,7 +121,7 @@ use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
-use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 
 class NotificationsController extends Controller
 {
@@ -10946,16 +10948,72 @@ class NotificationsController extends Controller
                 }
                 else if ($id == 229){
                     $email = [];
-                    $user_id = $reference_1_id;
-                    $sale_commission_users = SalesCommission::with('users')->where('shipper_id', $user_id->id)->latest()->first();
-                    foreach($sale_commission_users->users as $sale_commission_user){
-                        if($sale_commission_user->user_type == 1){
-                            $email[] = $sale_commission_user->sales_person->email;
+                    $user = $reference_1_id;
+                    $sale_commission_users = SalesCommission::with('users')->where('shipper_id', $user->id)->latest()->first();
+                    $sales_tier_kam = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
+                    $sales_tier_sale_person = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
+
+                    if(isset($sale_commission_users, $sale_commission_users->users)){
+                        foreach($sale_commission_users->users as $sale_commission_user){
+                            if($sale_commission_user->user_type == 1 && ($sale_commission_user->tier_id == $sales_tier_kam || $sale_commission_user->tier_id == $sales_tier_sale_person) ){
+                                $email['sale_lead_id'][] =  $sale_commission_user->sales_person->id;
+                                $email['email'][] = $sale_commission_user->sales_person->email;
+                            }
                         }
+
+                        $sale_person_tag = SalePersonTag::where('user_id', $user->id)->where('status', 0);
+                        if($sale_person_tag->exists()){
+                            $sale_person_tag_email = $sale_person_tag->orderBy('id', 'DESC')->first()->sales_person->email ?? null;
+                            $sale_person_tag_id = $sale_person_tag->orderBy('id', 'DESC')->first()->admin_id ?? null;
+                            $email['sale_lead_id'][] = $sale_person_tag_id;
+                        }
+
+                        $sale_lead_email = MultipleSaleTagging::whereIn('admin_id', $email['sale_lead_id'])->get()->pluck('lead_id')->toArray();
+                        $lead_email = Lead::whereIn('id', $sale_lead_email)->get()->pluck('email_address')->toArray();
+    
+                        $to = array_merge($email['email'], $lead_email);
+                        $to[] = $sale_person_tag_email;
+
+                        $admin_name = Admin::whereIn('email', $to)->get()->pluck('name')->toArray();
+                        $lead_name = MultipleSaleTagging::join('leads', 'leads.id', 'multiple_sale_taggings.id')
+                        ->whereIn('multiple_sale_taggings.admin_id', $email['sale_lead_id'])
+                        ->select('leads.contact_person as contact_person')
+                        ->get()
+                        ->pluck('contact_person')
+                        ->toArray();
+
+                        $sale_person_name = array_merge($admin_name, $lead_name);
+                        $sale_person_name = implode(' ,', $sale_person_name);
+
+
+                        // Table for User Disable/Block Accounts
+                        $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                        $html .= '<thead>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Shipper Name</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Tagged Sale Person</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Activation Date</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Disable Date</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Disability Reason</th>';
+                        $html .= '</thead>';
+                        $html .= '<tbody>';
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$user->name.'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$sale_person_name.'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->blocked_at).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name.'</td>';
+
+                        $html .= '</tr>';
+                        $html .= '<tbody>';
+                        $html .= '</table>';
+
+                        
+                        $body = str_replace('[preview]', $html, $body);
+                        self::email($subject, $body, $to);
+
+                    }else{
+                        return;
                     }
-
-                    dd($email);
-
                 } 
             }
         }

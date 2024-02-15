@@ -1459,7 +1459,7 @@ class AdminDashboardController extends Controller
         $user = User::where('id', $user_id);
         if ($user->exists()) {
             $user = $user->first();
-            NotificationsController::send(229, $user);
+            
 
             if ($status == 'block') {
                 $negative_balance_status = false;
