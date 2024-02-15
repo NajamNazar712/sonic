@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Admins\V3Pickup\V3PickupRequestJourneysController;
 use App\Http\Models\V2Pickup\ShipmentsV2PickupJourney;
+use App\Http\Models\V3Pickup\ShipmentsV3PickupJourney;
 use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Http\Models\V3Pickup\V3PickupNoteRequest;
 use App\Http\Models\V3Pickup\V3PickupRequest;
