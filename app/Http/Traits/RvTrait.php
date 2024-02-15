@@ -1069,7 +1069,7 @@ trait RvTrait
                         $this->rv_shipment_assign($data);
                         // break 2;
                         // break;
-                    // }
+                    }
                 }
 
                 //this check will work only if admin will assign shipment manually to agent 
