@@ -994,21 +994,18 @@ trait RvTrait
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                 if ($shipments)
                 {
-                    dd($shipments);
                     foreach ($shipments as $key => $shipment) {
                         // $rv_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
-
                         
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                         // $shipment_assigned_unassigned_agent = $rv_shipments->where('rv_state_id', 3)->first();
                         if ($rv_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3)->first()) {
-                            // dd(1);
                             $rv_shipments->update(['rv_state_id'=> 1, 'agent_id'=> $agent_id, 'assigned_by' => 0]);
                             
-                            $shipment_assign_agent = $rv_shipments->latest()->first();
+                            $shipment = $rv_shipments->latest()->first();
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                             
-                            $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
+                            $data = ['rv_shipment_assign_agent_id' => $shipment->id, 'agent_id' => $agent_id,
                             'shipments_journey_id' => $shipments_journey->id,
                             'last_shipments_journey_id' => $shipments_journey->id,
                                     'shipment_id' => $shipment->id,
@@ -1026,28 +1023,24 @@ trait RvTrait
                                 ];
                                 $this->data_rv_shipment_assign_agent_details($data);
                             // break 2;
-                            // break;
+                            break;
                         }
-
+                        
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
-                        if ($rv_shipments = RvShipmentAssignAgent::where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
-                            // dd(2);
-                            // break 2;
+                        if ($shipment = RvShipmentAssignAgent::where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
                             break;
                         }
 
                         // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
-                        if($shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
-                            // dd(222);
+                        if($shipment = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
                             continue;
                         }
                         
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         // $find_shipment_assigned_agent = $rv_shipments->first();
-                        if ($find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first()) {
-                            // dd(3);
+                        if ($shipment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first()) {
                             $shipment = null;
                             continue;
                         }
@@ -1067,8 +1060,7 @@ trait RvTrait
                         
                         // creating a new record
                         $this->rv_shipment_assign($data);
-                        // break 2;
-                        // break;
+                        break;
                     }
                 }
 
