@@ -60,7 +60,7 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 12 hours ago.            
-                ->where('updated_at', '<', $sarDateTime->subHours(16)->toDateTimeString())
+                ->where('updated_at', '>', $sarDateTime->subHours(16)->toDateTimeString())
                 ->where('unresponsive_email_count', '<', 1);
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
@@ -78,7 +78,7 @@ class AgentSarNotification extends Command
 
                 foreach ($sendEmail as $shipment) {
                     // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-                    if($shipment->rv_assign_agent_status_id == 6){
+                    if($shipment->rv_assign_agent_status_id == 7){
                         $shipment->increment('unresponsive_email_count');
                         $shipment->unresponsive_email_time = $sarDateTime->toDateTimeString();
                         $shipment->save();
