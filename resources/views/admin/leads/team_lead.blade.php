@@ -79,7 +79,7 @@
         </thead>
     </table>
 
-    <div class="modal fade" id="AssignHubModal" data-backdrop="static" tabindex="-1" role="dialog"
+    <div class="modal fade" id="AssignZoneModal" data-backdrop="static" tabindex="-1" role="dialog"
         aria-labelledby="LastWorkingDayModal" aria-hidden="true">
         <div class="modal-dialog modal-lg justify-content-center" role="document">
             <div class="modal-content">
@@ -731,6 +731,7 @@
                         enabled:false,
                         // enabled: false,
                         action: function(e, dt, node, config) {
+                            var selected_rows = [];
 
                             // Select all rows with the class 'select-checkbox'
                             dt.rows({ selected: true }).nodes().each(function(row) {
@@ -738,13 +739,11 @@
                                 selected_rows.push(employee_id);
                             });
 
-                            // Deselect all rows
-                            // table.rows().deselect();
                             // employee ids are saving in selected_rows
                             if (selected_rows.length > 0) {
                                 $('#search_origin').val('').trigger('change'); //empty field opening on modal
-                                $('#AssignHubModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
-                                $('#AssignHubModal').modal('show');
+                                $('#AssignZoneModal input[name="employee_id_bulk"]').val(selected_rows.join(',')); // Join array elements into a string
+                                $('#AssignZoneModal').modal('show');
                             }
                         }
                     },
@@ -759,8 +758,6 @@
                                 selected_rows.push(employee_id);
                             });
 
-                            // Deselect all rows
-                            // table.rows().deselect();
                             // employee ids are saving in selected_rows
                             if (selected_rows.length > 0) {
                                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
@@ -1034,7 +1031,7 @@
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var index = $.inArray(id, selected_rows);
-
+                
                 
                 if (index === -1) {
                     selected_rows.push(id);
@@ -1042,7 +1039,7 @@
                 else {
                     selected_rows.splice(index, 1);
                 }
-                $('#AssignHubModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
+                $('#AssignZoneModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val(selected_rows.join(','));
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
@@ -1091,16 +1088,23 @@
                 });
             });
 
-            $('#EditDisableAgentModal').on('hide.bs.modal', function(e) {
-                    $('#employee_id').text(''); //clearing error message when modal is close
-                    $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
-                    $('#deactivate_reason_input').text(''); //clearing error message when modal is close
+            $('body').on('click', '.action', function() {
+                $('#AssignZoneModal input[name="employee_id_bulk"]').val('');
             });
-            // $('#AssignHubModal').on('hide.bs.modal', function(e) {
-            //         // $('#search_origin').text('');
-            //         $('#search_origin').empty();
-            // });
+
+            $('#EditDisableAgentModal').on('hide.bs.modal', function(e) {
+                $('#employee_id').text(''); //clearing error message when modal is close
+                $('#deactivate_reason_input-error').text(''); //clearing error message when modal is close
+                $('#deactivate_reason_input').text(''); //clearing error message when modal is close
+            });
+            $('#AssignZoneModal').on('hide.bs.modal', function(e) {
+                table.rows().deselect();
+                selected_rows = [];
+                $('#AssignZoneModal input[name="employee_id_bulk"]').val('');
+                $('#AssignZoneModal input[name="employee_id"]').val('');
+            });
             $('#BulkAddDaysModal').on('hide.bs.modal', function(e) {
+                table.rows().deselect();
                 selected_rows = [];
                 $('#BulkAddDaysModal input[name="employee_id_bulk"]').val('');
             });
@@ -1396,10 +1400,10 @@
                     $('input[name="unsorted_zones"]').val(selectedCities);
 
                     $('#search_origin').trigger('change');
-                    $('#AssignHubModal').modal('show');
+                    $('#AssignZoneModal').modal('show');
                 } else if (rv_city == null) {
                     $("#search_origin option").prop("selected", false).trigger("change");
-                    $('#AssignHubModal').modal('show');
+                    $('#AssignZoneModal').modal('show');
                 }
             });
 
