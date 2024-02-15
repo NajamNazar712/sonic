@@ -5469,7 +5469,7 @@ class ReturnController extends Controller
                                 'error' => ($assigned_to_new_user != null)
                                     ? 'These Shipments are assigned to this agent successfully: ' . $assigned_shipment . 
                                     (($already_assigned_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $already_assigned_shipment : '')
-                                    : 'Already Assigned' 
+                                    : 'Shipment Already Assigned' 
                             ]);
                         } 
                     }
