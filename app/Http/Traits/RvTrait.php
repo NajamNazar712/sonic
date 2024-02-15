@@ -998,7 +998,6 @@ trait RvTrait
                         $rv_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
 
                         
-                        
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                         $shipment_assigned_unassigned_agent = $rv_shipments->where('rv_state_id', 3)->first();
                         if ($shipment_assigned_unassigned_agent) {
@@ -1038,8 +1037,8 @@ trait RvTrait
                             break;
                         }
 
-                        $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
-                        if ($shipment_assigned_assigned_agent) {
+                        // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
+                        else if($shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
                             dd(222);
                             continue;
                         }
