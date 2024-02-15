@@ -2248,8 +2248,8 @@ class AdminTrackingController extends Controller
                                         $handover_note = str_pad($handover->id, 6, '0', STR_PAD_LEFT);
                                         $handover_created_by = Admin::find($handover->created_by)->name;
                                         $handover_created_at = $handover->created_at;
-                                        $handover_from = HandoverResponsibilities::find($handover->from)->name . ' (' . $handover->from_dept_area_desg . ')';
-                                        $handover_to = HandoverResponsibilities::find($handover->to)->name . ' (' . $handover->to_dept_area_desg . ')';
+                                        $handover_from = HandoverResponsibilities::find($handover->from)->admin->name . ' (' . (isset($handover->from_admin->Edesignation) && isset($handover->from_admin->Edesignation->department) ? $handover->from_admin->Edesignation->department->name : '-') . ')' ;
+                                        $handover_to = HandoverResponsibilities::find($handover->to)->admin->name . ' (' . (isset($handover->to_admin->Edesignation) && isset($handover->to_admin->Edesignation->department) ? $handover->to_admin->Edesignation->department->name : '-') . ')';
                                         if($handover->received_by != null){
                                             $handover_received_by = Admin::find($handover->received_by)->name;
                                             $handover_received_at = $handover->received_at;

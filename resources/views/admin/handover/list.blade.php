@@ -19,7 +19,7 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
+                            <select name="R" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach

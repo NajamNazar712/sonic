@@ -46,7 +46,7 @@ class AdminShipmentHandoverController extends Controller
         $value = $request->get('value');
         // $dependent = $request->get('dependent');-
         $dependent = "select From Person";
-        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->get();
+        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->distinct('id')->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
@@ -200,17 +200,18 @@ class AdminShipmentHandoverController extends Controller
 
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
-      
         $shipment_ids = explode(',', $request->shipment_ids);
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
         if($total > 0){
+            $from_admin_dept = Admin::find($request->from);
+            $to_admin_dept = Admin::find($request->to);
             $handover = new Handover();
             $handover->created_by = Auth::id();
             $handover->from = $request->from;
-            $handover->from_dept_area_desg = $request->from_dept_area_desg;
+            $handover->from_dept_area_desg = $from_admin_dept->Edesignation->department_id ?? null;
             $handover->to = $request->to;
-            $handover->to_dept_area_desg = $request->to_dept_area_desg;
+            $handover->to_dept_area_desg = $to_admin_dept->Edesignation->department_id ?? null;
             $handover->hub = $request->hub_id;
             $handover->status_id = 1 ;
             $handover->shipments =$total;
@@ -279,7 +280,11 @@ class AdminShipmentHandoverController extends Controller
         $hubs = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
             ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
 
-        $handover_admins = HandoverResponsibilities::select('id', 'name')->get();
+        $handover_admins = HandoverResponsibilities::select('admin.id as id', 'admin.name as name')->join('admins as admin','admin.id','handover_responsibilities.admin_id')
+        ->where('admin_id','!=','')
+        ->where('admin.status', 1)
+        ->distinct('id')
+        ->get();
         $areas = DB::table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
         return view('admin.handover.list')->with(['hubs'=>$hubs, 'handover_admins'=>$handover_admins,'areas'=> $areas]);
@@ -845,7 +850,7 @@ class AdminShipmentHandoverController extends Controller
 
     public function get_sub_area(Request  $request){
       if(isset($request->city_id)){
-        $admins = Admin::where('default_hub_id', $request->city_id)->get();
+        $admins = Admin::where('default_hub_id', $request->city_id)->where('status', 1)->get();
         $areas  = CityArea::where('city_id', $request->city_id)->where('status', 1)->get();
       }
 
@@ -855,7 +860,12 @@ class AdminShipmentHandoverController extends Controller
     }
     public function get_user(Request  $request){
         if(isset($request->city_id)){
-            $users = HandoverResponsibilities::where('hub_id',$request->city_id)->where('status',1);
+            $users = HandoverResponsibilities::select('admin.id as id', 'admin.name as name')
+            ->join('admins as admin','admin.id','handover_responsibilities.admin_id')
+            ->where('admin_id','!=','')->where('handover_responsibilities.hub_id',$request->city_id)
+            ->where('handover_responsibilities.status',1)
+            ->where('admin.status', 1)
+            ->distinct('id');
             if($users->exists()){
                 return response()->json(['status' => 1,'users'=>$users->get()]);
             }
