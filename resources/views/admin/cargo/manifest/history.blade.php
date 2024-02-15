@@ -124,8 +124,8 @@
                                     <th class="border-primary border-darken-1">Rush Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Swift Shipment Count</th>
                                     <th class="border-primary border-darken-1">Swift Shipment Weight</th>
-                                    <th class="border-primary border-darken-1">Saver Shipment Count</th>
-                                    <th class="border-primary border-darken-1">Saver Shipment Weight</th>
+                                    <th class="border-primary border-darken-1">Saver Plus Shipment Count</th>
+                                    <th class="border-primary border-darken-1">Saver Plus Shipment Weight</th>
                                     <th class="border-primary border-darken-1">Total Weight</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
@@ -330,8 +330,8 @@
                             head.push('Rush Shipment Weight');
                             head.push('Swift Shipment Count');
                             head.push('Swift Shipment Weight');
-                            head.push('Saver Shipment Count');
-                            head.push('Saver Shipment Weight');
+                            head.push('Saver Plus Shipment Count');
+                            head.push('Saver Plus Shipment Weight');
                             head.push('Total Weight');
                             head.push('Transport Mode');
                             head.push('Vendor');
