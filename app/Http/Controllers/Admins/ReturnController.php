@@ -5372,8 +5372,8 @@ class ReturnController extends Controller
 
             $contractual_agent = Admin::where('id',$request->admin_id)->where('trax_id','like','%Trax-C%')->first();
             if($contractual_agent){
-                $sorted_agents = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->orderBy('priority', 'ASC')->get();
-                $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->pluck('zone_id')->toArray();
+                // $sorted_agents = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->orderBy('priority', 'ASC')->get();
+                // $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->pluck('zone_id')->toArray();
     
                 $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
                 if ($included_shipper->exists()) {
@@ -5402,7 +5402,7 @@ class ReturnController extends Controller
                 $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
                 $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
                 
-                if(!empty($sorted_agents_zones)){
+                // if(!empty($sorted_agents_zones)){
                     foreach($shipment_ids as $shipment_id){
                         $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
                         
@@ -5425,10 +5425,12 @@ class ReturnController extends Controller
                             return abs($item->created_at->diffInSeconds($currentDateTime));
                         })->first();
                         if($shipment->exists()){
-                            if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
-                            $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                            // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
+                            // $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
+                            if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                                 // DB::commit();
-                                $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
+                                // $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
+                                $this->included_shippers($contractual_agent->id, $shipment_id); 
                                 $assigned_shipment[] = $shipment->tracking_number;
                                 if($already_assigned_state != null){
                                     $assigned_to_new_user[] = $shipment->tracking_number;
@@ -5474,10 +5476,10 @@ class ReturnController extends Controller
                     else{
                         return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Contractual Agent Successfully']);
                     }
-                }
-                else{
-                    return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
-                }
+                // }
+                // else{
+                //     return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
+                // }
             }
             //assigning shipments to agents
             else{
@@ -5503,11 +5505,8 @@ class ReturnController extends Controller
                             }
 
                             if($shipment){
-                                // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12))
                                 if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3))
                                 {
-                                    // DB::commit();
-
                                     // if agent shipment is assigned - not assigned to same agent only 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -5750,13 +5749,14 @@ class ReturnController extends Controller
                                     $osa_shipments[] = $shipment->tracking_number;
                                 }
                                 else{
-                                    $zones_assigned_to_agent = RvAgentAssignHub::where('agent_id', $row['agent_id'])->pluck('zone_id')->toArray();
+                                    // $zones_assigned_to_agent = RvAgentAssignHub::where('agent_id', $row['agent_id'])->pluck('zone_id')->toArray();
                                     
-                                    if(!empty($zones_assigned_to_agent))
-                                    {
-                                        if(in_array($shipment->destination_city['zone_id'], $zones_assigned_to_agent)){
-                                            $sorted_agents = RvAgentAssignHub::where('agent_id', $row['agent_id'])->orderBy('priority', 'ASC')->get();
-                                            $include_shippers = $this->included_shippers($sorted_agents, $row['agent_id'], $shipment->id); 
+                                    // if(!empty($zones_assigned_to_agent))
+                                    // {
+                                        // if(in_array($shipment->destination_city['zone_id'], $zones_assigned_to_agent)){
+                                            // $sorted_agents = RvAgentAssignHub::where('agent_id', $row['agent_id'])->orderBy('priority', 'ASC')->get();
+                                            // $include_shippers = $this->included_shippers($sorted_agents, $row['agent_id'], $shipment->id); 
+                                            $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
                                             $data = $include_shippers->getData();
     
                                             if($data->status === 0 && $data->success === 'Shipments Assigned successfully')
@@ -5770,17 +5770,17 @@ class ReturnController extends Controller
                                                 $disabled_shippers[] = $tracking_number;
                                                 // return redirect()->back()->with('error', 'Shipper is disabled');
                                             }
-                                        }
-                                        else{
-                                            //zone not assigned to an agent 
-                                            $zone_not_assigned_contractual_agent[] = $row['agent_id'];
-                                        }
-                                    }
+                                        // }
+                                        // else{
+                                        //     //zone not assigned to an agent 
+                                        //     $zone_not_assigned_contractual_agent[] = $row['agent_id'];
+                                        // }
+                                    // }
                 
-                                    else{
-                                        //No Zone Assigned To Agent
-                                        $contractual_agent_with_no_zone[] = $row['agent_id'];
-                                    }
+                                    // else{
+                                    //     //No Zone Assigned To Agent
+                                    //     $contractual_agent_with_no_zone[] = $row['agent_id'];
+                                    // }
                                 }
                             }
                             

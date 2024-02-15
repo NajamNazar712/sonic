@@ -831,7 +831,8 @@ trait RvTrait
         $nsa_charges_log->save();
     }
 
-    protected function included_shippers($agent_sorted_hubs, $agent_id, $agent_shipment_id = null)
+    // protected function included_shippers($agent_sorted_hubs, $agent_id, $agent_shipment_id = null)
+    protected function included_shippers($agent_id, $agent_shipment_id = null)
     {
         $shipment = null;
 
