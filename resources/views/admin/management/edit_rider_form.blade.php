@@ -184,6 +184,16 @@
                 </div>
             </div>
         </div>
+        <div class='row' id="allow_delivered_row"> 
+            <div class="col text-center">
+                <label class="font-small-2 font-weight-bold block">This rider will mark delivered status?</label>
+                <div class="form-group">
+                    <label for="allow_delivered_status" class="font-small-2 text-bold-600 mr-1">No</label>
+                    <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status" class="checkbox allow_delivered_status" data-size="sm" data-switchery="true" {{ ($rider->allow_delivered_status == 1)? 'checked':'' }}>
+                    <label for="allow_delivered_status" class="font-small-2 text-bold-600 ml-1">Yes</label>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update Rider</button>
@@ -201,6 +211,13 @@
         @if($type == 1)
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);
+        @endif
+
+        var allow_elem = document.querySelector('.allow_delivered_status');
+        var allow_switchery = new Switchery(allow_elem);
+
+        @if($rider->operation_rider_id != 2)
+            $('#allow_delivered_row').addClass('d-none');
         @endif
 
         @if($rider->incentive_amount == null)
@@ -306,11 +323,25 @@
         @endif
 
         @if($rider->operation_rider_id != Null)
-        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change');
+        $('#operation_rider_id').val({!! $rider->operation_rider_id !!}).trigger('change').bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
+        });
         @else
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#editRiderForm")
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_row').addClass('d-none');
+                }
         });
         @endif
 
