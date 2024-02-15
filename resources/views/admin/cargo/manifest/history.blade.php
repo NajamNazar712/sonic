@@ -358,9 +358,9 @@
                                 row.push(values.rush_shipment_count);
                                 row.push(values.rush_shipment_weight);
                                 row.push(values.swift_shipment_count);
-                                row.push(values.swift_shipment_count);
+                                row.push(values.swift_shipment_weight);
                                 row.push(values.saver_shipment_count);
-                                row.push(values.saver_shipment_count);
+                                row.push(values.saver_shipment_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
@@ -441,9 +441,9 @@
                     {data: 'rush_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
                     {data: 'rush_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
                     {data: 'swift_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
-                    {data: 'swift_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
-                    {data: 'saver_shipment_count', name: 'rush_shipment_count', class: 'align-middle rush_shipment_count'},
-                    {data: 'saver_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle rush_shipment_weight'},
+                    {data: 'swift_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle swift_shipment_weight'},
+                    {data: 'saver_shipment_count', name: 'rush_shipment_count', class: 'align-middle saver_shipment_count'},
+                    {data: 'saver_shipment_weight', name: 'rush_shipment_weight', class: 'align-middle saver_shipment_weight'},
                     {data: 'actual_weight', name: 'cargo_manifests.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},
