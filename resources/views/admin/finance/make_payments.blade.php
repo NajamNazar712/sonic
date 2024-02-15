@@ -502,6 +502,7 @@
     <script>
         $(document).ready(function() {
 
+         
             $('#requested_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1229,7 +1230,7 @@
                     className: 'select_all',
                     action: function(e) {
                         e.preventDefault();
-
+                        console.log("ok hai");
                         make_payments_table.rows().nodes().each(function(index) {
                             var row = make_payments_table.row(index);
 
@@ -1239,7 +1240,7 @@
 
                                 var parent = $(row.node());
 
-                                calculation(parent);
+                                calculation(parent,0);
                             }
                         });
                     }
@@ -1259,7 +1260,7 @@
 
                                 var parent = $(row.node());
 
-                                calculation(parent);
+                                calculation(parent,0);
                             }
                         });
                     }
@@ -1752,9 +1753,11 @@
 
             var payable_list = [];
             let shipperTotal = {};
-
+            var shipper_cap = @json($shipper_cap);
+            var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
             // Make Payments Modal Calculation
-            function calculation(parent) {
+            function calculation(parent,flag=0) {
+             
                 var id = parseInt(parent.attr('id'));
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();
@@ -1775,7 +1778,7 @@
                     // payable_list.push(parseFloat(payable),shipper_id); //adding payable in to array payable_list 
                     payable_list.push({ payable, shipper_id }); //adding payable in to array payable_list 
                     // console.log(payable_list);
-                    calculateShipperTotal();
+                    calculateShipperTotal(parent);
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
                     .val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children(
@@ -1825,6 +1828,7 @@
 
                 //Row UnSelected
                 else {
+                   
                     selected_rows_shipments.splice(index, 1);
 
                     // console.log("when unselect", shipperTotal);
@@ -1838,7 +1842,7 @@
                     payable_list.splice(index, 1);
                     // Recalculate shipperTotal after removing the entry
                     shipperTotal = {}; // Reset shipperTotal object
-                    calculateShipperTotal();
+                    calculateShipperTotal(parent);
                     // console.log("when unselect and after calculate shipper total", shipperTotal);
 
                     var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector
@@ -1860,8 +1864,9 @@
                         0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children(
                             'td.payable').html().replace(/,/g, '')) : 0);
                 }
-
+               
                 if (selected_rows_shipments.length > 0) {
+                   
                     total_amount_selector.val(parseInt(total_amount));
                     total_charges_selector.val(parseFloat(total_charges).toFixed(2));
                     total_gst_selector.val(parseFloat(total_gst).toFixed(2));
@@ -1876,13 +1881,31 @@
                     //if total payable is grate than 0 it enable make and export bank order button
                     if($('#make_payments #make_payments_form .total_payable').val() > 0){
                             const isAnyNegative = Object.values(shipperTotal).some(total => total < 0);
+                            // console.log(x); 
                             // Disable make and export bank order button if any shipper's total payable is negative
+                           
                             if (isAnyNegative) {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', true);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
                             } else {
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
+                            }
+                            if( total_payable > shipper_limit)
+                            {
+                                // console.log("ok ahi");
+                                // setTimeout(() => {
+                                //     $("#make_payments #make_payments_datatable tbody tr").eq($(parent).index()).removeClass('selected bg-primary bg-lighten-5 primary');
+                                // }, 200);
+                                console.log("nikal ba");
+                               
+                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                                if(flag == 1)
+                                {
+                                     scan_sound(2);
+                                     toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
                             }
                     }
                     else{
@@ -1891,6 +1914,7 @@
                     }
 
                 } else {
+                  
                     total_amount_selector.val(0);
                     total_charges_selector.val(0);
                     total_gst_selector.val(0);
@@ -1907,24 +1931,43 @@
             }
 
             // Function to calculate shipper totals and disable buttons if any shipper's total payable is negative
+         
+            // var shipper_cap = @json($shipper_cap);
+            // var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
+            // var total_payable_amt=0;
             function calculateShipperTotal() {
+                
+                // console.log("oknhai");
                 shipperTotal = {}; // Reset shipperTotal object
-                total_payable=0;
+                // total_payable_amt = 0; // Reset total_payable_amt
+                
                 payable_list.forEach(entry => {
                     const shipperId = entry.shipper_id;
                     const payable = parseFloat(entry.payable.replace(/,/g, ''));
-                        total_payable+=payable;
-                        console.log(total_payable);
-                    if (shipperTotal[shipperId]) {
-                        shipperTotal[shipperId] += payable;
-                    } else {
-                        shipperTotal[shipperId] = payable;
-                    }
+                        // total_payable_amt +=payable;
+                        if (shipperTotal[shipperId]) {
+                            shipperTotal[shipperId] += payable;
+                        } else {
+                            shipperTotal[shipperId] = payable;
+                        }
                 });
+               
+                // if(total_payable_amt > shipper_limit)
+                // {
+                //     // alert("nikal ba");
+                //     calculation(tr);
+                //      var tr_index=$(tr).index();
+                //       setTimeout(() => {
+                //           $("#make_payments #make_payments_datatable tbody tr").eq(tr_index).removeClass('selected bg-primary bg-lighten-5 primary');
+                //       }, 150);
+                      
+                // }
+              
+
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-
+               
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
@@ -1939,7 +1982,7 @@
                                 .node()).hasClass('selected')) {
                                 var parent = $(row.node());
 
-                                calculation(parent);
+                                calculation(parent,1);
                                 if (selected_id != row_id) {
                                     row.select();
                                 }
@@ -1947,7 +1990,7 @@
                             } else {
                                 var parent = $(row.node());
 
-                                calculation(parent);
+                                calculation(parent,1);
                                 if (selected_id != row_id) {
                                     row.deselect();
                                 }
@@ -1958,7 +2001,7 @@
                     });
 
                 } else {
-                    calculation(parent);
+                    calculation(parent,1);
                 }
 
             });
