@@ -877,7 +877,7 @@ trait RvTrait
             return $value != "";
         });
 
-        foreach ($agent_sorted_hubs as $key => $agent) {
+        // foreach ($agent_sorted_hubs as $key => $agent) {
             $shipments = [];
             
             //this wont be null if admin is assigning shipment to an agent
@@ -901,7 +901,7 @@ trait RvTrait
 
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                 ->whereIn('shipper_status_id', [12,65,66,52])
-                ->where('consignee_city_id', $agent->city_id)  
+                // ->where('consignee_city_id', $agent->city_id)  
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
                     FROM shipments_journey AS sj
@@ -920,11 +920,10 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
 
-                // $shipments = $shipments->get();
                 $shipments = $shipments->get();
-                if($shipments->isEmpty()){
-                    continue;
-                }  
+                // if($shipments->isEmpty()){
+                //     continue;
+                // }  
             }
 
             
@@ -948,8 +947,8 @@ trait RvTrait
                 
                 if (!empty($result)){
                     $exploded_result = implode(',', $result);
-                    $shipments = Shipment::where('consignee_city_id', $agent->city_id)
-                    ->whereIn('shipper_status_id', [12,65,66,52])
+                    // $shipments = Shipment::where('consignee_city_id', $agent->city_id)
+                    $shipments = Shipment::whereIn('shipper_status_id', [12,65,66,52])
                     ->whereIn('user_id', $result)
                     ->whereRaw('NOT EXISTS (
                         SELECT sj.id
@@ -977,9 +976,9 @@ trait RvTrait
                     // $shipments = $shipments->get();
                     $shipments = $shipments->get();
                     
-                    if($shipments->isEmpty()){
-                        continue;
-                    }  
+                    // if($shipments->isEmpty()){
+                    //     continue;
+                    // }  
                 }
             }
                 
@@ -1021,13 +1020,15 @@ trait RvTrait
                                     'assigned_by' => Null,
                                 ];
                             $this->data_rv_shipment_assign_agent_details($data);
-                            break 2;
+                            // break 2;
+                            break;
                         }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
                         if ($shipment_assigned_assigned_agent) {
-                            break 2;
+                            // break 2;
+                            break;
                         }
                         
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
@@ -1052,7 +1053,8 @@ trait RvTrait
                         
                         // creating a new record
                         $this->rv_shipment_assign($data);
-                        break 2;
+                        // break 2;
+                        break;
                     }
                 }
 
@@ -1097,7 +1099,7 @@ trait RvTrait
                 //No Shipment Found in Assigned Hub
                 return response()->json(['status' => 1, 'error' => 'No zone assigned or shipment not found']);
             }
-        }
+        // }
         return $shipment;
     }
 
