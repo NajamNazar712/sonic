@@ -93,7 +93,7 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 ->where('unresponsive_email_count', '>', 0)
-                ->where('unresponsive_email_time', '<', $currentDateTime->subHours(48)->toDateTimeString())
+                ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48)->toDateTimeString())
                 ->get();
 
             if ($unresponsive_shipments->isNotEmpty()) {
@@ -137,7 +137,7 @@ class AgentSarNotification extends Command
             $refusal_currentDateTime = Carbon::now();
             $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('updated_at', '<', $refusal_currentDateTime->subHours(24)->toDateTimeString())
+                ->where('updated_at', '>', $refusal_currentDateTime->subHours(24)->toDateTimeString())
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {
