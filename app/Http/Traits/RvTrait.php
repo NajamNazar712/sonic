@@ -999,7 +999,7 @@ trait RvTrait
 
                         
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
-                        $shipment_assigned_unassigned_agent = $rv_shipments->where('rv_state_id', 3)->first();
+                        $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('rv_state_id', 3)->first();
                         if ($shipment_assigned_unassigned_agent) {
                             dd(1);
                             $shipment_assigned_unassigned_agent->update(['rv_state_id'=> 1, 'agent_id'=> $agent_id, 'assigned_by' => 0]);
@@ -1030,15 +1030,15 @@ trait RvTrait
 
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
-                        $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
+                        $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
                         if ($shipment_assigned_assigned_agent) {
                             dd(2);
                             // break 2;
                             break;
                         }
 
-                        // $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
-                        else if($shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
+                        // $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
+                        else if($shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first()) {
                             dd(222);
                             continue;
                         }
