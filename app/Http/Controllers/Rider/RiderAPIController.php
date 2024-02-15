@@ -3049,7 +3049,7 @@ class RiderAPIController extends Controller
                 )
                 ->join('user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
                 ->join('users as ur', 'ur.id', '=', 'usi.user_id')
-                ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+                ->leftJoin('shipments_v3_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
                 ->where('sp.tracking_number', $tracking_no)
                 ->get();
 
@@ -3294,7 +3294,7 @@ class RiderAPIController extends Controller
             )
             ->join('user_shipping_infos as usi', 'usi.id', '=', 'sp.pickup_address_id')
             ->join('users as ur', 'ur.id', '=', 'usi.user_id')
-            ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+            ->leftJoin('shipments_v3_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
             ->where('sp.tracking_number', $tracking_no)
             ->whereIn('sp.shipper_status_id', [1, 17])
             ->get();
@@ -12040,7 +12040,7 @@ class RiderAPIController extends Controller
                                             $shipment->shipper_status_id = 53;
                                             $shipment->consignee_status_id = 53;
                                             $shipment->save();
-                                            $shipmentPickupJourney = new ShipmentsV2PickupJourney();
+                                            $shipmentPickupJourney = new ShipmentsV3PickupJourney();
                                             $shipmentPickupJourney->created_at = $added_at; // Use the appropriate value here.
                                             $shipmentPickupJourney->updated_at = $added_at; // Use the appropriate value here.
                                             $shipmentPickupJourney->shipment_id = $shipment->id; // Replace 1 with the actual shipment_id value.
