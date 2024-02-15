@@ -46,7 +46,7 @@ class AdminShipmentHandoverController extends Controller
         $value = $request->get('value');
         // $dependent = $request->get('dependent');-
         $dependent = "select From Person";
-        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->get();
+        $data = HandoverResponsibilities::where('hub_id',$value)->where('status',1)->distinct('id')->get();
         $output = '<option value ="">' .ucfirst($dependent). '</option> ';
         foreach($data as $row){
           if ($type == 0 && isset($row->name)){
@@ -200,17 +200,18 @@ class AdminShipmentHandoverController extends Controller
 
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
-      
         $shipment_ids = explode(',', $request->shipment_ids);
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
         if($total > 0){
+            $from_admin_dept = Admin::find($request->from);
+            $to_admin_dept = Admin::find($request->to);
             $handover = new Handover();
             $handover->created_by = Auth::id();
             $handover->from = $request->from;
-            $handover->from_dept_area_desg = $request->from_dept_area_desg;
+            $handover->from_dept_area_desg = $from_admin_dept->Edesignation->department_id ?? null;
             $handover->to = $request->to;
-            $handover->to_dept_area_desg = $request->to_dept_area_desg;
+            $handover->to_dept_area_desg = $to_admin_dept->Edesignation->department_id ?? null;
             $handover->hub = $request->hub_id;
             $handover->status_id = 1 ;
             $handover->shipments =$total;
