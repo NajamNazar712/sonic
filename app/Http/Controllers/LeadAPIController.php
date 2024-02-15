@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Models\Admin\AreaTerritory;
+use App\Http\Models\Admin\LeadReference;
 use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Territory;
@@ -31,8 +32,9 @@ class LeadAPIController extends Controller
         'territory_id'        => ['required', 'integer', 'exists:territories,id'],
         // 'territory_area_id'   => ['required', 'integer', 'exists:area_territories,id'],
         // 'brand'               => ['required', 'max:255'],
-        // 'company'             => ['required', 'max:255'],
+        'company'             => ['required', 'max:255'],
         // 'reference_id'        => ['required', 'integer', 'exists:lead_references,id'],
+        'expected_shipments' => ['required','integer']
 
     ];
 
@@ -69,10 +71,26 @@ class LeadAPIController extends Controller
         }
 
         $auto_tag_territory = AutoTagTerritory::where('territory_id', $request->territory_id);
+        $area_territory = AreaTerritory::where('territory_id', $request->territory_id);
+        $lead_reference = LeadReference::find(8);   
         $sales_person_id = null;
+        $territory_area_id = null;
+        $reference_id =null;
+
         if ($auto_tag_territory->exists()) {
             $auto_tag_territory = $auto_tag_territory->first();
             $sales_person_id = $auto_tag_territory->admin_id;
+        }
+
+        if($area_territory->exists())
+        {
+            $area_territory = $area_territory->first();
+            $territory_area_id = $area_territory->id;
+        }
+
+        if($lead_reference)
+        {
+            $reference_id=$lead_reference->id;
         }
 
         try {
@@ -86,16 +104,17 @@ class LeadAPIController extends Controller
             $new_lead->service_id = $request->service_id;
             $new_lead->reference_person_id = $request->reference_person_id;
             $new_lead->territory_id = $request->territory_id;
-            $new_lead->territory_area_id = $request->territory_area_id;
-            $new_lead->brand = $request->brand;
+            $new_lead->territory_area_id = $territory_area_id;
+            $new_lead->brand = $request->company;
             $new_lead->company = $request->company;
-            $new_lead->reference_id = $request->reference_id;
+            $new_lead->reference_id = $reference_id;
+            $new_lead->expected_shipments = $request->expected_shipments;
             $new_lead->status_id = 9;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
             if ($sales_person_id != null) {
-            NotificationsController::send(113, $new_lead);
+                NotificationsController::send(113, $new_lead);
             }
             return response()->json(['status' => 0, 'success' => 'Lead added successfully']);
         } catch (\Exception $e) {
@@ -115,7 +134,6 @@ class LeadAPIController extends Controller
         if ($id) {
             $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy','lead_reference', 'status')->find($id);
             if ($lead) {
-              
                 $lead = [
                     'contact_person' =>  $lead->contact_person,
                     'phone_number' => $lead->phone_number,
@@ -154,39 +172,53 @@ class LeadAPIController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    // public function update(Request $request, $id)
+    // {
 
-        $lead_id = $id;
-        if ($lead_id) {
+    //     $lead_id = $id;
+    //     if ($lead_id) {
 
-            $lead = Lead::find($lead_id);
-            if ($lead) {
-                unset($this->rules['email_address']);
-                $validate = Validator::make($request->all(), $this->rules);
-                if ($validate->fails()) {
-                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                }
-                $lead->contact_person = $request->contact_person;
-                $lead->phone_number = $request->phone_number;
-                $lead->email_address = $request->email_address;
-                $lead->city_id = $request->city_id;
-                $lead->service_id = $request->service_id;
-                $lead->reference_person_id = $request->reference_person_id;
-                $lead->territory_id = $request->territory_id;
-                $lead->territory_area_id = $request->territory_area_id;
-                $lead->brand = $request->brand;
-                $lead->company = $request->company;
-                $lead->reference_id = $request->reference_id;
-                $lead->status_id = 15;
-                $lead->save();
-                // LeadTaggingController::auto_tagging($lead->id, Auth::id());
-                return response()->json(['status' => 0, 'success' => 'Lead Edited successfully!']);
-            }
-            return response()->json(['status' => 1, 'error', 'Lead not found!']);
-        }
-        return response()->json(['status' => 1, 'error' =>  'Something went wrong!']);
-    }
+    //         $lead = Lead::find($lead_id);
+    //         if ($lead) {
+    //             unset($this->rules['email_address']);
+    //             $validate = Validator::make($request->all(), $this->rules);
+    //             if ($validate->fails()) {
+    //                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+    //             }
+    //             // $lead->contact_person = $request->contact_person;
+    //             // $lead->phone_number = $request->phone_number;
+    //             // $lead->email_address = $request->email_address;
+    //             // $lead->city_id = $request->city_id;
+    //             // $lead->service_id = $request->service_id;
+    //             // $lead->reference_person_id = $request->reference_person_id;
+    //             // $lead->territory_id = $request->territory_id;
+    //             // $lead->territory_area_id = $request->territory_area_id;
+    //             // $lead->brand = $request->brand;
+    //             // $lead->company = $request->company;
+    //             // $lead->reference_id = $request->reference_id;
+    //             // $lead->status_id = 15;
+    //              $lead->contact_person = $request->contact_person;
+    //              $lead->phone_number = $request->phone_number;
+    //              $lead->email_address = $request->email_address;
+    //              $lead->city_id = $request->city_id;
+    //              $lead->sale_person_id = $sales_person_id;
+    //              $lead->service_id = $request->service_id;
+    //              $lead->territory_id = $request->territory_id;
+    //              $lead->territory_area_id = $territory_area_id;
+    //              $lead->brand = $request->company;
+    //              $lead->company = $request->company;
+    //              $lead->reference_id = $reference_id;
+    //              $lead->expected_shipments = $request->expected_shipments;
+    //              $lead->status_id = 15;
+    //              $lead->updated_by = Auth::id();
+    //             $lead->save();
+    //             // LeadTaggingController::auto_tagging($lead->id, Auth::id());
+    //             return response()->json(['status' => 0, 'success' => 'Lead Edited successfully!']);
+    //         }
+    //         return response()->json(['status' => 1, 'error', 'Lead not found!']);
+    //     }
+    //     return response()->json(['status' => 1, 'error' =>  'Something went wrong!']);
+    // }
 
     /**
      * Remove the specified resource from storage.

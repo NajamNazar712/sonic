@@ -354,7 +354,7 @@ Route::name('api.')->group(function () {
                 Route::get('', 'LeadAPIController@index')->name('index');
                 Route::post('', 'LeadAPIController@store')->name('store');
                 Route::post('{id}', 'LeadAPIController@show')->name('show');
-                Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
+                // Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
                 Route::post('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
                 Route::post('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
             });

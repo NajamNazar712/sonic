@@ -260,6 +260,7 @@
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Brand</th>
                         <th class="border-primary border-darken-1">Company</th>
+                        <th class="border-primary border-darken-1">Expected Shipments</th>
                         <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Aging</th>
@@ -538,18 +539,24 @@
                                     <input type="text" class="form-control" name="brand" id="add_brand" placeholder="Brand*" data-rule-required="true"  data-msg-required="Brand is required">
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="form-group">
                                     <input type="text" class="form-control" name="company" id="add_company" placeholder="Company*" data-rule-required="true"  data-msg-required="Company Name is required">
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="form-group">
                                     <select name="reference_id" id="reference_id" class="form-control select2" data-rule-required="true"  data-msg-required="Reference is required">
                                         @foreach($lead_references as $references)
                                             <option value="{{ $references->id }}"> {{ $references->name }} </option>
                                         @endforeach
                                     </select>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="expected_shipments" id="expected_shipments" placeholder="Expected Shipments*" data-rule-required="true"  data-msg-required="Expected Shipment is required">
+
                                 </div>
                             </div>
                         </div>
@@ -1240,6 +1247,7 @@
                     {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
                     {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
                     {data: 'company', name: 'leads.company', class: 'align-middle company'},
+                    {data: 'expected_shipments', name: 'leads.expected_shipments', class: 'align-middle expected_shipments'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},

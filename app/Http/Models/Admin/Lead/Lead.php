@@ -8,11 +8,17 @@ class Lead extends Model
 {
     public function sales_person()
     {
-        return $this->belongsTo('App\Http\Models\Admin\Admin', 'sale_person_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\Admin', 'sale_person_id', 'id')->withDefault([
+            'name' => Null,
+            'id' => NUll,
+        ]);
     }
     public function reference_person()
     {
-        return $this->belongsTo('App\Http\Models\Admin\Admin', 'reference_person_id', 'id');
+        return $this->belongsTo('App\Http\Models\Rider', 'reference_person_id', 'id') ->withDefault([
+                    'name' => Null,
+                    'id' => NUll,
+        ]);
     }
     public function admin()
     {
@@ -33,7 +39,10 @@ class Lead extends Model
     }
     public function area_territoy()
     {
-        return $this->belongsTo('App\Http\Models\Admin\AreaTerritory', 'territory_area_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\AreaTerritory', 'territory_area_id', 'id') ->withDefault([
+                 'name' => Null,
+                 'id' => NUll,
+        ]);
     }
 
     public function service()
@@ -43,6 +52,9 @@ class Lead extends Model
 
     public function lead_reference()
     {
-        return $this->belongsTo('App\Http\Models\Admin\LeadReference', 'reference_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\LeadReference', 'reference_id', 'id')->withDefault([
+                 'name' => Null,
+                 'id' => NUll,
+        ]);
     }
 }
