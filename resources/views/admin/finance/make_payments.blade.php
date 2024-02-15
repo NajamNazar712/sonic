@@ -1208,8 +1208,10 @@
                 }
             });
 
-    
-
+            
+            var total_payable_amt=0;
+            var shipper_cap = @json($shipper_cap);
+            var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
             //Make Payment Modal Datatable
             var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
                 dom: '<"pull-right"B>tr',
@@ -1230,7 +1232,7 @@
                     className: 'select_all',
                     action: function(e) {
                         e.preventDefault();
-                        console.log("ok hai");
+                      
                         make_payments_table.rows().nodes().each(function(index) {
                             var row = make_payments_table.row(index);
 
@@ -1240,9 +1242,19 @@
 
                                 var parent = $(row.node());
 
-                                calculation(parent,0);
+                                calculation(parent);
                             }
+                           
                         });
+                        total_payable_amt = total_payable_amt.toFixed(2);
+                        if(total_payable_amt > shipper_limit)
+                        {
+                            scan_sound(2);
+                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                            $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                        }
+                        
                     }
                 }, {
                     extend: 'selectNone',
@@ -1260,7 +1272,7 @@
 
                                 var parent = $(row.node());
 
-                                calculation(parent,0);
+                                calculation(parent);
                             }
                         });
                     }
@@ -1753,11 +1765,10 @@
 
             var payable_list = [];
             let shipperTotal = {};
-            var shipper_cap = @json($shipper_cap);
-            var shipper_limit=parseFloat(shipper_cap.setting_value).toFixed(2);
+       
             // Make Payments Modal Calculation
-            function calculation(parent,flag=0) {
-             
+            function calculation(parent) {
+                total_payable_amt=0;
                 var id = parseInt(parent.attr('id'));
                 var payable = parent.children('td.payable').html();
                 var shipper_id = parent.children('td.shipper_id').html();
@@ -1891,22 +1902,7 @@
                                 $('#make_payments #make_payments_form button.make').prop('disabled', false);
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
                             }
-                            if( total_payable > shipper_limit)
-                            {
-                                // console.log("ok ahi");
-                                // setTimeout(() => {
-                                //     $("#make_payments #make_payments_datatable tbody tr").eq($(parent).index()).removeClass('selected bg-primary bg-lighten-5 primary');
-                                // }, 200);
-                                console.log("nikal ba");
-                               
-                                $('#make_payments #make_payments_form button.make').prop('disabled', true);
-                                $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
-                                if(flag == 1)
-                                {
-                                     scan_sound(2);
-                                     toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            }
+                            total_payable_amt+=total_payable;
                     }
                     else{
                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
@@ -1967,10 +1963,11 @@
             }
 
             $('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-               
+                
                 var parent = $(this).parent('tr');
                 var selected_id = $(this).parent('tr').attr('id');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+               
                 if (con_id) {
                     var count = 0;
                     make_payments_table.rows().nodes().each(function(index) {
@@ -1982,7 +1979,7 @@
                                 .node()).hasClass('selected')) {
                                 var parent = $(row.node());
 
-                                calculation(parent,1);
+                                calculation(parent);
                                 if (selected_id != row_id) {
                                     row.select();
                                 }
@@ -1990,7 +1987,7 @@
                             } else {
                                 var parent = $(row.node());
 
-                                calculation(parent,1);
+                                calculation(parent);
                                 if (selected_id != row_id) {
                                     row.deselect();
                                 }
@@ -1999,9 +1996,25 @@
                         }
 
                     });
+                    
+                    if(total_payable_amt > shipper_limit)
+                     {
+                         scan_sound(2);
+                         toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                    }
 
                 } else {
-                    calculation(parent,1);
+                    
+                    calculation(parent);
+                     if(total_payable_amt > shipper_limit)
+                     {
+                         scan_sound(2);
+                         toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
+                         $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+                    }
                 }
 
             });
@@ -2061,9 +2074,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else if (data.duplicate_shipments) {
@@ -2100,9 +2118,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else if (data.over_payments) {
@@ -2140,9 +2163,14 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                       if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             } else {
@@ -2168,9 +2196,15 @@
                                     dangerMode: true
                                 }).then(function(confirm) {
                                     if (confirm) {
-                                        $('#make_payments #make_payments_form button').remove();
-
-                                        form.submit();
+                                       
+                                        if(total_payable_amt > shipper_limit)
+                                        {
+                                            scan_sound(2);
+                                            toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }else{
+                                            $('#make_payments #make_payments_form button').remove();
+                                            form.submit();
+                                        }
                                     }
                                 });
                             }
@@ -2236,8 +2270,13 @@
                             }).then(function(confirm) {
                                 if (confirm) {
                                     $('#make_payments #make_payments_form button').remove();
-
-                                    form.submit();
+                                    if(total_payable_amt > shipper_limit)
+                                    {
+                                        scan_sound(2);
+                                        toastr.error("Payable amount should be less than shipper Cap!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }else{
+                                        form.submit();
+                                    }
                                 }
                             });
                         }
