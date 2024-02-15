@@ -921,8 +921,8 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
 
-                // $shipments = $shipments->get();
-                $shipment = $shipments->first();
+                $shipments = $shipments->get(['id']);
+
                 // if($shipments->isEmpty()){
                 //     continue;
                 // }  
@@ -975,8 +975,7 @@ trait RvTrait
                         $shipments->orderBy('updated_at', 'ASC');
                     } 
                     
-                    // $shipments = $shipments->get();
-                    $shipment = $shipments->first();
+                    $shipments = $shipments->get(['id']);
                     
                     // if($shipments->isEmpty()){
                     //     continue;
@@ -989,15 +988,16 @@ trait RvTrait
             }
             
             // check if shipments exist or if admin is assign shipment to agent
-            // if (count($shipments) || $agent_shipment_id) {
-            if ($shipment || $agent_shipment_id) {
+            if (count($shipments) || $agent_shipment_id) {
+            // if ($shipment || $agent_shipment_id) {
 
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
-                if ($shipment)
+                if ($shipments)
                 {
-                    dd(11);
-                    // foreach ($shipments as $key => $shipment) {
+                    foreach ($shipments as $key => $shipment) {
                         $rv_shipments = RvShipmentAssignAgent::where('shipment_id', $shipment->id);
+
+                        
                         
                         // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                         $shipment_assigned_unassigned_agent = $rv_shipments->where('rv_state_id', 3)->first();
@@ -1028,13 +1028,20 @@ trait RvTrait
                             // break 2;
                             // break;
                         }
+
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', Auth::id())->where('rv_state_id', 1)->first();
                         if ($shipment_assigned_assigned_agent) {
                             dd(2);
                             // break 2;
-                            // break;
+                            break;
+                        }
+
+                        $shipment_assigned_assigned_agent = $rv_shipments->where('agent_id', '!=', Auth::id())->where('rv_state_id', 1)->first();
+                        if ($shipment_assigned_assigned_agent) {
+                            dd(222);
+                            continue;
                         }
                         
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
@@ -1042,7 +1049,7 @@ trait RvTrait
                         if ($find_shipment_assigned_agent) {
                             dd(3);
                             $shipment = null;
-                            // continue;
+                            continue;
                         }
                         
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
