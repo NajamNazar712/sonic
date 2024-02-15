@@ -279,7 +279,11 @@ class AdminShipmentHandoverController extends Controller
         $hubs = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
             ->select(['c.id','c.name'])->groupBy('handover_responsibilities.hub_id')->get();
 
-        $handover_admins = HandoverResponsibilities::select('id', 'name')->get();
+        $handover_admins = HandoverResponsibilities::select('admin.id as id', 'admin.name as name')->join('admins as admin','admin.id','handover_responsibilities.admin_id')
+        ->where('admin_id','!=','')
+        ->where('admin.status', 1)
+        ->distinct('id')
+        ->get();
         $areas = DB::table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
         return view('admin.handover.list')->with(['hubs'=>$hubs, 'handover_admins'=>$handover_admins,'areas'=> $areas]);
@@ -872,7 +876,7 @@ class AdminShipmentHandoverController extends Controller
 
     public function get_sub_area(Request  $request){
       if(isset($request->city_id)){
-        $admins = Admin::where('default_hub_id', $request->city_id)->get();
+        $admins = Admin::where('default_hub_id', $request->city_id)->where('status', 1)->get();
         $areas  = CityArea::where('city_id', $request->city_id)->where('status', 1)->get();
       }
 
@@ -882,7 +886,12 @@ class AdminShipmentHandoverController extends Controller
     }
     public function get_user(Request  $request){
         if(isset($request->city_id)){
-            $users = HandoverResponsibilities::where('hub_id',$request->city_id)->where('status',1);
+            $users = HandoverResponsibilities::select('admin.id as id', 'admin.name as name')
+            ->join('admins as admin','admin.id','handover_responsibilities.admin_id')
+            ->where('admin_id','!=','')->where('handover_responsibilities.hub_id',$request->city_id)
+            ->where('handover_responsibilities.status',1)
+            ->where('admin.status', 1)
+            ->distinct('id');
             if($users->exists()){
                 return response()->json(['status' => 1,'users'=>$users->get()]);
             }
