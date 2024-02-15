@@ -1900,52 +1900,57 @@ function checkboxStatus() {
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());
         });
+
+        var block_user_id;
+        var block_user_status;
+        
         $('body').on('click','button.blacklist',function () {
             $('#BlockDisableReasonModal').modal('show');
-            var id = $(this).data('id');
-			var status = $(this).attr('rel');
-            if(id){
-                $('#BlockDisableReasonSubmit').click(function () {
-                    var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
-                    var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
-                    if(remarks == ''){
-                        $('.blocked_remarks').removeClass('d-none');
-                    }else if (reasons == ''){
-                        $('.blocked_reasons').removeClass('d-none');
-                    }else{
-                        $.ajax({
-                        url: '{!! route('admin.accounts.status.block') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            'reason': reasons,
-                            'remarks': remarks,
-                            'status' : status,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status === 1) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                            // $('#blocked_remarks').addClass('d-none');
-                            // $('#blocked_reasons').addClass('d-none');
-                            $('#BlockDisableReasonModal').modal('hide');
-                            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
-                            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
-                            table.draw()
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        });
-                    }
+            block_user_id = $(this).data('id');
+			block_user_status = $(this).attr('rel');
+        });
+
+        $('#BlockDisableReasonSubmit').click(function () {
+            var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
+            var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
+            if(remarks == ''){
+                $('.blocked_remarks').removeClass('d-none');
+            }else if (reasons == ''){
+                $('.blocked_reasons').removeClass('d-none');
+            }else{
+                $.ajax({
+                url: '{!! route('admin.accounts.status.block') !!}',
+                method: 'POST',
+                data: {
+                    'id': block_user_id,
+                    'reason': reasons,
+                    'remarks': remarks,
+                    'status' : block_user_status,
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if (data.status === 1) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    // $('#blocked_remarks').addClass('d-none');
+                    // $('#blocked_reasons').addClass('d-none');
+                    $('#BlockDisableReasonModal').modal('hide');
+                    $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+                    $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
+                    table.draw()
+                } else {
+                    toastr.error(data.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
                 });
             }
-        });
+        });  
+              
+            
 
         $('input[name="block_disable_remarks"]').keyup(function() {
             $('#blocked_remarks').addClass('d-none');

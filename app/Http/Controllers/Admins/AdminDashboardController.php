@@ -1459,6 +1459,8 @@ class AdminDashboardController extends Controller
         $user = User::where('id', $user_id);
         if ($user->exists()) {
             $user = $user->first();
+            NotificationsController::send(229, $user);
+
             if ($status == 'block') {
                 $negative_balance_status = false;
                 $merged_account = MergedSisterAccount::where('user_id', $user_id);
@@ -1490,9 +1492,11 @@ class AdminDashboardController extends Controller
                         $user->blacklist = 1;
                         $user->blacklist_reason = $remarks;
                         $user->blacklist_reason_1 = $reason;
+                        $user->blocked_at = Carbon::now()->format('Y-m-d H:i:s');
                         $user->save();
 
-                        
+                        NotificationsController::send(229, $user);
+
                         return response()->json(['status' => 1, 'success' => "User added to the blacklist!"]);
                     } else {
                         return response()->json(['status' => 0, 'error' => "User is already in blacklist!"]);

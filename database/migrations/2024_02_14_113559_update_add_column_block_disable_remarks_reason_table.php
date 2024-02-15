@@ -17,7 +17,7 @@ class UpdateAddColumnBlockDisableRemarksReasonTable extends Migration
             $table->integer('blacklist_reason_1')->index()->nullable();
             $table->integer('disable_reason_1')->index()->nullable();
             $table->string('disable_reason')->nullable();
-
+            $table->timestamp('blocked_at');
         });
     }
 

@@ -259,11 +259,10 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
     {
-
         $notification = Notification::find($id);
-
+        
         if ($notification) {
-
+            
             if ($notification->status) {
 
                 if ($notification->type_id == 1) {
@@ -272,7 +271,6 @@ class NotificationsController extends Controller
 
                 $body = $notification->body;
                 $head = $notification->head;
-
 
                 if ($id == 1) {
                     $fields = ['account_id' => 'id', 'company_name' => 'name', 'email' => 'email', 'person_of_contact' => 'poc', 'phone_no_1' => 'phone', 'phone_no_2' => 'phone2', 'address' => 'address', 'cnic' => 'cnic', 'ntn_no' => 'ntn_no', 'api_token' => 'api_token'];
@@ -10945,6 +10943,16 @@ class NotificationsController extends Controller
                         $to = ['tauseef.sarfaraz@trax.pk', 'mansoor.ahmad@trax.pk', 'shahbaz.abbasi@trax.pk'];
     
                         self::email($subject, $body, $to);
+                }
+                else if ($id == 229){
+                    $email = [];
+                    $user_id = $reference_1_id;
+                    $sale_commission_users = SalesCommission::with('users')->where('shipper_id', $user_id->id)->latest()->first();
+                    foreach($sale_commission_users->users as $sale_commission_user){
+                        if($sale_commission_user->user_type == 1){
+                            dd($sale_commission_user->sales_person->email);
+                        }
+                    }
                 } 
             }
         }
