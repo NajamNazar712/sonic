@@ -134,6 +134,7 @@ class LeadAPIController extends Controller
             $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy', 'lead_reference', 'status')->find($id);
             if ($lead) {
                 $lead = [
+                    'lead_id' => $lead->id,
                     'contact_person' => $lead->contact_person,
                     'phone_number' => $lead->phone_number,
                     'email_address' => $lead->email_address,
