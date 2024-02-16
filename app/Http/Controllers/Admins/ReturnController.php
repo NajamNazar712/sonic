@@ -5358,7 +5358,6 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         try{
-            // DB::beginTransaction();
             $shipment_ids =  $request->shipment_ids;
             $already_assigned_shipment = [];
             $assigned_shipment = [];
@@ -5749,14 +5748,15 @@ class ReturnController extends Controller
                                             // $sorted_agents = RvAgentAssignHub::where('agent_id', $row['agent_id'])->orderBy('priority', 'ASC')->get();
                                             // $include_shippers = $this->included_shippers($sorted_agents, $row['agent_id'], $shipment->id); 
                                             $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
-                                            $data = $include_shippers->getData();
-    
-                                            if($data->status === 0 && $data->success === 'Shipments Assigned successfully')
-                                            {
-                                                $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
-                                            }
-                                            else if($data->status === 1 && $data->error === 'Shipment is already assigned'){
-                                                $already_assigned_shipments[] = $tracking_number;
+
+                                            if ($include_shippers) {
+                                                $data = $include_shippers->getData();
+                                                
+                                                if ($data && isset($data->status) && isset($data->success) && $data->status === 0 && $data->success === 'Shipments Assigned successfully') {
+                                                    $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
+                                                } elseif ($data && isset($data->status) && isset($data->error) && $data->status === 1 && $data->error === 'Shipment is already assigned') {
+                                                    $already_assigned_shipments[] = $tracking_number;
+                                                }
                                             }
                                             else{
                                                 $disabled_shippers[] = $tracking_number;

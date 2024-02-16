@@ -881,13 +881,11 @@ trait RvTrait
         // foreach ($agent_sorted_hubs as $key => $agent) {
             $shipments = [];
             
-            //this wont be null if admin is assigning shipment to an agent
-            if($agent_shipment_id)
-            $agent_shipment_id;
+           
             
 
             //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
-            else if (!empty($included_shippers)) {              
+            if (!empty($included_shippers)) {              
                 $flag = false;                
                 if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
                     $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
@@ -982,10 +980,15 @@ trait RvTrait
                     // }  
                 }
             }
+
+             //this wont be null if admin is assigning shipment to an agent
+            else if($agent_shipment_id)
+             $agent_shipment_id;
                 
             else if ($all_shipper_exists && !($included_shipper)->exists()) {
                 $shipment = [];
             }
+
             
             // check if shipments exist or if admin is assign shipment to agent
             if (count($shipments) || $agent_shipment_id) {
@@ -1058,8 +1061,8 @@ trait RvTrait
                         // creating a new record
                         $this->rv_shipment_assign($data);
                         break;
+                    }
                 }
-            }
 
                 //this check will work only if admin will assign shipment manually to agent 
                 else if($agent_shipment_id){
@@ -1099,8 +1102,7 @@ trait RvTrait
 
             }
             else {
-                //No Shipment Found in Assigned Hub
-                return response()->json(['status' => 1, 'error' => 'No zone assigned or shipment not found']);
+                return response()->json(['status' => 1, 'error' => 'No shipment found']);
             }
         // }
         return $shipment;
