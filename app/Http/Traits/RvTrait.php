@@ -454,7 +454,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function return_confirm($request)
+    protected function return_confirm($request,$globalAdminId = null)
     {   
         // $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
@@ -506,7 +506,7 @@ trait RvTrait
                 }
             }
             
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
@@ -1217,14 +1217,48 @@ trait RvTrait
     {
         try 
         {
-            DB::beginTransaction();
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->latest()->first();
+            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->first();
 
             if($shipments_journey){
-                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('shipment_id',$data['shipment_id'])->where('agent_id',$data['agent_id'])->latest()->first();
+                $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', null)->first();
+                $rv_shipment_assign_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('shipment_id',$data['shipment_id'])->where('assigned_to_type_id', 1)->where('agent_id',$data['agent_id'])->first();
+
+                if($agent_unassign_shipment){
+                    $agent_unassign_shipment->agent_id = $data['agent_id'];
+                    $agent_unassign_shipment->shipments_journey_id = $shipments_journey->id;
+                    $agent_unassign_shipment->last_shipments_journey_id = $shipments_journey->id;
+                    $agent_unassign_shipment->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
+                    $agent_unassign_shipment->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
+                    $agent_unassign_shipment->rv_state_id = 4;
+                    $agent_unassign_shipment->updated_type_id = 1; 
+                    $agent_unassign_shipment->updated_by_id = $data['updated_by_id'];
+                    $agent_unassign_shipment->remarks = isset($data['remarks']) ? $data['remarks'] : null;
+                    $agent_unassign_shipment->call_to_id  = 1;
+                    $agent_unassign_shipment->save();
+                    
+                    $updated_data = [   
+                        'rv_shipment_assign_agent_id' => $agent_unassign_shipment->id,
+                        'agent_id' => $agent_unassign_shipment->agent_id,
+                        'shipments_journey_id' => $agent_unassign_shipment->shipments_journey_id,
+                        'last_shipments_journey_id' => $agent_unassign_shipment->last_shipments_journey_id,
+                        'shipment_id' => $agent_unassign_shipment->shipment_id,
+                        'rv_assign_agent_status_id' => $agent_unassign_shipment->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $agent_unassign_shipment->rv_assign_agent_sub_status_id,
+                        'rv_state_id' => $agent_unassign_shipment->rv_state_id,
+                        'updated_type_id' => $agent_unassign_shipment->updated_type_id,
+                        'updated_by_id' =>  $agent_unassign_shipment->updated_by_id,
+                        'is_fake_status' => $agent_unassign_shipment->is_fake_status,
+                        'rv_fake_status_id' => $agent_unassign_shipment->rv_fake_status_id,
+                        'remarks' => $agent_unassign_shipment->remarks,
+                        'call_to_id' => $agent_unassign_shipment->call_to_id,
+                        'assigned_by' => $agent_unassign_shipment->assigned_by,
+                        'assigned_to_type_id' => $agent_unassign_shipment->assigned_to_type_id,
+                    ];
+                    $this->data_rv_shipment_assign_agent_details($updated_data);
+                }
                 
                 //if shipment row in rv_shipment_assign_agent is not found it means that admin is udating the status itself
-                if(!$rv_shipment_assign_agent){
+                else if(!$rv_shipment_assign_agent){
                     $rv_shipment_assign_agent = new RvShipmentAssignAgent();
                     $rv_shipment_assign_agent->agent_id = $data['agent_id'];
                     $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
@@ -1246,7 +1280,6 @@ trait RvTrait
                     $rv_shipment_assign_agent->unresponsive_attempt_time  = null;
                     $rv_shipment_assign_agent->assigned_to_type_id  = 0;
                     $rv_shipment_assign_agent->save();
-
                     
                     $updated_data = [   
                         'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent->id,
@@ -1268,6 +1301,8 @@ trait RvTrait
                     ];
                     $this->data_rv_shipment_assign_agent_details($updated_data);
                 }
+
+                
 
                 //if shipment row in rv_shipment_assign_agent is found it means that admin has already assign the shipment to customer experince & customer experice 
                 //agent is udating the status
@@ -1308,10 +1343,8 @@ trait RvTrait
             else{
                 return false;
             }
-            DB::commit();
         } 
         catch (\Exception $e) {
-            DB::rollBack();
             return false;
         }
         return true;
