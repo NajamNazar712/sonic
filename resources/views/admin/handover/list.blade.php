@@ -54,6 +54,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Handover ID</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">From</th>
@@ -288,6 +289,7 @@
                             head = [];
 
                             head.push('S. No');
+                            head.push('Handover ID');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('From');
@@ -299,7 +301,6 @@
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
-                            head.push('Shipment(s)');
                             head.push('Received Shipment(s)');
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
@@ -308,6 +309,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.handover_id);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.from);
@@ -322,7 +324,6 @@
                                 row.push(values.total_shipments);
                                 row.push(values.received_shipments);
                                 row.push(values.remaining);
-                                row.push(values.shipment_pieces);// change it
                                 row.push(values.received_by);
                                 row.push(values.received_at);
 
@@ -476,6 +477,7 @@
                 columns: [
                     {data: 'handover_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'handover_id_padded', name: 'handovers.id', class: 'align-middle handover_id_padded'},
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
@@ -513,7 +515,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.remaining_shipment_count')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.remaining_shipment_count') || $(header).is('.shipment_pieces')) {
                             $(td).appendTo($(search));
                         }
                         else {

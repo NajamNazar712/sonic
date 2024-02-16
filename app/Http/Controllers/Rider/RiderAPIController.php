@@ -8962,15 +8962,7 @@ class RiderAPIController extends Controller
             try {
                 //code...
                 $success_flag = false;
-                $payload = md5(json_encode($request));
-                $temp_data = TempRiderDelivery::where('payload', $payload);
-                if($temp_data->exists()){
-                    return response()->json(['status' => 1, 'message' => 'Request already in process!']);
-                }
 
-                $temp_data = new TempRiderDelivery();
-                $temp_data->payload = $payload;
-                $temp_data->save();
 
                 $user_excluded_otp_shippers = DeliveryNoteShipment::join('shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
                 ->join('notification_setting_shippers as nss', 'shipments.user_id', 'nss.shipper_id')
@@ -9242,8 +9234,7 @@ class RiderAPIController extends Controller
                     $delivery_note_data->status_updated_at = Carbon::now();
                     $delivery_note_data->save();
                 }
-                $temp_data->delete();
-                
+
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             } catch (\Throwable $th) {
 
@@ -11430,18 +11421,7 @@ class RiderAPIController extends Controller
         else {
             try {
                 //code...
-                
                 $success_flag = false;
-                $payload = md5(json_encode($request));
-                $temp_data = TempRiderDelivery::where('payload', $payload);
-                if($temp_data->exists()){
-                    return response()->json(['status' => 1, 'message' => 'Request already in process!']);
-                }
-
-                $temp_data = new TempRiderDelivery();
-                $temp_data->payload = $payload;
-                $temp_data->save();
-
 
                 $rc_flag = false;
                 $rider_id = $request->rider_id;
@@ -11646,7 +11626,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is not for Out for Delivery';
                 }
-                $temp_data->delete();
                 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             }
@@ -12712,15 +12691,6 @@ class RiderAPIController extends Controller
             $nodes = array();
 
             foreach ($delivery_notes as $delivery_note) {
-
-//                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
-//                    continue;
-//                }
-
-                
-
-                
-
 
                 $information = array();
 

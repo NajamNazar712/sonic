@@ -958,6 +958,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
     Route::prefix('return')->name('return.')->group(function () {
         Route::get('', 'Admins\ReturnController@return_view')->name('index');
         Route::post('list', 'Admins\ReturnController@return_marked_list')->name('list');
+        Route::get('data', 'Admins\ReturnController@return_view_data')->name('data');
         Route::post('confirm/status', 'Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status', 'Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
         Route::post('update_call_status', 'Admins\ReturnController@update_call_status')->name('update_call_status');
