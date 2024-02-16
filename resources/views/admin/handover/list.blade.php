@@ -301,6 +301,7 @@
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
+                            head.push('Total Shipment(s)');
                             head.push('Received Shipment(s)');
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
