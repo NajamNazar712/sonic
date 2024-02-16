@@ -404,9 +404,7 @@ class AdminShipmentHandoverController extends Controller
           });
 
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('handover_shipments as hss', 'hss.handover_id', '=', 'handovers.id')
-                ->join('shipments as s', 'hss.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
+            $datatable->where('s.tracking_number', '=', $tracking_number);
         }
 
         if ($hub = $request->get('search_hub')) {
