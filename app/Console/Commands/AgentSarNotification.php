@@ -55,17 +55,21 @@ class AgentSarNotification extends Command
             $currentDateTime1 = Carbon::now()->toDateTimeString();
             $currentDateTime = Carbon::parse($currentDateTime1);
 
+            $nowSub16Hours = Carbon::now()->subHours(16)->toDateTimeString();
+            $nowSub24Hours = Carbon::now()->subHours(24)->toDateTimeString();
+            $nowSub48Hours = Carbon::now()->subHours(48)->toDateTimeString();
+
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
-                //selects older records, i.e., records that were updated more than 12 hours ago.            
-                ->where('updated_at', '<', $currentDateTime->subHours(16))
+                //selects older records, i.e., records that were updated more than 16 hours ago.            
+                ->where('updated_at', '>', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('updated_at', '<', $currentDateTime->subHours(24))
+            ->where('updated_at', '<', $nowSub24Hours)
             ->where('rv_state_id', 2);
 
             //Combine the results for sending in single email
@@ -92,7 +96,7 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 ->where('unresponsive_email_count', '>', 0)
-                ->where('unresponsive_email_time', '<', $currentDateTime->subHours(48))
+                ->where('unresponsive_email_time', '<=', $nowSub48Hours)
                 ->get();
 
             if ($unresponsive_shipments->isNotEmpty()) {
@@ -135,7 +139,7 @@ class AgentSarNotification extends Command
             
             $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('updated_at', '<', $currentDateTime->subHours(24))
+                ->where('updated_at', '<', $nowSub24Hours)
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {
