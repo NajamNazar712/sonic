@@ -3370,7 +3370,7 @@ class RiderAPIController extends Controller
             ->select('ur.id as user_id', 'sp.id as shipment_id', 'spj.status_id')
             ->join('user_shipping_infos as usi', 'usi.user_id', '=', 'ur.id')
             ->join('shipments as sp', 'sp.pickup_address_id', '=', 'usi.id')
-            ->leftJoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
+            ->leftJoin('shipments_v3_pickup_journeys as spj', 'spj.shipment_id', '=', 'sp.id')
             ->where('ur.id', $user_id)
             ->get();
         $totalShipmentsOfShipper = count($userShipments);
