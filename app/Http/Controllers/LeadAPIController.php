@@ -22,19 +22,19 @@ class LeadAPIController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    private  $rules = [
-        'contact_person'      => ['required', 'max:255'],
-        'phone_number'        => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-        'email_address'       => ['required', 'unique:leads,email_address', 'email'],
-        'city_id'             => ['required', 'integer', 'exists:cities,id'],
-        'service_id'          => ['required', 'integer', 'exists:service_list,id'],
+    private $rules = [
+        'contact_person' => ['required', 'max:255'],
+        'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+        'email_address' => ['required', 'unique:leads,email_address', 'email'],
+        'city_id' => ['required', 'integer', 'exists:cities,id'],
+        'service_id' => ['required', 'integer', 'exists:service_list,id'],
         'reference_person_id' => ['required', 'integer', 'exists:riders,id'],
-        'territory_id'        => ['required', 'integer', 'exists:territories,id'],
+        'territory_id' => ['required', 'integer', 'exists:territories,id'],
         // 'territory_area_id'   => ['required', 'integer', 'exists:area_territories,id'],
         // 'brand'               => ['required', 'max:255'],
-        'company'             => ['required', 'max:255'],
+        'company' => ['required', 'max:255'],
         // 'reference_id'        => ['required', 'integer', 'exists:lead_references,id'],
-        'expected_shipments' => ['required','integer']
+        'expected_shipments' => ['required', 'integer']
 
     ];
 
@@ -50,7 +50,7 @@ class LeadAPIController extends Controller
 
         if ($leads->exists()) {
             $leads = $leads->get();
-            return response()->json(['status' => 0, 'leads' =>  $leads]);
+            return response()->json(['status' => 0, 'leads' => $leads]);
         }
         return response()->json(['status' => 1, 'message', 'Leads not found']);
     }
@@ -72,25 +72,23 @@ class LeadAPIController extends Controller
 
         $auto_tag_territory = AutoTagTerritory::where('territory_id', $request->territory_id);
         $area_territory = AreaTerritory::where('territory_id', $request->territory_id);
-        $lead_reference = LeadReference::find(8);   
+        $lead_reference = LeadReference::find(8);
         $sales_person_id = null;
         $territory_area_id = null;
-        $reference_id =null;
+        $reference_id = null;
 
         if ($auto_tag_territory->exists()) {
             $auto_tag_territory = $auto_tag_territory->first();
             $sales_person_id = $auto_tag_territory->admin_id;
         }
 
-        if($area_territory->exists())
-        {
+        if ($area_territory->exists()) {
             $area_territory = $area_territory->first();
             $territory_area_id = $area_territory->id;
         }
 
-        if($lead_reference)
-        {
-            $reference_id=$lead_reference->id;
+        if ($lead_reference) {
+            $reference_id = $lead_reference->id;
         }
 
         try {
@@ -129,13 +127,14 @@ class LeadAPIController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        if ($id) {
-            $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy','lead_reference', 'status')->find($id);
+        if ($request->id) {
+            $id = $request->id;
+            $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy', 'lead_reference', 'status')->find($id);
             if ($lead) {
                 $lead = [
-                    'contact_person' =>  $lead->contact_person,
+                    'contact_person' => $lead->contact_person,
                     'phone_number' => $lead->phone_number,
                     'email_address' => $lead->email_address,
                     'brand' => $lead->brand,
@@ -152,8 +151,8 @@ class LeadAPIController extends Controller
                     'territory_id' => $lead->territory->id,
                     'area_name' => $lead->area_territoy->name,
                     'area_id' => $lead->area_territoy->id,
-                    'lead_reference_id'=>$lead->lead_reference->id,
-                    'lead_reference_name'=>$lead->lead_reference->name,
+                    'lead_reference_id' => $lead->lead_reference->id,
+                    'lead_reference_name' => $lead->lead_reference->name,
                     'status_id' => $lead->status->id,
                     'status_name' => $lead->status->name
 
@@ -162,7 +161,7 @@ class LeadAPIController extends Controller
                 return response()->json(['status' => 1, 'lead' => $lead]);
             }
         }
-        return response()->json(['status' => 1, 'error' =>  'Something went wrong!']);
+        return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
     }
 
     /**
@@ -238,9 +237,9 @@ class LeadAPIController extends Controller
             $territories = Territory::where('city_id', $city_id)->where('territory_status', 1);
             if ($territories->exists()) {
                 $territories = $territories->get();
-                return response()->json(['status' => 0, 'territories' =>  $territories]);
+                return response()->json(['status' => 0, 'territories' => $territories]);
             } else {
-                return response()->json(['status' => 0, 'error' =>  $territories]);
+                return response()->json(['status' => 0, 'error' => $territories]);
             }
         }
         return response()->json(['status' => 1, 'message', 'Territories not found']);
@@ -253,7 +252,7 @@ class LeadAPIController extends Controller
             $territory_areas = AreaTerritory::where('territory_id', $territory_id)->where('area_territory_status', 1);
             if ($territory_areas->exists()) {
                 $territory_areas = $territory_areas->get();
-                return response()->json(['status' => 0, 'territory_areas' =>  $territory_areas]);
+                return response()->json(['status' => 0, 'territory_areas' => $territory_areas]);
             } else {
                 return response()->json(['status' => 1, 'message', 'Territory Areas not found']);
             }
