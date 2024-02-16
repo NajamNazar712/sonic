@@ -12104,7 +12104,7 @@ class RiderAPIController extends Controller
                             $ship->shipper_status_id = 53;
                             $ship->consignee_status_id = 53;
                             $ship->save();
-                            $shipmentPickupJourney = new ShipmentsV2PickupJourney();
+                            $shipmentPickupJourney = new ShipmentsV3PickupJourney();
                             $shipmentPickupJourney->created_at = $added_at; // Use the appropriate value here.
                             $shipmentPickupJourney->updated_at = $added_at; // Use the appropriate value here.
                             $shipmentPickupJourney->shipment_id = $shipment->id; // Replace 1 with the actual shipment_id value.
