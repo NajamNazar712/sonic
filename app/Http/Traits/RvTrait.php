@@ -1025,14 +1025,14 @@ trait RvTrait
                                     'assigned_by' => Null,
                                 ];
                             $this->data_rv_shipment_assign_agent_details($data);
-                            break 2;
+                            break;
                         }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                         if ($shipment_assigned_assigned_agent->exists()) {
                             $shipment_assigned_assigned_agent->first();
-                            break 2;
+                            break;
                         }
                         
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
@@ -1057,10 +1057,9 @@ trait RvTrait
                         
                         // creating a new record
                         $this->rv_shipment_assign($data);
-                        break 2;
-                    }
+                        break;
                 }
-                }
+            }
 
                 //this check will work only if admin will assign shipment manually to agent 
                 else if($agent_shipment_id){
