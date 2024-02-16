@@ -5369,6 +5369,8 @@ class ReturnController extends Controller
             $assigned_to_new_user = [];
             $assigned_to_now_new_user = [];
             $osa_shipments = [];
+            $damaged_shipments = [];
+            $delivery_stop_shipments = [];
 
             $contractual_agent = Admin::where('id',$request->admin_id)->where('trax_id','like','%Trax-C%')->first();
             if($contractual_agent){
@@ -5404,13 +5406,19 @@ class ReturnController extends Controller
                 
                 // if(!empty($sorted_agents_zones)){
                     foreach($shipment_ids as $shipment_id){
-                        $osa_reason = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                        $shipments_not_assigned = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
                         
                         $shipment = Shipment::where('id', $shipment_id)->first();
-                        // status_reason_id == 12 (osa shipment)
-                        if($osa_reason->status_reason_id == 12){
+                        // status_reason_id == 12 (osa shipment), 27 (damaged shipment), 35 (delivery stop shipment)
+                        if($shipments_not_assigned->status_reason_id == 12){
                             //saving shipments in $osa_shipments because osa shipments cannot be assigned to contratual agent
                             $osa_shipments[] = $shipment->tracking_number;
+                        }
+                        else if ($shipments_not_assigned->status_reason_id == 27){
+                            $damaged_shipments[] = $shipment->tracking_number;
+                        }
+                        else if ($shipments_not_assigned->status_reason_id == 35){
+                            $delivery_stop_shipments[] = $shipment->tracking_number;
                         }
                         $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                         if($already_assigned_state->exists()){
@@ -5441,25 +5449,33 @@ class ReturnController extends Controller
                             }
                         }
                     } 
-                    if(!empty($already_assigned_shipment) || !empty($already_assigned) || !empty($osa_shipments)){
+                    if(!empty($already_assigned_shipment) || !empty($already_assigned) || !empty($osa_shipments) || !empty($damaged_shipments) || !empty($delivery_stop_shipments)){
                         $already_assigned_shipment = implode(',', $already_assigned_shipment);
                         $already_assigned = implode(',', $already_assigned);
                         $assigned_shipment = implode(',', $assigned_shipment);
                         $assigned_to_new_user = implode(',', $assigned_to_new_user);
                         $osa_shipments = implode(',', $osa_shipments);
+                        $damaged_shipments = implode(',', $damaged_shipments);
+                        $delivery_stop_shipments = implode(',', $delivery_stop_shipments);
                         
-                        // if ($already_assigned == '') {
-                        //     return response()->json([
-                        //         'status' => 1,
-                        //         'error' => 'Tracking Numbers Are Not Assigned: ' . $already_assigned_shipment . ' because Zone is not Assigned' .
-                        //                 (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
-                        //     ]);
-                        // } 
-                        // else if($osa_shipments != ''){
                         if($osa_shipments != ''){
                             return response()->json([
                                 'status' => 1,
                                 'error' => 'Tracking Numbers Are Not Assigned: ' . $osa_shipments . ' because OSA Shipments cannot be assigned to Contractual Agent' .
+                                        (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                            ]);
+                        }
+                        else if($damaged_shipments != ''){
+                            return response()->json([
+                                'status' => 1,
+                                'error' => 'Tracking Numbers Are Not Assigned: ' . $damaged_shipments . ' because Damaged Shipments cannot be assigned to Contractual Agent' .
+                                        (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
+                            ]);
+                        }
+                        else if($delivery_stop_shipments != ''){
+                            return response()->json([
+                                'status' => 1,
+                                'error' => 'Tracking Numbers Are Not Assigned: ' . $delivery_stop_shipments . ' because Delivery Stopped Shipments cannot be assigned to Contractual Agent' .
                                         (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                             ]);
                         }
@@ -5716,6 +5732,8 @@ class ReturnController extends Controller
                 $disabled_shippers = [];
                 $contractual_agent_with_no_zone = [];
                 $osa_shipments = [];
+                $damaged_shipments = [];
+                $delivery_stop_shipments = [];
                 $invalid_shipments = [];
                 $zone_not_assigned_contractual_agent = []; 
                 foreach ($rows as $key => $row) 
@@ -5747,6 +5765,12 @@ class ReturnController extends Controller
                                 if($osa_reason->status_reason_id == 12){
                                     //saving shipments in $osa_shipments because osa shipments cannot be assigned to contratual agent
                                     $osa_shipments[] = $shipment->tracking_number;
+                                }
+                                else if ($osa_reason->status_reason_id == 27){
+                                    $damaged_shipments[] = $shipment->tracking_number;
+                                }
+                                else if ($osa_reason->status_reason_id == 35){
+                                    $delivery_stop_shipments[] = $shipment->tracking_number;
                                 }
                                 else{
                                     // $zones_assigned_to_agent = RvAgentAssignHub::where('agent_id', $row['agent_id'])->pluck('zone_id')->toArray();
@@ -5834,7 +5858,7 @@ class ReturnController extends Controller
                 } //for each loop end
 
                 if (!empty($unsuccessfull_assign_shipments) || !empty($already_assigned_shipments) || !empty($invalid_agent) 
-                || !empty($disabled_shippers) || !empty($contractual_agent_with_no_zone) || !empty($osa_shipments)
+                || !empty($disabled_shippers) || !empty($contractual_agent_with_no_zone) || !empty($osa_shipments) || !empty($damaged_shipments) || !empty($delivery_stop_shipments)
                 || !empty($admin_agent_unsuccessfull_assign_shipments)  || !empty($invalid_shipments) || !empty($zone_not_assigned_contractual_agent)){
                     $errorMessages = [];
 
@@ -5882,6 +5906,22 @@ class ReturnController extends Controller
                             $errorMessages[] = 'These Shipments '. $osa_shipmentMessage . ' Are not Assign as Osa Shipments cannot be assigned to Contractual Agent And Rest Has Been Assigned';
                         } else {
                             $errorMessages[] = 'These Shipments '. $osa_shipmentMessage . ' Are not Assign as Osa Shipments cannot be assigned to Contractual Agent';
+                        }
+                    }
+                    if(!empty($damaged_shipments)){
+                        $damaged_shipmentMessage = implode(', ', $damaged_shipments);
+                        if (!empty($successfull_assign_shipments)) {
+                            $errorMessages[] = 'These Shipments '. $damaged_shipmentMessage . ' Are not Assign as Damaged Shipments cannot be assigned to Contractual Agent And Rest Has Been Assigned';
+                        } else {
+                            $errorMessages[] = 'These Shipments '. $damaged_shipmentMessage . ' Are not Assign as Damaged Shipments cannot be assigned to Contractual Agent';
+                        }
+                    }
+                    if($delivery_stop_shipments != ''){
+                        $delivery_stopMessage = implode(', ', $delivery_stop_shipments);
+                        if (!empty($successfull_assign_shipments)) {
+                            $errorMessages[] = 'These Shipments '. $delivery_stopMessage . ' Are not Assign as Delivery Stopped Shipments cannot be assigned to Contractual Agent And Rest Has Been Assigned';
+                        } else {
+                            $errorMessages[] = 'These Shipments '. $delivery_stopMessage . ' Are not Assign as Delivery Stopped Shipments cannot be assigned to Contractual Agent';
                         }
                     }
                     if (!empty($invalid_shipments)) {
