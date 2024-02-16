@@ -454,7 +454,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function return_confirm($request)
+    protected function return_confirm($request,$globalAdminId = null)
     {   
         // $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
@@ -506,7 +506,7 @@ trait RvTrait
                 }
             }
             
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, $globalAdminId ?? Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }

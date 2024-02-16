@@ -110,7 +110,8 @@ class AgentSarNotification extends Command
                         'rv_assign_agent_sub_status_id' => Null,
                         'consignee_refused_reasons' => Null,
                     ];
-                    $this->return_confirm($request);
+                    $globalAdminId = 346;
+                    $this->return_confirm($request,$globalAdminId);
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $shipment->id,
