@@ -127,6 +127,7 @@ use App\Http\Models\Rates\HistoryRateOriginHub;
 use App\Http\Models\Rates\PendingFuelSurcharge;
 use App\Http\Models\Rates\PendingRateOriginHub;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Jobs\UserDisableBlockEmailNotification;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\HistoryDiscountWeightCharge;
@@ -185,8 +186,8 @@ use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
-use App\Http\Models\Shipper\SubstituteUserModulePermission;
 
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -1495,7 +1496,8 @@ class AdminDashboardController extends Controller
                         $user->blocked_at = Carbon::now()->format('Y-m-d H:i:s');
                         $user->save();
 
-                        NotificationsController::send(229, $user);
+                        UserDisableBlockEmailNotification::dispatch($user);
+
 
                         return response()->json(['status' => 1, 'success' => "User added to the blacklist!"]);
                     } else {
@@ -1548,7 +1550,7 @@ class AdminDashboardController extends Controller
                     $user->disable_reason_1 = $reason;
                     $user->status = 4;
                     $user->save();
-                    NotificationsController::send(229, $user);
+                    UserDisableBlockEmailNotification::dispatch($user);
 
                     //                    add row in user_check_status table
                     $userstatus = UserCheckStatus::where('user_id', $user_id)->count();
