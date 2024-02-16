@@ -5896,7 +5896,9 @@ class DeliveryController extends Controller
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
-                $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+                if(session('role_id') == 1 || in_array(941, session('permissions'))){
+                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+                }
 
                 $dropdown = '
                   <div class="btn-group">
@@ -5954,7 +5956,9 @@ class DeliveryController extends Controller
                     }
                 }
                 $dropdown .= $view_logs;
-                $dropdown .= $sdn_action_log;
+                if(session('role_id') == 1 || in_array(941, session('permissions'))){
+                    $dropdown .= $sdn_action_log;
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -9426,6 +9430,7 @@ class DeliveryController extends Controller
 
     public function sdn_actions(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 751);
         $sdn_id = $request->sdn_id;
         if ($sdn_id) {
             $sdn_actions_logs = array();
