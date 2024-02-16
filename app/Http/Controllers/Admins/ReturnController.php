@@ -5451,7 +5451,7 @@ class ReturnController extends Controller
                         if($failed_shipments != ''){
                             return response()->json([
                                 'status' => 1,
-                                'error' => 'Tracking Numbers Are Not Assigned: ' . $failed_shipments . ' because Osa, Delivery Stopped, Shipment Damaged Shipments cannot be assigned to Contractual Agent' .
+                                'error' => 'Tracking Numbers Are Not Assigned: ' . $failed_shipments . ' because (Osa, Delivery Stopped, Damaged Shipments) cannot be assigned to Contractual Agent, Or Shipper is Disabled' .
                                         (($assigned_shipment != null) ? ' And Rest Has Been Assigned' : '')
                             ]);
                         }
