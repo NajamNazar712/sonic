@@ -244,7 +244,7 @@ class ReturnV2Controller extends Controller
                         }
 
                         else{
-                            return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
+                            return response()->json(['status' => 5, 'errors' => 'No shipment found or Shipper is disabled']);
                         }
 
                     } else {

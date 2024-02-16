@@ -923,7 +923,7 @@ trait RvTrait
                 $shipments->orderBy('updated_at', 'ASC');
             } 
 
-            $shipments = $shipments->limit(100)->get();
+            $shipments = $shipments->get();
 
             // if($shipments->isEmpty()){
             //     continue;
@@ -977,7 +977,7 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
                 
-                $shipments = $shipments->limit(100)->get();
+                $shipments = $shipments->get();
                 
                 // if($shipments->isEmpty()){
                 //     continue;
