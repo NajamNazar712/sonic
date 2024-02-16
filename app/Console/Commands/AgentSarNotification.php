@@ -52,20 +52,20 @@ class AgentSarNotification extends Command
     public function handle()
     {
         try {
-            $sarDateTime = Carbon::now();
-            $refusalDateTime = Carbon::now();
+            $currentDateTime1 = Carbon::now()->toDateTimeString();
+            $currentDateTime = Carbon::parse($currentDateTime1);
 
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmails = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 12 hours ago.            
-                ->where('updated_at', '>', $sarDateTime->subHours(16)->toDateTimeString())
+                ->where('updated_at', '<', $currentDateTime->subHours(16))
                 ->where('unresponsive_email_count', '<', 1);
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('updated_at', '<', $refusalDateTime->subHours(24)->toDateTimeString())
+            ->where('updated_at', '<', $currentDateTime->subHours(24))
             ->where('rv_state_id', 2);
 
             //Combine the results for sending in single email
@@ -78,9 +78,9 @@ class AgentSarNotification extends Command
 
                 foreach ($sendEmail as $shipment) {
                     // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-                    if($shipment->rv_assign_agent_status_id == 7){
+                    if($shipment->rv_assign_agent_status_id == 6){
                         $shipment->increment('unresponsive_email_count');
-                        $shipment->unresponsive_email_time = $sarDateTime->toDateTimeString();
+                        $shipment->unresponsive_email_time = $currentDateTime;
                         $shipment->save();
                     }
                 }
@@ -88,12 +88,11 @@ class AgentSarNotification extends Command
 
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
-            $currentDateTime = Carbon::now();
             $unresponsive_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 ->where('unresponsive_email_count', '>', 0)
-                ->where('unresponsive_email_time', '>', $currentDateTime->subHours(48)->toDateTimeString())
+                ->where('unresponsive_email_time', '<', $currentDateTime->subHours(48))
                 ->get();
 
             if ($unresponsive_shipments->isNotEmpty()) {
@@ -134,10 +133,9 @@ class AgentSarNotification extends Command
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status after refusal on call status, 
             // the system will automatically update the shipment status to "Return Confirm."
             
-            $refusal_currentDateTime = Carbon::now();
             $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('updated_at', '>', $refusal_currentDateTime->subHours(24)->toDateTimeString())
+                ->where('updated_at', '<', $currentDateTime->subHours(24))
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {
