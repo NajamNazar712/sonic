@@ -350,14 +350,17 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
 
-             Route::prefix('lead')->name('lead.')->group(function () {
-                Route::get('', 'LeadAPIController@index')->name('index');
-                Route::post('', 'LeadAPIController@store')->name('store');
-                Route::post('{id}', 'LeadAPIController@show')->name('show');
-                // Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
-                Route::post('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
-                Route::post('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
+            Route::prefix('leadmanagement')->name('leadmanagement.')->group(function () {
+                Route::prefix('lead')->name('lead.')->group(function () {
+                    Route::get('', 'LeadAPIController@index')->name('index');
+                    Route::post('', 'LeadAPIController@store')->name('store');
+                    Route::post('fetch', 'LeadAPIController@show')->name('show');
+                    // Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
+                    Route::post('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
+                    Route::post('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
+                });
             });
+
         });
     });
 
@@ -551,7 +554,7 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment', 'AdminAPIController@scan_shipment')->name('index');
             });
 
-           
+
         });
 
         Route::middleware('AdminAPIDWSToken')->group(function () {
