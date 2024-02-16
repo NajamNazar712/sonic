@@ -5709,6 +5709,8 @@ class ReturnController extends Controller
                 $failed_shpments = [];
                 $invalid_shipments = [];
                 $zone_not_assigned_contractual_agent = []; 
+                $included_shippers = []; 
+                $only_shippers = []; 
                 foreach ($rows as $key => $row) 
                 {
                     $row_id = $key + 2;
@@ -5734,6 +5736,29 @@ class ReturnController extends Controller
                         if($shipment)
                         {
                             if($contractual_agent){
+                                $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+                                if ($included_shipper->exists()) {
+                                    $flag = true;
+                                    $included_shipper = $included_shipper->first();
+                                    $included_shippers = explode(',', $included_shipper['text']);
+                                    $included_shippers = array_filter($included_shippers, function($value){
+                                        return $value != "";
+                                    });
+                                }
+                    
+                                $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+                                if ($only_shipper->exists()) {
+                                    $flag = false;
+                                    $only_shipper = $only_shipper->first();
+                                    $only_shippers = explode(',', $only_shipper['text']);
+                                    $only_shippers = array_filter($only_shippers, function($value){
+                                        return $value != "";
+                                    });
+                                    $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+                                    $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+                                        return !in_array($value, $only_shippers);
+                                    });
+                                }
                                 
                                 $osa_reason = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                                 if($osa_reason->status_reason_id == 12 || $osa_reason->status_reason_id == 27 || $osa_reason->status_reason_id == 35){
@@ -5747,20 +5772,24 @@ class ReturnController extends Controller
                                         // if(in_array($shipment->destination_city['zone_id'], $zones_assigned_to_agent)){
                                             // $sorted_agents = RvAgentAssignHub::where('agent_id', $row['agent_id'])->orderBy('priority', 'ASC')->get();
                                             // $include_shippers = $this->included_shippers($sorted_agents, $row['agent_id'], $shipment->id); 
-                                            $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
-
-                                            if ($include_shippers) {
-                                                $data = $include_shippers->getData();
-                                                
-                                                if ($data && isset($data->status) && isset($data->success) && $data->status === 0 && $data->success === 'Shipments Assigned successfully') {
-                                                    $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
-                                                } elseif ($data && isset($data->status) && isset($data->error) && $data->status === 1 && $data->error === 'Shipment is already assigned') {
-                                                    $already_assigned_shipments[] = $tracking_number;
+                                            if(in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
+                                                $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
+                                                if($include_shippers){
+                                                    $data = $include_shippers->getData();
+                                                    if($data->status === 0 && $data->success === 'Shipments Assigned successfully')
+                                                    {
+                                                        $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
+                                                    }
+                                                    else if($data->status === 1 && $data->error === 'Shipment is already assigned'){
+                                                        $already_assigned_shipments[] = $tracking_number;
+                                                    }
+                                                }
+                                                else{
+                                                    $disabled_shippers[] = $tracking_number;
                                                 }
                                             }
                                             else{
                                                 $disabled_shippers[] = $tracking_number;
-                                                // return redirect()->back()->with('error', 'Shipper is disabled');
                                             }
                                         // }
                                         // else{
