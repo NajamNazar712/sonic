@@ -82,7 +82,7 @@ class AgentSarNotification extends Command
 
                 foreach ($sendEmail as $shipment) {
                     // if shipment status is unresponsive Increment the unresponsive_email_count for each shipment after sending the email
-                    if($shipment->rv_assign_agent_status_id == 6){
+                    if($shipment->rv_assign_agent_status_id == 7){
                         $shipment->increment('unresponsive_email_count');
                         $shipment->unresponsive_email_time = $currentDateTime;
                         $shipment->save();
