@@ -2482,6 +2482,23 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
         });
 
+
+
+
+
+
+
+        Route::prefix('intercept_restriction')->name('intercept_restriction.')->group(function () {
+            Route::get('', 'Admins\InterceptRestrictionController@intercept_restriction_index')->name('shipper_index');
+            // Route::post('', 'Admins\InterceptRestrictionController@auto_account_disabled_days_store')->name('auto_store');
+        });
+
+
+
+
+        
+
+
         Route::prefix('auto_account_disabled_days')->name('auto_account_disabled_days.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_account_disabled_days_index')->name('auto_index');
             Route::post('', 'Admins\GlobalSettingsController@auto_account_disabled_days_store')->name('auto_store');
