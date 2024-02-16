@@ -88,6 +88,7 @@
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Account Disable Reason</th>
                                         <th class="border-primary border-darken-1">Account Disable Count</th>
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
@@ -1042,7 +1043,7 @@ function checkboxStatus() {
                         head.push('Account Activation Date');
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
-                        // head.push('Account Disable Remarks');
+                        head.push('Account Disable Reason');
                         head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
@@ -1093,7 +1094,8 @@ function checkboxStatus() {
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_at);
-                            row.push(values.disable_remarks);
+                            row.push(values.disable_reason);
+                            row.push(values.reason);
                             row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
@@ -1714,7 +1716,8 @@ function checkboxStatus() {
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
-                {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
+                {data: 'reason', name: 'bdru.name', class: 'reason'},
                 {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
@@ -1903,13 +1906,26 @@ function checkboxStatus() {
 
         var block_user_id;
         var block_user_status;
+
+        var disable_user_id;
+        var disable_user_status;
+
         
-        $('body').on('click','button.blacklist',function () {
+        $('body').on('click', 'button.blacklist', function () {
             $('#BlockDisableReasonModal').modal('show');
             block_user_id = $(this).data('id');
-			block_user_status = $(this).attr('rel');
+            block_user_status = $(this).attr('rel');
+            disable_user_id = null; 
         });
 
+        $('body').on('click', 'button.userdisable', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            disable_user_id = $(this).data('id');
+            disable_user_status = 'disable';
+            block_user_id = null; 
+        });
+
+        
         $('#BlockDisableReasonSubmit').click(function () {
             var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
             var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
@@ -1919,13 +1935,13 @@ function checkboxStatus() {
                 $('.blocked_reasons').removeClass('d-none');
             }else{
                 $.ajax({
-                url: '{!! route('admin.accounts.status.block') !!}',
+                url:  block_user_id ? '{!! route('admin.accounts.status.block') !!}' : '{!! route('admin.accounts.status.change') !!}',
                 method: 'POST',
                 data: {
-                    'id': block_user_id,
+                    'id': block_user_id ? block_user_id : disable_user_id,
                     'reason': reasons,
                     'remarks': remarks,
-                    'status' : block_user_status,
+                    'status' : block_user_id ? block_user_status : 'disable',
                     '_token': '{{ csrf_token() }}'
                 }
             }).done(function (data) {
@@ -1961,6 +1977,8 @@ function checkboxStatus() {
             $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change'); 
             $('#blocked_remarks').addClass('d-none');
             $('#blocked_reasons').addClass('d-none');
+            disable_user_id = null; 
+            block_user_id = null; 
         });
 		
         $("#saletag").prepend('<option value="" selected></option>').select2({
@@ -2085,55 +2103,7 @@ function checkboxStatus() {
             });
 
         });
-        $('body').on('click','button.userdisable',function () {
-            var status  = "disable";
-            var id = $(this).parents('tr').attr('id');
-            swal({
-                title: 'Are You Sure?',
-                text: 'Select Yes to Disable this account!',
-                icon: 'warning',
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: null,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: true
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then(function (confirm) {
-               if(confirm){
-                   if(id){
-                       $.ajax({
-                           url: '{!! route('admin.accounts.status.change') !!}',
-                           method: 'POST',
-                           data: {
-                               'id':id,
-                               'status':status,
-                               '_token': '{{ csrf_token() }}'
-                           }
-                       }).done(function (data) {
-                           if(data.status == 1){
-                               table.draw('false');
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                           }
 
-                       });
-                   }
-               }
-            });
-
-        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
