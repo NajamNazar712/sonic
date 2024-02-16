@@ -301,6 +301,8 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
+        ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
+        ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
         ->leftjoin('city_areas as c_from', function ($join) {
             $join->on('c_from.id', '=', 'hr.city_area_id');
 //                ->where('c_from.default', 1);
@@ -313,8 +315,12 @@ class AdminShipmentHandoverController extends Controller
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
-        'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
-        'c_from.name as from_area','c_to.name as to_area']);
+        'handovers.from_dept_area_desg as from_dept_area_desg','handovers.to_dept_area_desg as to_dept_area_desg','handovers.received_at','handovers.created_at',
+        DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
+      ])
+      ->orderBy('handovers.id', 'DESC')
+      ->groupBy('hss.handover_id');
 
         $datatable = Datatables::of($handover_list)
             ->addColumn('handover_id_padded', function ($handover) {
@@ -337,6 +343,32 @@ class AdminShipmentHandoverController extends Controller
                   return $handover_list->from_name;
               }
             })
+
+            ->editColumn('from_dept_area_desg', function($handover_list){
+              if (isset($handover_list->from_admin_id)) {
+                 $admin = Admin::where('id', $handover_list->from_admin_id)->first();
+                 if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
+                  return $admin->Edesignation->department->name;
+                 }else{
+                  return '-';
+                 }
+              }else {
+                  return '-';
+              }            
+          })
+
+          ->editColumn('to_dept_area_desg', function($handover_list){
+            if (isset($handover_list->to_admin_id)) {
+               $admin = Admin::where('id', $handover_list->to_admin_id)->first();
+               if(isset($admin->Edesignation) && isset($admin->Edesignation->department)){
+                return $admin->Edesignation->department->name;
+               }else{
+                return '-';
+               }
+            }else {
+              return '-';
+            }            
+        })
 
             ->editColumn('to', function($handover_list) {
               if (isset($handover_list->to_admin_id)) {
