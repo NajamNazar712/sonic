@@ -64,12 +64,12 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 2)
                 //selects older records, i.e., records that were updated more than 16 hours ago.            
-                ->where('updated_at', '>', $nowSub16Hours)
+                ->where('updated_at', '>=', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
 
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('updated_at', '<', $nowSub24Hours)
+            ->where('updated_at', '>=', $nowSub24Hours)
             ->where('rv_state_id', 2);
 
             //Combine the results for sending in single email
@@ -140,7 +140,7 @@ class AgentSarNotification extends Command
             
             $refusal_call_shipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
                 ->where('rv_state_id', 2)
-                ->where('updated_at', '<', $nowSub24Hours)
+                ->where('updated_at', '<=', $nowSub24Hours)
                 ->get();
                 
             if ($refusal_call_shipments->isNotEmpty()) {
@@ -153,7 +153,8 @@ class AgentSarNotification extends Command
                         'rv_assign_agent_sub_status_id' => Null,
                         'consignee_refused_reasons' => Null,
                     ];
-                    $this->return_confirm($request);
+                    $globalAdminId = 346;
+                    $this->return_confirm($request,$globalAdminId);
 
                     $data = [
                         'rv_shipment_assign_agent_id' => $refusal_call_shipment->id,
