@@ -12049,6 +12049,8 @@ class RiderAPIController extends Controller
                                             $shipmentPickupJourney->admin_id = 3; // Replace 3 with the actual admin_id value.
                                             $shipmentPickupJourney->save();
                                             ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
+                                            //add scanningjourneyController
+                                            ShipmentScanningJourneyController::add($shipment->id, 1, 5, $rider_id, null, null, null, null, $request->actual_location_latitude, $request->actual_location_longitude, 'app');
                                             $shipment_count += 1;
                                             $notification_shipments[] = $shipment->id;
                                         } else {
@@ -12114,6 +12116,9 @@ class RiderAPIController extends Controller
 
                             // set 0 value to Pickup_request_id and note
                             ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, 0, 0, 1, NULL, $rider_id);
+
+                            //add scanningjourneyController
+                            ShipmentScanningJourneyController::add($shipment->id, 1, 5, $rider_id, null, null, null, null, $request->actual_location_latitude, $request->actual_location_longitude, 'app');
                             $shipment_count += 1;
                         }
                     }
