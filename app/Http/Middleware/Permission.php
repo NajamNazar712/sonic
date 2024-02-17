@@ -810,6 +810,8 @@ class Permission
             'settings.petty_cash.heads.active' => 161,
             'settings.petty_cash.heads.inactive' => 162,
 
+            'settings.shipper_cap.index' => 942,
+
             'settings.petty_cash.titles.index' => 158,
             'settings.petty_cash.titles.list' => 158,
             'settings.petty_cash.titles.add' => 163,

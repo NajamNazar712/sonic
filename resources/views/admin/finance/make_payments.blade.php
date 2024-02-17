@@ -1246,7 +1246,11 @@
                             }
                            
                         });
-                        total_payable_amt = total_payable_amt.toFixed(2);
+
+                      shipper_limit = parseFloat(shipper_limit).toFixed(2);
+                      shipper_limit = parseFloat(shipper_limit);
+                      total_payable_amt = total_payable_amt.toFixed(2);
+
                         if(total_payable_amt > shipper_limit)
                         {
                             scan_sound(2);
@@ -1903,6 +1907,7 @@
                                 $('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
                             }
                             total_payable_amt+=total_payable;
+                            // console.log(total_payable_amt);
                     }
                     else{
                         $('#make_payments #make_payments_form button.make').prop('disabled', true);
