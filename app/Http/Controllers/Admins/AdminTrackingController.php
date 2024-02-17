@@ -1506,7 +1506,7 @@ class AdminTrackingController extends Controller
                                    
                             }
                         } 
-                        //shipment_pickup_journey_v3 get direct table
+                        //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
                         $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
                         if($shipment_pickup_journey_v3->exists())
                         {
@@ -1531,7 +1531,7 @@ class AdminTrackingController extends Controller
                                     $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
                                     if ($journey->reference_2_id) {
-                                        if ($journey->status_id == 2) {
+                                        if ($journey->status_id == 6) {
                                             $rider = Rider::find($journey->reference_2_id);
                                             if ($rider) {
                                                 $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
@@ -1546,8 +1546,7 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $admin = DB::table('admins')->where('id',$journey->admin_id)->first();
-                                // $admin = $journey->admin;
-
+                                
                                 if ($admin) {
                                     $journey_details['user'] = $admin->name;
                                 } else {
