@@ -10973,13 +10973,17 @@ class NotificationsController extends Controller
 
                         $sale_lead_email = MultipleSaleTagging::whereIn('admin_id', $email['sale_lead_id'])->get()->pluck('lead_id')->toArray();
                         $lead_email = Lead::whereIn('id', $sale_lead_email)->get()->pluck('email_address')->toArray();
-
-                        if(isset($email['email'])){
-                            $to = array_merge($email['email'], $lead_email);
+                        
+                        $to = [];
+                        if (isset($email['email'])) {
+                            $to = array_merge($to, $email['email']);
                         }
-                        $to[] = $sale_person_tag_email;
+                        $to = array_merge($to, $lead_email);
+                        
+                        if (!is_null($sale_person_tag_email)) {
+                            $to[] = $sale_person_tag_email;
+                        }
                         $to = array_merge($to , ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
-
                         $to_excluded = array_diff($to,  ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
                         
                         $admin_name = Admin::whereIn('email', $to_excluded)->get()->pluck('name')->toArray();
