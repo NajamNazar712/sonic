@@ -10956,74 +10956,75 @@ class NotificationsController extends Controller
 
                     if ($sale_commission_users->exists() || $sale_person_tag->exists()){
                         $sale_commission_users = $sale_commission_users->latest()->first();
-                        if(isset($sale_commission_users, $sale_commission_users->users) || $sale_person_tag->exists()){
+                        if(isset($sale_commission_users, $sale_commission_users->users)){
                             foreach($sale_commission_users->users as $sale_commission_user){
                                 if($sale_commission_user->user_type == 1 && ($sale_commission_user->tier_id == $sales_tier_kam || $sale_commission_user->tier_id == $sales_tier_sale_person) ){
                                     $email['sale_lead_id'][] =  $sale_commission_user->sales_person->id;
                                     $email['email'][] = $sale_commission_user->sales_person->email;
                                 }
                             }
-    
-                            if($sale_person_tag->exists()){
-                                $sale_person_tag_email = $sale_person_tag->orderBy('id', 'DESC')->first()->sales_person->email ?? null;
-                                $sale_person_tag_id = $sale_person_tag->orderBy('id', 'DESC')->first()->admin_id ?? null;
-                                $email['sale_lead_id'][] = $sale_person_tag_id;
-                            }
-    
-                            $sale_lead_email = MultipleSaleTagging::whereIn('admin_id', $email['sale_lead_id'])->get()->pluck('lead_id')->toArray();
-                            $lead_email = Lead::whereIn('id', $sale_lead_email)->get()->pluck('email_address')->toArray();
-        
-                            $to = array_merge($email['email'], $lead_email);
-                            $to[] = $sale_person_tag_email;
-                            $to = array_merge($to , ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
-
-                            $to_excluded = array_diff($to,  ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
-                            
-                            $admin_name = Admin::whereIn('email', $to_excluded)->get()->pluck('name')->toArray();
-                            $lead_name = MultipleSaleTagging::join('leads', 'leads.id', 'multiple_sale_taggings.id')
-                            ->whereIn('multiple_sale_taggings.admin_id', $email['sale_lead_id'])
-                            ->select('leads.contact_person as contact_person')
-                            ->get()
-                            ->pluck('contact_person')
-                            ->toArray();
-    
-                            $sale_person_name = array_merge($admin_name, $lead_name);
-                            $sale_person_name = implode(' ,', $sale_person_name);
-
-                            $status = $user->blacklist == 1 ? 'Blocked' : ' Disabled';
-                            $status = $status == 'Blocked' ? 'Block' : 'Disable';
-    
-                            // Table for User Disable/Block Accounts
-                            $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
-                            $html .= '<thead>';
-                            $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Shipper Name</th>';
-                            $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Tagged Sale Person</th>';
-                            $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Activation Date</th>';
-                            $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Date</th>';
-                            $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">' . ($status) . ' Reason</th>';
-                            $html .= '</thead>';
-                            $html .= '<tbody>';
-                            $html .= '<tr>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$user->name.'</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$sale_person_name.'</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? Carbon::parse($user->blocked_at) : Carbon::parse($user->disable_at))  .'</td>';
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name : BlockDisableReasonUser::where('id', $user->disable_reason_1)->first()->name).'</td>';
-    
-                            $html .= '</tr>';
-                            $html .= '<tbody>';
-                            $html .= '</table>';
-    
-                            
-                            $subject = str_replace('[subject_status]', $status, $subject);
-                            $body = str_replace('[preview]', $html, $body);
-                            $body = str_replace('[status]', $status, $body);
-
-                            self::email($subject, $body, $to);
-    
-                        }else{
-                            return;
                         }
+    
+                        if($sale_person_tag->exists()){
+                            $sale_person_tag_email = $sale_person_tag->orderBy('id', 'DESC')->first()->sales_person->email ?? null;
+                            $sale_person_tag_id = $sale_person_tag->orderBy('id', 'DESC')->first()->admin_id ?? null;
+                            $email['sale_lead_id'][] = $sale_person_tag_id;
+                        }
+
+                        $sale_lead_email = MultipleSaleTagging::whereIn('admin_id', $email['sale_lead_id'])->get()->pluck('lead_id')->toArray();
+                        $lead_email = Lead::whereIn('id', $sale_lead_email)->get()->pluck('email_address')->toArray();
+
+                        if(isset($email['email'])){
+                            $to = array_merge($email['email'], $lead_email);
+                        }
+                        $to[] = $sale_person_tag_email;
+                        $to = array_merge($to , ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
+
+                        $to_excluded = array_diff($to,  ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
+                        
+                        $admin_name = Admin::whereIn('email', $to_excluded)->get()->pluck('name')->toArray();
+                        $lead_name = MultipleSaleTagging::join('leads', 'leads.id', 'multiple_sale_taggings.id')
+                        ->whereIn('multiple_sale_taggings.admin_id', $email['sale_lead_id'])
+                        ->select('leads.contact_person as contact_person')
+                        ->get()
+                        ->pluck('contact_person')
+                        ->toArray();
+
+                        $sale_person_name = array_merge($admin_name, $lead_name);
+                        $sale_person_name = implode(' ,', $sale_person_name);
+
+                        $status = $user->blacklist == 1 ? 'Blocked' : ' Disabled';
+                        $status = $status == 'Blocked' ? 'Block' : 'Disable';
+
+                        // Table for User Disable/Block Accounts
+                        $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                        $html .= '<thead>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Shipper Name</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Tagged Sale Person</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Activation Date</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Date</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">' . ($status) . ' Reason</th>';
+                        $html .= '</thead>';
+                        $html .= '<tbody>';
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$user->name.'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$sale_person_name.'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? Carbon::parse($user->blocked_at) : Carbon::parse($user->disable_at))  .'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name : BlockDisableReasonUser::where('id', $user->disable_reason_1)->first()->name).'</td>';
+
+                        $html .= '</tr>';
+                        $html .= '<tbody>';
+                        $html .= '</table>';
+
+                        
+                        $subject = str_replace('[subject_status]', $status, $subject);
+                        $body = str_replace('[preview]', $html, $body);
+                        $body = str_replace('[status]', $status, $body);
+
+                        self::email($subject, $body, $to);
+                    }else{
+                        return;
                     }
                
                 } 
