@@ -94,7 +94,7 @@
                            </div>
                         </div>
                         <div class="form-group ml-1">
-                            <button type="button" id="addrow" class="btn btn-success ">Add Row</button>
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
 
                             <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -553,7 +553,8 @@
                                 {
                                     form.submit();
                                 }else{
-                                    alert("Sack Bag No# already exist");
+                                    scan_sound(2);
+                                    toastr.error("Sack Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
                 });
@@ -570,7 +571,8 @@
                          sack_bag_no_check(sack_bag_no);
 
                        }else{
-                         alert('Please fill Sack Bag No#');
+                         scan_sound(2);
+                         toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                        }
                        
                     }
@@ -583,11 +585,12 @@
                         
                         sack_bag_no_check(sack_bag_no);
                     }else{
-                         alert('Please fill Sack Bag No#');
+                         scan_sound(2);
+                         toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
-                // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                // $("#sackbag_detail").append(row);
-            });
+                    // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                    // $("#sackbag_detail").append(row);
+                }); 
           
             $('body').on('click','#remove_row',function(){
                 $(this).closest('tr').remove();
@@ -595,25 +598,46 @@
 
         });
 
-        var current_sack_bag_no=0;
+        var current_sack_bag_no=Array();
         function sack_bag_check_zero(sack_bag_no)
         {   
               var sackbag_no =$(sack_bag_no).val();
-              sack_bag_no_check(sackbag_no,'change');
+              
+              if(sackbag_no!='')
+              {
              
-                    $("#sackbag_detail tr").each(function(){
-                        if(current_sack_bag_no == $(this).find('#sack_bag_no_id').val())
-                        {
-                            alert("Sack Bag Already Add");
-                            $(sack_bag_no).val('');
-                            return false;
-                        }
-                    })
-                    if($(sack_bag_no).val()!='')
-                    {
-                         current_sack_bag_no=$(sack_bag_no).val();
-                    }
-                    console.log(current_sack_bag_no);
+                
+                if(!current_sack_bag_no.includes(sackbag_no))
+                {
+               
+                    sack_bag_no_check(sackbag_no,'change');
+                    current_sack_bag_no.push(sackbag_no);
+                }else{
+                    scan_sound(2);
+                    toastr.error("Sack Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    $(sack_bag_no).val('');
+                }
+                
+                // current_sack_bag_no=$(sack_bag_no).val();
+
+              }
+           
+             
+                    // $("#sackbag_detail tr").each(function(){
+                    //     if(current_sack_bag_no == $(this).find('#sack_bag_no_id').val())
+                    //     {
+                    //         alert("Sack Bag Already Add");
+                    //         $(sack_bag_no).val('');
+                    //         return false;
+                    //     }
+                    // })
+                    
+                    // if(sackbag_no!='')
+                    // {
+
+                       
+                    // }
+                    // console.log(current_sack_bag_no);
               
              
              
@@ -644,7 +668,10 @@
                                     if(type!='change')
                                     {
                                         var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                                        $("#sackbag_detail").append(row);
+                                        var $row = $(row);
+                                        $("#sackbag_detail").append($row);
+                                        $row.find('#sack_bag_no_id').focus();
+
                                     }
                                     $("#sack_bag_no_check").val(0);
                             }
