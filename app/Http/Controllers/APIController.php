@@ -2860,7 +2860,7 @@ class APIController extends Controller
         $rules = [
             'complaint_id' => ['required', 'integer'], 
             'description' => ['required', 'string'], 
-            'shipment_id' => ['required', 'integer', 'exists:shipments,id'], 
+            'tracking_number' => ['required', 'integer', 'exists:shipments,tracking_number'], 
             'complaint_name' => ['required', 'string'], 
             'complaint_phone' => ['required', 'string'], 
         ];
@@ -2877,7 +2877,7 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
             
-            $shipment_id = $request->shipment_id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;
