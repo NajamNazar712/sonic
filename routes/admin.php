@@ -1348,13 +1348,15 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::prefix('create')->name('create.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@create_index')->name('index');
                 Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details')->name('shipment_details');
+                //Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details_old')->name('shipment_details'); // old_one
                 Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
                 Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminCargoManifestController@create_store')->name('store');
+                //Route::post('', 'Admins\AdminCargoManifestController@create_store_old')->name('store'); // old one
 
                 Route::prefix('open_bag')->name('open_bag.')->group(function () {
                     Route::get('', 'Admins\AdminCargoManifestController@create_open_bag_index')->name('index');
-                    //                    Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_open_bag_shipment_details')->name('shipment_details');
+                    //Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_open_bag_shipment_details')->name('shipment_details');
                     Route::post('', 'Admins\AdminCargoManifestController@create_open_bag_store')->name('store');
                 });
             });
@@ -1364,6 +1366,14 @@ Route::prefix('admin')->name('admin.')->group(function(){
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
                 Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
+            });
+            Route::prefix('sack_bag')->name('sack_bag.')->group(function () {
+                Route::get('', 'Admins\AdminCargoManifestController@sack_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
+                Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
+                Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
+                Route::post('no_check_for_cb', 'Admins\AdminCargoManifestController@sack_bag_no_check_for_cb')->name('no_check_for_cb');
+                
             });
         });
         Route::get('/', 'Admins\AdminCargoManifestController@manifest_index')->name('index');
@@ -1381,13 +1391,20 @@ Route::prefix('admin')->name('admin.')->group(function(){
 
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'Admins\AdminCargoManifestController@receive_bag_index')->name('index');
+            //Route::get('', 'Admins\AdminCargoManifestController@receive_bag_index_old')->name('index'); // old_one
             Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
+            //Route::post('bag_details', 'Admins\AdminCargoManifestController@receive_bag_details_old')->name('bag_details'); // old one
             Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_store')->name('store');
+            //Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_store_old')->name('store'); // old one
 
             Route::prefix('bag')->name('bag.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@receive_bag_shipments_index')->name('index');
+                //Route::get('', 'Admins\AdminCargoManifestController@receive_bag_shipments_index_old')->name('index'); //old one
                 Route::post('details', 'Admins\AdminCargoManifestController@receive_bag_shipments_details')->name('details');
+                //Route::post('details', 'Admins\AdminCargoManifestController@receive_bag_shipments_details_old')->name('details'); // old one
+                Route::post('details/return', 'Admins\AdminCargoManifestController@receive_bag_shipments_details_return')->name('details.return');
                 Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');
+                //Route::post('store', 'Admins\AdminCargoManifestController@receive_bag_shipments_store_old')->name('store'); // old one
             });
         });
 
@@ -2377,11 +2394,33 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@ibft_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@ibft_report_list')->name('list');
         });
-
-        Route::prefix('rv_action_count_report')->name('rv_action_count_report.')->group(function () {
+		Route::prefix('rv_action_count_report')->name('rv_action_count_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rv_action_count_report_index')->name('index');
             Route::post('', 'Admins\AdminReportsController@fetch_rv_action_count_report')->name('fetch');
-            });
+        });
+        Route::prefix('sack_bag_utilization')->name('sack_bag_utilization.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@sack_bag_utilization_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@sack_bag_utilization_list')->name('list');
+            Route::post('sack_bag_list', 'Admins\AdminReportsController@get_sack_bag_list')->name('sack_bag_list');
+        });
+        Route::prefix('sack_bag_status')->name('sack_bag_status.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@sack_bag_status_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@sack_bag_status_list')->name('list');
+        });
+        // Route::prefix('reused_sack_bag')->name('reused_sack_bag.')->group(function () {
+        //     Route::get('', 'Admins\AdminReportsController@reused_sack_bag_index')->name('index');
+        //     Route::get('list', 'Admins\AdminReportsController@reused_sack_bag_list')->name('list');
+        // });
+        Route::prefix('issuance_sack_bag')->name('issuance_sack_bag.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@issuance_sack_bag_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@issuance_sack_bag_list')->name('list');
+            Route::post('sack_bag_list', 'Admins\AdminReportsController@get_issuance_sack_bag_list')->name('sack_bag_list');
+        });
+
+        Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
+        });
     });
 
     //Reports end
@@ -4063,5 +4102,12 @@ Route::prefix('admin')->name('admin.')->group(function(){
 
         });
 
+    });
+
+    Route::prefix('sack_bag')->name('sack_bag.')->group(function () {
+        Route::get('', 'Admins\AdminCargoManifestController@sack_bag_index')->name('index');
+        Route::get('list', 'Admins\AdminCargoManifestController@sack_bag_list')->name('list');
+        Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
+        Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
     });
 });

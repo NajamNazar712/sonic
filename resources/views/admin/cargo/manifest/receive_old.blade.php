@@ -46,11 +46,6 @@
                                     {!! session('bag_not_exist_error') !!}
                                 </div>
                             @endif
-                            @if(session('went_wrong_html'))
-                                <div class="alert alert-danger">
-                                    {!! session('went_wrong_html') !!}
-                                </div>
-                            @endif
                             <form id="add_bag_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div id="camera_scan" class="d-none">
                                     <div id="camera_view" class="camera_view"></div>
@@ -126,7 +121,7 @@
         $(document).ready(function() {
             @if(session('errors'))
             scan_sound(2);
-            @endif
+                    @endif
 
             var bag_ids = [];
 
@@ -148,13 +143,7 @@
                     {name: 'misroute', class: 'misroute', orderable: false,searchable: false, visible: false}
                 ],
                 rowCallback: function(row, data, index) {
-
                     if(data[misroute_id] == 1)
-                    {
-                        $(row).addClass('alert-danger');
-                    }
-
-                    if(data[10] == 1) // if bag without manifest
                     {
                         $(row).addClass('alert-danger');
                     }
@@ -201,7 +190,7 @@
                                     if (index === -1) {
                                         $action = "<button class='btn btn-danger btn-icon btn-sm remove_bag'><i class='la la-close'></i></button>";
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute,data.details.without_manifest]).node().id = data.details.bag_id;
+                                        table.row.add([rowNo + 1,data.details.bag_number,data.details.manifest_id,data.details.origin,data.details.destination,data.details.last_junction,data.details.actual_weight,data.details.shipping_mode,$action,data.details.misroute]).node().id = data.details.bag_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);

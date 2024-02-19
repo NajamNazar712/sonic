@@ -3668,9 +3668,9 @@ class RiderAPIController extends Controller
                                 DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
                             }
 
-                            $arr['shipment_id'] = $request->shipment_id;
-                            $arr['delivery_note_id'] = $request->delivery_note_id;
-                            dispatch(new ProcessAgentCallMonitoring($arr));
+//                            $arr['shipment_id'] = $request->shipment_id;
+//                            $arr['delivery_note_id'] = $request->delivery_note_id;
+//                            dispatch(new ProcessAgentCallMonitoring($arr));
 
 
                             $message = 'Shipment is marked as Undelivered Successfully';
@@ -11597,16 +11597,16 @@ class RiderAPIController extends Controller
                                                 $this->auto_return_confirm($shipment->id);
                                                 ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             } else {
-                                                $arr['shipment_id'] = $request->shipment_id;
-                                                $arr['delivery_note_id'] = $request->delivery_note_id;
-                                                dispatch(new ProcessAgentCallMonitoring($arr));
+//                                                $arr['shipment_id'] = $request->shipment_id;
+//                                                $arr['delivery_note_id'] = $request->delivery_note_id;
+//                                                dispatch(new ProcessAgentCallMonitoring($arr));
                                             }
                                         }
-                                        if ($rc_flag == false) {
-                                            $arr['shipment_id'] = $request->shipment_id;
-                                            $arr['delivery_note_id'] = $request->delivery_note_id;
-                                            dispatch(new ProcessAgentCallMonitoring($arr));
-                                        }
+//                                        if ($rc_flag == false) {
+//                                            $arr['shipment_id'] = $request->shipment_id;
+//                                            $arr['delivery_note_id'] = $request->delivery_note_id;
+//                                            dispatch(new ProcessAgentCallMonitoring($arr));
+//                                        }
 
                                         $message = 'Shipment is marked as Undelivered Successfully';
                                         $success_flag = true;
@@ -11829,16 +11829,16 @@ class RiderAPIController extends Controller
                                                 $this->auto_return_confirm($shipment->id);
                                                 ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             } else {
-                                                $arr['shipment_id'] = $request->shipment_id;
-                                                $arr['delivery_note_id'] = $request->delivery_note_id;
-                                                dispatch(new ProcessAgentCallMonitoring($arr));
+//                                                $arr['shipment_id'] = $request->shipment_id;
+//                                                $arr['delivery_note_id'] = $request->delivery_note_id;
+//                                                dispatch(new ProcessAgentCallMonitoring($arr));
                                             }
                                         }
-                                        if ($rc_flag == false) {
-                                            $arr['shipment_id'] = $request->shipment_id;
-                                            $arr['delivery_note_id'] = $request->delivery_note_id;
-                                            dispatch(new ProcessAgentCallMonitoring($arr));
-                                        }
+//                                        if ($rc_flag == false) {
+//                                            $arr['shipment_id'] = $request->shipment_id;
+//                                            $arr['delivery_note_id'] = $request->delivery_note_id;
+//                                            dispatch(new ProcessAgentCallMonitoring($arr));
+//                                        }
 
                                         $message = 'Shipment is marked as Undelivered Successfully';
                                    
@@ -14729,7 +14729,7 @@ class RiderAPIController extends Controller
                 }
 //                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
-                dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+//                dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
                 //fintech
 
