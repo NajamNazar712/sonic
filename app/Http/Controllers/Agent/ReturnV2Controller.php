@@ -144,6 +144,7 @@ class ReturnV2Controller extends Controller
                             $shipment = $this->included_shippers($agent_id);
                         }
                         if ($shipment) {
+                            $shipment = Shipment::find($shipment->id);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
