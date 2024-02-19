@@ -508,7 +508,7 @@ class V3AdminPickupsController extends Controller
 
                 $update_request_status = '<a href="javascript:void(0);" class="dropdown-item update_request_status" data-action="Update Status" data-current_status_id=' . $reminder_request->status_id . '><i class="ft-plus-square primary"></i> Change Status</a>';
 
-                if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([920], session('permissions'))) !== 0) {
                     $dropdown = "
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
@@ -790,7 +790,7 @@ class V3AdminPickupsController extends Controller
                 $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
 
-                if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([919], session('permissions'))) !== 0) {
                     $dropdown = "
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
