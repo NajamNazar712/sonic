@@ -359,7 +359,7 @@ class AdminCargoManifestController extends Controller
             })
             ->leftjoin('misrouted_history as gmhh', function ($join) {
                 $join->on('gmhh.shipment_id', '=', 'shipments.id')
-                    ->on('shipments.shipper_status_id', '=', DB::raw(66))
+                    ->on('shipments.shipper_status_id', '=', DB::raw(68))
                     ->where('gmhh.id', '=',
                         DB::raw('(select max(id) from misrouted_history where misrouted_history.shipment_id = shipments.id)'));
             })
@@ -398,7 +398,7 @@ class AdminCargoManifestController extends Controller
                                     ->where('gmh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->where('shipments.shipper_status_id', '=', 66)
+                                $sub_query->where('shipments.shipper_status_id', '=', 68)
                                     ->where('gmhh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
@@ -436,7 +436,7 @@ class AdminCargoManifestController extends Controller
                             ->whereIn('csj.city_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
-                        $sub_query->where('shipments.shipper_status_id', 66)
+                        $sub_query->where('shipments.shipper_status_id', 68)
                             ->whereIn('csj.city_id', session('hubs'));
                     })
                     ->orWhere(function ($sub_query) {
@@ -684,14 +684,14 @@ class AdminCargoManifestController extends Controller
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,66]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68]);
             } else if ($shipment_type == 1) {
-                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,66]);
+                $datatables->whereIn('shipments.shipper_status_id', [2, 49, 55,11,68]);
             } else if ($shipment_type == 2) {
                 $datatables->whereIn('shipments.shipper_status_id', [20, 30, 37]);
             }
         } else {
-            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,66]);
+            $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 37, 49, 55,11,68]);
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $datatables->where('sm.id', '=', $mode);
@@ -1256,7 +1256,7 @@ class AdminCargoManifestController extends Controller
                 }
 
 
-                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 66])) {
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68])) {
                     if ($shipment->shipper_status_id == 2) {
                         $hub_id = $shipment->pickup_address->city->hub_id;
                     } else if ($shipment->shipper_status_id == 49) {
@@ -1292,7 +1292,7 @@ class AdminCargoManifestController extends Controller
                             }
 
                             if ($request->bag_type != 0) {
-                                if (in_array($shipment->shipper_status_id, [2, 49, 55, 66])) {
+                                if (in_array($shipment->shipper_status_id, [2, 49, 55, 68])) {
                                     $hub_id = $shipment->consignee_city->hub_id;
                                 } else {
                                     if (in_array($shipment->shipper_status_id, [20])) {
@@ -1315,7 +1315,7 @@ class AdminCargoManifestController extends Controller
 
                                 if ($request->bag_type != 0) {
                                     if ($request->bag_type == 1) {
-                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55,66])) {
+                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55,68])) {
                                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
                                         }
 
@@ -1328,7 +1328,7 @@ class AdminCargoManifestController extends Controller
                                         $bag_type = 2;
                                     }
                                 } else {
-                                    if (in_array($shipment->shipper_status_id, [2, 49, 55, 66])) {
+                                    if (in_array($shipment->shipper_status_id, [2, 49, 55, 68])) {
                                         $details['bag_type'] = 1;
 
                                         $bag_type = 1;
@@ -1792,7 +1792,7 @@ class AdminCargoManifestController extends Controller
                 }
 
 
-                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 66])) {
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55, 68])) {
                     $shipments++;
                     $shipments_weight += $shipment->actual_weight;
                     $quantity = $quantity + count($shipment->items);
@@ -5468,7 +5468,7 @@ class AdminCargoManifestController extends Controller
         try{
             DB::beginTransaction();
 
-        $shipment_status_array = [3, 11,21, 26, 32, 49,66];
+        $shipment_status_array = [3, 11,21, 26, 32, 49,68];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $open_box_ids = explode(',', $request->open_box_ids);
         $bag_ids = array();
@@ -5549,8 +5549,8 @@ class AdminCargoManifestController extends Controller
                                         }
                                         else
                                         {
-                                            $shipper_status_id = 66;
-                                            $consignee_status_id = 66;
+                                            $shipper_status_id = 68;
+                                            $consignee_status_id = 68;
                                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                                             MisroutedHistory::create([
@@ -5640,8 +5640,8 @@ class AdminCargoManifestController extends Controller
                             }
                             else
                             {
-                                $shipment->shipper_status_id = 66;
-                                $shipment->consignee_status_id = 66;
+                                $shipment->shipper_status_id = 68;
+                                $shipment->consignee_status_id = 68;
                                 $shipment->save();
                                 $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
                                 if ($last_scanned->exists())
@@ -5655,7 +5655,7 @@ class AdminCargoManifestController extends Controller
                                 }
 
                                 ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
-                                ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
+                                ShipmentsJourneyController::add($shipment_id, 68, 68, NULL, $remarks, NULL, Auth::id());// new misrouted
                                 array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                                 MisroutedHistory::create([
@@ -5691,8 +5691,8 @@ class AdminCargoManifestController extends Controller
                         }
                         else
                         {
-                            $shipment->shipper_status_id = 66;
-                            $shipment->consignee_status_id = 66;
+                            $shipment->shipper_status_id = 68;
+                            $shipment->consignee_status_id = 68;
                             $shipment->save();
                             $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
                             if ($last_scanned->exists())
@@ -5706,7 +5706,7 @@ class AdminCargoManifestController extends Controller
                             }
 
                             ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
-                            ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
+                            ShipmentsJourneyController::add($shipment_id, 68, 68, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
 
                             MisroutedHistory::create([
@@ -5830,8 +5830,8 @@ class AdminCargoManifestController extends Controller
                                         }
                                         else
                                         {
-                                            $shipper_status_id = 66;
-                                            $consignee_status_id = 66;
+                                            $shipper_status_id = 68;
+                                            $consignee_status_id = 68;
                                         }
 
                                         $self_collection = SelfCollectionShipment::where('shipment_id', $shipment_id)->first();
@@ -5957,8 +5957,8 @@ class AdminCargoManifestController extends Controller
                         }
                         else
                         {
-                            $shipment->shipper_status_id = 66;
-                            $shipment->consignee_status_id = 66;
+                            $shipment->shipper_status_id = 68;
+                            $shipment->consignee_status_id = 68;
                             $shipment->save();
 
                             $last_scanned = ShipmentsJourney::where('shipment_id',$shipment_id)->select('city_id');
@@ -5972,7 +5972,7 @@ class AdminCargoManifestController extends Controller
                                 $remarks = '--';
                             }
                             ShipmentsJourneyController::add($shipment_id, 67, 67, NULL, NULL, NULL, Auth::id()); // without manifest status
-                            ShipmentsJourneyController::add($shipment_id, 66, 66, NULL, $remarks, NULL, Auth::id());// new misrouted
+                            ShipmentsJourneyController::add($shipment_id, 68, 68, NULL, $remarks, NULL, Auth::id());// new misrouted
                             array_push($shipment_ids_array_misrouted, $shipment->tracking_number);
                         }
                     }
@@ -6062,7 +6062,7 @@ class AdminCargoManifestController extends Controller
         }
 
         //remove misrouted shipment ids from $short_received_shipments_array
-            $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,66])->pluck('tracking_number')->toArray();
+            $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68])->pluck('tracking_number')->toArray();
             $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
         //remove misrouted shipment ids from $short_received_shipments_array end
 
