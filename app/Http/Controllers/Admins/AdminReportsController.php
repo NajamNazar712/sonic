@@ -118,6 +118,7 @@ class AdminReportsController extends Controller
         }
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
@@ -125,7 +126,7 @@ class AdminReportsController extends Controller
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities,'zones' => $zones , 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
     }
 
     public function qsr_list(Request $request)
@@ -419,6 +420,9 @@ class AdminReportsController extends Controller
         }
         if ($destination = $request->get('search_destination')) {
             $datatable->where('dc.id', '=', $destination);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $datatable->where('z.id', '=', $zone);
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('h.id', '=', $hub);
