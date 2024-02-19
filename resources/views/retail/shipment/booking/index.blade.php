@@ -1489,9 +1489,9 @@
                             $('#previous_name').empty();
 
                             // Add new options based on the response
-                            previousNames.forEach(function (name) {
-                                console.log(name);
-                                $('#previous_name').append('<option value="' + name.name + '">' + name.name + '</option>');
+                            previousNames.forEach(function (data) {
+                                console.log(data);
+                                $('#previous_name').append('<option value="' + data.id + '">' + data.shipper_name + '</option>');
                             });
 
                             // Trigger select2 update

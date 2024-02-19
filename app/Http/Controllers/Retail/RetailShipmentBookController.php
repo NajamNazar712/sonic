@@ -2209,20 +2209,30 @@ class RetailShipmentBookController extends Controller
     {
         $phone_number = str_replace('-', '', $phone_number);
         $shipper_cnic = str_replace('-', '', $shipper_cnic);
-        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
-        {
-            return 0;
-        }
-        else
-        {
-            
-        }
-        $update_shipper = new RetailShipperNameVerification();
-        $update_shipper->phone_number = $phone_number;
-        $update_shipper->shipper_name = $shipper_name;
-        $update_shipper->shipper_cnic = $shipper_cnic;
-        $update_shipper->shipper_address = $shipper_address;
-        $update_shipper->save();
+//        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
+//        {
+//            return 0;
+//        }
+//        else
+//        {
+            $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
+            if($record_exist->exists())
+            {
+                $record_exist = $record_exist->first();
+                $record_exist->shipper_cnic = $shipper_cnic;
+                $record_exist->shipper_address = $shipper_address;
+                $record_exist->save();
+            }
+            else
+            {
+                $update_shipper = new RetailShipperNameVerification();
+                $update_shipper->phone_number = $phone_number;
+                $update_shipper->shipper_name = $shipper_name;
+                $update_shipper->shipper_cnic = $shipper_cnic;
+                $update_shipper->shipper_address = $shipper_address;
+                $update_shipper->save();
+            }
+//        }
     }
 
     public function previous_names_verify(Request $request)
