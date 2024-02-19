@@ -26,11 +26,15 @@ use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Traits\RvTrait;
 
 class AdminInterceptRebookRequestHistoryController extends Controller
 {
+    use RvTrait;
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -139,8 +143,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-//        dd($consignee_cities);
-//        $consignee_cities = City::leftjoin('city_deliveries as cd', 'cd.city_id', '=', 'cities.id')->leftjoin('')->where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
                 return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
@@ -170,7 +172,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         if($crm_request->exists()){
             $crm = true;
         }
-        if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
+        if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true || $shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 66) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                 if ($shipment['intercepted'] == 1) {
 
@@ -257,6 +259,17 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              }
                      }
 
+                     $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
+                    $rv_shipment_assign_agent_data = [
+                            'agent_id' => Auth::id(),
+                            'shipment_id' => $request->shipment_id,
+                            'rv_assign_agent_status_id' => 3, //Intercept Requested
+                            'rv_assign_agent_sub_status_id' => Null,
+                            'updated_by_id' =>  Auth::id(),
+                            'remarks' => Null,
+                        ];
+                    $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
+
                    }
                    //Same Consignee
                    else{
@@ -334,13 +347,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
 
-                            //  $return_assign_log = new RcpAssignedShipmentLog();
-                            //  $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                            //  $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                            //  $return_assign_log->status = 2; //unassigning shipment from agent
-                            //  $return_assign_log->admin_id = Auth::id();
-                            //  $return_assign_log->save();
-
                              }
                              
                             //If admin is updating the status update rcp_assigned_shipment & log
@@ -372,33 +378,34 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
 
-                            //  $return_assign_log = new RcpAssignedShipmentLog();
-                            //  $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                            //  $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                            //  $return_assign_log->status = 2; //unassigning shipment from agent
-                            //  $return_assign_log->admin_id = Auth::id();
-                            //  $return_assign_log->save();
                              }
-                     }
 
+                        }
+                    $rv_shipment_assign_agent_data = [
+                            'agent_id' => Auth::id(),
+                            'shipment_id' => $request->shipment_id,
+                            'rv_assign_agent_status_id' => 4, //Intercept Approved (Since its same consignee and it auto approves)
+                            'rv_assign_agent_sub_status_id' => Null,
+                            'updated_by_id' =>  Auth::id(),
+                            'remarks' => Null,
+                        ];
+                    $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
-                      
-
-                       if($request->hasFile('replacement_parcel_image')){
-                           $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
-                           if($shipment_parcel_image->exists()){
-                               $shipment_parcel_image = $shipment_parcel_image->first();
-                               Storage::disk('public')->delete($shipment_parcel_image->picture_path);
-                           }else{
-                               $shipment_parcel_image = new ShipmentReplacementParcelImage();
-                               $shipment_parcel_image->shipment_id = $request->shipment_id;
-                           }
-                           $time = Carbon::now()->toDateString();
-                           $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
-                           Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
-                           $shipment_parcel_image->picture_path = $picture_path;
-                           $shipment_parcel_image->save();
-                       }
+                    if($request->hasFile('replacement_parcel_image')){
+                        $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                        if($shipment_parcel_image->exists()){
+                            $shipment_parcel_image = $shipment_parcel_image->first();
+                            Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                        }else{
+                            $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                            $shipment_parcel_image->shipment_id = $request->shipment_id;
+                        }
+                        $time = Carbon::now()->toDateString();
+                        $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                        Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
+                        $shipment_parcel_image->picture_path = $picture_path;
+                        $shipment_parcel_image->save();
+                    }
 
                    }
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);

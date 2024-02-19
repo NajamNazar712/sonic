@@ -296,8 +296,6 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
-        ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
-        ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
         ->leftjoin('city_areas as c_from', function ($join) {
             $join->on('c_from.id', '=', 'hr.city_area_id');
 //                ->where('c_from.default', 1);
@@ -306,40 +304,18 @@ class AdminShipmentHandoverController extends Controller
             $join->on('c_to.id',   '=', 'hor.city_area_id');
 //                ->where('c_to.default', 1);
         })
-        ->leftJoin('shipments_journey as sjl', function ($join) {
-          $join->on('sjl.shipment_id', '=', 's.id')
-              ->where(
-                  'sjl.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
-              );
-      })
-
-      ->leftJoin('shipments_journey as journey', function ($join) {
-          $join->on('journey.shipment_id', '=', 's.id')
-              ->where(
-                  'journey.id',
-                  '=',
-                  DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id)')
-              );
-      })
         ->select(['handovers.id as handover_id','a.name as created_by','a.id as created_by_id','ad.name as received_by','ad.id as received_by_id',
         'hr.admin_id as from_admin_id','hor.admin_id as to_admin_id','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
         'handovers.received as received_shipments','hr.name as from_name','hor.name as to_name',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
-        DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area','journey.shipper_status_id as shipper_status_id',
-        'sjl.shipment_id as journey_latest_id',
-        'sjl.updated_at as journey_latest_updated_at',
-        'sjl.shipper_status_id as latest_shipper_status_id'
-      ])
-      ->orderBy('handovers.id', 'DESC')
-      ->groupBy('hss.handover_id');
+        'c_from.name as from_area','c_to.name as to_area']);
 
         $datatable = Datatables::of($handover_list)
-
-        ->editColumn('shipment_count', function($handover_list) {
+            ->addColumn('handover_id_padded', function ($handover) {
+                return str_pad($handover->handover_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipment_count', function($handover_list) {
               if ($handover_list->shipment_count != 0) {
                   return '<button class="btn btn-sm btn-outline-info align-middle">' . $handover_list->shipment_count . '</button>';
               }
@@ -386,17 +362,14 @@ class AdminShipmentHandoverController extends Controller
                 return 0;
             }
         })
-
-          ->editColumn('shipment_pieces', function($handover_list) {
-            if ($handover_list->shipment_pieces > 0) {
-              return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">' . $handover_list->shipment_pieces . '</button>';
-          } else {
-              return '-';
-          }
+          ->addColumn('shipment_pieces', function($handover_list) {
+              return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">Piece(s) Breakup</button>';
           });
 
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->where('s.tracking_number', '=', $tracking_number);
+            $datatable->join('handover_shipments as hss', 'hss.handover_id', '=', 'handovers.id')
+                ->join('shipments as s', 'hss.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
         }
 
         if ($hub = $request->get('search_hub')) {

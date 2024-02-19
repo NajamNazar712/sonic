@@ -15,17 +15,21 @@ use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Traits\RvTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ShipperInterceptReBookController extends Controller
 {
+    use RvTrait;
     public function __construct() {
         $this->middleware('auth:web,substitute_users');
 
@@ -84,7 +88,8 @@ class ShipperInterceptReBookController extends Controller
         
         $shipment_status = $shipment->status_shipper->name;
 
-        if ($shipment['shipper_status_id'] == 12) {
+        // if ($shipment['shipper_status_id'] == 12) {
+        if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                 if ($shipment['intercepted'] == 1) {
                     return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
@@ -141,7 +146,16 @@ class ShipperInterceptReBookController extends Controller
                             $return_assign_log->user_id = Auth::id();
                             $return_assign_log->save();
                                 
-                        }  
+                        }
+
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+
+                            $updated_by_id = Auth::id();
+                            $updated_type_id = 3; //updated by shipper;
+                            $update_rv_assign_agent_status_id = 3; //intercept requested
+                            $updated_rv_state_id = 4; //complete
+
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id);
                     }
 
                     // Same Consignee
@@ -166,6 +180,7 @@ class ShipperInterceptReBookController extends Controller
                             'old_amount' => $shipment->amount,
                             'new_amount' => $amount,
                             'shipper_id' => $user_id,
+                            'intercept_type' => $intercept_type,
                             'new_con_city_area_id' => $new_con_city_area_id,
                             'old_con_city_area_id' => $old_con_city_area_id
                         ]);
@@ -175,28 +190,6 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
-
-                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                        // if($return_assign_shipment->exists()){
-
-                        //     $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                        //     $return_assign_shipment->status = 0;
-                        //     $return_assign_shipment->save();
-
-                        //     // Adding row as request intercept with status = 9
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 9;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-
-                        //     // Adding another row as approved intercept with status = 10
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 10;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-                        // }
 
                         //Updating New RcpAssigned Tables 
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
@@ -229,7 +222,15 @@ class ShipperInterceptReBookController extends Controller
                             $return_assign_log->user_id = Auth::id();
                             $return_assign_log->save();
                                 
-                        }  
+                        }
+
+                            request()->request->add(['shipment_id' => $request->shipment_id]);
+                            $updated_by_id = Auth::id();
+                            $updated_type_id = 3; //updated by shipper;
+                            $update_rv_assign_agent_status_id = 4; //intercept approved
+                            $updated_rv_state_id = 4; //complete
+
+                            $this->shipment_status_update_shipper($request, $updated_by_id, $updated_type_id, $update_rv_assign_agent_status_id, $updated_rv_state_id);
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
