@@ -2207,6 +2207,16 @@ class RetailShipmentBookController extends Controller
 
     static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address)
     {
+        $phone_number = str_replace('-', '', $phone_number);
+        $shipper_cnic = str_replace('-', '', $shipper_cnic);
+        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
+        {
+            return 0;
+        }
+        else
+        {
+            
+        }
         $update_shipper = new RetailShipperNameVerification();
         $update_shipper->phone_number = $phone_number;
         $update_shipper->shipper_name = $shipper_name;
