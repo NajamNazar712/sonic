@@ -465,6 +465,7 @@ class ProcessShipmentBookingDB implements ShouldQueue
             $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
             $shipment_try_and_buy->save();
         }
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
         if(!empty($this->booking['nsas']) && $this->booking['nsa']) {
             $present = '';
@@ -497,5 +498,6 @@ class ProcessShipmentBookingDB implements ShouldQueue
             NotificationsController::send(152, $shipment_id);
             NotificationsController::send(153, $shipment_id);
         }
+
     }
 }
