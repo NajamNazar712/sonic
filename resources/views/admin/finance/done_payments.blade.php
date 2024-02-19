@@ -175,6 +175,8 @@
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
+										<th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Paid / Reverted Datetime</th>
 										{{--										<th class="border-primary border-darken-1">Aging</th>--}}
@@ -549,6 +551,8 @@
                             head.push('Reference No.');
                             head.push('Done Datetime');
                             head.push('Company Bank');
+							head.push('Payment Cycle');
+                            head.push('Payment Cycle Days');
                             head.push('Status');
 							head.push('Paid / Reverted Datetime');
 							// head.push('Updated By');
@@ -581,6 +585,8 @@
                                 row.push(values.reference_number);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
+								row.push(values.payment_cycle);
+                                row.push(values.payment_cycle_days);
                                 row.push(values.status);
 								row.push(values.status_updated_at);
 								// row.push(values.updated_by);
@@ -827,6 +833,8 @@
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
+					{data:'payment_cycle_days', name: 'u.payment_cycle_days', class: 'align-middle text-center payment_cycle_days'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data:'paid_reverted_at', name: 'done_payments.status_updated_at', class: 'align-middle text-center paid_reverted_at'},
 					// {data:'aging', name: 'aging', class: 'align-middle text-center aging'},
@@ -858,6 +866,17 @@
                         '<option value="1">Paid</option>' +
                         '<option value="2">Reverted</option>' +
                         '</select>';
+					var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
+
+                        '</select>';
+
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -874,6 +893,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -932,6 +956,16 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+					$("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    });
+					
 					this.api().table().columns.adjust();
 				}
 			});

@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Admins\Reports;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Shipper\User;
-use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Models\City;
+use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 
 class LogisticReportController extends Controller
@@ -34,10 +37,9 @@ class LogisticReportController extends Controller
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->where('id', '!=', 17)->get();
-        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
-        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
-        return view('admin.reports.logistic')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
+        return view('admin.reports.logistic')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses,'areas'=> $areas]);
     }
 
     public function list(Request $request)
@@ -45,7 +47,8 @@ class LogisticReportController extends Controller
         $connection = 'reports';
 
         $shippers = GlobalSettings::where('type','logistic_setting')->select('text')->first();
-        $special_shippers = explode(',', $shippers->text);
+
+        $special_shippers = explode(',', $shippers->text ?? "");
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 719); //trail ID
@@ -119,11 +122,35 @@ class LogisticReportController extends Controller
                     ->where('si.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
+            ->leftJoin('shipments_journey as sjad', function ($join) use ($connection, $sj_from_id) {
+                $join->on('sjad.shipment_id', '=', 'shipments.id')
+                    ->where('sjad.shipper_status_id', 2)
+                    ->where('sjad.id', '=',
+                        DB::connection($connection)->raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.id >= $sj_from_id)"));
+            })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'si.description','si.quantity','shipments.pieces','shipments.estimated_weight', 'oc.name as origin')
+            ->leftJoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjl.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
+                    );
+            })
+
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'journey.id',
+                        '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'si.description','si.quantity','shipments.pieces','shipments.estimated_weight', 'oc.name as origin', 'sjl.updated_at as journey_updated_at', 'sjl.shipment_id as journey_latest_id', 'sjl.updated_at as journey_latest_updated_at', 'sjl.shipper_status_id as latest_shipper_status_id', 'shipments.shipper_status_id as shipper_status_id', 'sjad.created_at as arrived_date')
             ->where('shipments.shipper_status_id', '!=', 17)
             ->whereIn('u.id', $special_shippers)
-            ->whereBetween('sj.created_at', [$from,$to]);
+            ->whereBetween('sj.created_at', [$from,$to])
+            ->groupBy('shipments.id');
    
         
         if($from != null && $to != null) {
@@ -215,7 +242,6 @@ class LogisticReportController extends Controller
         if ($status = $request->get('search_status')) {
             $datatable->where('ss.id', '=', $status);
         }
-
         return $datatable->make(true);
     } 
 

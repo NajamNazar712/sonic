@@ -34,6 +34,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
@@ -55,15 +64,6 @@
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $destination)
                                     <option value="{{$destination->id}}">{{$destination->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
-                                @foreach($hubs as $concerned_hub)
-                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -112,6 +112,7 @@
                             @endforeach
                         </select>
                     </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -305,6 +306,11 @@
             });
             $('#search_qsr').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select QSR',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Zone',
                 width:'100%',
                 allowClear:true
             });
@@ -583,6 +589,7 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
@@ -590,7 +597,6 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
-                        d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
                 },
                 rowId: 'shId',
