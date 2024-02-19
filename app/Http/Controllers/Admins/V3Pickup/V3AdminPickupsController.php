@@ -2601,7 +2601,9 @@ class V3AdminPickupsController extends Controller
 
                 $pickup_request_received_shipment->save();
                 $pickup_request = $pickup_request_shipment->pickup_request;
-                ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
+                
+                //disabled this line of code because shipments_v3_pickup_journeys table alreay mark status on rider picked
+                // ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
 
                 $pickup_request->received = $pickup_request->received + 1;
                 $pickup_request->status_id = 2;
@@ -3011,7 +3013,7 @@ class V3AdminPickupsController extends Controller
                     // }
                     // add new part
                     $reference_1_id = null;
-                    $picked_rider = ShipmentsJourney::leftjoin('shipments_v2_pickup_journeys as spj', 'spj.shipment_id', '=', 'shipments_journey.shipment_id')
+                    $picked_rider = ShipmentsJourney::leftjoin('shipments_v3_pickup_journeys as spj', 'spj.shipment_id', '=', 'shipments_journey.shipment_id')
                         ->select('shipments_journey.rider_id')->where('spj.status_id', 6)->where('shipper_status_id', 53)->where('shipments_journey.shipment_id', $shipment_id)->first();
                     if ($picked_rider) {
                         $rider_id = $picked_rider->rider_id;

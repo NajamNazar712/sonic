@@ -12046,7 +12046,8 @@ class RiderAPIController extends Controller
                                             $shipmentPickupJourney->updated_at = $added_at; // Use the appropriate value here.
                                             $shipmentPickupJourney->shipment_id = $shipment->id; // Replace 1 with the actual shipment_id value.
                                             $shipmentPickupJourney->status_id = 6; // Replace 2 with the actual status_id value.
-                                            $shipmentPickupJourney->admin_id = 3; // Replace 3 with the actual admin_id value.
+                                            $shipmentPickupJourney->reference_1_id = $pickup_request->id; //set pickup request id
+                                            $shipmentPickupJourney->reference_2_id =  $rider_id; // Set Rider id
                                             $shipmentPickupJourney->save();
                                             ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                                             //add scanningjourneyController

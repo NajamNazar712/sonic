@@ -220,7 +220,7 @@ class AdminTrackingController extends Controller
                     $details['order_information']['instructions'] = $shipment->special_instructions;
                     $details['order_information']['business_category'] = $shipment->business_category->name;
 
-
+                    
                     foreach ($shipment->shipment_journey as $journey) {
                         $journey_details = array();
 
@@ -301,6 +301,7 @@ class AdminTrackingController extends Controller
                         $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                         $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
+                      
                         $details['tracking_history'][] = $journey_details;
                     }
 
@@ -1332,9 +1333,10 @@ class AdminTrackingController extends Controller
                                     } else {
                                         $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
                                     }
-                                    
+                                     
 
                                     if ($journey->reference_2_id) {
+                                    
                                         if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
                                             $rider = Rider::find($journey->reference_2_id);
                                             if ($rider) {
@@ -1408,6 +1410,7 @@ class AdminTrackingController extends Controller
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
 
+                          
                             $details['tracking_history'][] = $journey_details;
                         }
 
@@ -1433,7 +1436,7 @@ class AdminTrackingController extends Controller
                                 $journey_details['user'] = $journey->admin->name;
                                 $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
-                                $details['pickup_history_v2'][] = $journey_details;
+                                $details['payment_history'][] = $journey_details;
                             }
                         }
 
@@ -1476,7 +1479,7 @@ class AdminTrackingController extends Controller
                                 } else {
                                     $journey_details['user'] = '';
                                 }
-                                $details['pickup_history'][] = $journey_details;
+                                $details['pickup_history_v2'][] = $journey_details;
                             }
                         }
 
