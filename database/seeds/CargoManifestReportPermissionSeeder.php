@@ -13,7 +13,7 @@ class CargoManifestReportPermissionSeeder extends Seeder
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('module_permissions')->insert(array(
-            array('id' => 933, 'name' => 'Cargo Manifest Report - View', 'module_id' => 32),
+            array('id' => 933, 'name' => 'Cargo Manifest Report - View', 'module_id' => 9),
         ));
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 732, 'screen_name' => 'Cargo Manifest Report', 'action' => 'View'),
