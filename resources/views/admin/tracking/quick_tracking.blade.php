@@ -848,7 +848,7 @@
                                 $('#single_div p.date').text(data.details.current_status_date);
                                 if(data.details.status_id == 13){
                                     $('#status_card').addClass('greenClass');
-                                }else if(data.details.status_id == 12 || data.details.status_id == 52){
+                                }else if(data.details.status_id == 12 || data.details.status_id == 52 || data.details.status_id == 65 || data.details.status_id == 66){
                                     $('#status_card').addClass('goldClass');
                                 }else if(data.details.status_id == 20){
                                     $('#status_card').addClass('redClass');
