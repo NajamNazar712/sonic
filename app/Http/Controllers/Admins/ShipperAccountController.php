@@ -48,8 +48,8 @@ class ShipperAccountController extends Controller
             $result = array_diff($users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    $concern_user = User::where('id', $status)->first();
                     User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_reason' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    $concern_user = User::where('id', $status)->first();
 
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
@@ -79,8 +79,8 @@ class ShipperAccountController extends Controller
             $result = array_diff($active_users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    $concern_user = User::where('id', $status)->first();
                     User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_reason' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    $concern_user = User::where('id', $status)->first();
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
 
