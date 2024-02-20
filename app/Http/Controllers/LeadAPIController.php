@@ -113,9 +113,12 @@ class LeadAPIController extends Controller
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
-            // email add in queue
           
-            LeadApiGeneratEmailNotification::dispatch($new_lead);
+                NotificationsController::send(113, $new_lead);
+                if($new_lead->sales_person_id)
+                {
+                    NotificationsController::send(204, $new_lead);
+                }
 
             return response()->json(['status' => 0, 'success' => 'Lead added successfully']);
         } catch (\Exception $e) {
