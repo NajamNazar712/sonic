@@ -129,7 +129,7 @@
                                                 <div class="row" id="sackbag_row">
                                                     <div class="col-6">
                                                         <div class="form-group">
-                                                            <label for="origin">Sack Bag</label>
+                                                            <label for="origin">Canvas Bag</label>
                                                             <input type="text" name="sack_bag_no" class="form-control rounded-right sack_bag_no" placeholder="Sack Bag No#"  id="sack_bag_no" data-rule-required="true" data-msg-required="Sack Bag No is Required">
 
                                                         </div>
@@ -785,7 +785,7 @@
                       $("#sackbag_row").css('display','none');
                 }else{
                       $("#sackbag_row").css('display','block');
-                    $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
+                     $("#sack_bag_no").attr('data-rule-required', true).attr('data-msg-required', 'Sack Bag No is Required');
                   
                 
 

@@ -344,7 +344,7 @@
 
             @if (session('role_id') == 1 ||
                     count(array_intersect(
-                            [25, 26, 27, 124, 386, 501, 545, 546, 547, 551, 554, 557, 556, 559, 564],
+                            [25, 26, 27, 124, 386, 501, 545, 546, 547, 551, 554, 557, 556, 559, 564,934],
                             session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-truck"></i>Supply Chain</span></a>
@@ -365,7 +365,7 @@
 
                     <ul class="menu-content">
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([545, 546, 547, 551, 554, 557, 556, 559, 564], session('permissions'))) !== 0)
+                                count(array_intersect([545, 546, 547, 551, 554, 557, 556, 559, 564,934], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Cargo Vehicle
                                         Manifest</span></a>
                                 <ul class="menu-content">
@@ -383,11 +383,11 @@
                                                         Bag</a></li>
                                             @endif
 
-{{--                                            @if (session('role_id') == 1 || in_array(547, session('permissions')))--}}
-{{--                                                <li><a class="menu-item"--}}
-{{--                                                        href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Sack Bag</a>--}}
-{{--                                                </li>--}}
-{{--                                            @endif--}}
+                                            @if (session('role_id') == 1 || in_array(934, session('permissions')))
+                                                <li><a class="menu-item"
+                                                        href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Canvas Bag</a>
+                                                </li>
+                                            @endif
 
                                             @if (session('role_id') == 1 || (in_array(559, session('permissions')) && Auth::user()->default_hub_id != null))
                                                 <li><a class="menu-item"
@@ -1311,7 +1311,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,905,915,930,925],session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892,901,915,925,935,936,937],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
@@ -1735,16 +1735,16 @@
                         <li><a class="menu-item" href="{{ route('admin.reports.logistic.index') }}">Logistic Report</a></li>
                         @endif
 
-						@if (session('role_id') == 1 || in_array(899, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_utilization.index') }}">Utilization of Sack Bag</a></li>
+						@if (session('role_id') == 1 || in_array(935, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_utilization.index') }}">Utilization of Canvas Bag</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_status.index') }}"> Sack Bag Status</a></li>
+                        @if (session('role_id') == 1 || in_array(936, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.sack_bag_status.index') }}"> Canvas Bag Status</a></li>
                         @endif
-
-                        @if (session('role_id') == 1 || in_array(899, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.reports.issuance_sack_bag.index') }}">Issuance of Sack Bag</a></li>
+                        
+                        @if (session('role_id') == 1 || in_array(937, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.issuance_sack_bag.index') }}">Issuance of Canvas Bag</a></li>
                         @endif
 {{-- 
                         @if (session('role_id') == 1 || in_array(899, session('permissions')))
