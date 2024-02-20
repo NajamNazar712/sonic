@@ -1717,7 +1717,7 @@ function checkboxStatus() {
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
                 {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
-                {data: 'reason', name: 'bdru.name', class: 'reason'},
+                {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
                 {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
