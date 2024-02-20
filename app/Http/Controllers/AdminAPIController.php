@@ -3033,7 +3033,7 @@ class AdminAPIController extends Controller
 
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
-
+        
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
     }
