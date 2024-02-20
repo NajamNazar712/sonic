@@ -92,7 +92,7 @@ class ReturnV2Controller extends Controller
         $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
 
         if ($employee_attendance->exists()) {
-            $employee_attendance->update(['clock_in' => date('H:i:s')]);
+            $employee_attendance->update(['clock_in' => date('H:i:s'),'clock_out'=>null]);
         } else {
             $employee_attendance = new EmployeeAttendance();
             $employee_attendance->employee_id = $admin->employee_id;
