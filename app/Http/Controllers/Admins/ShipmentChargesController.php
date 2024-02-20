@@ -897,18 +897,37 @@ class ShipmentChargesController extends Controller
                 $shipment->chargeable_weight = $result['chargeable_weight'];
             }
             $shipment->save();
-            $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
-            if($shipment_weight->exists()){
-                $shipments_weight_type = $shipment_weight->first();
-            }else{
-                $shipments_weight_type = new ShipmentsWeightType;
-                $shipments_weight_type->shipment_id = $shipment->id;
+            if($result && $shipment->business_category_id == 1) {
+                $shipment_weight = ShipmentsWeightType::where('shipment_id', $shipment->id);
+                if($shipment_weight->exists()){
+                    $shipments_weight_type = $shipment_weight->first();
+                }else{
+                    $shipments_weight_type = new ShipmentsWeightType;
+                    $shipments_weight_type->shipment_id = $shipment->id;
+                }
+                $shipments_weight_type->range_down_arrival_weight = $result['range_down'] ? $result['range_down'] : $result['chargeable_weight'];
+                $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
+                $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
+                $shipments_weight_type->save();
+                if($shipments_weight_type->range_down_shipper_weight == $shipment->estimated_weight) {
+                    $shipments_weight_type->shipper_range_weight_charges = $shipments_weight_type->shipper_weight_charges;
+                }else{
+                    $shiper_range_charges = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipments_weight_type->range_down_shipper_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+                    $shipments_weight_type->shipper_range_weight_charges = $shiper_range_charges['weight_charges'];
+                }
+                $shipments_weight_type->save();
+                if($shipments_weight_type->range_down_arrival_weight == $shipment->actual_weight ) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipment->weight_charges;
+                } else if($shipments_weight_type->range_down_arrival_weight ==                   $shipments_weight_type->range_down_shipper_weight) {
+                    $shipments_weight_type->arrival_range_weight_charges = $shipments_weight_type->shipper_range_weight_charges;
+                }else{
+                    $arrival_range_charges = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipments_weight_type->range_down_arrival_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
+
+                    $shipments_weight_type->arrival_range_weight_charges = $arrival_range_charges['weight_charges'];
+                }
+                $shipments_weight_type->save();
             }
-            $shipments_weight_type->range_down_arrival_weight = $result['range_down'] ? $result['range_down'] : $result['chargeable_weight'];
-            $shipments_weight_type->range_down_shipper_weight =  $shipper_weight_charges ? ($result_shipper_weight['range_down'] ? $result_shipper_weight['range_down'] : $result_shipper_weight['chargeable_weight'] ) : ($result['range_down'] ? $result['range_down'] : $result['chargeable_weight']);
-            $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
-            $shipments_weight_type->save();
-            
         }
     }
 

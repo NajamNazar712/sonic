@@ -34,6 +34,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
@@ -55,15 +64,6 @@
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $destination)
                                     <option value="{{$destination->id}}">{{$destination->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
-                                @foreach($hubs as $concerned_hub)
-                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -109,23 +109,6 @@
                         <select name="sub_segment_select" id="sub_segment_select" class="select2">
                             @foreach($sub_segments as $sub_segment)
                                 <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-4">
-                        <select name="search_concerned_status_area" id="search_concerned_status_area" class="select2">
-                            @foreach($areas as $area)
-                                <option value="{{$area->id}}">{{$area->name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-
-                    <div class="col-4">
-                        <select name="search_concerned_status_hub" id="search_concerned_status_hub" class="select2">
-                            @foreach($hubs as $concerned_hub)
-                                <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -209,10 +192,6 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Area</th>
-                        <th class="border-primary border-darken-1">Status Area/City</th>
-                        <th class="border-primary border-darken-1">Location Status</th>
-                        <th class="border-primary border-darken-1">Latitude</th>
-                        <th class="border-primary border-darken-1">Longitude</th>
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -330,6 +309,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Zone',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
@@ -348,16 +332,7 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
-            $('#search_concerned_status_area').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Status Area',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_concerned_status_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Status Hub',
-                width:'100%',
-                allowClear:true
-            });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -511,10 +486,6 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Area');
-                            head.push('Status Area/City');
-                            head.push('Location Status');
-                            head.push('Latitude');
-                            head.push('Longitude');
                             head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
@@ -557,10 +528,6 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.area);
-                                row.push(values.status_area_city);
-                                row.push(values.location_status);
-                                row.push(values.latitude);
-                                row.push(values.longitude);
                                 row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -622,6 +589,7 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
@@ -629,11 +597,6 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
-                        d.search_concerned_hub = $('#search_concerned_hub').val();
-                        d.search_concerned_status_area = $('#search_concerned_status_area').val();
-                        d.search_concerned_status_hub = $('#search_concerned_status_hub').val();
-
-
                     }
                 },
                 rowId: 'shId',
@@ -665,10 +628,6 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
-                    {data: 'status_area_city', name: 'status_area_city', class: 'align-middle status_area_city'},
-                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
-                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
-                    {data: 'longitude', name: 'longitude', class: 'align-middle longitude'},
                     {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
