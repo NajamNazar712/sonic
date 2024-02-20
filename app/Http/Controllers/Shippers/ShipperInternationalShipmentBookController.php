@@ -252,7 +252,6 @@ class ShipperInternationalShipmentBookController extends Controller
         if($service_type_id == 1 && $pieces_quantity > 1){
             ShipperShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
         }
-        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
         NotificationsController::send(2, $shipment_id);
         $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
