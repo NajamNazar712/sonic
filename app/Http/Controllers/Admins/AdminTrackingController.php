@@ -2,78 +2,80 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\CargoManifest\ManifestBag;
-use App\Http\Models\Admin\CargoManifest\V2Junctions;
-use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\HighAlertShipper;
-use App\Http\Models\Admin\KeyAccountDailyShipment;
-use App\Http\Models\Admin\KeyAccountDailySummary;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\BagShipment;
-use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
-use App\Http\Models\Admin\ResolvedOutstandingShipment;
-use App\Http\Models\Admin\Retail\RetailFranchise;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\ShipmentPosition;
-use App\Http\Models\Admin\SubStatusCallFinding;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\Shipper\ReturnSheetShipments;
-use App\Http\Models\City;
-use App\Http\Models\CityArea;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CRM\CrmSettings;
-use App\Http\Models\CRM\CrmTatHolidays;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverResponsibilities;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\RetailDonePaymentShipment;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\RiderDelivery;
-use App\Http\Models\RiderUnresponsiveStatus;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentInformationLog;
-use App\Http\Models\ShipmentScanningJourney;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\StarShipper;
-use App\Http\Models\WMS\WmsUserInformation;
+use DB;
 use Auth;
 use Carbon\Carbon;
-use DB;
+use App\Http\Models\City;
+use App\Http\Models\Rider;
 use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
 use App\Http\Models\DwsDetail;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\ConsigneeRefusedReason;
 use App\RvAssignAgentSubStatus;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\SaleTierTag;
+use App\Http\Models\StarShipper;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\CRM\CrmTatHolidays;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Admin\HighAlertShipper;
+use App\Http\Models\Admin\ShipmentPosition;
+use App\Http\Models\ConsigneeRefusedReason;
+use App\Http\Models\ShipmentInformationLog;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\RiderUnresponsiveStatus;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\RetailDonePaymentShipment;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\SubStatusCallFinding;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\ReturnSheetShipments;
+use App\Http\Models\Admin\KeyAccountDailyShipment;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Handover\HandoverResponsibilities;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Commission\SalesTier;
 
 class AdminTrackingController extends Controller
 {
@@ -901,12 +903,12 @@ class AdminTrackingController extends Controller
 
     function setJourneyDetails($scanning_data) {
        if (isset($scanning_data)) {
-        // dd($scanning_data,  City::where('id', $scanning_data['hub_id'])->first()->name ?? '-');
             return [
-                'latitude' => $scanning_data['latitude'],
-                'longitude' => $scanning_data['longitude'],
-                'area' => CityArea::find($scanning_data['area_id'])->name ?? '-',
-                'city' => City::where(['id' => $scanning_data['hub_id'], 'hub'=>"1"])->first()->name ?? '-',
+                'latitude' => $scanning_data['latitude'] ?? '-',
+                'longitude' => $scanning_data['longitude'] ?? '-',
+                'location_status' => ($scanning_data['location_status'] == 1) ? 'On-Site' : 'Off-site',
+                'area' => CityArea::find($scanning_data['area_id'])->name ?? '-', 
+                'city' => City::where(['id' => $scanning_data['hub_id'], 'hub'=>"1"])->first()->name ?? '-', 
 
             ];
         } else {
@@ -915,8 +917,7 @@ class AdminTrackingController extends Controller
                 'longitude' => '-',
                 'area' => '-',
                 'city' => '-',
-
-
+                'location_status' => '-',
             ];
         }
     }
@@ -1005,16 +1006,34 @@ class AdminTrackingController extends Controller
                         } else {
                             $sales_person_name = null;
                         }
+
+                        $tagged_persons = [];
                         $tagged_kae = SaleTierTag::where('user_id', $shipper->id);
-                        if ($tagged_kae->exists()) {
+                        $sale_commissions = SalesCommission::with('users')->where('shipper_id', $shipper->id);
+                        $sales_tier = SalesTier::where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
+                        if($sale_commissions->exists()){
+                            $sale_commissions = $sale_commissions->latest()->first();
+                            foreach($sale_commissions->users as $sale_commission){
+                                if($sale_commission->tier_id == $sales_tier){
+                                    if($sale_commission->user_type == 1){
+                                        $tagged_persons[] = $sale_commission->sales_person->name;
+                                    }else{
+                                        $tagged_persons[] = $sale_commission->rider_person->name;
+                                    }
+                                }
+                            }
+                            $tagged_persons = implode(' ,', $tagged_persons);
+                            $tagged_kae_name = $tagged_persons ?? '-';
+                        }else if($tagged_kae->exists()){
                             $tagged_kae = $tagged_kae->first();
                             if ($tagged_kae->kam)
                                 $tagged_kae_name = $tagged_kae->kam_admin->name;
                             else
                                 $tagged_kae_name = "-";
-                        } else {
+                        }else{
                             $tagged_kae_name = "-";
                         }
+            
                         $wms_user = WmsUserInformation::where('user_id', $shipper->id);
                         if ($wms_user->exists()) {
                             $wms_user = $wms_user->first();
@@ -1413,8 +1432,79 @@ class AdminTrackingController extends Controller
 
                                 }
                             }
-
-
+                            $shipment_scanning_query = ShipmentScanningJourney::select(
+                                'shipment_scanning_journeys.id',
+                                'ssjal.shipment_id',
+                                'ssjal.location_status',
+                                'shipment_scanning_journeys.latitude',
+                                'shipment_scanning_journeys.longitude',
+                                'ssjal.area_id',
+                                'ssjal.admin_id',
+                                'shipment_scanning_journeys.created_at',
+                                'ssjal.hub_id',
+                                'sj.shipper_status_id'
+                            )
+                            ->join('shipments_journey as sj', function($join) use ($journey) {
+                                $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                                    ->where('sj.id', '=', $journey->id);
+                            })
+                            ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
+                            ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
+                            if($journey->admin['role_id'] != 1){
+                                switch ($journey->shipper_status_id) {
+                                    case 2:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
+                                        break;
+                                    case 3:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 4:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [20, 21])->latest()->first();
+                                        break;
+                                    case 5:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 4)->latest()->first();
+                                        break;
+                                    case 11:
+                                        $scanning_data = $shipment_scanning_query->whereIn('screen_location_id', [3, 10, 20, 21])->latest()->first();
+                                        break;
+                                    case 21:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 22:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 23:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 26:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 27:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 28:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;
+                                    case 32:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
+                                        break;
+                                    case 33:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 20)->latest()->first();
+                                        break;
+                                    case 34:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
+                                        break;      
+                                    case 53:
+                                        $scanning_data = $shipment_scanning_query->where('screen_location_id', 31)->latest()->first();
+                                        break;                      
+                                    default:
+                                        $scanning_data = null;
+                                        break;
+                                }
+                            }else{
+                                $scanning_data = null;
+                            }
+                            $journey_details['area_log'] = $this->setJourneyDetails($scanning_data);
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                             $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
                             $journey_details['user'] = $user;
@@ -1825,7 +1915,6 @@ class AdminTrackingController extends Controller
                 $tracking['invalid'][] = $tracking_number;
             }
         }
-
         return $tracking;
     }
 
@@ -2179,8 +2268,8 @@ class AdminTrackingController extends Controller
                                         $handover_note = str_pad($handover->id, 6, '0', STR_PAD_LEFT);
                                         $handover_created_by = Admin::find($handover->created_by)->name;
                                         $handover_created_at = $handover->created_at;
-                                        $handover_from = HandoverResponsibilities::find($handover->from)->name . ' (' . $handover->from_dept_area_desg . ')';
-                                        $handover_to = HandoverResponsibilities::find($handover->to)->name . ' (' . $handover->to_dept_area_desg . ')';
+                                        $handover_from = HandoverResponsibilities::find($handover->from)->admin->name . ' (' . (isset($handover->from_admin->Edesignation) && isset($handover->from_admin->Edesignation->department) ? $handover->from_admin->Edesignation->department->name : '-') . ')' ;
+                                        $handover_to = HandoverResponsibilities::find($handover->to)->admin->name . ' (' . (isset($handover->to_admin->Edesignation) && isset($handover->to_admin->Edesignation->department) ? $handover->to_admin->Edesignation->department->name : '-') . ')';
                                         if($handover->received_by != null){
                                             $handover_received_by = Admin::find($handover->received_by)->name;
                                             $handover_received_at = $handover->received_at;

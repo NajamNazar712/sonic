@@ -447,7 +447,7 @@ class ShipperTrackingController extends Controller
                             $user_type = 3;
                             $substitute_user_id = Auth::id();
                         }
-                        ShipmentScanningJourneyController::add($shipment->id ,1,$user_type,null,$user_id,$substitute_user_id,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                        ShipmentScanningJourneyController::add($shipment->id , 9, $user_type , null, $user_id, $substitute_user_id,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
 
                         $tracking['shipments'][$shipment->id] = $details;
