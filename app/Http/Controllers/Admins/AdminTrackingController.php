@@ -2,78 +2,80 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\CargoManifest\ManifestBag;
-use App\Http\Models\Admin\CargoManifest\V2Junctions;
-use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\HighAlertShipper;
-use App\Http\Models\Admin\KeyAccountDailyShipment;
-use App\Http\Models\Admin\KeyAccountDailySummary;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\BagShipment;
-use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
-use App\Http\Models\Admin\ResolvedOutstandingShipment;
-use App\Http\Models\Admin\Retail\RetailFranchise;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\ShipmentPosition;
-use App\Http\Models\Admin\SubStatusCallFinding;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\Shipper\ReturnSheetShipments;
-use App\Http\Models\City;
-use App\Http\Models\CityArea;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CRM\CrmSettings;
-use App\Http\Models\CRM\CrmTatHolidays;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverResponsibilities;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\RetailDonePaymentShipment;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\RiderDelivery;
-use App\Http\Models\RiderUnresponsiveStatus;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentInformationLog;
-use App\Http\Models\ShipmentScanningJourney;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\StarShipper;
-use App\Http\Models\WMS\WmsUserInformation;
+use DB;
 use Auth;
 use Carbon\Carbon;
-use DB;
+use App\Http\Models\City;
+use App\Http\Models\Rider;
 use Illuminate\Http\Request;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
 use App\Http\Models\DwsDetail;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\ConsigneeRefusedReason;
 use App\RvAssignAgentSubStatus;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\SaleTierTag;
+use App\Http\Models\StarShipper;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\CRM\CrmTatHolidays;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Admin\HighAlertShipper;
+use App\Http\Models\Admin\ShipmentPosition;
+use App\Http\Models\ConsigneeRefusedReason;
+use App\Http\Models\ShipmentInformationLog;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\RiderUnresponsiveStatus;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\RetailDonePaymentShipment;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\SubStatusCallFinding;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\ReturnSheetShipments;
+use App\Http\Models\Admin\KeyAccountDailyShipment;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
+use App\Http\Models\Handover\HandoverResponsibilities;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Commission\SalesTier;
 
 class AdminTrackingController extends Controller
 {
@@ -1005,16 +1007,34 @@ class AdminTrackingController extends Controller
                         } else {
                             $sales_person_name = null;
                         }
+
+                        $tagged_persons = [];
                         $tagged_kae = SaleTierTag::where('user_id', $shipper->id);
-                        if ($tagged_kae->exists()) {
+                        $sale_commissions = SalesCommission::with('users')->where('shipper_id', $shipper->id);
+                        $sales_tier = SalesTier::where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
+                        if($sale_commissions->exists()){
+                            $sale_commissions = $sale_commissions->latest()->first();
+                            foreach($sale_commissions->users as $sale_commission){
+                                if($sale_commission->tier_id == $sales_tier){
+                                    if($sale_commission->user_type == 1){
+                                        $tagged_persons[] = $sale_commission->sales_person->name;
+                                    }else{
+                                        $tagged_persons[] = $sale_commission->rider_person->name;
+                                    }
+                                }
+                            }
+                            $tagged_persons = implode(' ,', $tagged_persons);
+                            $tagged_kae_name = $tagged_persons ?? '-';
+                        }else if($tagged_kae->exists()){
                             $tagged_kae = $tagged_kae->first();
                             if ($tagged_kae->kam)
                                 $tagged_kae_name = $tagged_kae->kam_admin->name;
                             else
                                 $tagged_kae_name = "-";
-                        } else {
+                        }else{
                             $tagged_kae_name = "-";
                         }
+            
                         $wms_user = WmsUserInformation::where('user_id', $shipper->id);
                         if ($wms_user->exists()) {
                             $wms_user = $wms_user->first();
