@@ -364,7 +364,7 @@
 
                                             @if (session('role_id') == 1 || in_array(934, session('permissions')))
                                                 <li><a class="menu-item"
-                                                        href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Sack Bag</a>
+                                                        href="{{ route('admin.cargo_manifest.bags.sack_bag.index') }}">Canvas Bag</a>
                                                 </li>
                                             @endif
 

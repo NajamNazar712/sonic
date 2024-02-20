@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Sack Bag
+                    Canvas Bag
                 </h1>
 
                 <div class="card">
@@ -42,7 +42,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add Sack Bag</h4>
+                    <h4 class="modal-title">Add Canvas Bag</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -76,7 +76,7 @@
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
                                     <thead>
                                         <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                            <th class="border-primary border-darken-1">Canvas Bag No#</th>
                                             <th class="border-primary border-darken-1">Remark</th>
                                             <th class="border-primary border-darken-1">Action</th>
                                         </tr>
