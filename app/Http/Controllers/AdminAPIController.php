@@ -149,6 +149,7 @@ use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
+use App\Http\Traits\RvTrait;
 use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -166,7 +167,7 @@ use Password;
 
 class AdminAPIController extends Controller
 {
-    use SendsPasswordResetEmails, CommonTrait;
+    use SendsPasswordResetEmails, CommonTrait, RvTrait;
 
     public function broker()
     {
@@ -3032,7 +3033,7 @@ class AdminAPIController extends Controller
 
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
-
+        
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
     }
@@ -12871,6 +12872,34 @@ class AdminAPIController extends Controller
         }
 
         return $shipment_scanned;
+    }
+
+    public function get_staff_working_shift(Request $request) {
+
+        $rules = [
+            'staff_category_id' => 'required'
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shifts = EmployeeShift::where('id', '!=', 1);
+            $shifts = $request->staff_category_id == 3 ? $shifts->where('shift_type_id', '2') : $shifts->where('shift_type_id', '!=', '2');
+            $shifts = $shifts->select('id', 'name', 'start_time', 'end_time')->get();
+
+            $shift_data = array();
+            foreach ($shifts as $shift) {
+                $datum = array();
+                $datum['id'] = $shift->id;
+                $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
+                $shift_data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'shifts' => $shift_data]);
+        }
     }
 
 }

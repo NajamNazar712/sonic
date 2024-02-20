@@ -53,7 +53,7 @@
                                     </div>
                                     <input type="text" name="search_date_from"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_from" placeholder="Arrival Date (From)" title="Arrival Date (From)" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_from" placeholder="Booking Date (From)" title="Booking Date (From)" data-rule-required="true" data-msg-required="Booking Date is required">
                                 </div>
                             </div>
                             <div class="col-4 mt-1">
@@ -65,7 +65,7 @@
                                     </div>
                                     <input type="text" name="search_date_to"
                                            class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_date_to" placeholder="Arrival Date (To)" title="Arrival Date (To)" data-rule-required="true" data-msg-required="Date is required">
+                                           id="search_date_to" placeholder="Booking Date (To)" title="Booking Date (To)" data-rule-required="true" data-msg-required="Booking Date is required">
                                 </div>
                             </div>
 
@@ -203,11 +203,13 @@
                 clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
+                max: '{{ Carbon\Carbon::now() }}',
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
                         var toDatePicker = $('#search_form #search_date_to').pickadate('picker');
+                        toDatePicker.clear();
                         toDatePicker.set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
@@ -222,17 +224,18 @@
                 clear: 'Clear',
                 selectYears: true,
                 selectMonths: true,
+                max: '{{ Carbon\Carbon::now() }}',
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
                         var fromDatePicker = $('#search_form #search_date_from').pickadate('picker');
-                        fromDatePicker.set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        // fromDatePicker.set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
 
                         // Limit the range to 30 days
                         var minDate = new Date(context.select);
                         minDate.setDate(minDate.getDate() - 30);
-                        fromDatePicker.set('min', minDate);
+                        // fromDatePicker.set('min', minDate);
                     }
                 }
             });
@@ -246,69 +249,69 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.last_mile_app.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
+                    {{--    url: '{{ route('admin.reports.last_mile_app.list') }}',--}}
+                    {{--    data: params,--}}
+                    {{--    success: function (result) {--}}
+                    {{--        head = [];--}}
 
-                            head.push('S. No');
-                            head.push('Trax IDs');
-                            head.push('Rider Name');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Delivery Date');
-                            head.push('Total Shipments');
-                            head.push('Before 11');
-                            head.push('At 11');
-                            head.push('At 12');
-                            head.push('At 13');
-                            head.push('At 14');
-                            head.push('At 15');
-                            head.push('At 16');
-                            head.push('At 17');
-                            head.push('At 18');
-                            head.push('At 19');
-                            head.push('At 20');
-                            head.push('At 21');
-                            head.push('At 22');
-                            head.push('At 23');
-                            head.push('After 23');
-                            head.push('Total Updated Shipments');
-                            head.push('Update Via App');
-                            head.push('Update Via Admin');
-                            $.each(result.data, function(index, values) {
-                                row = [];
+                    {{--        head.push('S. No');--}}
+                    {{--        head.push('Trax IDs');--}}
+                    {{--        head.push('Rider Name');--}}
+                    {{--        head.push('Hub');--}}
+                    {{--        head.push('Zone');--}}
+                    {{--        head.push('Delivery Date');--}}
+                    {{--        head.push('Total Shipments');--}}
+                    {{--        head.push('Before 11');--}}
+                    {{--        head.push('At 11');--}}
+                    {{--        head.push('At 12');--}}
+                    {{--        head.push('At 13');--}}
+                    {{--        head.push('At 14');--}}
+                    {{--        head.push('At 15');--}}
+                    {{--        head.push('At 16');--}}
+                    {{--        head.push('At 17');--}}
+                    {{--        head.push('At 18');--}}
+                    {{--        head.push('At 19');--}}
+                    {{--        head.push('At 20');--}}
+                    {{--        head.push('At 21');--}}
+                    {{--        head.push('At 22');--}}
+                    {{--        head.push('At 23');--}}
+                    {{--        head.push('After 23');--}}
+                    {{--        head.push('Total Updated Shipments');--}}
+                    {{--        head.push('Update Via App');--}}
+                    {{--        head.push('Update Via Admin');--}}
+                    {{--        $.each(result.data, function(index, values) {--}}
+                    {{--            row = [];--}}
 
-                                row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.rider_name);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.delivery_date);
-                                row.push(values.total_shipments_excel);
-                                row.push(values.before_11_count);
-                                row.push(values.at_11_count);
-                                row.push(values.at_12_count);
-                                row.push(values.at_13_count);
-                                row.push(values.at_14_count);
-                                row.push(values.at_15_count);
-                                row.push(values.at_16_count);
-                                row.push(values.at_17_count);
-                                row.push(values.at_18_count);
-                                row.push(values.at_19_count);
-                                row.push(values.at_20_count);
-                                row.push(values.at_21_count);
-                                row.push(values.at_22_count);
-                                row.push(values.at_23_count);
-                                row.push(values.after_23_count);
-                                row.push(values.total_updated_shipments);
-                                row.push(values.updated_via_rider1);
-                                row.push(values.updated_via_admin1);
+                    {{--            row.push(index + 1);--}}
+                    {{--            row.push(values.trax_id);--}}
+                    {{--            row.push(values.rider_name);--}}
+                    {{--            row.push(values.hub);--}}
+                    {{--            row.push(values.zone);--}}
+                    {{--            row.push(values.delivery_date);--}}
+                    {{--            row.push(values.total_shipments_excel);--}}
+                    {{--            row.push(values.before_11_count);--}}
+                    {{--            row.push(values.at_11_count);--}}
+                    {{--            row.push(values.at_12_count);--}}
+                    {{--            row.push(values.at_13_count);--}}
+                    {{--            row.push(values.at_14_count);--}}
+                    {{--            row.push(values.at_15_count);--}}
+                    {{--            row.push(values.at_16_count);--}}
+                    {{--            row.push(values.at_17_count);--}}
+                    {{--            row.push(values.at_18_count);--}}
+                    {{--            row.push(values.at_19_count);--}}
+                    {{--            row.push(values.at_20_count);--}}
+                    {{--            row.push(values.at_21_count);--}}
+                    {{--            row.push(values.at_22_count);--}}
+                    {{--            row.push(values.at_23_count);--}}
+                    {{--            row.push(values.after_23_count);--}}
+                    {{--            row.push(values.total_updated_shipments);--}}
+                    {{--            row.push(values.updated_via_rider1);--}}
+                    {{--            row.push(values.updated_via_admin1);--}}
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
+                    {{--            body.push(row);--}}
+                    {{--        });--}}
+                    {{--    },--}}
+                    {{--    async: false--}}
                     });
                     return {body: body, header: head,};
                 }
@@ -369,13 +372,7 @@
                 drawCallback: function () {
                     var api = this.api();
 
-                    var update_via_app_count = 0;
-                    var update_via_dbf_count = 0;
-                    var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        update_via_app_count+=this.data().updated_via_rider1;
-                        update_via_dbf_count+=this.data().updated_via_admin1;
-                        total_shipment_count+=this.data().total_shipments;
                     } );
                 },
 

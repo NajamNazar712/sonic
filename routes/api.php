@@ -224,6 +224,9 @@ Route::name('api.')->group(function () {
                 Route::get('summary/multiple_v5', 'Rider\RiderAPIController@delivery_summary_multiple_v5')->name('delivery_summary_multiple_v5');
                 Route::get('summary/multiple_v6', 'Rider\RiderAPIController@delivery_summary_multiple_v6')->name('delivery_summary_multiple_v6');
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@shipment_undelivered_v3')->name('undelivered_v3');
+                Route::post('undelivered_v4', 'Rider\RiderAPIController@shipment_undelivered_v4')->name('undelivered_v4');
+                Route::get('undelivered_reason_map', 'Rider\RiderAPIController@undelivered_reason_map')->name('undelivered_reason_map');
+
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
@@ -384,6 +387,7 @@ Route::name('api.')->group(function () {
             Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
             Route::post('attachment_check', 'AdminAPIController@admin_attachments_check')->name('attachment_check');
             Route::post('get_line_managers', 'AdminAPIController@get_line_managers')->name('get_line_managers');
+            Route::post('get_working_shift', 'AdminAPIController@get_staff_working_shift')->name('get_working_shift');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {

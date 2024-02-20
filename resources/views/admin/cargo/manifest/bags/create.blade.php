@@ -502,7 +502,7 @@
                                     UnblockPagePermanently();
                                     $('#sackbag_row .col-6 .form-group').append('<label id="sack_bag_no_check" class="danger w-100" for="seal_number">Sack Bag Not exists</label>');
                                 }else{
-                                        
+
                                     swal({
                                         title: 'Please Wait!',
                                         text: 'Your Bag is being created!',
@@ -518,9 +518,11 @@
                                 }
                             }
                         });
-                    }else{
+                    }
+                    else{
                          swal({
                             text: 'Are you sure you want to submit without SackBag No#?',
+                            // text: 'Are you sure you want to submit !',
                             icon: 'info',
                             buttons: {
                                 cancel: {
