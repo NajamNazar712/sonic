@@ -272,7 +272,7 @@ class ReturnController extends Controller
        $rv_tickets = $rv_tickets_count ? $rv_tickets_count : 1 ;
        
        //Total Shipments
-       $this->total_of_shipments_exclude = $this->shipments()->get()->pluck('rv_shipment_id')->toArray();
+       $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
        $total_of_shipments = count($this->total_of_shipments_exclude);
         
        //Average Hours
