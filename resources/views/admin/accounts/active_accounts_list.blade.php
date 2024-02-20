@@ -740,6 +740,52 @@
 </div>
 {{-- End --}}
 
+{{-- Add intercept shipper modal --}}
+<div class="modal fade text-left" id="AddShipperExcludeInterceptType" data-backdrop="static" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add_shipper_exclude_intercept_type" method="POST" action="{{ route('admin.accounts.store_shipper_exclude') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="text-center">
+                        <h4 id="shipper_name"></h4>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="exclude_shipper" id="exclude_shipper">
+                                <label for="exclude_shipper">Exclude Shipper</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="different_consignee" id="different_consignee">
+                                <label for="different_consignee">For Different Consignee</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="same_consignee" id="same_consignee">
+                                <label for="same_consignee">For Same Consignee</label>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <input type="submit" value="Submit" class="btn btn-success">
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End intercept shipper modal --}}
 
 @endsection
 
@@ -768,6 +814,12 @@
         /* Style the label when the checkbox is checked */
         #checkboxContainer input[type="checkbox"]:checked+label {
             background-color: #56e73c; }
+
+        /* Style the actions dropdown due to increase in action buttons */
+        #datatable > tbody > tr > td:last-child > div.btn-group > div.dropdown-menu.dropdown-menu-sm.accounts {
+            overflow-y: scroll;
+            height: 300px;
+        }
 </style>
 @endsection
 
@@ -2383,7 +2435,113 @@ function checkboxStatus() {
             }
         }
     });
-    
+
+        // Shipper exclude feature
+        $(document).ready(function() {
+            $('#shipper').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
+
+            // Setup event handlers for checkboxes
+            var exclude_shipper = $('#exclude_shipper');
+            var different_consignee = $('#different_consignee');
+            var same_consignee = $('#same_consignee');
+
+            // if exclude shipper is checked
+            exclude_shipper.on('change', function() {
+                if ($(this).prop('checked')) {
+                    different_consignee.prop('disabled', true);
+                    same_consignee.prop('disabled', true);
+                } else {
+                    different_consignee.prop('disabled', false);
+                    same_consignee.prop('disabled', false);
+                }
+            });
+
+            // if different consignee is checked
+            different_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                    if (same_consignee.prop('checked')) {
+                        var error = "Cannot select For Different Consignee when Same Consignee is selected.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            // if same consignee is checked
+            same_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                if (different_consignee.prop('checked')) {
+                        var error = "Cannot select For Same Consignee when Different Consignee is selected.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                var name = $(this).parents('tr').find('td:eq(4)').text();
+                if ($(this).hasClass('add_shipper_exclude_intercept_type')) {
+                    $('#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type #user_id').val(id);
+                    $('#shipper_name').text(name);
+                    $('#AddShipperExcludeInterceptType').modal('show');
+                }
+            });
+
+            $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
+                    errorClass: "danger",
+                    successClass: 'success',
+                    errorPlacement: function (error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function (form) {
+                        if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                                var error = "Please select at least one option.";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        } else {
+                            swal({
+                                title: 'Are you sure?',
+                                text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                                })
+                            .then(function(confirm) {
+                                if (confirm) {
+                                    form.submit();
+                                }
+                            });
+                        }
+
+                    }
+                });
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
@@ -3367,9 +3525,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-
-
-
 </script>
 
 @endsection

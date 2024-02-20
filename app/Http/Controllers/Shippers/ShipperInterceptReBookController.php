@@ -26,6 +26,7 @@ use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class ShipperInterceptReBookController extends Controller
 {
@@ -37,8 +38,16 @@ class ShipperInterceptReBookController extends Controller
     }
 
     public function intercept_re_book_index($shipment_id){
+        // Retrieve the shipment
+        $shipment = Shipment::find($shipment_id);
+        if (!$shipment) {
+            return view('errors.404');
+        }
+
         if($shipment_id){
-            $shipment = Shipment::where('id',$shipment_id)->first();
+            $shipment = Shipment::where('id',$shipment_id)->first();            
+            $intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
+
             if($shipment){
                 if($shipment->shipping_mode_id == 2){
                     $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
@@ -63,7 +72,7 @@ class ShipperInterceptReBookController extends Controller
                     ->groupBy('c.name')
                     ->get();
 //        $consignee_cities = City::where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-                return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return view('client.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities, 'intercept_type' => $intercept_type]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
         }
@@ -88,9 +97,19 @@ class ShipperInterceptReBookController extends Controller
         
         $shipment_status = $shipment->status_shipper->name;
 
+        
         // if ($shipment['shipper_status_id'] == 12) {
-        if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
+            if ($shipment['shipper_status_id'] == 65 || $shipment['shipper_status_id'] == 12) {
             if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
+                
+                $shipper_intercept_type = ShipperInterceptExclude::where('user_id', $shipment->user_id)->first();
+                if (
+                    ($intercept_type == 1 && $shipper_intercept_type->different_consignee == 1)|| // different_consignee == 0 means allow different
+                    ($intercept_type == 0 && $shipper_intercept_type->same_consignee == 1) // same_consignee == 0 means that allow same
+                ){
+                    return redirect()->back()->with('error', 'You cannot select the same shipper intercept type as the consignee type');
+                }
+                
                 if ($shipment['intercepted'] == 1) {
                     return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
                 } else {

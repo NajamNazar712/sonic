@@ -35,6 +35,7 @@ use App\Http\Traits\RvTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class ShipperReturnController extends Controller
 {
@@ -66,7 +67,7 @@ class ShipperReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
+            // ->join('rv_shipment_assign_agents as rsaa' ,'rsaa.shipment_id', '=' , 'shipments.id')
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -191,7 +192,12 @@ class ShipperReturnController extends Controller
                     $dropdown .= $reattempt_button;
                 }
 				if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52 || $result->shipper_status_id == 65) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
-                    $dropdown .= $intercept;
+                    $shipper_exclude_type = ShipperInterceptExclude::where('user_id', auth()->user()->id)
+                        ->where('exclude_shipper', 0)
+                        ->first();
+                    if ($shipper_exclude_type) {
+                        $dropdown .= $intercept;
+                    }
                 }
 			}
                         

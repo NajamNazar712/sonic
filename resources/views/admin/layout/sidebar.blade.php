@@ -1738,28 +1738,7 @@
 
                         @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846,861, 910,932], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
-                                <ul class="menu-content">
-
-
-
-
-
-
-                                    {{-- Soon to add permissions for this as well --}}
-                                    @if (session('role_id') == 1 || in_array(14, session('permissions')))
-                                        <li>
-                                            <a class="menu-item" href="{{ route('admin.settings.intercept_restriction.shipper_index') }}">
-                                                Intercept Restriction
-                                            </a>
-                                        </li>
-                                    @endif
-
-
-
-
-
-
-                                    
+                                <ul class="menu-content">                                    
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.auto_account_disabled_days.auto_index') }}">Auto

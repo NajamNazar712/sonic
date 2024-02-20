@@ -198,6 +198,7 @@ use App\Http\Models\Operataions\OperationsForecastLastUpdatedTime;
 use App\Http\Models\Operataions\OperationsOutgoingTopCustomersShipments;
 use App\Http\Models\Operataions\OperationsOutgoingPickupRequestShipments;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class AdminDashboardController extends Controller
 {
@@ -1280,7 +1281,48 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['text'] = 'Riders';
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users]);
+        $active_shippers = User::where('status', 3)->get();
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'active_shippers' => $active_shippers]);
+    }
+
+    public function shipperExclude(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required',
+        ]);
+
+        $user_id = $request->user_id;
+        // Convert checkbox value to boolean
+        $exclude_shipper = $request->input('exclude_shipper') ? true : false; 
+        $different_consignee = $request->input('different_consignee') ? true : false;
+        $same_consignee = $request->input('same_consignee') ? true : false;
+
+        if ($different_consignee && $same_consignee) {
+            return redirect()->back()->with('error', 'Cannot select both consignee types at the same time.');
+        }
+
+        if  (
+                ($exclude_shipper && $same_consignee) || 
+                ($exclude_shipper && $different_consignee) || 
+                ($exclude_shipper && $same_consignee && $different_consignee)
+            ) {
+            return redirect()->back()->with('error', 'Cannot select consignee types if shipper is excluded.');
+        }
+
+        if (!$different_consignee && !$same_consignee && !$exclude_shipper) {
+            return redirect()->back()->with('error', 'Please select an option first');
+        }
+
+        ShipperInterceptExclude::updateOrCreate(
+            ['user_id' => $user_id],
+            [
+                'exclude_shipper' => $exclude_shipper,
+                'different_consignee' => $different_consignee,
+                'same_consignee' => $same_consignee,
+            ]
+        );
+        
+        return redirect()->back()->with('success', 'Shipper exclude settings saved successfully.');
     }
 
     public function blockAccountsList()
@@ -9529,6 +9571,9 @@ class AdminDashboardController extends Controller
                 if (session('role_id') == 1 || in_array(855, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
+
+                $dropdown .= '<button type="button" class="dropdown-item add_shipper_exclude_intercept_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add shipper exclude/Intercept 
+                Type </div></button>';
 
                     $dropdown .= '
                     </div>
