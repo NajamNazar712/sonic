@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Http\Models\ServiceList;
+use App\Jobs\LeadApiGeneratEmailNotification;
 
 class LeadAPIController extends Controller
 {
@@ -111,9 +113,14 @@ class LeadAPIController extends Controller
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
-            if ($sales_person_id != null) {
-                NotificationsController::send(113, $new_lead);
-            }
+            // email add in queue
+            LeadApiGeneratEmailNotification::dispatch($new_lead);
+            
+
+            // if ($sales_person_id != null) {
+            //     NotificationsController::send(204, $new_lead);
+            //     NotificationsController::send(113, $new_lead);
+            // }
             return response()->json(['status' => 0, 'success' => 'Lead added successfully']);
         } catch (\Exception $e) {
 
@@ -129,6 +136,7 @@ class LeadAPIController extends Controller
      */
     public function show(Request $request)
     {
+        $leads = array();
         if ($request->id) {
             $id = $request->id;
             $lead = Lead::with('sales_person', 'reference_person', 'city', 'territory', 'service', 'area_territoy', 'lead_reference', 'status')->find($id);
@@ -159,7 +167,8 @@ class LeadAPIController extends Controller
 
 
                 ];
-                return response()->json(['status' => 1, 'lead' => $lead]);
+                array_push($leads,$lead);
+                return response()->json(['status' => 1, 'lead' => $leads]);
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
@@ -259,5 +268,16 @@ class LeadAPIController extends Controller
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+    }
+
+    public function services_list()
+    {
+        $services_list = ServiceList::where('status',1);
+        if($services_list->exists())
+        {
+            $services_list = $services_list->get();
+            return response()->json(['status' => 0,'services_list' => $services_list]);
+        }
+        return response()->json(['status' => 1, 'error' => 'Services not found!']);
     }
 }

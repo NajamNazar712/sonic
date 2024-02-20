@@ -358,6 +358,7 @@ Route::name('api.')->group(function () {
                     // Route::post('/update/{id}', 'LeadAPIController@update')->name('update');
                     Route::post('/city_territories/{city_id}', 'LeadAPIController@city_territories')->name('city_territories');
                     Route::post('/territory_areas/{territory_id}', 'LeadAPIController@territory_areas')->name('territory_areas');
+                    Route::get('/services_list','LeadAPIController@services_list')->name('services_list');
                 });
             });
 
