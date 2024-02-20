@@ -14,6 +14,7 @@ class LeadApiGeneratEmailNotification implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $lead;
+    public $tries = 2;
 
     /**
      * Create a new job instance.
@@ -34,12 +35,16 @@ class LeadApiGeneratEmailNotification implements ShouldQueue
     public function handle()
     {
 
-           NotificationsController::send(113, $this->lead);
-           if($this->lead->sales_person_id)
-           {
-                NotificationsController::send(204, $this->lead);
-           }
-   
-        
+          try {
+                NotificationsController::send(113, $this->lead);
+                if($this->lead->sales_person_id)
+                {
+                    NotificationsController::send(204, $this->lead);
+                }
+          } catch (\Throwable $th) {
+               //if any exception than try again after 10 
+                Log::error('An error occurred LeadApiController Email Sending: ' . $e->getMessage());
+               $this->release(20);
+          }        
     }
 }
