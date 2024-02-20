@@ -402,6 +402,81 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="PaymentCycleModal" data-backdrop="static" role="dialog" aria-labelledby="PaymentCycleModal"
+    aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Payment Cycle</h4>
+                </div>
+                <form id="payment_cycle_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.payment_cycle.submit') }}">
+                    @csrf
+                <div class="modal-body">
+                    <input type="hidden" name="shipper_id" id="shipper_id">
+                    <div class="form-group">
+                        <select name="payment_cycles" id="payment_cycles" class="form-control select2" data-rule-required="true" data-msg-required="Payment Cycle is required">
+                            @foreach($payment_cycles as $pc)
+                                <option value="{{ $pc->id }}" > {{ $pc->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div id="checkboxContainer" class="d-none">
+                    </div>
+                
+                    <span class="text-danger d-none" id="payment_cycle_msg"></span>
+                    <span class="text-danger d-none" id="msg_payment">Maximum Selected</span>
+
+                    <div>
+                        <input type="hidden" id="fortnite_val" name="fortnite" value="">
+                        <label class="d-none" id="label">Day 1</label>
+                        <select name="fornite" id="fornite"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+
+                            <option value="none">Please Select Day</option>
+                            @for ($i = 1; $i < 14; $i++)
+                                <option value="{{ $i }}">
+                                    {{ $i . ' day' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    
+
+                    <div class="mt-2">
+                        <label class="d-none" id="label_2">Day 2</label>
+                        <select name="fornite_2" id="fornite_2"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+                        </select>
+                    </div>
+
+                    <div>
+                        <select name="monthly" id="monthly"
+                            class="select2 form-control d-none"
+                            style="width: 100%">
+                            <option value="nonem">Please Select Day</option>
+
+                            @for ($i = 1; $i < 29; $i++)
+                                <option value="{{ $i }}">
+                                    {{ $i . ' day' }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div id="msg_limit_days" class="d-none text-danger">
+                    </div>
+                    <input type="hidden" name="selected_days" value="" id="selected_days">
+
+                </div>
+            
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 {{-- Commission Moal --}}
 <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 100%;" role="document">
@@ -499,6 +574,9 @@
 </div>
 {{-- End --}}
 
+
+
+
 @endsection
 
 @section('css')
@@ -506,6 +584,27 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+
+    <style>
+        #checkboxContainer label {
+               display: inline-block;
+               padding: 10px;
+               margin: 5px;
+               background-color: #3498db;
+               color: #fff;
+               border-radius: 5px;
+               cursor: pointer;
+           }
+   
+           /* Style the checkbox to be hidden */
+           #checkboxContainer input[type="checkbox"] {
+               display: none;
+           }
+   
+           /* Style the label when the checkbox is checked */
+           #checkboxContainer input[type="checkbox"]:checked+label {
+               background-color: #56e73c; }
+   </style>
 @endsection
 
 @section('js')
@@ -916,6 +1015,15 @@
             width:'100%',
             dropdownParent:$('#SalesTierTypeTagModal')
         });
+
+        $('#payment_cycles').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Payment Cycle',
+            dropdownParent:$('#PaymentCycleModal')
+
+        }).on('change', function () {
+            $('#msg_limit_days').addClass('d-none')
+        });
         
         $("#bulk_segment1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Segment",
@@ -1215,6 +1323,24 @@
                             }
                         }
                     },*/
+                    
+                    @if (session('role_id') == 1 || in_array(365, session('permissions')))
+                    {
+                            text: 'Payment Cycle',
+                            className: 'btn btn-primary payment_cycle',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('#payment_cycle_form [name="shipper_id"]').val(selected_rows);
+                           $('#PaymentCycleModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                     }
+                    },
+                    @endif
                     @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
                             text: 'Bulk Tagging',
@@ -1393,7 +1519,8 @@
 
                                         table.button('.assign_rider').enable();
                                         table.button('.bulk_segment_tagging').enable();
-                                        
+                                        table.button('.payment_cycle').enable();
+
                                         table.button('.territory_tag').enable();
                                         table.button('.territory_retag').enable();
                                         table.button('.tag').enable();
@@ -1426,7 +1553,8 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.assign_rider').disable();
                                         table.button('.bulk_segment_tagging').disable();
-                                        
+                                        table.button('.payment_cycle').disable();
+
                                         table.button('.tag').disable();
                                         table.button('.territory_tag').disable();
                                         table.button('.territory_retag').disable();
@@ -2011,6 +2139,7 @@
                     table.button('.assign_rider').enable();
                     table.button('.bulk_segment_tagging').enable();
                     table.button('.tag').enable();
+                    table.button('.payment_cycle').enable();
 
                     table.button('.territory_tag').enable();
                     table.button('.territory_retag').enable();
@@ -2019,6 +2148,7 @@
                     table.button('.assign_rider').disable();
                     table.button('.bulk_segment_tagging').disable();
                     table.button('.tag').disable();
+                    table.button('.payment_cycle').disable();
 
                     table.button('.territory_tag').disable();
                     table.button('.territory_retag').disable();
@@ -2237,9 +2367,191 @@
             this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9.%.]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
         }
     });
-
-  
 }
+
+$('#payment_cycle_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function (value) {
+                return $.trim(value);
+            },
+            errorPlacement: function (error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function (form) {
+                var formData = $(form).serializeArray();
+                var fortnite = formData[3]['value'].split(',');
+                var monthly = formData[5]['value'];
+                var selected_days = [];
+
+                if (formData[6] && formData[6]['value']) {
+                    var splitValues = formData[6]['value'].split(',');
+                    if (splitValues.length > 0) {
+                        selected_days = splitValues;
+                    }
+                }                
+
+                var swalConfig = {
+                    title: 'Please Wait!',
+                    text: 'Payment Cycle is being Updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                };
+                fortnite = fortnite.length;
+                selected_days = selected_days.length;
+                if ((formData[2]['value'] == '4' && selected_days === 2) ||
+                    (formData[2]['value'] == '5' && selected_days === 3) ||
+                    (formData[2]['value'] == '2' && selected_days === 1) || 
+                    (formData[2]['value'] == '6' && fortnite > 1) || 
+                    (formData[2]['value'] == '1') ||
+                    (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
+                        swal(swalConfig);
+                        form.submit();
+                } 
+                else {
+                    if(formData[2]['value'] == '4'){
+                        days = 2;
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '5'){
+                        days = 3
+                        $('#msg_limit_days').text('Select ' + days + ' days only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '2'){
+                        days = 1;
+                        $('#msg_limit_days').text('Select ' + days + ' day only');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '6'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+                    }else if (formData[2]['value'] == '3'){
+                        $('#msg_limit_days').text('Select day');
+                        $('#msg_limit_days').removeClass('d-none');
+
+                    }
+                }
+            }
+        });
+
+    $('#payment_cycles').on('change', function() {
+        
+            $("#checkboxContainer input[type='checkbox']").prop('checked', false);
+            $('#msg_payment').addClass("d-none");
+            selectedValues = [];
+            $('#payment_cycle_msg').text('')
+            var id = $(this).val();
+            if (id == 4 || id == 5 || id == 2) {
+                $("#checkboxContainer").removeClass("d-none");
+                $('#fornite').addClass('d-none')
+                $('#fornite_2').addClass('d-none');
+                $('#monthly').addClass('d-none');
+                $('#label').addClass('d-none');
+                $('#label_2').addClass('d-none');
+              
+
+                if (id == 4) {//Twice A Week
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_2));
+                } else if (id == 5) {//Thrice A Week
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_3));
+                } else if (id == 2) {//Weekly
+                    $("#checkboxContainer input[type='checkbox']").off('click').on('click', handleCheckboxSelection(
+                        numSelected, maxSelections_1));
+                }
+            } else if (id == 6) {
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').removeClass('d-none')
+                $('#label').removeClass('d-none')
+                $('#monthly').addClass('d-none');
+
+            } else if (id == 3) {
+                $('#monthly').removeClass('d-none')
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').addClass('d-none');
+                $('#label').addClass('d-none');
+                $('#fornite_2').addClass('d-none')
+                $('#label_2').addClass('d-none');
+
+            } else {
+                $("#checkboxContainer").addClass("d-none");
+                $('#fornite').addClass('d-none');
+                $('#fornite_2').addClass('d-none');
+                $('#monthly').addClass('d-none');
+                $('#label_2').addClass('d-none');
+                $('#label').addClass('d-none')
+
+            }
+        });
+        $('#fornite').on('change', function() {
+            var fornite = parseInt($(this).val(), 10);
+            var fornite_2 = fornite + 15;
+            var value = $(this).val() + ',' + fornite_2;
+            var option = $('<option></option>').attr('value', fornite_2).text(fornite_2 + " Days");
+            $("#fornite_2").empty().append(option);
+            $('#fornite_2').removeClass('d-none');
+            $('#label_2').removeClass('d-none');
+            $('#msg_payment').addClass("d-none");
+            $('#fortnite_val').val(value);
+        });
+        var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+        var selectedValues = []; // Create an array to store selected values
+        for (var i = 0; i < days.length; i++) {
+            var day = days[i];
+            var checkboxId = day;
+            var labelId = "label_" + day;
+            var value = parseInt([i], 10) + 1;
+
+            var checkbox = $("<input>", {
+                type: "checkbox",
+                id: checkboxId,
+                value: value,
+            });
+
+            var label = $("<label>", {
+                for: checkboxId,
+                text: day
+            });
+
+            $("#checkboxContainer").append(checkbox);
+            $("#checkboxContainer").append(label);
+        }
+
+
+        var numSelected = 1;
+        var maxSelections_1 = 1; //Weekly
+        var maxSelections_2 = 2; //Twice A Week
+        var maxSelections_3 = 3; //Thrice A Week
+
+        function handleCheckboxSelection(numSelectedVar, maxSelectionsVar) {
+            return function() {
+                var checkbox = $(this);
+                var value = checkbox.val()
+                if (checkbox.is(':checked')) {
+                    if (numSelectedVar <= maxSelectionsVar) {
+                        numSelectedVar++;
+                        selectedValues.push(value);
+                        $('#selected_days').val(selectedValues);
+
+                    } else {
+                        checkbox.prop('checked', false);
+                        $('#msg_payment').removeClass("d-none");
+                    }
+                } else {
+                    numSelectedVar--;
+                    $('#msg_payment').addClass("d-none");
+                    var index = selectedValues.indexOf(value);
+                    if (index !== -1) {
+                        selectedValues.splice(index, 1);
+                        $('#selected_days').val(selectedValues);
+
+                    }
+                }
+            }
+        }
+
 </script>
 
 @endsection

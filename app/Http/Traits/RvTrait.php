@@ -834,6 +834,7 @@ trait RvTrait
     // protected function included_shippers($agent_sorted_hubs, $agent_id, $agent_shipment_id = null)
     protected function included_shippers($agent_id, $agent_shipment_id = null)
     {
+        $connection = 'reports_2';
         $shipment = null;
 
         //this wont be null if admin is assigning shipment to an agent
@@ -902,7 +903,7 @@ trait RvTrait
                 $flag = true;
             }   
 
-            $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
+            $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
             ->whereIn('shipper_status_id', [12,65,66,52])
             // ->where('consignee_city_id', $agent->city_id)  
             ->whereRaw('NOT EXISTS (
@@ -952,7 +953,7 @@ trait RvTrait
             if (!empty($result)){
                 $exploded_result = implode(',', $result);
                 // $shipments = Shipment::where('consignee_city_id', $agent->city_id)
-                $shipments = Shipment::whereIn('shipper_status_id', [12,65,66,52])
+                $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,65,66,52])
                 ->whereIn('user_id', $result)
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
