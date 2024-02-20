@@ -10987,7 +10987,7 @@ class NotificationsController extends Controller
                         $to_excluded = array_diff($to,  ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
                         
                         $admin_name = Admin::whereIn('email', $to_excluded)->get()->pluck('name')->toArray();
-                        $lead_name = MultipleSaleTagging::join('leads', 'leads.id', 'multiple_sale_taggings.id')
+                        $lead_name = MultipleSaleTagging::join('leads', 'leads.id', 'multiple_sale_taggings.lead_id')
                         ->whereIn('multiple_sale_taggings.admin_id', $email['sale_lead_id'])
                         ->select('leads.contact_person as contact_person')
                         ->get()
