@@ -273,7 +273,6 @@ class ReturnController extends Controller
        
        //Total Shipments
        $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
-    //    dd($this->total_of_shipments_exclude);
        $total_of_shipments = count($this->total_of_shipments_exclude);
         
        //Average Hours
@@ -321,7 +320,7 @@ class ReturnController extends Controller
 
 
        //Average Response Time
-       $rvShipments = [];
+    //    $rvShipments = [];
     //    $rvShipments = RvShipmentAssignAgent::with([
     //     'shipment'=>function($shipment){
     //         $shipment->with([
@@ -331,6 +330,13 @@ class ReturnController extends Controller
     //         ->select('id');
     //    }])
     //    ->get(['id','shipment_id','created_at'])->toArray();
+    $rvShipments = RvShipmentAssignAgent::with(['shipment.latest_shipment_journey' => function ($query) {
+        $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
+    }])
+    ->select('id', 'shipment_id', 'created_at')
+    ->get()
+    ->toArray();
+
 
        $details = [];
        $averageResponseTime = 0;
