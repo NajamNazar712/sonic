@@ -3898,6 +3898,8 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('edit', 'Admins\AdminHumanResourseController@employee_confirmation_edit')->name('edit');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_confirmation_reject')->name('reject');
             Route::post('get_info', 'Admins\AdminHumanResourseController@get_employee_info')->name('get_info');
+            Route::post('get_employee_info_name_type', 'Admins\AdminHumanResourseController@get_employee_info_name_type')->name('get_employee_info_name_type');
+
             Route::post('submit', 'Admins\AdminHumanResourseController@submit_employee_rating')->name('rating');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_confirmation_approve')->name('approve');
             Route::post('view', 'Admins\AdminHumanResourseController@view_employee_confirmation')->name('view');

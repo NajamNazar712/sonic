@@ -10,7 +10,9 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <div class="alert alert-danger d-none">
+                    
+                </div>
                 <form id="lost_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="row align-items-center justify-content-center">
                         <div class="form-group">
@@ -61,7 +63,9 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Amount</th>
-                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Employee ID</th>
+                            <th class="border-primary border-darken-1">Employee Name</th>
+                            <th class="border-primary border-darken-1">Employee Type</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1"></th>
@@ -103,6 +107,13 @@
         </div>
     </div>
 
+    
+    <select id="yourDropdownId" class="form-control select2" place>
+
+    </select>
+
+    
+
 @endsection
 
 @section('css')
@@ -126,10 +137,13 @@ label.error {
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script>
+        var employees = @json($employees); // Assuming $admins is a PHP variable containing admin data
+    </script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+       
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -145,15 +159,19 @@ label.error {
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
                     {name: 'hub', class: 'align-middle hub form-group', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
-                    {name: 'remarks', class: 'align-middle remarks', orderable: false},
+                    {
+                        name: 'employee_id',
+                        class: 'align-middle admin_select',
+                        orderable: false,
+                    },                    
+                    {name: 'employee_name', class: 'align-middle employee_name', orderable: false},
+                    {name: 'employee_type', class: 'align-middle employee_type', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
-                    // var info = table.page.info();
-                    //
-                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                
                 },
                 initComplete: function() {
 
@@ -161,7 +179,10 @@ label.error {
                 }
             });
             var rowsCount = 0;
-
+            var counter = 0;
+            var counter_excel = 0;
+            var limit = 19;
+            var excluded_shipment = []
             $('#lost_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -192,7 +213,7 @@ label.error {
                             }
                         })
                             .done(function(data) {
-                                if (data.status == 1) {
+                                if (data.status == 1 && counter <= limit) {
                                     UnblockPagePermanently();
                                     id = data.details.id;
 
@@ -200,10 +221,49 @@ label.error {
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-
+                                        var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
+                                        $.each(employees, function (index, value) {
+                                            if(value.trax_id){
+                                                employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
+                                            }
+                                        });
+                                        counter+=1;
+                                        employeeDropdownHtml += '</select>';
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, employeeDropdownHtml, data.details.employee_name, data.details.employee_type, data.details.mode, data.details.service_type, action]).node().id = data.details.id;
                                         table.draw(false);
+
+                                        $('.employeeDropdownHtml').select2({
+                                            width: '100%',
+                                            placeholder: "Search Here...",
+                                            minimumInputLength: 4,
+                                        }).on('change', function() {
+                                            var traxID = $(this).val(); 
+                                            var row = $(this).closest('tr'); 
+
+                                            $.ajax({
+                                                url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                                                method: 'POST', 
+                                                data: {
+                                                    '_token': '{{ csrf_token() }}',
+                                                    'trax_id': traxID
+                                                },                                 
+                                                success: function(response) {
+                                                    if(response.status == 1){
+                                                        var inputElementName = row.find('input[name="employee_name[' + data.details.id + ']"]');
+                                                        inputElementName.val(response.details.name); 
+
+                                                        var inputElementType = row.find('input[name="employee_type[' + data.details.id + ']"]');
+                                                        inputElementType.val(response.details.type); 
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    // Handle errors
+                                                    console.error(xhr.responseText);
+                                                }
+                                            });
+                                        });
+
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
 
@@ -220,7 +280,7 @@ label.error {
                                     UnblockPagePermanently();
                                     $('#lost_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error ? data.error : 'Only 20 shipments is allowed to select !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
@@ -255,7 +315,6 @@ label.error {
                 // Create a new FormData object
                 var formData = new FormData();
                 formData.append('excel', file);
-                console.log(shipment_ids);
                 // Make the AJAX request
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
@@ -271,47 +330,95 @@ label.error {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
+                                var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
+                                $.each(employees, function (index, value) {
+                                    if(value.trax_id){
+                                        employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
+                                    }
+                                });
+                                employeeDropdownHtml += '</select>';
+
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
                                 var shipment;
                                 var alreadyAddedShipments = [];
                                 id = data.details;
-                               $.each(shipmentIDs, function (index, id) {
-                                    // $.each(shipmentData, function(id, shipment2){
-                                        var index = $.inArray(id, shipment_ids);
-                                        shipment = shipmentData[id];
-                                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
-                                            console.log(shipment.tracking_number);
-                                            var rowNo = table.rows().count();
-       
-                                           var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                           table.row.add([
-                                           rowNo + 1,
-                                           shipment.tracking_number,
-                                           shipment.shipper_name,
-                                           shipment.origin,
-                                           shipment.destination,
-                                           shipment.hub,
-                                           shipment.amount,
-                                           shipment.remarks,
-                                           shipment.mode,
-                                           shipment.service_type,
-                                           action
-                                       ]).node().id = id;
-       
-                                        table.draw(false);
-                                        scan_sound(1);
-                                        table.order([0, 'desc']).draw();
 
-                                        shipment_ids.push(id);
-                                        shipmentAdded = true;
+                                $.each(shipmentIDs, function (index, id) {
+                                    var tracking_number = shipmentData[id].tracking_number;
+                                    if(counter_excel <= limit){
+                                        // $.each(shipmentData, function(id, shipment2){
+                                            var index = $.inArray(id, shipment_ids);
+                                            counter_excel+=1
+                                            shipment = shipmentData[id];
+                                            if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
+                                                console.log(shipment.tracking_number);
+                                                var rowNo = table.rows().count();
+        
+                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                            table.row.add([
+                                            rowNo + 1,
+                                            shipment.tracking_number,
+                                            shipment.shipper_name,
+                                            shipment.origin,
+                                            shipment.destination,
+                                            shipment.hub,
+                                            shipment.amount,
+                                            employeeDropdownHtml, shipment.employee_name, shipment.employee_type,
+                                            shipment.mode,
+                                            shipment.service_type,
+                                            action
+                                        ]).node().id = id;
+        
+                                            table.draw(false);
+                                            scan_sound(1);
+                                            table.order([0, 'desc']).draw();
+                                            $('.employeeDropdownHtml').select2({
+                                                width: '100%',
+                                                placeholder: "Search Here...",
+                                                minimumInputLength: 4,
+                                            }).on('change', function() {
+                                                var traxID = $(this).val(); 
+                                                var row = $(this).closest('tr'); 
+                                                $.ajax({
+                                                    url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                                                    method: 'POST', 
+                                                    data: {
+                                                        '_token': '{{ csrf_token() }}',
+                                                        'trax_id': traxID
+                                                    },                                 
+                                                    success: function(response) {
+                                                        if(response.status == 1){
+                                                            var inputElementName = row.find('input[name="employee_name[' + id + ']"]');
+                                                            inputElementName.val(response.details.name); 
 
-                                        toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-                                    }
-                                    else {
-                                        alreadyAddedShipments.push(shipment.tracking_number);
+                                                            var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
+                                                            inputElementType.val(response.details.type); 
+                                                        }
+                                                    },
+                                                    error: function(xhr, status, error) {
+                                                        // Handle errors
+                                                        console.error(xhr.responseText);
+                                                    }
+                                                });
+                                            });
+                                            shipment_ids.push(id);
+                                            shipmentAdded = true;
+
+                                            toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
+                                        }
+                                        else {
+                                            alreadyAddedShipments.push(shipment.tracking_number);
+                                        }
+                                    }else{
+                                        excluded_shipment.push(tracking_number);
+                                        var excludedString = excluded_shipment.join(', ');
+                                        $('.alert-danger').text(excludedString)
+                                        $('.alert-danger').removeClass('d-none')
+
                                     }
                                 });
+                               
 
                                var text = '<div class="col"><table class="table table-sm table-borderless mb-0">';
                                 text += '<thead><th>S No.</th><th>Tracking Number</th><th>Error</th></thead>';
@@ -418,7 +525,7 @@ label.error {
             $('body').on('click','.action a.removerow',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, shipment_ids);
-
+                counter -=1;
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
                 }

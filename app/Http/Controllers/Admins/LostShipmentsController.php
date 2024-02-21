@@ -2,40 +2,40 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\CargoManifestBagJourneyController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\Admin\CargoManifest\CargoManifest;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\CargoManifest\ManifestBag;
-use App\Http\Models\BookingType;
-use App\Http\Models\CargoConsignmentShipment;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\ManifestBagLostShipment;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestHistory;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\ShippingMode;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use Illuminate\Validation\Rule;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\ShippingMode;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Yajra\Datatables\Datatables;
-use Carbon\Carbon;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\LostShipmentAdmin;
-use App\Http\Models\Admin\LostShipmentShipper;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\ShipmentsJourney;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
-
+use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\LostShipmentAdmin;
+use App\Http\Models\ManifestBagLostShipment;
+use App\Http\Models\CargoConsignmentShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Admin\LostShipmentShipper;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Controllers\CargoManifestBagJourneyController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\HR\Employee;
 
 class LostShipmentsController extends Controller
 {
@@ -99,7 +99,7 @@ class LostShipmentsController extends Controller
             }
 
             if(session('role_id') != 1){
-                $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
+                $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
                 $lost_shipments_shippers_id = LostShipmentShipper::pluck('user_id')->toArray();
                 if(!empty($lost_shipments_shippers_id)){
                     if($check_lost_shipments_admins->exists()){
@@ -311,12 +311,13 @@ class LostShipmentsController extends Controller
     }
 
     public function lost_add_index(){
-        return view('admin.lost.add_shipments');
+        $employees = Employee::all();
+        return view('admin.lost.add_shipments')->with('employees', $employees);
     }
     public function get_shipment_info(Request $request)
     {
             $shipment_status_for_bags = array(3,21,26,32,49);
-            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+            $status_array = array(5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);
@@ -364,7 +365,8 @@ class LostShipmentsController extends Controller
                         $data['amount'] = number_format($shipment->amount);
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
-                        $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+                        $data['employee_name'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" name="employee_name[' . $shipment->id . ']" readonly>';
+                        $data['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" name="employee_type[' . $shipment->id. ']" readonly>';
 
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 1, 'details' => $data]);
@@ -381,7 +383,7 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-
+        dd($request->all());
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -488,7 +490,7 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
-        $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+        $status_array = array(5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
         $names = [
             'tracking_number' => 'Tracking Number',
         ];
@@ -631,7 +633,8 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
-                        $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+                        $data[$shipment->id]['employee_name'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" name="employee_name[' . $shipment->id . ']" readonly>';
+                        $data[$shipment->id]['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" name="employee_type[' . $shipment->id. ']" readonly>';
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
