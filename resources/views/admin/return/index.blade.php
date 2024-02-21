@@ -213,7 +213,7 @@
                             </div>
                         </div>
 
-                        <div class="col-3" >
+                        {{-- <div class="col-3" >
                             <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -231,7 +231,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <div class="col-3" >
                             <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
@@ -3510,9 +3510,9 @@
                             var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
                             $('#average_aging').text(content);
 
-                            var average_response_time = parseFloat(data.stats.average_response_time);
-                            var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
-                            $('#average_response_time').text(average_response_time_content);
+                            //var average_response_time = parseFloat(data.stats.average_response_time);
+                            //var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
+                            //$('#average_response_time').text(average_response_time_content);
 
                             $('#oldest_shipments').text(data.stats.oldest_shipments);
                        }
