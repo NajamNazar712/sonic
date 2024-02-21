@@ -107,13 +107,6 @@
         </div>
     </div>
 
-    
-    <select id="yourDropdownId" class="form-control select2" place>
-
-    </select>
-
-    
-
 @endsection
 
 @section('css')
@@ -137,13 +130,10 @@ label.error {
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script>
-        var employees = @json($employees); // Assuming $admins is a PHP variable containing admin data
-    </script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-       
+            var employees = @json($employees); // Assuming $admins is a PHP variable containing admin data
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -182,7 +172,14 @@ label.error {
             var counter = 0;
             var counter_excel = 0;
             var limit = 19;
-            var excluded_shipment = []
+            var excluded_shipment = [];
+            var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
+            $.each(employees, function (index, value) {
+                if(value.trax_id){
+                    employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
+                }
+            });
+            employeeDropdownHtml += '</select>';
             $('#lost_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -220,15 +217,8 @@ label.error {
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
-                                        var rowNo = table.rows().count();
-                                        var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
-                                        $.each(employees, function (index, value) {
-                                            if(value.trax_id){
-                                                employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
-                                            }
-                                        });
+                                        var rowNo = table.rows().count();                                 
                                         counter+=1;
-                                        employeeDropdownHtml += '</select>';
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, employeeDropdownHtml, data.details.employee_name, data.details.employee_type, data.details.mode, data.details.service_type, action]).node().id = data.details.id;
                                         table.draw(false);
@@ -330,13 +320,7 @@ label.error {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
-                                var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
-                                $.each(employees, function (index, value) {
-                                    if(value.trax_id){
-                                        employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
-                                    }
-                                });
-                                employeeDropdownHtml += '</select>';
+                               
 
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
@@ -347,12 +331,10 @@ label.error {
                                 $.each(shipmentIDs, function (index, id) {
                                     var tracking_number = shipmentData[id].tracking_number;
                                     if(counter_excel <= limit){
-                                        // $.each(shipmentData, function(id, shipment2){
                                             var index = $.inArray(id, shipment_ids);
                                             counter_excel+=1
                                             shipment = shipmentData[id];
                                             if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
-                                                console.log(shipment.tracking_number);
                                                 var rowNo = table.rows().count();
         
                                             var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
@@ -413,9 +395,8 @@ label.error {
                                     }else{
                                         excluded_shipment.push(tracking_number);
                                         var excludedString = excluded_shipment.join(', ');
-                                        $('.alert-danger').text(excludedString)
+                                        $('.alert-danger').text('Maximum 20 shipments reached, remaining tracking numbers:' + excludedString)
                                         $('.alert-danger').removeClass('d-none')
-
                                     }
                                 });
                                
