@@ -240,7 +240,17 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    var shipper_cap_limit =  $("#shipper_cap_limit").val();
+                    if(shipper_cap_limit <= 10000000) 
+                    {
+                        form.submit();    
+                    }else{
+                        scan_sound(2);
+                        toastr.error("Shipper Cap Limit is 10 Million", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});      
+                    }
+                    
+
+                    
                 }
                 
             });
@@ -251,7 +261,16 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    var shipper_cap_limit =  $("#edit_shipper_cap_limit").val();
+                    if(shipper_cap_limit <= 10000000) 
+                    {
+                        form.submit();    
+                    }else{
+                        scan_sound(2);
+                        toastr.error("Shipper Cap Limit is 10 Million", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    
+                    
                 }
                 
             });
