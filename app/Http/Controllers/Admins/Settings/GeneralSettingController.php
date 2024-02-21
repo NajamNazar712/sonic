@@ -251,7 +251,7 @@ class GeneralSettingController extends Controller
                 $shipper_cap = $shipper_cap->first();
                 $shipper_cap->setting_value = $request->edit_shipper_cap_limit;
                 $shipper_cap->save();
-                return redirect()->back()->with(['status'=>0, 'success'=>'Shipper Cap update successfully']);
+                return redirect()->back()->with(['status'=>0, 'success'=>'Shipper Cap updated successfully']);
 
              } else {
                  return redirect()->back()->with(['status'=>1, 'error'=>'Shipper Cap not exists']);

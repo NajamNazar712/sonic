@@ -125,9 +125,9 @@
                             $('#SubmitShipperCapModal').modal('show');
                             
                         }
-                    },
+                    }
                     @endif
-                    'reset'
+                    
                     ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
