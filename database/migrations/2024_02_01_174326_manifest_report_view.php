@@ -36,7 +36,7 @@ JOIN `cities` `oc`)
 JOIN `zones` `oz`)
 JOIN `shipments_journey` `sj`)
 WHERE ((`sh`.`id` = `sj`.`shipment_id`) AND (`sj`.`shipper_status_id` = '3') AND (`sh`.`user_id` = `u`.`id`) AND (`p`.`id` = `sp`.`segment_id`) AND (`u`.`segment_id` = `p`.`id`) AND (`u`.`sub_segment_id` = `sp`.`id`) AND (`c`.`zone_id` = `z`.`id`) AND (`oc`.`zone_id` = `oz`.`id`) AND (`sh`.`consignee_city_id` = `c`.`id`) AND (`u`.`city_id` = `oc`.`id`)) UNION
-SELECT `sh`.`created_at` AS `created_at`,`sh`.`id` AS `id`,`u`.`city_id` AS `origin`,`oc`.`name` AS `origin_name`,`oz`.`name` AS `origin_zonecode`,`sh`.`consignee_city_id` AS `shipment_destination`,`c`.`name` AS `destination_name`,`z`.`name` AS `destination_zonecode`,`p`.`name` AS `parent_prod_name`,`sp`.`name` AS `sub_prod_name`, NULL AS `NULL`, NULL AS `arrival`, NULL AS `NULL`, NULL AS `NULL`,(CASE WHEN (`sj`.`shipper_status_id` in (66,11)) THEN 1 ELSE 0 END) AS `mr_cont`,'Misroute' AS `Misroute`, NULL AS `wm_code`,'Without_manifest' AS `Without_manifest`
+SELECT `sh`.`created_at` AS `created_at`,`sh`.`id` AS `id`,`u`.`city_id` AS `origin`,`oc`.`name` AS `origin_name`,`oz`.`name` AS `origin_zonecode`,`sh`.`consignee_city_id` AS `shipment_destination`,`c`.`name` AS `destination_name`,`z`.`name` AS `destination_zonecode`,`p`.`name` AS `parent_prod_name`,`sp`.`name` AS `sub_prod_name`, NULL AS `NULL`, NULL AS `arrival`, NULL AS `NULL`, NULL AS `NULL`,(CASE WHEN (`sj`.`shipper_status_id` in (68,11)) THEN 1 ELSE 0 END) AS `mr_cont`,'Misroute' AS `Misroute`, NULL AS `wm_code`,'Without_manifest' AS `Without_manifest`
 FROM ((((((((`shipments` `sh`
 JOIN `users` `u`)
 JOIN `segments` `p`)
@@ -46,7 +46,7 @@ JOIN `zones` `z`)
 JOIN `cities` `oc`)
 JOIN `zones` `oz`)
 JOIN `shipments_journey` `sj`)
-WHERE ((`sh`.`id` = `sj`.`shipment_id`) AND (`sj`.`shipper_status_id` in ('66','11')) AND (`sh`.`user_id` = `u`.`id`) AND (`p`.`id` = `sp`.`segment_id`) AND (`u`.`segment_id` = `p`.`id`) AND (`u`.`sub_segment_id` = `sp`.`id`) AND (`c`.`zone_id` = `z`.`id`) AND (`oc`.`zone_id` = `oz`.`id`) AND (`sh`.`consignee_city_id` = `c`.`id`) AND (`u`.`city_id` = `oc`.`id`)) UNION
+WHERE ((`sh`.`id` = `sj`.`shipment_id`) AND (`sj`.`shipper_status_id` in ('68','11')) AND (`sh`.`user_id` = `u`.`id`) AND (`p`.`id` = `sp`.`segment_id`) AND (`u`.`segment_id` = `p`.`id`) AND (`u`.`sub_segment_id` = `sp`.`id`) AND (`c`.`zone_id` = `z`.`id`) AND (`oc`.`zone_id` = `oz`.`id`) AND (`sh`.`consignee_city_id` = `c`.`id`) AND (`u`.`city_id` = `oc`.`id`)) UNION
 SELECT `sh`.`created_at` AS `created_at`,`sh`.`id` AS `id`,`u`.`city_id` AS `origin`,`oc`.`name` AS `origin_name`,`oz`.`name` AS `origin_zonecode`,`sh`.`consignee_city_id` AS `shipment_destination`,`c`.`name` AS `destination_name`,`z`.`name` AS `destination_zonecode`,`p`.`name` AS `parent_prod_name`,`sp`.`name` AS `sub_prod_name`, NULL AS `NULL`, NULL AS `arrival`, NULL AS `NULL`, NULL AS `NULL`, NULL AS `NULL`, NULL AS `NULL`,(CASE WHEN (`sj`.`shipper_status_id` = 67) THEN 1 ELSE 0 END) AS `WM_cont`,'Without_manifest' AS `Without_manifest`
 FROM ((((((((`shipments` `sh`
 JOIN `users` `u`)
@@ -65,7 +65,7 @@ WHERE ((`sh`.`id` = `sj`.`shipment_id`) AND (`sj`.`shipper_status_id` = '67') AN
         DB::statement($manifest_report);
         DB::statement($manifest_report2);
     }
- 
+
     /**
      * Reverse the migrations.
      *
