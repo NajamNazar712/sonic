@@ -273,7 +273,7 @@ class ReturnController extends Controller
        
        //Total Shipments
        $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
-       dd($this->total_of_shipments_exclude);
+    //    dd($this->total_of_shipments_exclude);
        $total_of_shipments = count($this->total_of_shipments_exclude);
         
        //Average Hours
