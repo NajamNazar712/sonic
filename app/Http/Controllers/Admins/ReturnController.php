@@ -336,7 +336,8 @@ class ReturnController extends Controller
     // ->select('id', 'shipment_id', 'created_at')
     // ->get()
     // ->toArray();
-
+        $count = RvShipmentAssignAgent::count();
+        dd($count);
         $rvShipments = RvShipmentAssignAgent::chunk(100, function ($agents) {
             foreach ($agents as $agent) {
                 $agent->load(['shipment.latest_shipment_journey' => function ($query) {
