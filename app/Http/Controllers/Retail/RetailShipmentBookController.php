@@ -2237,11 +2237,20 @@ class RetailShipmentBookController extends Controller
 
     public function previous_names_verify(Request $request)
     {
-        //dd(1,$request->all());
+        $retail_shipper = array();
         $phone_number = $request->phone_number;
         $phone_number_without_hyphen = str_replace('-', '', $phone_number);
-        $retail_shipper = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+        $phone_number_without_hyphen = str_replace('_', '', $phone_number_without_hyphen);
+        $length = strlen($phone_number_without_hyphen);
 
-        return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ', 'data' => $retail_shipper]);
+        if ($length == 11)
+        {
+            $retail_shipper = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+            return response()->json(['status' => 1, 'success' => 'Shipper info found: ', 'data' => $retail_shipper]);
+        }
+        else
+        {
+            return response()->json(['status' => 0, 'error' => 'Not found: ', 'data' => $retail_shipper]);
+        }
     }
 }

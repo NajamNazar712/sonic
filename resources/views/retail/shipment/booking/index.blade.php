@@ -128,7 +128,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-6 previous-names">
-                                        <select name="previous_name" id="previous_name" class="select2 form-control" ">
+                                        <select name="previous_name" id="previous_name" class="select2 form-control">
                                         </select>
                                     </div>
                                     <div class="form-group col-6">
@@ -1491,13 +1491,19 @@
                             // Add new options based on the response
                             previousNames.forEach(function (data) {
                                 console.log(data);
-                                $('#previous_name').append('<option value="' + data.id + '">' + data.shipper_name + '</option>');
+                                $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'">' + data.shipper_name + '</option>');
                             });
 
                             // Trigger select2 update
                             $('#previous_name').trigger('change');
                         }
                     });
+            });
+
+            $('#previous_name').on('change', function() {
+                var selectedValue = $(this).val();
+                console.log('selected value : ',selectedValue);
+                console.log('selected data-value : ',selectedValue.dataset);
             });
         });
     </script>
