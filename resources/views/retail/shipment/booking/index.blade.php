@@ -1468,42 +1468,53 @@
             });
 
             $('#shipper_phone_no').keyup(function () {
-                console.log('key press');
-                console.log('val', $(this).val());
+
                 var phone_number = $(this).val();
+                var cleaned_phone_number = phone_number.replace(/[-_]/g, '');
 
-                $.ajax({
-                    url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'phone_number': phone_number
-                    },
-                })
-                    .done(function (data) {
-                        if (data.status == 1) {
-                            // Assuming the response is an array of previous names
-                            var previousNames = data.data;
-                            console.log(previousNames);
-                            // Clear previous options
-                            $('#previous_name').empty();
+                if (cleaned_phone_number.length === 11)
+                {
+                    $.ajax({
+                        url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone_number': phone_number
+                        },
+                    })
+                        .done(function (data) {
+                            if (data.status === 1) {
 
-                            // Add new options based on the response
-                            previousNames.forEach(function (data) {
-                                console.log(data);
-                                $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'">' + data.shipper_name + '</option>');
-                            });
+                                var previousNames = data.data;
 
-                            // Trigger select2 update
-                            $('#previous_name').trigger('change');
-                        }
-                    });
+                                $('#previous_name').empty();
+
+                                previousNames.forEach(function (data) {
+                                    console.log(data);
+                                    $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'" data-value1="'+ data.shipper_address+'" data-value2="'+ data.shipper_name+'">' + data.shipper_name + '</option>');
+                                });
+
+                                $('#previous_name').trigger('change');
+                                $('#shipper_cnic').val('');
+                                $('#shipper_address').val('');
+                                $('#shipper_name').val('');
+                            }
+                        });
+                }
             });
 
             $('#previous_name').on('change', function() {
-                var selectedValue = $(this).val();
-                console.log('selected value : ',selectedValue);
-                console.log('selected data-value : ',selectedValue.dataset);
+
+                var selectedOption  = $('#previous_name option:selected');
+                var selectedValue = selectedOption.val();
+                var cnic = selectedOption.data('value');
+                var address = selectedOption.data('value1');
+                var name = selectedOption.data('value2');
+
+                $('#shipper_cnic').val(cnic);
+                $('#shipper_address').val(address);
+                $('#shipper_name').val(name);
+
             });
         });
     </script>
