@@ -637,11 +637,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Enter Verification Pin</h4>
+                    <h4 class="modal-title" id="">Verification Pin</h4>
                 </div>
 
                 <div class="modal-body">
-                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
+                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code*"/>
                     <input type="hidden" id="code" name="code"/>
                 </div>
                 <div class="modal-footer">
@@ -1509,7 +1509,7 @@
                             var code    = $('#code').val();
                             if(pincode == code)
                             {
-                                $('#AddBankModal').modal('show');
+                                // $('#AddBankModal').modal('show');
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Your bank is being added!',
