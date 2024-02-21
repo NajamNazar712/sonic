@@ -2264,6 +2264,8 @@ class AdminDashboardController extends Controller
                 'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
                 'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
                 'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
+                'on_reverse_charges.numeric' => 'The overnight reverse pickup charges field must be numeric.',
+                'on_reverse_charges.required' => 'The overnight reverse pickup charges field is required.',
                 'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
                 'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -2314,6 +2316,8 @@ class AdminDashboardController extends Controller
                 'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
                 'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
                 'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
+                'ol_reverse_charges.numeric' => 'The overland reverse pickup charges field must be numeric.',
+                'ol_reverse_charges.required' => 'The overland reverse pickup charges field is required.',
                 'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
                 'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -2361,6 +2365,8 @@ class AdminDashboardController extends Controller
                 'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
                 'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
                 'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
+                'detain_reverse_charges.numeric' => 'The detain reverse pickup charges field must be numeric.',
+                'detain_reverse_charges.required' => 'The detain reverse pickup charges field is required.',
                 'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
                 'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -2405,6 +2411,8 @@ class AdminDashboardController extends Controller
                 'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
                 'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
                 'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
+                'sameday_reverse_charges.numeric' => 'The sameday reverse pickup charges field must be numeric.',
+                'sameday_reverse_charges.required' => 'The sameday reverse pickup charges field is required.',
                 'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
                 'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -2477,6 +2485,7 @@ class AdminDashboardController extends Controller
                     'on_wa_spkg.*' => 'numeric',
                     'on_replacement_charges' => 'required|numeric',
                     'on_tnb_charges' => 'required|numeric',
+                    'on_reverse_charges' => 'required|numeric',
                     'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
@@ -2514,6 +2523,7 @@ class AdminDashboardController extends Controller
                     'ol_wa_spkg.*' => 'numeric',
                     'ol_replacement_charges' => 'required|numeric',
                     'ol_tnb_charges' => 'required|numeric',
+                    'ol_reverse_charges' => 'required|numeric',
                     'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
@@ -2551,6 +2561,7 @@ class AdminDashboardController extends Controller
                     'detain_wa_spkg.*' => 'numeric',
                     'detain_replacement_charges' => 'required|numeric',
                     'detain_tnb_charges' => 'required|numeric',
+                    'detain_reverse_charges' => 'required|numeric',
                     'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
@@ -2585,6 +2596,7 @@ class AdminDashboardController extends Controller
                     'sameday_wa_spkg.*' => 'numeric',
                     'sameday_replacement_charges' => 'required|numeric',
                     'sameday_tnb_charges' => 'required|numeric',
+                    'sameday_reverse_charges' => 'required|numeric',
                     'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
@@ -2840,14 +2852,16 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $request->on_replacement_charges,
-                            'try_and_buy_charges' => $request->on_tnb_charges
+                            'try_and_buy_charges' => $request->on_tnb_charges,
+                            'reverse_pickup_charges' => $request->on_reverse_charges
                         ]);
                     } else {
                         BookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $request->on_replacement_charges,
-                            'try_and_buy_charges' => $request->on_tnb_charges
+                            'try_and_buy_charges' => $request->on_tnb_charges,
+                            'reverse_pickup_charges' => $request->on_reverse_charges
                         ]);
                     }
 
@@ -3161,14 +3175,16 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $request->ol_replacement_charges,
-                            'try_and_buy_charges' => $request->ol_tnb_charges
+                            'try_and_buy_charges' => $request->ol_tnb_charges,
+                            'reverse_pickup_charges' => $request->ol_reverse_charges
                         ]);
                     } else {
                         BookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $request->ol_replacement_charges,
-                            'try_and_buy_charges' => $request->ol_tnb_charges
+                            'try_and_buy_charges' => $request->ol_tnb_charges,
+                            'reverse_pickup_charges' => $request->ol_reverse_charges
                         ]);
                     }
 
@@ -3479,14 +3495,16 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $request->detain_replacement_charges,
-                            'try_and_buy_charges' => $request->detain_tnb_charges
+                            'try_and_buy_charges' => $request->detain_tnb_charges,
+                            'reverse_pickup_charges' => $request->detain_reverse_charges
                         ]);
                     } else {
                         BookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $request->detain_replacement_charges,
-                            'try_and_buy_charges' => $request->detain_tnb_charges
+                            'try_and_buy_charges' => $request->detain_tnb_charges,
+                            'reverse_pickup_charges' => $request->detain_reverse_charges
                         ]);
                     }
 
@@ -3798,14 +3816,16 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $request->sameday_replacement_charges,
-                            'try_and_buy_charges' => $request->sameday_tnb_charges
+                            'try_and_buy_charges' => $request->sameday_tnb_charges,
+                            'reverse_pickup_charges' => $request->sameday_reverse_charges
                         ]);
                     } else {
                         BookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $request->sameday_replacement_charges,
-                            'try_and_buy_charges' => $request->sameday_tnb_charges
+                            'try_and_buy_charges' => $request->sameday_tnb_charges,
+                            'reverse_pickup_charges' => $request->sameday_reverse_charges
                         ]);
                     }
 
@@ -4223,6 +4243,8 @@ class AdminDashboardController extends Controller
                 'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
                 'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
                 'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
+                'on_reverse_charges.numeric' => 'The overnight reverse pickup charges field must be numeric.',
+                'on_reverse_charges.required' => 'The overnight reverse pickup charges field is required.',
                 'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
                 'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -4277,6 +4299,8 @@ class AdminDashboardController extends Controller
                 'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
                 'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
                 'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
+                'ol_reverse_charges.numeric' => 'The overland reverse pickup charges field must be numeric.',
+                'ol_reverse_charges.required' => 'The overland reverse pickup charges field is required.',
                 'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
                 'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -4331,6 +4355,8 @@ class AdminDashboardController extends Controller
                 'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
                 'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
                 'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
+                'detain_reverse_charges.numeric' => 'The detain reverse pickup charges field must be numeric.',
+                'detain_reverse_charges.required' => 'The detain reverse pickup charges field is required.',
                 'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
                 'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -4382,6 +4408,8 @@ class AdminDashboardController extends Controller
                 'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
                 'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
                 'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
+                'sameday_reverse_charges.numeric' => 'The sameday reverse pickup charges field must be numeric.',
+                'sameday_reverse_charges.required' => 'The sameday reverse pickup charges field is required.',
                 'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
                 'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -4461,6 +4489,7 @@ class AdminDashboardController extends Controller
                     'on_wa_spkg.*' => 'numeric',
                     'on_replacement_charges' => 'required|numeric',
                     'on_tnb_charges' => 'required|numeric',
+                    'on_reverse_charges' => 'required|numeric',
                     'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
@@ -4498,6 +4527,7 @@ class AdminDashboardController extends Controller
                     'ol_wa_spkg.*' => 'numeric',
                     'ol_replacement_charges' => 'required|numeric',
                     'ol_tnb_charges' => 'required|numeric',
+                    'ol_reverse_charges' => 'required|numeric',
                     'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
@@ -4535,6 +4565,7 @@ class AdminDashboardController extends Controller
                     'detain_wa_spkg.*' => 'numeric',
                     'detain_replacement_charges' => 'required|numeric',
                     'detain_tnb_charges' => 'required|numeric',
+                    'detain_reverse_charges' => 'required|numeric',
                     'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
@@ -4569,6 +4600,7 @@ class AdminDashboardController extends Controller
                     'sameday_wa_spkg.*' => 'numeric',
                     'sameday_replacement_charges' => 'required|numeric',
                     'sameday_tnb_charges' => 'required|numeric',
+                    'sameday_reverse_charges' => 'required|numeric',
                     'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
@@ -4729,7 +4761,8 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
                         'replacement_charges' => $request->on_replacement_charges,
-                        'try_and_buy_charges' => $request->on_tnb_charges
+                        'try_and_buy_charges' => $request->on_tnb_charges,
+                        'reverse_pickup_charges' => $request->on_reverse_charges
                     ]);
                     //Cash handling Charges
                     if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
@@ -4955,7 +4988,9 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
                         'replacement_charges' => $request->ol_replacement_charges,
-                        'try_and_buy_charges' => $request->ol_tnb_charges
+                        'try_and_buy_charges' => $request->ol_tnb_charges,
+                        'reverse_pickup_charges' => $request->ol_reverse_charges
+
                     ]);
                     //Cash handling Charges
                     if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
@@ -5180,7 +5215,9 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'replacement_charges' => $request->detain_replacement_charges,
-                        'try_and_buy_charges' => $request->detain_tnb_charges
+                        'try_and_buy_charges' => $request->detain_tnb_charges,
+                        'reverse_pickup_charges' => $request->detain_reverse_charges
+
                     ]);
                     //Cash handling Charges
                     if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
@@ -5406,7 +5443,9 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
                         'replacement_charges' => $request->sameday_replacement_charges,
-                        'try_and_buy_charges' => $request->sameday_tnb_charges
+                        'try_and_buy_charges' => $request->sameday_tnb_charges,
+                        'reverse_pickup_charges' => $request->sameday_reverse_charges
+
                     ]);
                     //Cash handling Charges
                     if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
@@ -5757,7 +5796,8 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $bookingType['replacement_charges'],
-                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' =>$bookingType['reverse_pickup_charges']
                         ]);
                     }
                 }
@@ -5767,7 +5807,8 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $bookingType['replacement_charges'],
-                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' =>$bookingType['reverse_pickup_charges']
                         ]);
                     }
                 }
@@ -5777,7 +5818,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $bookingType['replacement_charges'],
-                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' =>$bookingType['reverse_pickup_charges']
+
                         ]);
                     }
                 }
@@ -5787,7 +5830,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $bookingType['replacement_charges'],
-                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' =>$bookingType['reverse_pickup_charges']
+
                         ]);
                     }
                 }
@@ -6355,7 +6400,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
-                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' => $pendingbookingType['reverse_pickup_charges'],
+
                         ]);
                     }
                 }
@@ -6365,7 +6412,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
-                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' => $pendingbookingType['reverse_pickup_charges'],
+
                         ]);
                     }
                 }
@@ -6375,7 +6424,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
-                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' => $pendingbookingType['reverse_pickup_charges'],
+
                         ]);
                     }
                 }
@@ -6385,7 +6436,9 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'replacement_charges' => $pendingbookingType['replacement_charges'],
-                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges'],
+                            'reverse_pickup_charges' => $pendingbookingType['reverse_pickup_charges'],
+
                         ]);
                     }
                 }
@@ -6893,6 +6946,8 @@ class AdminDashboardController extends Controller
             'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
             'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
             'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
+            'on_reverse_charges.numeric' => 'The overnight reverse pickup charges field must be numeric.',
+            'on_reverse_charges.required' => 'The overnight reverse pickup charges field is required.',
             'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
             'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
             'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -6949,6 +7004,8 @@ class AdminDashboardController extends Controller
             'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
             'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
             'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
+            'ol_reverse_charges.numeric' => 'The overland reverse pickup charges field must be numeric.',
+            'ol_reverse_charges.required' => 'The overland reverse pickup charges field is required.',
             'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
             'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
             'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -7003,6 +7060,8 @@ class AdminDashboardController extends Controller
             'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
             'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
             'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
+            'detain_reverse_charges.numeric' => 'The detain reverse pickup charges field must be numeric.',
+            'detain_reverse_charges.required' => 'The detain reverse pickup charges field is required.',
             'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
             'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
             'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -7054,6 +7113,8 @@ class AdminDashboardController extends Controller
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
             'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
             'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
+            'sameday_reverse_charges.numeric' => 'The sameday reverse pickup charges field must be numeric.',
+            'sameday_reverse_charges.required' => 'The sameday reverse pickup charges field is required.',
             'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
             'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
             'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -7134,6 +7195,7 @@ class AdminDashboardController extends Controller
                 'on_wa_spkg.*' => 'numeric',
                 'on_replacement_charges' => 'required|numeric',
                 'on_tnb_charges' => 'required|numeric',
+                'on_reverse_charges' => 'required|numeric',
                 'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                 'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                 'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
@@ -7171,6 +7233,7 @@ class AdminDashboardController extends Controller
                 'ol_wa_spkg.*' => 'numeric',
                 'ol_replacement_charges' => 'required|numeric',
                 'ol_tnb_charges' => 'required|numeric',
+                'ol_reverse_charges' => 'required|numeric',
                 'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                 'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                 'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
@@ -7208,6 +7271,7 @@ class AdminDashboardController extends Controller
                 'detain_wa_spkg.*' => 'numeric',
                 'detain_replacement_charges' => 'required|numeric',
                 'detain_tnb_charges' => 'required|numeric',
+                'detain_reverse_charges' => 'required|numeric',
                 'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                 'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                 'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
@@ -7242,6 +7306,7 @@ class AdminDashboardController extends Controller
                 'sameday_wa_spkg.*' => 'numeric',
                 'sameday_replacement_charges' => 'required|numeric',
                 'sameday_tnb_charges' => 'required|numeric',
+                'sameday_reverse_charges' => 'required|numeric',
                 'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                 'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                 'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
@@ -7371,7 +7436,8 @@ class AdminDashboardController extends Controller
                     'user_id' => $id,
                     'shipping_mode_id' => 1,
                     'replacement_charges' => $request->on_replacement_charges,
-                    'try_and_buy_charges' => $request->on_tnb_charges
+                    'try_and_buy_charges' => $request->on_tnb_charges,
+                    'reverse_pickup_charges' => $request->on_reverse_charges
                 ]);
                 //Cash handling Charges
                 if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
@@ -7602,7 +7668,8 @@ class AdminDashboardController extends Controller
                     'user_id' => $id,
                     'shipping_mode_id' => 2,
                     'replacement_charges' => $request->ol_replacement_charges,
-                    'try_and_buy_charges' => $request->ol_tnb_charges
+                    'try_and_buy_charges' => $request->ol_tnb_charges,
+                    'reverse_pickup_charges' => $request->ol_reverse_charges
                 ]);
                 //Cash handling Charges
                 if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
@@ -7833,7 +7900,8 @@ class AdminDashboardController extends Controller
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
                     'replacement_charges' => $request->detain_replacement_charges,
-                    'try_and_buy_charges' => $request->detain_tnb_charges
+                    'try_and_buy_charges' => $request->detain_tnb_charges,
+                    'reverse_pickup_charges' => $request->detain_reverse_charges
                 ]);
                 //Cash handling Charges
                 if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
@@ -8063,7 +8131,8 @@ class AdminDashboardController extends Controller
                     'user_id' => $id,
                     'shipping_mode_id' => 4,
                     'replacement_charges' => $request->sameday_replacement_charges,
-                    'try_and_buy_charges' => $request->sameday_tnb_charges
+                    'try_and_buy_charges' => $request->sameday_tnb_charges,
+                    'reverse_pickup_charges' => $request->sameday_reverse_charges
                 ]);
                 //Cash handling Charges
                 if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
@@ -8328,7 +8397,7 @@ class AdminDashboardController extends Controller
 
             $booking_type_charges_diff = 0;
             if ($booking_type_charges) {
-                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges || $standard_booking_type_charges->reverse_pickup_charges != $booking_type_charges->reverse_pickup_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
@@ -8460,7 +8529,7 @@ class AdminDashboardController extends Controller
 
             $booking_type_charges_diff = 0;
             if ($booking_type_charges) {
-                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges || $standard_booking_type_charges->reverse_pickup_charges != $booking_type_charges->reverse_pickup_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
@@ -8593,7 +8662,7 @@ class AdminDashboardController extends Controller
 
             $booking_type_charges_diff = 0;
             if ($booking_type_charges) {
-                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges || $standard_booking_type_charges->reverse_pickup_charges != $booking_type_charges->reverse_pickup_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
@@ -8727,7 +8796,7 @@ class AdminDashboardController extends Controller
 
             $booking_type_charges_diff = 0;
             if ($booking_type_charges) {
-                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges || $standard_booking_type_charges->reverse_pickup_charges != $booking_type_charges->reverse_pickup_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
