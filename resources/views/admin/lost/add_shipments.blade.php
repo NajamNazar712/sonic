@@ -321,7 +321,13 @@ label.error {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
                                
+                                var dropdownToUse = employeeDropdownHtml;
+                                var dropdownHtml =  dropdownToUse;
 
+                                if (counter_excel != 1) {
+                                    var lastDropdown = $(dropdownToUse).find("select").last().clone();
+                                    $(dropdownHtml).appendTo(lastDropdown.parent());
+                                }
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
                                 var shipment;
@@ -346,7 +352,7 @@ label.error {
                                             shipment.destination,
                                             shipment.hub,
                                             shipment.amount,
-                                            employeeDropdownHtml, shipment.employee_name, shipment.employee_type,
+                                            dropdownHtml, shipment.employee_name, shipment.employee_type,
                                             shipment.mode,
                                             shipment.service_type,
                                             action
