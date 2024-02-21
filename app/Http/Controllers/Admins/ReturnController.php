@@ -330,12 +330,20 @@ class ReturnController extends Controller
     //         ->select('id');
     //    }])
     //    ->get(['id','shipment_id','created_at'])->toArray();
-    $rvShipments = RvShipmentAssignAgent::with(['shipment.latest_shipment_journey' => function ($query) {
-        $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
-    }])
-    ->select('id', 'shipment_id', 'created_at')
-    ->get()
-    ->toArray();
+    // $rvShipments = RvShipmentAssignAgent::with(['shipment.latest_shipment_journey' => function ($query) {
+    //     $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
+    // }])
+    // ->select('id', 'shipment_id', 'created_at')
+    // ->get()
+    // ->toArray();
+
+        $rvShipments = RvShipmentAssignAgent::chunk(100, function ($agents) {
+            foreach ($agents as $agent) {
+                $agent->load(['shipment.latest_shipment_journey' => function ($query) {
+                    $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
+                }]);
+            }
+        });
 
 
        $details = [];
