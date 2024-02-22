@@ -55,20 +55,32 @@ trait LastMileAppReportTrait
                  ->whereDate('delivery_notes.created_at', $today);
                               if($delivery_note_data->exists()){
                  $delivery_note_data = $delivery_note_data->first();
-                 $exist_delivery_note_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today)->orderBy('created_at','desc  ')->pluck('rwdnsum_id')->first();
                  
-                 $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->where('id', $exist_delivery_note_shipment);
+                 $check_summary = RiderWiseDeliveryNoteSummary::join('rider_wise_delivery_notes as rwdn','rwdn.rwdnsum_id','rider_wise_delivery_note_summaries.id')->where('rider_id',$rider_id)->whereDate('delivery_date', $today)->where('rwdn.delivery_note_id', $delivery_note_id);
                 //  $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
-
                  if($check_summary->exists())
                  {
                      $check_summary = $check_summary->first();
-                     $rwdnsum_id = $check_summary->id; 
+                    $rwdnsum_id = $check_summary->rwdnsum_id; 
                     $finishTime = Carbon::parse($check_summary->delivery_date);
                     $totalDuration = $finishTime->diffInHours($time);
-
+                    
                     $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                     $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
+                    $check_summary->save();
+                    $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
+                    
+                    if(!$riderWiseShipmentNote->exists())
+                    {
+                        $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
+                        $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
+                        $new_delivery_note_shipment->rwdn_id = $check_summary->id;
+                        $new_delivery_note_shipment->shipment_id = $shipment_id;
+                        $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                        $new_delivery_note_shipment->updated_time = $time;
+                        $new_delivery_note_shipment->updated_via = $via;
+                        $new_delivery_note_shipment->save();
+                    }
 
                     if($totalDuration <= 0){
                          return true;   
