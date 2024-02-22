@@ -1170,7 +1170,7 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
-                            return $shipment;
+                            // return $shipment;
                             // dd(11,$shipment);
                         }
             
@@ -1342,6 +1342,7 @@ trait RvTrait
         //     return response()->json(['status' => 1, 'error' => 'No shipment found']);
         // }
         // }
+        dd(1, $shipment);
         // return $shipment;
     }
 
