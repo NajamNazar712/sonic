@@ -1069,9 +1069,9 @@ trait RvTrait
                     
                     // creating a new record
                     $this->rv_shipment_assign($data);
+                    $global_shipment = $shipment->id;
                     break;
                 }
-                $global_shipment = $shipment->id;
             
                 return false;
             }
