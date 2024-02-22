@@ -82,9 +82,9 @@ trait LastMileAppReportTrait
                         $new_delivery_note_shipment->save();
                     }
 
-                    if($totalDuration <= 0){
-                         return true;   
-                    }
+                    // if($totalDuration <= 0){
+                    //      return true;   
+                    // }
                     // if(!empty($check_summary->before_11_count) && $time <= '10:59:59')
                     // {
                     //     $check_summary->before_11_count = $check_summary->before_11_count - 1; 
