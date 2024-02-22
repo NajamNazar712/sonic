@@ -136,13 +136,23 @@ class ReturnV2Controller extends Controller
                         }
                         // $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->first();
                         $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->where('rv_assign_agent_status_id', null)->where('rv_assign_agent_sub_status_id', null)->where('assigned_to_type_id', '!=', 0)->where('assigned_by', '!=', 0)->first();
-                        if($assigned_shipment){
+                        
+                        // If no shipment is assigned, find an unassigned one
+                        if (!$assigned_shipment) {
+                            $already_assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)
+                                ->where('rv_state_id', 1)
+                                ->whereNull('rv_assign_agent_status_id')
+                                ->whereNull('rv_assign_agent_sub_status_id')
+                                ->first();
+
+                            // If no shipment is already assigned, assign a new one
+                            if (!$already_assigned_shipment) {
+                                $shipment = $this->included_shippers($agent_id);
+                            } else {
+                                $shipment = $already_assigned_shipment->shipment_id;
+                            }
+                        } else {
                             $shipment = $assigned_shipment->shipment_id;
-                        }
-                        else{
-                            // $shipment = $this->included_shippers($agent_sorted_hubs, $agent_sorted_hubs, $agent_id);
-                            $shipment = $this->included_shippers($agent_id);
-                            // dd($shipment);
                         }
                         if ($shipment) {
                             $shipment = Shipment::find($shipment);
