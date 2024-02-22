@@ -1,6 +1,6 @@
 <?php
 //Admin Routes Start
-Route::prefix('admin')->name('admin.')->group(function(){
+Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('admin.login');
     });
@@ -2489,7 +2489,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::prefix('bypass_weight')->name('bypass_weight.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
                 Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');
-      
+
             });
         });
 
@@ -2545,6 +2545,14 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::get('', 'Admins\Settings\GeneralSettingController@ticker_index')->name('index');
             Route::post('', 'Admins\Settings\GeneralSettingController@ticker_store')->name('store');
         });
+
+        // //test
+        // Route::prefix('shipper')->name('shipper.')->group(function () {
+        //     Route::prefix('cap')->name('cap.')->group(function () {
+        //         Route::get('', 'Admins\Settings\GeneralSettingController@shipper_cap_index')->name('index');
+        //         Route::post('', 'Admins\Settings\GeneralSettingController@tshipper_cap_store')->name('store');
+        //     });
+        // });
 
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
@@ -2649,7 +2657,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
             Route::post('add', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_add')->name('add');
         });
 
-        
+
         Route::prefix('csat_cases_setting')->name('csat_cases_setting.')->group(function () {
             Route::get('', 'Admins\AdminCrmSettingsController@csat_cases_setting_index')->name('index');
             Route::get('formula', 'Admins\AdminCrmSettingsController@csat_score_formula_index')->name('formula.index');
@@ -3301,13 +3309,22 @@ Route::prefix('admin')->name('admin.')->group(function(){
         Route::prefix('logistic_report_setting')->name('logistic_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@logistic_report_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@logistic_report_store')->name('store');
-        
+
         });
 
         Route::prefix('shipper_ibft_charges_settings')->name('shipper_ibft_charges_settings.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_list')->name('list');
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
+        });
+
+        Route::prefix('shipper_cap')->name('shipper_cap.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@shipper_cap_index')->name('index');
+            Route::get('list', 'Admins\Settings\GeneralSettingController@shipper_cap_list')->name('list');
+            Route::post('store', 'Admins\Settings\GeneralSettingController@shipper_cap_store')->name('store');
+            Route::post('edit', 'Admins\Settings\GeneralSettingController@shipper_cap_edit')->name('edit');
+            Route::post('update', 'Admins\Settings\GeneralSettingController@shipper_cap_update')->name('update');
+
         });
 
     });

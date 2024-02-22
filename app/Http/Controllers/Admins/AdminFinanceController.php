@@ -117,6 +117,8 @@ use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\ShipmentServicesCharges;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+
 
 class AdminFinanceController extends Controller
 {
@@ -4589,7 +4591,15 @@ class AdminFinanceController extends Controller
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        $shipper_cap   =   GeneralSetting::where('type','shipper_cap');
+        if($shipper_cap->exists())
+        {
+             $shipper_cap = $shipper_cap->first();
+
+        }else{
+             $shipper_cap=0;
+        }
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'shipper_cap'=>$shipper_cap]);
     }
 
   
@@ -5484,17 +5494,17 @@ class AdminFinanceController extends Controller
         $company_bank = $request->get('company_bank_id');
 
         $done_payment_ids = array();
-//        $present_consolidation_shipments = array();
-//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
-//            foreach ($pending_payment_shipment_ids as $shipment_id){
-//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
-//                if($present->exists()){
-//                    $present = $present->first();
-//                    $consolidation_id = $present->consolidation_id;
-//
-//                }
-//            }
-//        }
+        //        $present_consolidation_shipments = array();
+        //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+        //            foreach ($pending_payment_shipment_ids as $shipment_id){
+        //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+        //                if($present->exists()){
+        //                    $present = $present->first();
+        //                    $consolidation_id = $present->consolidation_id;
+        //
+        //                }
+        //            }
+        //        }
 
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
@@ -5749,6 +5759,42 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function make_done_payment($done_payment_id,$user_id,$total_shipments,$delivered_shipments,$returned_shipments,$adjusted_shipments,$user_bank_id,$company_bank)
+    {
+        if(is_null($done_payment_id))
+        {
+           $done_payment = new DonePayment();
+
+           $done_payment->user_id = $user_id;
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+           $done_payment->user_bank_info_id = $user_bank_id;
+           $done_payment->company_bank_id = $company_bank;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        } else {
+
+           $done_payment = DonePayment::find($done_payment_id);
+
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        }
+        
+
+    }
+    
     public function make_payments_stats_calculate(Request $request)
     {
         $total_amount = 0;
