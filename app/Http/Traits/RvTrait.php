@@ -1342,7 +1342,7 @@ trait RvTrait
         //     return response()->json(['status' => 1, 'error' => 'No shipment found']);
         // }
         // }
-        dd(1, $shipment);
+        dd(1, $shipments);
         // return $shipment;
     }
 
