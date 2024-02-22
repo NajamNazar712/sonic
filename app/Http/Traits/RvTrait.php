@@ -835,7 +835,7 @@ trait RvTrait
     protected function included_shippers($agent_id, $agent_shipment_id = null)
     {
         $connection = 'reports_2';
-        $shipment = null;
+        $global_shipment = null;
 
         //this wont be null if admin is assigning shipment to an agent
         if($agent_shipment_id)
@@ -1170,6 +1170,7 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
+                            $global_shipment = $shipment;
                             // return $shipment;
                             // dd(11,$shipment);
                         }
@@ -1342,8 +1343,8 @@ trait RvTrait
         //     return response()->json(['status' => 1, 'error' => 'No shipment found']);
         // }
         // }
-        dd(1, $shipments);
-        // return $shipment;
+        // dd(1, $shipment);
+        return $global_shipment;
     }
 
 
