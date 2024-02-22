@@ -320,42 +320,42 @@ class ReturnController extends Controller
            ->count();
 
 
-       //Average Response Time
-       $rvShipments = [];
-    //    $rvShipments = RvShipmentAssignAgent::with([
-    //     'shipment'=>function($shipment){
-    //         $shipment->with([
-    //             'latest_shipment_journey'=>function($query){
-    //                 $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
-    //         }])
-    //         ->select('id');
-    //    }])
-    //    ->get(['id','shipment_id','created_at'])->toArray();
+        //Average Response Time
+        $rvShipments = [];
+        //    $rvShipments = RvShipmentAssignAgent::with([
+        //     'shipment'=>function($shipment){
+        //         $shipment->with([
+        //             'latest_shipment_journey'=>function($query){
+        //                 $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
+        //         }])
+        //         ->select('id');
+        //    }])
+        //    ->get(['id','shipment_id','created_at'])->toArray();
 
-    //    $details = [];
-    //    $averageResponseTime = 0;
-    //    foreach ($rvShipments as $key => $rvShipment) {
-    //        $details['rv_shipment_created_at'][] = $rvShipment['created_at'];
+        //    $details = [];
+        //    $averageResponseTime = 0;
+        //    foreach ($rvShipments as $key => $rvShipment) {
+        //        $details['rv_shipment_created_at'][] = $rvShipment['created_at'];
 
-    //        $latestJourney =$rvShipment['shipment']['latest_shipment_journey'];
+        //        $latestJourney =$rvShipment['shipment']['latest_shipment_journey'];
 
-    //        $details['shipment_journey_rcp_latest'][] = isset($latestJourney['updated_at']) ? $latestJourney['updated_at'] : '-';
-    //    }
-    //    if($details){
-    //        for ($i = 0; $i < count($details['shipment_journey_rcp_latest']); $i++) {
-    //            if($details['shipment_journey_rcp_latest'][$i] != null){
-    //                $created_at = new DateTime($details['rv_shipment_created_at'][$i]);
-    //                $updated_at = new DateTime($details['shipment_journey_rcp_latest'][$i]);
-    //                $interval = $created_at->diff($updated_at);
-    //                $averageResponseTime += $interval->s + $interval->i * 60 + $interval->h * 3600;
-    //            }
-    //        }
-    //        $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
-    //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
-    //    }else{
-    //        $averageResponseTimeInSeconds = $averageResponseTime / 1;
-    //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
-    //    }
+        //        $details['shipment_journey_rcp_latest'][] = isset($latestJourney['updated_at']) ? $latestJourney['updated_at'] : '-';
+        //    }
+        //    if($details){
+        //        for ($i = 0; $i < count($details['shipment_journey_rcp_latest']); $i++) {
+        //            if($details['shipment_journey_rcp_latest'][$i] != null){
+        //                $created_at = new DateTime($details['rv_shipment_created_at'][$i]);
+        //                $updated_at = new DateTime($details['shipment_journey_rcp_latest'][$i]);
+        //                $interval = $created_at->diff($updated_at);
+        //                $averageResponseTime += $interval->s + $interval->i * 60 + $interval->h * 3600;
+        //            }
+        //        }
+        //        $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
+        //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
+        //    }else{
+        //        $averageResponseTimeInSeconds = $averageResponseTime / 1;
+        //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
+        //    }
 
        //Oldest Shipments
        $oldest_shipments = RvShipmentAssignAgent::join('shipments','rv_shipment_assign_agents.shipment_id','shipments.id')

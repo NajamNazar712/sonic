@@ -916,15 +916,18 @@ trait RvTrait
                     FROM shipments_journey
                     WHERE shipment_id = shipments.id
                 )
-            )');
+            )')
+            ->count();
 
-            if ($flag == true){
-                $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-            } else {
-                $shipments->orderBy('updated_at', 'ASC');
-            } 
+            dd(1,$shipments);
 
-            $shipments = $shipments->get(['id']);
+            // if ($flag == true){
+            //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+            // } else {
+            //     $shipments->orderBy('updated_at', 'ASC');
+            // } 
+
+            // $shipments = $shipments->get(['id']);
 
             // if($shipments->isEmpty()){
             //     continue;
@@ -965,20 +968,22 @@ trait RvTrait
                         FROM shipments_journey
                         WHERE shipment_id = shipments.id
                     )
-                )');
+                )')
+                ->count();
+                dd(2,$shipments);
                 if(!empty($rv_priority_shippers)){
                     $flag = true;
                 }else{
                     $flag = false;
                 }
                 
-                if ($flag == true){
-                    $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-                } else {
-                    $shipments->orderBy('updated_at', 'ASC');
-                } 
+                // if ($flag == true){
+                //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+                // } else {
+                //     $shipments->orderBy('updated_at', 'ASC');
+                // } 
                 
-                $shipments = $shipments->get(['id']);
+                // $shipments = $shipments->get(['id']);
                 
                 // if($shipments->isEmpty()){
                 //     continue;
