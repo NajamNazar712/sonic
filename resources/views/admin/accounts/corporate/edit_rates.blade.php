@@ -518,7 +518,7 @@
                                         <div class="row mt-2">
                                             <input type="hidden" name="on_booking_record" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->id != '')? $shippingType[1][0]->id : ''}}">
                                             {{--{{dd($e_shippingType[1])}}--}}
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -531,13 +531,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" >Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->try_and_buy_charges != $shippingType[1][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) @if(isset($shippingType[1][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->try_and_buy_charges != $shippingType[1][0]->try_and_buy_charges) {{$e_shippingType[1][0]->try_and_buy_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->try_and_buy_charges != '')? $shippingType[1][0]->try_and_buy_charges : ''}}" name="on_tnb_charges">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" >%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" >Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->reverse_pickup_charges != $shippingType[1][0]->reverse_pickup_charges) changed @elseif(!isset($e_shippingType[1][0]) && $existing == 1) @if(isset($shippingType[1][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[1][0]) && isset($shippingType[1][0]) && $e_shippingType[1][0]->reverse_pickup_charges != $shippingType[1][0]->reverse_pickup_charges) {{$e_shippingType[1][0]->reverse_pickup_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[1][0]) && $shippingType[1][0]->reverse_pickup_charges != '')? $shippingType[1][0]->reverse_pickup_charges : ''}}" name="on_reverse_charges">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" >%</span>
                                                         </div>
@@ -1475,7 +1488,7 @@
                                         <div class="row mt-2">
                                             <input type="hidden" name="ol_booking_record" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->id != '')? $shippingType[2][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -1488,13 +1501,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->try_and_buy_charges != $shippingType[2][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) @if(isset($shippingType[2][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->try_and_buy_charges != $shippingType[2][0]->try_and_buy_charges) {{$e_shippingType[2][0]->try_and_buy_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" name="ol_tnb_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->try_and_buy_charges != '')? $shippingType[2][0]->try_and_buy_charges : ''}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text" class="form-control @if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->reverse_pickup_charges != $shippingType[2][0]->reverse_pickup_charges) changed @elseif(!isset($e_shippingType[2][0]) && $existing == 1) @if(isset($shippingType[2][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[2][0]) && isset($shippingType[2][0]) && $e_shippingType[2][0]->reverse_pickup_charges != $shippingType[2][0]->reverse_pickup_charges) {{$e_shippingType[2][0]->reverse_pickup_charges}} @endif" data-rule-required="true" data-msg-required="This field is required" name="ol_reverse_charges" value="{{ (isset($shippingType[2][0]) && $shippingType[2][0]->reverse_pickup_charges != '')? $shippingType[2][0]->reverse_pickup_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -2451,7 +2477,7 @@
                                         <div class="row mt-2">
                                             <input type="hidden" name="detain_booking_record" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->id != '')? $shippingType[3][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -2464,13 +2490,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try &amp; Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->try_and_buy_charges != $shippingType[3][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) @if(isset($shippingType[3][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[3][0]) &&  isset($shippingType[3][0]) && $e_shippingType[3][0]->try_and_buy_charges != $shippingType[3][0]->try_and_buy_charges) {{$e_shippingType[3][0]->try_and_buy_charges}} @endif" name="detain_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->try_and_buy_charges != '')? $shippingType[3][0]->try_and_buy_charges : ''}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[3][0]) && isset($shippingType[3][0]) && $e_shippingType[3][0]->reverse_pickup_charges != $shippingType[3][0]->reverse_pickup_charges) changed @elseif(!isset($e_shippingType[3][0]) && $existing == 1) @if(isset($shippingType[3][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[3][0]) &&  isset($shippingType[3][0]) && $e_shippingType[3][0]->reverse_pickup_charges != $shippingType[3][0]->reverse_pickup_charges) {{$e_shippingType[3][0]->reverse_pickup_charges}} @endif" name="detain_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[3][0]) && $shippingType[3][0]->reverse_pickup_charges != '')? $shippingType[3][0]->reverse_pickup_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -3348,7 +3387,7 @@
                                         <div class="row mt-2">
                                             <input type="hidden" name="sameday_booking_record" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->id != '')? $shippingType[4][0]->id : ''}}">
 
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
@@ -3361,13 +3400,26 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-3 text-center">
+                                            <div class="col-md-2 text-center">
                                                 <fieldset>
                                                     <div class="input-group form-group">
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text">Try & Buy</span>
                                                         </div>
                                                         <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->try_and_buy_charges != $shippingType[4][0]->try_and_buy_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) @if(isset($shippingType[4][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->try_and_buy_charges != $shippingType[4][0]->try_and_buy_charges) {{$e_shippingType[4][0]->try_and_buy_charges}} @endif" name="sameday_tnb_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->try_and_buy_charges != '')? $shippingType[4][0]->try_and_buy_charges : ''}}">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-md-2 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">Reverse Pickup</span>
+                                                        </div>
+                                                        <input type="text"  class="form-control @if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->reverse_pickup_charges != $shippingType[4][0]->reverse_pickup_charges) changed @elseif(!isset($e_shippingType[4][0]) && $existing == 1) @if(isset($shippingType[4][0])) new @endif @endif percent" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="@if(isset($e_shippingType[4][0]) && isset($shippingType[4][0]) && $e_shippingType[4][0]->reverse_pickup_charges != $shippingType[4][0]->reverse_pickup_charges) {{$e_shippingType[4][0]->reverse_pickup_charges}} @endif" name="sameday_reverse_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($shippingType[4][0]) && $shippingType[4][0]->reverse_pickup_charges != '')? $shippingType[4][0]->reverse_pickup_charges : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
