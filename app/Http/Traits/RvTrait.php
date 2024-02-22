@@ -835,7 +835,7 @@ trait RvTrait
     protected function included_shippers($agent_id, $agent_shipment_id = null)
     {
         $connection = 'reports_2';
-        $global_shipment = null;
+        $global_shipment = 22;
 
         //this wont be null if admin is assigning shipment to an agent
         if($agent_shipment_id)
@@ -1096,10 +1096,9 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
                 
-                $shipments = $shipments->select('id', 'shipper_status_id');
-                $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
-
-                    if ($shipments || $agent_shipment_id) {
+                $shipments = $shipments->select('id');
+                $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
+                    if ($shipments->count() || $agent_shipment_id) {
 
                         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                         if ($shipments && $agent_shipment_id == null)
@@ -1171,10 +1170,10 @@ trait RvTrait
                                 break;
                             }
                             $global_shipment = $shipment->id;
-                            // return $shipment;
-                            dd(11,$shipment->id, $shipment->shipper_status_id);
+                        
+                            return false;
                         }
-            
+                        
                         //this check will work only if admin will assign shipment manually to agent 
                         else if($agent_shipment_id){
                             // if agent shipment is assigned - not assigned to same agent only 
@@ -1210,12 +1209,13 @@ trait RvTrait
                             // return true;
                             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                         }
-            
+                        
                     }
                     else {
                         return response()->json(['status' => 1, 'error' => 'No shipment found']);
                     }
                 });
+                // dd($global_shipment);
                 
                 // if($shipments->isEmpty()){
                 //     continue;
@@ -1343,8 +1343,8 @@ trait RvTrait
         //     return response()->json(['status' => 1, 'error' => 'No shipment found']);
         // }
         // }
-        dd(1, $global_shipment);
-        // return $global_shipment;
+        // dd(2, $global_shipment);
+        return $global_shipment;
     }
 
 
