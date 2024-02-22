@@ -1098,6 +1098,7 @@ trait RvTrait
                 } 
                 
                 $shipments = $shipments->select('id');
+
                 $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
                     if ($shipments->count() || $agent_shipment_id) {
 
@@ -1105,7 +1106,6 @@ trait RvTrait
                         if ($shipments && $agent_shipment_id == null)
                         {
                             foreach ($shipments as $key => $shipment) {
-                                dd($shipment->id);
                                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                                 $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                                 if ($shipment_assigned_unassigned_agent->exists()) {
@@ -1149,7 +1149,8 @@ trait RvTrait
                                 // Shipment is found and already in working state or return is completed, new shipment will get to agent
                                 $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                                 if ($find_shipment_assigned_agent ) {
-                                    $shipment = null;
+                                    dd($shipment->id);
+                                    // $shipment = null;
                                     continue;
                                 }
                                 
