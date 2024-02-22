@@ -1100,12 +1100,12 @@ trait RvTrait
                 $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
 
                     if ($shipments || $agent_shipment_id) {
-                        dd(1,$shipments);
 
                         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                         if ($shipments && $agent_shipment_id == null)
                         {
                             foreach ($shipments as $key => $shipment) {
+                                dd($shipment->id);
                                 
                                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                                 $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
