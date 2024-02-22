@@ -337,12 +337,12 @@ label.error {
                                 $.each(shipmentIDs, function (index, id) {
                                     var tracking_number = shipmentData[id].tracking_number;
                                     if(counter_excel <= limit){
-                                            var index = $.inArray(id, shipment_ids);
+                                        console.log(counter_excel);
+                                        var index = $.inArray(id, shipment_ids);
+                                        shipment = shipmentData[id];
+                                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
+                                            var rowNo = table.rows().count();
                                             counter_excel+=1
-                                            shipment = shipmentData[id];
-                                            if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
-                                                var rowNo = table.rows().count();
-        
                                             var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                             table.row.add([
                                             rowNo + 1,
@@ -357,7 +357,7 @@ label.error {
                                             shipment.service_type,
                                             action
                                         ]).node().id = id;
-        
+
                                             table.draw(false);
                                             scan_sound(1);
                                             table.order([0, 'desc']).draw();
@@ -513,6 +513,8 @@ label.error {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, shipment_ids);
                 counter -=1;
+                counter_excel-=1
+                console.log(counter_excel);
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
                 }
