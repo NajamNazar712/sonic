@@ -1170,7 +1170,7 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
-                            dd(11,$shipment);
+                            return $shipment;
                         }
             
                         //this check will work only if admin will assign shipment manually to agent 
