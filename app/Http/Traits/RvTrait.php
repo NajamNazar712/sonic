@@ -1105,7 +1105,7 @@ trait RvTrait
                         if ($shipments && $agent_shipment_id == null)
                         {
                             foreach ($shipments as $key => $shipment) {
-                                
+                                dd($shipment->id);
                                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
                                 $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                                 if ($shipment_assigned_unassigned_agent->exists()) {
