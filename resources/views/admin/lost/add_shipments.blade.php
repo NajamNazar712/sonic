@@ -13,6 +13,8 @@
                 <div class="alert alert-danger d-none">
                     
                 </div>
+
+
                 <form id="lost_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="row align-items-center justify-content-center">
                         <div class="form-group">
@@ -22,12 +24,13 @@
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
-                        
+
                     </div>
                 </form>
+
+               
                 @if( session('role_id') == 1|| in_array(890, session('permissions')))
                 <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
-                    
 
                     <div class="row align-items-center justify-content-center">
                         <div class="col">
@@ -37,7 +40,7 @@
                         </div>
                         <div class="col">
                             <div class="form-group pt-2 text-left">
-                                <button type="submit" name="upload" class="btn btn-primary" value="upload">Upload</button>
+                                <button type="submit" name="upload" id="upload" class="btn btn-primary" value="upload" disabled>Upload</button>
                             </div>
                         </div>
 
@@ -45,6 +48,19 @@
                             <div class="form-group text-right">
                                 <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                             </div>
+                        </div>
+
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="employee_excel" class="employee_excel" id="employee_excel" class="form-control select2 dynamic" data-dependent="from"
+                                        required>
+                                    @foreach($employees as $employee)
+                                        <option value="{{$employee->trax_id}}">{{$employee->name}}</option>
+                                    @endforeach
+                                </select>
+                                <div class="danger" id="hub_error" style="display:none;">This field is required</div>
+                            </fieldset>
+    
                         </div>
                     </div>
                 </form>
@@ -73,6 +89,8 @@
                         </thead>
                     </table>
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+                    <input type="hidden" name="trax_id" id="trax_id">
+
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <button type="submit" class="btn btn-primary btn-block" disabled id="update_lost_form_submit">Submit</button>
@@ -133,8 +151,25 @@ label.error {
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var excel_employee_value;
+            $('#employee_excel').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Employee*',
+                allowClear: true,
+            }).on('change', function(){
+                excel_employee_value = $(this).val();
+                if(excel_employee_value){
+                    $('#excel_upload_form #upload').removeAttr('disabled');
+                    trax_id.push(excel_employee_value)
+                    $('#update_lost_form input#trax_id').val(trax_id);
+                }else{
+                    $('#excel_upload_form #upload').attr('disabled', true)
+                }
+            });
             var employees = @json($employees); // Assuming $admins is a PHP variable containing admin data
             var shipment_ids = [];
+            var trax_id = [];
+
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true,
@@ -173,7 +208,9 @@ label.error {
             var counter_excel = 0;
             var limit = 19;
             var excluded_shipment = [];
-            var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml"><option value=""></option>';
+            var change = {}
+
+            var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml" multiple = "multiple"><option value=""></option>';
             $.each(employees, function (index, value) {
                 if(value.trax_id){
                     employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
@@ -185,6 +222,7 @@ label.error {
                 'allowMinus': false,
                 'allowPlus': false
             });
+           
             {{--var cities_array = @json($cities);--}}
             $('#lost_shipment_form').validate({
                 errorClass: 'danger',
@@ -213,7 +251,8 @@ label.error {
                                 if (data.status == 1 && counter <= limit) {
                                     UnblockPagePermanently();
                                     id = data.details.id;
-
+                                    var inputElementName;
+                                    var inputElementType;
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
@@ -227,42 +266,75 @@ label.error {
                                             width: '100%',
                                             placeholder: "Search Here...",
                                             minimumInputLength: 4,
-                                        }).on('change', function() {
-                                            var traxID = $(this).val(); 
-                                            var row = $(this).closest('tr'); 
+                                            maximumSelectionLength: 3, // Limiting selection to 3 options
+                                        }).on('change', function(e) {
+                                            var traxID = $(this).val();
+                                            var row = $(this).closest('tr');
+                                            var trackingNumber = data.details.tracking_number;
+                                            
+                                            if (!change[trackingNumber]) {
+                                                change[trackingNumber] = [];
+                                            }
+                                            $.each(traxID, function(index, value) {
+                                                var existingChangeIndex = change[trackingNumber].findIndex(function(item) {
+                                                    return item.value === value;
+                                                });
 
-                                            $.ajax({
-                                                url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
-                                                method: 'POST', 
-                                                data: {
-                                                    '_token': '{{ csrf_token() }}',
-                                                    'trax_id': traxID
-                                                },                                 
-                                                success: function(response) {
-                                                    if(response.status == 1){
-                                                        var inputElementName = row.find('input[name="employee_name[' + data.details.id + ']"]');
-                                                        inputElementName.val(response.details.name); 
-
-                                                        var inputElementType = row.find('input[name="employee_type[' + data.details.id + ']"]');
-                                                        inputElementType.val(response.details.type); 
-                                                    }
-                                                },
-                                                error: function(xhr, status, error) {
-                                                    // Handle errors
-                                                    console.error(xhr.responseText);
+                                                if (existingChangeIndex === -1) {
+                                                    change[trackingNumber].push({
+                                                        value: value,
+                                                        row: row
+                                                    });
                                                 }
-                                            });
-                                        });
 
+                                                console.log(change);
+                                                $.ajax({
+                                                    url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        '_token': '{{ csrf_token() }}',
+                                                        'trax_id': value
+                                                    },
+                                                    success: function(response) {
+                                                        if (response.status == 1) {
+                                                            inputElementName = row.find('input[name="employee_name[' + data.details.id + index + ']"]');
+                                                            inputElementName.val(response.details.name);
+                                                            inputElementName.removeClass('d-none');
+
+                                                            trax_id.push(value);
+                                                            inputElementType = row.find('input[name="employee_type[' + data.details.id + index + ']"]');
+                                                            inputElementType.val(response.details.type);
+                                                            inputElementType.removeClass('d-none');
+                                                        } 
+                                                    },
+                                                    error: function(xhr, status, error) {
+                                                        // Handle errors
+                                                        console.error(xhr.responseText);
+                                                    }
+                                                });
+                                            });
+                                        }).on('select2:unselecting', function(e) {
+                                            var unselectedValue = e.params.args.data.id;
+                                            var trackingNumber = data.details.tracking_number;
+                                            if (change[trackingNumber]) {
+                                                // Remove the unselected value from the change object
+                                                change[trackingNumber] = change[trackingNumber].filter(function(item) {
+                                                    return item.value !== unselectedValue;
+                                                });
+                                            }
+                                            console.log(change);
+
+                                            var row = $(this).closest('tr');
+                                            var inputElementName = row.find('input[name^="employee_name"]');
+                                            var inputElementType = row.find('input[name^="employee_type"]');
+                                            inputElementName.addClass('d-none');
+                                            inputElementType.addClass('d-none');
+                                        });
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
-
                                         shipment_ids.push(data.details.id);
-
                                         $('#lost_shipment_form button.add').prop('disabled', false);
-
                                         $('#update_lost_form_submit').prop('disabled', false);
-
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
@@ -305,11 +377,12 @@ label.error {
                 // Create a new FormData object
                 var formData = new FormData();
                 formData.append('excel', file);
+                formData.append('excel_employee_value', excel_employee_value);
                 // Make the AJAX request
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
                     method: 'POST',
-                    data: formData,
+                    data: formData, 'excel_employee_value': excel_employee_value,
                     processData: false, // Prevent automatic processing of data
                     contentType: false, // Prevent automatic content-type header
                     headers: {
@@ -320,24 +393,15 @@ label.error {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
-                               
-                                var dropdownToUse = employeeDropdownHtml;
-                                var dropdownHtml =  dropdownToUse;
-
-                                if (counter_excel != 1) {
-                                    var lastDropdown = $(dropdownToUse).find("select").last().clone();
-                                    $(dropdownHtml).appendTo(lastDropdown.parent());
-                                }
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
                                 var shipment;
                                 var alreadyAddedShipments = [];
                                 id = data.details;
-
+                                
                                 $.each(shipmentIDs, function (index, id) {
                                     var tracking_number = shipmentData[id].tracking_number;
                                     if(counter_excel <= limit){
-                                        console.log(counter_excel);
                                         var index = $.inArray(id, shipment_ids);
                                         shipment = shipmentData[id];
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
@@ -352,44 +416,48 @@ label.error {
                                             shipment.destination,
                                             shipment.hub,
                                             shipment.amount,
-                                            dropdownHtml, shipment.employee_name, shipment.employee_type,
+                                            shipment.employee_trax_id, shipment.employee_name, shipment.employee_type,
                                             shipment.mode,
                                             shipment.service_type,
                                             action
                                         ]).node().id = id;
+                                        
+                                        $('.employee_excel').on('change', function() {
+                                            $.ajax({
+                                                url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                                                method: 'POST', 
+                                                data: {
+                                                    '_token': '{{ csrf_token() }}',
+                                                    'trax_id': excel_employee_value
+                                                },                                 
+                                                success: function(response) {
+                                                    if(response.status == 1){
+                                                        var row = $('tr');
+                                                        var inputElementTraxID = row.find('input[name="employee_trax_id[' + id + ']"]');
+                                                        inputElementTraxID.val(response.details.trax_id); 
 
+                                                        if (trax_id.indexOf(response.details.trax_id) === -1) {
+                                                            trax_id.push(response.details.trax_id)
+                                                        }
+
+                                                        $('#update_lost_form input#trax_id').val(trax_id);
+
+                                                        var inputElementName = row.find('input[id="employee_name[' + id + ']"]');
+                                                        inputElementName.val(response.details.name); 
+
+                                                        var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
+                                                        inputElementType.val(response.details.type); 
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    // Handle errors
+                                                    console.error(xhr.responseText);
+                                                }
+                                            });
+                                        });
                                             table.draw(false);
                                             scan_sound(1);
                                             table.order([0, 'desc']).draw();
-                                            $('.employeeDropdownHtml').select2({
-                                                width: '100%',
-                                                placeholder: "Search Here...",
-                                                minimumInputLength: 4,
-                                            }).on('change', function() {
-                                                var traxID = $(this).val(); 
-                                                var row = $(this).closest('tr'); 
-                                                $.ajax({
-                                                    url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
-                                                    method: 'POST', 
-                                                    data: {
-                                                        '_token': '{{ csrf_token() }}',
-                                                        'trax_id': traxID
-                                                    },                                 
-                                                    success: function(response) {
-                                                        if(response.status == 1){
-                                                            var inputElementName = row.find('input[name="employee_name[' + id + ']"]');
-                                                            inputElementName.val(response.details.name); 
-
-                                                            var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
-                                                            inputElementType.val(response.details.type); 
-                                                        }
-                                                    },
-                                                    error: function(xhr, status, error) {
-                                                        // Handle errors
-                                                        console.error(xhr.responseText);
-                                                    }
-                                                });
-                                            });
                                             shipment_ids.push(id);
                                             shipmentAdded = true;
 

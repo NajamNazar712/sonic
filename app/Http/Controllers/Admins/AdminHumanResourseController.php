@@ -5860,8 +5860,8 @@ class AdminHumanResourseController extends Controller
         if($employee->exists()){
             $employee = $employee->first();
             $details = array();
-            $details['name'] = $employee->name;
             $details['trax_id'] = $employee->trax_id;
+            $details['name'] = $employee->name;
             $details['type'] = $employee->employee_type->name;
             
 

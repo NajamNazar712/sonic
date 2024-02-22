@@ -365,8 +365,14 @@ class LostShipmentsController extends Controller
                         $data['amount'] = number_format($shipment->amount);
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
-                        $data['employee_name'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" name="employee_name[' . $shipment->id . ']" readonly>';
-                        $data['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" name="employee_type[' . $shipment->id. ']" readonly>';
+                        $data['employee_trax_id'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" value = "" name="employee_trax_id[' . $shipment->id . ']" readonly>';
+                        $data['employee_name'] = '<input class="form-control d-none" id="' . $shipment->id . '0" form-control-sm" name="employee_name[' . $shipment->id . '0]" readonly> <br> 
+                        <input class="form-control d-none" id="' . $shipment->id . '1" form-control-sm" name="employee_name[' . $shipment->id . '1]" readonly> <br>
+                        <input class="form-control d-none" id="' . $shipment->id . '2" form-control-sm" name="employee_name[' . $shipment->id . '2]" readonly>';
+
+                        $data['employee_type'] = '<input class="form-control d-none" id="' . $shipment->id . '0" form-control-sm" name="employee_type[' . $shipment->id . '0]" readonly> <br>
+                        <input class="form-control d-none" id="' . $shipment->id . '1" form-control-sm" name="employee_type[' . $shipment->id . '1]" readonly> <br>
+                        <input class="form-control d-none" id="' . $shipment->id . '2" form-control-sm" name="employee_type[' . $shipment->id . '2]" readonly>';
 
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 1, 'details' => $data]);
@@ -490,6 +496,7 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
+        $employee = Employee::where('trax_id' , $request->excel_employee_value)->first();
         $status_array = array(5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
         $names = [
             'tracking_number' => 'Tracking Number',
@@ -633,8 +640,9 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
-                        $data[$shipment->id]['employee_name'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" name="employee_name[' . $shipment->id . ']" readonly>';
-                        $data[$shipment->id]['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" name="employee_type[' . $shipment->id. ']" readonly>';
+                        $data[$shipment->id]['employee_trax_id'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" value = "' . $employee->trax_id . '" name="employee_trax_id[' . $shipment->id . ']" readonly>';
+                        $data[$shipment->id]['employee_name'] = '<input class="form-control" id="employee_name[' . $shipment->id . ']"  form-control-sm" value = "' . $employee->name . '" name="employee_name[' . $employee->trax_id . ']" readonly>';
+                        $data[$shipment->id]['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" value = "' . $employee->employee_type->name . '" name="employee_type[' . $shipment->id. ']" readonly>';
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
