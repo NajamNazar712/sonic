@@ -142,6 +142,7 @@ class ReturnV2Controller extends Controller
                         else{
                             // $shipment = $this->included_shippers($agent_sorted_hubs, $agent_sorted_hubs, $agent_id);
                             $shipment = $this->included_shippers($agent_id);
+                            dd($shipment);
                         }
                         if ($shipment) {
                             $shipment = Shipment::find($shipment->id);
