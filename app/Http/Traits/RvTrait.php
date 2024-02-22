@@ -1099,7 +1099,7 @@ trait RvTrait
                 
                 $shipments = $shipments->select('id');
 
-                $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
+                $shipments = $shipments->chunk(3000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
                     if ($shipments->count() || $agent_shipment_id) {
 
                         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
@@ -1150,7 +1150,7 @@ trait RvTrait
                                 $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                                 if ($find_shipment_assigned_agent ) {
                                     // dd($shipment->id);
-                                    // $shipment = null;
+                                    $shipment = null;
                                     continue;
                                 }
                                 
