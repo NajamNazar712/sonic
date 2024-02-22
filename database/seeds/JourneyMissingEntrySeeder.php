@@ -24,10 +24,12 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [37149634, 37087937, 37167298, 37058183, 36874709, 36680250, 36672671, 37188410, 37134893, 37082869, 36980277, 36954300, 36917192, 36836072, 37051864, 37210910, 37196631, 37159596, 37152661, 37120685, 37079851, 37039072];
+        $shipmentId = [36874709, 36680250, 36672671, 37188410, 37134893, 37082869, 36980277, 36954300, 36917192, 36836072, 37051864, 37210910, 37196631, 37159596, 37152661, 37120685, 37079851, 37039072];
         if ($shipmentId) {
-            foreach ($shipmentId as $value) {
-                $shipment = Shipment::find($value);
+            $shipmentId = Shipment::whereIn('id', $shipmentId)->get();
+
+            foreach ($shipmentId as $shipment) {
+
                 if ($shipment->shipper_status_id === 5) {
                     // $shipment->created_at = $shipment->updated_at;
                     $shipment->updated_at = $shipment->updated_at;
