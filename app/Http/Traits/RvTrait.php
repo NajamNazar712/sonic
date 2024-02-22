@@ -837,7 +837,7 @@ trait RvTrait
         $connection = 'reports_2';
         $global_shipment = null;
 
-        $chunkCount = 100;
+        $chunkCount = 1000;
 
         //this wont be null if admin is assigning shipment to an agent
         if($agent_shipment_id)
