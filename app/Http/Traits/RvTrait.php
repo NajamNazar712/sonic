@@ -1096,7 +1096,7 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
                 
-                $shipments = $shipments->select('id');
+                $shipments = $shipments->select('id', 'shipper_status_id');
                 $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
 
                     if ($shipments || $agent_shipment_id) {
