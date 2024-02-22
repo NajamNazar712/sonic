@@ -999,7 +999,9 @@ trait RvTrait
                             $global_shipment = $shipment->id;
                             break;
                         }
-                        return false;
+                        if($global_shipment){
+                            return false;
+                        }
                     }
         
                     //this check will work only if admin will assign shipment manually to agent 
@@ -1099,7 +1101,7 @@ trait RvTrait
                 
                 $shipments = $shipments->select('id');
 
-                $shipments = $shipments->chunk(3000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
+                $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
                     if ($shipments->count() || $agent_shipment_id) {
 
                         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
@@ -1172,8 +1174,9 @@ trait RvTrait
                                 $global_shipment = $shipment->id;
                                 break;
                             }
-                        
-                            return false;
+                            if($global_shipment){
+                                return false;
+                            }
                         }
                         
                         //this check will work only if admin will assign shipment manually to agent 
