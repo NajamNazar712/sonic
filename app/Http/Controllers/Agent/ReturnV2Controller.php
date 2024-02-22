@@ -147,7 +147,7 @@ class ReturnV2Controller extends Controller
                                 WHERE shipment_id = s.id
                             )
                         )')
-                        ->whereIn('s.shipper_status_id', [12,65,66,52])
+                        ->whereIn('s.shipper_status_id', [12,66,52])
                         ->where('agent_id', $agent_id)
                         ->where('rv_state_id', 1)
                         ->where('rv_assign_agent_status_id', null)
@@ -156,7 +156,7 @@ class ReturnV2Controller extends Controller
                         ->where('assigned_by', '!=', 0)
                         ->first();
                         
-                        // If no shipment is assigned and shipment status is (12,65,66,52) and no reasons id 12, 27, 35 on shipment journey, find an unassigned one
+                        // If no shipment is assigned and shipment status is (12,66,52) and no reasons id 12, 27, 35 on shipment journey, find an unassigned one
                         if (!$assigned_shipment) {
                             $already_assigned_shipment = RvShipmentAssignAgent::join('shipments as s', 'rv_shipment_assign_agents.shipment_id', '=', 's.id')
                             ->whereRaw('NOT EXISTS (
@@ -172,7 +172,7 @@ class ReturnV2Controller extends Controller
                             )')
                             ->where('agent_id', $agent_id)
                             ->where('rv_state_id', 1)
-                            ->whereIn('s.shipper_status_id', [12,65,66,52])
+                            ->whereIn('s.shipper_status_id', [12,66,52])
                             ->whereNull('rv_assign_agent_status_id')
                             ->whereNull('rv_assign_agent_sub_status_id')
                             ->first();

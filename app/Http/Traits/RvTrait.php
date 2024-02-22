@@ -414,8 +414,8 @@ trait RvTrait
             }
         }
 
-        if (in_array($parcel->shipper_status_id, [12, 52, 65, 66])) { 
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 65, 66])->latest('id')->first();
+        if (in_array($parcel->shipper_status_id, [12, 52, 66])) { 
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52,  66])->latest('id')->first();
 
             if ($journey) {
                 if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -482,11 +482,10 @@ trait RvTrait
         // 12 = Shipment - Reason Validation Required
         // 15 = Shipment - On Hold for Self Collection
         // 52 = Shipment - Re-Attempt Requested
-        // 65 = Shipment - Shipper Advise Requested 
         // 66 = Shipment - Re-Attempt Call Requested (from shipper)
 
-        // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) { old for rv
-        if (in_array($parcel->shipper_status_id, [12, 52, 65, 66])) {
+        // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52])) { old for rv
+        if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -570,7 +569,7 @@ trait RvTrait
                 $crm = true;
             }
 
-            if (in_array($shipment->shipper_status_id, [12, 52, 65, 66]) || $crm == true) {
+            if (in_array($shipment->shipper_status_id, [12, 52, 66]) || $crm == true) {
                 if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name 
                 || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 
                 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email 
@@ -896,7 +895,7 @@ trait RvTrait
             }   
 
             $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
-            ->whereIn('shipper_status_id', [12,65,66,52])
+            ->whereIn('shipper_status_id', [12,66,52])
             // ->where('consignee_city_id', $agent->city_id)  
             ->whereRaw('NOT EXISTS (
                 SELECT sj.id
@@ -935,7 +934,7 @@ trait RvTrait
                                 ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
                                 
                                 $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->latest()->first();
-                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
         
                                 $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
                                         'shipments_journey_id' => $shipments_journey->id,
@@ -971,7 +970,7 @@ trait RvTrait
                                 continue;
                             }
                             
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                            $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                             
                             $data = [
                                 'agent_id' => $agent_id,
@@ -1011,7 +1010,7 @@ trait RvTrait
                             return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                         }
         
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                         $data = [
                             'agent_id' => $agent_id,
                             'shipment_id' => $agent_shipment_id,
@@ -1064,7 +1063,7 @@ trait RvTrait
             if (!empty($result)){
                 $exploded_result = implode(',', $result);
                 // $shipments = Shipment::where('consignee_city_id', $agent->city_id)
-                $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,65,66,52])
+                $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,66,52])
                 ->whereIn('user_id', $result)
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
@@ -1107,7 +1106,7 @@ trait RvTrait
                                     ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
                                     
                                     $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->latest()->first();
-                                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
             
                                     $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
                                             'shipments_journey_id' => $shipments_journey->id,
@@ -1144,7 +1143,7 @@ trait RvTrait
                                     continue;
                                 }
                                 
-                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                                 
                                 $data = [
                                     'agent_id' => $agent_id,
@@ -1184,7 +1183,7 @@ trait RvTrait
                                 return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                             }
             
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                            $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                             $data = [
                                 'agent_id' => $agent_id,
                                 'shipment_id' => $agent_shipment_id,
@@ -1237,7 +1236,7 @@ trait RvTrait
                         ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
                         
                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->latest()->first();
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
 
                         $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
                                 'shipments_journey_id' => $shipments_journey->id,
@@ -1273,7 +1272,7 @@ trait RvTrait
                         continue;
                     }
                     
-                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                     
                     $data = [
                         'agent_id' => $agent_id,
@@ -1312,7 +1311,7 @@ trait RvTrait
                     return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                 }
 
-                $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
+                $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                 $data = [
                     'agent_id' => $agent_id,
                     'shipment_id' => $agent_shipment_id,
@@ -1444,7 +1443,7 @@ trait RvTrait
     {
         try 
         {
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12,65,66,52])->first();
+            $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12,66,52])->first();
 
             if($shipments_journey){
                 $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', null)->first();
