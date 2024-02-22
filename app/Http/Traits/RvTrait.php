@@ -1170,9 +1170,9 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
-                            $global_shipment = $shipment;
+                            $global_shipment = $shipment->id;
                             // return $shipment;
-                            dd(11,$global_shipment);
+                            // dd(11,$global_shipment);
                         }
             
                         //this check will work only if admin will assign shipment manually to agent 
