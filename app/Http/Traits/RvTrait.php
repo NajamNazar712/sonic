@@ -925,7 +925,7 @@ trait RvTrait
             } 
 
             $shipments = $shipments->select('id');
-            $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
+            $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id,&$global_shipment ) {
 
                 if (count($shipments) || $agent_shipment_id) {
 
@@ -996,6 +996,7 @@ trait RvTrait
                             
                             // creating a new record
                             $this->rv_shipment_assign($data);
+                            $global_shipment = $shipment->id;
                             break;
                         }
                         return false;

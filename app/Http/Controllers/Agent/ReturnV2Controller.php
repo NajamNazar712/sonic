@@ -137,7 +137,7 @@ class ReturnV2Controller extends Controller
                         // $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->first();
                         $assigned_shipment = RvShipmentAssignAgent::where('agent_id', $agent_id)->where('rv_state_id', 1)->where('rv_assign_agent_status_id', null)->where('rv_assign_agent_sub_status_id', null)->where('assigned_to_type_id', '!=', 0)->where('assigned_by', '!=', 0)->first();
                         if($assigned_shipment){
-                            $shipment = Shipment::find($assigned_shipment->shipment_id);
+                            $shipment = $assigned_shipment->shipment_id;
                         }
                         else{
                             // $shipment = $this->included_shippers($agent_sorted_hubs, $agent_sorted_hubs, $agent_id);
