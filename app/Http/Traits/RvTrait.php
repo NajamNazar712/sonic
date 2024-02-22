@@ -927,7 +927,7 @@ trait RvTrait
             $shipments = $shipments->select('id');
             $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
 
-                if ($shipments->count() || $agent_shipment_id) {
+                if (count($shipments) || $agent_shipment_id) {
 
                     //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                     if ($shipments && $agent_shipment_id == null)
@@ -1095,8 +1095,9 @@ trait RvTrait
                     $shipments->orderBy('updated_at', 'ASC');
                 } 
                 
+                $shipments = $shipments->select('id');
                 $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id) {
-                    if ($shipments->count() || $agent_shipment_id) {
+                    if (count($shipments) || $agent_shipment_id) {
 
                         //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                         if ($shipments && $agent_shipment_id == null)
