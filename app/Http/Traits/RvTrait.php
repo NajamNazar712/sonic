@@ -998,6 +998,7 @@ trait RvTrait
                             $this->rv_shipment_assign($data);
                             break;
                         }
+                        return false;
                     }
         
                     //this check will work only if admin will assign shipment manually to agent 
@@ -1168,6 +1169,7 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
+                            return false;
                         }
             
                         //this check will work only if admin will assign shipment manually to agent 
