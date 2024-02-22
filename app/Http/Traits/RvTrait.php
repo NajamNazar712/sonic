@@ -1170,7 +1170,7 @@ trait RvTrait
                                 $this->rv_shipment_assign($data);
                                 break;
                             }
-                            // return $shipment;
+                            return dd(1, $shipment);
                         }
             
                         //this check will work only if admin will assign shipment manually to agent 
@@ -1214,7 +1214,6 @@ trait RvTrait
                         return response()->json(['status' => 1, 'error' => 'No shipment found']);
                     }
                 });
-                return $shipment;
                 
                 // if($shipments->isEmpty()){
                 //     continue;
