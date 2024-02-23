@@ -9688,15 +9688,15 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('updated_via_rider', function ($new_deliveries) {
-                if ($new_deliveries->via_rider_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->via_rider_count . '</button>';
+                if ($new_deliveries->updated_via_rider != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_rider . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->editColumn('updated_via_rider1', function ($new_deliveries) {
                 if ($new_deliveries->via_rider_count != 0) {
-                    return  $new_deliveries->via_rider_count;
+                    return  $new_deliveries->updated_via_rider;
                 } else {
                     return 0;
                 }
