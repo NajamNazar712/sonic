@@ -9631,8 +9631,19 @@ class AdminReportsController extends Controller
             'rider_wise_delivery_note_summaries.at_20_count','rider_wise_delivery_note_summaries.at_21_count','rider_wise_delivery_note_summaries.at_22_count',
             'rider_wise_delivery_note_summaries.at_23_count','rider_wise_delivery_note_summaries.after_23_count',
             'z.name as zone','h.name as hub','r.name as rider_name',
-            DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
-            DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin'));
+            DB::raw('(select count(rider_wise_delivery_note_shipments.id) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
+            DB::raw('(select count(rider_wise_delivery_note_shipments.id) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin'));
+            
+            // $shipment_id = [378056,378057,378058,378059,378060,378061,378062,378063,378064,378066
+            // ,378066];
+            // $added_at1 = Carbon::now()->toDateTimeString();
+            // $rider_delivery = Carbon::now()->toDateTimeString();
+
+            // foreach($shipment_id as $id)
+            // {
+
+            //     LastMileAppReport::dispatch($id,14697,3065,14,$added_at1,$rider_delivery,2);
+            // }
 
         $datatable = Datatables::of($new_deliveries)
             ->addColumn('delivery_note', function ($new_deliveries) {
@@ -9656,15 +9667,15 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('updated_via_rider', function ($new_deliveries) {
-                if ($new_deliveries->via_rider_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->via_rider_count . '</button>';
+                if ($new_deliveries->updated_via_rider != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_rider . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->editColumn('updated_via_rider1', function ($new_deliveries) {
                 if ($new_deliveries->via_rider_count != 0) {
-                    return  $new_deliveries->via_rider_count;
+                    return  $new_deliveries->updated_via_rider;
                 } else {
                     return 0;
                 }
