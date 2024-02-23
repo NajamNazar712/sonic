@@ -213,7 +213,6 @@ trait LastMileAppReportTrait
 
     static function countAdd($time,$check_summary)
     {   
-        
 		if ($time <= '10:59:59') {
     
 			$check_summary->before_11_count = $check_summary->before_11_count + 1;
