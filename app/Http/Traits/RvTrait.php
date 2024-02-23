@@ -962,6 +962,28 @@ trait RvTrait
                                 $shipment_assigned_assigned_agent->first();
                                 break;
                             }
+
+                            
+                            //Create new row in rv shipment assign table if same shipment got again after return confirm, reattempt, intercept or onhold.
+                            $same_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_assign_agent_status_id', [1,2,3,4,5])->where('rv_state_id', '!=', 1);
+                            if ($same_shipment->exists()) {
+                                $shipments_journeys = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
+                                $data = [
+                                    'agent_id' => $agent_id,
+                                    'shipment_id' => $shipment->id,
+                                    'shipments_journey_id' => $shipments_journeys->id,
+                                    'rv_state_id' => 1, //Assigned
+                                    'rv_assign_agent_status_id' => null,
+                                    'rv_assign_agent_sub_status_id' => null,
+                                    'assigned_to_type_id' => null,
+                                    'assigned_by' => null,
+                                ];
+                                
+                                // creating a new record
+                                $this->rv_shipment_assign($data);
+                                $global_shipment = $shipment->id;
+                                break;
+                            }
                             
                             // Shipment is found and already in working state or return is completed, new shipment will get to agent
                             $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
@@ -1041,8 +1063,6 @@ trait RvTrait
             // }  
         }
 
-        
-        // Check if only_shippers exists (1 && 0)
         //Rv Disable Shippers Setting Screen when all shippers are disabled and there are shippers in only shippers select box(agents will not get those shippers shipments)
         else if (!empty($only_shippers) && !($all_shipper_exists)) {
             $all_shippers = User::where('status', 3)->pluck('id')->toArray();
@@ -1062,7 +1082,6 @@ trait RvTrait
             
             if (!empty($result)){
                 $exploded_result = implode(',', $result);
-                // $shipments = Shipment::where('consignee_city_id', $agent->city_id)
                 $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,66,52])
                 ->whereIn('user_id', $result)
                 ->whereRaw('NOT EXISTS (
@@ -1134,11 +1153,31 @@ trait RvTrait
                                     $shipment_assigned_assigned_agent->first();
                                     break;
                                 }
+
+                                //Create new row in rv shipment assign table if same shipment got again after return confirm, reattempt, intercept or onhold.
+                                $same_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_assign_agent_status_id', [1,2,3,4,5])->where('rv_state_id', '!=', 1);
+                                if ($same_shipment->exists()) {
+                                    $shipments_journeys = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
+                                    $data = [
+                                        'agent_id' => $agent_id,
+                                        'shipment_id' => $shipment->id,
+                                        'shipments_journey_id' => $shipments_journeys->id,
+                                        'rv_state_id' => 1, //Assigned
+                                        'rv_assign_agent_status_id' => null,
+                                        'rv_assign_agent_sub_status_id' => null,
+                                        'assigned_to_type_id' => null,
+                                        'assigned_by' => null,
+                                    ];
+                                    
+                                    // creating a new record
+                                    $this->rv_shipment_assign($data);
+                                    $global_shipment = $shipment->id;
+                                    break;
+                                }
                                 
                                 // Shipment is found and already in working state or return is completed, new shipment will get to agent
                                 $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                                 if ($find_shipment_assigned_agent ) {
-                                    // dd($shipment->id);
                                     $shipment = null;
                                     continue;
                                 }
