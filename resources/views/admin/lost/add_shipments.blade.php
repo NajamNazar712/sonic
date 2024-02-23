@@ -208,7 +208,7 @@ label.error {
             var counter_excel = 0;
             var limit = 19;
             var excluded_shipment = [];
-            var change = {}
+            var included_employee_lost_shipment = {};
 
             var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml" multiple = "multiple"><option value=""></option>';
             $.each(employees, function (index, value) {
@@ -272,22 +272,21 @@ label.error {
                                             var row = $(this).closest('tr');
                                             var trackingNumber = data.details.tracking_number;
                                             
-                                            if (!change[trackingNumber]) {
-                                                change[trackingNumber] = [];
+                                            if (!included_employee_lost_shipment[trackingNumber]) {
+                                                included_employee_lost_shipment[trackingNumber] = [];
                                             }
                                             $.each(traxID, function(index, value) {
-                                                var existingChangeIndex = change[trackingNumber].findIndex(function(item) {
+                                                var existingChangeIndex = included_employee_lost_shipment[trackingNumber].findIndex(function(item) {
                                                     return item.value === value;
                                                 });
-
+                                                
                                                 if (existingChangeIndex === -1) {
-                                                    change[trackingNumber].push({
+                                                    included_employee_lost_shipment[trackingNumber].push({
                                                         value: value,
-                                                        row: row
                                                     });
                                                 }
+                                                $('#update_lost_form input#trax_id').val(JSON.stringify(included_employee_lost_shipment));
 
-                                                console.log(change);
                                                 $.ajax({
                                                     url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
                                                     method: 'POST',
@@ -301,7 +300,6 @@ label.error {
                                                             inputElementName.val(response.details.name);
                                                             inputElementName.removeClass('d-none');
 
-                                                            trax_id.push(value);
                                                             inputElementType = row.find('input[name="employee_type[' + data.details.id + index + ']"]');
                                                             inputElementType.val(response.details.type);
                                                             inputElementType.removeClass('d-none');
@@ -315,12 +313,11 @@ label.error {
                                         }).on('select2:unselecting', function(e) {
                                             var unselectedValue = e.params.args.data.id;
                                             var trackingNumber = data.details.tracking_number;
-                                            if (change[trackingNumber]) {
-                                                change[trackingNumber] = change[trackingNumber].filter(function(item) {
+                                            if (included_employee_lost_shipment[trackingNumber]) {
+                                                included_employee_lost_shipment[trackingNumber] = included_employee_lost_shipment[trackingNumber].filter(function(item) {
                                                     return item.value !== unselectedValue;
                                                 });
                                             }
-                                            console.log(change);
 
                                             var row = $(this).closest('tr');
                                             var inputElementName = row.find('input[name^="employee_name"]');
@@ -438,7 +435,6 @@ label.error {
                                                             trax_id.push(response.details.trax_id)
                                                         }
 
-                                                        $('#update_lost_form input#trax_id').val(trax_id);
 
                                                         var inputElementName = row.find('input[id="employee_name[' + id + ']"]');
                                                         inputElementName.val(response.details.name); 
@@ -589,6 +585,8 @@ label.error {
                     $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
                 }
             });
+
+            
 
         });
     </script>

@@ -389,7 +389,13 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-        dd($request->all());
+
+        $traxIdArray = json_decode($request->trax_id, true);
+        $formattedValues = [];
+        foreach ($traxIdArray as $key => $values) {
+            $formattedValues[$key] = implode(', ', array_column($values, 'value'));
+        }
+        
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
