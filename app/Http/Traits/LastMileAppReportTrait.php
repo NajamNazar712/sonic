@@ -184,7 +184,7 @@ trait LastMileAppReportTrait
 
                      
                      $new_summary->save();
-                     self::countAdd($time,$check_summary);
+                     self::countAdd($time,$new_summary);
                      $new_delivery_note = new RiderWiseDeliveryNote();
                      $new_delivery_note->rwdnsum_id = $new_summary->id;
                      $new_delivery_note->delivery_note_id = $delivery_note_id;
@@ -213,6 +213,7 @@ trait LastMileAppReportTrait
 
     static function countAdd($time,$check_summary)
     {   
+        
 		if ($time <= '10:59:59') {
     
 			$check_summary->before_11_count = $check_summary->before_11_count + 1;
