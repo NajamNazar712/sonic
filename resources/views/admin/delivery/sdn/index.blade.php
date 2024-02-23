@@ -1151,7 +1151,16 @@
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        render: function (data, type, row) {
+                            var sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                            var adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                            var hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
+                            var oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
+                            var traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
+                            var amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
+                            return amount.toLocaleString();
+                        }
                     },
                     {
                         data: 'deposit_slip',
