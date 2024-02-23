@@ -55,7 +55,7 @@
                                 <select name="employee_excel" class="employee_excel" id="employee_excel" class="form-control select2 dynamic" data-dependent="from"
                                         required>
                                     @foreach($employees as $employee)
-                                        <option value="{{$employee->trax_id}}">{{$employee->name}}</option>
+                                        <option value="{{$employee->trax_id}}">{{$employee->name . ' - ' . $employee->trax_id}}</option>
                                     @endforeach
                                 </select>
                                 <div class="danger" id="hub_error" style="display:none;">This field is required</div>
@@ -265,8 +265,8 @@ label.error {
                                         $('.employeeDropdownHtml').select2({
                                             width: '100%',
                                             placeholder: "Search Here...",
-                                            minimumInputLength: 4,
-                                            maximumSelectionLength: 3, // Limiting selection to 3 options
+                                            minimumInputLength: 5,
+                                            maximumSelectionLength: 3, 
                                         }).on('change', function(e) {
                                             var traxID = $(this).val();
                                             var row = $(this).closest('tr');
@@ -308,7 +308,6 @@ label.error {
                                                         } 
                                                     },
                                                     error: function(xhr, status, error) {
-                                                        // Handle errors
                                                         console.error(xhr.responseText);
                                                     }
                                                 });
@@ -317,7 +316,6 @@ label.error {
                                             var unselectedValue = e.params.args.data.id;
                                             var trackingNumber = data.details.tracking_number;
                                             if (change[trackingNumber]) {
-                                                // Remove the unselected value from the change object
                                                 change[trackingNumber] = change[trackingNumber].filter(function(item) {
                                                     return item.value !== unselectedValue;
                                                 });
