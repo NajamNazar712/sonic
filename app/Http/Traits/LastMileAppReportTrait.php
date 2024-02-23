@@ -181,10 +181,10 @@ trait LastMileAppReportTrait
                      $new_summary->delivery_note_count = 1;
                      $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments ?? 0;
                      $new_summary->via_rider_count = 1;
-
+                    
                      
                      $new_summary->save();
-                     self::countAdd($time,$check_summary);
+                     self::countAdd($time,$new_summary);
                      $new_delivery_note = new RiderWiseDeliveryNote();
                      $new_delivery_note->rwdnsum_id = $new_summary->id;
                      $new_delivery_note->delivery_note_id = $delivery_note_id;
