@@ -3285,7 +3285,8 @@ class AdminReportsController extends Controller
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
+        $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments, 'zones' => $zones ]);
     }
     public function overall_sales_list(Request $request)
     {
@@ -3319,6 +3320,8 @@ class AdminReportsController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->join('cities as och', 'oc.hub_id', 'och.id') // och for origin city hub
+            ->leftjoin('zones as ocz', 'ocz.id', 'oc.zone_id') // ocz for origin city zone
             ->leftjoin('zone_class_cities as zcc', function ($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
                     ->on('dc.id', '=', 'zcc.city_id')
@@ -3686,6 +3689,12 @@ class AdminReportsController extends Controller
         }
         if ($search_business_category = $request->get('search_business_category')) {
             $datatable->where('shipments.business_category_id', '=', $search_business_category);
+        }
+        if ($search_origin_hub = $request->get('search_origin_hub')) {
+            $datatable->where('och.id', '=', $search_origin_hub);
+        }
+        if ($search_origin_zone = $request->get('search_origin_zone')) {
+            $datatable->where('ocz.id', '=', $search_origin_zone);
         }
         return $datatable->make(true);
     }

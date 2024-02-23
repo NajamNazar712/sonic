@@ -67,6 +67,28 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_zone" id="search_origin_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+         
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -359,6 +381,17 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+            $('#search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Hub',
+                allowClear:true,
+            });
+            $('#search_origin_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Zone',
+                allowClear:true,
+            });
+        
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -633,6 +666,9 @@
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_origin_zone = $('#search_origin_zone').val();
+
                     }
                 },
                 order: [[14, 'desc']],
