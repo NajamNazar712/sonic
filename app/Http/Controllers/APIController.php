@@ -1338,6 +1338,8 @@ class APIController extends Controller
                 $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
                 $shipment_try_and_buy->save();
             }
+            
+            ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
             $check = NonServiceArea::pluck('name')->toArray();
             $msg_string = null;
@@ -1461,6 +1463,7 @@ class APIController extends Controller
                     return response()->json(['status' => 0, 'message' => 'Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment!', 'tracking_number' => $tracking_number, 'video' => $video]);
                 }
             }
+
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
@@ -1687,7 +1690,8 @@ class APIController extends Controller
             if($service_type_id == 1 && $pieces_quantity > 1){
                 ShipperShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
             }
-    
+            ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
             NotificationsController::send(2, $shipment_id);
             $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
             $now = Carbon::now()->format('H:i:s');
@@ -1732,6 +1736,7 @@ class APIController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
             }
+
             return response()->json(['status' => 1, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
         }
     }
@@ -2863,7 +2868,7 @@ class APIController extends Controller
         $rules = [
             'complaint_id' => ['required', 'integer'], 
             'description' => ['required', 'string'], 
-            'shipment_id' => ['required', 'integer', 'exists:shipments,id'], 
+            'tracking_number' => ['required', 'integer', 'exists:shipments,tracking_number'], 
             'complaint_name' => ['required', 'string'], 
             'complaint_phone' => ['required', 'string'], 
         ];
@@ -2880,7 +2885,7 @@ class APIController extends Controller
             $request_channel = 2;
             $description = $request->description;
             
-            $shipment_id = $request->shipment_id;
+            $shipment_id = Shipment::where('tracking_number', $request->tracking_number)->first()->id;
             $launched_by = 4;
             $name = $request->complaint_name;
             $phoneno = $request->complaint_phone;

@@ -910,7 +910,7 @@ class ShipmentChargesController extends Controller
                 $shipments_weight_type->shipper_weight_charges = $shipper_weight_charges ? $result_shipper_weight['weight_charges'] : $result['weight_charges'];
                 $shipments_weight_type->save();
                 if($shipments_weight_type->range_down_shipper_weight == $shipment->estimated_weight) {
-                    $shipments_weight_type->shipper_range_weight_charges = $shipments_weight_type->$shipper_weight_charges;
+                    $shipments_weight_type->shipper_range_weight_charges = $shipments_weight_type->shipper_weight_charges;
                 }else{
                     $shiper_range_charges = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipments_weight_type->range_down_shipper_weight , $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
 
