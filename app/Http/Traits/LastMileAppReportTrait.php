@@ -36,7 +36,7 @@ trait LastMileAppReportTrait
          }
          else
          {
-             $rider_delivery_date = $rider_delivery;
+             $rider_delivery_date = $rider_delivery->added_at;
 
              $rider = Rider::select('name as rider_name', 'trax_id')
                  ->where('id', $rider_id);
@@ -181,38 +181,10 @@ trait LastMileAppReportTrait
                      $new_summary->delivery_note_count = 1;
                      $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments ?? 0;
                      $new_summary->via_rider_count = 1;
-                     if ($time <= '10:59:59') {
-                        $new_summary->before_11_count = 1;
-                    } elseif ($time > '10:59:59' && $time <= '11:59:59') {
-                        $new_summary->at_11_count = 1;
-                    } elseif ($time > '11:59:59' && $time <= '12:59:59') {
-                        $new_summary->at_12_count = 1;
-                    } elseif ($time > '12:59:59' && $time <= '13:59:59') {
-                        $new_summary->at_13_count = 1;
-                    } elseif ($time > '13:59:59' && $time <= '14:59:59') {
-                        $new_summary->at_14_count = 1;
-                    } elseif ($time > '14:59:59' && $time <= '15:59:59') {
-                        $new_summary->at_15_count = 1;
-                    } elseif ($time > '15:59:59' && $time <= '16:59:59') {
-                        $new_summary->at_16_count = 1;
-                    } elseif ($time > '16:59:59' && $time <= '17:59:59') {
-                        $new_summary->at_17_count = 1;
-                    } elseif ($time > '17:59:59' && $time <= '18:59:59') {
-                        $new_summary->at_18_count = 1;
-                    } elseif ($time > '18:59:59' && $time <= '19:59:59') {
-                        $new_summary->at_19_count = 1;
-                    } elseif ($time > '19:59:59' && $time <= '20:59:59') {
-                        $new_summary->at_20_count = 1;
-                    } elseif ($time > '20:59:59' && $time <= '21:59:59') {
-                        $new_summary->at_21_count = 1;
-                    } elseif ($time > '21:59:59' && $time <= '22:59:59') {
-                        $new_summary->at_22_count = 1;
-                    } elseif ($time > '22:59:59' && $time <= '23:59:59') {
-                        $new_summary->after_23_count = 1;
-                    }
+                    
                      
                      $new_summary->save();
-                    //  self::countAdd($time,$new_summary);
+                     self::countAdd($time,$new_summary);
                      $new_delivery_note = new RiderWiseDeliveryNote();
                      $new_delivery_note->rwdnsum_id = $new_summary->id;
                      $new_delivery_note->delivery_note_id = $delivery_note_id;
