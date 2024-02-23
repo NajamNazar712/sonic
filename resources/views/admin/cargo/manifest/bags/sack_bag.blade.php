@@ -312,117 +312,6 @@
                 dropdownParent:$('#AddSackBagModal')
             });
 
-            // jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
-            //     if (this.context.length) {
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         params.excel = true;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.cargo_manifest.bags.sack_bag.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
-
-            //                 head.push('S.No');
-            //                 head.push('Pickup Request ID');
-            //                 head.push('Pickup Date');
-            //                 head.push('Ask Time');
-            //                 head.push('Shipments/Pieces');
-            //                 head.push('Weight (KG)');
-            //                 head.push('Additional Services');
-            //                 head.push('Status');
-            //                 head.push('Product');
-            //                 head.push('Service');
-            //                 head.push('Shipment Type');
-            //                 head.push('Shipper');
-            //                 head.push('Contact Person');
-            //                 head.push('Contact No(s).');
-            //                 head.push('Address');
-            //                 head.push('City');
-            //                 head.push('Route Code');
-            //                 head.push('Route Rider');
-            //                 head.push('Route Rider Phone');
-            //                 head.push('Assigned Courier');
-            //                 head.push('Assigned Courier Phone');
-                     
-            //                 // head.push('Current Rider');
-            //                 // head.push('Last Rider');
-            //                 // head.push('Pickup Note ID');
-            //                 // head.push('Shipment(s) Booked');
-            //                 // head.push('Shipment(s) Rider Picked');
-            //                 // head.push('Shipment(s) Received');
-                        
-            //                 // head.push('Territory');
-                         
-            //                 // head.push('Vendor');
-            //                 // head.push('Brand Name');
-                        
-                        
-            //                 // head.push('Trax Reason');
-            //                 // head.push('Trax Remark(s)');
-            //                 // head.push('Shipper Remark(s)');
-            //                 // head.push('Rider Remark(s)');
-            //                 // head.push('Assigned Date');
-            //                 // head.push('Attempt Date');
-            //                 // head.push('Aging');
-            //                 // head.push('Attempt(s)');
-
-
-            //                 $.each(result.data, function (index, values) {
-                            
-            //                     row = [];
-
-            //                     row.push(index + 1);
-            //                     row.push(values.pickup_request_id);
-            //                     row.push(values.pickup_date);
-            //                     row.push(values.time_range);
-            //                     // row.push(values.last_rider);
-            //                     // row.push(values.pickup_note_id);
-            //                     // row.push(values.booked);
-            //                     // row.push(values.shipments_rider_picked);
-            //                     // row.push(values.received);
-            //                     row.push(values.shipment_pieces);
-            //                     row.push(values.weight);
-            //                     row.push(values.services_count);
-            //                     row.push(values.status);
-            //                     row.push(values.product);
-            //                     row.push(values.service);
-            //                     row.push(values.shippment_type);
-            //                     row.push(values.shipper);
-            //                     // row.push(values.territory);
-            //                     row.push(values.contact_person);
-            //                     // row.push(values.vendor_name);
-            //                     // row.push(values.brand_name);
-            //                     row.push(values.contact_number);
-            //                     row.push(values.address);
-            //                     row.push(values.city);
-            //                     row.push(values.route_code);
-            //                     row.push((values.rider_id!=null?values.rider_id + '-' + values.rider_name:''));
-            //                     row.push(values.rider_phone);
-            //                     row.push((values.current_rider_id !=null?values.current_rider_id + '-' + values.current_rider:''));
-            //                     row.push(values.current_rider_phone);
-            //                     // row.push(values.pickup_status);
-            //                     // row.push(values.trax_reason);
-            //                     // row.push(values.trax_remarks);
-            //                     // row.push(values.shipper_remarks);
-            //                     // row.push(values.rider_remarks);
-            //                     // row.push(values.assigned_date);
-            //                     // row.push(values.attempted_date);
-            //                     // row.push(values.aging);
-            //                     // row.push(values.attempts);
-
-
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
-
-            //         return {body: body, header: head};
-            //     }
-            // });
 
 
             var selected_rows = [];
@@ -467,13 +356,7 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.bags.sack_bag.list') }}',
-                    // data: function (d) {
-                    //     d.before_cut_off_time = $('#search_filter').val();
-                    //     d.requested_from_date = $('#requested_from_date').val();
-                    //     d.requested_to_date = $('#requested_to_date').val();
-                    //     d.pickup_status_id = $('#status_filter_input').val();
-                    //     d.pickup_reason_id = $('#status_filter_input_reason').val();
-                    // }
+                    
                 },
                 rowId: 'id',
                 order: [[2, 'desc']],
@@ -506,12 +389,7 @@
                     }
                 },
                 initComplete: function () {
-                    // var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    // var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    // var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    // var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -561,36 +439,41 @@
           
 
             
-                // Check Sack Bag No#
-                $("#add_sack_bag_form").on("keydown", function(e) {
+                // add sackbag_no in detail on scan
+                $("#add_sack_bag_form #sackbag_detail").on("keydown","tr", function(e) {
                     if(e.which == 13 || e.keyCode == 13) {
+                       var tr_index = $(this).index();
+                    
+                     
                         $(".errormessage").empty();
-                       var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
-                       if(sack_bag_no!='')
-                       {
-                         sack_bag_no_check(sack_bag_no);
-
-                       }else{
-                         scan_sound(2);
-                         toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                       }
-                       
+                        //  var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                   
+                            var sack_bag_no = $(this).find("#sack_bag_no_id").val();
+                            if(sack_bag_no!='')
+                            {
+                                // alert(sack_bag_no);
+                              sack_bag_no_check(sack_bag_no,tr_index);
+                            }else{
+                                scan_sound(2);
+                                toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
                     }
+                      
                 });
 
-                $("#addrow").click(function(){
-                    var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
-                    if(sack_bag_no!='')
-                    {
+                // $("#addrow").click(function(){
+                //     var sack_bag_no=$("#sackbag_detail tr:last input[name='sack_bag_no[]']").val();
+                //     if(sack_bag_no!='')
+                //     {
                         
-                        sack_bag_no_check(sack_bag_no);
-                    }else{
-                         scan_sound(2);
-                         toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                    // $("#sackbag_detail").append(row);
-                }); 
+                //         sack_bag_no_check(sack_bag_no);
+                //     }else{
+                //          scan_sound(2);
+                //          toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //     }
+                //     // var row='<tr><td><input type="text" name="sack_bag_no[]" class="form-control"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                //     // $("#sackbag_detail").append(row);
+                // }); 
           
             $('body').on('click','#remove_row',function(){
                 $(this).closest('tr').remove();
@@ -598,55 +481,44 @@
 
         });
 
-        var current_sack_bag_no=Array();
+        //this function check sackbag_no not duplicate on screen frontend 
+        //
+         var current_sack_bag_no=Array(); 
         function sack_bag_check_zero(sack_bag_no)
         {   
-              var sackbag_no =$(sack_bag_no).val();
-              
-              if(sackbag_no!='')
-              {
-             
-                
-                if(!current_sack_bag_no.includes(sackbag_no))
-                {
-               
-                    sack_bag_no_check(sackbag_no,'change');
-                    current_sack_bag_no.push(sackbag_no);
-                }else{
-                    scan_sound(2);
-                    toastr.error("Sack Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    $(sack_bag_no).val('');
-                }
-                
-                // current_sack_bag_no=$(sack_bag_no).val();
+                  
+                    var sackbag_no=0;
+                    current_sack_bag_no = [];
+            
+                    $("#sackbag_detail tr").each(function(index, element) {
 
-              }
-           
-             
-                    // $("#sackbag_detail tr").each(function(){
-                    //     if(current_sack_bag_no == $(this).find('#sack_bag_no_id').val())
-                    //     {
-                    //         alert("Sack Bag Already Add");
-                    //         $(sack_bag_no).val('');
-                    //         return false;
-                    //     }
-                    // })
-                    
-                    // if(sackbag_no!='')
-                    // {
-
+                        sackbag_no = $(element).find("#sack_bag_no_id").val();
+                        if(current_sack_bag_no.includes(sackbag_no))
+                        {   
+                           
+                            scan_sound(2);
+                            toastr.error("Sack Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});  scan_sound(2);
+                            // $(sack_bag_no).closest('tr').find('#sack_bag_no_id').val('');
+                            $(sack_bag_no).closest('tr').remove();
+                            $("#sack_bag_no_check").val(1);
+                           
+                        }else{
+                             current_sack_bag_no.push(sackbag_no);
+                             $("#sack_bag_no_check").val(0);
+                          
+                        }
                        
-                    // }
-                    // console.log(current_sack_bag_no);
-              
-             
-             
-            // 
-        }
-        
+                 
+                    });
 
-        function sack_bag_no_check(sack_bag_no,type='click')
+                    
+        }
+
+
+        // this function check input sack bag no exist in database 
+        function sack_bag_no_check(sack_bag_no,index)
         {
+                   $("#sack_bag_no_check").val(0);
                  $.ajax({
                             url: '{!! route('admin.cargo_manifest.bags.sack_bag.sack_bag_check') !!}',
                             method: 'POST',
@@ -663,17 +535,20 @@
                                 $(".errormessage").append('<div class="alert alert-danger">'+data.error+'</div>');
                                 $(".errormessage").show();
                                 $("#sack_bag_no_check").val(1);
-                            }else{
-                                    
-                                    if(type!='change')
+                                $("#sack_bag_no_id").eq(index).val('');
+                            } else{
+                             
+                                    if( $("#sack_bag_no_check").val() == 0)
                                     {
-                                        var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
-                                        var $row = $(row);
-                                        $("#sackbag_detail").append($row);
-                                        $row.find('#sack_bag_no_id').focus();
+                                        
+                                           var row='<tr><td><input type="text" id="sack_bag_no_id" name="sack_bag_no[]" class="form-control" onchange="sack_bag_check_zero(this)"></td><td><input type="text" name="remarks[]" class="form-control"></td><td><span class="btn btn-danger" id="remove_row">x</span></td></tr>';
+                                            var $row = $(row);
+                                            $("#sackbag_detail").append($row);
+                                            $row.find('#sack_bag_no_id').focus();
+                                            //  $("#sack_bag_no_check").val(0);
 
                                     }
-                                    $("#sack_bag_no_check").val(0);
+                                
                             }
                 });
                           
