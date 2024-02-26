@@ -8912,15 +8912,106 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
     }
 
+
+    // public function duplicate_info(Request $request)
+    // {
+    //     $shipper_id = $request->shipper_id;
+    //     $duplicate = DuplicateUser::where('user_id', $shipper_id)->first();
+    //     $data = array();
+    //     $data['phone'] = ($duplicate->phone) ? $duplicate->phone : '';
+    //     $data['cnic'] = ($duplicate->cnic) ? $duplicate->cnic : '';
+    //     $data['iban'] = ($duplicate->iban) ? $duplicate->iban : '';
+    //     $data['name'] = ($duplicate->name) ? $duplicate->name : '';
+    //     return response()->json(['status' => 1, 'info' => $data]);
+    // }
+
+
     public function duplicate_info(Request $request)
     {
         $shipper_id = $request->shipper_id;
         $duplicate = DuplicateUser::where('user_id', $shipper_id)->first();
+        $user = User::where('id', $shipper_id)->first();
+
+        if (!$duplicate) {
+            $duplicate = (object) [
+                'phone' => null,
+                'cnic' => null,
+                'name' => null,
+                'iban' => null
+            ];
+        }
+
+        if (!$user) {
+            $user = (object) [
+                'ntn_no' => null,
+                'email' => null
+            ];
+        }
+
+        // Set null values to empty strings
+        $duplicate->phone = $duplicate->phone ?? '';
+        $duplicate->cnic = $duplicate->cnic ?? '';
+        $duplicate->name = $duplicate->name ?? '';
+        $duplicate->iban = $duplicate->iban ?? '';
+        $user->ntn_no = $user->ntn_no ?? '';
+        $user->email = $user->email ?? '';
+
         $data = array();
         $data['phone'] = ($duplicate->phone) ? $duplicate->phone : '';
         $data['cnic'] = ($duplicate->cnic) ? $duplicate->cnic : '';
-        $data['iban'] = ($duplicate->iban) ? $duplicate->iban : '';
         $data['name'] = ($duplicate->name) ? $duplicate->name : '';
+        $data['iban'] = ($duplicate->iban) ? $duplicate->iban : '';
+        $data['ntn'] = ($user->ntn_no) ? $user->ntn_no : '';
+        $data['email'] = ($user->email) ? $user->email : '';
+
+        // Get user IDs with same phone number
+        $similarUsersPhone = User::where('phone', $duplicate->phone)
+            ->where('id', '!=', $shipper_id)
+            ->pluck('id')
+            ->toArray();
+
+        // Get user IDs with same CNIC
+        $similarUsersCnic = User::where('cnic', $duplicate->cnic)
+            ->where('id', '!=', $shipper_id)
+            ->pluck('id')
+            ->toArray();
+
+        // Get user IDs with same name
+        $similarUsersName = User::where('name', $duplicate->name)
+            ->where('id', '!=', $shipper_id)
+            ->pluck('id')
+            ->toArray();
+
+        // Get user IDs with same IBAN
+        $similarUsersIban = UserBankInfo::where('iban', $duplicate->iban)
+            ->where('user_id', '!=', $shipper_id)
+            ->pluck('user_id')
+            ->toArray();
+
+        // Get user IDs with same NTN
+        $similarUsersNtn = [];
+        if ($user->ntn_no) {
+            $similarUsersNtn = User::where('ntn_no', $user->ntn_no)
+                ->where('id', '!=', $shipper_id)
+                ->pluck('id')
+                ->toArray();
+        }
+
+        // Get user IDs with same Email
+        $similarUsersEmail = User::where('email', $user->email)
+            ->where('id', '!=', $shipper_id)
+            ->groupBy('email') // Group by email to find duplicates
+            ->havingRaw('COUNT(email) > 1') // Only select emails that have duplicates
+            ->pluck('email')
+            ->toArray();
+
+        $data['shared_phone'] = implode(', ', $similarUsersPhone);
+        $data['shared_cnic'] = implode(', ', $similarUsersCnic);
+        $data['shared_name'] = implode(', ', $similarUsersName);
+        $data['shared_iban'] = implode(', ', $similarUsersIban);
+        $data['shared_ntn_no'] = implode(', ', $similarUsersNtn);
+        $data['shared_email'] = !empty($similarUsersEmail) ? implode(', ', $similarUsersEmail) : '';
+
         return response()->json(['status' => 1, 'info' => $data]);
     }
 
@@ -8930,6 +9021,21 @@ class AdminDashboardController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
+
+        $duplicateNtnCount = User::whereNotNull('ntn_no')
+            ->select('ntn_no', DB::raw('COUNT(*) as count'))
+            ->groupBy('ntn_no')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('ntn_no')
+            ->toArray();
+        
+        $duplicateEmailCount = User::whereNotNull('email')
+            ->select('email', DB::raw('COUNT(*) as count'))
+            ->groupBy('email')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('email')
+            ->toArray();
+
         $users = DB::connection('mysql')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products as p', 'p.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
@@ -8964,7 +9070,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type'])
+            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9255,9 +9361,18 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users)  use ($request){
-
+            ->addColumn('duplication', function ($users)  use ($request, $duplicateNtnCount, $duplicateEmailCount){
+                
                 $count = 0;
+
+                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $duplicateNtnCount)) {
+                    $count++;
+                }
+                
+                if (in_array($users->email, $duplicateEmailCount)) {
+                    $count++;
+                }
+
                 if ($users->duplicate_phone != null) {
                     $count++;
                 }
@@ -9542,6 +9657,21 @@ class AdminDashboardController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
+
+        $duplicateNtnCount = User::whereNotNull('ntn_no')
+            ->select('ntn_no', DB::raw('COUNT(*) as count'))
+            ->groupBy('ntn_no')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('ntn_no')
+            ->toArray();
+        
+        $duplicateEmailCount = User::whereNotNull('email')
+            ->select('email', DB::raw('COUNT(*) as count'))
+            ->groupBy('email')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('email')
+            ->toArray();
+
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products', 'products.id', '=', 'users.product_id')
             ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
@@ -9572,7 +9702,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9846,8 +9976,17 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users)  use ($request){
+            ->addColumn('duplication', function ($users)  use ($request, $duplicateNtnCount, $duplicateEmailCount){
                 $count = 0;
+
+                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $duplicateNtnCount)) {
+                    $count++;
+                }
+                
+                if (in_array($users->email, $duplicateEmailCount)) {
+                    $count++;
+                }
+
                 if ($users->duplicate_phone != null) {
                     $count++;
                 }
