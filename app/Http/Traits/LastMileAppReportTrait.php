@@ -93,7 +93,7 @@ trait LastMileAppReportTrait
                         $new_delivery_note_shipment->updated_via = $via;
                         $new_delivery_note_shipment->save();
 
-                        self::countSub($check_summary);
+                        self::countSub($time,$check_summary);
                     }
                     
 
@@ -221,9 +221,8 @@ trait LastMileAppReportTrait
 		$check_summary->save();
     }
 
-    static function countSub($check_summary)
+    static function countSub($time,$check_summary)
     {
-        $time = carbon::parse($check_summary->updated_at)->format('H:i:s');
 
         if(!empty($check_summary->before_11_count) && $time <= '10:59:59')
         {
