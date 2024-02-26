@@ -89,6 +89,12 @@ trait LastMileAppReportTrait
                     if($totalDuration <= 0){
                          return true;   
                     }else{
+                        $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today)->first();
+                        $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                        $new_delivery_note_shipment->updated_time = $time;
+                        $new_delivery_note_shipment->updated_via = $via;
+                        $new_delivery_note_shipment->save();
+
                         self::countSub($check_summary);
                     }
                     
