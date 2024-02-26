@@ -44,13 +44,7 @@
                             </div>
                         </div>
 
-                        <div class="col ml-auto">
-                            <div class="form-group text-right">
-                                <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
-                            </div>
-                        </div>
-
-                        <div class="col-3">
+                        <div style="padding-right: 300px;">
                             <fieldset class="form-group">
                                 <select name="employee_excel" class="employee_excel" id="employee_excel" class="form-control select2 dynamic" data-dependent="from"
                                         required>
@@ -60,7 +54,11 @@
                                 </select>
                                 <div class="danger" id="hub_error" style="display:none;">This field is required</div>
                             </fieldset>
-    
+                        </div>
+                        <div class="col ml-auto">
+                            <div class="form-group text-right">
+                                <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -377,7 +375,7 @@ label.error {
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
                     method: 'POST',
-                    data: formData, 'excel_employee_value': excel_employee_value,
+                    data: formData,
                     processData: false, // Prevent automatic processing of data
                     contentType: false, // Prevent automatic content-type header
                     headers: {
@@ -429,17 +427,15 @@ label.error {
                                                     if(response.status == 1){
                                                         var row = $('tr');
                                                         var inputElementTraxID = row.find('input[name="employee_trax_id[' + id + ']"]');
-                                                        inputElementTraxID.val(response.details.trax_id); 
-
+                                                        var inputElementName = row.find('input[id="employee_name[' + id + ']"]');
+                                                        var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
+                                                        
                                                         if (trax_id.indexOf(response.details.trax_id) === -1) {
                                                             trax_id.push(response.details.trax_id)
                                                         }
-
-
-                                                        var inputElementName = row.find('input[id="employee_name[' + id + ']"]');
+                                                        
+                                                        inputElementTraxID.val(response.details.trax_id); 
                                                         inputElementName.val(response.details.name); 
-
-                                                        var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
                                                         inputElementType.val(response.details.type); 
                                                     }
                                                 },
