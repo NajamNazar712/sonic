@@ -1551,7 +1551,7 @@
                 else {
                     selected_rowsx.splice(index, 1);
                 }
-                console.log(selected_rowsx);
+                // console.log(selected_rowsx);
 
 
                 if (selected_rowsx.length > 0) {
