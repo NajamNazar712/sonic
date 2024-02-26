@@ -363,16 +363,14 @@ class LostShipmentsController extends Controller
                         $data['destination'] = $shipment->pickup_address->city->name;
                         $data['hub'] = $shipment->pickup_address->city->hub_city->name;
                         $data['amount'] = number_format($shipment->amount);
+                        $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
-                        $data['employee_trax_id'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" value = "" name="employee_trax_id[' . $shipment->id . ']" readonly>';
-                        $data['employee_name'] = '<input class="form-control d-none" id="' . $shipment->id . '0" form-control-sm" name="employee_name[' . $shipment->id . '0]" readonly> <br> 
-                        <input class="form-control d-none" id="' . $shipment->id . '1" form-control-sm" name="employee_name[' . $shipment->id . '1]" readonly> <br>
-                        <input class="form-control d-none" id="' . $shipment->id . '2" form-control-sm" name="employee_name[' . $shipment->id . '2]" readonly>';
-
-                        $data['employee_type'] = '<input class="form-control d-none" id="' . $shipment->id . '0" form-control-sm" name="employee_type[' . $shipment->id . '0]" readonly> <br>
-                        <input class="form-control d-none" id="' . $shipment->id . '1" form-control-sm" name="employee_type[' . $shipment->id . '1]" readonly> <br>
-                        <input class="form-control d-none" id="' . $shipment->id . '2" form-control-sm" name="employee_type[' . $shipment->id . '2]" readonly>';
+                        $data['action_button'] = ' <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm"></div>
+                        </div>';
+   
 
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 1, 'details' => $data]);

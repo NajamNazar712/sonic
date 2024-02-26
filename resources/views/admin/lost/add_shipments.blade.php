@@ -10,10 +10,6 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="alert alert-danger d-none">
-                    
-                </div>
-
 
                 <form id="lost_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="row align-items-center justify-content-center">
@@ -24,13 +20,12 @@
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
-
+                        
                     </div>
                 </form>
-
-               
                 @if( session('role_id') == 1|| in_array(890, session('permissions')))
                 <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
+                    
 
                     <div class="row align-items-center justify-content-center">
                         <div class="col">
@@ -40,21 +35,10 @@
                         </div>
                         <div class="col">
                             <div class="form-group pt-2 text-left">
-                                <button type="submit" name="upload" id="upload" class="btn btn-primary" value="upload" disabled>Upload</button>
+                                <button type="submit" name="upload" class="btn btn-primary" value="upload">Upload</button>
                             </div>
                         </div>
 
-                        <div style="padding-right: 300px;">
-                            <fieldset class="form-group">
-                                <select name="employee_excel" class="employee_excel" id="employee_excel" class="form-control select2 dynamic" data-dependent="from"
-                                        required>
-                                    @foreach($employees as $employee)
-                                        <option value="{{$employee->trax_id}}">{{$employee->name . ' - ' . $employee->trax_id}}</option>
-                                    @endforeach
-                                </select>
-                                <div class="danger" id="hub_error" style="display:none;">This field is required</div>
-                            </fieldset>
-                        </div>
                         <div class="col ml-auto">
                             <div class="form-group text-right">
                                 <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
@@ -77,18 +61,15 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Amount</th>
-                            <th class="border-primary border-darken-1">Employee ID</th>
-                            <th class="border-primary border-darken-1">Employee Name</th>
-                            <th class="border-primary border-darken-1">Employee Type</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Action</th>
                             <th class="border-primary border-darken-1"></th>
                         </tr>
                         </thead>
                     </table>
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
-                    <input type="hidden" name="trax_id" id="trax_id">
-
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <button type="submit" class="btn btn-primary btn-block" disabled id="update_lost_form_submit">Submit</button>
@@ -150,24 +131,7 @@ label.error {
     <script type="text/javascript">
         $(document).ready(function () {
 
-            var excel_employee_value;
-            $('#employee_excel').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Employee*',
-                allowClear: true,
-            }).on('change', function(){
-                excel_employee_value = $(this).val();
-                if(excel_employee_value){
-                    $('#excel_upload_form #upload').removeAttr('disabled');
-                    trax_id.push(excel_employee_value)
-                    $('#update_lost_form input#trax_id').val(trax_id);
-                }else{
-                    $('#excel_upload_form #upload').attr('disabled', true)
-                }
-            });
-            var employees = @json($employees); // Assuming $admins is a PHP variable containing admin data
             var shipment_ids = [];
-            var trax_id = [];
-
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true,
@@ -182,19 +146,16 @@ label.error {
                     {name: 'destination', class: 'align-middle destination form-group', orderable: false},
                     {name: 'hub', class: 'align-middle hub form-group', orderable: false},
                     {name: 'amount', class: 'align-middle amount', orderable: false},
-                    {
-                        name: 'employee_id',
-                        class: 'align-middle admin_select',
-                        orderable: false,
-                    },                    
-                    {name: 'employee_name', class: 'align-middle employee_name', orderable: false},
-                    {name: 'employee_type', class: 'align-middle employee_type', orderable: false},
+                    {name: 'remarks', class: 'align-middle remarks', orderable: false},
                     {name: 'mode', class: 'align-middle mode', orderable: false},
                     {name: 'service_type', class: 'align-middle service_type', orderable: false},
+                    {name: 'action_button', class: 'align-middle action_button', orderable: false},
                     {name: 'action', class: 'align-middle action', orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
-                
+                    // var info = table.page.info();
+                    //
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
 
@@ -202,25 +163,12 @@ label.error {
                 }
             });
             var rowsCount = 0;
-            var counter = 0;
-            var counter_excel = 0;
-            var limit = 19;
-            var excluded_shipment = [];
-            var included_employee_lost_shipment = {};
 
-            var employeeDropdownHtml = '<select class="form-control employeeDropdownHtml" multiple = "multiple"><option value=""></option>';
-            $.each(employees, function (index, value) {
-                if(value.trax_id){
-                    employeeDropdownHtml += `<option value="${value.trax_id}">${value.trax_id}</option>`;
-                }
-            });
-            employeeDropdownHtml += '</select>';
             $('#lost_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-           
             {{--var cities_array = @json($cities);--}}
             $('#lost_shipment_form').validate({
                 errorClass: 'danger',
@@ -246,88 +194,27 @@ label.error {
                             }
                         })
                             .done(function(data) {
-                                if (data.status == 1 && counter <= limit) {
+                                if (data.status == 1) {
                                     UnblockPagePermanently();
                                     id = data.details.id;
-                                    var inputElementName;
-                                    var inputElementType;
+
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
-                                        var rowNo = table.rows().count();                                 
-                                        counter+=1;
+                                        var rowNo = table.rows().count();
+
                                         var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, employeeDropdownHtml, data.details.employee_name, data.details.employee_type, data.details.mode, data.details.service_type, action]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, data.details.action_button ,action]).node().id = data.details.id;
                                         table.draw(false);
-
-                                        $('.employeeDropdownHtml').select2({
-                                            width: '100%',
-                                            placeholder: "Search Here...",
-                                            minimumInputLength: 5,
-                                            maximumSelectionLength: 3, 
-                                        }).on('change', function(e) {
-                                            var traxID = $(this).val();
-                                            var row = $(this).closest('tr');
-                                            var trackingNumber = data.details.tracking_number;
-                                            
-                                            if (!included_employee_lost_shipment[trackingNumber]) {
-                                                included_employee_lost_shipment[trackingNumber] = [];
-                                            }
-                                            $.each(traxID, function(index, value) {
-                                                var existingChangeIndex = included_employee_lost_shipment[trackingNumber].findIndex(function(item) {
-                                                    return item.value === value;
-                                                });
-                                                
-                                                if (existingChangeIndex === -1) {
-                                                    included_employee_lost_shipment[trackingNumber].push({
-                                                        value: value,
-                                                    });
-                                                }
-                                                $('#update_lost_form input#trax_id').val(JSON.stringify(included_employee_lost_shipment));
-
-                                                $.ajax({
-                                                    url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
-                                                    method: 'POST',
-                                                    data: {
-                                                        '_token': '{{ csrf_token() }}',
-                                                        'trax_id': value
-                                                    },
-                                                    success: function(response) {
-                                                        if (response.status == 1) {
-                                                            inputElementName = row.find('input[name="employee_name[' + data.details.id + index + ']"]');
-                                                            inputElementName.val(response.details.name);
-                                                            inputElementName.removeClass('d-none');
-
-                                                            inputElementType = row.find('input[name="employee_type[' + data.details.id + index + ']"]');
-                                                            inputElementType.val(response.details.type);
-                                                            inputElementType.removeClass('d-none');
-                                                        } 
-                                                    },
-                                                    error: function(xhr, status, error) {
-                                                        console.error(xhr.responseText);
-                                                    }
-                                                });
-                                            });
-                                        }).on('select2:unselecting', function(e) {
-                                            var unselectedValue = e.params.args.data.id;
-                                            var trackingNumber = data.details.tracking_number;
-                                            if (included_employee_lost_shipment[trackingNumber]) {
-                                                included_employee_lost_shipment[trackingNumber] = included_employee_lost_shipment[trackingNumber].filter(function(item) {
-                                                    return item.value !== unselectedValue;
-                                                });
-                                            }
-
-                                            var row = $(this).closest('tr');
-                                            var inputElementName = row.find('input[name^="employee_name"]');
-                                            var inputElementType = row.find('input[name^="employee_type"]');
-                                            inputElementName.addClass('d-none');
-                                            inputElementType.addClass('d-none');
-                                        });
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
+
                                         shipment_ids.push(data.details.id);
+
                                         $('#lost_shipment_form button.add').prop('disabled', false);
+
                                         $('#update_lost_form_submit').prop('disabled', false);
+
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                 }
@@ -335,7 +222,7 @@ label.error {
                                     UnblockPagePermanently();
                                     $('#lost_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
-                                    toastr.error(data.error ? data.error : 'Only 20 shipments is allowed to select !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
@@ -370,7 +257,7 @@ label.error {
                 // Create a new FormData object
                 var formData = new FormData();
                 formData.append('excel', file);
-                formData.append('excel_employee_value', excel_employee_value);
+                console.log(shipment_ids);
                 // Make the AJAX request
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
@@ -391,79 +278,42 @@ label.error {
                                 var shipment;
                                 var alreadyAddedShipments = [];
                                 id = data.details;
-                                
-                                $.each(shipmentIDs, function (index, id) {
-                                    var tracking_number = shipmentData[id].tracking_number;
-                                    if(counter_excel <= limit){
+                               $.each(shipmentIDs, function (index, id) {
+                                    // $.each(shipmentData, function(id, shipment2){
                                         var index = $.inArray(id, shipment_ids);
                                         shipment = shipmentData[id];
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
+                                            console.log(shipment.tracking_number);
                                             var rowNo = table.rows().count();
-                                            counter_excel+=1
-                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                            table.row.add([
-                                            rowNo + 1,
-                                            shipment.tracking_number,
-                                            shipment.shipper_name,
-                                            shipment.origin,
-                                            shipment.destination,
-                                            shipment.hub,
-                                            shipment.amount,
-                                            shipment.employee_trax_id, shipment.employee_name, shipment.employee_type,
-                                            shipment.mode,
-                                            shipment.service_type,
-                                            action
-                                        ]).node().id = id;
-                                        
-                                        $('.employee_excel').on('change', function() {
-                                            $.ajax({
-                                                url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
-                                                method: 'POST', 
-                                                data: {
-                                                    '_token': '{{ csrf_token() }}',
-                                                    'trax_id': excel_employee_value
-                                                },                                 
-                                                success: function(response) {
-                                                    if(response.status == 1){
-                                                        var row = $('tr');
-                                                        var inputElementTraxID = row.find('input[name="employee_trax_id[' + id + ']"]');
-                                                        var inputElementName = row.find('input[id="employee_name[' + id + ']"]');
-                                                        var inputElementType = row.find('input[name="employee_type[' + id + ']"]');
-                                                        
-                                                        if (trax_id.indexOf(response.details.trax_id) === -1) {
-                                                            trax_id.push(response.details.trax_id)
-                                                        }
-                                                        
-                                                        inputElementTraxID.val(response.details.trax_id); 
-                                                        inputElementName.val(response.details.name); 
-                                                        inputElementType.val(response.details.type); 
-                                                    }
-                                                },
-                                                error: function(xhr, status, error) {
-                                                    // Handle errors
-                                                    console.error(xhr.responseText);
-                                                }
-                                            });
-                                        });
-                                            table.draw(false);
-                                            scan_sound(1);
-                                            table.order([0, 'desc']).draw();
-                                            shipment_ids.push(id);
-                                            shipmentAdded = true;
+       
+                                           var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                           table.row.add([
+                                           rowNo + 1,
+                                           shipment.tracking_number,
+                                           shipment.shipper_name,
+                                           shipment.origin,
+                                           shipment.destination,
+                                           shipment.hub,
+                                           shipment.amount,
+                                           shipment.remarks,
+                                           shipment.mode,
+                                           shipment.service_type,
+                                           action
+                                       ]).node().id = id;
+       
+                                        table.draw(false);
+                                        scan_sound(1);
+                                        table.order([0, 'desc']).draw();
 
-                                            toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-                                        }
-                                        else {
-                                            alreadyAddedShipments.push(shipment.tracking_number);
-                                        }
-                                    }else{
-                                        excluded_shipment.push(tracking_number);
-                                        var excludedString = excluded_shipment.join(', ');
-                                        $('.alert-danger').text('Maximum 20 shipments reached, remaining tracking numbers:' + excludedString)
-                                        $('.alert-danger').removeClass('d-none')
+                                        shipment_ids.push(id);
+                                        shipmentAdded = true;
+
+                                        toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
+                                    }
+                                    else {
+                                        alreadyAddedShipments.push(shipment.tracking_number);
                                     }
                                 });
-                               
 
                                var text = '<div class="col"><table class="table table-sm table-borderless mb-0">';
                                 text += '<thead><th>S No.</th><th>Tracking Number</th><th>Error</th></thead>';
@@ -570,9 +420,7 @@ label.error {
             $('body').on('click','.action a.removerow',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, shipment_ids);
-                counter -=1;
-                counter_excel-=1
-                console.log(counter_excel);
+
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
                 }
@@ -581,8 +429,6 @@ label.error {
                     $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
                 }
             });
-
-            
 
         });
     </script>
