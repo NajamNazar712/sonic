@@ -12371,13 +12371,16 @@ class AdminReportsController extends Controller
                     })
                     ->addColumn('rcp_agent_updated_by', function($rv_report) {
                         if ($rv_report['rv_state_id'] != 1 && $rv_report['updated_type_id'] == 2) { 
-                            // dd($rv_report->agent_id);
                             $agent = Admin::where('id', $rv_report->agent_id)->select('name')->first();
-                            return $agent->name;
+                            if ($agent) {
+                                return $agent->name;
+                            } else {
+                                return '-';
+                            }
                         }
-                        // else {
-                        //     return $rv_report['rv_status'];
-                        // }
+                        else {
+                            return '-';
+                        }
                     })
                     ->editColumn('rv_status', function($rv_report) {
                         if ($rv_report['rv_status'] == "") { 
@@ -12448,11 +12451,11 @@ class AdminReportsController extends Controller
                         }
                     })
                     ->addColumn('delivery_attempt_count', function($rv_report) {
-                        $delivered_status = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 5)->get('id');
+                        $delivered_status = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 5)->get();
                         return count($delivered_status);
                     })
                     ->addColumn('re_attempt_count', function($rv_report) { 
-                        $reattempt = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 13)->get('id');
+                        $reattempt = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 13)->get();
                         return count($reattempt);               
                     })
                     ->addColumn('unresponsive_count', function($rv_report){
