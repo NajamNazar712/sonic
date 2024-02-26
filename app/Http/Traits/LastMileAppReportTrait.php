@@ -225,7 +225,7 @@ trait LastMileAppReportTrait
 
     static function countSub($check_summary)
     {
-        $time = carbon::parse($check_summary->delivery_date)->format('H:i:s');
+        $time = carbon::parse($check_summary->updated_at)->format('H:i:s');
 
         if(!empty($check_summary->before_11_count) && $time <= '10:59:59')
         {
