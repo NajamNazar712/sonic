@@ -367,13 +367,17 @@ class LostShipmentsController extends Controller
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
                         $data['action_button'] = '<div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Actions
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a class="dropdown-item" href="#">Add Responsible</a>
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm accounts">
+                            <button type="button" class="dropdown-item remove_sales_tier">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-minus-circle"></i></div>
+                                    <div class="col-9 offset-1">Remove Sales Tier Tagging</div>
+                                </div>
+                            </button>
                         </div>
                     </div>
+                    
                     ';
    
 
