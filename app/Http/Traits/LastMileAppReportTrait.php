@@ -146,7 +146,7 @@ trait LastMileAppReportTrait
                         //  $new_delivery_note_shipment->save();
                      }
 
-                     $check_summary->save();
+                    //  $check_summary->save();
                  }
                  else
                  {
