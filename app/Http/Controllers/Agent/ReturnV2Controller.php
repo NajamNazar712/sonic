@@ -111,7 +111,7 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-        $agent_sorted_hubs = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->select('city_id')->get();
+        // $agent_sorted_hubs = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->select('city_id')->get();
         $admin = Admin::where('id', Auth::id());
 
         if ($admin->exists()) {
@@ -140,9 +140,11 @@ class ReturnV2Controller extends Controller
                             $shipment = Shipment::find($assigned_shipment->shipment_id);
                         }
                         else{
-                            $shipment = $this->included_shippers($agent_sorted_hubs, $agent_id);
+                            // $shipment = $this->included_shippers($agent_sorted_hubs, $agent_sorted_hubs, $agent_id);
+                            $shipment = $this->included_shippers($agent_id);
                         }
                         if ($shipment) {
+                            $shipment = Shipment::find($shipment->id);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
@@ -243,7 +245,7 @@ class ReturnV2Controller extends Controller
                         }
 
                         else{
-                            return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
+                            return response()->json(['status' => 5, 'errors' => 'No shipment found or Shipper is disabled']);
                         }
 
                     } else {
