@@ -63,9 +63,7 @@ trait LastMileAppReportTrait
                     $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_summary_delivery->rwdnsum_id)->first();
 
                     $rwdnsum_id = $check_summary->id; 
-                    $finishTime = Carbon::parse($check_summary->delivery_date);
-                    $time = carbon::parse($check_summary->updated_at);
-                    
+                    $finishTime = Carbon::parse($check_summary->delivery_date);                    
                     $totalDuration = $finishTime->diffInHours($time);
                     $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today);
                     if(!$riderWiseShipmentNote->exists())
