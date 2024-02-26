@@ -115,7 +115,7 @@ class AdminReportsController extends Controller
         }
 
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
-        $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $zones = DB::connection('reports')->table('zones')->where('status',1)->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $areas = DB::connection('reports')->table('city_areas')->where('status', 1)->select('id', 'name')->get();
 
