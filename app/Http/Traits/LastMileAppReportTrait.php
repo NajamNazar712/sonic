@@ -87,13 +87,14 @@ trait LastMileAppReportTrait
                     if($totalDuration <= 0){
                          return true;   
                     }else{
-                        $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today)->first();
-                        $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
-                        $new_delivery_note_shipment->updated_time = $time;
-                        $new_delivery_note_shipment->updated_via = $via;
-                        $new_delivery_note_shipment->save();
-
-                        self::countSub($time,$check_summary);
+                        $update_delivery_note_shipment = $riderWiseShipmentNote->first();
+                        $minusTime = $update_delivery_note_shipment->updated_time;
+                        $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
+                        $update_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                        $update_delivery_note_shipment->updated_time = $time;
+                        $update_delivery_note_shipment->updated_via = $via;
+                        $update_delivery_note_shipment->save();
+                        self::countSub($minusTime,$check_summary);
                     }
                     
 
@@ -103,9 +104,9 @@ trait LastMileAppReportTrait
                     // $check_summary->shipment_update_count = $check_summary->via_rider_count;
                     // $check_summary->save(); 
                      $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
-                                          if (!$check_existing_note->exists())
+                     if (!$check_existing_note->exists())
                      {
-                         $check_summary->delivery_note_count = $check_summary->delivery_note_count + 1;
+                                                 $check_summary->delivery_note_count = $check_summary->delivery_note_count + 1;
                          $check_summary->delivery_note_shipments_count = $check_summary->delivery_note_shipments_count + $delivery_note_data->total_shipments;
 
                          $new_delivery_note = new RiderWiseDeliveryNote();
@@ -130,24 +131,26 @@ trait LastMileAppReportTrait
                      }
                      else
                      {
-                         $check_existing_note = $check_existing_note->first();
-                         $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
-                         $check_existing_note->save();
+                        
+                        //  $check_existing_note = $check_existing_note->first();
+                        //  $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
+                        //  $check_existing_note->save();
 
-                         $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
-                         $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
-                         $new_delivery_note_shipment->rwdn_id = $check_existing_note->id;
-                         $new_delivery_note_shipment->shipment_id = $shipment_id;
-                         $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
-                         $new_delivery_note_shipment->updated_time = $time;
-                         $new_delivery_note_shipment->updated_via = $via;
-                         $new_delivery_note_shipment->save();
+                        //  $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
+                        //  $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
+                        //  $new_delivery_note_shipment->rwdn_id = $check_existing_note->id;
+                        //  $new_delivery_note_shipment->shipment_id = $shipment_id;
+                        //  $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                        //  $new_delivery_note_shipment->updated_time = $time;
+                        //  $new_delivery_note_shipment->updated_via = $via;
+                        //  $new_delivery_note_shipment->save();
                      }
 
                      $check_summary->save();
                  }
                  else
                  {
+                    
                      $new_summary = new RiderWiseDeliveryNoteSummary();
                      $new_summary->delivery_date = $rider_delivery_date ?? '00:00:00 00:00:00';
                      $new_summary->rider_id = $rider_id;
@@ -244,8 +247,7 @@ trait LastMileAppReportTrait
             $check_summary->at_17_count = $check_summary->at_17_count - 1;
         } elseif (!empty($check_summary->at_18_count) && $time > '17:59:59' && $time <= '18:59:59') {
             $check_summary->at_18_count = $check_summary->at_18_count - 1;
-        } elseif (!empty($check_summary->at_19_count) && $time > '18:59:59' && $time <= '19:59:59') {
-            
+        } elseif (!empty($check_summary->at_19_count) && $time > '18:59:59' && $time <= '19:59:59') {   
             $check_summary->at_19_count = $check_summary->at_19_count - 1;
         } elseif (!empty($check_summary->at_20_count) && $time > '19:59:59' && $time <= '20:59:59') {
             $check_summary->at_20_count = $check_summary->at_20_count - 1;
