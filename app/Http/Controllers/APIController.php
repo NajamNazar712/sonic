@@ -120,6 +120,8 @@ use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+
 class APIController extends Controller
 {
 
@@ -216,14 +218,14 @@ class APIController extends Controller
         'unique' => ':attribute is already Present.',
         'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
 
-        'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        'phone_number.regex' => ':attribute format is Invalid or must be integer, required Format is: 03000000000.',
 
-        'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
-        'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'consignee_phone_number_1.regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'consignee_phone_number_2.regex' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
 
         'distinct' => ':attribute must not be Repeated.',
 
-        'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+        'phone_number' => ':attribute format is Invalid or must be integer, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
         'origin_check' => 'Origin city not allowed, please contact your sales person!',
         'destination_check' => 'Destination city not allowed, please contact your sales person!',
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
@@ -479,17 +481,48 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
 
-        Validator::extend('phone_number', function ($attribute, $value, $parameters) {
-            if ($value) {
-                $value = $this->phone_number($value);
+        
+        // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+        //     if ($value) {
+        //         $value = $this->phone_number($value);
 
-                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
-                    return true;
-                } else {
-                    return false;
+        //         if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+        //             return true;
+        //         } else {
+        //             return false;
+        //         }
+        //     }
+        // });
+
+        if(preg_match('/^(92|03)\d+/', $request->consignee_phone_number_1))
+        {
+            Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+                if ($value) {
+                    $value = $this->phone_number($value);
+
+                    if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{10}$|^03\d{9}$/', $value)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
-            }
-        });
+            });
+
+        } else {
+
+             Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+                if ($value) {
+                    $value = $this->phone_number($value);
+
+                    if (preg_match('/^\d+$/', $value)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+        }
+       
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             if (isset($data['shipping_mode_id']) && isset($data['service_type_id'])) {

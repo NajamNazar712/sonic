@@ -2447,6 +2447,11 @@ Route::prefix('admin')->name('admin.')->group(function(){
                 Route::put('update', 'Admins\GlobalSettingsController@status_webhook_update')->name('update');
             });
 
+            // Route::prefix('mobile_check')->name('mobile_check.')->group(function() {
+            //     Route::get('', 'Admins\Settings\GeneralSettingController@mobile_check_index')->name('index');
+            //     Route::post('store', 'Admins\Settings\GeneralSettingController@mobile_check_store')->name('store');
+            // });
+
             Route::prefix('bypass_weight')->name('bypass_weight.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
                 Route::post('update', 'Admins\GlobalSettingsController@bypass_weight_update')->name('update');

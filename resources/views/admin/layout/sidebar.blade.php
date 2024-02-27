@@ -1744,6 +1744,10 @@
                                                 href="{{ route('admin.settings.auto_account_disabled_days.auto_index') }}">Auto
                                                 Account Disabled Days</a></li>
                                     @endif
+                                    {{-- @if (session('role_id') == 1 || in_array(149, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.shippers.mobile_check.index') }}">Shipper Mobiler Number Check</a></li>
+                                    @endif --}}
                                     {{--                                    @if (session('role_id') == 1 || in_array(228, session('permissions'))) --}}
                                     {{--                                        <li><a class="menu-item" href="{{ route('admin.settings.stock_movement.index') }}">Packaging Material Stock Movement Account</a></li> --}}
                                     {{--                                    @endif --}}
