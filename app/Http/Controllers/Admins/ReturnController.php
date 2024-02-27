@@ -7739,7 +7739,7 @@ class ReturnController extends Controller
                     $errorMessages = 'Try to update the shipment after 24 hours';
                 }
             }
-            return response()->json(['status' => 0, 'message' => $errorMessages, 'custom_check', $unresponsive_shipments_error ? 1 : 0]);
+            return response()->json(['status' => 0, 'message' => $errorMessages, 'custom_check' => $unresponsive_shipments_error ? 1 : 0]);
         }
 
         // When call history of all shipments are updated without any error
