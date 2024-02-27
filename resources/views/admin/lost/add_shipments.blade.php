@@ -104,6 +104,51 @@
         </div>
     </div>
 
+    <!--Deposit Slip Modal -->
+    <div class="modal fade text-left" id="addLostResponsible" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="addLostResponsible"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Lost Responsible</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="addLostResponsibleForm" class="form" method="post"
+                          enctype="multipart/form-data">
+                        @csrf
+         
+                        <table class="table table-bordered datatable" id="addLostResponsibleTable" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Employee ID</th>
+                                <th class="border-primary border-darken-1">Employee Name</th>
+                                <th class="border-primary border-darken-1">Employee Type</th>
+                                <th class="border-primary border-darken-1"></th>
+
+                            </tr>
+                            </thead>
+
+                        </table>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>
+                                    Upload
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Deposit Slip Modal -->
+
 @endsection
 
 @section('css')
@@ -430,6 +475,96 @@ label.error {
                 }
             });
 
+
+            $('body').on('click', '.add_lost_responsible', function () {
+                var shipment_id = $(this).attr('data-id'); 
+                $('#addLostResponsible').attr('id', 'addLostResponsible' + shipment_id);
+                $('#addLostResponsible' + shipment_id).modal('show'); 
+
+                $('#addLostResponsible' + shipment_id).on('shown.bs.modal', function (event) {
+                    if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable')) { 
+                        addLostResponsible = $('#addLostResponsibleTable').DataTable({
+                            dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                            buttons: [{
+                                title: 'Add Row',
+                                className: 'btn btn-primary mb-1',
+                                text: '<i class="la la-plus"></i> Add Row',
+                                action: function (e) {
+                                    add_row(shipment_id);
+                                }
+                            }],
+                            ordering: false,
+                            paging: false,
+                            columns: [
+                                { orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
+                                { name: 'user', class: 'align-middle user form-group', width: '40%' },
+                                { name: 'user_name', class: 'align-middle user_name form-group', width: '20%' },
+                                { name: 'user_type', class: 'align-middle user_type form-group', width: '20%' },
+                                {name: 'action', class: 'align-middle action'},
+                            ],
+                            rowCallback: function (row, data, index) {
+                                var info = addLostResponsible.page.info();
+                                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                            },
+                            initComplete: function () {
+                                // this.api().table().columns.adjust();
+                            }
+                        });
+                    }
+                });
+            });
+
+            var rows_count = 0;
+            var selected_rows = [];
+            function add_row(shipment_id) {
+                rows_count++;
+                var user_input = '<input class="form-control user-input" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
+                var user_name = '<input class="form-control user-name" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+                var user_type = '<input class="form-control user-type" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+
+                if (rows_count == 1) {
+                    var remove = '';
+                } else {
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+                }
+
+                addLostResponsible.row.add([0, user_input, user_name, user_type, remove]).node().id = rows_count;
+                addLostResponsible.draw(true);
+                selected_rows.push(rows_count);
+
+                $('.user-input[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').on('keypress', function(event) {
+                    if (event.which === 13 || event.keyCode === 13) {
+                        var inputValue = $(this).val();
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
+                            method: 'POST',
+                            data: 
+                            {   trax_id: inputValue,
+                                '_token': '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                $('.user-name[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.name)
+                                $('.user-type[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.type)
+                            },
+                            error: function(xhr, status, error) {
+                                // Handle AJAX error
+                            }
+                        });
+                    }
+                });
+            }
+
+            $('body').on('click', 'a.remove_row', function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+                addLostResponsible.row($(this).parents('tr')).remove().draw();
+            });
+
+            
         });
     </script>
 @endsection
