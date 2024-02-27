@@ -4541,34 +4541,30 @@
                                     @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))))
                                         {{-- <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button> --}}
                                         <button id="duplicate_modal_btn" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
+                                    
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                    
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-success">Yes</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
                                     @if ((in_array($shipper->rate_status, [0, 1]) && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
-
-                                    <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
-                                
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">×</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body text-center">
-                                
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button id="accountApproveActiveSubmit" type="submit" class="btn btn-success">Yes</button>
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
                                 </div>
 
                             </div>
@@ -5194,16 +5190,12 @@
             $('#authorize').val(1);
         });
 
-
         // $('#accountApproveActiveSubmit').on('click',function(){
         //     $('#approve').val(1);
-        //     // console.log('ddd');
         // });
-
 
         $('#duplicate_modal_btn').on('click', function(e){
             e.preventDefault();
-            $('#duplicate_modal').modal('show');
             var url = window.location.href;
             var urlParts = url.split('/');
             var id = urlParts[5];
@@ -5267,12 +5259,12 @@
                             }
 
                             $('#duplicate_modal .modal-body').html(html);
+                            $('#approve').val(1);
                         }
 
                     });
                 }
         });
-
 
         $('.decimal').inputmask({
             'alias': 'decimal',
@@ -5460,7 +5452,6 @@
 
             });
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
             on_slab_count++;
         });
         //add more slabs insurance
@@ -5498,7 +5489,6 @@
         //Cash handling
         // cashChargesOvernight
         cashhandlingswitch.onchange = function () {
-            console.log(cashhandlingswitch);
             if(cashhandlingswitch.checked === true){
                 $('.cash-handling-div-overnight').find('input').prop('disabled',false);
                 $('.cash-handling-btn-overnight').find('button').prop('disabled',false);
@@ -5670,7 +5660,6 @@
             ol_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -5699,7 +5688,6 @@
             ol_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -5757,7 +5745,6 @@
 
         $('.weightAdditionDetain').on('change',function() {
             var wid = $(this).attr('id');
-            console.log(wid);
             var wswitch = document.querySelector('#' + wid);
             if (wswitch.checked === true) {
 
@@ -5843,7 +5830,6 @@
             detain_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -5872,7 +5858,6 @@
             detain_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -6026,7 +6011,6 @@
             sameday_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -6055,7 +6039,6 @@
             sameday_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -6124,7 +6107,6 @@
         //     ONdiscount(ondiscountSwitch[4]);
         // };
         // $.each(ondiscountSwitch,function () {
-        //     console.log('heeee');
         // });
         function ONdiscount(eve) {
             if(eve.checked === true){

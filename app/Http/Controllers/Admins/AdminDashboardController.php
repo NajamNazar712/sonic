@@ -2241,9 +2241,7 @@ class AdminDashboardController extends Controller
 
     public function editRates(Request $request, $id)
     {
-        // dd($request->all());
         $user = User::find($id);
-
         if ($user['status'] != 3) {
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
@@ -7114,6 +7112,8 @@ class AdminDashboardController extends Controller
             'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
 
         ];
+
+        dd(2);
 
         $validations = array();
         $on_validations = array();

@@ -922,8 +922,6 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1108,7 +1106,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1260,7 +1257,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1389,7 +1385,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -2255,7 +2250,6 @@ function checkboxStatus() {
                                 //             '</tr>' +
                                 //         '</table>';
 
-                                // console.log(data.info);
 
                                 var baseURL = "{{ url('admin/accounts') }}";
                                 var html = '<table class="table table-bordered">';
@@ -3000,7 +2994,6 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){

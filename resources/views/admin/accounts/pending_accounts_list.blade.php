@@ -1046,8 +1046,6 @@
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1075,7 +1073,6 @@
                     };
                 }
 
-                console.log(params);
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.pending.ajax') }}',
                     type: "POST",
@@ -1200,7 +1197,6 @@
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1350,7 +1346,6 @@
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1925,7 +1920,6 @@
                 closeOnEsc: false,
                 dangerMode: true
             }).then((value) => {
-                console.log(value);
                 if (value) {
                     if (value === '') {
                         swal("You have not entered any remarks!", {

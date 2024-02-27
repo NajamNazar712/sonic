@@ -236,7 +236,6 @@
             $('.edit').on('click', function() {
                 
                 var user_id = {!! $id !!};
-                console.log(user_id);
                 $.ajax({
                     url: '{!! route('admin.accounts.documents.edit') !!}',
                     method: 'POST',
@@ -246,8 +245,6 @@
                     }
                 }).done(function (data) {
                     if(data.status === 1){
-                        // console.log(data);
-                        // console.log(data.user_attachment.blank_cheque_image);
                         $('#old_filled_and_signed_pdf').text(data.user_attachment.filled_and_signed_pdf);
                         $('#old_signed_acknowledgement_pdf').text(data.user_attachment.signed_acknowledgement_pdf);
                         $('#old_cnic_front_image').text(data.user_attachment.cnic_front_image);
@@ -411,7 +408,7 @@
                             'shipper_id': id,
                         }
                     }).done(function(data) {
-                        if(data.status){
+                        if(data.status == 1){
                             $('#duplicate_modal').modal('show');
                             var baseURL = "{{ url('admin/accounts') }}";
                             var html = '<table class="table table-bordered">';
