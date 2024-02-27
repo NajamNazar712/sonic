@@ -319,6 +319,7 @@ class ReturnV2Controller extends Controller
                             //if agent already exists on same date update row
                         if ($assign_agent) 
                         {
+                            dd(2);
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
                                 // DB::rollBack();
@@ -355,6 +356,7 @@ class ReturnV2Controller extends Controller
 
                         //when there is no row of agent in rv_shipment_agents table i.e update status on different day 
                         else {
+                            dd(1);
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
                                 // DB::rollBack();
