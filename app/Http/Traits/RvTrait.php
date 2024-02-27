@@ -340,6 +340,7 @@ trait RvTrait
     protected function add_shipment_agent($request, $shipment_assign_agent)
     {
         try {
+            dd($request->all(), $shipment_assign_agent);
             //updating columns in shipment assign agent table 
 
             $add_agent = new RvShipmentAgent();
