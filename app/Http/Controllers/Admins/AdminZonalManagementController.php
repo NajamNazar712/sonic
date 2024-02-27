@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\ZoneCitiesGst;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
@@ -135,8 +136,13 @@ class AdminZonalManagementController extends Controller
         $zone = Zone::find($id);
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
         $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
+        $zone_cities_gst = ZoneCitiesGst::join('cities as c','c.id','zone_cities_gsts.city_id')
+            ->join('zones as z','z.id','zone_cities_gsts.zone_id')
+            ->where('zone_cities_gsts.zone_id',$id)
+            ->select('c.id as city_id','c.name as city_name','zone_cities_gsts.gst','z.id as zone_id','z.name as zone_name')
+            ->get();
 
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor]);
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_id' => $id, 'zone_name' => 'south']);
     }
 
     public function update_store(Request $request, $id) {
@@ -298,4 +304,27 @@ class AdminZonalManagementController extends Controller
           return 'false';
         }
       }
+    public function update_zone_cities_gst(Request $request)
+    {
+
+        $zone_id = $request->zone_id;
+        $tableData = $request->table_data;
+
+        $tableData_1 = [['zone_id_hidden'=>1,'city_id'=>202,'gst'=>5]];
+//        dd($request->all(),$tableData,$tableData_1);
+        ZoneCitiesGst::where('zone_id',$zone_id)->truncate();
+
+        $zoneCityGstCollection = collect(array_map(function ($row) {
+            $zoneCityGst = new ZoneCitiesGst();
+            $zoneCityGst->fill($row);
+            return $zoneCityGst;
+        }, $tableData_1));
+        // Save all models in the collection using insert()
+        $zoneCityGstCollection->each->save();
+
+        // Optionally, dump all saved models
+        dump($zoneCityGstCollection->toArray());
+
+        return response()->json(['status' => 1, 'success' => 'Zone Cities Updated !']);
+    }
 }

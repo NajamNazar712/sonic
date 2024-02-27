@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ZoneCitiesGst;
 use Auth;
 use DateTime;
 use SnappyPDF;
@@ -151,14 +152,25 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id)
+    static private function gst($zone_id,$city = Null)
     {
         $zone = Zone::find($zone_id);
-
-        if ($zone) {
-            return $zone->gst;
-        } else {
-            return 0.13;
+        $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
+            ->where('city_id',$city)
+            ->where('status',1)
+            ->select('gst');
+        if ($zone_city_gst->exists())
+        {
+            $zone_city_gst = $zone_city_gst->first();
+            return $zone_city_gst->gst;
+        }
+        else
+        {
+            if ($zone) {
+                return $zone->gst;
+            } else {
+                return 0.13;
+            }
         }
     }
 
@@ -3739,14 +3751,14 @@ class AdminFinanceController extends Controller
                 $crs = true;
             }
         }
-
         $amount = $shipment->amount;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
+                        dd($charges,$gst);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }

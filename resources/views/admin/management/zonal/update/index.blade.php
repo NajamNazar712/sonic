@@ -21,11 +21,11 @@
 								{{ csrf_field() }}
 
 								<div class="row">
-									<div class="col-8">
+									<div class="col-4">
 										<div class="form-group">
 											<label>Name</label>
 											{{-- <input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $zone->name }}"> --}}
-											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" 
+											<input type="text" name="name" id="zone_name" class="form-control subject" placeholder="Name*" data-rule-required="true"
 											data-rule-remote="{{ route('admin.management.zonal.check_zone_name',$zone->id) }}" data-msg-remote="Zone Name must be unique" data-msg-required="Name is required" value="{{ $zone->name }}">
 										</div>
 									</div>
@@ -34,6 +34,20 @@
 										<div class="form-group">
 											<label>GST</label>
 											<input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required"value="{{ $zone->gst }}">
+										</div>
+									</div>
+									<div class="col-2">
+										<div class="form-group mt-3">
+											<label for="" class="">Individual City GST</label>
+											<input type="checkbox" id="individual_city_gst" name="individual_city_gst" class="switchery"
+												   data-size="sm" data-switchery="true">
+											<input id="individual_city_gst_bit" value="0" name="individual_city_gst_bit" hidden>
+										</div>
+									</div>
+									<div class="col-2">
+										<div class="form-group mt-2">
+											<label  id="add_cities" class="btn btn-primary"
+													 data-size="sm"> Add Cities</label>
 										</div>
 									</div>
 
@@ -124,6 +138,97 @@
 									</div>
 								</div>
 							</form>
+
+							{{--city wise gst--}}
+							<div class="modal fade" id="city_wise_gst" role="dialog" aria-labelledby="city_wise_gst_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="city_wise_gst_title">Cities Wise GST</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<div class="container">
+												<div class="row">
+													<div class="col-md-5">
+														<select name="zone_city_enter" class="select2" id="zone_city_enter"
+																data-rule-required="true" data-msg-required="City is required">
+															@foreach($cities as $city)
+																<option value="{{ $city->id }}">{{ $city->name }}</option>
+															@endforeach
+														</select>
+													</div>
+													<div class="col-md-5">
+														<input type="text" name="zone_city_gst_enter" id="zone_city_gst_enter" value="" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+													</div>
+													<div class="col-md-2">
+														<input type="button" class="btn btn-md btn-primary " id="addrow" value="Add Row" />
+													</div>
+												</div>
+												<div class="row mt-2">
+													<table id="myTable" class=" table order-list">
+														<thead>
+														<tr>
+															<td>Zone</td>
+															<td>City</td>
+															<td>GST</td>
+														</tr>
+														</thead>
+														<tbody>
+														@foreach($zone_cities_gst as $zcg)
+															<tr>
+																<td class="col-sm-4">
+																	<input type="text" name="zone_id[]"
+																		   id="zone_id[]"
+																		   value="{{$zcg->zone_name}}"
+																		   class="form-control" readonly/>
+																	<input type="hidden" name="zone_id_hidden[]"
+																		   id="zone_id_hidden[]"
+																		   value="{{$zcg->zone_id}}"
+																		   class="form-control" readonly/>
+																</td>
+																<td class="col-sm-4">
+																	<input type="text" name="zone_city_id[]"
+																		   value="{{$zcg->city_name}}"
+																		   class="form-control" readonly/>
+																	<input type="hidden" name="zone_city_id_hidden[]"
+																		   value="{{$zcg->city_id}}"
+																		   class="form-control" readonly/>
+																</td>
+																<td class="col-sm-4">
+																	<input type="mail" name="zone_city_gst[]"
+																		   value="{{$zcg->gst}}"
+																		   class="form-control"/>
+																</td>
+																<td class="col-sm-2"><a class="deleteRow"></a>
+																	<input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete">
+																</td>
+															</tr>
+														@endforeach
+														</tbody>
+														<tfoot>
+														<tr>
+															<td colspan="5" style="text-align: center;">
+																<button id="update_all_gst" class="btn btn-primary">Update</button>
+															</td>
+														</tr>
+														<tr>
+														</tr>
+														</tfoot>
+													</table>
+												</div>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							{{--city wise gst end--}}
 						</div>
 					</div>
 				</div>
@@ -134,15 +239,20 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
+
 			$('#zone_form .gst').inputmask({
 				'alias': 'decimal',
 				'allowMinus': false,
@@ -189,6 +299,104 @@
 					});
 
 					form.submit();
+				}
+			});
+
+			$('#zone_city_enter').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select City*'
+			});
+
+			$('#add_cities').on('click', function () {
+				$('#city_wise_gst').modal('show');
+			});
+
+			var toggleValue = false;// depend upon condition if mim=n one city found then true
+			$('#individual_city_gst').change( function () {
+				console.log('clicked');
+				toggleValue = !toggleValue;
+				if(toggleValue)
+				{
+					$('#individual_city_gst_bit').val("1");
+					console.log(toggleValue);
+				}
+				else
+				{
+					$('#individual_city_gst_bit').val("0");
+					console.log(toggleValue);
+				}
+			});
+
+			var counter = 0;
+			$("#addrow").on("click", function () {
+
+				var zone_id = {{ $zone_id }};
+				var zone_name = $('#zone_name').val();
+				var zone_city_enter_value = $("#zone_city_enter").val();
+				var zone_city_enter_text = $("#zone_city_enter option:selected").text();
+				var zone_city_gst_enter_value = $("#zone_city_gst_enter").val();
+				// console.log(zone_id,zone_city_enter_value,zone_city_enter_text,zone_city_gst_enter_value);
+				var newRow = $("<tr>");
+				var cols = "";
+
+				cols += '<td><input type="text" class="form-control" value="'+ zone_name +'" name="zone_id[]" readonly></td>';
+				cols += '<td class="d-none"><input type="hidden" class="form-control" value="'+ zone_id +'" name="zone_id_hidden[]" readonly></td>';
+				cols += '<td><input type="text" class="form-control" value="' + zone_city_enter_text + '" name="zone_city_id[]" readonly/></td>';
+				cols += '<td class="d-none"><input type="hidden" class="form-control" value="' + zone_city_enter_value + '" name="zone_city_id_hidden[]" readonly/></td>';
+				cols += '<td><input type="text" class="form-control" value="' + zone_city_gst_enter_value + '" name="zone_city_gst[]"/></td>';
+
+				cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+				newRow.append(cols);
+				$("table.order-list").append(newRow);
+				counter++;
+			});
+
+			$("table.order-list").on("click", ".ibtnDel", function (event) {
+				$(this).closest("tr").remove();
+				counter -= 1
+			});
+
+			$("#update_all_gst").on("click", function() {
+				var tableData = [];
+				var hasEmptyGst = true;
+				$("table.order-list tbody tr").each(function () {
+					var row = {};
+					row.zone_id = $(this).find('input[name="zone_id[]"]').val();
+					row.zone_id_hidden = $(this).find('input[name="zone_id_hidden[]"]').val();
+					row.zone_city_id = $(this).find('input[name="zone_city_id[]"]').val();
+					row.zone_city_id_hidden = $(this).find('input[name="zone_city_id_hidden[]"]').val();
+					row.zone_city_gst = $(this).find('input[name="zone_city_gst[]"]').val();
+
+					if (!row.zone_city_gst) {
+						hasEmptyGst = false;
+						console.error("Empty GST value found!");
+						return false; // Exit the loop if an empty GST is found
+					}
+					tableData.push(row);
+				});
+
+				if (hasEmptyGst) {
+					$.ajax({
+						url: '{!! route('admin.management.zonal.update_zone_cities_gst') !!}',
+						method: 'POST',
+						data: {
+							table_data: tableData,
+							'zone_id':{{ $zone_id }},
+							'_token': '{{ csrf_token() }}'
+						},
+					}).done(function (data) {
+						if (data.status == 1) {
+							toastr.success(data.success, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else{
+							toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+					});
+				} else {
+					toastr.error('GST is required !', 'Error!', {
+						positionClass: 'toast-top-center',
+						containerId: 'toast-top-center'
+					});
 				}
 			});
 		});
