@@ -717,6 +717,7 @@ trait RvTrait
                 }
                 //if unresponsive count is 2 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
                 else if ($rv_shipment_assign_agent->unresponsive_count == 2) {
+                    dd(123);
                     //updating the shipment status to Shipper Advise Requested(65) in shipments table
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
                     
