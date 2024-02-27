@@ -369,7 +369,7 @@ class LostShipmentsController extends Controller
                         $data['action_button'] = '<div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm accounts">
-                        <button type="button" class="dropdown-item add_lost_responsible" data-id="' . $shipment->id . '">
+                        <button type="button" class="dropdown-item add_lost_responsible" data-id="' . $shipment->id . '" data-toggle="modal">
                         <div class="row no-gutters align-items-center">
                                     <div class="col-2"><i class="ft-minus-circle"></i></div>
                                     <div class="col-9 offset-1">Add Lost Responsible</div>

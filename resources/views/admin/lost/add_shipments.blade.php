@@ -104,7 +104,7 @@
         </div>
     </div>
 
-    <!--Deposit Slip Modal -->
+    <!--lost Responsibl Modal -->
     <div class="modal fade text-left" id="addLostResponsible" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="addLostResponsible"
          aria-hidden="true">
@@ -477,11 +477,11 @@ label.error {
 
 
             $('body').on('click', '.add_lost_responsible', function () {
-                var shipment_id = $(this).attr('data-id'); 
-                $('#addLostResponsible').attr('id', 'addLostResponsible' + shipment_id);
-                $('#addLostResponsible' + shipment_id).modal('show'); 
-
-                $('#addLostResponsible' + shipment_id).on('shown.bs.modal', function (event) {
+                var shipment_id = $(this).attr('data-id');
+                var idModal = '#addLostResponsible' + (table.length == 0 ? '' : shipment_id);
+                console.log(idModal);
+                $(idModal).modal('show');
+                $(idModal).on('shown.bs.modal', function (event) {
                     if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable')) { 
                         addLostResponsible = $('#addLostResponsibleTable').DataTable({
                             dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -513,6 +513,8 @@ label.error {
                     }
                 });
             });
+
+
 
             var rows_count = 0;
             var selected_rows = [];
