@@ -105,48 +105,7 @@
     </div>
 
     <!--lost Responsibl Modal -->
-    <div class="modal fade text-left" id="addLostResponsible" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="addLostResponsible"
-         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Lost Responsible</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="addLostResponsibleForm" class="form" method="post"
-                          enctype="multipart/form-data">
-                        @csrf
-         
-                        <table class="table table-bordered datatable" id="addLostResponsibleTable" style="z-index: 3;">
-                            <thead>
-                            <tr role="row" class="bg-primary white">
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Employee ID</th>
-                                <th class="border-primary border-darken-1">Employee Name</th>
-                                <th class="border-primary border-darken-1">Employee Type</th>
-                                <th class="border-primary border-darken-1"></th>
-
-                            </tr>
-                            </thead>
-
-                        </table>
-                        <hr>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>
-                                    Upload
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="addLostResponsibleModal"> </div>
     <!--Deposit Slip Modal -->
 
 @endsection
@@ -478,12 +437,48 @@ label.error {
 
             $('body').on('click', '.add_lost_responsible', function () {
                 var shipment_id = $(this).attr('data-id');
-                var idModal = '#addLostResponsible' + (table.length == 0 ? '' : shipment_id);
-                console.log(idModal);
-                $(idModal).modal('show');
-                $(idModal).on('shown.bs.modal', function (event) {
-                    if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable')) { 
-                        addLostResponsible = $('#addLostResponsibleTable').DataTable({
+                var modalId = 'addLostResponsibleModal_' + shipment_id; // Unique ID for each modal
+                var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
+                    '<div class="modal-dialog modal-xl" role="document">' +
+                    '<div class="modal-content">' +
+                    '<div class="modal-header bg-primary white">' +
+                    '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                    '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span>' +
+                    '</button>' +
+                    '</div>' +
+                    '<div class="modal-body text-center">' +
+                    '<form id="addLostResponsibleForm_' + shipment_id + '" class="form" method="post" enctype="multipart/form-data">' +
+                    '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                    '<input type="hidden" id="shipment_id" name="shipment_id" value="' + shipment_id + '">' +
+                    '<table class="table table-bordered datatable" id="addLostResponsibleTable_' + shipment_id + '">' +
+                    '<thead>' +
+                    '<tr role="row" class="bg-primary white">' +
+                    '<th class="border-primary border-darken-1">S. No.</th>' +
+                    '<th class="border-primary border-darken-1">Employee ID</th>' +
+                    '<th class="border-primary border-darken-1">Employee Name</th>' +
+                    '<th class="border-primary border-darken-1">Employee Type</th>' +
+                    '<th class="border-primary border-darken-1"></th>' +
+                    '</tr>' +
+                    '</thead>' +
+                    '</table>' +
+                    '<hr>' +
+                    '<div class="row justify-content-center">' +
+                    '<div class="col-3">' +
+                    '<button id="DepositSlipButton_' + shipment_id + '" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</form>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                $('.addLostResponsibleModal').append(modalContent);
+                $('#' + modalId).modal('show');
+                $('#' + modalId).on('shown.bs.modal', function (event) {
+                    if (!$.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) { 
+                        addLostResponsible = $('#addLostResponsibleTable_' + shipment_id).DataTable({
                             dom: '<"d-inline-block"l><"pull-right"B>tipr',
                             buttons: [{
                                 title: 'Add Row',
