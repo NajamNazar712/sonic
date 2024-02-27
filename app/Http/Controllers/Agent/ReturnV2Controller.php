@@ -338,6 +338,7 @@ class ReturnV2Controller extends Controller
                                         return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
                                     } 
                                     else {
+                                        dd(1);
                                         // $shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 2)->latest()->first();
                                         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
                                         // //adding logs in rv_shipment_assign_agent_details table
