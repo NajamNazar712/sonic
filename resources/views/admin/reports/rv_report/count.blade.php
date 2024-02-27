@@ -375,6 +375,11 @@
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#search_date_from_root').css('top','40px');
+                },
+                onSet: function(context) {
+
+                var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                to_date.pickadate('picker').set('select', new Date(old_date_formatted),{muted:true});
                 }
             });
 
