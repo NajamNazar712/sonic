@@ -171,11 +171,11 @@
     </div>
     <div class='row' id="allow_delivered_row"> 
         <div class="col text-center">
-                <label class="font-small-2 font-weight-bold block">This rider will mark delivered status?</label>
+                <label class="font-medium-2 font-weight-bold block">This rider will mark delivered status?</label>
                 <div class="form-group">
-                    <label for="allow_delivered_status" class="font-small-2 text-bold-600 mr-1">No</label>
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 mr-1">No</label>
                     <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status" class="checkbox allow_delivered_status" data-size="sm" data-switchery="true">
-                    <label for="allow_delivered_status" class="font-small-2 text-bold-600 ml-1">Yes</label>
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 ml-1">Yes</label>
                 </div>
         </div>
     </div>
