@@ -370,7 +370,6 @@ class ReturnV2Controller extends Controller
                                     $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
                                         // DB::rollBack();
-                                        dd(1);
                                         return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
                                     } else {
                                         $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
