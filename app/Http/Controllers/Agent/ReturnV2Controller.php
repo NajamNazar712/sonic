@@ -366,6 +366,7 @@ class ReturnV2Controller extends Controller
                                     $shipment_assign_agent = $shipment_assign_agents;
                                 }
                                 else {
+                                    $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->latest()->first();
                                     // this function is updating rv_shipment_assign_agents table columns like increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
                                     $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
