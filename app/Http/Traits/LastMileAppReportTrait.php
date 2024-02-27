@@ -43,7 +43,7 @@ trait LastMileAppReportTrait
          }
          
          if($rider->exists()){
-             $rider = $rider->first();
+                         $rider = $rider->first();
 
              $today = Carbon::today();
 
@@ -53,7 +53,7 @@ trait LastMileAppReportTrait
                  ->select('delivery_notes.created_at as created_at', 'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments', 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
                  ->where('delivery_notes.id', $delivery_note_id)
                  ->whereDate('delivery_notes.created_at', $today);
-                              if($delivery_note_data->exists()){
+            if($delivery_note_data->exists()){
                  $delivery_note_data = $delivery_note_data->first();
                  
                  $check_summary_delivery = RiderWiseDeliveryNoteSummary::join('rider_wise_delivery_notes as rwdn','rwdn.rwdnsum_id','rider_wise_delivery_note_summaries.id')->where('rider_id',$rider_id)->whereDate('delivery_date', $today)->where('rwdn.delivery_note_id', $delivery_note_id);
@@ -61,14 +61,12 @@ trait LastMileAppReportTrait
                  {
                     $check_summary_delivery = $check_summary_delivery->first();
                     $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_summary_delivery->rwdnsum_id)->first();
-
                     $rwdnsum_id = $check_summary->id; 
                     $finishTime = Carbon::parse($check_summary->delivery_date);                    
                     $totalDuration = $finishTime->diffInHours($time);
-                    $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today);
+                    $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereDate('created_at', $today);
                     if(!$riderWiseShipmentNote->exists())
                     {
-
                         $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                         $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
                         $new_delivery_note_shipment->rwdn_id = $check_summary_delivery->id;
@@ -164,6 +162,7 @@ trait LastMileAppReportTrait
                      
                      $new_summary->save();
                      self::countAdd($time,$new_summary);
+                     
                      $new_delivery_note = new RiderWiseDeliveryNote();
                      $new_delivery_note->rwdnsum_id = $new_summary->id;
                      $new_delivery_note->delivery_note_id = $delivery_note_id;
