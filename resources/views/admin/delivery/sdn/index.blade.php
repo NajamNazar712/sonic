@@ -805,11 +805,26 @@
                             head.push('Trax Pay Amount');
                             head.push('Cash Amount');
                             head.push('Aging');
+                             var sdnDepositAmount =0;
+                             var adjustmentAmount =0;
+                             var hblAmount =0;
+                             var oneLinkAmount =0;
+                             var traxPayAmount =0;
+                             var difference_amount =0;
+                             var cash_amount =0;
 
                             $.each(result.data, function (index, values) {
+                                sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                                adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                                hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
+                                oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
+                                traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
+                                difference_amount = ( sdnDepositAmount - adjustmentAmount);
+                                cash_amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
+                               
+
                                 row = [];
-
-
+                         
                                 row.push(index + 1);
                                 row.push(values.sdn_id_padded);
                                 row.push(values.sdn_type);
@@ -827,11 +842,11 @@
                                 row.push(values.adjustment_date);
                                 row.push(values.adjustment_amount);
                                 row.push(values.adjustment_ref);
-                                row.push(values.difference_amount);
+                                row.push(difference_amount);
                                 row.push(values.hbl_amount);
                                 row.push(values.one_link_amount);
                                 row.push(values.Trax_pay_amount);
-                                row.push(values.cash_amount);
+                                row.push(cash_amount);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -1123,7 +1138,13 @@
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        render: function (data, type, row) {
+                            sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                            adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                            difference_amount = ( sdnDepositAmount - adjustmentAmount );
+                            return difference_amount.toLocaleString();
+                        }
                     },
                     {
                         data: 'hbl_amount',
@@ -1153,13 +1174,13 @@
                         orderable: false,
                         searchable: false,
                         render: function (data, type, row) {
-                            var sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
-                            var adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
-                            var hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
-                            var oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
-                            var traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
-                            var amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
-                            return amount.toLocaleString();
+                             sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                             adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                             hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
+                             oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
+                             traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
+                             cash_amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
+                            return cash_amount.toLocaleString();
                         }
                     },
                     {
