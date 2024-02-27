@@ -12330,16 +12330,7 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agent_details.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agent_details.rv_fake_status_id','rv_fakes.id')
-
-        //this join is only for agents who have updated the shipment status
-        // ->leftJoin('rv_shipment_assign_agent_details', function ($join) {
-        //     $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=', 'rv_shipment_assign_agents.id')
-        //          ->where('rv_shipment_assign_agent_details.id', '=', DB::raw('(SELECT MAX(id) FROM rv_shipment_assign_agent_details WHERE rv_shipment_assign_agent_details.rv_shipment_assign_agent_id = rv_shipment_assign_agents.id AND rv_shipment_assign_agent_details.rv_state_id != 1 AND rv_shipment_assign_agent_details.updated_type_id = 2)'))
-        //          ->orderBy('id', 'DESC');
-        // })
-        // ->leftjoin('admins as ad', 'rv_shipment_assign_agent_details.agent_id','ad.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
-
 
         ->leftjoin('shipments_journey as sj', function($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -12361,8 +12352,8 @@ class AdminReportsController extends Controller
         'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id')
-        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->groupBy('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id');
+        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1);
+        // ->groupBy('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id');
             
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
