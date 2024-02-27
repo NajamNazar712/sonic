@@ -346,7 +346,7 @@ class ReturnV2Controller extends Controller
                                             // DB::rollBack();
                                             return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
                                         } 
-                                        DB::commit();
+                                        // DB::commit();
                                         return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                                     }
                                 }
