@@ -266,6 +266,7 @@ trait RvTrait
 
     protected function update_shipments_status($request, $assigned_agent)
     {
+        dd($request->all(), $request, $assigned_agent);
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
         $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count', 3)->latest()->first();
         $reattempt_requested_shipment = Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 52)->latest()->first();
