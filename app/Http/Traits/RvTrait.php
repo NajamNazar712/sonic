@@ -312,6 +312,7 @@ trait RvTrait
     // Description: this function is updating table rows of rv_shipment_assign_agents
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
+        dd($request->all(), $assigned_agent);
         $shipment_assign_agent_table_columns = $this->update_shipments_status($request, $assigned_agent);
         if($admin_agent->employee){
 
