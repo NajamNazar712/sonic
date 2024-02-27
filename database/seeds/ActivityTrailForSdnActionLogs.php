@@ -15,7 +15,7 @@ class ActivityTrailForSdnActionLogs extends Seeder
             array('id' => 751, 'screen_name' => 'SDN acions logs', 'action'=> 'View'),
         ));
         DB::table('module_permissions')->insert(array(
-            array('id' => 941, 'name' => 'SDN acions logs - View', 'module_id' => 6)
+            array('id' => 941, 'name' => 'SDN acions logs - View', 'module_id' => 8)
 
         ));
     }
