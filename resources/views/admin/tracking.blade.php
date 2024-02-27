@@ -766,7 +766,7 @@
                                 $('#update_call_status_modal').modal('hide');
                                 window.reaload();
                             }
-                            elseif(response.custom_check == 1) {
+                            else if(response.custom_check == 1) {
                                 swal({
                                     title: 'Something Went Wrong!',
                                     text: response.message,
