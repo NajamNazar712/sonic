@@ -12362,8 +12362,7 @@ class AdminReportsController extends Controller
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
         'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id')
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->where('rv_shipment_assign_agent_details.call_to_id', '!=', 0);
-        // ->groupBy('rv_shipment_assign_agent_details.shipment_id');
+        ->groupBy('rv_shipment_assign_agent_details.shipment_id');
 
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
@@ -12488,7 +12487,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+            $rv_report->whereBetween('action_date', [$from, $to]);
         }   
 
         return $datatable->make(true);
