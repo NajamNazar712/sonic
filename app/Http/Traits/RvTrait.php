@@ -269,7 +269,8 @@ trait RvTrait
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
         $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id', $request->shipment_id)->where('count', 3)->latest()->first();
         $reattempt_requested_shipment = Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 52)->latest()->first();
-
+        
+        dd($request->rv_assign_agent_status_id, $shipment_assign_agent->unresponsive_count);
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
 
         //if shipment delivery count is 3 and again status is updated to unresponsive set the shipment to return confirm
@@ -312,7 +313,6 @@ trait RvTrait
     // Description: this function is updating table rows of rv_shipment_assign_agents
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
-        dd($request->all(), $assigned_agent);
         $shipment_assign_agent_table_columns = $this->update_shipments_status($request, $assigned_agent);
         if($admin_agent->employee){
 
