@@ -2223,7 +2223,7 @@ function checkboxStatus() {
                     }
                 })
                     .done(function(data) {
-                        if(data.status){
+                        if(data.status == 1){
                             $('#duplicate_modal').modal('show');
                             // var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
 
@@ -2279,14 +2279,13 @@ function checkboxStatus() {
                                     '</tr>';
                                 html += '<tr>' +
                                     '<td><strong>NTN</strong></td>' +
-                                    '<td>' + (data.info.ntn ? data.info.ntn : '') + '</td>' +
+                                    '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
                                     '<td>' + (data.info.shared_ntn_no ?
                                         generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
-                                    '</tr>';  
+                                    '</tr>';
                                 html += '<tr>' +
                                     '<td><strong>Email</strong></td>' +
-                                    '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
-                                        data.info.email : '') + '</td>' +
+                                    '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ? data.info.email : '') + '</td>' +
                                     '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
                                         generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
                                     '</tr>';

@@ -9009,7 +9009,7 @@ class AdminDashboardController extends Controller
         $data['shared_cnic'] = implode(', ', $similarUsersCnic);
         $data['shared_name'] = implode(', ', $similarUsersName);
         $data['shared_iban'] = implode(', ', $similarUsersIban);
-        $data['shared_ntn_no'] = implode(', ', $similarUsersNtn);
+        $data['shared_ntn_no'] = !empty($similarUsersNtn) ? implode(', ', $similarUsersNtn) : '';
         $data['shared_email'] = !empty($similarUsersEmail) ? implode(', ', $similarUsersEmail) : '';
 
         return response()->json(['status' => 1, 'info' => $data]);
@@ -9022,7 +9022,7 @@ class AdminDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
 
-        $duplicateNtnCount = User::whereNotNull('ntn_no')
+        $usersWithSameNtn = User::whereNotNull('ntn_no')
             ->select('ntn_no', DB::raw('COUNT(*) as count'))
             ->groupBy('ntn_no')
             ->havingRaw('COUNT(*) > 1')
@@ -9361,11 +9361,11 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users)  use ($request, $duplicateNtnCount, $duplicateEmailCount){
+            ->addColumn('duplication', function ($users)  use ($request, $usersWithSameNtn, $duplicateEmailCount){
                 
                 $count = 0;
 
-                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $duplicateNtnCount)) {
+                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $usersWithSameNtn)) {
                     $count++;
                 }
                 

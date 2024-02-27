@@ -2123,10 +2123,10 @@
                                     '</tr>';
                                 html += '<tr>' +
                                     '<td><strong>NTN</strong></td>' +
-                                    '<td>' + (data.info.ntn ? data.info.ntn : '') + '</td>' +
+                                    '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
                                     '<td>' + (data.info.shared_ntn_no ?
                                         generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
-                                    '</tr>';  
+                                    '</tr>';
                                 html += '<tr>' +
                                     '<td><strong>Email</strong></td>' +
                                     '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?

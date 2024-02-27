@@ -5130,7 +5130,7 @@
             $('#duplicate_modal').modal('show');
             var url = window.location.href;
             var urlParts = url.split('/');
-            var id = urlParts[5];
+            var id = urlParts[6];
             if (id) {
                     $.ajax({
                         url: '{!! route('admin.accounts.duplicate.info') !!}',
@@ -5138,7 +5138,7 @@
                             'shipper_id': id,
                         }
                     }).done(function(data) {
-                        if(data.status){
+                        if(data.status == 1){
                             $('#duplicate_modal').modal('show');
                             var baseURL = "{{ url('admin/accounts') }}";
                             var html = '<table class="table table-bordered">';
@@ -5168,7 +5168,7 @@
                                 '</tr>';
                             html += '<tr>' +
                                 '<td><strong>NTN</strong></td>' +
-                                '<td>' + (data.info.ntn ? data.info.ntn : '') + '</td>' +
+                                '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
                                 '<td>' + (data.info.shared_ntn_no ?
                                     generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
                                 '</tr>';  
