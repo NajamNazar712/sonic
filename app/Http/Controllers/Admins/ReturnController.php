@@ -5487,7 +5487,7 @@ class ReturnController extends Controller
                     
                         foreach($shipment_ids as $shipment_id)
                         {
-                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->first();
+                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,66,52])->first();
                             $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                             if($already_assigned_state->exists()){
                                 $already_assigned_state =  $already_assigned_state->first();
