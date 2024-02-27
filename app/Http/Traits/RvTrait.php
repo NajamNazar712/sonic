@@ -340,7 +340,6 @@ trait RvTrait
     protected function add_shipment_agent($request, $shipment_assign_agent)
     {
         try {
-            dd($request->all(), $shipment_assign_agent);
             //updating columns in shipment assign agent table 
 
             $add_agent = new RvShipmentAgent();
@@ -372,6 +371,7 @@ trait RvTrait
             } 
             
             else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 2) {
+                dd(123);
                 $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
                 $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
             } 
@@ -381,9 +381,9 @@ trait RvTrait
                 $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = null;
                 $shipment_assign_agent_table_columns['rv_state_id'] = 4; //set status as shipment completed
             }
-
-            $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
-            $shipment_assign_agent_table_columns['rv_state_id'] = 2;
+            else{
+                $shipment_assign_agent_table_columns['rv_state_id'] = 2;
+            }
             $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
             return true;
