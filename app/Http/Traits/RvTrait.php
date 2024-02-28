@@ -962,7 +962,7 @@ trait RvTrait
                     
                             $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$shipment->id)->get();
                             
-                            // if data found
+                            // if shipment is found in RvShipmentAssignAgent
                             if($rv_shipment_assign_agent->first())
                             {
                                 // IF AGENT SHIPMENT IS OPEN - ASSIGNED TO ANY USER WHO COMES FIRST
@@ -999,20 +999,21 @@ trait RvTrait
                                     $global_shipment = $shipment->id;
                                     break;
                                 }
-                            }
-                            
-                            // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
-                            if ($rv_shipment_assign_agent->where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
-                                $global_shipment = $shipment->id;
-                                break;
-                            }
-                            
-                            // Shipment is found and already in working state or return is completed, new shipment will get to agent
-                            if ($rv_shipment_assign_agent->first() ) {
+
+                                
+                                // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
+                                if ($rv_shipment_assign_agent->where('agent_id', Auth::id())->where('rv_state_id', 1)->first()) {
+                                    $global_shipment = $shipment->id;
+                                    break;
+                                }
+                                
+                                // Shipment is found and already in working state or return is completed, new shipment will get to agent
                                 $global_shipment = null;
                                 continue;
+
                             }
                             
+                            // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                             
                             $data = [
@@ -1149,7 +1150,7 @@ trait RvTrait
                                 continue;
                             }
                             
-                            
+                            // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                             
                             $data = [
