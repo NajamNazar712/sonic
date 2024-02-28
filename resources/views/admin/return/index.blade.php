@@ -1157,6 +1157,7 @@
                                 } 
                                 else if(response.status == 0){
                                     swal({
+                                        title: 'Something Went Wrong!',
                                         text: response.message,
                                         icon: 'error',
                                         closeOnClickOutside: false,
