@@ -270,30 +270,48 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
         }
         else if ($id == 15) {
+            $details['receiver'] = ['Shipper'];
+            
             $details['fields'] = ['return_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
         }
         else if ($id == 16) {
+            $details['receiver'] = ['Shipper Phone Number'];
+            
             $details['fields'] = ['return_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
         }
         else if ($id == 17) {
+             $details['receiver'] = ['Shipper'];
+             
              $details['fields'] = ['account_id', 'company_name', 'service_type', 'order_id', 'tracking_number', 'new_tracking_number'];
         }
         else if ($id == 18) {
+             $details['receiver'] = ['Shipper Phone Number'];
+             
              $details['fields'] = ['account_id', 'company_name', 'service_type', 'order_id', 'tracking_number', 'new_tracking_number'];
         }
         else if ($id == 19) {
+             $details['receiver'] = ['Shipper/Admins'];
+             
              $details['fields'] = ['dispute_number', 'dispute_type', 'dispute_description', 'launched_by', 'city', 'tracking_number'];
         }
         else if ($id == 20) {
+             $details['receiver'] = ['Shipper'];
+             
              $details['fields'] = ['company_name', 'city', 'bank', 'bank_branch', 'account_number', 'account_title', 'iban', 'account_city', 'payment_cycle', 'payment_done_id', 'payment_done_at', 'total_shipments', 'delivered_shipments', 'returned_shipments', 'adjusted_shipments', 'total_amount', 'total_weight_charges', 'total_cash_handling_charges', 'total_insurance_charges', 'total_replacement_charges', 'total_return_charges', 'total_packaging_material_charges', 'total_fuel_surcharge', 'total_gst', 'total_charges', 'total_payable', 'consignee_name', 'consignee_city', 'order_id', 'estimated_weight', 'actual_weight', 'chargeable_weight', 'tracking_number', 'amount', 'weight_charges', 'cash_handling_charges', 'charges', 'gst', 'payable']; //total_try_and_buy_charges
         }
         else if ($id == 21) {
+             $details['receiver'] = ['Shipper','Role-Department Head'];
+
              $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_address', 'consignee_city', 'order_id', 'amount', 'payment_mode', 'tracking_number'];
         }
         else if ($id == 22) {
+             $details['receiver'] = ['Rider Phone Number'];
+             
              $details['fields'] = ['company_name', 'person_of_contact', 'phone_number', 'address', 'city'];
         }
         else if ($id == 23) {
+             $details['receiver'] = ['Shipper'];
+             
              $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'status', 'status_reason', 'status_date', 'arrival_date', 'tracking_number'];
         }
         else if ($id == 24) {
