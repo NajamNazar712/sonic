@@ -266,6 +266,7 @@
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">First Attempt Date</th>
                             <th class="border-primary border-darken-1">Rider Picked Status Date</th>
+                            <th class="border-primary border-darken-1">Quantity</th>
                             <th class="border-primary border-darken-1">Pieces</th>
                             <th class="border-primary border-darken-1">Actual Weight</th>
                             <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -398,7 +399,7 @@
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
                     var contractMoment = moment(old_date_formatted);
-                    var current = moment(contractMoment).add(29, 'days');
+                    var current = moment(contractMoment).add(30, 'days');
                     to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                     to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
                     to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
@@ -507,6 +508,7 @@
                             head.push('Vendor');
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
+                            head.push('Quantity');
                             head.push('Pieces');
                             head.push('Actual Weight');
                             head.push('Shipping Mode');
@@ -542,6 +544,7 @@
                                 row.push(values.vendor);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
+                                row.push(values.shipment_quantity);
                                 row.push(values.pieces);
                                 row.push(values.actual_weight);
                                 row.push(values.shipping_mode);
@@ -619,6 +622,7 @@
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     { data:'rider_picked_status_date' ,name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
+                    { data:'shipment_quantity' ,name: 'shipment_quantity', class: 'align-middle shipment_quantity'},
                     { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
                     { data:'actual_weight' ,name: 'actual_weight', class: 'align-middle actual_weight'},
                     { data:'shipping_mode' ,name: 'shipping_mode', class: 'align-middle shipping_mode'},
