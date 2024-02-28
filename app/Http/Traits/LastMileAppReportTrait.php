@@ -104,28 +104,28 @@ trait LastMileAppReportTrait
                      $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
                      if (!$check_existing_note->exists())
                      {
-                                                 $check_summary->delivery_note_count = $check_summary->delivery_note_count + 1;
-                         $check_summary->delivery_note_shipments_count = $check_summary->delivery_note_shipments_count + $delivery_note_data->total_shipments;
+                        //                          $check_summary->delivery_note_count = $check_summary->delivery_note_count + 1;
+                        //  $check_summary->delivery_note_shipments_count = $check_summary->delivery_note_shipments_count + $delivery_note_data->total_shipments;
 
-                         $new_delivery_note = new RiderWiseDeliveryNote();
-                         $new_delivery_note->rwdnsum_id = $rwdnsum_id;
-                         $new_delivery_note->delivery_note_id = $delivery_note_id;
-                         $new_delivery_note->delivery_note_created_at = $delivery_note_data->created_at;
-                         $new_delivery_note->shipment_update_count = 1;
-                         $new_delivery_note->hub_id = $delivery_note_data->hub_id;
-                         $new_delivery_note->hub_name = $delivery_note_data->hub_name;
-                         $new_delivery_note->zone_id = $delivery_note_data->zone_id;
-                         $new_delivery_note->zone_name = $delivery_note_data->zone_name;
-                         $new_delivery_note->save();
+                        //  $new_delivery_note = new RiderWiseDeliveryNote();
+                        //  $new_delivery_note->rwdnsum_id = $rwdnsum_id;
+                        //  $new_delivery_note->delivery_note_id = $delivery_note_id;
+                        //  $new_delivery_note->delivery_note_created_at = $delivery_note_data->created_at;
+                        //  $new_delivery_note->shipment_update_count = 1;
+                        //  $new_delivery_note->hub_id = $delivery_note_data->hub_id;
+                        //  $new_delivery_note->hub_name = $delivery_note_data->hub_name;
+                        //  $new_delivery_note->zone_id = $delivery_note_data->zone_id;
+                        //  $new_delivery_note->zone_name = $delivery_note_data->zone_name;
+                        //  $new_delivery_note->save();
 
-                         $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
-                         $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
-                         $new_delivery_note_shipment->rwdn_id = $new_delivery_note->id;
-                         $new_delivery_note_shipment->shipment_id = $shipment_id;
-                         $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
-                         $new_delivery_note_shipment->updated_time = $time;
-                         $new_delivery_note_shipment->updated_via = $via;
-                         $new_delivery_note_shipment->save();
+                        //  $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
+                        //  $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
+                        //  $new_delivery_note_shipment->rwdn_id = $new_delivery_note->id;
+                        //  $new_delivery_note_shipment->shipment_id = $shipment_id;
+                        //  $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                        //  $new_delivery_note_shipment->updated_time = $time;
+                        //  $new_delivery_note_shipment->updated_via = $via;
+                        //  $new_delivery_note_shipment->save();
                      }
                      else
                      {
