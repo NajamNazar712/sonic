@@ -200,45 +200,73 @@ class AdminNotificationsController extends Controller
         $details['body'] = $notification->body;
 
         if ($id == 1) {
+            $details['receiver'] = ['Shipper', 'Sales Person'];
+
             $details['fields'] = ['account_id', 'company_name', 'email', 'person_of_contact', 'phone_no_1', 'phone_no_2', 'address', 'city', 'cnic', 'ntn_no', 'api_token'];
         }
         else if ($id == 2) {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['account_id', 'company_name', 'service_type', 'pickup_address', 'pickup_city', 'order_id', 'pickup_date', 'shipping_mode', 'amount', 'payment_mode', 'tracking_number'];
         }
         else if ($id == 3) {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'tracking_number'];
         }
         else if ($id == 4) {
+            $details['receiver'] = ['Shipper'];
+            
             $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
         }
         else if ($id == 5) {
+            $details['receiver'] = ['Shipper'];
+             
             $details['fields'] = ['cargo_number', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
         }
         else if ($id == 6) {
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['cargo_number', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
         }
         else if ($id == 7) {
+            $details['receiver'] = ['Shipper'];
+             
             $details['fields'] = ['cargo_number', 'arrival_at', 'company_name', 'order_id', 'tracking_number'];
         }
         else if ($id == 8) {
+            $details['receiver'] = ['Shipper Phone Number'];
+            
             $details['fields'] = ['cargo_number', 'arrival_at', 'company_name', 'order_id', 'tracking_number'];
         }
         else if ($id == 9) {
+            $details['receiver'] = ['Role-Department Head'];
+            
             $details['fields'] = ['cargo_number', 'departure_at', 'seal_number', 'builty_number', 'expected_arrival_date', 'shipping_mode', 'transport_mode', 'vendor', 'sender', 'tracking_number'];
         }
         else if ($id == 10) {
+            $details['receiver'] = ['Shipper'];
+            
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
         }
         else if ($id == 11) {
+            $details['receiver'] = ['Shipper Phone Number'];
+             
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
         }
         else if ($id == 12) {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp','online_payment_link'];
         }
         else if ($id == 13) {
+             $details['receiver'] = ['Shipper'];
+             
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
         }
         else if ($id == 14) {
+             $details['receiver'] = ['Shipper'];
+             
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
         }
         else if ($id == 15) {
