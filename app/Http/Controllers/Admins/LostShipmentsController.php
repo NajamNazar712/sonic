@@ -31,6 +31,7 @@ use Carbon\Carbon;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\LostShipmentAdmin;
 use App\Http\Models\Admin\LostShipmentShipper;
+use App\LostShipmentStatusCount;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -53,6 +54,23 @@ class LostShipmentsController extends Controller
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41, 42])->select('id', 'name')->get();
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons]);
     }
+
+    static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
+        $lost_shipment_approval = LostShipmentStatusCount::where('shipment_id', $shipment_id);
+        
+        if(!$lost_shipment_approval->exists()) {
+            LostShipmentStatusCount::create(['shipment_id'=> $shipment_id, $fieldToUpdate => 1, 'cleared' => $clearedValue]);
+        } else {
+            $lost_shipment_approval = $lost_shipment_approval->first();
+            $field_value = $lost_shipment_approval->$fieldToUpdate;
+            $lost_shipment_approval->update([
+                $fieldToUpdate => $field_value + 1,
+                'cleared' => $clearedValue
+            ]);
+        }
+    }
+    
+    
     public function lost_shipments_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -244,7 +262,7 @@ class LostShipmentsController extends Controller
 //                    }
                     }
 
-
+                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
@@ -302,7 +320,8 @@ class LostShipmentsController extends Controller
                         }
                     }
 
-                    
+                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
+
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
@@ -466,9 +485,14 @@ class LostShipmentsController extends Controller
                     }
 
                     $shipment_details->shipper_status_id = 18;
+                    $shipment_status_reason_for_shipment_lost_id = DB::table('shipment_status_reason')->where('name', '=','Shipment Lost - Requested')->first()->id;
+
                     $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
+                    ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
                     $lost_shipments_array[] = $shipment;
+
+                    //Pending Count For Lost Pending
+                    $this->updateLostShipmentApproval($shipment_details->id, 'lost_count', 0);
                 }
             }
             if(count($lost_shipments_array) > 0){
