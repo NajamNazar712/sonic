@@ -361,13 +361,13 @@
 				var hasEmptyGst = true;
 				$("table.order-list tbody tr").each(function () {
 					var row = {};
-					row.zone_id = $(this).find('input[name="zone_id[]"]').val();
-					row.zone_id_hidden = $(this).find('input[name="zone_id_hidden[]"]').val();
-					row.zone_city_id = $(this).find('input[name="zone_city_id[]"]').val();
-					row.zone_city_id_hidden = $(this).find('input[name="zone_city_id_hidden[]"]').val();
-					row.zone_city_gst = $(this).find('input[name="zone_city_gst[]"]').val();
+					row.zone_name = $(this).find('input[name="zone_id[]"]').val();
+					row.zone_id = $(this).find('input[name="zone_id_hidden[]"]').val();
+					row.city_name = $(this).find('input[name="zone_city_id[]"]').val();
+					row.city_id = $(this).find('input[name="zone_city_id_hidden[]"]').val();
+					row.gst = $(this).find('input[name="zone_city_gst[]"]').val();
 
-					if (!row.zone_city_gst) {
+					if (!row.gst) {
 						hasEmptyGst = false;
 						console.error("Empty GST value found!");
 						return false; // Exit the loop if an empty GST is found

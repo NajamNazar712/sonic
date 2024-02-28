@@ -18,7 +18,7 @@ class CreateZoneCitiesGstsTable extends Migration
             $table->integer('zone_id')->index();
             $table->integer('city_id')->index();
             $table->decimal('gst')->index();
-            $table->integer('status')->default(0);
+            $table->integer('status')->default(1);
             $table->integer('updated_by')->index();
             $table->timestamps();
         });

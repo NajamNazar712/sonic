@@ -3758,7 +3758,6 @@ class AdminFinanceController extends Controller
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
-                        dd($charges,$gst);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -3773,7 +3772,7 @@ class AdminFinanceController extends Controller
                     $amount = 0;
                     $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }

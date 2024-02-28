@@ -310,21 +310,21 @@ class AdminZonalManagementController extends Controller
         $zone_id = $request->zone_id;
         $tableData = $request->table_data;
 
-        $tableData_1 = [['zone_id_hidden'=>1,'city_id'=>202,'gst'=>5]];
-//        dd($request->all(),$tableData,$tableData_1);
-        ZoneCitiesGst::where('zone_id',$zone_id)->truncate();
+        ZoneCitiesGst::where('zone_id',$zone_id)->delete();
 
-        $zoneCityGstCollection = collect(array_map(function ($row) {
-            $zoneCityGst = new ZoneCitiesGst();
-            $zoneCityGst->fill($row);
-            return $zoneCityGst;
-        }, $tableData_1));
-        // Save all models in the collection using insert()
-        $zoneCityGstCollection->each->save();
+        if ($tableData)
+        {
+            $zoneCityGstCollection = collect(array_map(function ($row) {
+                $zoneCityGst = new ZoneCitiesGst();
+                $zoneCityGst->fill($row);
+                return $zoneCityGst;
+            }, $tableData));
 
-        // Optionally, dump all saved models
-        dump($zoneCityGstCollection->toArray());
+            $zoneCityGstCollection->each->save();
+        }
 
-        return response()->json(['status' => 1, 'success' => 'Zone Cities Updated !']);
+        //dump($zoneCityGstCollection->toArray());
+
+        return response()->json(['status' => 1, 'success' => 'Zone cities GST updated !']);
     }
 }
