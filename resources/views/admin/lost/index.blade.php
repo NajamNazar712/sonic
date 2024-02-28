@@ -259,6 +259,7 @@
                                             selected_rows = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
+                                            table.button('.approve').disable();
                                             table.draw('false');
                                             table.rows().deselect();
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -330,6 +331,7 @@
                                             $('#add_remarks_modal').modal('hide');
                                             selected_rows = [];
                                             table.button('.confirm').disable();
+                                            table.button('.approve').disable();
                                             table.button('.re-attempt').disable();
                                             table.draw('false');
                                             table.rows().deselect();
@@ -342,6 +344,79 @@
                     }
                 },
                     @endif
+                    @if (session('role_id') == 1 || in_array(944, session('permissions')))
+                                {
+                                    text: 'Approve',
+                                    className: 'btn btn-primary approve',
+                                    enabled: false,
+                                    action: function(e, dt, node, config) {
+                                        if (selected_rows != '') {
+                                            swal({
+                                                title: 'Are You Sure?',
+                                                text: 'Select yes to approve!',
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'No',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Yes',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            }).then(function(confirm) {
+                                                if (confirm) {
+                                                    blockPagePermanently();
+                                            
+                                                    $.ajax({
+                                                        url: '{!! route('admin.delivery.lost.approve.status') !!}',
+                                                        method: 'POST',
+                                                        data: {
+                                                            'shipment_ids': selected_rows,
+                                                            '_token': '{{ csrf_token() }}',
+                                                            'approve': '1',
+                                                        }
+                                                    }).done(function(data) {
+                                                        UnblockPagePermanently();
+                                                        table.rows().deselect();
+                                                        table.button('.confirm').disable();
+                                                        table.button('.approve').disable();
+                                                        table.button('.re-attempt').disable();
+                                                        table.draw('false');
+                                                        if (data.status == 1) {
+                                                            UnblockPagePermanently();
+                                                            table.draw('false');
+                                                            toastr.success(data.success,
+                                                                'Success!', {
+                                                                    positionClass: 'toast-bottom-center',
+                                                                    containerId: 'toast-bottom-center'
+                                                                });
+                                                        } else {
+                                                            UnblockPagePermanently();
+                                                            toastr.error(data.error,
+                                                                'Error!', {
+                                                                    positionClass: 'toast-top-center',
+                                                                    containerId: 'toast-top-center'
+                                                                });
+                                                        }
+
+                                                    });
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                },
+                                
+                            @endif
                 {
                     extend: 'excel',
                     title: 'Lost Shipments',
@@ -368,7 +443,7 @@
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
+                                    table.button('.approve').enable();
                                     table.button('.confirm').enable();
                                     table.button('.re-attempt').enable();
                                 }
@@ -397,6 +472,7 @@
                                 }
 
                                 if (selected_rows.length == 0) {
+                                    table.button('.approve').disable();
                                     table.button('.confirm').disable();
                                     table.button('.re-attempt').disable();
                                 }
@@ -563,10 +639,12 @@
                 }
 
                 if (selected_rows.length > 0) {
+                    table.button('.approve').enable();
                     table.button('.confirm').enable();
                     table.button('.re-attempt').enable();
                 }
                 else {
+                    table.button('.approve').disable();
                     table.button('.confirm').disable();
                     table.button('.re-attempt').disable();
                 }

@@ -467,7 +467,7 @@ class LostShipmentsController extends Controller
 
                     $shipment_details->shipper_status_id = 18;
                     $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment_details->id],NULL,Auth::id());
+                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
                     $lost_shipments_array[] = $shipment;
                 }
             }
@@ -654,5 +654,15 @@ class LostShipmentsController extends Controller
         else {
             return response()->json(['status' => 3, 'error' => 'File Not Found!']);
         }
+    }
+
+    public function shipment_approve_status(Request $request){
+
+        foreach ($request->shipment_ids as $shipment_id) {
+            ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
+        }
+
+        return response()->json(['status' => 1, 'success' => 'Shipment Has Been Approved To Lost !!']);
+
     }
 }
