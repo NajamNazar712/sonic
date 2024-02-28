@@ -765,7 +765,17 @@
                                 });
                                 $('#update_call_status_modal').modal('hide');
                                 window.reaload();
-                            } else {
+                            }
+                            else if(response.custom_check == 1) {
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: response.message,
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            } 
+                            else {
                                 swal({
                                     title: 'Something Went Wrong!',
                                     text: 'Please Update Status Again',

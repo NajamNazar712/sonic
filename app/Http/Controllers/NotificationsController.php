@@ -4076,6 +4076,8 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);
 
                     $to[] = 'muhammad.waqas@trax.pk';
+                    $to[] = 'shoaib.ameen@trax.pk';
+
                     foreach ($to as $email) {
                         self::email($subject, $body, $email);
                     }
