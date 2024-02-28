@@ -813,7 +813,6 @@
                                 '_token': '{!! csrf_token() !!}'
                             }
                         }).done(function (data) {
-                            console.log(data.details);
                             if(data.status == 0){
                                 $('#single_div').addClass('d-none');
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
