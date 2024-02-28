@@ -64,7 +64,7 @@
                                     <th class="border-primary border-darken-1">Handover Received By</th>
                                     <th class="border-primary border-darken-1">Handover Received At</th>
                                     <th class="border-primary border-darken-1">Last Action Performed</th>
-            
+
 
                                 </tr>
                                 </thead>
@@ -205,6 +205,8 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
+                         	
+							
                     
 
                             $.each(result.data, function(index, values) {
@@ -232,7 +234,8 @@
                                 row.push(values.handover_to);
                                 row.push(values.handover_received_by);
                                 row.push(values.handover_received_at);
-                                row.push(values.last_action);                 
+                                row.push(values.last_action);
+
                                 body.push(row);
                             });
                         },

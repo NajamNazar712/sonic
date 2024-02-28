@@ -127,10 +127,20 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Booking Date</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
-                            <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
-                            <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                            <th class="border-primary border-darken-1">Difference (B-A)</th>
-                            <th class="border-primary border-darken-1">Chargeable Weight</th>
+                            <th class="border-primary border-darken-1">User Hub</th>
+                            <th class="border-primary border-darken-1">User Area</th>
+                            <th class="border-primary border-darken-1">Weight Input by Shipper</th>
+                            <th class="border-primary border-darken-1">Arrival Weight</th>
+                            <th class="border-primary border-darken-1">Weight Diffrence (Arrival Weight vs Shipper Weight)</th>
+                            <th class="border-primary border-darken-1">Weight Input by Shipper (Roundup to shipper/ rates range)</th>
+                            <th class="border-primary border-darken-1">Arrival Weight (As per shipper/ rate range roundup)</th>
+                            <th class="border-primary border-darken-1">Weight Diffrence (Shipper Rate Range vs Arrival Rate Range)</th>
+                            <th class="border-primary border-darken-1">Charges as per shipper weight</th>
+                            <th class="border-primary border-darken-1">Charges as per arrival weight</th>
+                            <th class="border-primary border-darken-1">Charges Diffrence (Booking vs Arrival Weight)</th>
+                            <th class="border-primary border-darken-1">Charges as per shipper booking weight range (Roundup)</th>
+                            <th class="border-primary border-darken-1">Charges as per arrival weight range (Roundup)</th>
+                            <th class="border-primary border-darken-1">Charges Difference (Shipper Rate Range vs Arrival Rate Range)</th>
                             <th class="border-primary border-darken-1">Weighted As</th> 
                             <th class="border-primary border-darken-1">Weight Recorded As</th>
                         </tr>
@@ -298,10 +308,20 @@
                             head.push('Destination');
                             head.push('Booking Date');
                             head.push('Arrival Date');
-                            head.push('Weight Input by Shipper (A)');
-                            head.push('Arrival Weight (B)');
-                            head.push('Difference (B-A)');
-                            head.push('Chargeable Weight')
+                            head.push('User Hub');
+                            head.push('User Area');
+                            head.push('Weight Input by Shipper');
+                            head.push('Arrival Weight');
+                            head.push('Weight Diffrence (Arrival Weight vs Shipper Weight)');
+                            head.push('Weight Input by Shipper (Roundup to shipper/ rates range)');
+                            head.push('Arrival Weight (As per shipper/ rate range roundup)');
+                            head.push('Weight Diffrence (Shipper Rate Range vs Arrival Rate Range');
+                            head.push('Charges as per shipper weight');
+                            head.push('Charges as per arrival weight');
+                            head.push('Charges Diffrence (Booking vs Arrival Weight)');
+                            head.push('Charges as per shipper booking weight range (Roundup)');
+                            head.push('Charges as per arrival weight range (Roundup)');
+                            head.push('Charges Difference (Shipper Rate Range vs Arrival Rate Range)');
                             head.push('Weighted As');
                             head.push('Weight Recorded As');
 
@@ -318,10 +338,20 @@
                                 row.push(values.destination);
                                 row.push(values.booking_date);
                                 row.push(values.arrival_date);
+                                row.push(values.hub_name);
+                                row.push(values.area_name);
                                 row.push(values.estimated_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
-                                row.push(values.chargeable_weight);
+                                row.push(values.range_down_shipper_weight);
+                                row.push(values.range_down_arrival_weight)
+                                row.push(values.range_difference);
+                                row.push(values.shipper_weight_charges);
+                                row.push(values.arrival_weight_charges);
+                                row.push(values.charges_diff);
+                                row.push(values.shipper_range_weight_charges);
+                                row.push(values.arrival_range_weight_charges);
+                                row.push(values.weight_range_charges_diff);
                                 row.push(values.weighted_as);
                                 row.push(values.weight_type_name)
                                 body.push(row);
@@ -381,10 +411,20 @@
                     { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
                     { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
                     { data:'arrival_date' ,name: 'arv_date.created_at', class: 'align-middle text-center arrival_date'},
+                    { data:'hub_name' ,name: 'hub.hub_name', class: 'align-middle text-center hub_name'},
+                    { data:'area_name' ,name: 'area.area_name', class: 'align-middle text-center area_name'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
-                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle text-center chargeable_weight', orderable: false, searchable: false},
+                    { data:'range_down_shipper_weight' ,name: 'sw.range_down_shipper_weight', class: 'align-middle text-center range_down_shipper_weight'},
+                    { data:'range_down_arrival_weight' ,name: 'sw.range_down_arrival_weight', class: 'align-middle text-center range_down_arrival_weight'},
+                    { data:'range_difference' ,name: 'range_difference', class: 'align-middle text-center range_difference', orderable: false, searchable: false},
+                    { data:'shipper_weight_charges' ,name: 'sw.shipper_weight_charges', class: 'align-middle text-center shipper_weight_charges', orderable: false, searchable: false},
+                    { data:'arrival_weight_charges' ,name: 'shipments.arrival_weight_charges', class: 'align-middle text-center arrival_weight_charges', orderable: false, searchable: false},
+                    { data:'charges_diff' ,name: 'charges_diff', class: 'align-middle text-center charges_diff', orderable: false, searchable: false},
+                    { data:'shipper_range_weight_charges' ,name: 'sw.shipper_range_weight_charges', class: 'align-middle text-center shipper_range_weight_charges', orderable: false, searchable: false},
+                    { data:'arrival_range_weight_charges' ,name: 'sw.arrival_range_weight_charges', class: 'align-middle text-center arrival_range_weight_charges', orderable: false, searchable: false},
+                    { data:'weight_range_charges_diff' ,name: 'weight_range_charges_diff', class: 'align-middle text-center weight_range_charges_diff', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
                     { data:'weight_type_name' ,name: 'weight_type', class: 'align-middle text-center weight_type', orderable: false, searchable: false},
                 ],

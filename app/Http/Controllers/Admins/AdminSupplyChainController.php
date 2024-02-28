@@ -40,7 +40,7 @@ class AdminSupplyChainController extends Controller
                 }
                 else{
                     $hub = City::find($shipment->consignee_city->hub_id)->name;
-                    ShipmentScanningJourneyController::add($shipment->id,23,1,Auth::id(),null,null);
+                    ShipmentScanningJourneyController::add($shipment->id ,23,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return response()->json(['status' => 0, 'success' => 'Shipment found', 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $shipment->booking_type->booking_type, 'shipment_status' => $shipment->status_shipper->name]);
                 }
             }

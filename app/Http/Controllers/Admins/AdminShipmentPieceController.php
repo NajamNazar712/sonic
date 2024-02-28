@@ -56,7 +56,7 @@ class AdminShipmentPieceController extends Controller
             $details['origin'] = $shipment->pickup_address->city->name;
             $details['destination'] = $shipment->consignee_city->name;
             $details['pieces'] = $shipment->pieces;
-            ShipmentScanningJourneyController::add($shipment->id,22,1,Auth::id(),null,null);
+            ShipmentScanningJourneyController::add($shipment->id ,22,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
             return  response()->json(['status' => 0, 'details' => $details]);
         }else{
             return response()->json(['status' => 1, 'error' => 'Shipment not found!']);

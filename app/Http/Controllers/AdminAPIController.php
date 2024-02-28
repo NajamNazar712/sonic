@@ -83,6 +83,7 @@ use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\HR\EducationList;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeAttendanceAdjustment;
@@ -148,6 +149,7 @@ use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
+use App\Http\Traits\RvTrait;
 use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -165,7 +167,7 @@ use Password;
 
 class AdminAPIController extends Controller
 {
-    use SendsPasswordResetEmails, CommonTrait;
+    use SendsPasswordResetEmails, CommonTrait, RvTrait;
 
     public function broker()
     {
@@ -3031,7 +3033,7 @@ class AdminAPIController extends Controller
 
         AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
-
+        
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
     }
@@ -6222,6 +6224,8 @@ class AdminAPIController extends Controller
                 'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
                 'account_title' => ['nullable'],
                 'iban' => ['nullable'],
+                'education_id'=> ['required','integer', 'digits_between:1,10', 'exists:education_lists,id']
+
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -6311,6 +6315,8 @@ class AdminAPIController extends Controller
                         $employee_request->shift_id = $request->shift_id;
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->line_manager_id = $request->line_manager_id;
+                        $employee_request->education_id=$request->education_id;
+
                         $employee_request->save();
 
                         if ($request->has("bank_id") && $request->has("account_title") && $request->has("iban")) {
@@ -7502,6 +7508,8 @@ class AdminAPIController extends Controller
         $shifts = EmployeeShift::where('id', '!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
+        $education_list=EducationList::select('id','name')->where('status',1)->get();
+
         $shift_data = array();
         foreach ($shifts as $shift) {
             $datum = array();
@@ -7509,7 +7517,7 @@ class AdminAPIController extends Controller
             $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
             $shift_data[] = $datum;
         }
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category,'education_list'=>$education_list]);
     }
 
     public function mark_attendance_v3(Request $request)
@@ -8999,7 +9007,7 @@ class AdminAPIController extends Controller
                 if (!$dispute_check) {
                     return response()->json(['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)']);
                 }
-                ShipmentScanningJourneyController::add($shipment->id, 7, 1, $admin_id, null, null);
+                ShipmentScanningJourneyController::add($shipment->id,7,1,$admin_id,NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if ($request->shipper_id != null) {
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -9374,7 +9382,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment_id, 7, 1, $admin_id, null, null, $shipment_piece->id);
+                        ShipmentScanningJourneyController::add($shipment->id,7,1,$admin_id,NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
@@ -10614,7 +10622,7 @@ class AdminAPIController extends Controller
                                             if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                                 $complaint_row = 1;
                                             }
-                                            ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                            ShipmentScanningJourneyController::add($shipment->id,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                             $consolidation_details = DeliveryController::check_consolidation($shipment->id);
                                             $consolidation_flag = FALSE;
 
@@ -10697,7 +10705,7 @@ class AdminAPIController extends Controller
                                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                                             $complaint_row = 1;
                                         }
-                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, $request->admin_id, null, null);
+                                        ShipmentScanningJourneyController::add($shipment->id,4,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                                         $consolidation_details = DeliveryController::check_consolidation($shipment->id);
 
                                         $consolidation_flag = FALSE;
@@ -10786,7 +10794,7 @@ class AdminAPIController extends Controller
                     $shipment_piece = $shipment_piece->first();
                     if ($shipment_piece->shipment_id == $shipment_id) {
                         $scanned_shipment_piece = $shipment_piece->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment_id, 4, 1, $admin_id, null, null, $shipment_piece->id);
+                        ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL,$shipment_piece->id,NULL, session('latitude'), session('longitude'), NULL);
                         return response()->json(['status' => 0, 'message' => 'Shipment Piece found!', "piece_details" => ["tracking_no" => $shipment->tracking_number, "piece_id" => $request->piece_id]]);
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Given Item ID does not belong here']);
@@ -12035,7 +12043,7 @@ class AdminAPIController extends Controller
 
                                         $details['total'] = $shipments->count;
                                     }
-                                    ShipmentScanningJourneyController::add($shipment->id, 2, 1, $request->adminid, null, null);
+                                    ShipmentScanningJourneyController::add($shipment->id,2,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                                     return response()->json(['status' => 0, 'message' => 'Shipment has been added', 'details' => $details]);
                                     /*}
@@ -12089,7 +12097,7 @@ class AdminAPIController extends Controller
                 $shipment_piece = $shipment_piece->first();
                 if ($shipment_piece->shipment_id == $shipment_id) {
                     $scanned_shipment_piece = $shipment_piece->tracking_number;
-                    ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, $admin_id, null, null, $shipment_piece->id);
+                    ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, $admin_id, null, null, null, null, session('latitude'), session('longitude'), NULL);
                     return ['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
                 } else {
                     return ['status' => 1, 'message' => 'Given Item ID does not belong here'];
@@ -12806,7 +12814,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id)
+    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id, $lat = NULL, $long = NULL)
     {
         $shipment_scanned = array();
                 
@@ -12858,12 +12866,40 @@ class AdminAPIController extends Controller
                 $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
 
-           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2, null,null, 'rider');
+           ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2, $lat,$long, 'rider');
 
             $shipment_scanned[] = $details;
         }
 
         return $shipment_scanned;
+    }
+
+    public function get_staff_working_shift(Request $request) {
+
+        $rules = [
+            'staff_category_id' => 'required'
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shifts = EmployeeShift::where('id', '!=', 1);
+            $shifts = $request->staff_category_id == 3 ? $shifts->where('shift_type_id', '2') : $shifts->where('shift_type_id', '!=', '2');
+            $shifts = $shifts->select('id', 'name', 'start_time', 'end_time')->get();
+
+            $shift_data = array();
+            foreach ($shifts as $shift) {
+                $datum = array();
+                $datum['id'] = $shift->id;
+                $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
+                $shift_data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'shifts' => $shift_data]);
+        }
     }
 
 }
