@@ -32,6 +32,7 @@ use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use DB;
 
 class ShipperTrackingController extends Controller
 {
@@ -432,9 +433,67 @@ class ShipperTrackingController extends Controller
                                     $journey_details['user'] = '';
                                 }
 
-                                $details['pickup_history'][] = $journey_details;
+                                $details['pickup_history_v2'][] = $journey_details;
                             }
                         }
+
+                         //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
+
+                        $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
+
+                        if ($shipment_pickup_journey_v3->exists()) {
+
+                            $shipment_pickup_journey_v3 = $shipment_pickup_journey_v3->get();
+
+                            foreach ($shipment_pickup_journey_v3 as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+
+                                $v3_pickup_status = DB::table('v3_pickup_request_statuses')->where('id',$journey->status_id)->first();
+
+                                $journey_details['status'] = $v3_pickup_status->name;
+                                if($journey->reason_id != NULL){
+                                    $v3_pickup_request_reason = DB::table('v3_pickup_request_reasons')->where('id',$journey->reason_id)->first();
+                                    $journey_details['reason'] = $v3_pickup_request_reason->name;
+                                }
+                                else{
+                                    $journey_details['reason'] = '';
+                                }
+
+                                if ($journey->reference_1_id) {
+                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                    if ($journey->reference_2_id) {
+                                        if ($journey->status_id == 6) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= $rider->name;
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+
+                                    $journey_details['status'] .= ')';
+                                }
+
+                                // $admin = $journey->admin;
+                                $admin = DB::table('admins')->where('id',$journey->admin_id)->first();
+
+                                if ($admin) {
+                                    $journey_details['user'] = $admin->name;
+                                }
+                                else {
+                                    $journey_details['user'] = '';
+                                }
+
+                                $details['pickup_history_v3'][] = $journey_details;
+                            }
+                        }
+
 
 
                         $user_id = null;
