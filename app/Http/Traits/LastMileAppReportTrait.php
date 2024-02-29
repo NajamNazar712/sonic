@@ -57,11 +57,13 @@ trait LastMileAppReportTrait
             if($delivery_note_data->exists()){
                  $delivery_note_data = $delivery_note_data->first();
                  
-                 $check_summary_delivery = RiderWiseDeliveryNoteSummary::join('rider_wise_delivery_notes as rwdn','rwdn.rwdnsum_id','rider_wise_delivery_note_summaries.id')->where('rider_id',$rider_id)->whereDate('delivery_date', $today)->where('rwdn.delivery_note_id', $delivery_note_id);
-                 if($check_summary_delivery->exists())
+                 $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
+                 $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id)->whereDate('delivery_note_created_at', $today);
+
+                 if($check_summary->exists() && $check_note_id_delivery->exists())
                  {
-                    $check_summary_delivery = $check_summary_delivery->first();
-                    $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_summary_delivery->rwdnsum_id)->first();
+                    $check_summary = $check_summary->first();
+                    $check_summary_delivery = $check_note_id_delivery->first();
                     $rwdnsum_id = $check_summary->id; 
                     $finishTime = Carbon::parse($check_summary->delivery_date);                    
                     $totalDuration = $finishTime->diffInHours($time);
@@ -81,6 +83,7 @@ trait LastMileAppReportTrait
                         $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                         $check_summary->shipment_update_count = $check_summary->via_rider_count;
                         $check_summary->save();
+                        return true;
                     }
                     
                     
@@ -97,6 +100,7 @@ trait LastMileAppReportTrait
                         self::countSub($minusTime,$check_summary);
                     }
                     self::countAdd($time,$check_summary);
+                    return true;
                  }
                  else
                  {
