@@ -25,7 +25,7 @@ trait LastMileAppReportTrait
      public function rider_wise_delivery_note($shipment_id, $delivery_note_id, $rider_id, $shipper_status_id,
                                                     $added_at, $rider_delivery, $via)
      {
-                 //via : 1=admin, 2=rider
+         //via : 1=admin, 2=rider
          if ($via == 1) {
              $delivery_note = DeliveryNote::where('id', $delivery_note_id)->select('rider_id')->first();
              $rider_id = $delivery_note->rider_id;
@@ -57,9 +57,9 @@ trait LastMileAppReportTrait
             if($delivery_note_data->exists()){
                  $delivery_note_data = $delivery_note_data->first();
                  
-                 $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
                  $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id)->whereDate('delivery_note_created_at', $today);
-
+                 $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->pluck('rwdnsum_id'))->where('rider_id',$rider_id)->whereDate('delivery_date', $today);
+                 
                  if($check_summary->exists() && $check_note_id_delivery->exists())
                  {
                     $check_summary = $check_summary->first();
@@ -68,6 +68,7 @@ trait LastMileAppReportTrait
                     $finishTime = Carbon::parse($check_summary->delivery_date);                    
                     $totalDuration = $finishTime->diffInHours($time);
                     $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereDate('created_at', $today);
+                    
                     if(!$riderWiseShipmentNote->exists())
                     {
                         $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
@@ -79,9 +80,8 @@ trait LastMileAppReportTrait
                         $new_delivery_note_shipment->updated_via = $via;
                         $new_delivery_note_shipment->save();
                         self::countAdd($time,$check_summary);
-                        
                         $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
-                        $check_summary->shipment_update_count = $check_summary->via_rider_count;
+                        $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                         $check_summary->save();
                         return true;
                     }
