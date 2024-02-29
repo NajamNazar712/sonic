@@ -25,7 +25,7 @@ trait LastMileAppReportTrait
      public function rider_wise_delivery_note($shipment_id, $delivery_note_id, $rider_id, $shipper_status_id,
                                                     $added_at, $rider_delivery, $via)
      {
-                 //via : 1=admin, 2=rider
+         //via : 1=admin, 2=rider
          if ($via == 1) {
              $delivery_note = DeliveryNote::where('id', $delivery_note_id)->select('rider_id')->first();
              $rider_id = $delivery_note->rider_id;
@@ -81,7 +81,7 @@ trait LastMileAppReportTrait
                         $new_delivery_note_shipment->save();
                         self::countAdd($time,$check_summary);
                         $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
-                        $check_summary->shipment_update_count = $check_summary->via_rider_count;
+                        $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                         $check_summary->save();
                         return true;
                     }
