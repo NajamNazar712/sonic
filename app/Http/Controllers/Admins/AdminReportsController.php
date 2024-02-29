@@ -12354,7 +12354,7 @@ class AdminReportsController extends Controller
         'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
         /*'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address',*/ 
         'shipments.amount as cod_amount', /*'shipments.estimated_weight as weight',*/ 'shipping_modes.mode as shipping_mode', 
-        'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agent_details.remarks as remarks',
+        'booking_types.booking_type as service_type', 'rv_aas.name as action', 'rv_aass.name as reason', 'rv_shipment_assign_agent_details.remarks as remarks',
         'rv_shipment_assign_agent_details.created_at as action_date', /*'ad.name as rcp_agent_updated_by', */
         'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
         'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
@@ -12380,12 +12380,12 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    ->editColumn('rv_status', function($rv_report) {
-                        if ($rv_report['rv_status'] == "") { 
+                    ->editColumn('action', function($rv_report) {
+                        if ($rv_report['action'] == "") { 
                             return '-';
                         }
                         else {
-                            return $rv_report['rv_status'];
+                            return $rv_report['action'];
                         }
                     })
                     ->editColumn('remarks', function($rv_report) {

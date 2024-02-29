@@ -453,7 +453,7 @@
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Arrival Date');
-                            head.push('RV Status');
+                            // head.push('RV Status');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Action Date');
@@ -487,7 +487,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
-                                row.push(values.rv_status);
+                                row.push(values.action);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.action_date);
@@ -566,7 +566,7 @@
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
-                    {data: 'rv_status', name: 'rv_status', class: 'align-middle rv_status',searchable: false},
+                    {data: 'action', name: 'action', class: 'align-middle action',searchable: false},
                     {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
