@@ -12343,7 +12343,7 @@ class AdminReportsController extends Controller
                  ->where('sj.shipper_status_id', '=', 12);
         })
         ->leftjoin('shipment_status as rv_status', 'sj.shipper_status_id', 'rv_status.id')
-        ->leftjoin('shipment_status_reason as rv_reason', 'sj.shipper_status_id', 'rv_reason.id')
+        ->leftjoin('shipment_status_reason as rv_reason', 'sj.status_reason_id', 'rv_reason.id')
 
         ->leftjoin('shipments_journey as sjj', function($join) {
             $join->on('sjj.shipment_id', '=', 'shipments.id')
