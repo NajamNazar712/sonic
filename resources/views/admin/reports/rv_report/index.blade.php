@@ -453,7 +453,7 @@
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Arrival Date');
-                            // head.push('RV Status');
+                            head.push('Action');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Action Date');
