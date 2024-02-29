@@ -999,6 +999,7 @@ class ReturnController extends Controller
                             'rv_assign_agent_status_id' => 1, //Return Confirm
                             'rv_assign_agent_sub_status_id' => $rv_assign_agent_sub_status_id,
                             'updated_by_id' =>  Auth::id(),
+                            'remarks' => $remark,
                         ];
                         $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
                     }
