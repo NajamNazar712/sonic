@@ -940,7 +940,7 @@ trait RvTrait
         $shipments = [];
 
         //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
-        if (!empty($included_shippers)) {              
+        if (!empty($included_shippers)) {   
             // $flag = false;                
             // if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
             //     $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
@@ -952,9 +952,17 @@ trait RvTrait
             //     $exploded_result = implode(',', $result);                    
             //     $flag = true;
             // }   
+            
 
-            $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $included_shippers)
-            ->whereIn('shipper_status_id', [12,66,52])
+            $shipments = DB::connection($connection)->table('shipments')
+            ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
+                $join->on('rvsaa.shipment_id', '=', 'shipments.id')
+                     ->where('rvsaa.rv_assign_agent_status_id', 6)
+                     ->whereDate('unresponsive_attempt_time', Carbon::today());
+            })
+            ->whereIn('shipments.user_id', $included_shippers)
+            ->whereIn('shipments.shipper_status_id', [12,66,52])
+            ->whereNull('rvsaa.shipment_id')
             ->whereRaw('NOT EXISTS (
                 SELECT sj.id
                 FROM shipments_journey AS sj
@@ -965,15 +973,13 @@ trait RvTrait
                     FROM shipments_journey
                     WHERE shipment_id = shipments.id
                 )
-            )');
-
+            )')
+            ->orderBy('shipments.updated_at', 'ASC')
+            ->select('shipments.id');
             // if ($flag == true){
             //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
             // }
 
-            $shipments->orderBy('updated_at', 'ASC');
-
-            $shipments = $shipments->select('id');
             $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id,&$global_shipment ) {
 
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
@@ -1104,8 +1110,16 @@ trait RvTrait
             
             if (!empty($result)){
                 // $exploded_result = implode(',', $result);
-                $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,66,52])
-                ->whereIn('user_id', $result)
+                $shipments = DB::connection($connection)->table('shipments')
+                ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
+                    $join->on('rvsaa.shipment_id', '=', 'shipments.id')
+                         ->where('rvsaa.rv_assign_agent_status_id', 6)
+                         ->whereDate('unresponsive_attempt_time', Carbon::today());
+
+                })
+                ->whereIn('shipments.shipper_status_id', [12,66,52])
+                ->whereIn('shipments.user_id', $result)
+                ->whereNull('rvsaa.shipment_id')
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
                     FROM shipments_journey AS sj
@@ -1116,20 +1130,9 @@ trait RvTrait
                         FROM shipments_journey
                         WHERE shipment_id = shipments.id
                     )
-                )');
-                // if(!empty($rv_priority_shippers)){
-                //     $flag = true;
-                // }else{
-                //     $flag = false;
-                // }
-                
-                // if ($flag == true){
-                //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-                // }
-
-                $shipments->orderBy('updated_at', 'ASC');
-                
-                $shipments = $shipments->select('id');
+                )')
+                ->orderBy('shipments.updated_at', 'ASC')
+                ->select('shipments.id');
 
                 $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
 
