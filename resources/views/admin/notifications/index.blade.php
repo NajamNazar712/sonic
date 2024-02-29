@@ -32,7 +32,7 @@
 							</table>
 
 							@if (session('role_id') == 1 || in_array(103, session('permissions')))
-								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
+								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true" style="overflow: scroll">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
 											<form  class="form-horizontal" method="POST" action="{{ route('admin.notifications.send_custom_email') }}" enctype="multipart/form-data" novalidate="novalidate">
@@ -46,6 +46,13 @@
 													</button>
 												</div>
 												<div class="modal-body">
+													<div class="form-group">
+														<select name="notification_sender" class="select2 notification_sender" data-rule-required="true" data-msg-required="Sender is required">
+															<option value="" selected="selected"></option>
+															<option value="info@trax.pk">info@trax.pk</option>
+															<option value="marketing@trax.pk">marketing@trax.pk</option>
+														</select>
+													</div>
 													<div class="form-group">
 														<select name="receiver" class="select2 receiver" data-rule-required="true" data-msg-required="Receiver is required">
 															<option value="" selected="selected"></option>
@@ -99,7 +106,7 @@
 
 													<div class="form-group">
 														<label>Body</label>
-														<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
+														<textarea class="form-control summernote" name="body" id="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
 													</div>
 													<div class="form-group">
 														<label>Upload File(s)</label>
@@ -131,6 +138,7 @@
 													</button>
 												</div>
 												<div class="modal-body">
+												
 													<div class="form-group">
 														<select name="notification_receiver" class="select2 notification_receiver" data-rule-required="true" data-msg-required="Receiver is required">
 															<option value="" selected="selected"></option>
@@ -226,6 +234,8 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/summernote/summernote.css')}}">
+
 @endsection
 
 @section('js')
@@ -234,10 +244,48 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/js/scripts/summernote/summernote.js')}}" type="text/javascript"></script>
+
 
 	<script>
 		$(document).ready(function() {
 			@if (session('role_id') == 1 || in_array(103, session('permissions')))
+
+				$('#send_custom_email .summernote').summernote({
+					 colors: [
+						['white', 'black', 'gray', 'red', 'green', 'blue', 'yellow', 'purple', 'cyan'],
+						['#c4b540', '#1dd381', '#ba1cd2', '#ff5733', '#33ff57', '#3344ff', '#ffff33', '#cc33ff', '#33ffff']
+					],
+					toolbar: [
+						['style', ['bold', 'italic', 'underline', 'clear']],
+						['font', ['strikethrough', 'superscript', 'subscript']],
+						['fontsize', ['fontsize']],
+						['color', ['forecolor', 'backcolor']],
+						['para', ['ul', 'ol', 'paragraph']],
+						['insert', ['picture']],
+						['view', ['fullscreen', 'codeview', 'help']],
+					],
+					
+
+					styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], // This is to include headings in the style dropdown
+					fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Merriweather'], // Add the desired font names
+					defaultParagraphSeparator: 'p', // Set the default paragraph separator to 'p'
+					tooltip: false, // Disable tooltips for the toolbar buttons
+					disableDragAndDrop: true, // Disable drag and drop of files
+					callbacks: {
+						onImageUpload: function(files) {
+							// Save image data in hidden input field
+							var reader = new FileReader();
+							reader.onload = function(e) {
+								var imageData = e.target.result;
+								$('#body').summernote('insertImage', imageData);
+							};
+							reader.readAsDataURL(files[0]);
+						}
+					}
+					
+
+            	});
 				$('#send_custom_email .shipper_status').select2({
 					width: '100%',
 					placeholder: 'Status*'
@@ -279,6 +327,11 @@
 						$('#segment_div').addClass('d-none');
 					}
 				});
+
+			$("#send_custom_email .notification_sender").select2({
+				width: '100%',
+				placeholder: 'Sender*'
+			});
 
 			$('#send_custom_notification .notification_receiver').select2({
 				width: '100%',
@@ -452,7 +505,7 @@
 							closeOnClickOutside: false,
 							closeOnEsc: false
 						});
-
+					
 						form.submit();
 					}
 				});
