@@ -224,7 +224,7 @@ trait LastMileAppReportTrait
 			$check_summary->after_23_count = $check_summary->after_23_count + 1;
 		}
 		$check_summary->save();
-        Log::channel('last_mile_app_report_log')->info('save'.$product->getChanges());
+        Log::channel('last_mile_app_report_log')->info('save'.$check_summary->getChanges());
 
     }
 
