@@ -209,107 +209,266 @@
                 return {body: body, header: head};
             }
         } );
+        var confirm_reattempt;
         var selected_rows = [];
+        @if (session('role_id') == 1 || count(array_intersect([128, 129], session('permissions'))) !== 0)
+         confirm_reattempt = 1
+        @endif
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
 
             buttons: [
-                    @if (session('role_id') == 1 || in_array(944, session('permissions')))
-                                {
-                                    text: 'Approve',
-                                    className: 'btn btn-primary approve',
-                                    enabled: false,
-                                    action: function(e, dt, node, config) {
-                                        if (selected_rows != '') {
-                                            swal({
-                                                title: 'Are You Sure?',
-                                                text: 'Select yes to approve!',
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'No',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                    confirm: {
-                                                        text: 'Yes',
-                                                        value: true,
-                                                        visible: true,
-                                                        closeModal: true
-                                                    }
+                @if (session('role_id') == 1 || count(array_intersect([128, 129], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || in_array(128, session('permissions')))
+                        {
+                            text: 'Confirm',
+                            className: 'btn btn-primary confirm',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $('#ReturnConfirmReasonModal').modal('show');
+                                $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
+                                    $('#return_reason_select').val(null).trigger('change');
+                                });
+                                $('#update_return_reason_form').validate({
+                                    ignore: [],
+                                    errorClass: 'danger',
+                                    successClass: 'success',
+                                    errorPlacement: function(error, element) {
+                                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                                    },
+                                    normalizer: function(value) {
+                                        return $.trim(value);
+                                    },
+                                    submitHandler: function(form) {
+                                        var return_reason_select = $('#return_reason_select').val();
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes to change shipment status to Return-Confirm!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
                                                 },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            }).then(function(confirm) {
-                                                if (confirm) {
-                                                    blockPagePermanently();
-                                            
-                                                    $.ajax({
-                                                        url: '{!! route('admin.delivery.lost.approve.status') !!}',
-                                                        method: 'POST',
-                                                        data: {
-                                                            'shipment_ids': selected_rows,
-                                                            '_token': '{{ csrf_token() }}',
-                                                            'approve': '1',
-                                                        }
-                                                    }).done(function(data) {
-                                                        UnblockPagePermanently();
-                                                        table.rows().deselect();
-                                                        table.button('.reject').disable();
-                                                        table.button('.approve').disable();
-                                                        table.draw('false');
-                                                        if (data.status == 1) {
-                                                            UnblockPagePermanently();
-                                                            table.draw('false');
-                                                            toastr.success(data.success,
-                                                                'Success!', {
-                                                                    positionClass: 'toast-bottom-center',
-                                                                    containerId: 'toast-bottom-center'
-                                                                });
-                                                        } else {
-                                                            UnblockPagePermanently();
-                                                            toastr.error(data.error,
-                                                                'Error!', {
-                                                                    positionClass: 'toast-top-center',
-                                                                    containerId: 'toast-top-center'
-                                                                });
-                                                        }
-
-                                                    });
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
                                                 }
-                                            });
-
-                                        }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                $.ajax({
+                                                    url: '{ !! route('admin.delivery.lost.confirm.status') !!}',
+                                                    method:'POST',
+                                                    data:{
+                                                        'shipment_ids':selected_rows,
+                                                        'reason':return_reason_select,
+                                                        '_token':'{{ csrf_token() }}'
+                                                    }
+                                                }).done(function (data) {
+                                                    UnblockPagePermanently();
+                                                    $('#ReturnConfirmReasonModal').modal('hide');
+                                                    selected_rows = [];
+                                                    table.button('.reject').disable();
+                                                    table.button('.approve').disable();
+                                                    table.button('.re-attempt').disable();
+                                                    table.button('.confirm').disable();
+                                                    table.draw('false');
+                                                    table.rows().deselect();
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                });
+                                            }
+                                        });
                                     }
-                                },
-                                
-                            @endif
+                                });
+                            }
+                        },
+                    @endif
 
-                            @if (session('role_id') == 1 || in_array(944, session('permissions')))
-                                {
-                                    text: 'Reject',
-                                    className: 'btn btn-primary reject',
-                                    enabled: false,
-                                    action: function(e, dt, node, config) {
-                                        if (selected_rows != '') {                               
-                                            $('#rejectModal').modal('show');
-                                        }
+                    @if (session('role_id') == 1 || in_array(129, session('permissions')))
+                        {
+                            text: 'Re-Attempt',
+                            className: 'btn btn-primary re-attempt',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $('#add_remarks_modal').modal('show');
+                                $('#add_remarks_modal').on('hide.bs.modal', function () {
+                                    $('#add_remarks_form input.add_remarks').val('');
+                                });
+                                $('#add_remarks_form').validate({
+                                    ignore: [],
+                                    errorClass: 'danger',
+                                    successClass: 'success',
+                                    errorPlacement: function(error, element) {
+                                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                                    },
+                                    normalizer: function(value) {
+                                        return $.trim(value);
+                                    },
+                                    submitHandler: function(form) {
+                                        var remarks = $('#add_remarks').val();
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes to change shipment status to Re-Attempt!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                $.ajax({
+                                                    url: '{ !! route('admin.delivery.lost.reattempt.status') !!}',
+                                                    method:'POST',
+                                                    data:{
+                                                        'shipment_ids':selected_rows,
+                                                        'remarks':remarks,
+                                                        '_token':'{{ csrf_token() }}'
+                                                    }
+                                                }).done(function (data) {
+                                                    UnblockPagePermanently();
+                                                    $('#add_remarks_modal').modal('hide');
+                                                    selected_rows = [];
+                                                    table.button('.reject').disable();
+                                                    table.button('.approve').disable();
+                                                    table.button('.re-attempt').disable();
+                                                    table.button('.confirm').disable();
+                                                    
+                                                    table.draw('false');
+                                                    table.rows().deselect();
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                });
+                                            }
+                                        });
                                     }
-                                },
+                                });
                                 
-                            @endif
+                            }
+                        },
+                    @endif
+                @endif
+
+                @if (session('role_id') == 1 || in_array(944, session('permissions')))
+                    {
+                        text: 'Approve',
+                        className: 'btn btn-primary approve',
+                        enabled: false,
+                        action: function(e, dt, node, config) {
+                            if (selected_rows != '') {
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select yes to approve!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                
+                                        $.ajax({
+                                            url: '{!! route('admin.delivery.lost.approve.status') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'shipment_ids': selected_rows,
+                                                '_token': '{{ csrf_token() }}',
+                                                'approve': '1',
+                                            }
+                                        }).done(function(data) {
+                                            UnblockPagePermanently();
+                                            table.rows().deselect();
+                                            table.button('.reject').disable();
+                                            table.button('.approve').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.button('.confirm').disable();
+                                            table.draw('false');
+                                            if (data.status == 1) {
+                                                UnblockPagePermanently();
+                                                table.draw('false');
+                                                toastr.success(data.success,
+                                                    'Success!', {
+                                                        positionClass: 'toast-bottom-center',
+                                                        containerId: 'toast-bottom-center'
+                                                    });
+                                            } else {
+                                                UnblockPagePermanently();
+                                                toastr.error(data.error,
+                                                    'Error!', {
+                                                        positionClass: 'toast-top-center',
+                                                        containerId: 'toast-top-center'
+                                                    });
+                                            }
+
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    },
+                    
+                @endif
+
+                    @if (session('role_id') == 1 || in_array(944, session('permissions')))
+                        {
+                            text: 'Reject',
+                            className: 'btn btn-primary reject',
+                            enabled: false,
+                            action: function(e, dt, node, config) {
+                                if (selected_rows != '') {                               
+                                    $('#rejectModal').modal('show');
+                                }
+                            }
+                        },
+                    @endif
+
                 {
                     extend: 'excel',
                     title: 'Lost Shipments',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }, {
+                },
+                {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
-                    action : function(e) {
+                    action: function(e) {
                         e.preventDefault();
 
                         table.rows().nodes().each(function(index) {
@@ -320,20 +479,24 @@
                                 approval = row.data().approval;
                                 if (id) {
                                     var index = $.inArray(id, selected_rows);
-                                    if (index === -1 && approval != 1) {
+                                    if ((index === -1 && approval != 1) || confirm_reattempt === 1) {
                                         selected_rows.push(id);
                                         row.select();
-                                        
+                                        table.button('.reject').enable();
+                                        table.button('.approve').enable();
+                                        table.button('.re-attempt').enable();
+                                        table.button('.confirm').enable();
                                     }
                                 }
                             }
                         });
                     }
-                }, {
+                },
+                {
                     extend: 'selectNone',
                     text: 'Select None',
                     className: 'select_none',
-                    action : function(e) {
+                    action: function(e) {
                         e.preventDefault();
 
                         table.rows().nodes().each(function(index) {
@@ -353,6 +516,8 @@
                                 if (selected_rows.length == 0) {
                                     table.button('.reject').disable();
                                     table.button('.approve').disable();
+                                    table.button('.re-attempt').disable();
+                                    table.button('.confirm').disable();
                                 }
                             }
                         });
@@ -360,6 +525,7 @@
                 },
                 'reset'
             ],
+
            
             scrollX: true, scrollY: '500px',
             select: {
@@ -406,7 +572,11 @@
                 if (data.approval == 1 && data.permission === 944) {
                     $('td:eq(0)', row).removeClass('select-checkbox');
                 }
-                console.log(data);
+
+                if (data.approval == 0 && data.permission != 944) {
+                    $('td:eq(0)', row).removeClass('select-checkbox');
+                }
+
                 var info = table.page.info();
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -426,8 +596,6 @@
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
-
-
                     if ($(header).is('.select') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
@@ -506,7 +674,7 @@
             var rowData = table.row($(this).parents('tr')).data();
             var index = $.inArray(id, selected_rows);
 
-            if (index === -1 && rowData.approval != 1) {
+            if ((index === -1 && rowData.approval != 1 ||  confirm_reattempt === 1)) {
                 selected_rows.push(id);
             }
             else {
@@ -515,12 +683,16 @@
         
 
             if (selected_rows.length > 0) {
-                table.button('.approve').enable();
                 table.button('.reject').enable();
+                table.button('.approve').enable();
+                table.button('.re-attempt').enable();
+                table.button('.confirm').enable();
             }
             else {
-                table.button('.approve').disable();
                 table.button('.reject').disable();
+                table.button('.approve').disable();
+                table.button('.re-attempt').disable();
+                table.button('.confirm').disable();
 
             }
         });
@@ -571,7 +743,7 @@
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url:"{{route('admin.delivery.lost.confirm.status')}}",
+                                url: '{{!! route('admin.delivery.lost.confirm.status') !!}}',
                                 method:'POST',
                                 data:{
                                     'shipment_ids':selected_rows,
@@ -585,6 +757,8 @@
                                 table.rows().deselect();
                                 table.button('.reject').disable();
                                 table.button('.approve').disable();
+                                table.button('.re-attempt').disable();
+                                table.button('.confirm').disable();
                                 table.draw('false');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             });
@@ -636,7 +810,7 @@
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url:"{{route('admin.delivery.lost.reattempt.status')}}",
+                                url: '{ !! route('admin.delivery.lost.reattempt.status') !!}',
                                 method:'POST',
                                 data:{
                                     'shipment_ids':selected_rows,
@@ -649,6 +823,8 @@
                                 selected_rows = [];
                                 table.button('.reject').disable();
                                 table.button('.approve').disable();
+                                table.button('.re-attempt').disable();
+                                table.button('.confirm').disable();
                                 table.draw('false');
                                 table.rows().deselect();
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
