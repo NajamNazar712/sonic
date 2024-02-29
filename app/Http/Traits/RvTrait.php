@@ -872,16 +872,16 @@ trait RvTrait
             $agent_shipment_id;
 
        
-        $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority');
+        // $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority');
 
-        if($rv_priority_shipper->exists()){
-            $rv_priority_shipper = $rv_priority_shipper->first();
-            $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
-        }
+        // if($rv_priority_shipper->exists()){
+        //     $rv_priority_shipper = $rv_priority_shipper->first();
+        //     $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
+        // }
 
-        $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
-            return $value != "";
-        });
+        // $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
+        //     return $value != "";
+        // });
 
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
@@ -921,19 +921,21 @@ trait RvTrait
 
         //Rv Disable Shippers Setting when all shippers are enbale and there are exluded shipper(agents can get those shippers shipments)
         if (!empty($included_shippers)) {              
-            $flag = false;                
-            if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
-                $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
-                $mergeArr = array_merge($rv_priority_value, $included_shippers);
-                $mergeArr = array_unique($mergeArr);
-                $result = array_filter($mergeArr, function($value){
-                    return $value != '';
-                });
-                $exploded_result = implode(',', $result);                    
-                $flag = true;
-            }   
+            // $flag = false;                
+            // if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
+            // if (!($only_shipper->exists())){
+            //     // $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
+            //     $mergeArr = array_merge($rv_priority_value, $included_shippers);
+            //     $mergeArr = array_unique($mergeArr);
+            //     $result = array_filter($mergeArr, function($value){
+            //         return $value != '';
+            //     });
+            //     $exploded_result = implode(',', $result);                    
+            //     $flag = true;
+            // }   
 
-            $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
+            // $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
+            $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $included_shippers)
             ->whereIn('shipper_status_id', [12,66,52])
             // ->where('consignee_city_id', $agent->city_id)  
             ->whereRaw('NOT EXISTS (
@@ -948,11 +950,11 @@ trait RvTrait
                 )
             )');
 
-            if ($flag == true){
-                $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-            } else {
-                $shipments->orderBy('updated_at', 'ASC');
-            } 
+            // if ($flag == true){
+            //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+            // } else {
+            // } 
+            $shipments->orderBy('updated_at', 'ASC');
 
             $shipments = $shipments->get(['id']);
 
@@ -967,24 +969,25 @@ trait RvTrait
         else if (!empty($only_shippers) && !($all_shipper_exists)) {
             $all_shippers = User::where('status', 3)->pluck('id')->toArray();
 
-            $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
-                return !in_array($value, $only_shippers);
-            });
-            $rv_priority_shippers = array_filter($rv_priority_shippers, function($value)  use ($only_shippers) {
-                return !in_array($value, $only_shippers);
-            });
+            // $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+            //     return !in_array($value, $only_shippers);
+            // });
+            // $rv_priority_shippers = array_filter($rv_priority_shippers, function($value)  use ($only_shippers) {
+            //     return !in_array($value, $only_shippers);
+            // });
 
-            $mergeArr = array_merge($rv_priority_shippers, $all_shippers);
-            $mergeArr = array_unique($mergeArr);
-            $result = array_filter($mergeArr, function($value){ 
-                return $value != '';
-            });
+            // $mergeArr = array_merge($rv_priority_shippers, $all_shippers);
+            // $mergeArr = array_unique($mergeArr);
+            // $result = array_filter($mergeArr, function($value){ 
+            //     return $value != '';
+            // });
             
-            if (!empty($result)){
-                $exploded_result = implode(',', $result);
+            // if (!empty($result)){
+            if (!empty($all_shippers)){
+                // $exploded_result = implode(',', $all_shippers);
                 // $shipments = Shipment::where('consignee_city_id', $agent->city_id)
                 $shipments = DB::connection($connection)->table('shipments')->whereIn('shipper_status_id', [12,66,52])
-                ->whereIn('user_id', $result)
+                ->whereIn('user_id', $all_shippers)
                 ->whereRaw('NOT EXISTS (
                     SELECT sj.id
                     FROM shipments_journey AS sj
@@ -1002,11 +1005,11 @@ trait RvTrait
                     $flag = false;
                 }
                 
-                if ($flag == true){
-                    $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
-                } else {
-                    $shipments->orderBy('updated_at', 'ASC');
-                } 
+                // if ($flag == true){
+                //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+                // } else {
+                // } 
+                $shipments->orderBy('updated_at', 'ASC');
                 
                 $shipments = $shipments->get(['id']);
                 
