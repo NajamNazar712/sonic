@@ -58,6 +58,7 @@ trait LastMileAppReportTrait
                  $delivery_note_data = $delivery_note_data->first();
                  
                  $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id)->whereDate('delivery_note_created_at', $today);
+                 error_log('data'.print_r($check_note_id_delivery,true));   
                  $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->pluck('rwdnsum_id'))->where('rider_id',$rider_id)->whereDate('delivery_date', $today);
                  
                  if($check_summary->exists() && $check_note_id_delivery->exists())
