@@ -214,7 +214,6 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
 
             buttons: [
-                  
                     @if (session('role_id') == 1 || in_array(944, session('permissions')))
                                 {
                                     text: 'Approve',
@@ -318,17 +317,14 @@
 
                             if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                 id = parseInt(row.id());
-
+                                approval = row.data().approval;
                                 if (id) {
-                                    row.select();
-
                                     var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
+                                    if (index === -1 && approval != 1) {
                                         selected_rows.push(id);
+                                        row.select();
+                                        
                                     }
-                                    table.button('.approve').enable();
-                                    table.button('.reject').enable();
                                 }
                             }
                         });
@@ -407,6 +403,10 @@
                 if (data.aging < 7) {
                     $('td:eq(0)', row).addClass('select-checkbox');
                 }
+                if (data.approval == 1 && data.permission === 944) {
+                    $('td:eq(0)', row).removeClass('select-checkbox');
+                }
+                console.log(data);
                 var info = table.page.info();
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -499,30 +499,33 @@
                 this.api().table().columns.adjust();
             }
         });
-
+        var selectedRows = [];        
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
             var id = parseInt($(this).parent('tr').attr('id'));
+            var rowData = table.row($(this).parents('tr')).data();
+            var index = $.inArray(id, selected_rows);
 
-                var index = $.inArray(id, selected_rows);
+            if (index === -1 && rowData.approval != 1) {
+                selected_rows.push(id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+        
 
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
+            if (selected_rows.length > 0) {
+                table.button('.approve').enable();
+                table.button('.reject').enable();
+            }
+            else {
+                table.button('.approve').disable();
+                table.button('.reject').disable();
 
-                if (selected_rows.length > 0) {
-                    table.button('.approve').enable();
-                    table.button('.reject').enable();
-                }
-                else {
-                    table.button('.approve').disable();
-                    table.button('.reject').disable();
-
-                }
+            }
         });
+      
+
 
         $('#rejectModal .confirm').click(function(){
             $('#ReturnConfirmReasonModal').modal('show');
