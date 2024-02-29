@@ -194,7 +194,6 @@ trait LastMileAppReportTrait
     static function countAdd($time,$check_summary)
     {   
         
-        Log::channel('last_mile_app_report_log')->info('Before'.$check_summary);
 		if ($time <= '10:59:59') {
 			$check_summary->before_11_count = $check_summary->before_11_count + 1;
 		} elseif ($time > '10:59:59' && $time <= '11:59:59') {
@@ -224,9 +223,8 @@ trait LastMileAppReportTrait
 		} elseif ($time > '22:59:59' && $time <= '23:59:59') {
 			$check_summary->after_23_count = $check_summary->after_23_count + 1;
 		}
-        Log::channel('last_mile_app_report_log')->info('after'.$check_summary);
 		$check_summary->save();
-        Log::channel('last_mile_app_report_log')->info('save'.$check_summary);
+        Log::channel('last_mile_app_report_log')->info('save'.$product->getChanges());
 
     }
 
