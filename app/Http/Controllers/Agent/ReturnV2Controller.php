@@ -216,18 +216,18 @@ class ReturnV2Controller extends Controller
                                 if (isset($rider_info)) {
                                     // $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
                                     // $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
-                                    $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
+                                    $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
                                     $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
                                     $rider_details['attempted_time'] = (isset($rider_info->created_at)) ? ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
-                                    $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                    $rider_details['remarks'] = ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first();
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                                 } else {
                                     // $rider_details['reason'] = '-';
-                                    $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
+                                    $rider_details['reason'] =ShipmentStatusReason::where('id', ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first()->status_reason_id)->first();
                                     $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
                                     $rider_details['attempted_time'] = '-';
                                     // $rider_details['remarks'] = '-';
-                                    $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                    $rider_details['remarks'] = ShipmentsJourney::where('shipper_status_id',12)->where('shipment_id', $shipment->id)->latest()->first();
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                                 }
 
