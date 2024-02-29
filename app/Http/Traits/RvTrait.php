@@ -858,6 +858,7 @@ trait RvTrait
     {
         $connection = 'reports_2';
         $global_shipment = null;
+        $chunkSize = 100;
        
         //this check will work only if admin will assign shipment manually to agent 
         if($agent_shipment_id){
@@ -980,7 +981,7 @@ trait RvTrait
             //     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
             // }
 
-            $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id,&$global_shipment ) {
+            $shipments = $shipments->chunk($chunkSize, function ($shipments) use ($agent_shipment_id,$agent_id,&$global_shipment ) {
 
                 //---THIS CHECK WILL WORK IF AGENT GETS THE TICKET FROM VIRTUAL RCP AGENT SCREEN---//
                 if (count($shipments) && $agent_shipment_id == null) {
@@ -1051,6 +1052,9 @@ trait RvTrait
                                     $global_shipment = $shipment->id;
                                     break;
                                 }
+
+                                $global_shipment = null;
+                                continue;
                             }
                             
                             // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
@@ -1134,7 +1138,7 @@ trait RvTrait
                 ->orderBy('shipments.updated_at', 'ASC')
                 ->select('shipments.id');
 
-                $shipments = $shipments->chunk(1000, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
+                $shipments = $shipments->chunk($chunkSize, function ($shipments) use ($agent_shipment_id,$agent_id, &$global_shipment) {
 
                     if (count($shipments) && $agent_shipment_id == null) {
 
@@ -1206,6 +1210,9 @@ trait RvTrait
                                     $global_shipment = $shipment->id;
                                     break;
                                 }
+                                
+                                $global_shipment = null;
+                                continue;
                             }
                             
                             // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
