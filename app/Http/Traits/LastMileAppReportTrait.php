@@ -224,7 +224,11 @@ trait LastMileAppReportTrait
 			$check_summary->after_23_count = $check_summary->after_23_count + 1;
 		}
 		$check_summary->save();
-        Log::channel('last_mile_app_report_log')->info('save'.json_encode($check_summary->getChanges()));
+        DeliveryNoteErrorLog::create([
+            'delivery_note_id' => $check_summary->id,
+            'shipment_id' => $check_summary->id,
+            'message' => json_encode($check_summary->getChanges()),
+        ]);
     }
 
     static function countSub($time,$check_summary)
