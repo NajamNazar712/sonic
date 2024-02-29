@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Http\Models\ServiceList;
 use App\Jobs\LeadApiGeneratEmailNotification;
+use  App\Http\Models\City; 
 
 class LeadAPIController extends Controller
 {
@@ -40,7 +41,7 @@ class LeadAPIController extends Controller
 
     ];
 
-    public function index()
+    public function index(Request $request)
     {
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->join('service_list as sl', 'sl.id', '=', 'leads.service_id')
@@ -54,7 +55,7 @@ class LeadAPIController extends Controller
             $leads = $leads->get();
             return response()->json(['status' => 0, 'leads' => $leads]);
         }
-        return response()->json(['status' => 1, 'message', 'Leads not found']);
+        return response()->json(['status' => 1, 'message' => 'Leads not found']);
     }
 
     /**
@@ -239,19 +240,20 @@ class LeadAPIController extends Controller
         //
     }
 
-    public function city_territories($city_id)
+    public function city_territories(Request $request)
     {
-        $city_id = $city_id;
+        $city_id = $request->city_id;
         if ($city_id) {
             $territories = Territory::where('city_id', $city_id)->where('territory_status', 1);
             if ($territories->exists()) {
                 $territories = $territories->get();
                 return response()->json(['status' => 0, 'territories' => $territories]);
             } else {
-                return response()->json(['status' => 0, 'error' => $territories]);
+                return response()->json(['status' => 1, 'message' => 'Territories not found']);
             }
         }
-        return response()->json(['status' => 1, 'message', 'Territories not found']);
+        return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+
     }
 
     public function territory_areas($territory_id)
@@ -263,13 +265,13 @@ class LeadAPIController extends Controller
                 $territory_areas = $territory_areas->get();
                 return response()->json(['status' => 0, 'territory_areas' => $territory_areas]);
             } else {
-                return response()->json(['status' => 1, 'message', 'Territory Areas not found']);
+                return response()->json(['status' => 1, 'message' => 'Territory Areas not found']);
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
     }
 
-    public function services_list()
+    public function services_list(Request $request)
     {
         $services_list = ServiceList::where('status',1);
         if($services_list->exists())
@@ -277,6 +279,18 @@ class LeadAPIController extends Controller
             $services_list = $services_list->get();
             return response()->json(['status' => 0,'services_list' => $services_list]);
         }
-        return response()->json(['status' => 1, 'error' => 'Services not found!']);
+         return response()->json(['status' => 1, 'error' => 'Services not found!']);
+        
+    }
+
+    public function city_list(Request $request)
+    {
+        $city_list = City::select(['id as city_id', 'name as city_name']) ->where('status', 1);
+        if($city_list->exists())
+        {
+            $city_list = $city_list->get();
+            return response()->json(['status'=> 0,'city_list'=>$city_list]);
+        }
+         return response()->json(['status' => 1, 'error' => 'City not found!']);
     }
 }
