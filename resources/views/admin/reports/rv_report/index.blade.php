@@ -86,12 +86,12 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Area</th>
-                                    <th class="border-primary border-darken-1">Consignee Name</th>
-                                    <th class="border-primary border-darken-1">Number</th>
-                                    <th class="border-primary border-darken-1">Address</th>
+                                    {{-- <th class="border-primary border-darken-1">Area</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Consignee Name</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Number</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Address</th> --}}
                                     <th class="border-primary border-darken-1">COD Amount</th>
-                                    <th class="border-primary border-darken-1">Weight</th>
+                                    {{-- <th class="border-primary border-darken-1">Weight</th> --}}
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
@@ -443,12 +443,12 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Area');
-                            head.push('Consignee');
-                            head.push('Number');
-                            head.push('Address');
+                            // head.push('Area');
+                            // head.push('Consignee');
+                            // head.push('Number');
+                            // head.push('Address');
                             head.push('COD Amount');
-                            head.push('Weight');
+                            // head.push('Weight');
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Arrival Date');
@@ -476,12 +476,12 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.area);
-                                row.push(values.consignee_name);
-                                row.push(values.number);
-                                row.push(values.address);
+                                // row.push(values.area);
+                                // row.push(values.consignee_name);
+                                // row.push(values.number);
+                                // row.push(values.address);
                                 row.push(values.cod_amount);
-                                row.push(values.weight);
+                                // row.push(values.weight);
                                 row.push(values.shipping_mode);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
@@ -554,12 +554,12 @@
                     {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
                     {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
                     {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    {data: 'area', name: 'area', class: 'align-middle area',searchable: false},
-                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable: false},
-                    {data: 'number', name: 'number', class: 'align-middle number',searchable: false},
-                    {data: 'address', name: 'address', class: 'align-middle address',searchable: false},
+                    // {data: 'area', name: 'area', class: 'align-middle area',searchable: false},
+                    // {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable: false},
+                    // {data: 'number', name: 'number', class: 'align-middle number',searchable: false},
+                    // {data: 'address', name: 'address', class: 'align-middle address',searchable: false},
                     {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
-                    {data: 'weight', name: 'weight', class: 'align-middle dweightesignation',searchable: false},
+                    // {data: 'weight', name: 'weight', class: 'align-middle dweightesignation',searchable: false},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
