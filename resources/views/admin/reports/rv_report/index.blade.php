@@ -459,7 +459,7 @@
                             head.push('Action Date');
                             head.push('Action Updated By');
                             head.push('RCP Agent Updated By');
-                            head.push('RV Action');
+                            head.push('RV Status');
                             head.push('RV Reason');
                             head.push('RV Status Date');
                             head.push('Current Status');
