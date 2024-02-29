@@ -5385,10 +5385,8 @@ class ReturnController extends Controller
             $failed_shipments = [];
 
             $contractual_agent = Admin::where('id',$request->admin_id)->where('trax_id','like','%Trax-C%')->first();
+            //assigning shipments to contractual agents
             if($contractual_agent){
-                // $sorted_agents = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->orderBy('priority', 'ASC')->get();
-                // $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $contractual_agent->id)->pluck('zone_id')->toArray();
-    
                 $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
                 if ($included_shipper->exists()) {
                     $flag = true;
@@ -5416,7 +5414,6 @@ class ReturnController extends Controller
                 $already_assign =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->where('rv_state_id', 1)->pluck('shipment_id')->toArray();
                 $already_assigned =  Shipment::whereIn('id', $already_assign)->pluck('tracking_number')->toArray();
                 
-                // if(!empty($sorted_agents_zones)){
                     foreach($shipment_ids as $shipment_id){
                         $shipments_not_assigned = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
                         
@@ -5439,10 +5436,7 @@ class ReturnController extends Controller
                             return abs($item->created_at->diffInSeconds($currentDateTime));
                         })->first();
                         if($shipment->exists()){
-                            // if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], 
-                            // $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                             if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
-                                // $this->included_shippers($sorted_agents, $contractual_agent->id, $shipment_id); 
                                 $this->included_shippers($contractual_agent->id, $shipment_id); 
                                 $assigned_shipment[] = $shipment->tracking_number;
                                 if($already_assigned_state != null){
@@ -5482,10 +5476,6 @@ class ReturnController extends Controller
                     else{
                         return response()->json(['status'=> 0, 'success'=>'Shipments Assigned to Contractual Agent Successfully']);
                     }
-                // }
-                // else{
-                //     return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
-                // }
             }
             //assigning shipments to agents
             else{
@@ -5537,9 +5527,7 @@ class ReturnController extends Controller
                                         'assigned_by' => Auth::id(),
                                     ];
                                     
-                                    // creating a new record
                                     $this->rv_shipment_assign($data);
-                                    // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                                 }
                                 else{
                                     $no_zone_shipment[] = $shipment->tracking_number;
@@ -5578,7 +5566,6 @@ class ReturnController extends Controller
                 }
             }
             catch(Exception $th){
-                // DB::rollBack();
                 return response()->json(['error'=> $th->getMessage()]);
             } 
     }
@@ -5589,7 +5576,6 @@ class ReturnController extends Controller
         if($emp_type == 3){
             $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->leftjoin('cities as c','c.id','a.default_hub_id')
-            // ->where('admin_roles.department_id',3)
             ->where('a.status',1)
             ->Where('a.trax_id','like','%Trax-C%')
             ->select('a.id as id','a.name as name','a.trax_id as trax_id','c.name as city_name')
@@ -5622,11 +5608,9 @@ class ReturnController extends Controller
             'integer' => ':attribute must be an Integer.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
             'unique' => ':attribute is already Present.',
-            // 'regex' => ':attribute must start with "Trax-C-" and be followed by digits.',
         ];
         $rules_with_agent = [
             'tracking_number' => ['required', 'integer'],
-            // 'agent_id' => ['required', 'regex:/^Trax-C-\d+$/']
             'agent_id' => ['required']
         ];
 
@@ -5706,7 +5690,6 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    // if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->exists()) {
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 65])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
@@ -5780,43 +5763,25 @@ class ReturnController extends Controller
                                     $failed_shpments[] = $shipment->tracking_number;
                                 }
                                 else{
-                                    // $zones_assigned_to_agent = RvAgentAssignHub::where('agent_id', $row['agent_id'])->pluck('zone_id')->toArray();
-                                    
-                                    // if(!empty($zones_assigned_to_agent))
-                                    // {
-                                        // if(in_array($shipment->destination_city['zone_id'], $zones_assigned_to_agent)){
-                                            // $sorted_agents = RvAgentAssignHub::where('agent_id', $row['agent_id'])->orderBy('priority', 'ASC')->get();
-                                            // $include_shippers = $this->included_shippers($sorted_agents, $row['agent_id'], $shipment->id); 
-                                            if(in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
-                                                $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
-                                                if($include_shippers){
-                                                    $data = $include_shippers->getData();
-                                                    if($data->status === 0 && $data->success === 'Shipments Assigned successfully')
-                                                    {
-                                                        $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
-                                                    }
-                                                    else if($data->status === 1 && $data->error === 'Shipment is already assigned'){
-                                                        $already_assigned_shipments[] = $tracking_number;
-                                                    }
-                                                }
-                                                else{
-                                                    $disabled_shippers[] = $tracking_number;
-                                                }
+                                    if(in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
+                                        $include_shippers = $this->included_shippers($row['agent_id'], $shipment->id); 
+                                        if($include_shippers){
+                                            $data = $include_shippers->getData();
+                                            if($data->status === 0 && $data->success === 'Shipments Assigned successfully')
+                                            {
+                                                $successfull_assign_shipments['Row #' . $row_id] = $tracking_number;
                                             }
-                                            else{
-                                                $disabled_shippers[] = $tracking_number;
+                                            else if($data->status === 1 && $data->error === 'Shipment is already assigned'){
+                                                $already_assigned_shipments[] = $tracking_number;
                                             }
-                                        // }
-                                        // else{
-                                        //     //zone not assigned to an agent 
-                                        //     $zone_not_assigned_contractual_agent[] = $row['agent_id'];
-                                        // }
-                                    // }
-                
-                                    // else{
-                                    //     //No Zone Assigned To Agent
-                                    //     $contractual_agent_with_no_zone[] = $row['agent_id'];
-                                    // }
+                                        }
+                                        else{
+                                            $disabled_shippers[] = $tracking_number;
+                                        }
+                                    }
+                                    else{
+                                        $disabled_shippers[] = $tracking_number;
+                                    }
                                 }
                             }
                             

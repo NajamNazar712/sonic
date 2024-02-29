@@ -43,7 +43,6 @@ use App\RvAssignAgentSubStatus;
 
 trait RvTrait
 {
-
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -147,7 +146,6 @@ trait RvTrait
        
     }
 
-
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -208,7 +206,6 @@ trait RvTrait
             }
         }
     }
-
 
     // Heading: N/A
     // Siderbar: N/A
@@ -540,7 +537,6 @@ trait RvTrait
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
     }
 
-
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -783,6 +779,7 @@ trait RvTrait
             return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
         }
     }
+
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -812,7 +809,6 @@ trait RvTrait
             return ['status' => 0, 'error'=> 'Shipment not found', 'redirect'=> true];
         }
     }
-
 
     // Heading: N/A
     // Siderbar: N/A
@@ -858,13 +854,11 @@ trait RvTrait
         $nsa_charges_log->save();
     }
 
-    // protected function included_shippers($agent_sorted_hubs, $agent_id, $agent_shipment_id = null)
     protected function included_shippers($agent_id, $agent_shipment_id = null)
     {
         $connection = 'reports_2';
         $global_shipment = null;
        
-        
         //this check will work only if admin will assign shipment manually to agent 
         if($agent_shipment_id){
             // if agent shipment is assigned - not assigned to same agent only 
@@ -961,7 +955,6 @@ trait RvTrait
 
             $shipments = DB::connection($connection)->table('shipments')->whereIn('user_id', $flag ? $result : $included_shippers)
             ->whereIn('shipper_status_id', [12,66,52])
-            // ->where('consignee_city_id', $agent->city_id)  
             ->whereRaw('NOT EXISTS (
                 SELECT sj.id
                 FROM shipments_journey AS sj
@@ -1009,9 +1002,7 @@ trait RvTrait
                                             'rv_assign_agent_status_id' => Null,
                                             'rv_assign_agent_sub_status_id' => Null,
                                             'rv_state_id' => 1,
-                                            // 'updated_type_id' => Null,
                                             'updated_type_id' => 2,
-                                            // 'updated_by_id' =>  Null,
                                             'updated_by_id' =>  Auth::id(),
                                             'is_fake_status' => 0,
                                             'rv_fake_status_id' => Null,
@@ -1049,12 +1040,11 @@ trait RvTrait
                                         'assigned_by' => null,
                                     ];
                                     
-                                    // creating a new record
+                                    //updating a row and creating new one
                                     $this->rv_shipment_assign($data);
                                     $global_shipment = $shipment->id;
                                     break;
                                 }
-
                             }
                             
                             // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
@@ -1168,9 +1158,7 @@ trait RvTrait
                                             'rv_assign_agent_status_id' => Null,
                                             'rv_assign_agent_sub_status_id' => Null,
                                             'rv_state_id' => 1,
-                                            // 'updated_type_id' => Null,
                                             'updated_type_id' => 2,
-                                            // 'updated_by_id' =>  Null,
                                             'updated_by_id' =>  Auth::id(),
                                             'is_fake_status' => 0,
                                             'rv_fake_status_id' => Null,
@@ -1251,7 +1239,6 @@ trait RvTrait
 
         return $global_shipment;
     }
-
 
     // private function assign_shipment($shipments,$agent_shipment_id,$agent_id,&$global_shipment)
     // {
@@ -1414,7 +1401,6 @@ trait RvTrait
         $rv_shipment_assign_agent_details->assigned_by  = $data['assigned_by'];
         $rv_shipment_assign_agent_details->save();
     }
-
 
     // Heading: N/A
     // Siderbar: N/A
@@ -1615,8 +1601,8 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: this function is updating table rows of rv_shipment_assign_agents requested to approve or reject intercept request
-    protected function update_rv_shipment_assign_agent_by_admin($data){
-
+    protected function update_rv_shipment_assign_agent_by_admin($data)
+    {
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->latest()->first();
         $shipments_journey = ShipmentsJourney::where('shipment_id', $data['shipment_id'])->whereIn('shipper_status_id', [12,65,66,52])->latest()->first();
 
