@@ -266,7 +266,7 @@
                                             if (confirm) {
                                                 blockPagePermanently();
                                                 $.ajax({
-                                                    url: '{ !! route('admin.delivery.lost.confirm.status.lost') !!}',
+                                                    url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
                                                     method:'POST',
                                                     data:{
                                                         'shipment_ids':selected_rows,
@@ -340,7 +340,7 @@
                                             if (confirm) {
                                                 blockPagePermanently();
                                                 $.ajax({
-                                                    url: '{ !! route('admin.delivery.lost.reattempt.status.lost') !!}',
+                                                    url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
                                                     method:'POST',
                                                     data:{
                                                         'shipment_ids':selected_rows,
@@ -743,7 +743,7 @@
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url: '{!! route('admin.delivery.lost.confirm.status.lost') !!}',
+                                url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
                                 method:'POST',
                                 data:{
                                     'shipment_ids':selected_rows,
