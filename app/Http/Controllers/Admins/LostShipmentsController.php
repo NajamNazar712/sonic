@@ -276,7 +276,6 @@ class LostShipmentsController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
     }
     public function shipment_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-    dd(1);
         $shipment_ids = $request->shipment_ids;
 
         foreach ($shipment_ids as $shipment){

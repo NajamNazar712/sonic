@@ -266,7 +266,7 @@
                                             if (confirm) {
                                                 blockPagePermanently();
                                                 $.ajax({
-                                                    url: '{ !! route('admin.delivery.lost.confirm.status') !!}',
+                                                    url: '{ !! route('admin.delivery.lost.confirm.status.lost') !!}',
                                                     method:'POST',
                                                     data:{
                                                         'shipment_ids':selected_rows,
@@ -340,7 +340,7 @@
                                             if (confirm) {
                                                 blockPagePermanently();
                                                 $.ajax({
-                                                    url: '{ !! route('admin.delivery.lost.reattempt.status') !!}',
+                                                    url: '{ !! route('admin.delivery.lost.reattempt.status.lost') !!}',
                                                     method:'POST',
                                                     data:{
                                                         'shipment_ids':selected_rows,
@@ -403,7 +403,7 @@
                                         blockPagePermanently();
                                 
                                         $.ajax({
-                                            url: '{!! route('admin.delivery.lost.approve.status') !!}',
+                                            url: '{!! route('admin.delivery.lost.approve.status.lost') !!}',
                                             method: 'POST',
                                             data: {
                                                 'shipment_ids': selected_rows,
@@ -743,7 +743,7 @@
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url: '{{!! route('admin.delivery.lost.confirm.status') !!}}',
+                                url: '{!! route('admin.delivery.lost.confirm.status.lost') !!}',
                                 method:'POST',
                                 data:{
                                     'shipment_ids':selected_rows,
@@ -767,12 +767,14 @@
                 }
             });
 		});
-        $('#rejectModal .re-attempt').click(function(){
+
+        $('#rejectModal .re-attempt').click(function() {
             $('#add_remarks_modal').modal('show');
-            $('#add_remarks_modal').on('hide.bs.modal', function () {
+            $('#add_remarks_modal').on('hide.bs.modal', function() {
                 $('#add_remarks_form input.add_remarks').val('');
             });
-            $('#rejectModal').modal('hide');    
+            $('#rejectModal').modal('hide');
+
             $('#add_remarks_form').validate({
                 ignore: [],
                 errorClass: 'danger',
@@ -806,34 +808,39 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url: '{ !! route('admin.delivery.lost.reattempt.status') !!}',
-                                method:'POST',
-                                data:{
-                                    'shipment_ids':selected_rows,
-                                    'remarks':remarks,
-                                    '_token':'{{ csrf_token() }}'
+                                url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}',
+                                    'remarks': remarks,
                                 }
-                            }).done(function (data) {
+                            }).done(function(data) {
                                 UnblockPagePermanently();
                                 $('#add_remarks_modal').modal('hide');
                                 selected_rows = [];
+                                // Assuming 'table' is defined somewhere and it's DataTable
                                 table.button('.reject').disable();
                                 table.button('.approve').disable();
                                 table.button('.re-attempt').disable();
                                 table.button('.confirm').disable();
                                 table.draw('false');
                                 table.rows().deselect();
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
                             });
                         }
                     });
                 }
-            });
-		});
+            })
+        })
+
     });
 
     </script>
