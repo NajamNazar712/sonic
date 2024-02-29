@@ -132,6 +132,7 @@ class AdminZonalManagementController extends Controller
     }
 
     public function update_index($id) {
+        $zone_cities_gst = array();
         $cities = City::where('status', 1)->where('business_category_id', 1)->get();
         $zone = Zone::find($id);
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
@@ -139,10 +140,22 @@ class AdminZonalManagementController extends Controller
         $zone_cities_gst = ZoneCitiesGst::join('cities as c','c.id','zone_cities_gsts.city_id')
             ->join('zones as z','z.id','zone_cities_gsts.zone_id')
             ->where('zone_cities_gsts.zone_id',$id)
-            ->select('c.id as city_id','c.name as city_name','zone_cities_gsts.gst','z.id as zone_id','z.name as zone_name')
-            ->get();
+            ->select('c.id as city_id','c.name as city_name','zone_cities_gsts.gst','z.id as zone_id','z.name as zone_name');
 
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_id' => $id, 'zone_name' => 'south']);
+        if ($zone_cities_gst->exists())
+        {
+            $zone_cities_gst = $zone_cities_gst->get();
+            $zone_cities_gst_count = count($zone_cities_gst);
+        }
+        else
+        {
+            $zone_cities_gst = [];
+            $zone_cities_gst_count = 0;
+        }
+
+//        dump($zone_cities_gst,$zone_cities_gst_count);
+
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor,'zone_cities_gst' => $zone_cities_gst,'zone_cities_gst_count' => $zone_cities_gst_count,'zone_id' => $id]);
     }
 
     public function update_store(Request $request, $id) {
@@ -306,8 +319,19 @@ class AdminZonalManagementController extends Controller
       }
     public function update_zone_cities_gst(Request $request)
     {
-
         $zone_id = $request->zone_id;
+
+        if ($request->has('toggle_value'))
+        {
+            if ($request->toggle_value)
+                ZoneCitiesGst::where('zone_id',$zone_id)->update(['status' => 1]);
+            else
+                ZoneCitiesGst::where('zone_id',$zone_id)->update(['status' => 0]);
+
+                return response()->json(['status' => 1, 'success' => 'Zone cities GST Updated !']);
+        }
+
+
         $tableData = $request->table_data;
 
         ZoneCitiesGst::where('zone_id',$zone_id)->delete();

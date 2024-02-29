@@ -152,17 +152,27 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id,$city = Null)
+    static private function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
-        $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
-            ->where('city_id',$city)
-            ->where('status',1)
-            ->select('gst');
-        if ($zone_city_gst->exists())
-        {
-            $zone_city_gst = $zone_city_gst->first();
-            return $zone_city_gst->gst;
+        if (!is_null($city_id) && $city_id !== '') {
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
+                ->where('city_id',$city_id)
+                ->where('status',1)
+                ->select('gst');
+            if ($zone_city_gst->exists())
+            {
+                $zone_city_gst = $zone_city_gst->first();
+                return $zone_city_gst->gst;
+            }
+            else
+            {
+                if ($zone) {
+                    return $zone->gst;
+                } else {
+                    return 0.13;
+                }
+            }
         }
         else
         {

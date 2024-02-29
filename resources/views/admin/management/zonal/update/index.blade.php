@@ -55,81 +55,81 @@
 										<h3 class="form-section mb-2">City Class Categorization</h3>
 									</div>
 
-									<div class="col-12 col-lg-6">
-										<h3 class="form-section mb-2">Rush/Same-day</h3>
+{{--									<div class="col-12 col-lg-6">--}}
+{{--										<h3 class="form-section mb-2">Rush/Same-day</h3>--}}
 
-										@foreach($cities as $city)
-											<div class="form-group">
-												<div class="row align-items-center justify-content-between">
-													<div class="col">
-														<label class="mb-0 mr-1">{{ $city->name }}</label>
-													</div>
+{{--										@foreach($cities as $city)--}}
+{{--											<div class="form-group">--}}
+{{--												<div class="row align-items-center justify-content-between">--}}
+{{--													<div class="col">--}}
+{{--														<label class="mb-0 mr-1">{{ $city->name }}</label>--}}
+{{--													</div>--}}
 
-													<div class="col text-right">
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 0) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class A</label>
-														</fieldset>
+{{--													<div class="col text-right">--}}
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 0) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class A</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 1) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class B</label>
-														</fieldset>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 1) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class B</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 2) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class C</label>
-														</fieldset>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 2) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class C</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 3) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class D</label>
-														</fieldset>
-													</div>
-												</div>
-											</div>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 3) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class D</label>--}}
+{{--														</fieldset>--}}
+{{--													</div>--}}
+{{--												</div>--}}
+{{--											</div>--}}
 
-											<hr/>
-										@endforeach
-									</div>
+{{--											<hr/>--}}
+{{--										@endforeach--}}
+{{--									</div>--}}
 
-									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
-										<h3 class="form-section mb-2">Saver Plus/Swift</h3>
+{{--									<div class="col-12 col-lg-6 mt-2 mt-lg-0">--}}
+{{--										<h3 class="form-section mb-2">Saver Plus/Swift</h3>--}}
 
-										@foreach($cities as $city)
-											<div class="form-group">
-												<div class="row align-items-center justify-content-between">
-													<div class="col">
-														<label class="mb-0 mr-1">{{ $city->name }}</label>
-													</div>
+{{--										@foreach($cities as $city)--}}
+{{--											<div class="form-group">--}}
+{{--												<div class="row align-items-center justify-content-between">--}}
+{{--													<div class="col">--}}
+{{--														<label class="mb-0 mr-1">{{ $city->name }}</label>--}}
+{{--													</div>--}}
 
-													<div class="col text-right">
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 0) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class A</label>
-														</fieldset>
+{{--													<div class="col text-right">--}}
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 0) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class A</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 1) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class B</label>
-														</fieldset>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 1) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class B</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 2) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class C</label>
-														</fieldset>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 2) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class C</label>--}}
+{{--														</fieldset>--}}
 
-														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 3) checked="checked" @endif>
-															<label for="city_class_{{ $city->id }}">Class D</label>
-														</fieldset>
-													</div>
-												</div>
-											</div>
+{{--														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">--}}
+{{--															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities_cor[$city->id]) && $zone_class_cities_cor[$city->id] == 3) checked="checked" @endif>--}}
+{{--															<label for="city_class_{{ $city->id }}">Class D</label>--}}
+{{--														</fieldset>--}}
+{{--													</div>--}}
+{{--												</div>--}}
+{{--											</div>--}}
 
-											<hr/>
-										@endforeach
-									</div>
+{{--											<hr/>--}}
+{{--										@endforeach--}}
+{{--									</div>--}}
 
 									<div class="col-12">
 										<div class="form-group text-center">
@@ -241,6 +241,11 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style>
+		.error {
+			border-color: red; /* Change border color to indicate error */
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -306,24 +311,76 @@
 				width: '100%',
 				placeholder: 'Select City*'
 			});
+			var toggleValue = false;
+			let cities_gst_count = {{$zone_cities_gst_count}};
+			console.log('city gst count :',cities_gst_count);
 
 			$('#add_cities').on('click', function () {
 				$('#city_wise_gst').modal('show');
 			});
 
-			var toggleValue = false;// depend upon condition if mim=n one city found then true
+			if (cities_gst_count > 0)
+			{
+				console.log('greater zero');
+
+				$('#individual_city_gst').click();
+
+				var toggleValue = true;
+				$('#individual_city_gst_bit').val("1");
+			}
+			else
+			{
+				console.log('less zero');
+				$('#individual_city_gst_bit').val("0");
+				// $('#individual_city_gst').prop('checked');
+			}
+
 			$('#individual_city_gst').change( function () {
 				console.log('clicked');
 				toggleValue = !toggleValue;
 				if(toggleValue)
 				{
 					$('#individual_city_gst_bit').val("1");
-					console.log(toggleValue);
+					console.log('11',toggleValue);
+
+					$.ajax({
+						url: '{!! route('admin.management.zonal.update_zone_cities_gst') !!}',
+						method: 'POST',
+						data: {
+							toggle_value: $('#individual_city_gst_bit').val(),
+							'zone_id':{{ $zone_id }},
+							'_token': '{{ csrf_token() }}'
+						},
+					}).done(function (data) {
+						if (data.status == 1) {
+							toastr.success(data.success, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else{
+							toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+					});
 				}
 				else
 				{
 					$('#individual_city_gst_bit').val("0");
-					console.log(toggleValue);
+					console.log('00',toggleValue);
+
+					$.ajax({
+						url: '{!! route('admin.management.zonal.update_zone_cities_gst') !!}',
+						method: 'POST',
+						data: {
+							toggle_value: $('#individual_city_gst_bit').val(),
+							'zone_id':{{ $zone_id }},
+							'_token': '{{ csrf_token() }}'
+						},
+					}).done(function (data) {
+						if (data.status == 1) {
+							toastr.success(data.success, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else{
+							toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+					});
 				}
 			});
 
@@ -335,14 +392,31 @@
 				var zone_city_enter_value = $("#zone_city_enter").val();
 				var zone_city_enter_text = $("#zone_city_enter option:selected").text();
 				var zone_city_gst_enter_value = $("#zone_city_gst_enter").val();
-				// console.log(zone_id,zone_city_enter_value,zone_city_enter_text,zone_city_gst_enter_value);
+				console.log(zone_id,zone_city_enter_value,zone_city_enter_text,zone_city_gst_enter_value);
+				if (zone_city_enter_value === '' || zone_city_gst_enter_value === '') {
+					$("#zone_city_enter").addClass("error");
+					$("#zone_city_gst_enter").addClass("error");
+					toastr.error('Select city and enter gst !', 'Error!', {
+						positionClass: 'toast-top-center',
+						containerId: 'toast-top-center'
+					});
+					return;
+				} else {
+					$("#zone_city_enter").removeClass("error");
+					$("#zone_city_gst_enter").removeClass("error");
+				}
+
+
 				var newRow = $("<tr>");
 				var cols = "";
 
-				cols += '<td><input type="text" class="form-control" value="'+ zone_name +'" name="zone_id[]" readonly></td>';
-				cols += '<td class="d-none"><input type="hidden" class="form-control" value="'+ zone_id +'" name="zone_id_hidden[]" readonly></td>';
-				cols += '<td><input type="text" class="form-control" value="' + zone_city_enter_text + '" name="zone_city_id[]" readonly/></td>';
-				cols += '<td class="d-none"><input type="hidden" class="form-control" value="' + zone_city_enter_value + '" name="zone_city_id_hidden[]" readonly/></td>';
+				cols += '<td>' +
+						'<input type="text" class="form-control" value="'+ zone_name +'" name="zone_id[]" readonly>' +
+						'<input type="hidden" class="form-control" value="'+ zone_id +'" name="zone_id_hidden[]" readonly>' +
+						'</td>';
+				cols += '<td><input type="text" class="form-control" value="' + zone_city_enter_text + '" name="zone_city_id[]" readonly/>'+
+						'<input type="hidden" class="form-control" value="' + zone_city_enter_value + '" name="zone_city_id_hidden[]" readonly/>' +
+						'</td>';
 				cols += '<td><input type="text" class="form-control" value="' + zone_city_gst_enter_value + '" name="zone_city_gst[]"/></td>';
 
 				cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
