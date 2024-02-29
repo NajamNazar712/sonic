@@ -1101,8 +1101,9 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
-
-                                $details['shipper']['name'] = $shipper->shipper_name;
+                                $shipment_name_verification = \DB::table('retail_shipments')->where('shipment_id', $retail_shipment->shipment_id)->first();
+                                // $details['shipper']['name'] = $shipper->shipper_name;
+                                $details['shipper']['name'] = $shipment_name_verification->shipper_name;
                                 $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                                 $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
                                 $details['shipper']['sales_person'] = $sales_person_name;
