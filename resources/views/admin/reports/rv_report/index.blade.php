@@ -102,6 +102,7 @@
                                     <th class="border-primary border-darken-1">Action Updated By</th>
                                     <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">RV Status</th>
+                                    <th class="border-primary border-darken-1">RV Reason</th>
                                     <th class="border-primary border-darken-1">RV Status Date</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
@@ -459,6 +460,7 @@
                             head.push('Action Updated By');
                             head.push('RCP Agent Updated By');
                             head.push('RV Action');
+                            head.push('RV Reason');
                             head.push('RV Status Date');
                             head.push('Current Status');
                             head.push('Current Status Date');
@@ -492,6 +494,7 @@
                                 row.push(values.action_updated_by);
                                 row.push(values.rcp_agent_updated_by);
                                 row.push(values.rv_status_name);
+                                row.push(values.rv_reason);
                                 row.push(values.rv_status_date);
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
@@ -570,6 +573,7 @@
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
                     {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
                     {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
+                    {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false},
                     {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
                     {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
