@@ -193,119 +193,65 @@ trait LastMileAppReportTrait
 
     static function countAdd($time,$check_summary)
     {   
-        
+        DeliveryNoteErrorLog::create([
+            'delivery_note_id' => $check_summary->id,
+            'shipment_id' => $check_summary->id,
+            'message' => $time,
+        ]);
 		if ($time <= '10:59:59') {
 			$check_summary->before_11_count = $check_summary->before_11_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
 		} elseif ($time > '10:59:59' && $time <= '11:59:59') {
 			$check_summary->at_11_count = $check_summary->at_11_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '11:59:59' && $time <= '12:59:59') {
 			$check_summary->at_12_count = $check_summary->at_12_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return  $check_summary->save();
+            
 		} elseif ($time > '12:59:59' && $time <= '13:59:59') {
 			$check_summary->at_13_count = $check_summary->at_13_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return  $check_summary->save();
+            
 		} elseif ($time > '13:59:59' && $time <= '14:59:59') {
 			$check_summary->at_14_count = $check_summary->at_14_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return  $check_summary->save();
+            
 		} elseif ($time > '14:59:59' && $time <= '15:59:59') {
 			$check_summary->at_15_count = $check_summary->at_15_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '15:59:59' && $time <= '16:59:59') {
 			$check_summary->at_16_count = $check_summary->at_16_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '16:59:59' && $time <= '17:59:59') {
 			$check_summary->at_17_count = $check_summary->at_17_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return  $check_summary->save();
+            
 		} elseif ($time > '17:59:59' && $time <= '18:59:59') {
 			$check_summary->at_18_count = $check_summary->at_18_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return  $check_summary->save();
+            
 		} elseif ($time > '18:59:59' && $time <= '19:59:59') {
 			$check_summary->at_19_count = $check_summary->at_19_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '19:59:59' && $time <= '20:59:59') {
 			$check_summary->at_20_count = $check_summary->at_20_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '20:59:59' && $time <= '21:59:59') {
 			$check_summary->at_21_count = $check_summary->at_21_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '21:59:59' && $time <= '22:59:59') {
 			$check_summary->at_22_count = $check_summary->at_22_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
+            
 		} elseif ($time > '22:59:59' && $time <= '23:59:59') {
 			$check_summary->after_23_count = $check_summary->after_23_count + 1;
-            $check_summary->save();
-            DeliveryNoteErrorLog::create([
-                'delivery_note_id' => $check_summary->id,
-                'shipment_id' => $check_summary->id,
-                'message' => json_encode($check_summary->getChanges()),
-            ]);
+            return $check_summary->save();
 		}
     }
 
