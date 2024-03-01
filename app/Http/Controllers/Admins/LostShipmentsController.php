@@ -52,7 +52,27 @@ class LostShipmentsController extends Controller
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41, 42])->select('id', 'name')->get();
-        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons]);
+        
+        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
+            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                ->where('shipments_journey.id', '=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        })
+        ->where('shipments.shipper_status_id', 18);
+        
+        $shipmentsCounts = $shipments
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(IF(shipments_journey.verification = 1, 1, 0)) as approved,
+                SUM(IF(shipments_journey.verification = 0, 1, 0)) as pending
+            ')
+            ->first();
+        
+        $lost_shipments = $shipmentsCounts->total;
+        $total_of_approved_shipments = $shipmentsCounts->approved;
+        $total_of_pending_shipments = $shipmentsCounts->pending;
+    
+        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments]);
     }
 
     static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
@@ -117,6 +137,7 @@ class LostShipmentsController extends Controller
             if (session('role_id') != 1) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
+            
 
             if(session('role_id') != 1){
                 $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id',Auth::id());
@@ -129,6 +150,20 @@ class LostShipmentsController extends Controller
                             $shipments = $shipments->whereNotIn('shipments.user_id', $lost_shipments_shippers_id);
                     }
                 }
+            }
+
+            if ($request->get('search_total_lost_shipments') === "1") {
+                $shipments->where('shipments.shipper_status_id', 18);
+            }
+
+            if ($request->get('search_total_lost_approved_shipments') === "2") {
+                $shipments->where('shipments.shipper_status_id',18)->where('lssc.approval_count', '>=', 1)
+                ->where('lssc.cleared', 1);
+            }
+
+            if ($request->get('search_total_lost_pending_shipments') === "3") {
+                $shipments->where('shipments.shipper_status_id',18)->where('lssc.approval_count', '>=', 0)
+                ->where('lssc.cleared', 0);
             }
 
             return Datatables::of($shipments)
@@ -187,6 +222,14 @@ class LostShipmentsController extends Controller
                 ->addColumn('permission',function ($shipment){
                     if (in_array(944, session('permissions'))){
                         return 944;
+                    }
+                })
+                ->addColumn('lost_confirmation_status', function($shipment){
+
+                    if($shipment->approval >= 1 && $shipment->cleared === 1){
+                        return 'Approved';
+                    }else if($shipment->approval >= 0 && $shipment->cleared === 0){
+                        return 'Pending';
                     }
                 })
                 ->filterColumn('u.name', function ($query, $keyword) {

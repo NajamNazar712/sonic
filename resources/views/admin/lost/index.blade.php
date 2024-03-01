@@ -12,6 +12,75 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                @if (session('role_id') == 1 || in_array(944, session('permissions')))
+                    <input type="hidden" name="search_total_lost_shipments" id="search_total_lost_shipments">
+                    <input type="hidden" name="search_total_lost_approved_shipments" id="search_total_lost_approved_shipments">
+                    <input type="hidden" name="search_total_lost_pending_shipments" id="search_total_lost_pending_shipments">
+
+                    <div class="row justify-content-center" >
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_shipments">
+                                                    {{ $lost_shipments }}
+                                                </h3>
+                                                <span>Total Lost Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="search_total_approved_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_approved_shipments">
+                                                    {{ $total_of_approved_shipments }}
+                                                </h3>
+                                                <span>Total Lost Approved Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_total_pending_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_pending_shipments">
+                                                    {{ $total_of_pending_shipments }}
+                                                </h3>
+                                                <span>Total Lost Pending Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                @endif
+           
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -33,6 +102,7 @@
                         <th class="border-primary border-darken-1">Reference</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Lost confirmation status</th>
                         <th class="border-primary border-darken-1">Marked By</th>
                     </tr>
                     </thead>
@@ -132,6 +202,23 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <style>
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+
+    </style>
 @endsection
 
 @section('js')
@@ -546,7 +633,19 @@
                     processing: data_table_loader
                 },
             serverSide: true,
-            ajax: '{{ route('admin.delivery.lost.list') }}',
+            ajax: {
+                url: '{{ route('admin.delivery.lost.list') }}',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: function(d) {    
+                    d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
+                    d.search_total_lost_approved_shipments = $('#search_total_lost_approved_shipments').val();
+                    d.search_total_lost_pending_shipments = $('#search_total_lost_pending_shipments').val();
+
+                }
+            },
             rowId: 'shId',
             order: [[15, 'desc']],
             columns: [
@@ -567,6 +666,7 @@
                 {data: 'reference', name: 'shipments_journey.reference_1_id', class: 'align-middle reference'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                {data: 'lost_confirmation_status', name: 'lost_confirmation_status', class: 'align-middle lost_confirmation_status'},
                 {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'}
             ],
             rowCallback: function(row, data, index) {
@@ -841,8 +941,29 @@
                     });
                 }
             })
-        })
+        });
 
+        $('#search_total_div').on('click', function() {
+            $('#search_total_lost_shipments').val(1);
+            $('#search_total_lost_approved_shipments').val('');
+            $('#search_total_lost_pending_shipments').val('');
+            table.draw();
+        });
+
+
+        $('#search_total_approved_div').on('click', function() {
+            $('#search_total_lost_shipments').val('');
+            $('#search_total_lost_approved_shipments').val(2);
+            $('#search_total_lost_pending_shipments').val('');
+            table.draw();
+        });
+
+        $('#search_total_pending_div').on('click', function() {
+            $('#search_total_lost_shipments').val('');
+            $('#search_total_lost_approved_shipments').val('');
+            $('#search_total_lost_pending_shipments').val(3);
+            table.draw();
+        });
     });
 
     </script>

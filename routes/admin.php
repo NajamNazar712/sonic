@@ -892,7 +892,7 @@ Route::prefix('admin')->name('admin.')->group(function(){
         //Lost Module Start
         Route::prefix('lost')->name('lost.')->group(function () {
             Route::get('', 'Admins\LostShipmentsController@lost_shipments_index')->name('index');
-            Route::get('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
+            Route::post('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
             Route::post('confirm/status', 'Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status.lost');
             Route::post('reattempt/status', 'Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status.lost');
             Route::post('approve/status', 'Admins\LostShipmentsController@shipment_approve_status')->name('approve.status.lost');
