@@ -69,6 +69,7 @@ class LastMileApp implements ShouldQueue
     {
         //via : 1=admin, 2=rider
         try {
+            
             if ($this->via == 1) {
                 $delivery_note = DeliveryNote::where('id', $this->delivery_note_id)->select('rider_id')->first();
                 $rider_id = $delivery_note->rider_id;
@@ -89,68 +90,77 @@ class LastMileApp implements ShouldQueue
             if($rider->exists()){
                             $rider = $rider->first();
     
-                $today = Carbon::today();
-    
-                $time = Carbon::parse($rider_delivery_date)->format('H:i:s');
+                $today = date('Y-m-d');
+                
+                $time = date('H:i:s',strtotime($rider_delivery_date));
+                
                 $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
                     ->join('zones as z', 'c.zone_id', 'z.id')
                     ->select('delivery_notes.created_at as created_at', 'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments', 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
                     ->where('delivery_notes.id', $this->delivery_note_id)
                     ->whereDate('delivery_notes.created_at', $today);
+                  
                if($delivery_note_data->exists()){
                     $delivery_note_data = $delivery_note_data->first();
                     
-                    $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$this->delivery_note_id)->whereDate('delivery_note_created_at', $today);
-                    $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->pluck('rwdnsum_id'))->where('rider_id',$rider_id)->whereDate('delivery_date', $today);
                     
-                    if($check_summary->exists() && $check_note_id_delivery->exists())
+                    $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$this->delivery_note_id)->whereDate('delivery_note_created_at', $today);
+                    if(!empty($check_note_id_delivery->latest()->first()->rwdnsum_id))
                     {
-                       $check_summary = $check_summary->first();
-                       $check_summary_delivery = $check_note_id_delivery->first();
-                       $rwdnsum_id = $check_summary->id; 
-                       $finishTime = Carbon::parse($check_summary->delivery_date);                    
-                       $totalDuration = $finishTime->diffInHours($time);
-                       $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereDate('created_at', $today);
-                       
-                       if(!$riderWiseShipmentNote->exists())
-                       {
-                           $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
-                           $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
-                           $new_delivery_note_shipment->rwdn_id = $check_summary_delivery->id;
-                           $new_delivery_note_shipment->shipment_id = $this->shipment_id;
-                           $new_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
-                           $new_delivery_note_shipment->updated_time = $time;
-                           $new_delivery_note_shipment->updated_via = $this->via;
-                           $new_delivery_note_shipment->save();
-                           self::countAdd($time,$check_summary);
-                           $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
-                           $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
-                           $check_summary->save();
-                           return true;
-                       }
-                       
-                       
-                       if($totalDuration <= 0){
-                            return true;   
-                       }else{
-                           $update_delivery_note_shipment = $riderWiseShipmentNote->first();
-                           $minusTime = $update_delivery_note_shipment->updated_time;
-                           $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
-                           $update_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
-                           $update_delivery_note_shipment->updated_time = $time;
-                           $update_delivery_note_shipment->updated_via = $this->via;
-                           $update_delivery_note_shipment->save();
-                           self::countSub($minusTime,$check_summary);
-                       }
-                       self::countAdd($time,$check_summary);
-                       return true;
+                        $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->first()->rwdnsum_id)->where('rider_id',$this->rider_id)->whereDate('delivery_date', $today);
+                        if($check_summary->exists() && $check_note_id_delivery->exists())
+                        {
+                        $check_summary = $check_summary->first();
+                        $check_summary_delivery = $check_note_id_delivery->first();
+                        $rwdnsum_id = $check_summary->id; 
+                        $current_time = Carbon::parse($check_summary->delivery_date);
+                        $finishTime = date('Y-m-d H:i:s');                    
+                        $totalDuration = $current_time->diffInHours($finishTime);
+                        $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$this->shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereDate('created_at', $today);
+                        
+                        if(!$riderWiseShipmentNote->exists())
+                        {
+                            $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
+                            $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
+                            $new_delivery_note_shipment->rwdn_id = $check_summary_delivery->id;
+                            $new_delivery_note_shipment->shipment_id = $this->shipment_id;
+                            $new_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
+                            $new_delivery_note_shipment->updated_time = $time;
+                            $new_delivery_note_shipment->updated_via = $this->via;
+                            $new_delivery_note_shipment->save();
+                            self::countAdd($time,$check_summary);
+                            $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
+                            $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
+                            $check_summary->save();
+                            return true;
+                        }
+                        
+                        
+                        if($totalDuration <= 0){
+                                return true;   
+                        }else{
+                            
+                            $update_delivery_note_shipment = $riderWiseShipmentNote->first();
+                            $minusTime = $update_delivery_note_shipment->updated_time;
+                            $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
+                            $update_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
+                            $update_delivery_note_shipment->updated_time = date('H:i:s');
+                            $update_delivery_note_shipment->updated_via = $this->via;
+                            $update_delivery_note_shipment->save();
+                            self::countSub($minusTime,$check_summary);
+                        }
+                        $time = date('H:i:s');
+                        self::countAdd($time,$check_summary);
+                        return true;
+                        }
                     }
+                    
+                    
                     else
                     {
-                       
                         $new_summary = new RiderWiseDeliveryNoteSummary();
-                        $new_summary->delivery_date = $rider_delivery_date ?? '00:00:00 00:00:00';
-                        $new_summary->rider_id = $rider_id;
+                        $new_summary->delivery_date = $rider_delivery_date ?? date('Y-m-d H:i:s');
+                        $new_summary->rider_id = $this->rider_id;
                         $new_summary->trax_id = $rider->trax_id ?? '';
                         $new_summary->rider_name = $rider->rider_name ?? '';
                         $new_summary->shipment_update_count = 1;
@@ -188,6 +198,7 @@ class LastMileApp implements ShouldQueue
             }
         }
         catch(Exception $exception) {
+            
             $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
             DeliveryNoteErrorLog::create([
                 'delivery_note_id' => $this->delivery_note_id,
