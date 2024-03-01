@@ -242,9 +242,9 @@
 		.note-modal .modal-header .modal-title {
 			display: none!important
 		}
-		.note-modal .modal-body .note-form-label {
+		/* .note-modal .modal-body .note-form-label {
 			display: none!important
-		}
+		} */
 	</style>
 
 @endsection
@@ -306,6 +306,10 @@
 					
 
             	});
+
+				$('.note-modal .modal-header').prepend("<h4>Insert Image</h4>");
+
+
 				$('#send_custom_email .shipper_status').select2({
 					width: '100%',
 					placeholder: 'Status*'
