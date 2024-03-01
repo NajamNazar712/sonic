@@ -244,6 +244,7 @@
 	<style>
 		.error {
 			border-color: red; /* Change border color to indicate error */
+			color: red;
 		}
 	</style>
 @endsection
@@ -385,8 +386,10 @@
 			});
 
 			var counter = 0;
-			$("#addrow").on("click", function () {
 
+			$("#addrow").on("click", function () {
+				var tableData = [];
+				var city_data = [];
 				var zone_id = {{ $zone_id }};
 				var zone_name = $('#zone_name').val();
 				var zone_city_enter_value = $("#zone_city_enter").val();
@@ -394,18 +397,43 @@
 				var zone_city_gst_enter_value = $("#zone_city_gst_enter").val();
 				console.log(zone_id,zone_city_enter_value,zone_city_enter_text,zone_city_gst_enter_value);
 				if (zone_city_enter_value === '' || zone_city_gst_enter_value === '') {
-					$("#zone_city_enter").addClass("error");
-					$("#zone_city_gst_enter").addClass("error");
+
+					// $("#zone_city_enter").addClass("error");
+					// $("#zone_city_gst_enter").addClass("error");
+
 					toastr.error('Select city and enter gst !', 'Error!', {
 						positionClass: 'toast-top-center',
 						containerId: 'toast-top-center'
 					});
 					return;
-				} else {
-					$("#zone_city_enter").removeClass("error");
-					$("#zone_city_gst_enter").removeClass("error");
+				}
+				else {
+					// $("#zone_city_enter").removeClass("error");
+					// $("#zone_city_gst_enter").removeClass("error");
 				}
 
+				$("table.order-list tbody tr").each(function () {
+					var row = {};
+					row.zone_name = $(this).find('input[name="zone_id[]"]').val();
+					row.zone_id = $(this).find('input[name="zone_id_hidden[]"]').val();
+					row.city_name = $(this).find('input[name="zone_city_id[]"]').val();
+					row.city_id = $(this).find('input[name="zone_city_id_hidden[]"]').val();
+					row.gst = $(this).find('input[name="zone_city_gst[]"]').val();
+
+					tableData.push(row);
+					city_data.push(row.city_id);
+				});
+
+				//now check duplicate entries
+				console.log('table:',tableData);
+				console.log('city table:',city_data);
+
+				if ($.inArray(zone_city_enter_value, city_data) !== -1) {
+					toastr.error('Data already exists !', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					return;
+				}
+
+				//now check duplicate entries end
 
 				var newRow = $("<tr>");
 				var cols = "";
