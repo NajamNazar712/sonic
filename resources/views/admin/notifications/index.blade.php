@@ -242,6 +242,9 @@
 		.note-modal .modal-header .modal-title {
 			display: none!important
 		}
+		.note-modal .modal-body .note-form-label {
+			display: none!important
+		}
 	</style>
 
 @endsection
