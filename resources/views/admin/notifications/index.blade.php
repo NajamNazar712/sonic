@@ -302,11 +302,7 @@
 							};
 							reader.readAsDataURL(files[0]);
 						},
-						onImageDialogShown: function() {
-							console.log("ok hai");
-							// Hide the "Insert Image" button in the image modal
-							$('.note-modal .modal-footer .note-image-btn').hide();
-						}
+						
 						
 					}
 					
