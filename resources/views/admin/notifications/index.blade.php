@@ -229,6 +229,8 @@
 			</div>
 		</div>
 	</div>
+
+
 @endsection
 
 @section('css')
@@ -262,8 +264,8 @@
 						['fontsize', ['fontsize']],
 						['color', ['forecolor', 'backcolor']],
 						['para', ['ul', 'ol', 'paragraph']],
-						['insert', ['picture']],
-						['view', ['fullscreen', 'codeview', 'help']],
+						['insert', ['picture']]
+						// ['view', ['fullscreen', 'codeview', 'help']],
 					],
 					
 
@@ -282,7 +284,9 @@
 							};
 							reader.readAsDataURL(files[0]);
 						}
+						
 					}
+					
 					
 
             	});
