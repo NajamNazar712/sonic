@@ -238,6 +238,12 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/summernote/summernote.css')}}">
 
+	<style>
+		.note-modal .modal-header .modal-title {
+			display: none!important
+		}
+	</style>
+
 @endsection
 
 @section('js')
@@ -254,6 +260,8 @@
 			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 
 				$('#send_custom_email .summernote').summernote({
+					dialogsInBody: true,
+					// dialogsFade: false,
 					 colors: [
 						['white', 'black', 'gray', 'red', 'green', 'blue', 'yellow', 'purple', 'cyan'],
 						['#c4b540', '#1dd381', '#ba1cd2', '#ff5733', '#33ff57', '#3344ff', '#ffff33', '#cc33ff', '#33ffff']
@@ -283,6 +291,11 @@
 								$('#body').summernote('insertImage', imageData);
 							};
 							reader.readAsDataURL(files[0]);
+						},
+						onImageDialogShown: function() {
+							console.log("ok hai");
+							// Hide the "Insert Image" button in the image modal
+							$('.note-modal .modal-footer .note-image-btn').hide();
 						}
 						
 					}
