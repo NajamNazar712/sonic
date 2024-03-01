@@ -7589,7 +7589,6 @@ class ReturnController extends Controller
             else if($unresponsive_shipments){
                 $unresponsive_invalid_shipments[] = $shipment_id;
                 $unresponsive_shipments_error = true;
-                // return response()->json(['status' => 0, 'message' => 'Status of shipment cannot update to unresponsive right now']);
             }
             else if($unassigned_shipment)
             {
@@ -7672,7 +7671,6 @@ class ReturnController extends Controller
                 }
                 else{
                     $unresponsive_invalid_shipments[] = $shipment_id;
-                    // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                 }
             }
             //create new row for both RvShipmentAssignAgent and RvShipmentAssignAgentDetails($this->rv_shipment_assign_agent_details) (this will be created only when admin is updaing call history)
@@ -7725,7 +7723,6 @@ class ReturnController extends Controller
 
         // When call history of all shipments are updated without any error
         else{
-            // return response()->json(['status' => 1, 'message' => ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $successfull_updated_shipments]);
             return response()->json(['status' => 1, 'message' => 'Call History Updated Successfully']);
         }
     }
