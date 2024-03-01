@@ -1729,7 +1729,7 @@ class AdminDashboardController extends Controller
             $rate_origin_hubs = RateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
-            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->first();
+            $sms_charge = User::where('id', $id)->select(['id','sms_charges_type_id','sms_charges','sms_charges_status'])->get();
 
         } else {
             $tomorrow = Carbon::parse($date)->addDay(1);
