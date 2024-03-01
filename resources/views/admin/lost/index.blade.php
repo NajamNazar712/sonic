@@ -477,9 +477,13 @@
                             if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                 id = parseInt(row.id());
                                 approval = row.data().approval;
+                                cleared = row.data().cleared;
+                                permission = row.data().permission;
+                                shipment_cleared = row.data().shipment_cleared;
+
                                 if (id) {
                                     var index = $.inArray(id, selected_rows);
-                                    if ((index === -1 && approval != 1) || confirm_reattempt === 1) {
+                                    if ((index === -1 && approval >= 1 && cleared == 0) || (confirm_reattempt === 1) || (permission == 944 && shipment_cleared == null)) {
                                         selected_rows.push(id);
                                         row.select();
                                         table.button('.reject').enable();
@@ -569,14 +573,12 @@
                 if (data.aging < 7) {
                     $('td:eq(0)', row).addClass('select-checkbox');
                 }
-                if (data.approval == 1 && data.permission === 944) {
+                if (data.approval >= 1 && data.permission === 944 && data.cleared != 0) {
                     $('td:eq(0)', row).removeClass('select-checkbox');
                 }
-
-                if (data.approval == 0 && data.permission != 944) {
+                if ((data.approval == 0 && data.permission != 944 || (data.approval >= 1 && data.permission != 944  && data.cleared == 0))|| (data.permission != 944 && data.shipment_cleared == null)) {
                     $('td:eq(0)', row).removeClass('select-checkbox');
                 }
-
                 var info = table.page.info();
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -674,7 +676,7 @@
             var rowData = table.row($(this).parents('tr')).data();
             var index = $.inArray(id, selected_rows);
 
-            if ((index === -1 && rowData.approval != 1 ||  confirm_reattempt === 1)) {
+            if ((index === -1 && rowData.approval != 1) ||  (index === -1 && confirm_reattempt === 1) || (index === -1 && rowData.approval >= 1 && rowData.cleared == 0)) {
                 selected_rows.push(id);
             }
             else {
