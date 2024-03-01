@@ -570,14 +570,14 @@
 
                                 if (id) {
                                     var index = $.inArray(id, selected_rows);
-                                    if ((index === -1 && approval >= 1 && cleared == 0) || (index === -1 && confirm_reattempt === 1) || (index === -1 && permission == 944 && shipment_cleared == null)) {
+                                    // if ((index === -1 && approval >= 1 && cleared != 0) || (index === -1 && confirm_reattempt === 1) || (permission == 944 && shipment_cleared == null)) {
                                         selected_rows.push(id);
                                         row.select();
                                         table.button('.reject').enable();
                                         table.button('.approve').enable();
                                         table.button('.re-attempt').enable();
                                         table.button('.confirm').enable();
-                                    }
+                                    // }
                                 }
                             }
                         });
