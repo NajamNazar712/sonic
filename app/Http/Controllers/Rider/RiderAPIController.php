@@ -21,7 +21,7 @@ use App\RiderWiseDeliveryNote;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\PickupNote;
 use App\Jobs\LastMileAppReport;
-use App\JObs\LastMileApp;
+use App\Jobs\LastMileApp;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RiderPickup;
