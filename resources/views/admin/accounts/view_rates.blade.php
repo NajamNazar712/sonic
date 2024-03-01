@@ -25,7 +25,72 @@
                         <form id="ratesAdditionForm" class="card-body card-dashboard" novalidate="novalidate">
                             @csrf
 
-                            <div id="headingCollapse61" class="card-header border-success">
+                            <div class="card-header border-success">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h3 class="display-inline card-title lead success">SMS Charges</h3>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="javascript:void(0);" class="pull-right" id="sms_main_switch"><input
+                                                    name="sms_main_switch" type="checkbox"
+                                                    class="switchery sms-main-switch" data-size="sm" {{ ((isset($sms_charges[0]['sms_charges']) && $sms_charges[0]->sms_charges_status == 1) ? 'checked' : '') }} disabled /></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="sms" class="border-success no-border-top card {{ ((isset($sms_charges[0]['sms_charges']) && $sms_charges[0]->sms_charges_status == 1) ? '' : 'hide') }} "
+                                 aria-expanded="true">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <!-- <div class="row">
+                                            <div class="col-12">
+                                                <h4>Do you want to charge SMS?</h4>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <p class="font-weight-bold">How do you charge with shipper?</p>
+                                            </div>
+                                        </div> -->
+                                        @foreach($sms_charges as $sms_charge)
+                                        <div class="row mt-2">
+                                            <div class="col-1">
+                                                <input type="hidden" id="sms_type" name="smsPostType" value="">
+                                                <fieldset class="radio-inline ml-1">
+                                                    <input type="radio" name="sms-radio_{{$sms_charge->id}}" class="icheck cradio" id="fixed-radio" rel="fixed" {{ ((isset($sms_charge->sms_charges_type_id) && $sms_charge->sms_charges_type_id == 1) ? 'checked' : '') }} disabled>
+                                                    <label for="fixed-sms">Fixed</label>
+                                                </fieldset>
+                                            </div>
+                                            <div class="col-2">
+                                                <fieldset class="radio-inline ml-2">
+                                                    <input type="radio" name="sms-radio_{{$sms_charge->id}}" class="icheck cradio" id="persms-radio" rel="persms" {{ ((isset($sms_charge->sms_charges_type_id) && $sms_charge->sms_charges_type_id == 2) ? 'checked' : '') }} disabled>
+                                                    <label for="per-sms">Per SMS</label>
+                                                </fieldset>
+
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                                <div class="col-md-3 text-center">
+                                                    <fieldset>
+                                                        <div class="input-group form-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">SMS Charges</span>
+                                                            </div>
+                                                            <input type="text" class="form-control"
+                                                                value="{{ (isset($sms_charge['sms_charges']) && $sms_charge->sms_charges != '')? $sms_charge->sms_charges : ''}}"
+                                                                name="sms_charges" disabled>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">PKR</span>
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="headingCollapse61" class="card-header border-success mt-1">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Rush</h3>
