@@ -1157,14 +1157,22 @@ trait RvTrait
                                 {
                                     RvShipmentAssignAgent::where('shipment_id', $shipment->id)
                                     ->where('rv_state_id', 3)
-                                    ->update(['rv_state_id'=> 1, 'agent_id'=>$agent_id, 'assigned_by' => 0]);
+                                    ->update(['rv_state_id'=> 1, 
+                                    'agent_id'=>$agent_id, 
+                                    'assigned_by' => 0]);
                                     
-                                    $shipment_assign_agent = $rv_shipment_assign_agent->latest()->first();
+                                    // $shipment_assign_agent = $rv_shipment_assign_agent->latest()->first();
+
+                                    $updated_row = RvShipmentAssignAgent::where('shipment_id', $shipment->id)
+                                    ->where('rv_state_id', 1)
+                                    ->where('agent_id', $agent_id)
+                                    ->where('assigned_by', 0)
+                                    ->first();
                                     
                                     
                                     $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
             
-                                    $data = ['rv_shipment_assign_agent_id' => $shipment_assign_agent->id, 'agent_id' => $agent_id,
+                                    $data = ['rv_shipment_assign_agent_id' => $updated_row->id, 'agent_id' => $agent_id,
                                             'shipments_journey_id' => $shipments_journey->id,
                                             'last_shipments_journey_id' => $shipments_journey->id,
                                             'shipment_id' => $shipment->id,
