@@ -1655,7 +1655,7 @@ function checkboxStatus() {
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'lead_id', name: 'lead_id', class:'align-middle lead_id'},
+                {data: 'lead_id_link', name: 'users.lead_id', class:'align-middle lead_id_link'},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
