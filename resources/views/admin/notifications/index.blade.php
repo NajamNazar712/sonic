@@ -242,6 +242,13 @@
 		.note-modal .modal-header .modal-title {
 			display: none!important
 		}
+		/* .note-modal .modal-body .form-group .note-group-image-url{
+			display: none!important
+		}
+		.note-modal .modal-footer
+		{
+			display: none!important
+		} */
 		/* .note-modal .modal-body .note-form-label {
 			display: none!important
 		} */
