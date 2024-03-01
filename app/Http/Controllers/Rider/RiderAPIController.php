@@ -8967,7 +8967,7 @@ class RiderAPIController extends Controller
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
 
-                $user_excluded_otp_shippers = $user_excluded_otp_shippers ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
+                $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 
                 $rider_id = $request->rider_id;
 
@@ -11688,7 +11688,7 @@ class RiderAPIController extends Controller
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
                 //$added_at = $request->added_at;
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->first();
                     if ($shipment_journey->shipper_status_id == 5) {
