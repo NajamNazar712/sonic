@@ -956,9 +956,11 @@ trait RvTrait
             
 
             $shipments = DB::connection($connection)->table('shipments')
+            //skipping unresponsive shipments submitted status on current day
             ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
                 $join->on('rvsaa.shipment_id', '=', 'shipments.id')
                      ->where('rvsaa.rv_assign_agent_status_id', 6)
+                     ->where('rvsaa.rv_state_id', 2)
                      ->whereDate('unresponsive_attempt_time', Carbon::today());
             })
             ->whereIn('shipments.user_id', $included_shippers)
@@ -1115,11 +1117,12 @@ trait RvTrait
             if (!empty($result)){
                 // $exploded_result = implode(',', $result);
                 $shipments = DB::connection($connection)->table('shipments')
+                //skipping unresponsive shipments submitted status on current day
                 ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
                     $join->on('rvsaa.shipment_id', '=', 'shipments.id')
-                         ->where('rvsaa.rv_assign_agent_status_id', 6)
-                         ->whereDate('unresponsive_attempt_time', Carbon::today());
-
+                        ->where('rvsaa.rv_assign_agent_status_id', 6)
+                        ->where('rvsaa.rv_state_id', 2)
+                        ->whereDate('unresponsive_attempt_time', Carbon::today());
                 })
                 ->whereIn('shipments.shipper_status_id', [12,66,52])
                 ->whereIn('shipments.user_id', $result)
