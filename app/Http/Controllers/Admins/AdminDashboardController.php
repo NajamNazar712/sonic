@@ -9019,7 +9019,7 @@ class AdminDashboardController extends Controller
                 }
 
             })
-            ->editColumn('lead_id', function($user) {
+            ->addColumn('lead_id_link', function($user) {
                 
                 if($user->lead_id)
                 {
@@ -14011,4 +14011,3 @@ class AdminDashboardController extends Controller
     }
     
 }
-
