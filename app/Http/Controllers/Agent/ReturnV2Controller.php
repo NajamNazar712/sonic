@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\RvAgentCallHistory;
 use Exception;
 use Carbon\Carbon;
 use App\RvShipmentAgent;
@@ -55,10 +56,11 @@ class ReturnV2Controller extends Controller
         $startOfDay = Carbon::today()->startOfDay();
         $endOfDay = Carbon::today()->endOfDay();        
         $user = Auth::user();
+        // $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
         $fake_status_remarks = RvFakeStatus::get();
         $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
         $agent_total_tickets = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
-        $unresponsive_count = RvShipmentAssignAgentDetails::join('rv_agent_call_histories as rach','rach.updated_by_id','rv_shipment_assign_agent_details.agent_id')->where('rv_shipment_assign_agent_details.agent_id', '=', Auth::id())->where('rv_shipment_assign_agent_details.updated_by_id', '=', Auth::id())->where('rv_shipment_assign_agent_details.rv_assign_agent_status_id', 6)->where('rach.updated_type_id', 2)->whereBetween('rv_shipment_assign_agent_details.created_at', [$startOfDay, $endOfDay])->count();
+        $unresponsive_count = RvAgentCallHistory::where('updated_by_id', '=', Auth::id())->whereIn('call_finding_id', [1,28,29,30,31,32])->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
         $reattempt_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
         $intercept_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->whereIn('rv_assign_agent_status_id', [3,4])->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
         $hold_count = RvShipmentAssignAgentDetails::where('agent_id', '=', Auth::id())->where('updated_by_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->whereBetween('created_at', [$startOfDay, $endOfDay])->count();
