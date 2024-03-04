@@ -7535,11 +7535,11 @@ class ReturnController extends Controller
             $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
             $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','>=', 2)->latest()->first();
             $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
-            $unassigned_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 6)->where('rv_state_id', 2)->latest()->first();
             
             if($exist_shipment){
-                if($unassigned_unresponsive_shipment){
+                if($unresponsive_shipments){
                     $unresponsive_invalid_shipments[] = $shipment_id;
+                    $unresponsive_shipments_error = true;
                 }
                 else if($assigned_shipment)
                 {
@@ -7714,10 +7714,7 @@ class ReturnController extends Controller
                         $unresponsive_invalid_shipments[] = $shipment_id;
                     }
                 }
-                else if($unresponsive_shipments){
-                    $unresponsive_invalid_shipments[] = $shipment_id;
-                    $unresponsive_shipments_error = true;
-                }
+                
             }
             else{
                 $add_call_status = new RvShipmentAssignAgent;
