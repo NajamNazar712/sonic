@@ -756,7 +756,7 @@ trait RvTrait
                 }
 
                 //if unresponsive count 3 & rv_state_id is 4 then shipment status will be auto return confirm
-                else if ($rv_shipment_assign_agent->unresponsive_count >= 3) {
+                else if ($rv_shipment_assign_agent->unresponsive_count > 2) {
                     
                    request()->request->add([
                         'shipment_id'=>$rv_shipment_assign_agent->shipment_id, 
