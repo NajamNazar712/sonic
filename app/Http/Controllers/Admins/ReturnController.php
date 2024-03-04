@@ -7647,6 +7647,7 @@ class ReturnController extends Controller
                 }
 
                 else if($completed_shipment){
+                    dd($request->all());
                     $completed_shipment->agent_id = Auth::id();
                     $completed_shipment->shipment_id = $shipment_id;
                     $completed_shipment->shipments_journey_id = $shipments_journey->id;
