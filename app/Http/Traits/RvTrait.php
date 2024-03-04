@@ -1413,6 +1413,7 @@ trait RvTrait
     }
 
     protected function data_rv_shipment_assign_agent_details($data){
+        dd($data);
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
         $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
