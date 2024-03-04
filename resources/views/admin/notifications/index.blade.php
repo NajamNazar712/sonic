@@ -232,6 +232,11 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style>
+	.linebreak{
+		line-break:anywhere
+	}
+	</style>
 @endsection
 
 @section('js')
@@ -505,7 +510,7 @@
 								valid_fields.push(field);
 							});
 							$.each(data.receiver, function(index, receiver) {
-								$('#edit .receivers').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + receiver + ']</span>');
+								$('#edit .receivers').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white linebreak">[' + receiver + ']</span>');
 
 								// valid_fields.push(field);
 							});
