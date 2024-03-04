@@ -1612,6 +1612,10 @@ trait RvTrait
                 //if shipment row in rv_shipment_assign_agent is not found it means that admin is updating the status itself
                 else{
                     $rv_shipment_assign_agent = new RvShipmentAssignAgent();
+                    $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+                    $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
+                    $rv_shipment_assign_agent->last_shipments_journey_id = $data['last_shipments_journey_id'];
+                    $rv_shipment_assign_agent->shipment_id = $data['shipment_id'];
                     $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
                     $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null;
                     $rv_shipment_assign_agent->rv_state_id = 4;
