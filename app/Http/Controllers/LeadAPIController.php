@@ -37,7 +37,8 @@ class LeadAPIController extends Controller
         // 'brand'               => ['required', 'max:255'],
         'company' => ['required', 'max:255'],
         // 'reference_id'        => ['required', 'integer', 'exists:lead_references,id'],
-        'expected_shipments' => ['required', 'integer']
+        'expected_shipments' => ['required', 'integer'],
+        'address' => ['required','max:200']
 
     ];
 
@@ -111,6 +112,7 @@ class LeadAPIController extends Controller
             $new_lead->reference_id = $reference_id;
             $new_lead->expected_shipments = $request->expected_shipments;
             $new_lead->status_id = 9;
+            $new_lead->address = $request->address;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
 
@@ -146,6 +148,7 @@ class LeadAPIController extends Controller
                     'contact_person' => $lead->contact_person,
                     'phone_number' => $lead->phone_number,
                     'email_address' => $lead->email_address,
+                    'address'=>$lead->address,
                     'brand' => $lead->brand,
                     'company' => $lead->company,
                     'service_name' => $lead->service->name,
