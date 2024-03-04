@@ -7536,7 +7536,6 @@ class ReturnController extends Controller
 
     public function update_call_status(Request $request)
     {
-        dd($request->all());
         $unresponsive_invalid_shipments = [];
         $successfull_updated_shipments = [];
         $shipment_ids = explode(',',$request->shipment_id);
@@ -7556,7 +7555,7 @@ class ReturnController extends Controller
             $unassigned_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 2)->latest()->first();
             $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 3)->where('unresponsive_count', 1)->latest()->first();
             $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-            $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','=>', 2)->latest()->first();
+            $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','>=', 2)->latest()->first();
             
             if($exist_shipment){
                 if($assigned_shipment)
