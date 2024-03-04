@@ -7544,7 +7544,7 @@ class ReturnController extends Controller
         foreach ($shipment_ids as $shipment_id) 
         {
             $shipment = Shipment::find($shipment_id);
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52, 66])->latest()->first();
             if (!$shipment) {
                 return response()->json(['status' => 0]);
             }
@@ -7555,7 +7555,7 @@ class ReturnController extends Controller
             $unassigned_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 2)->latest()->first();
             $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 3)->where('unresponsive_count', 1)->latest()->first();
             $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
-            $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','>', 1)->latest()->first();
+            $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','=>', 2)->latest()->first();
             
             if($exist_shipment){
                 if($assigned_shipment)
@@ -7643,7 +7643,6 @@ class ReturnController extends Controller
                     }
                     else{
                         $unresponsive_invalid_shipments[] = $shipment_id;
-                        // return response()->json(['status' => 0, 'message' => 'Status of shipment not updated to unresponsive']);
                     }
                 }
 
@@ -7669,7 +7668,7 @@ class ReturnController extends Controller
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
                     if($new_call_history){
-                        $completed_shipment->update(['rv_assign_agent_status_id' => 7, 'rv_state_id' => 2]); //when shipment is open and there is 1 unresposive count and shipment is updated to unresposnvie again it should be unassign and status should set to sar 
+                        $completed_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_state_id' => 4]);
                         $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $completed_shipment, $shipments_journey);
                         $successfull_updated_shipments[] = $shipment_id;
                     }
