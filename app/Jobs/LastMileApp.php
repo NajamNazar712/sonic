@@ -125,6 +125,7 @@ class LastMileApp implements ShouldQueue
                         
                         if(!$riderWiseShipmentNote->exists())
                         {
+                            self::countAdd($time,$check_summary);
                             $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                             $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
                             $new_delivery_note_shipment->rwdn_id = $check_summary_delivery->id;
@@ -133,7 +134,6 @@ class LastMileApp implements ShouldQueue
                             $new_delivery_note_shipment->updated_time = $time;
                             $new_delivery_note_shipment->updated_via = $this->via;
                             $new_delivery_note_shipment->save();
-                            self::countAdd($time,$check_summary);
                             $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                             $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                             $check_summary->save();
