@@ -1499,7 +1499,7 @@ trait RvTrait
 
             if($shipments_journey){
 
-                $shipment_exist = RvShipmentAgent::where('shipment_id',$data['shipment_id'])->first();
+                $shipment_exist = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->first();
                 if($shipment_exist)
                 {
                     $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->whereNotNull('rv_assign_agent_status_id')->first();
