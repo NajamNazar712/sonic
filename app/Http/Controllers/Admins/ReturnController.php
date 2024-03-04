@@ -7648,13 +7648,20 @@ class ReturnController extends Controller
                 }
 
                 else if($completed_shipment){
+                    $completed_shipment->agent_id = Auth::id();
+                    $completed_shipment->shipment_id = $shipment_id;
                     $completed_shipment->shipments_journey_id = $shipments_journey->id;
                     $completed_shipment->last_shipments_journey_id = $shipments_journey->id;
+                    $completed_shipment->rv_assign_agent_status_id = $request->call_finding_id;
                     $completed_shipment->rv_assign_agent_sub_status_id = $request->sub_status_call_finding_id;
-                    $completed_shipment->call_to_id = $request->call_to_id;
-                    $completed_shipment->updated_type_id = 1; //this status will always updated by admin
-                    $completed_shipment->remarks =  $request->remark; 
+                    $completed_shipment->rv_state_id = 1; //because unresponsive ($this->unresponsive) status only update of rv state id 1 or 3
+                    $completed_shipment->is_fake_status = 0;
+                    $completed_shipment->rv_fake_status_id = null;
+                    $completed_shipment->rv_shipment_agent_id = 0;
+                    $completed_shipment->updated_type_id = 1;
                     $completed_shipment->updated_by_id = Auth::id();
+                    $completed_shipment->remarks = $request->remark;
+                    $completed_shipment->call_to_id = $request->call_to_id;
                     $completed_shipment->save();
     
                     $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
