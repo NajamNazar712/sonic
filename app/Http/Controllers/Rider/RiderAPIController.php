@@ -8946,7 +8946,7 @@ class RiderAPIController extends Controller
             'replacement_image' => ['nullable', 'mimes:png,jpeg,jpg'],
             'dbf_otp_entered' => ['nullable', 'integer'],
         ];
-
+       
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -8966,7 +8966,7 @@ class RiderAPIController extends Controller
                 ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
-
+                
                 $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 
                 $rider_id = $request->rider_id;
@@ -9107,7 +9107,7 @@ class RiderAPIController extends Controller
                                         ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                     
                                         //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
-                                        dispatch(new LastMileApp(890,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2));
+                                        dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2));
 
                                         // LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
 
@@ -9225,6 +9225,7 @@ class RiderAPIController extends Controller
                         $message = 'Shipment is marked as delivered already';
                     }
                 }
+                
                 $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
                 if(count($delivered_shipment_ids) > 0){
                     $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
@@ -9247,7 +9248,6 @@ class RiderAPIController extends Controller
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             } catch (\Throwable $th) {
-
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
 

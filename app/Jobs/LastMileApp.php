@@ -66,7 +66,7 @@ class LastMileApp implements ShouldQueue
      * @return void
      */
     public function handle()
-    {
+    { 
         //via : 1=admin, 2=rider
         try {
             
@@ -91,23 +91,28 @@ class LastMileApp implements ShouldQueue
                             $rider = $rider->first();
     
                 $today = date('Y-m-d');
-                
+                $start = date('Y-m-d')." 00:00:00";
+                $end = date('Y-m-d')." 23:59:59";
+
                 $time = date('H:i:s',strtotime($rider_delivery_date));
                 
                 $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
                     ->join('zones as z', 'c.zone_id', 'z.id')
                     ->select('delivery_notes.created_at as created_at', 'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments', 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
                     ->where('delivery_notes.id', $this->delivery_note_id)
-                    ->whereDate('delivery_notes.created_at', $today);
-                  
-               if($delivery_note_data->exists()){
+                    ->whereBetween('delivery_notes.created_at', [date('Y-m-d')." 00:00:00",date('Y-m-d')." 23:59:59"]);
+                
+                 if($delivery_note_data->exists()){
                     $delivery_note_data = $delivery_note_data->first();
                     
                     
-                    $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$this->delivery_note_id)->whereDate('delivery_note_created_at', $today);
+                    $check_note_id_delivery = RiderWiseDeliveryNote::where('delivery_note_id',$this->delivery_note_id)->whereBetween('delivery_note_created_at', [date('Y-m-d')." 00:00:00",date('Y-m-d')." 23:59:59"]);
+                   
                     if(!empty($check_note_id_delivery->latest()->first()->rwdnsum_id))
                     {
-                        $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->first()->rwdnsum_id)->where('rider_id',$this->rider_id)->whereDate('delivery_date', $today);
+                        
+                        $check_summary = RiderWiseDeliveryNoteSummary::where('id',$check_note_id_delivery->latest()->first()->rwdnsum_id)->where('rider_id',$this->rider_id)->whereBetween('delivery_date', [date('Y-m-d')." 00:00:00",date('Y-m-d')." 23:59:59"]);
+                        
                         if($check_summary->exists() && $check_note_id_delivery->exists())
                         {
                         $check_summary = $check_summary->first();
@@ -116,7 +121,7 @@ class LastMileApp implements ShouldQueue
                         $current_time = Carbon::parse($check_summary->delivery_date);
                         $finishTime = date('Y-m-d H:i:s');                    
                         $totalDuration = $current_time->diffInHours($finishTime);
-                        $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$this->shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereDate('created_at', $today);
+                        $riderWiseShipmentNote = RiderWiseDeliveryNoteShipment::where('shipment_id',$this->shipment_id)->where('rwdnsum_id',$rwdnsum_id)->whereBetween('created_at', [date('Y-m-d')." 00:00:00",date('Y-m-d')." 23:59:59"]);
                         
                         if(!$riderWiseShipmentNote->exists())
                         {
