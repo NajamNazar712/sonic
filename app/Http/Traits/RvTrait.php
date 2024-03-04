@@ -1413,6 +1413,7 @@ trait RvTrait
     }
 
     protected function data_rv_shipment_assign_agent_details($data){
+        dd(1);
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
         $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
@@ -1549,18 +1550,10 @@ trait RvTrait
                                 'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'],
                                 'rv_assign_agent_sub_status_id' => isset($data['rv_assign_agent_sub_status_id']) ? $data['rv_assign_agent_sub_status_id'] : null,
                                 'rv_state_id' => 4,
-                                // 'is_fake_status' => 0,
-                                // 'rv_fake_status_id' => null,
-                                // 'rv_shipment_agent_id' => 0,
                                 'updated_type_id' => 1,
                                 'updated_by_id' => $data['updated_by_id'],
                                 'remarks' => isset($data['remarks']) ? $data['remarks'] : null,
                                 'call_to_id' => 1,
-                                // 'assigned_by' => 0,
-                                // 'unresponsive_count' => 0,
-                                // 'unresponsive_email_count' => 0,
-                                // 'unresponsive_attempt_time' => null,
-                                // 'assigned_to_type_id' => 0,
                             ]
                         );
                     

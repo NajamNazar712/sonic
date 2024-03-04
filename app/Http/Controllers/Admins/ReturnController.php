@@ -1016,28 +1016,6 @@ class ReturnController extends Controller
     public function unassign_agent(Request $request)
     {
         $this->rv_unassign_agents($request, null);
-
-        // **** OLD WORK *******
-        // $shipment_ids = $request->shipment_ids;
-
-        // if ($request->action == 'un-assign') {
-        //     foreach ($shipment_ids as $shipment) {
-        //         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->where('status', 1);
-        //         if ($return_assign_shipment->exists()) {
-        //             $return_assign_shipment = $return_assign_shipment->latest()->first();
-        //             $return_assign_shipment->status = 0;
-        //             $return_assign_shipment->save();
-
-
-        //             $return_assign_log = new ReturnAssignedShipmentLogs();
-        //             $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-        //             $return_assign_log->status = 4;
-        //             $return_assign_log->assigned_by = Auth::id();
-        //             $return_assign_log->save();
-        //         }
-        //     }
-        //     return ['status' => 1, 'success' => "Agent Unassigned successfully"];
-        // }
     }
 
     public function return_reattempt_status(Request $request)
