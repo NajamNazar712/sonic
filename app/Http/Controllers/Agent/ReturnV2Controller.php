@@ -362,13 +362,13 @@ class ReturnV2Controller extends Controller
     
                 // Check Employee Shift Time
                     try{
-                        // DB::beginTransaction();
+                        DB::beginTransaction();
                             //if agent already exists on same date update row
                         if ($assign_agent) 
                         {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
-                                // DB::rollBack();
+                                DB::rollBack();
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                             } 
                             else{
@@ -381,7 +381,7 @@ class ReturnV2Controller extends Controller
                                     // this function is updating rv_shipment_assign_agents table columns like increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
                                     $add_shipment_agent = $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
-                                        // DB::rollBack();
+                                        DB::rollBack();
                                         return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
                                     } 
                                     else {
@@ -390,10 +390,10 @@ class ReturnV2Controller extends Controller
                                         // //adding logs in rv_shipment_assign_agent_details table
                                         $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                         if($rv_shipment_assign_agent_details != true){
-                                            // DB::rollBack();
+                                            DB::rollBack();
                                             return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
                                         } 
-                                        // DB::commit();
+                                        DB::commit();
                                         return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                                     }
                                 }
@@ -404,7 +404,7 @@ class ReturnV2Controller extends Controller
                         else {
                             $update_shipment_status = $this->update_shipment_status($request); //updating status of shipment
                             if ($update_shipment_status['status'] == 0) {
-                                // DB::rollBack();
+                                DB::rollBack();
                                 return response()->json(['status' => 4, 'error' => $update_shipment_status['error']]);
                             } 
                             else {
@@ -417,16 +417,16 @@ class ReturnV2Controller extends Controller
                                     // this function is updating rv_shipment_assign_agents table columns like increment total_shipments, actual_productivity, already_updated, updated_type_id, rv_state_id
                                     $add_shipment_agent = $this->add_shipment_agent($request, $shipment_assign_agent);
                                     if($add_shipment_agent != true){
-                                        // DB::rollBack();
+                                        DB::rollBack();
                                         return response()->json(['status' => 3, 'errors' => 'Agent Not Updated']);
                                     } else {
                                         $rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
                                         if($rv_shipment_assign_agent_details != true){
-                                            // DB::rollBack();
+                                            DB::rollBack();
                                             return response()->json(['status' => 3, 'errors' => 'Shipment Details not updated']);
                                         } 
                                         else{
-                                            // DB::commit();
+                                            DB::commit();
                                             return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                                         }
                                     }
@@ -436,7 +436,7 @@ class ReturnV2Controller extends Controller
                     }
                     catch(\Throwable $th)
                     {
-                        // DB::rollBack();
+                        DB::rollBack();
                         return response()->json(['status' => 3, 'errors' => 'Something Went Wrong', 'info'=> $th->getMessage()]);
                     }
             }
