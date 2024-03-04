@@ -120,7 +120,7 @@ class LostShipmentsController extends Controller
                 ->leftJoin('lost_shipment_status_counts as lssc', 'lssc.shipment_id', '=', 'shipments.id')
 
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18);
                 // ->where(function ($sub_query) {
@@ -245,13 +245,13 @@ class LostShipmentsController extends Controller
                     ';
                 
                     if (session('role_id') == 1 || in_array(944, session('permissions'))) {
-                        // Approve Lost Shipment button
-                        $dropdown .= '<button type="button" class="dropdown-item approve" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Approve Lost Shipment</div></div></button>';
-                    
-                        // Reject Lost Shipment button
-                            // Only show the Reject button if the role_id is 1
+                        if($shipment->verification != 1){
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Approve Lost Shipment</div></div></button>';
+                        }
+
+                        if($shipment->verification == 0){
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1 reject">Reject Lost Shipment</div></div></button>';
-                        
+                        }
                     }
                     
                 
@@ -351,8 +351,6 @@ class LostShipmentsController extends Controller
     }
     public function shipment_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
-
-        dd($shipment_ids);
         foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
 
