@@ -7716,7 +7716,6 @@ class ReturnController extends Controller
                 }
             }
             else{
-                dd($request->all());
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
                 $add_call_status->shipment_id = $shipment_id;
@@ -7730,7 +7729,7 @@ class ReturnController extends Controller
                 $add_call_status->rv_shipment_agent_id = 0;
                 $add_call_status->updated_type_id = 1;
                 $add_call_status->updated_by_id = Auth::id();
-                $add_call_status->remarks = $request->remark;
+                $add_call_status->remarks = $request->remarks;
                 $add_call_status->call_to_id = $request->call_to_id;
                 $add_call_status->assigned_to_type_id = 0;
                 $add_call_status->assigned_by = 0;
