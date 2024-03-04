@@ -327,6 +327,7 @@
                         head.push('Reference');
                         head.push('Arrival Date');
                         head.push('Status Date');
+                        head.push('Lost Confirmation Status');
                         head.push('Marked By');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -348,6 +349,7 @@
                             row.push(values.reference);
                             row.push(values.arrival);
                             row.push(values.current_status_date);
+                            row.push(values.lost_confirmation_status);
                             row.push(values.marked_by);
 
                             body.push(row);
