@@ -16,7 +16,32 @@
                     <input type="hidden" name="search_total_lost_shipments" id="search_total_lost_shipments">
                     <input type="hidden" name="search_total_lost_approved_shipments" id="search_total_lost_approved_shipments">
                     <input type="hidden" name="search_total_lost_pending_shipments" id="search_total_lost_pending_shipments">
-
+                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o"></span>
+                                    </span>
+                                </div>
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o"></span>
+                                    </span>
+                                </div>
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" >
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </form>
+              
                     <div class="row justify-content-center" >
                         <div class="col-3">
                             <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
@@ -44,7 +69,7 @@
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                <i class="la la-check icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="total_of_approved_shipments">
@@ -64,7 +89,7 @@
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                <i class="la la-hourglass-3 icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="total_of_pending_shipments">
@@ -77,6 +102,27 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-3">
+
+                            <div class="card bg-gradient-directional-rejected_shipment pull-up cursor-pointer" id="total_shipment_rejection_count">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="rejection_shipments">
+                                                    {{ $total_of_rejected_shipments }}
+                                                </h3>
+                                                <span>Total Shipment Reject Count</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 @endif
@@ -104,6 +150,8 @@
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Lost confirmation status</th>
                         <th class="border-primary border-darken-1">Marked By</th>
+                        <th class="border-primary border-darken-1">Action</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -176,6 +224,9 @@
 
             </div>
         </div>
+
+    
+
     </div>
 
     <div class="modal fade" id="rejectModal" data-backdrop="static" role="dialog" aria-labelledby="rejectModal" aria-hidden="true">
@@ -195,6 +246,7 @@
             </div>
         </div>
     </div>
+    
 
 @endsection
 
@@ -202,6 +254,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         .bg-gradient-directional-in_transit {
             background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
@@ -218,6 +272,12 @@
             background-repeat: repeat-x;
         }
 
+        .bg-gradient-directional-rejected_shipment {
+            background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
+            background-repeat: repeat-x;
+        }
+
+
     </style>
 @endsection
 
@@ -227,6 +287,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -298,6 +361,8 @@
         } );
         var confirm_reattempt;
         var selected_rows = [];
+        var shipment_id;
+        var action_selected_shipment = [];
         @if (session('role_id') == 1 || count(array_intersect([128, 129], session('permissions'))) !== 0)
          confirm_reattempt = 1
         @endif
@@ -356,7 +421,7 @@
                                                     url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
                                                     method:'POST',
                                                     data:{
-                                                        'shipment_ids':selected_rows,
+                                                        'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
                                                         'reason':return_reason_select,
                                                         '_token':'{{ csrf_token() }}'
                                                     }
@@ -364,6 +429,7 @@
                                                     UnblockPagePermanently();
                                                     $('#ReturnConfirmReasonModal').modal('hide');
                                                     selected_rows = [];
+                                                    action_selected_shipment = [];
                                                     table.button('.reject').disable();
                                                     table.button('.approve').disable();
                                                     table.button('.re-attempt').disable();
@@ -430,7 +496,7 @@
                                                     url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
                                                     method:'POST',
                                                     data:{
-                                                        'shipment_ids':selected_rows,
+                                                        'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
                                                         'remarks':remarks,
                                                         '_token':'{{ csrf_token() }}'
                                                     }
@@ -438,6 +504,7 @@
                                                     UnblockPagePermanently();
                                                     $('#add_remarks_modal').modal('hide');
                                                     selected_rows = [];
+                                                    action_selected_shipment = [];
                                                     table.button('.reject').disable();
                                                     table.button('.approve').disable();
                                                     table.button('.re-attempt').disable();
@@ -493,7 +560,7 @@
                                             url: '{!! route('admin.delivery.lost.approve.status.lost') !!}',
                                             method: 'POST',
                                             data: {
-                                                'shipment_ids': selected_rows,
+                                                'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
                                                 '_token': '{{ csrf_token() }}',
                                                 'approve': '1',
                                             }
@@ -508,6 +575,8 @@
                                             if (data.status == 1) {
                                                 UnblockPagePermanently();
                                                 table.draw('false');
+                                                selected_rows = [];
+                                                action_selected_shipment = [];
                                                 toastr.success(data.success,
                                                     'Success!', {
                                                         positionClass: 'toast-bottom-center',
@@ -643,7 +712,8 @@
                     d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
                     d.search_total_lost_approved_shipments = $('#search_total_lost_approved_shipments').val();
                     d.search_total_lost_pending_shipments = $('#search_total_lost_pending_shipments').val();
-
+                    d.search_from = $('input[name="from_date_formatted"]').val();
+                    d.search_to = $('input[name="to_date_formatted"]').val();
                 }
             },
             rowId: 'shId',
@@ -667,7 +737,8 @@
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'lost_confirmation_status', name: 'lost_confirmation_status', class: 'align-middle lost_confirmation_status'},
-                {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'}
+                {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'},
+                {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
             ],
             rowCallback: function(row, data, index) {
                 if (data.aging < 7) {
@@ -769,9 +840,7 @@
                 this.api().table().columns.adjust();
             }
         });
-        var selectedRows = [];        
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-
             var id = parseInt($(this).parent('tr').attr('id'));
             var rowData = table.row($(this).parents('tr')).data();
             var index = $.inArray(id, selected_rows);
@@ -782,8 +851,7 @@
             else {
                 selected_rows.splice(index, 1);
             }
-        
-
+    
             if (selected_rows.length > 0) {
                 table.button('.reject').enable();
                 table.button('.approve').enable();
@@ -795,7 +863,6 @@
                 table.button('.approve').disable();
                 table.button('.re-attempt').disable();
                 table.button('.confirm').disable();
-
             }
         });
       
@@ -822,7 +889,7 @@
                     var return_reason_select = $('#return_reason_select').val();
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Return. Note that either of these actions will apply towards the destination',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -848,7 +915,7 @@
                                 url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
                                 method:'POST',
                                 data:{
-                                    'shipment_ids':selected_rows,
+                                    'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
                                     'reason':return_reason_select,
                                     '_token':'{{ csrf_token() }}'
                                 }
@@ -856,6 +923,7 @@
                                 UnblockPagePermanently();
                                 $('#ReturnConfirmReasonModal').modal('hide');
                                 selected_rows = [];
+                                action_selected_shipment = [];
                                 table.rows().deselect();
                                 table.button('.reject').disable();
                                 table.button('.approve').disable();
@@ -869,6 +937,8 @@
                 }
             });
 		});
+
+     
 
         $('#rejectModal .re-attempt').click(function() {
             $('#add_remarks_modal').modal('show');
@@ -891,7 +961,7 @@
                     var remarks = $('#add_remarks').val();
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to change shipment status to Re-Attempt!',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Reattempt. Note that either of these actions will apply towards the destination',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -917,7 +987,7 @@
                                 url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
                                 method: 'POST',
                                 data: {
-                                    'shipment_ids': selected_rows,
+                                    'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
                                     '_token': '{{ csrf_token() }}',
                                     'remarks': remarks,
                                 }
@@ -925,6 +995,7 @@
                                 UnblockPagePermanently();
                                 $('#add_remarks_modal').modal('hide');
                                 selected_rows = [];
+                                action_selected_shipment = [];
                                 // Assuming 'table' is defined somewhere and it's DataTable
                                 table.button('.reject').disable();
                                 table.button('.approve').disable();
@@ -962,6 +1033,145 @@
             $('#search_total_lost_shipments').val('');
             $('#search_total_lost_approved_shipments').val('');
             $('#search_total_lost_pending_shipments').val(3);
+            table.draw();
+        });
+
+  
+        $('#datatable tbody').on('click', '.reject', function() {
+            $('#rejectModal').modal('show');
+            shipment_id = $(this).attr('data-id');
+            action_selected_shipment.push(shipment_id); 
+            selected_rows = [];
+            action_selected_shipment = $.grep(action_selected_shipment, function(value) {
+                return value !== null && value !== undefined;
+            });
+
+        });
+
+        $('#datatable tbody').on('click', '.approve', function() {
+            shipment_id = $(this).attr('data-id')
+            action_selected_shipment.push(shipment_id);
+            selected_rows = []; 
+            action_selected_shipment = $.grep(action_selected_shipment, function(value) {
+                return value !== null && value !== undefined;
+            });
+            swal({  
+                title: 'Are You Sure?',
+                text: 'Select yes to approve!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    blockPagePermanently();
+            
+                    $.ajax({
+                        url: '{!! route('admin.delivery.lost.approve.status.lost') !!}',
+                        method: 'POST',
+                        data: {
+                            'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
+                            '_token': '{{ csrf_token() }}',
+                            'approve': '1',
+                        }
+                    }).done(function(data) {
+                        table.draw('false');
+                        if (data.status == 1) {
+                            UnblockPagePermanently();
+                            table.draw('false');
+                            selected_rows = [];
+                            action_selected_shipment = [];
+
+                            toastr.success(data.success,
+                                'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                        } else {
+                            UnblockPagePermanently();
+                            toastr.error(data.error,
+                                'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                        }
+
+                    });
+                }
+            });
+        });
+    
+        var today = new Date();
+        var max = '{{ Carbon\Carbon::now() }}';
+        var statusFilterFromDate, statusFilterToDate;
+
+        if (today.getDate() >= 20) {
+            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth(), 20);
+            statusFilterToDate = new Date(today.getFullYear(), today.getMonth() + 1, 20);
+        } else {
+            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth() - 1, 20);
+            statusFilterToDate = new Date(today.getFullYear(), today.getMonth(), 20);
+        }
+
+
+        var from_date = $('#from_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            min: statusFilterFromDate,
+            max: statusFilterToDate,
+            format: 'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            editable: false, 
+            onOpen: function() {
+                $('#from_date_root').css('top', '40px');
+            },
+            onClose: function() {
+                var toDateInstance = $('#to_date').pickadate('picker');
+                if (toDateInstance.get('select') < this.get('select')) {
+                    toDateInstance.set('select', this.get('select'));
+                }
+            }
+        });
+
+        var to_date = $('#to_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            max: max,
+            format: 'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            editable: false, 
+            onOpen: function() {
+                $('#to_date_root').css('top', '40px');
+            },
+            onClose: function() {
+                var fromDateInstance = $('#from_date').pickadate('picker');
+                if (fromDateInstance.get('select') > this.get('select')) {
+                    fromDateInstance.set('select', this.get('select'));
+                }
+            }
+        });
+
+        $('#search_filter_btn').on('click',function () {
             table.draw();
         });
     });

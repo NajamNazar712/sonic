@@ -71,8 +71,9 @@ class LostShipmentsController extends Controller
         $lost_shipments = $shipmentsCounts->total;
         $total_of_approved_shipments = $shipmentsCounts->approved;
         $total_of_pending_shipments = $shipmentsCounts->pending;
-    
-        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments]);
+        $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
+
+        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments]);
     }
 
     static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
@@ -153,18 +154,23 @@ class LostShipmentsController extends Controller
             }
 
             if ($request->get('search_total_lost_shipments') === "1") {
-                $shipments->where('shipments.shipper_status_id', 18);
+                $shipments;
             }
 
             if ($request->get('search_total_lost_approved_shipments') === "2") {
-                $shipments->where('shipments.shipper_status_id',18)->where('lssc.approval_count', '>=', 1)
-                ->where('lssc.cleared', 1);
+                $shipments->where('shipments_journey.verification', '=', 1);
             }
 
             if ($request->get('search_total_lost_pending_shipments') === "3") {
-                $shipments->where('shipments.shipper_status_id',18)->where('lssc.approval_count', '>=', 0)
-                ->where('lssc.cleared', 0);
+                $shipments->where('shipments_journey.verification', '=', 0);
             }
+
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $shipments->whereBetween('shipments.created_at',[$from, $to]);
+            }
+
 
             return Datatables::of($shipments)
                 ->editColumn('tracking_number_link', function ($shipments) {
@@ -225,13 +231,38 @@ class LostShipmentsController extends Controller
                     }
                 })
                 ->addColumn('lost_confirmation_status', function($shipment){
-
                     if($shipment->approval >= 1 && $shipment->cleared === 1){
                         return 'Approved';
                     }else if($shipment->approval >= 0 && $shipment->cleared === 0){
                         return 'Pending';
                     }
                 })
+                ->addColumn('action', function ($shipment) {
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm accounts">
+                    ';
+                
+                    if (session('role_id') == 1 || in_array(944, session('permissions'))) {
+                        // Approve Lost Shipment button
+                        $dropdown .= '<button type="button" class="dropdown-item approve" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Approve Lost Shipment</div></div></button>';
+                    
+                        // Reject Lost Shipment button
+                            // Only show the Reject button if the role_id is 1
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1 reject">Reject Lost Shipment</div></div></button>';
+                        
+                    }
+                    
+                
+                    $dropdown .= '
+                        </div>
+                    </div>
+                    ';
+                
+                    return $dropdown;
+                })
+            
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
                         $sub_query->where('shipments.booking_type_id', '!=', 4)
@@ -321,6 +352,7 @@ class LostShipmentsController extends Controller
     public function shipment_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
 
+        dd($shipment_ids);
         foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
 
@@ -732,7 +764,7 @@ class LostShipmentsController extends Controller
     }
 
     public function shipment_approve_status(Request $request){
-
+        
         foreach ($request->shipment_ids as $shipment_id) {
             ShipmentsJourneyController::add($shipment_id, 18, NULL, NULL, NULL, NULL, Auth::id(), NULL, NULL, $request->approve);
             $this->updateLostShipmentApproval($shipment_id, 'approval_count', 1);
