@@ -7553,9 +7553,10 @@ class ReturnController extends Controller
             $assigned_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 1)->where('assigned_to_type_id', 1)->where('agent_id', Auth::id())->latest()->first();
             $unresponsive_shipments = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 6)->where('rv_state_id', 2)->where('unresponsive_count', '>=', 1)->latest()->first();
             $unassigned_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 2)->latest()->first();
-            $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 3)->where('unresponsive_count', 1)->latest()->first();
+            $open_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->whereIn('rv_state_id', [3, 4])->where('unresponsive_count', 1)->latest()->first();
             $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
             $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_state_id', 4)->where('unresponsive_count','>=', 2)->latest()->first();
+            $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
             
             if($exist_shipment){
                 if($assigned_shipment)
@@ -7695,6 +7696,35 @@ class ReturnController extends Controller
                     if($new_call_history){
                         $sar_unresponsive_shipment->update(['rv_assign_agent_status_id' => 1, 'rv_assign_agent_sub_status_id' => null, 'rv_state_id' => 4]); //when shipment is open and shipper requested for reattempt call and admin update the status again to unresponsive it should be completed
                         $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $sar_unresponsive_shipment, $shipments_journey);
+                        $successfull_updated_shipments[] = $shipment_id;
+                    }
+                    else{
+                        $unresponsive_invalid_shipments[] = $shipment_id;
+                    }
+                }
+                else if($completed_shipment_first_unresponsive){
+                    $completed_shipment_first_unresponsive->agent_id = Auth::id();
+                    $completed_shipment_first_unresponsive->shipment_id = $shipment_id;
+                    $completed_shipment_first_unresponsive->shipments_journey_id = $shipments_journey->id;
+                    $completed_shipment_first_unresponsive->last_shipments_journey_id = $shipments_journey->id;
+                    $completed_shipment_first_unresponsive->rv_assign_agent_status_id = $request->call_finding_id;
+                    $completed_shipment_first_unresponsive->rv_assign_agent_sub_status_id = $request->sub_status_call_finding_id;
+                    $completed_shipment_first_unresponsive->is_fake_status = 0;
+                    $completed_shipment_first_unresponsive->rv_fake_status_id = null;
+                    $completed_shipment_first_unresponsive->rv_shipment_agent_id = 0;
+                    $completed_shipment_first_unresponsive->updated_type_id = 1;
+                    $completed_shipment_first_unresponsive->updated_by_id = Auth::id();
+                    $completed_shipment_first_unresponsive->remarks = $request->remark;
+                    $completed_shipment_first_unresponsive->call_to_id = $request->call_to_id;
+                    $completed_shipment_first_unresponsive->save();
+    
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    
+                    //adding new row in rv_agent_call_histories and updating unresposive count
+                    $new_call_history = $this->unresponsive($request);
+                    if($new_call_history){
+                        $completed_shipment_first_unresponsive->update(['rv_state_id' => 2]);
+                        $new_rv_shipment_assign_agent_details = $this->rv_shipment_assign_agent_details($request, $completed_shipment_first_unresponsive, $shipments_journey);
                         $successfull_updated_shipments[] = $shipment_id;
                     }
                     else{
