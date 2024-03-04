@@ -485,8 +485,16 @@ trait RvTrait
         $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
         
-        $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name') ?? null;
-        $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id ?? null;
+        $rv_sub_status = null;
+        $shipment_status_reason = null;
+
+        if ($request->rv_assign_agent_sub_status_id) {
+            $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
+
+            if ($rv_sub_status) {
+                $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->value('id');
+            }
+        }
         
         //these both could be null 
         $consignee_refused_reasons = $request->consignee_refused_reasons ?? null;
