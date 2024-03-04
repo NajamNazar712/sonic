@@ -73,7 +73,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="total_of_approved_shipments">
-                                                    {{ $total_of_approved_shipments }}
+                                                    {{ ($total_of_approved_shipments) == 0 ? '0' : $total_of_approved_shipments  }}
                                                 </h3>
                                                 <span>Total Lost Approved Shipments</span>
                                             </div>
@@ -93,7 +93,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="total_of_pending_shipments">
-                                                    {{ $total_of_pending_shipments }}
+                                                    {{ ($total_of_pending_shipments) == 0 ? '0' : $total_of_pending_shipments}}
                                                 </h3>
                                                 <span>Total Lost Pending Shipments</span>
                                             </div>
