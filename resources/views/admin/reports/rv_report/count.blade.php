@@ -25,7 +25,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                                                <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{ \Carbon\Carbon::now() }}">
                                                 {{-- <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}"> --}}
                                             </div>
                                         </div>
@@ -37,7 +37,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                                                <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{ \Carbon\Carbon::now() }}">
                                                 {{-- <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ \Carbon\Carbon::now() }}"> --}}
                                             </div>
                                         </div>
@@ -375,6 +375,11 @@
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#search_date_from_root').css('top','40px');
+                },
+                onSet: function(context) {
+
+                var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                to_date.pickadate('picker').set('select', new Date(old_date_formatted),{muted:true});
                 }
             });
 
