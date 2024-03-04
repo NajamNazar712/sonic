@@ -1413,8 +1413,7 @@ trait RvTrait
     }
 
     protected function data_rv_shipment_assign_agent_details($data){
-        dd($data);
-        $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
+        $rv_shipment_assign_agent_details = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $data['rv_shipment_assign_agent_id'];
         $rv_shipment_assign_agent_details->agent_id = $data['agent_id'];
         $rv_shipment_assign_agent_details->shipments_journey_id = $data['shipments_journey_id'];
@@ -1432,6 +1431,7 @@ trait RvTrait
         $rv_shipment_assign_agent_details->assigned_to_type_id  = $data['assigned_to_type_id'];
         $rv_shipment_assign_agent_details->assigned_by  = $data['assigned_by'];
         $rv_shipment_assign_agent_details->save();
+        dd('save', $rv_shipment_assign_agent_details);
     }
 
     // Heading: N/A
