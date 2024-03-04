@@ -7716,6 +7716,7 @@ class ReturnController extends Controller
                 }
             }
             else{
+                dd($request->all());
                 $add_call_status = new RvShipmentAssignAgent;
                 $add_call_status->agent_id = Auth::id();
                 $add_call_status->shipment_id = $shipment_id;
