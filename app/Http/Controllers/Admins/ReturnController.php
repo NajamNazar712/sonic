@@ -7536,6 +7536,7 @@ class ReturnController extends Controller
 
     public function update_call_status(Request $request)
     {
+        dd($request->all());
         $unresponsive_invalid_shipments = [];
         $successfull_updated_shipments = [];
         $shipment_ids = explode(',',$request->shipment_id);
@@ -7647,7 +7648,6 @@ class ReturnController extends Controller
                 }
 
                 else if($completed_shipment){
-                    dd($request->all());
                     $completed_shipment->agent_id = Auth::id();
                     $completed_shipment->shipment_id = $shipment_id;
                     $completed_shipment->shipments_journey_id = $shipments_journey->id;
