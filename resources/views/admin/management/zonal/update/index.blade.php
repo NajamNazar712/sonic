@@ -312,9 +312,9 @@
 				width: '100%',
 				placeholder: 'Select City*'
 			});
+
 			var toggleValue = false;
 			let cities_gst_count = {{$zone_cities_gst_count}};
-			console.log('city gst count :',cities_gst_count);
 
 			$('#add_cities').on('click', function () {
 				$('#city_wise_gst').modal('show');
@@ -322,8 +322,6 @@
 
 			if (cities_gst_count > 0)
 			{
-				console.log('greater zero');
-
 				$('#individual_city_gst').click();
 
 				var toggleValue = true;
@@ -331,18 +329,15 @@
 			}
 			else
 			{
-				console.log('less zero');
 				$('#individual_city_gst_bit').val("0");
 				// $('#individual_city_gst').prop('checked');
 			}
 
 			$('#individual_city_gst').change( function () {
-				console.log('clicked');
 				toggleValue = !toggleValue;
 				if(toggleValue)
 				{
 					$('#individual_city_gst_bit').val("1");
-					console.log('11',toggleValue);
 
 					$.ajax({
 						url: '{!! route('admin.management.zonal.update_zone_cities_gst') !!}',
@@ -364,7 +359,6 @@
 				else
 				{
 					$('#individual_city_gst_bit').val("0");
-					console.log('00',toggleValue);
 
 					$.ajax({
 						url: '{!! route('admin.management.zonal.update_zone_cities_gst') !!}',
@@ -395,21 +389,13 @@
 				var zone_city_enter_value = $("#zone_city_enter").val();
 				var zone_city_enter_text = $("#zone_city_enter option:selected").text();
 				var zone_city_gst_enter_value = $("#zone_city_gst_enter").val();
-				console.log(zone_id,zone_city_enter_value,zone_city_enter_text,zone_city_gst_enter_value);
+
 				if (zone_city_enter_value === '' || zone_city_gst_enter_value === '') {
-
-					// $("#zone_city_enter").addClass("error");
-					// $("#zone_city_gst_enter").addClass("error");
-
 					toastr.error('Select city and enter gst !', 'Error!', {
 						positionClass: 'toast-top-center',
 						containerId: 'toast-top-center'
 					});
 					return;
-				}
-				else {
-					// $("#zone_city_enter").removeClass("error");
-					// $("#zone_city_gst_enter").removeClass("error");
 				}
 
 				$("table.order-list tbody tr").each(function () {
@@ -425,14 +411,10 @@
 				});
 
 				//now check duplicate entries
-				console.log('table:',tableData);
-				console.log('city table:',city_data);
-
 				if ($.inArray(zone_city_enter_value, city_data) !== -1) {
 					toastr.error('Data already exists !', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 					return;
 				}
-
 				//now check duplicate entries end
 
 				var newRow = $("<tr>");
