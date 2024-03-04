@@ -7709,6 +7709,7 @@ class ReturnController extends Controller
                     $completed_shipment_first_unresponsive->last_shipments_journey_id = $shipments_journey->id;
                     $completed_shipment_first_unresponsive->rv_assign_agent_status_id = $request->call_finding_id;
                     $completed_shipment_first_unresponsive->rv_assign_agent_sub_status_id = $request->sub_status_call_finding_id;
+                    $completed_shipment_first_unresponsive->rv_state_id = 1; //because unresponsive ($this->unresponsive) status only update of rv state id 1 or 3
                     $completed_shipment_first_unresponsive->is_fake_status = 0;
                     $completed_shipment_first_unresponsive->rv_fake_status_id = null;
                     $completed_shipment_first_unresponsive->rv_shipment_agent_id = 0;
