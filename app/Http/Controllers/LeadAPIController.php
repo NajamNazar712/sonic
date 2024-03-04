@@ -31,7 +31,7 @@ class LeadAPIController extends Controller
         'email_address' => ['required', 'unique:leads,email_address', 'email'],
         'city_id' => ['required', 'integer', 'exists:cities,id'],
         'service_id' => ['required', 'integer', 'exists:service_list,id'],
-        'reference_person_id' => ['required', 'integer', 'exists:riders,id'],
+//        'reference_person_id' => ['required', 'integer', 'exists:riders,id'],
         'territory_id' => ['required', 'integer', 'exists:territories,id'],
         // 'territory_area_id'   => ['required', 'integer', 'exists:area_territories,id'],
         // 'brand'               => ['required', 'max:255'],
@@ -67,7 +67,7 @@ class LeadAPIController extends Controller
     public function store(Request $request)
     {
 
-
+        $rider_id = $request->rider_id;
         $validate = Validator::make($request->all(), $this->rules);
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -103,7 +103,7 @@ class LeadAPIController extends Controller
             $new_lead->requested_date = Carbon::now();
             $new_lead->sale_person_id = $sales_person_id;
             $new_lead->service_id = $request->service_id;
-            $new_lead->reference_person_id = $request->reference_person_id;
+            $new_lead->reference_person_id = $rider_id;
             $new_lead->territory_id = $request->territory_id;
             $new_lead->territory_area_id = $territory_area_id;
             $new_lead->brand = $request->company;
