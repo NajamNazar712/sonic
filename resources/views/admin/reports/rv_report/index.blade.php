@@ -478,12 +478,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
-                                // row.push(values.area);
-                                // row.push(values.consignee_name);
-                                // row.push(values.number);
-                                // row.push(values.address);
                                 row.push(values.cod_amount);
-                                // row.push(values.weight);
                                 row.push(values.shipping_mode);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
@@ -548,7 +543,6 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                // rowId: 'id',
                 order: [[13, 'desc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
@@ -557,12 +551,7 @@
                     {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
                     {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
                     {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    // {data: 'area', name: 'area', class: 'align-middle area',searchable: false},
-                    // {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable: false},
-                    // {data: 'number', name: 'number', class: 'align-middle number',searchable: false},
-                    // {data: 'address', name: 'address', class: 'align-middle address',searchable: false},
                     {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
-                    // {data: 'weight', name: 'weight', class: 'align-middle dweightesignation',searchable: false},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
@@ -631,7 +620,6 @@
                         $("#unresponsive_count").modal('show');
                     },
                     error: function(xhr, status, error) {
-                        // Handle errors here
                         console.error(xhr, status, error);
                     }
                 });
