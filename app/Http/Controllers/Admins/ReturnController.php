@@ -7627,7 +7627,6 @@ class ReturnController extends Controller
             else if($open_unresponsive_shipment){
                 $open_unresponsive_shipment->shipments_journey_id = $shipments_journey->id;
                 $open_unresponsive_shipment->last_shipments_journey_id = $shipments_journey->id;
-                // $open_unresponsive_shipment->rv_assign_agent_status_id = $request->call_finding_id; //unresponsive
                 $open_unresponsive_shipment->rv_assign_agent_sub_status_id = $request->sub_status_call_finding_id;
                 $open_unresponsive_shipment->call_to_id = $request->call_to_id;
                 $open_unresponsive_shipment->updated_type_id = 1; //this status will always updated by admin
@@ -7635,7 +7634,6 @@ class ReturnController extends Controller
                 $open_unresponsive_shipment->updated_by_id = Auth::id();
                 $open_unresponsive_shipment->save();
 
-                
                 $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
                 
                 //adding new row in rv_agent_call_histories and updating unresposive count

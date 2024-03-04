@@ -713,6 +713,7 @@ trait RvTrait
     // Description: 
     protected function unresponsive(Request $request)
     {
+        dd($request->all());
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
