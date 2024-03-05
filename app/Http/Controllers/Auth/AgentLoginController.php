@@ -9,6 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\EmployeeShift;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\Employee;
@@ -142,7 +143,8 @@ class AgentLoginController extends Controller
     public function logout(Request $request)
     {
         if (Auth::guard('agent')) {
-
+            $admin = Admin::find(Auth::guard('agent')->id());
+            EmployeeAttendance::where('employee_id',$admin->employee_id)->update(['clock_out'=>date('H:i:s')]);
             Auth::guard('agent')->logout();
 
             $request->session()->invalidate();
