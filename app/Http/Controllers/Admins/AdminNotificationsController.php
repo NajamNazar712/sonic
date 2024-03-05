@@ -330,12 +330,12 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 27) {
-            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+            $details['receiver'] = ['Shipper,Shipper Billing Person','Role-CC-(Sales Person,Regional Manager)'];
 
             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
         }
         else if ($id == 28) {
-            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+            $details['receiver'] = ['Shipper,Shipper Billing Person','Role-CC-(Sales Person,Regional Manager)'];
 
             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
         }
@@ -353,12 +353,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 32) {
             $details['receiver'] = ['ShipperNotificationEmail/Shipper'];
 
-            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+            $details['receiver'] = ['Shipper,Shipper Billing Person','Role-CC-(Sales Person,Regional Manager)'];
 
             $details['fields'] = ['nsa', 'tracking_number'];
         }
         else if ($id == 33) {
-            $details['receiver'] = ['ShipperNotificationEmail/Shipper','CC-(Department Head,Senior Officer,Officer)'];
+            $details['receiver'] = ['ShipperNotificationEmail/Shipper','Role-CC-(Department Head,Senior Officer,Officer)'];
 
             $details['fields'] = ['tracking_number','destination','nsa_osa_estimated_charges','remarks'];
         }
@@ -402,12 +402,12 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['rider_name', 'rider_phone_number'];
         }
         else if ($id == 43) {
-            $details['receiver'] = ['Pickup Request Email'];
+            $details['receiver'] = ['Pickup Address Email'];
 
             $details['fields'] = ['vendor', 'shipper_name', 'shipments_detail'];
         }
         else if ($id == 44) {
-            $details['receiver'] = ['Zonal Manager,Station Manager','CC-(Department Head,Regional Manager,Debriefing Officer,Network Manager Debriefing & Ops Excellence,)'];
+            $details['receiver'] = ['Zonal Manager,Station Manager','Role-CC-(Department Head,Regional Manager,Debriefing Officer,Network Manager Debriefing & Ops Excellence,)'];
 
             $details['fields'] = ['hub', 'date', 'link', 'preview'];
         }
@@ -438,18 +438,26 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 50) {
+            $details['receiver'] = ['Pickup Address Email'];
+
             $details['fields'] = ['status', 'contact_person', 'rider', 'rider_phone', 'vendor', 'shipper_name'];
         }
         else if ($id == 51) {
+            $details['receiver'] = ['Pickup Address Phone Number'];
+
             $details['fields'] = ['status', 'contact_person', 'rider', 'rider_phone', 'vendor', 'shipper_name'];
         }
 		else if ($id == 52) {
             $details['fields'] = ['contact_person', 'company_name', 'rider_name', 'rider_phone_number', 'order_id', 'tracking_number'];
         }
 		else if ($id == 53) {
+            $details['receiver'] = ['Role-(Station Manager)','Role-CC-(Zonal Manager)'];
+
             $details['fields'] = ['hub', 'date', 'preview','link'];
         }
 		else if ($id == 54) {
+            $details['receiver'] = ['Role-(Zonal Manager)','Role-CC-(Regional Manager)'];
+
             $details['fields'] = ['zone', 'date', 'preview','link'];
         }
 		else if ($id == 55) {
