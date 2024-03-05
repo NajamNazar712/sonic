@@ -56,7 +56,7 @@ class LeadAPIController extends Controller
             $leads = $leads->get();
             return response()->json(['status' => 0, 'leads' => $leads]);
         }
-        return response()->json(['status' => 1, 'message' => 'Leads not found']);
+        return response()->json(['status' => 1, 'error' => 'Leads not found']);
     }
 
     /**
@@ -122,11 +122,10 @@ class LeadAPIController extends Controller
                 {
                     NotificationsController::send(204, $new_lead);
                 }
+            return response()->json(['status' => 0,'success' => 'Lead added successfully']);
 
-            return response()->json(['status' => 0, 'success' => 'Lead added successfully']);
         } catch (\Exception $e) {
-
-            return $e->getMessage();
+            return response()->json(['status' => 1,'error' => 'Something went wrong!']);
         }
     }
 
@@ -171,7 +170,7 @@ class LeadAPIController extends Controller
 
                 ];
                 array_push($leads,$lead);
-                return response()->json(['status' => 1, 'lead' => $leads]);
+                return response()->json(['status' => 0, 'lead' => $leads]);
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
@@ -252,7 +251,7 @@ class LeadAPIController extends Controller
                 $territories = $territories->get();
                 return response()->json(['status' => 0, 'territories' => $territories]);
             } else {
-                return response()->json(['status' => 1, 'message' => 'Territories not found']);
+                return response()->json(['status' => 1, 'error' => 'Territories not found']);
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
@@ -268,7 +267,7 @@ class LeadAPIController extends Controller
                 $territory_areas = $territory_areas->get();
                 return response()->json(['status' => 0, 'territory_areas' => $territory_areas]);
             } else {
-                return response()->json(['status' => 1, 'message' => 'Territory Areas not found']);
+                return response()->json(['status' => 1, 'error' => 'Territory Areas not found']);
             }
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
