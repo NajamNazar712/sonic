@@ -330,10 +330,14 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 27) {
-             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
+            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+
+            $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
         }
         else if ($id == 28) {
-             $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
+            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+
+            $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
         }
         else if ($id == 29) {
             $details['fields'] = ['pin_code'];
@@ -342,27 +346,45 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['poc','receiving_of_pickup','company_name','tracking_number','order_id','destination','service_type','amount','quantity','product_type','description','estimated_weight'];
         }
 		else if($id == 31){
+            $details['receiver'] = ['Admin/complaints@trax.pk'];
+
             $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details','status'];
         }
         else if ($id == 32) {
-             $details['fields'] = ['nsa', 'tracking_number'];
+            $details['receiver'] = ['ShipperNotificationEmail/Shipper'];
+
+            $details['receiver'] = ['Shipper,Shipper Billing Person','CC-(Sales Person,Regional Manager)'];
+
+            $details['fields'] = ['nsa', 'tracking_number'];
         }
         else if ($id == 33) {
-             $details['fields'] = ['tracking_number','destination','nsa_osa_estimated_charges','remarks'];
+            $details['receiver'] = ['ShipperNotificationEmail/Shipper','CC-(Department Head,Senior Officer,Officer)'];
+
+            $details['fields'] = ['tracking_number','destination','nsa_osa_estimated_charges','remarks'];
         }
         else if ($id == 34) {
-             $details['fields'] = ['user_id', 'updated_at', 'tagged_sales_person'];
+            $details['receiver'] = ['Role-(Department Head)'];
+
+            $details['fields'] = ['user_id', 'updated_at', 'tagged_sales_person'];
         }
         else if ($id == 35) {
+             $details['receiver'] = ['Consignee Phone Number'];
+
              $details['fields'] = ['consignee_name', 'shipper_name', 'tracking_number', 'receiver_name','status_date','order_id'];
         }
         else if ($id == 36 || $id == 37) {
+             $details['receiver'] = ['Shipper'];
+
              $details['fields'] = ['account_id', 'company_name_b', 'company_name_a', 'trax_logo'];
         }
 		else if ($id == 38){
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['shipper_name','button','trax_logo','link'];
         }
         else if ($id == 39) {
+            $details['receiver'] = ['ShipperNotificationEmail/Shipper'];
+
             $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at','shipments_count','return_notes_id','return_detail'];
         }else if ($id == 40) {
             $details['fields'] = ['rider_name','delivery_note_id','password'];
