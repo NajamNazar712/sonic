@@ -223,6 +223,7 @@
             </div>
         </div>
     </div>
+    <div class="loader"></div>
 @endsection
 
 @section('css')
@@ -421,6 +422,9 @@
                                 search_date_to: search_date_to
                             },
                             dataType: 'json',
+                            beforeSend:function(){
+                                $(".loader").append(data_table_loader);
+                            },
                             success: function(response) {
                                 var reason_validation_required = response.reason_validation_required;
                                 if (reason_validation_required > 0) {
@@ -467,6 +471,9 @@
                             },
                             error: function(xhr, status, error) {
                                 console.error(xhr, status, error);
+                            },
+                            complete:function(){
+                                $(".loader").empty();
                             }
                         });
                     }
