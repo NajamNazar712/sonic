@@ -52,10 +52,6 @@ class Shipment extends Model
 	    return $this->hasMany('App\Http\Models\ShipmentsJourney')->orderBy('id', 'DESC');
     }
 
-	public function latest_shipment_journey(){
-	    return $this->hasOne('App\Http\Models\ShipmentsJourney')->orderBy('id', 'DESC')->orderBy('updated_at','desc');
-    }
-
     public function shipment_payment_journey(){
         if($this->shipment_type == 2) {
             return $this->hasMany('App\Http\Models\RetailShipmentsPaymentJourney')->orderBy('id', 'DESC');

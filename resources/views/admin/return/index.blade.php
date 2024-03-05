@@ -49,129 +49,127 @@
                 <input type="hidden" name="number_of_oldest_shipments_value_div" id="number_of_oldest_shipments_value_div">
 
                 <div class="row justify-content-center" >
-
-                    {{-- Cards --}}
-                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
-
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_of_shipments">
-                                                    0
-                                                </h3>
-                                                <span>Total Of Shipments</span>
-                                            </div>
+                   <div class="col-3">
+                       <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                           <div class="card-content">
+                               <div class="card-body">
+                                   <div class="media d-flex">
+                                       <div class="align-self-center">
+                                           <i class="icon-clock text-white font-large-2 float-left"></i>
+                                       </div>
+                                       <div class="media-body text-white text-right">
+                                           <h3 class="text-white" id="total_of_shipments">
+                                               0
+                                           </h3>
+                                           <span>Total Of Shipments</span>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="col-3" id="search_rvr_div">
+                        <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-grid text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
+                                            </h3>
+                                            <span>Reason Validation Required</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-3" id="search_rvr_div">
-                            <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-grid text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
-                                                </h3>
-                                                <span>Reason Validation Required</span>
-                                            </div>
+
+                    <div class="col-3">
+                        <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-flag text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
+                                            </h3>
+                                            <span>Shipper Advised Requested </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div> 
 
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="search_sar_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-flag text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
-                                                </h3>
-                                                <span>Shipper Advised Requested </span>
-                                            </div>
+
+
+                   <div class="col-3">
+                        <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="la la-calculator text-white font-large-2 float-left"></i>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> 
-
-                        <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_unresponsive_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="unresponsive_count">
-                                                    0
-                                                </h3>
-                                                <span>Unresponsive Count</span>
-                                            </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="unresponsive_count">
+                                                0
+                                            </h3>
+                                            <span>Unresponsive Count</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="number_of_pending_tickets"></span> / <span id="number_of_pending_ticket_percentage"></span>%
-                                                </h3>
-                                                <span>Pending Tickets</span>
-                                            </div>
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="number_of_pending_tickets_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-clock text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="number_of_pending_tickets"></span> / <span id="number_of_pending_ticket_percentage"></span>%
+                                            </h3>
+                                            <span>Pending Tickets</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-3" >
-                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-check text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="number_of_inprocess_tickets"></span> / <span id="number_of_inprocess_tickets_percentage"></span>%
-                                                </h3>
-                                                <span>No. of Inprocess Ticket</span>
-                                            </div>
+                    <div class="col-3" >
+                        <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="number_of_inprocess_tickets_div">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">
+                                                <span id="number_of_inprocess_tickets"></span> / <span id="number_of_inprocess_tickets_percentage"></span>%
+                                            </h3>
+                                            <span>No. of Inprocess Ticket</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
                         <div class="col-3" >
                             <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer" id="number_of_available_agents_div">
@@ -213,7 +211,7 @@
                             </div>
                         </div>
 
-                        {{-- <div class="col-3" >
+                        <div class="col-3" >
                             <div class="card bg-gradient-directional-delivered pull-up cursor-pointer">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -231,7 +229,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div> --}}
+                        </div>
 
                         <div class="col-3" >
                             <div class="card bg-gradient-directional-oldest_shipment pull-up cursor-pointer" id="number_of_oldest_shipments_div">
@@ -252,8 +250,7 @@
                                 </div>
                             </div>
                         </div>
-                    
-                @endif
+
                     
                     <div class="col justify-content-end mb-3">
                         <div class="card">
@@ -365,7 +362,6 @@
                     </table>
 
                 </div>
-
             </div>
         </div>
         <div class="modal fade" id="excel_upload_modal" data-backdrop="static" role="dialog"
@@ -1032,6 +1028,10 @@
                 }
             @endphp
             $(document).ready(function() {
+
+               
+
+                
 
                 // update_AssignAgentModal function
                 $('#AssignAgentModal').on('shown.bs.modal', function() {
@@ -3485,8 +3485,6 @@
                     $('#return_confirmation_pending_filter').val(0);
                 });
 
-                @if (session('role_id') == 1 || in_array(943, session('permissions')))
-
                 function fetchData() {
                 $.ajax({
                         url: '{!! route('admin.return.data') !!}',
@@ -3511,9 +3509,9 @@
                             var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
                             $('#average_aging').text(content);
 
-                            //var average_response_time = parseFloat(data.stats.average_response_time);
-                            //var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
-                            //$('#average_response_time').text(average_response_time_content);
+                            var average_response_time = parseFloat(data.stats.average_response_time);
+                            var average_response_time_content = average_response_time > 24 ? (Math.round(average_response_time / 60 * 100) / 100) + ' days' : Math.round(average_response_time * 100) / 100 + ' hrs';
+                            $('#average_response_time').text(average_response_time_content);
 
                             $('#oldest_shipments').text(data.stats.oldest_shipments);
                        }
@@ -3521,8 +3519,6 @@
                 }
 
                 fetchData();
-
-                @endif
                 
             });
         </script>
