@@ -2267,7 +2267,7 @@ function checkboxStatus() {
                                     '</tr>';
                                 html += '<tr>' +
                                     '<td><strong>IBAN</strong></td>' +
-                                    '<td>' + data.info.iban + '</td>' +
+                                    '<td>' + data.info.duplicated_ibans + '</td>' +
                                     '<td>' + (data.info.shared_iban ?
                                         generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
                                     '</tr>';
