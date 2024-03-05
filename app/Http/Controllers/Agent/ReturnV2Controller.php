@@ -188,6 +188,7 @@ class ReturnV2Controller extends Controller
                             $shipment = $assigned_shipment->shipment_id;
                         }
                         if ($shipment) {
+                            dd($shipment);
                             $shipment = Shipment::find($shipment->id);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
