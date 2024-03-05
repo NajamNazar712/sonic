@@ -520,7 +520,7 @@ class ReturnController extends Controller
                     // $latest_shipment = RvShipmentAssignAgentDetails::where('shipment_id', $shipment->shId)->latest()->first();
                     $latest_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment->shId)->latest()->first();
                     if(isset($latest_shipment)){
-                        $agent_name = Admin::where('id', $latest_shipment->agent_id)->first()->name;
+                        $agent_name = Admin::where('id', $latest_shipment->agent_id)->first()->name ?? '-';
                         return $agent_name;
                     }else{
                         return '-';
@@ -536,7 +536,7 @@ class ReturnController extends Controller
             
             ->editColumn('last_agent_name', function ($shipment) {
                 if(isset($shipment->last_agent_name)){
-                    $agent_name = Admin::where('id', $shipment->last_agent_name)->first()->name;
+                    $agent_name = Admin::where('id', $shipment->last_agent_name)->first()->name ?? '-';
                     return $agent_name;
                 }else{
                     return '-';
