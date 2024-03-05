@@ -8925,10 +8925,6 @@ class AdminDashboardController extends Controller
     //     return response()->json(['status' => 1, 'info' => $data]);
     // }
 
-
-
-
-
     public function duplicate_info(Request $request)
     {
         $shipper_id = $request->shipper_id;
@@ -9026,165 +9022,6 @@ class AdminDashboardController extends Controller
         return response()->json(['status' => 1, 'info' => $data]);
     }
     
-    
-
-
-
-    // public function duplicate_info(Request $request)
-    // {
-    //     $shipper_id = $request->shipper_id;
-
-    //     $duplicate = DuplicateUser::where('user_id', $shipper_id)->first();
-    //     $user = User::where('id', $shipper_id)->first();
-
-    //     // Check if $duplicate and $user are not null
-    //     if (!$duplicate) {
-    //         $duplicate = (object) [
-    //             'phone' => null,
-    //             'cnic' => null,
-    //             'name' => null,
-    //             'iban' => null
-    //         ];
-    //     }
-
-    //     if (!$user) {
-    //         $user = (object) [
-    //             'ntn_no' => null,
-    //             'email' => null
-    //         ];
-    //     }
-
-    //     // Set null values to empty strings
-    //     $duplicate->phone = $duplicate->phone ?? '';
-    //     $duplicate->cnic = $duplicate->cnic ?? '';
-    //     $duplicate->name = $duplicate->name ?? '';
-    //     $duplicate->iban = $duplicate->iban ?? '';
-    //     $user->ntn_no = $user->ntn_no ?? '';
-    //     $user->email = $user->email ?? '';
-
-    //     // Get user IDs with same phone number
-    //     $similarUsersPhone = User::where('phone', $duplicate->phone)
-    //         ->where('id', '!=', $shipper_id)
-    //         ->pluck('id')
-    //         ->toArray();
-
-    //     // Get user IDs with same CNIC
-    //     $similarUsersCnic = User::where('cnic', $duplicate->cnic)
-    //         ->where('id', '!=', $shipper_id)
-    //         ->pluck('id')
-    //         ->toArray();
-
-    //     // Get user IDs with same name
-    //     $similarUsersName = User::where('name', $duplicate->name)
-    //         ->where('id', '!=', $shipper_id)
-    //         ->pluck('id')
-    //         ->toArray();
-
-    //     // Get user IDs with same IBAN
-    //     $similarUsersIban = UserBankInfo::where('iban', $duplicate->iban)
-    //         ->where('user_id', '!=', $shipper_id)
-    //         ->pluck('user_id')
-    //         ->toArray();
-
-    //     // Get user IDs with same NTN
-    //     $similarUsersNtn = [];
-    //     if ($user->ntn_no) {
-    //         $similarUsersNtn = User::where('ntn_no', $user->ntn_no)
-    //             ->where('id', '!=', $shipper_id)
-    //             ->pluck('id')
-    //             ->toArray();
-    //     }
-
-    //     // Get user IDs with same Email
-    //     $similarUsersEmail = User::where('email', $user->email)
-    //         ->where('id', '!=', $shipper_id)
-    //         ->groupBy('email') // Group by email to find duplicates
-    //         ->havingRaw('COUNT(email) > 1') // Only select emails that have duplicates
-    //         ->pluck('email')
-    //         ->toArray();
-
-    //     // Include dynamic user's data for comparison
-    //     $dynamicSharedData = [];
-
-    //     // Eager load all users except the current shipper_id
-    //     $users = User::where('id', '!=', $shipper_id)
-    //         ->with('bank')
-    //         ->get();
-
-    //     foreach ($users as $dynamicUser) {
-    //         $dynamicDuplicate = $dynamicUser->duplicateUser;
-    //         $dynamicUserDetails = $dynamicUser;
-
-    //         if ($dynamicDuplicate && $dynamicUserDetails) {
-    //             // Get user IDs with same phone number for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_phone'] = User::where('phone', $dynamicDuplicate->phone)
-    //                 ->where('id', '!=', $dynamicUser->id)
-    //                 ->pluck('id')
-    //                 ->toArray();
-
-    //             // Get user IDs with same CNIC for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_cnic'] = User::where('cnic', $dynamicDuplicate->cnic)
-    //                 ->where('id', '!=', $dynamicUser->id)
-    //                 ->pluck('id')
-    //                 ->toArray();
-
-    //             // Get user IDs with same name for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_name'] = User::where('name', $dynamicDuplicate->name)
-    //                 ->where('id', '!=', $dynamicUser->id)
-    //                 ->pluck('id')
-    //                 ->toArray();
-
-    //             // Get user IDs with same IBAN for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_iban'] = UserBankInfo::where('iban', $dynamicDuplicate->iban)
-    //                 ->where('user_id', '!=', $dynamicUser->id)
-    //                 ->pluck('user_id')
-    //                 ->toArray();
-
-    //             // Get user IDs with same NTN for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_ntn_no'] = User::where('ntn_no', $dynamicUserDetails->ntn_no)
-    //                 ->where('id', '!=', $dynamicUser->id)
-    //                 ->pluck('id')
-    //                 ->toArray();
-
-    //             // Get user IDs with same Email for dynamic user
-    //             $dynamicSharedData[$dynamicUser->id]['shared_email'] = User::where('email', $dynamicUserDetails->email)
-    //                 ->where('id', '!=', $dynamicUser->id)
-    //                 ->groupBy('email') // Group by email to find duplicates
-    //                 ->havingRaw('COUNT(email) > 1') // Only select emails that have duplicates
-    //                 ->pluck('email')
-    //                 ->toArray();
-    //         }
-    //     }
-
-    //     // Prepare response data
-    //     $data = [
-    //         'phone' => $duplicate->phone,
-    //         'cnic' => $duplicate->cnic,
-    //         'name' => $duplicate->name,
-    //         'iban' => $duplicate->iban,
-    //         'ntn' => $user->ntn_no,
-    //         'email' => $user->email,
-    //         'shared_phone' => implode(', ', $similarUsersPhone),
-    //         'shared_cnic' => implode(', ', $similarUsersCnic),
-    //         'shared_name' => implode(', ', $similarUsersName),
-    //         'shared_iban' => implode(', ', $similarUsersIban),
-    //         'shared_ntn_no' => implode(', ', $similarUsersNtn),
-    //         'shared_email' => implode(', ', $similarUsersEmail),
-    //     ];
-
-    //     // Add dynamic user's shared data to response
-    //     foreach ($dynamicSharedData as $userId => $sharedData) {
-    //         $data['shared_phone_' . $userId] = implode(', ', $sharedData['shared_phone']);
-    //         $data['shared_cnic_' . $userId] = implode(', ', $sharedData['shared_cnic']);
-    //         $data['shared_name_' . $userId] = implode(', ', $sharedData['shared_name']);
-    //         $data['shared_iban_' . $userId] = implode(', ', $sharedData['shared_iban']);
-    //         $data['shared_ntn_no_' . $userId] = implode(', ', $sharedData['shared_ntn_no']);
-    //         $data['shared_email_' . $userId] = implode(', ', $sharedData['shared_email']);
-    //     }
-
-    //     return response()->json(['status' => 1, 'info' => $data]);
-    // }
-
     public function activeAccountListAjax(Request $request)
     {        
 
@@ -9204,12 +9041,6 @@ class AdminDashboardController extends Controller
             ->groupBy('email')
             ->havingRaw('COUNT(*) > 1')
             ->pluck('email')
-            ->toArray();
-
-        $usersWithSameIban = UserBankInfo::select('iban', DB::raw('COUNT(*) as count'))
-            ->groupBy('iban')
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('iban')
             ->toArray();
 
         $users = DB::connection('mysql')->table('users')->join('cities', 'users.city_id', '=', 'cities.id')
@@ -9246,8 +9077,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->leftjoin('user_bank_infos as ubi', 'ubi.user_id', '=', 'users.id')
-            ->select(['ubi.iban','users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type'])
+            ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9538,8 +9368,7 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }   
             })
-
-            ->addColumn('duplication', function ($users)  use ($request, $usersWithSameNtn, $duplicateEmailCount, $usersWithSameIban){
+            ->addColumn('duplication', function ($users)  use ($request, $usersWithSameNtn, $duplicateEmailCount){
                 
                 $count = 0;
 
@@ -9558,11 +9387,7 @@ class AdminDashboardController extends Controller
                     $count++;
                 }
 
-                // if ($users->duplicate_iban != null) {
-                //     $count++;
-                // }
-
-                if (!is_null($users->iban) && in_array($users->iban, $usersWithSameIban)) {
+                if ($users->duplicate_iban != null) {
                     $count++;
                 }
 
