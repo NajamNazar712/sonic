@@ -387,33 +387,54 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at','shipments_count','return_notes_id','return_detail'];
         }else if ($id == 40) {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['rider_name','delivery_note_id','password'];
         }
         else if ($id == 41) {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['request_id'];
         }
         else if ($id == 42) {
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['rider_name', 'rider_phone_number'];
         }
         else if ($id == 43) {
+            $details['receiver'] = ['Pickup Request Email'];
+
             $details['fields'] = ['vendor', 'shipper_name', 'shipments_detail'];
         }
         else if ($id == 44) {
+            $details['receiver'] = ['Zonal Manager,Station Manager','CC-(Department Head,Regional Manager,Debriefing Officer,Network Manager Debriefing & Ops Excellence,)'];
+
             $details['fields'] = ['hub', 'date', 'link', 'preview'];
         }
         else if ($id == 45) {
+            $details['receiver'] = ['Admin/uzair.anees@trax.pk','CC-(shahbaz.abbasi@trax.pk)'];
+
             $details['fields'] = ['zone', 'date', 'link', 'preview'];
         }
         else if ($id == 46) {
+            $details['receiver'] = ['uzair.anees@trax.pk','CC-(shahbaz.abbasi@trax.pk)'];
+
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 47) {
+            $details['receiver'] = ['abbas.ali@trax.pk,ali.cheema@trax.pk,tanveer.malik@trax.pk,waqas@trax.pk,khan.usama@trax.pk,noman.aziz@trax.pk,fawad.ahmed@trax.pk,nadir.qureshi@trax.pk,m.sohail@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk,asad.ahsan@trax.pk)'];
+
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 48) {
+            $details['receiver'] = ['uzair.anees@trax.pk','CC-(shahbaz.abbasi@trax.pk)'];
+
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 49) {
+            $details['receiver'] = ['mohsin.ali@trax.pk,waqas@trax.pk,khan.usama@trax.pk,noman.aziz@trax.pk,asad@trax.pk,fawad.ahmed@trax.pk,nadir.qureshi@trax.pk,m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
+
+
             $details['fields'] = ['date', 'link', 'preview'];
         }
         else if ($id == 50) {
