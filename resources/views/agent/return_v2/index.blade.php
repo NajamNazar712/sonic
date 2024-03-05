@@ -50,8 +50,7 @@
                                                     <tbody>
                                                         <tr>
                                                             <td class="text-center">
-                                                                {{-- <strong>{{ count($agent_total_tickets) }}</strong></td> --}}
-                                                                <strong>{{ $agent_total_tickets }}</strong></td>
+                                                                <strong>{{ count($agent_total_tickets) }}</strong></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
