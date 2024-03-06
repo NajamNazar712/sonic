@@ -417,8 +417,8 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
-            $shipment_status_for_bags = array(3,21,26,32,49);
-            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+            $shipment_status_for_bags = array(3,21,26,32,49); 
+            $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);  
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);
@@ -484,7 +484,7 @@ class LostShipmentsController extends Controller
     }
     public function add_lost_shipments(Request $request){
 
-        $passing_status_array = array(1,14,17,18,25,31,38);
+        $passing_status_array = array(1,14,17,18,25,31,38); 
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
@@ -595,7 +595,7 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
-        $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+        $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);        
         $names = [
             'tracking_number' => 'Tracking Number',
         ];
