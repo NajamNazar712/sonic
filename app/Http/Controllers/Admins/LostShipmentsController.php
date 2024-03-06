@@ -363,7 +363,7 @@ class LostShipmentsController extends Controller
                         $data['destination'] = $shipment->pickup_address->city->name;
                         $data['hub'] = $shipment->pickup_address->city->hub_city->name;
                         $data['amount'] = number_format($shipment->amount);
-                        $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+                        $data['remarks'] = '<input class="form-control form-control-sm remarks" id="remarks[' . $shipment->id. ']" name="remarks[' . $shipment->id. ']"  placeholder="Enter Remarks">';
                         $data['mode'] = $shipment->shipping_mode->mode;
                         $data['service_type'] = $shipment->booking_type->booking_type;
                         $data['action_button'] = '<div class="btn-group">
@@ -401,8 +401,7 @@ class LostShipmentsController extends Controller
         $formattedValues = [];
         foreach ($traxIdArray as $key => $values) {
             $formattedValues[$key] = implode(', ', array_column($values, 'value'));
-        }
-        
+        }        
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -652,10 +651,23 @@ class LostShipmentsController extends Controller
                         $data[$shipment->id]['hub'] = $shipment->pickup_address->city->hub_city->name;
                         $data[$shipment->id]['amount'] = number_format($shipment->amount);
                         $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
+                        $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+
                         $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
-                        $data[$shipment->id]['employee_trax_id'] = '<input class="form-control" id="' . $shipment->id . '" form-control-sm" value = "' . $employee->trax_id . '" name="employee_trax_id[' . $shipment->id . ']" readonly>';
-                        $data[$shipment->id]['employee_name'] = '<input class="form-control" id="employee_name[' . $shipment->id . ']"  form-control-sm" value = "' . $employee->name . '" name="employee_name[' . $employee->trax_id . ']" readonly>';
-                        $data[$shipment->id]['employee_type'] = '<input class="form-control id="' . $shipment->id . '" form-control-sm" value = "' . $employee->employee_type->name . '" name="employee_type[' . $shipment->id. ']" readonly>';
+                        $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
+                        $data[$shipment->id]['action_button'] = '<div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm accounts">
+                        <button type="button" class="dropdown-item add_lost_responsible" data-id="' . $shipment->id . '" data-toggle="modal">
+                        <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-minus-circle"></i></div>
+                                    <div class="col-9 offset-1">Add Lost Responsible</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ';
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
                         ShipmentScanningJourneyController::add($shipment->id ,11,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
