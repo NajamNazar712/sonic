@@ -216,8 +216,7 @@ label.error {
                                         table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(data.details.id);
-                                        validateRows(shipment_ids)
-                                        
+                                        validateRows(shipment_ids, change);                                        
                                         $('#lost_shipment_form button.add').prop('disabled', false);
 
                                         $('#update_lost_form_submit').prop('disabled', false);
@@ -317,7 +316,7 @@ label.error {
 
                                         shipment_ids.push(id);
                                         shipmentAdded = true;
-
+                                        validateRows(shipment_ids, change);                                        
                                         toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
                                     }
                                     else {
@@ -425,8 +424,10 @@ label.error {
 
         function validateRows(shipmentIds, change) {
             var emptyFields = []; 
+            
             $.each(shipmentIds, function(index, shipmentId) {
-                if ($.inArray(shipmentId, change[shipmentId]) == -1) {
+                shipmentId = shipmentId.toString();
+                if ($.inArray(shipmentId, Object.keys(change)) == -1) {
                     var field = $('[name="remarks[' + shipmentId + ']"]');
                     $('[name="remarks[' + shipmentId + ']"]').rules('add', {
                         required: true,
@@ -439,6 +440,7 @@ label.error {
                         emptyFields.push(shipmentId); 
                     }
                 } else {
+                    console.log(Object.keys(change).length);
                     // Remove validation rule if shipmentId is in change array
                     $('[name="remarks[' + shipmentId + ']"]').rules('remove', 'required');
                 }
@@ -452,7 +454,7 @@ label.error {
             var emptyFields = validateRows(shipment_ids, change);
             if (emptyFields.length > 0) {
                 var shipment_ids_string = emptyFields.join(',');
-                toastr.error('Either Remarks Or Responsible Will Be Required For These Shipments: ' + shipment_ids_string, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                toastr.error('Either Remarks Or Responsible Will Be Required For These Shipments: ' + shipment_ids_string, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
         });
 
@@ -468,6 +470,7 @@ label.error {
             if(shipment_ids.length == 0){
                 $('#update_lost_form button[type="submit"]').attr('disabled', 'disabled');
             }
+            
         });
         $('body').on('click', '.add_lost_responsible', function () {
             var shipment_id = $(this).attr('data-id');
@@ -516,7 +519,7 @@ label.error {
                         dom: '<"d-inline-block"l><"pull-right"B>tipr',
                         buttons: [{
                             title: 'Add Row',
-                            className: 'btn btn-primary mb-1',
+                            className: 'btn btn-primary mb-1 add_row',
                             text: '<i class="la la-plus"></i> Add Row',
                             action: function (e) {
                                 add_row(shipment_id);
@@ -552,17 +555,16 @@ label.error {
             var user_input = '<input class="form-control user-input" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
             var user_name = '<input class="form-control user-name" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
             var user_type = '<input class="form-control user-type" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
-
             if(rows_count === 1){
-                var remove = ''
+                var remove =''
             }else{
                 var remove = '<a href="javascript:void(0);" data-shipment_id="' + shipment_id + '" class="btn btn-icon btn-sm btn-danger remove_row ' + rows_count + '" data-trax_id=""><i class="la la-close"></i></a>';
             }
-            
+         
             addLostResponsible.row.add([0, user_input, user_name, user_type, remove]).node().id = rows_count;
             addLostResponsible.draw(true);
             selected_rows.push(rows_count);
-
+            
             $('.user-input[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').on('keypress', function(event) {
                 if (event.which === 13 || event.keyCode === 13) {
                     var inputValue = $(this).val();
@@ -624,18 +626,26 @@ label.error {
             var shipment_id_remove = $(this).attr('data-shipment_id');
             var trax_id = $(this).attr('data-trax_id');
 
-            console.log(trax_id);
 
             if (index !== -1) {
                 selected_rows.splice(index, 1);
             }
             addLostResponsible.row($(this).parents('tr')).remove().draw();
 
+            console.log(change[shipment_id_remove]);
+
             if (change[shipment_id_remove]) {
                 change[shipment_id_remove] = change[shipment_id_remove].filter(function(item) {
                     return item.value !== trax_id;
                 });
+
+                if (change[shipment_id_remove].length === 0) {
+                    change[shipment_id_remove] = [];
+                    delete change[shipment_id_remove];
+                }
             }
+
+            console.log(change);
         });     
     });
     </script>
