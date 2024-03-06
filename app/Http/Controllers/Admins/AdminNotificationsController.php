@@ -353,8 +353,6 @@ class AdminNotificationsController extends Controller
         else if ($id == 32) {
             $details['receiver'] = ['ShipperNotificationEmail/Shipper'];
 
-            $details['receiver'] = ['Shipper,Shipper Billing Person','Role-CC-(Sales Person,Regional Manager)'];
-
             $details['fields'] = ['nsa', 'tracking_number'];
         }
         else if ($id == 33) {
@@ -461,15 +459,23 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['zone', 'date', 'preview','link'];
         }
 		else if ($id == 55) {
+            $details['receiver'] = ['Role-(Department Head)'];
+
             $details['fields'] = ['date', 'preview','link'];
         }
         else if ($id == 56){
+            $details['receiver'] = ['Sales Person','CC-(fawad@outlook.com,waqar@outlook.com,talha.motiwala@trax.pk,shafay.tariq@trax.pk,wajiha.majeed@trax.pk)'];
+
             $details['fields'] = ['account_id', 'shipper_name','preview', 'sale_person'];
         }
 		else if ($id == 57){
+            $details['receiver'] = ['Shipper','CC-(Sales Head, Sales Person)'];
+
             $details['fields'] = ['preview'];
         }
         else if ($id == 58){
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipper_name'];
         }
         else if ($id == 59){
