@@ -63,15 +63,14 @@ trait LastMileAppReportTrait
                  {
                      $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
-                     $current_time = Carbon::parse($check_summary->delivery_date);
-                     $finishTime = date('Y-m-d H:i:s');                    
-                     $totalDuration = $current_time->diffInHours($finishTime);                        
-                     if($totalDuration <= 0){
-                        return true;  
-                     }else{
-                        self::countSub($time,$check_summary);
-
-                     }
+                    //  $current_time = Carbon::parse($check_summary->delivery_date);
+                    //  $finishTime = date('Y-m-d H:i:s');                    
+                    //  $totalDuration = $current_time->diffInHours($finishTime);                        
+                    //  if($totalDuration <= 0){
+                    //     return true;  
+                    //  }else{
+                    //     self::countSub($time,$check_summary);
+                    //  }
                      $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                      $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                      $check_summary->save();
