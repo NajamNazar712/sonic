@@ -13,7 +13,7 @@ class CreateLostShipmentStatusCountsTable extends Migration
      */
     public function up()
     {
-        Schema::create('lost_shipment_status_count', function (Blueprint $table) {
+        Schema::create('lost_shipment_status_counts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id')->index();
             $table->integer('approval_count')->default(0)->nullable();
