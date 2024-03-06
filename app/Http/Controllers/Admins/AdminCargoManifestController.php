@@ -5884,8 +5884,17 @@ class AdminCargoManifestController extends Controller
 
                         if ($bag_shipment->status == 0) {
                             if (in_array($shipment->shipper_status_id, $shipment_status_array)) {
-
-                                if ($shipment->consignee_city_id == $default_hub_id) {
+                                $check_city_id = City::where('id',$shipment->consignee_city_id)->select('hub_id');
+                                if($check_city_id->exists())
+                                {
+                                    $check_city_id = $check_city_id->first();
+                                    $selected_hub_id = $check_city_id->hub_id;
+                                }
+                                else
+                                {
+                                    $selected_hub_id = $shipment->consignee_city_id;
+                                }
+                                if ($selected_hub_id == $default_hub_id) {
                                     $bag_shipment->status = 1;
                                     $bag_shipment->save();
                                 }
@@ -5907,8 +5916,17 @@ class AdminCargoManifestController extends Controller
                                         $shipper_status_id = 15;
                                         $consignee_status_id = 15;
                                     } else {
-
-                                        if ($shipment->consignee_city_id == $default_hub_id) {
+                                        $check_city_id = City::where('id',$shipment->consignee_city_id)->select('hub_id');
+                                        if($check_city_id->exists())
+                                        {
+                                            $check_city_id = $check_city_id->first();
+                                            $selected_hub_id = $check_city_id->hub_id;
+                                        }
+                                        else
+                                        {
+                                            $selected_hub_id = $shipment->consignee_city_id;
+                                        }
+                                        if ($selected_hub_id == $default_hub_id) {
                                             $shipper_status_id = 4;
                                             $consignee_status_id = 4;
                                             array_push($shipment_ids_array, $shipment->tracking_number);
@@ -5989,7 +6007,17 @@ class AdminCargoManifestController extends Controller
                                 array_push($shipments_already_marked_received_array, $shipment->tracking_number);
                             }
                         } else {
-                            if ($shipment->consignee_city_id == $default_hub_id) {
+                            $check_city_id = City::where('id',$shipment->consignee_city_id)->select('hub_id');
+                            if($check_city_id->exists())
+                            {
+                                $check_city_id = $check_city_id->first();
+                                $selected_hub_id = $check_city_id->hub_id;
+                            }
+                            else
+                            {
+                                $selected_hub_id = $shipment->consignee_city_id;
+                            }
+                            if ($selected_hub_id == $default_hub_id) {
                                 $shipment->shipper_status_id = 4;
                                 $shipment->consignee_status_id = 4;
                                 $shipment->save();
@@ -6034,7 +6062,20 @@ class AdminCargoManifestController extends Controller
                             }
                         }
                     } else {
-                        if ($shipment->consignee_city_id == $default_hub_id) {
+
+                        $check_city_id = City::where('id',$shipment->consignee_city_id)->select('hub_id');
+                        if($check_city_id->exists())
+                        {
+                            $check_city_id = $check_city_id->first();
+                            $selected_hub_id = $check_city_id->hub_id;
+                        }
+                        else
+                        {
+                            $selected_hub_id = $shipment->consignee_city_id;
+                        }
+
+                        if ($selected_hub_id == $default_hub_id) {
+
                             $shipment->shipper_status_id = 4;
                             $shipment->consignee_status_id = 4;
                             $shipment->save();
@@ -6045,6 +6086,7 @@ class AdminCargoManifestController extends Controller
                         }
                         else
                         {
+
                             $shipment->shipper_status_id = 68;
                             $shipment->consignee_status_id = 68;
                             $shipment->save();
@@ -6114,7 +6156,17 @@ class AdminCargoManifestController extends Controller
                             $shipment = Shipment::find($shipment_id);
                             $origin = $shipment->pickup_address->city->id;
 
-                            if ($origin == $default_hub_id) // wisevarsa -> pickupaddress id
+                            $check_city_id = City::where('id',$origin)->select('hub_id');
+                            if($check_city_id->exists())
+                            {
+                                $check_city_id = $check_city_id->first();
+                                $selected_hub_id = $check_city_id->hub_id;
+                            }
+                            else
+                            {
+                                $selected_hub_id = $origin;
+                            }
+                            if ($selected_hub_id == $default_hub_id) // wisevarsa -> pickupaddress id
                             {
                                 $shipment->shipper_status_id = 22;
                                 $shipment->consignee_status_id = 22;
@@ -6185,8 +6237,20 @@ class AdminCargoManifestController extends Controller
                                         }
                                     }
                                 } else {
+
+                                    $check_city_id = City::where('id',$shipment->pickup_address->city->id)->select('hub_id');
+                                    if($check_city_id->exists())
+                                    {
+                                        $check_city_id = $check_city_id->first();
+                                        $selected_hub_id = $check_city_id->hub_id;
+                                    }
+                                    else
+                                    {
+                                        $selected_hub_id = $shipment->pickup_address->city->id;
+                                    }
+
                                     if ($shipment->booking_type_id == 1) {
-                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6195,7 +6259,7 @@ class AdminCargoManifestController extends Controller
                                         }
                                     } else if ($shipment->booking_type_id == 2) {
                                         if ($shipment->shipper_status_id == 21) {
-                                            if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                            if ($selected_hub_id == Auth::user()->default_hub_id) {
                                                 $shipper_status_id = 22;
                                                 $consignee_status_id = 22;
                                             } else {
@@ -6203,7 +6267,7 @@ class AdminCargoManifestController extends Controller
                                                 $consignee_status_id = 11;
                                             }
                                         } else {
-                                            if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                            if ($selected_hub_id == Auth::user()->default_hub_id) {
                                                 $shipper_status_id = 27;
                                                 $consignee_status_id = 27;
                                             } else {
@@ -6212,7 +6276,7 @@ class AdminCargoManifestController extends Controller
                                             }
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
-                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
                                             $shipper_status_id = 33;
                                             $consignee_status_id = 33;
                                         } else {
@@ -6220,7 +6284,7 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 11;
                                         }
                                     } else if ($shipment->booking_type_id == 4) {
-                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6228,7 +6292,7 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 11;
                                         }
                                     } else {
-                                        if ($shipment->pickup_address->city->id == Auth::user()->default_hub_id) {
+                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6260,7 +6324,18 @@ class AdminCargoManifestController extends Controller
                     } else {
                         $shipment = Shipment::find($shipment_id);
                         $origin = $shipment->pickup_address->city->id;
-                        if ($origin == $default_hub_id) // wisevarsa -> pickupaddress id
+
+                        $check_city_id = City::where('id',$origin)->select('hub_id');
+                        if($check_city_id->exists())
+                        {
+                            $check_city_id = $check_city_id->first();
+                            $selected_hub_id = $check_city_id->hub_id;
+                        }
+                        else
+                        {
+                            $selected_hub_id = $origin;
+                        }
+                        if ($selected_hub_id == $default_hub_id) // wisevarsa -> pickupaddress id
                         {
                             $shipment->shipper_status_id = 22;
                             $shipment->consignee_status_id = 22;
@@ -6371,7 +6446,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-        //remove misrouted shipment ids from $short_received_shipments_array
+            //remove misrouted shipment ids from $short_received_shipments_array
             $exclude_from_short_received = Shipment::whereIn('tracking_number',$short_received_shipments_array)->whereIn('shipper_status_id',[11,68])->pluck('tracking_number')->toArray();
             $short_received_shipments_array = array_diff($short_received_shipments_array, $exclude_from_short_received);
             //remove misrouted shipment ids from $short_received_shipments_array end
