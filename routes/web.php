@@ -428,6 +428,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/terms/success', 'Auth\RegisterController@register_success')->name('terms.success');
 
     //user profile
+    Route::post('addShipperId', 'Shippers\ShipperDashboardController@storeShipperId')->name('add.shipper.id');
     Route::get('/profile', 'Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile', 'Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('update/profile/password', 'Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');

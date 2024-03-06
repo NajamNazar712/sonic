@@ -121,6 +121,7 @@ use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -1098,6 +1099,51 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
+
+
+
+
+
+
+
+    public function storeShipperId(Request $request)
+    {
+        $userId = $request->input('userId');
+        $shipperStoreId = $request->input('shipper_store_id');
+        $userShippingInfos = UserShippingInfo::where('user_id', $userId)->get(['id', 'status']);
+
+        // Get all shipping info IDs for the given user
+        $userShippingInfoIds = $userShippingInfos->pluck('id');
+
+        // Get the status of the given user
+        $status = $userShippingInfos->pluck('status');
+
+        // Loop through each ID and create a UserShippingInfoStoreAddress for it
+        foreach ($userShippingInfoIds as $userShippingInfoId) {
+            UserShippingInfoStoreAddress::create([
+                'user_id' => $userId,
+                'user_shipping_infos_id' => $userShippingInfoId,
+                'shipper_store_id' => $shipperStoreId,
+                'status' => '',
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function verifyPincode(Request $request)
     {
         if(isset($request->action) && $request->action == 'verify_pincode')
@@ -1182,6 +1228,11 @@ class ShipperDashboardController extends Controller
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
+            $add_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Store ID</div></button>';
+            
+            if(auth()->user()->id == 2234 || auth()->user()->id == 10364){
+                $dropdown .= $add_store_id_button;
+            }
             if ($pickup->default_address == 1) {
                 $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
