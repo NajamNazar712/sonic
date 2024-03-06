@@ -4102,7 +4102,7 @@ class DeliveryController extends Controller
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_details->shipper_status_id, $shipper_status_details->consignee_status_id, NULL, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             }
                                         }
-dd('die');
+
                                         if ($parcel->amount == 0) {
                                             $zero_cod_shipments[] = $parcel->id;
                                         }
