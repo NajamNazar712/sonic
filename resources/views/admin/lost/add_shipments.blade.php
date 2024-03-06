@@ -474,6 +474,7 @@ label.error {
             var shipment_id_remove = $(this).attr('data-shipment_id');
             var existing_table = $('#addLostResponsibleTable_' + shipment_id_remove).DataTable();
             existing_table.clear().draw();
+
             delete change[shipment_id_remove];
 
         });
@@ -521,13 +522,13 @@ label.error {
                             className: 'btn btn-primary mb-1 add_row',
                             text: '<i class="la la-plus"></i> Add Row',
                             action: function (e) {
-                                    add_row(shipment_id);
-                                    if(flag_new || addLostResponsible.length === 0){
-                                        addLostResponsible.button(0).disable();
-                                    }else{
-                                        addLostResponsible.button(0).enable();
-                                        flag_new = true;
-                                    }
+                                add_row(shipment_id);
+                                if(flag_new || addLostResponsible.length === 0){
+                                    addLostResponsible.button(0).disable();
+                                }else{
+                                    addLostResponsible.button(0).enable();
+                                    flag_new = true;
+                                }
                             }
                         }],
                         ordering: false,
@@ -588,9 +589,9 @@ label.error {
                             success: function(response) {
                                 if(response.status == 1){
                                     flag_new = true;
-                                    if(addLostResponsible.length === 0){
+                                    // if(addLostResponsible.length === 0){
                                         addLostResponsible.button(0).enable();
-                                    }
+                                    // }
                                     $('.user-name[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.name)
                                     $('.user-type[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.type)
                                   
@@ -637,9 +638,6 @@ label.error {
                 selected_rows.splice(index, 1);
             }
             addLostResponsible.row($(this).parents('tr')).remove().draw();
-
-            console.log(change[shipment_id_remove]);
-
             if (change[shipment_id_remove]) {
                 change[shipment_id_remove] = change[shipment_id_remove].filter(function(item) {
                     return item.value !== trax_id;
@@ -650,6 +648,12 @@ label.error {
                     delete change[shipment_id_remove];
                 }
             }
+            console.log(addLostResponsible.row().length);
+            // console.log(addLostResponsible.row().length === 0);
+            if(addLostResponsible.row().length === 0){
+                addLostResponsible.button(0).enable();
+            }
+
 
         });     
     });
