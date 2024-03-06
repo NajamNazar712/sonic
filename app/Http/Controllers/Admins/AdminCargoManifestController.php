@@ -5916,8 +5916,17 @@ class AdminCargoManifestController extends Controller
                                         $shipper_status_id = 15;
                                         $consignee_status_id = 15;
                                     } else {
-
-                                        if ($shipment->consignee_city_id == $default_hub_id) {
+                                        $check_city_id = City::where('id',$shipment->consignee_city_id)->select('hub_id');
+                                        if($check_city_id->exists())
+                                        {
+                                            $check_city_id = $check_city_id->first();
+                                            $selected_hub_id = $check_city_id->hub_id;
+                                        }
+                                        else
+                                        {
+                                            $selected_hub_id = $shipment->consignee_city_id;
+                                        }
+                                        if ($selected_hub_id == $default_hub_id) {
                                             $shipper_status_id = 4;
                                             $consignee_status_id = 4;
                                             array_push($shipment_ids_array, $shipment->tracking_number);
