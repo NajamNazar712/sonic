@@ -501,11 +501,15 @@ label.error {
                 '<th class="border-primary border-darken-1">Employee ID</th>' +
                 '<th class="border-primary border-darken-1">Employee Name</th>' +
                 '<th class="border-primary border-darken-1">Employee Type</th>' +
+                '<th class="border-primary border-darken-1">Employee Status</th>' +
                 '<th class="border-primary border-darken-1"></th>' +
                 '</tr>' +
                 '</thead>' +
                 '</table>' +              
                 '</form>' +
+                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                '<span aria-hidden="true">Close</span>' +
+                '</button>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -538,6 +542,7 @@ label.error {
                             { name: 'user', class: 'align-middle user form-group', width: '40%' },
                             { name: 'user_name', class: 'align-middle user_name form-group', width: '20%' },
                             { name: 'user_type', class: 'align-middle user_type form-group', width: '20%' },
+                            { name: 'user_status', class: 'align-middle user_type form-group', width: '20%' },
                             {name: 'action', class: 'align-middle action'},
                         ],
                         rowCallback: function (row, data, index) {
@@ -561,9 +566,11 @@ label.error {
             var user_input = '<input class="form-control user-input" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
             var user_name = '<input class="form-control user-name" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
             var user_type = '<input class="form-control user-type" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+            var user_status = '<input class="form-control user-status" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
+
             var remove = '<a href="javascript:void(0);" data-shipment_id="' + shipment_id + '" class="btn btn-icon btn-sm btn-danger remove_row ' + rows_count + '" data-trax_id=""><i class="la la-close"></i></a>';
         
-            addLostResponsible.row.add([0, user_input, user_name, user_type, remove]).node().id = rows_count;
+            addLostResponsible.row.add([0, user_input, user_name, user_type, user_status,remove]).node().id = rows_count;
             addLostResponsible.draw(true);
             selected_rows.push(rows_count);
 
@@ -577,7 +584,9 @@ label.error {
                             return item.value === inputValue;
                         });
                     }
-                    if (trax_index == -1 || trax_index === undefined) {
+
+                    console.log(trax_index);
+                    if (trax_index == -1 || trax_index === undefined || change.length === 0 ) {
                         $('.remove_row.' + rows_count).attr('data-trax_id', inputValue);
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_confirmation.get_employee_info_name_type') !!}',
@@ -589,12 +598,11 @@ label.error {
                             success: function(response) {
                                 if(response.status == 1){
                                     flag_new = true;
-                                    // if(addLostResponsible.length === 0){
-                                        addLostResponsible.button(0).enable();
-                                    // }
+                                    addLostResponsible.button(0).enable();
                                     $('.user-name[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.name)
                                     $('.user-type[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.type)
-                                  
+                                    $('.user-status[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').val(response.details.status)
+
                                     if (!change[shipment_id]) {
                                         change[shipment_id] = [];
                                     }
@@ -648,8 +656,8 @@ label.error {
                     delete change[shipment_id_remove];
                 }
             }
-            console.log(addLostResponsible.row().length);
-            // console.log(addLostResponsible.row().length === 0);
+
+            console.log(change);
             if(addLostResponsible.row().length === 0){
                 addLostResponsible.button(0).enable();
             }

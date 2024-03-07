@@ -5863,7 +5863,7 @@ class AdminHumanResourseController extends Controller
             $details['trax_id'] = $employee->trax_id;
             $details['name'] = $employee->name;
             $details['type'] = $employee->employee_type->name;
-            
+            $details['status'] = $employee->employee_status->name;
 
             return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
         }

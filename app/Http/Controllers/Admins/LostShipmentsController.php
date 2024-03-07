@@ -36,6 +36,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Rider;
+use App\LostShipmentResponsible;
 
 class LostShipmentsController extends Controller
 {
@@ -398,12 +400,15 @@ class LostShipmentsController extends Controller
     public function add_lost_shipments(Request $request){
 
         $traxIdArray = json_decode($request->trax_id, true);
-        $formattedValues = [];
+        $LostShipmentResponsible = [];
         foreach ($traxIdArray as $key => $values) {
-            $formattedValues[$key] = implode(', ', array_column($values, 'value'));
-        }        
+            $LostShipmentResponsible[$key] = implode(', ', array_column($values, 'value'));
+        }  
 
-        dd($formattedValues);
+        if(count($LostShipmentResponsible) > 0){
+            $this->LostShipmentResponsible($LostShipmentResponsible);
+        }
+    
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -496,6 +501,9 @@ class LostShipmentsController extends Controller
             if(count($lost_shipments_array) > 0){
                 NotificationsController::send(150, $lost_shipments_array);
             }
+
+         
+
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
 
         }
@@ -693,4 +701,32 @@ class LostShipmentsController extends Controller
             return response()->json(['status' => 3, 'error' => 'File Not Found!']);
         }
     }
+    public static function LostShipmentResponsible($LostShipmentResponsible) {
+        foreach ($LostShipmentResponsible as $shipment_id => $value) {
+            $shipment_responsibles = explode(',', ltrim($value));
+            $shipment_responsibles = array_map('trim', $shipment_responsibles);
+            foreach ($shipment_responsibles as $traxId) {
+                $rider = Rider::where('trax_id', $traxId)->first();
+                $admin = Admin::where('trax_id', $traxId)->first();
+    
+                if ($admin != null) {
+                    $id = $admin->id;
+                    $user_type = 1;
+                } 
+                
+                if ($rider != null) {
+                    $id = $rider->id;
+                    $user_type = 2;
+                } 
+    
+                $LostShipmentResponsible = new LostShipmentResponsible;
+                $LostShipmentResponsible->shipment_id = $shipment_id;
+                $LostShipmentResponsible->user_id = $id;
+                $LostShipmentResponsible->user_type = $user_type;
+                $LostShipmentResponsible->save();
+            }
+        }
+    }
+
+
 }
