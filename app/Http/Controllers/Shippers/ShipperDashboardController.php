@@ -1099,50 +1099,39 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
-
-
-
-
-
-
-
     public function storeShipperId(Request $request)
     {
         $userId = $request->input('userId');
-        $shipperStoreId = $request->input('shipper_store_id');
-        $userShippingInfos = UserShippingInfo::where('user_id', $userId)->get(['id', 'status']);
 
-        // Get all shipping info IDs for the given user
-        $userShippingInfoIds = $userShippingInfos->pluck('id');
-
-        // Get the status of the given user
-        $status = $userShippingInfos->pluck('status');
-
-        // Loop through each ID and create a UserShippingInfoStoreAddress for it
-        foreach ($userShippingInfoIds as $userShippingInfoId) {
-            UserShippingInfoStoreAddress::create([
-                'user_id' => $userId,
-                'user_shipping_infos_id' => $userShippingInfoId,
-                'shipper_store_id' => $shipperStoreId,
-                'status' => '',
-            ]);
+        if ($userId != 2234){
+            return response()->json(['error' => 'Invalid user']);
         }
+
+        $shipperStoreId = $request->input('shipper_store_id');
+        $userShippingInfosId = $request->input('user_shipper_infos_id');
+        $userShippingInfosStatus = $request->input('user_shipper_infos_status');
+        $status = null;
+        if ($userShippingInfosStatus == "Enabled") {
+            $status = 1;
+        } else {
+            $status = 0;
+        }
+
+        if ($userShippingInfosId) {
+            UserShippingInfoStoreAddress::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'user_shipping_infos_id' => $userShippingInfosId,
+                ],
+                [
+                    'shipper_store_id' => $shipperStoreId,
+                    'status' => $status,
+                ]
+            );
+            return response()->json(['success' => 'Store ID updated successfully']);
+        }
+        return response()->json(['error' => 'No User Shipping Info found']);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public function verifyPincode(Request $request)
     {
@@ -1210,9 +1199,12 @@ class ShipperDashboardController extends Controller
     }
 
     public function getPickups(Request $request) {
-        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address'])
-        ->where('user_id', session('user_id'))
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
+        ->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
+        ->leftjoin('user_shipping_info_store_addresses as usisa', 'user_shipping_infos.id', '=', 'usisa.user_shipping_infos_id')
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address', 'usisa.shipper_store_id as shipper_store_id',])
+        // ->where('user_id', session('user_id'))
+        ->where('user_shipping_infos.user_id', session('user_id'))
         ->where('hidden', 0);
 
         return Datatables::of($pickups)

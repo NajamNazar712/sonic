@@ -192,8 +192,7 @@
 
                                                 <th class="border-primary border-darken-1">S.No</th>
                                                 <th class="border-primary border-darken-1">Pickup Address ID</th>
-                                                {{-- auth()->user()->id == 10364, only for testing on local, remove it once done --}}
-                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 10364)
+                                                @if (auth()->user()->id == 2234)
                                                     <th class="border-primary border-darken-1">Shipper Store ID</th>
                                                 @endif
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
@@ -904,7 +903,7 @@
                 columns: [
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
-                    {data: 'pickup_address', name: 'pickup_address'},
+                    {data: 'shipper_store_id', name: 'shipper_store_id'},
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'vendor', name: 'vendor'},
@@ -1193,8 +1192,9 @@
 
                 if ($(this).hasClass('add_store_id')) {
                     var userId = {!! auth()->user()->id !!};
-                    // remove this after testing || userId == 10364
-                    if (userId == 2234 || userId == 10364) {
+                    var id = parseInt($(this).parents('tr').attr('id'));
+                    var shipper_status = $(this).closest('tr').find('.status').text();
+                    if (userId == 2234) {
                         $("#shipperStoreIdModal").modal('show');
                         $("#addStoreID").on('click', function (event) {
                             event.preventDefault();
@@ -1223,18 +1223,21 @@
                                     if(confirm){
                                         if(userId){
                                             $.ajax({
-                                                url: '{!! route('cod.add.shipper.id') !!}',
+                                                url: '{!! route('cod.add.shipper_id') !!}',
                                                 method: 'POST',
                                                 data: {
                                                     'userId': userId,
+                                                    'user_shipper_infos_id': id,
+                                                    'user_shipper_infos_status': shipper_status,
                                                     'shipper_store_id': $('#add_shipper_store_id').val(),
                                                     '_token': '{{ csrf_token() }}'
                                                 }
                                             }).done(function (data) {
-                                                if(data.status == 1){
+                                                if (data.success) {
+                                                    $("#shipperStoreIdModal").modal('hide');
                                                     table.draw('false');
                                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                                }else{
+                                                } else {
                                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                                 }
                                             });
@@ -1246,7 +1249,6 @@
                     }
                 }
         });
-
 
             $('#city_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select City',
@@ -1594,7 +1596,6 @@
 
                     $(document).on('click', '#verify_pincode', function(){
                         var pincode = $('#pincode').val();
-                        console.log(pincode);
                         if(!pincode)
                         {
                             toastr.info('Please input Pin code', 'Info!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

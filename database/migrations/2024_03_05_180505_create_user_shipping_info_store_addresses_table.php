@@ -18,7 +18,7 @@ class CreateUserShippingInfoStoreAddressesTable extends Migration
             $table->integer('user_id')->index()->default(null);
             $table->integer('user_shipping_infos_id')->index()->default(null);
             $table->integer('shipper_store_id')->default(null);
-            $table->integer('status')->default(0);
+            $table->integer('status')->default(1);
             $table->timestamps();
         });
     }
