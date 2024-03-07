@@ -5122,7 +5122,7 @@ class AdminCargoManifestController extends Controller
             if ($misroute_history_count == 0) //for support screen misroute
             {
                 if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
-                    return ['status' => 1, 'error' => 'Shipment`s origin and destination are same ! '];
+                    return ['status' => 1, 'error' => 'Shipment`s origin and destination are same or Bag type is not relevant !'];
             }
 
             if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
@@ -5435,6 +5435,7 @@ class AdminCargoManifestController extends Controller
 
     public  function receive_bag_shipments_details_return(Request $request) // receive return bag shipment
     {
+
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
@@ -5453,7 +5454,7 @@ class AdminCargoManifestController extends Controller
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,49])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
