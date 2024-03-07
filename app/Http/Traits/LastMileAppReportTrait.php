@@ -63,14 +63,21 @@ trait LastMileAppReportTrait
                  {
                      $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
-                    //  $current_time = Carbon::parse($check_summary->delivery_date);
-                    //  $finishTime = date('Y-m-d H:i:s');                    
-                    //  $totalDuration = $current_time->diffInHours($finishTime);                        
-                    //  if($totalDuration <= 0){
-                    //     return true;  
-                    //  }else{
-                    //     self::countSub($time,$check_summary);
-                    //  }
+                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
+                     
+                     if($check_existing_shipment->exist())
+                     {
+                        $update_delivery_note_shipment = $check_existing_shipment->first();
+                        $minusTime = $update_delivery_note_shipment->updated_time;
+                        self::countSub($minusTime,$check_summary);
+
+                        $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
+                        $update_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
+                        $update_delivery_note_shipment->updated_time = date('H:i:s');
+                        $update_delivery_note_shipment->updated_via = $this->via;
+                        $update_delivery_note_shipment->save();
+                     }
+                    
                      $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                      $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                      $check_summary->save();
@@ -137,15 +144,18 @@ trait LastMileAppReportTrait
                          $check_existing_note = $check_existing_note->first();
                          $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
                          $check_existing_note->save();
-
-                         $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
-                         $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
-                         $new_delivery_note_shipment->rwdn_id = $check_existing_note->id;
-                         $new_delivery_note_shipment->shipment_id = $shipment_id;
-                         $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
-                         $new_delivery_note_shipment->updated_time = $time;
-                         $new_delivery_note_shipment->updated_via = $via;
-                         $new_delivery_note_shipment->save();
+                         if(!$check_existing_shipment->exist())
+                         {
+                            $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
+                            $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
+                            $new_delivery_note_shipment->rwdn_id = $check_existing_note->id;
+                            $new_delivery_note_shipment->shipment_id = $shipment_id;
+                            $new_delivery_note_shipment->shipper_status_id = $shipper_status_id;
+                            $new_delivery_note_shipment->updated_time = $time;
+                            $new_delivery_note_shipment->updated_via = $via;
+                            $new_delivery_note_shipment->save();
+                         }   
+                         
                      }
 
                      $check_summary->save();
