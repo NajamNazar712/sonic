@@ -518,7 +518,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Enter Shipper Store ID</h4>
+                    <h4 class="modal-title white">Shipper Store ID</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -1197,56 +1197,59 @@
                     var id = parseInt($(this).parents('tr').attr('id'));
                     var shipper_status = $(this).closest('tr').find('.status').text();
                     if (userId == 2234) {
-                        $("#shipperStoreIdModal").modal('show');
+                        $("#shipperStoreIdModal").modal('show');                        
                         $("#addStoreID").on('click', function (event) {
+                            if ($('#add_shipper_store_id').val() == ''){
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                return;
+                            }
                             event.preventDefault();
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Add to add Store ID',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Add',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Add to add Store ID',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
                                     },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if(confirm){
-                                        if(userId){
-                                            $.ajax({
-                                                url: '{!! route('cod.add.shipper_id') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'userId': userId,
-                                                    'user_shipper_infos_id': id,
-                                                    'user_shipper_infos_status': shipper_status,
-                                                    'shipper_store_id': $('#add_shipper_store_id').val(),
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            }).done(function (data) {
-                                                if (data.success) {
-                                                    $("#shipperStoreIdModal").modal('hide');
-                                                    table.draw('false');
-                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                                }
-                                            });
-                                        }
+                                    confirm: {
+                                        text: 'Add',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
                                     }
-                                });
-                            // }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if(confirm){
+                                    if(userId){
+                                        $.ajax({
+                                            url: '{!! route('cod.add.shipper_id') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'userId': userId,
+                                                'user_shipper_infos_id': id,
+                                                'user_shipper_infos_status': shipper_status,
+                                                'shipper_store_id': $('#add_shipper_store_id').val(),
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            if (data.success) {
+                                                $("#shipperStoreIdModal").modal('hide');
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                         });
                     }
                 }
