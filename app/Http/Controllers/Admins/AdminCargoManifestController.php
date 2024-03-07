@@ -4174,6 +4174,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_mapping = array();
             $bag_short_received = array();
             $request_bag_ids = explode(',', $request->bag_ids);
+            $admin_assigned_hubs = session('hubs');
             foreach ($request_bag_ids as $bag_id) {
 
                 $bag = CargoManifestBag::where('id', $bag_id)
@@ -4320,7 +4321,7 @@ class AdminCargoManifestController extends Controller
                             //array_push($bag_not_exists_in_mapping, $bag_id);
 
                             $misroute = 1;
-                            if ($bag->destination_hub_id == Auth::user()->default_hub_id) {
+                            if (($bag->destination_hub_id == Auth::user()->default_hub_id) || (in_array($bag->destination_hub_id,$admin_assigned_hubs))) {
                                 $misroute = 0;
                                 $bag->status_id = 7;
                                 $bag->short_received_shipments = 0;
@@ -5854,7 +5855,7 @@ class AdminCargoManifestController extends Controller
         $default_hub_id = $admin->default_hub_id;
         $default_hub_name = $admin->city->name;
         $admin_assigned_hubs = session('hubs');
-//        dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
+        // dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
         //todo : open box-work
         if (count($open_box_ids) > 0) {
 
