@@ -5896,7 +5896,7 @@ class AdminCargoManifestController extends Controller
                                 {
                                     $selected_hub_id = $shipment->consignee_city_id;
                                 }
-                                if ($selected_hub_id == $default_hub_id) {
+                                if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                     $bag_shipment->status = 1;
                                     $bag_shipment->save();
                                 }
@@ -5928,7 +5928,7 @@ class AdminCargoManifestController extends Controller
                                         {
                                             $selected_hub_id = $shipment->consignee_city_id;
                                         }
-                                        if ($selected_hub_id == $default_hub_id) {
+                                        if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 4;
                                             $consignee_status_id = 4;
                                             array_push($shipment_ids_array, $shipment->tracking_number);
@@ -6019,7 +6019,7 @@ class AdminCargoManifestController extends Controller
                             {
                                 $selected_hub_id = $shipment->consignee_city_id;
                             }
-                            if ($selected_hub_id == $default_hub_id) {
+                            if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                 $shipment->shipper_status_id = 4;
                                 $shipment->consignee_status_id = 4;
                                 $shipment->save();
