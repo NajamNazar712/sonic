@@ -5118,7 +5118,7 @@ class AdminCargoManifestController extends Controller
             $shipment = $shipment->first();
 
             $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
-
+//dd($shipment,$misroute_history_count);
             if ($misroute_history_count == 0) //for support screen misroute
             {
                 if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
@@ -5149,7 +5149,7 @@ class AdminCargoManifestController extends Controller
 
                 $bag_type = $request->bag_type;
                 $shipment_status = $shipment->shipper_status_id;
-
+//dd($bag_type,$shipment_status);
                 // validate bag n shipment type
                 if ($bag_type == 1) {
                     if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
@@ -5165,7 +5165,7 @@ class AdminCargoManifestController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-
+//dd($bag_shipment,$bag_shipment->bag);
                     if ($bag) {
 
                         if ($bag->type != $request->bag_type) {
@@ -5435,7 +5435,6 @@ class AdminCargoManifestController extends Controller
 
     public  function receive_bag_shipments_details_return(Request $request) // receive return bag shipment
     {
-
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
@@ -5454,7 +5453,7 @@ class AdminCargoManifestController extends Controller
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48,49])) {
+                    if (!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
