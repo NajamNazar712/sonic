@@ -5853,6 +5853,8 @@ class AdminCargoManifestController extends Controller
         $admin = Admin::where('id',\auth()->id())->select('default_hub_id')->first();
         $default_hub_id = $admin->default_hub_id;
         $default_hub_name = $admin->city->name;
+        $admin_assigned_hubs = session('hubs');
+//        dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
         //todo : open box-work
         if (count($open_box_ids) > 0) {
 
@@ -6074,7 +6076,7 @@ class AdminCargoManifestController extends Controller
                             $selected_hub_id = $shipment->consignee_city_id;
                         }
 
-                        if ($selected_hub_id == $default_hub_id) {
+                        if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
 
                             $shipment->shipper_status_id = 4;
                             $shipment->consignee_status_id = 4;
@@ -6146,7 +6148,8 @@ class AdminCargoManifestController extends Controller
                     }
                     //check previous bag received shipments end
                 }
-            } else {
+            }
+            else {
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
