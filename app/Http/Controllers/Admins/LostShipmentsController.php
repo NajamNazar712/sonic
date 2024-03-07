@@ -409,16 +409,6 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-
-        $traxIdArray = json_decode($request->trax_id, true);
-        $LostShipmentResponsible = [];
-        foreach ($traxIdArray as $key => $values) {
-            $LostShipmentResponsible[$key] = implode(', ', array_column($values, 'value'));
-        }  
-
-        if(count($LostShipmentResponsible) > 0){
-            $this->LostShipmentResponsible($LostShipmentResponsible);
-        }
     
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
@@ -507,6 +497,8 @@ class LostShipmentsController extends Controller
                     $shipment_details->save();
                     ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment_details->id],NULL,Auth::id());
                     $lost_shipments_array[] = $shipment;
+
+                    
                 }
             }
             if(count($lost_shipments_array) > 0){
@@ -514,6 +506,15 @@ class LostShipmentsController extends Controller
             }
 
          
+            $traxIdArray = json_decode($request->trax_id, true);
+            $LostShipmentResponsible = [];
+            foreach ($traxIdArray as $key => $values) {
+                $LostShipmentResponsible[$key] = implode(', ', array_column($values, 'value'));
+            }  
+
+            if(count($LostShipmentResponsible) > 0){
+                $this->LostShipmentResponsible($LostShipmentResponsible);
+            }
 
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
 
