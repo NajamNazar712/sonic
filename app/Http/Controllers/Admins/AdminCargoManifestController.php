@@ -4174,6 +4174,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_mapping = array();
             $bag_short_received = array();
             $request_bag_ids = explode(',', $request->bag_ids);
+            $admin_assigned_hubs = session('hubs');
             foreach ($request_bag_ids as $bag_id) {
 
                 $bag = CargoManifestBag::where('id', $bag_id)
@@ -4320,7 +4321,7 @@ class AdminCargoManifestController extends Controller
                             //array_push($bag_not_exists_in_mapping, $bag_id);
 
                             $misroute = 1;
-                            if ($bag->destination_hub_id == Auth::user()->default_hub_id) {
+                            if (($bag->destination_hub_id == Auth::user()->default_hub_id) || (in_array($bag->destination_hub_id,$admin_assigned_hubs))) {
                                 $misroute = 0;
                                 $bag->status_id = 7;
                                 $bag->short_received_shipments = 0;
@@ -5853,6 +5854,8 @@ class AdminCargoManifestController extends Controller
         $admin = Admin::where('id',\auth()->id())->select('default_hub_id')->first();
         $default_hub_id = $admin->default_hub_id;
         $default_hub_name = $admin->city->name;
+        $admin_assigned_hubs = session('hubs');
+        // dd($request->all(),session('hubs'),\auth()->id(),$admin_default_hubs);
         //todo : open box-work
         if (count($open_box_ids) > 0) {
 
@@ -5894,7 +5897,7 @@ class AdminCargoManifestController extends Controller
                                 {
                                     $selected_hub_id = $shipment->consignee_city_id;
                                 }
-                                if ($selected_hub_id == $default_hub_id) {
+                                if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                     $bag_shipment->status = 1;
                                     $bag_shipment->save();
                                 }
@@ -5926,7 +5929,7 @@ class AdminCargoManifestController extends Controller
                                         {
                                             $selected_hub_id = $shipment->consignee_city_id;
                                         }
-                                        if ($selected_hub_id == $default_hub_id) {
+                                        if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 4;
                                             $consignee_status_id = 4;
                                             array_push($shipment_ids_array, $shipment->tracking_number);
@@ -6017,7 +6020,7 @@ class AdminCargoManifestController extends Controller
                             {
                                 $selected_hub_id = $shipment->consignee_city_id;
                             }
-                            if ($selected_hub_id == $default_hub_id) {
+                            if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                 $shipment->shipper_status_id = 4;
                                 $shipment->consignee_status_id = 4;
                                 $shipment->save();
@@ -6074,7 +6077,7 @@ class AdminCargoManifestController extends Controller
                             $selected_hub_id = $shipment->consignee_city_id;
                         }
 
-                        if ($selected_hub_id == $default_hub_id) {
+                        if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
 
                             $shipment->shipper_status_id = 4;
                             $shipment->consignee_status_id = 4;
@@ -6146,7 +6149,8 @@ class AdminCargoManifestController extends Controller
                     }
                     //check previous bag received shipments end
                 }
-            } else {
+            }
+            else {
                 foreach ($shipment_ids as $shipment_id) {
                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
                     $shipment = Shipment::find($shipment_id);
@@ -6250,7 +6254,7 @@ class AdminCargoManifestController extends Controller
                                     }
 
                                     if ($shipment->booking_type_id == 1) {
-                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                        if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6259,7 +6263,7 @@ class AdminCargoManifestController extends Controller
                                         }
                                     } else if ($shipment->booking_type_id == 2) {
                                         if ($shipment->shipper_status_id == 21) {
-                                            if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                            if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                                 $shipper_status_id = 22;
                                                 $consignee_status_id = 22;
                                             } else {
@@ -6267,7 +6271,7 @@ class AdminCargoManifestController extends Controller
                                                 $consignee_status_id = 11;
                                             }
                                         } else {
-                                            if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                            if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                                 $shipper_status_id = 27;
                                                 $consignee_status_id = 27;
                                             } else {
@@ -6276,7 +6280,7 @@ class AdminCargoManifestController extends Controller
                                             }
                                         }
                                     } else if ($shipment->booking_type_id == 3) {
-                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                        if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 33;
                                             $consignee_status_id = 33;
                                         } else {
@@ -6284,7 +6288,7 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 11;
                                         }
                                     } else if ($shipment->booking_type_id == 4) {
-                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                        if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6292,7 +6296,7 @@ class AdminCargoManifestController extends Controller
                                             $consignee_status_id = 11;
                                         }
                                     } else {
-                                        if ($selected_hub_id == Auth::user()->default_hub_id) {
+                                        if (($selected_hub_id == Auth::user()->default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) {
                                             $shipper_status_id = 22;
                                             $consignee_status_id = 22;
                                         } else {
@@ -6335,7 +6339,7 @@ class AdminCargoManifestController extends Controller
                         {
                             $selected_hub_id = $origin;
                         }
-                        if ($selected_hub_id == $default_hub_id) // wisevarsa -> pickupaddress id
+                        if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) // wisevarsa -> pickupaddress id
                         {
                             $shipment->shipper_status_id = 22;
                             $shipment->consignee_status_id = 22;
