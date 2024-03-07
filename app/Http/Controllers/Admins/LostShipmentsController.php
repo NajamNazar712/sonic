@@ -169,7 +169,7 @@ class LostShipmentsController extends Controller
                 })
                 ->editColumn('responsible_person_shipment', function ($shipment) {
                     if ($shipment->responsible_person_shipment != 0) {
-                        $responsible_person_shipment = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->count();
+                        $responsible_person_shipment = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->distinct('user_id')->count('user_id');
                         return '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' . $shipment->responsible_person_shipment . '">' . $responsible_person_shipment . '</button>';
                     } else {
                         return 0;

@@ -610,19 +610,23 @@
                         '<th class="border-primary border-darken-1">Employee Status</th>' +
                         '</tr>' +
                         '</thead>' +
-                        '<tbody>'; // Start of tbody
+                        '<tbody>'; 
 
-                    // Assuming your response contains an array of data objects
-                    $.each(response.details, function(index, item) {
-                        var employee = item;
-                        modalContent += '<tr>';
-                        modalContent += '<td>' + (index + 1) + '</td>'; 
-                        modalContent += '<td>' + employee.trax_id + '</td>'; 
-                        modalContent += '<td>' + employee.name + '</td>'; 
-                        modalContent += '<td>' + employee.type + '</td>'; 
-                        modalContent += '<td>' + employee.status + '</td>'; 
-                        modalContent += '</tr>';
-                    });
+                        var addedTraxIds = []; 
+                        $.each(response.details, function(index, item) {
+                            var employee = item;
+                            if (!addedTraxIds.includes(employee.trax_id)) { 
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
+                                modalContent += '<td>' + employee.name + '</td>'; 
+                                modalContent += '<td>' + employee.type + '</td>'; 
+                                modalContent += '<td>' + employee.status + '</td>'; 
+                                modalContent += '</tr>';
+                                addedTraxIds.push(employee.trax_id); 
+                            }
+                        });
+
 
                     modalContent += '</tbody>' + // End of tbody
                         '</table>' +
