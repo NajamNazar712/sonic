@@ -80,10 +80,12 @@ class LostShipmentsController extends Controller
                             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+                ->join('lost_shipment_responsibles as lsr', 'lsr.shipment_id', '=', 'shipments.id')
+
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
-                ->where('shipments.shipper_status_id', 18);
+                ->where('shipments.shipper_status_id', 18)->groupBy('shipments.id');
                 // ->where(function ($sub_query) {
                 //     $sub_query->where('shipments.payment_status_id', '=', null)
                 //         ->orWhere('shipments.payment_status_id', '>', 1);
@@ -164,6 +166,15 @@ class LostShipmentsController extends Controller
                             return $today->diffInDays($shipment->status_date);
                         }
                     }
+                })
+                ->editColumn('responsible_person_shipment', function ($shipment) {
+                    if ($shipment->responsible_person_shipment != 0) {
+                        $responsible_person_shipment = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->count();
+                        return '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' . $shipment->responsible_person_shipment . '">' . $responsible_person_shipment . '</button>';
+                    } else {
+                        return 0;
+                    }
+                    
                 })
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
@@ -726,6 +737,30 @@ class LostShipmentsController extends Controller
                 $LostShipmentResponsible->save();
             }
         }
+    }
+
+    public function lost_responsible_list(Request $request){
+        $shipment_id = $request->shipment_id;
+        $details = [];
+        $lost_responsible_shipments = LostShipmentResponsible::where('shipment_id', $shipment_id)->get();
+        foreach($lost_responsible_shipments as $key => $lost_responsible_shipment){
+            if($lost_responsible_shipment->user_type == 1){
+                $admin = Admin::find($lost_responsible_shipment->user_id);
+                $details[$key]['trax_id'] = $admin->trax_id;
+                $details[$key]['name'] = $admin->name;
+                $details[$key]['type'] = $admin->employee->employee_type->name;
+                $details[$key]['status'] = $admin->employee->employee_status->name;
+            }else{
+                $rider = Rider::find($lost_responsible_shipment->user_id);
+                $details[$key]['trax_id'] = $rider->trax_id;
+                $details[$key]['name'] = $rider->name;
+                $details[$key]['type'] = $rider->employee->employee_type->name;
+                $details[$key]['status'] = $rider->employee->employee_status->name;            
+            }
+        }
+
+        return response()->json(['status' => 1, 'details'=> $details]);
+
     }
 
 

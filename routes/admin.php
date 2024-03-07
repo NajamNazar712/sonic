@@ -893,6 +893,8 @@ Route::prefix('admin')->name('admin.')->group(function(){
         Route::prefix('lost')->name('lost.')->group(function () {
             Route::get('', 'Admins\LostShipmentsController@lost_shipments_index')->name('index');
             Route::get('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
+            Route::get('lost_responsible_list', 'Admins\LostShipmentsController@lost_responsible_list')->name('lost_responsible_list');
+
             Route::post('confirm/status', 'Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status');
             Route::post('reattempt/status', 'Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status');
             Route::prefix('add')->name('add.')->group(function () {

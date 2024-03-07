@@ -19,6 +19,7 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Responsible Person (s)</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -106,6 +107,10 @@
 
             </div>
         </div>
+    </div>
+
+    <div class="modal fade text-left addLostResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog">        
+
     </div>
 
 @endsection
@@ -436,6 +441,7 @@
                 {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                {data: 'responsible_person_shipment', name: 'lsr.shipment_id', class: 'align-middle responsible_person_shipment_new'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -571,8 +577,70 @@
                     table.button('.re-attempt').disable();
                 }
 
-
         });
+
+        var shipment_id;
+        $('#datatable tbody').on('click', '.responsible_person_shipment', function() {
+            var shipment_id = $(this).attr('data-shipment-id');
+
+            // Make an AJAX request
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
+                type: 'GET', 
+                data: { shipment_id: shipment_id }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">Employee ID</th>' +
+                        '<th class="border-primary border-darken-1">Employee Name</th>' +
+                        '<th class="border-primary border-darken-1">Employee Type</th>' +
+                        '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; // Start of tbody
+
+                    // Assuming your response contains an array of data objects
+                    $.each(response.details, function(index, item) {
+                        var employee = item;
+                        modalContent += '<tr>';
+                        modalContent += '<td>' + (index + 1) + '</td>'; 
+                        modalContent += '<td>' + employee.trax_id + '</td>'; 
+                        modalContent += '<td>' + employee.name + '</td>'; 
+                        modalContent += '<td>' + employee.type + '</td>'; 
+                        modalContent += '<td>' + employee.status + '</td>'; 
+                        modalContent += '</tr>';
+                    });
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
+                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('.addLostResponsibleModal').html('');
+                    $('.addLostResponsibleModal').append(modalContent);
+                    $('.addLostResponsibleModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
+        });
+
+   
     });
 
     </script>
