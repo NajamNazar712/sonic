@@ -872,9 +872,9 @@
             // $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             // $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-
-
-
+            @php
+                $userId = auth()->user()->id;
+            @endphp
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -903,7 +903,9 @@
                 columns: [
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
-                    {data: 'shipper_store_id', name: 'shipper_store_id'},
+                    @if($userId == 2234)
+                        { data: 'shipper_store_id', name: 'shipper_store_id' },
+                    @endif
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'vendor', name: 'vendor'},
