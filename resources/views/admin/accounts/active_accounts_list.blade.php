@@ -74,6 +74,7 @@
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
                                         {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
+                                        <th class="border-primary border-darken-1">SMS Charges Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Added At</th>
@@ -994,6 +995,7 @@ function checkboxStatus() {
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
                         // head.push('ESO Tagged');
+                        head.push('SMS Charges Type');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Added At');
@@ -1046,6 +1048,7 @@ function checkboxStatus() {
                             row.push(values.kam);
                             row.push(values.ref);
                             // row.push(values.eso);
+                            row.push(values.sms_charges_type_id);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.rates_added_at);
@@ -1666,6 +1669,7 @@ function checkboxStatus() {
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                {data: 'sms_charges_type_id', name: 'users.sms_charges_type_id', class: 'align-middle sms_charges_type_id'},
                 // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
