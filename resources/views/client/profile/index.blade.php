@@ -904,7 +904,7 @@
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
                     @if($userId == 2234 || $userId == 10364)
-                        { data: 'shipper_store_id', name: 'shipper_store_id' },
+                        { data: 'shipper_store_id', name: 'shipper_store_id', class:'shipper_store_id' },
                     @endif
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
@@ -1194,10 +1194,14 @@
 
                 if ($(this).hasClass('add_store_id')) {
                     var userId = {!! auth()->user()->id !!};
+                    var previous_shipper_store_id = $(this).closest('tr').find('.shipper_store_id').text();
+                    $('#shipperStoreIdModal').on('shown.bs.modal', function () {
+                        $('#add_shipper_store_id').val(previous_shipper_store_id);
+                    });
                     var id = parseInt($(this).parents('tr').attr('id'));
                     var shipper_status = $(this).closest('tr').find('.status').text();
                     if (userId == 2234 || userId == 10364) {
-                        $("#shipperStoreIdModal").modal('show');                        
+                        $("#shipperStoreIdModal").modal('show');
                         $("#addStoreID").on('click', function (event) {
                             if ($('#add_shipper_store_id').val() == ''){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1241,6 +1245,7 @@
                                         }).done(function (data) {
                                             if (data.success) {
                                                 $("#shipperStoreIdModal").modal('hide');
+                                                $('#add_shipper_store_id').val('');
                                                 table.draw('false');
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                             } else {

@@ -1226,10 +1226,21 @@ class ShipperDashboardController extends Controller
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             $add_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Store ID</div></button>';
+            $edit_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Store ID</div></button>';
             
-            if(auth()->user()->id == 2234 || auth()->user()->id == 10364){
+            // if((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $store_id_check){
+            //     $dropdown .= $add_store_id_button;
+            // }
+
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $pickup->shipper_store_id) {
+                $dropdown .= $edit_store_id_button;
+            } 
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 10364)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
+
+
+
             if ($pickup->default_address == 1) {
                 $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
@@ -1289,11 +1300,14 @@ class ShipperDashboardController extends Controller
         $pickup_id = $request->id;
         $status = $request->status;
         $shipping_info = UserShippingInfo::where('id',$pickup_id)->first();
+        $shipper_store_id = UserShippingInfoStoreAddress::where('user_shipping_infos_id', $pickup_id)->first();
         if($shipping_info->exists()){
             if($status == 'enable'){
                 if($shipping_info->status == 0){
                     $shipping_info->status = 1;
                     $shipping_info->save();
+                    $shipper_store_id->status = 1;
+                    $shipper_store_id->save();
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now enabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already enabled!"]);
@@ -1306,6 +1320,8 @@ class ShipperDashboardController extends Controller
                 if($shipping_info->status == 1){
                     $shipping_info->status = 0;
                     $shipping_info->save();
+                    $shipper_store_id->status = 0;
+                    $shipper_store_id->save();
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now disabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already disabled!"]);
