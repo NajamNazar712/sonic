@@ -462,74 +462,75 @@
                     @endif
 
                     @if (session('role_id') == 1 || in_array(129, session('permissions')))
-                {
-                    text: 'Re-Attempt',
-                    className: 'btn btn-primary re-attempt',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        $('#add_remarks_modal').modal('show');
-                        $('#add_remarks_modal').on('hide.bs.modal', function () {
-                            $('#add_remarks_form input.add_remarks').val('');
-                        });
-                        $('#add_remarks_form').validate({
-                            ignore: [],
-                            errorClass: 'danger',
-                            successClass: 'success',
-                            errorPlacement: function(error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            normalizer: function(value) {
-                                return $.trim(value);
-                            },
-                            submitHandler: function(form) {
-                                var remarks = $('#add_remarks').val();
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Re-Attempt!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        blockPagePermanently();
-                                        $.ajax({
-                                            url:"{{route('admin.delivery.lost.reattempt.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                'remarks':remarks,
-                                                '_token':'{{ csrf_token() }}'
+                    {
+                        text: 'Re-Attempt',
+                        className: 'btn btn-primary re-attempt',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#add_remarks_modal').modal('show');
+                            $('#add_remarks_modal').on('hide.bs.modal', function () {
+                                $('#add_remarks_form input.add_remarks').val('');
+                            });
+                            $('#add_remarks_form').validate({
+                                ignore: [],
+                                errorClass: 'danger',
+                                successClass: 'success',
+                                errorPlacement: function(error, element) {
+                                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                                },
+                                normalizer: function(value) {
+                                    return $.trim(value);
+                                },
+                                submitHandler: function(form) {
+                                    var remarks = $('#add_remarks').val();
+                                    swal({
+                                        title: 'Are You Sure?',
+                                        text: 'Select Yes to change shipment status to Re-Attempt!',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
                                             }
-                                        }).done(function (data) {
-                                            UnblockPagePermanently();
-                                            $('#add_remarks_modal').modal('hide');
-                                            selected_rows = [];
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.draw('false');
-                                            table.rows().deselect();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if (confirm) {
+                                            blockPagePermanently();
+                                            $.ajax({
+                                                url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
+                                                method:'POST',
+                                                data:{
+                                                    'shipment_ids':selected_rows,
+                                                    'remarks':remarks,
+                                                    '_token':'{{ csrf_token() }}'
+                                                }
+                                            }).done(function (data) {
+                                                UnblockPagePermanently();
+                                                $('#add_remarks_modal').modal('hide');
+                                                selected_rows = [];
+                                                table.button('.confirm').disable();
+                                                table.button('.re-attempt').disable();
+                                                table.draw('false');
+                                                table.rows().deselect();
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        @endif
                 },
                     @endif
                 {
