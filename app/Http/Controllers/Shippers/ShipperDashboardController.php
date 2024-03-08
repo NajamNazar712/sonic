@@ -1105,7 +1105,7 @@ class ShipperDashboardController extends Controller
         $shipperStoreId = $request->input('shipper_store_id');
         $userShippingInfosId = $request->input('user_shipper_infos_id');
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
-        if ($userId != 2234 || $userId != 1049){
+        if ($userId != 2234 && $userId != '1049'){
             return response()->json(['error' => 'Invalid user']);
         } 
         if (!$shipperStoreId) {
