@@ -6170,7 +6170,7 @@ class AdminCargoManifestController extends Controller
                             {
                                 $selected_hub_id = $origin;
                             }
-                            if ($selected_hub_id == $default_hub_id) // wisevarsa -> pickupaddress id
+                            if (($selected_hub_id == $default_hub_id) || (in_array($selected_hub_id,$admin_assigned_hubs))) // wisevarsa -> pickupaddress id
                             {
                                 $shipment->shipper_status_id = 22;
                                 $shipment->consignee_status_id = 22;
