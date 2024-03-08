@@ -5112,13 +5112,17 @@ class AdminCargoManifestController extends Controller
         //        }
 
         // without restriction
+        $return_reattempt_flag = 0;
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
             $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
-//dd($shipment,$misroute_history_count);
+
+            if (in_array($shipment->shipper_status_id,[23,25]))
+                return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
+
             if ($misroute_history_count == 0) //for support screen misroute
             {
                 if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
@@ -5278,6 +5282,20 @@ class AdminCargoManifestController extends Controller
                     if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
+
+                    // check that is shipment return reattempt or not
+                    $return_confirm_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                        ->where('shipper_status_id', 20);
+                    if ($return_confirm_journey->exists()) {
+                        $return_reattempt_flag = 1;
+                    }
+
+                    if($return_reattempt_flag)
+                    {
+                        return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !!!'];
+                    }
+                    // check that is shipment return reattempt or not end
+
                 } else {
                     if (!in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
@@ -5435,10 +5453,16 @@ class AdminCargoManifestController extends Controller
 
     public  function receive_bag_shipments_details_return(Request $request) // receive return bag shipment
     {
+
+        $return_reattempt_flag = 0;
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            if (in_array($shipment->shipper_status_id,[23,25]))
+                return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
+
 
             if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
                 return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
@@ -5446,14 +5470,31 @@ class AdminCargoManifestController extends Controller
             $bag_type = $request->bag_type;
             $shipment_status = $shipment->shipper_status_id;
 
-            if ($shipment_status != 11) // agr status 11 h to masla h q k forwarding and return dono p same 11 lagta h ispe sochna h
+            if ($shipment_status != 11) // agr status 11 h to masla h q k forwarding and return dono p same 11 lagta h ispe sochna h, lekin koshish ki h niche is resolve krne ki ($return_confirm_journey,$return_reattampt)
             {
                 if ($bag_type == 1) {
                     if (in_array($shipment_status, [20, 21, 22, 23, 24, 25, 44, 47, 48])) {
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
-                    if (!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29])) {
+
+                    // check that is shipment return reattempt or not                    
+                    $return_confirm_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                        ->where('shipper_status_id', 20);
+                    if ($return_confirm_journey->exists()) {
+                        $return_confirm_journey = $return_confirm_journey->first();
+                        $return_confirm_journey_next = $return_confirm_journey->id + 1;
+
+                        $return_reattampt = ShipmentsJourney::where('id', $return_confirm_journey_next)
+                            ->where('shipper_status_id', 13);
+
+                        if ($return_reattampt->exists()) {
+                            $return_reattempt_flag = 1;
+                        }
+                    }
+                    // check that is shipment return reattempt or not end
+
+                    if ((!in_array($shipment_status, [20, 21, 22, 24, 44, 47, 48,49,26,27,29])) && ($return_reattempt_flag == 1)) {
                         return ['status' => 1, 'error' => 'Tracking Number is of normal type while bag type is return !'];
                     }
                 }
