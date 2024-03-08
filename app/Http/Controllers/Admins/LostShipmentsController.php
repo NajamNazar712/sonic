@@ -499,8 +499,13 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
+<<<<<<< HEAD
             $shipment_status_for_bags = array(3,21,26,32,49); 
             $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);  
+=======
+            $shipment_status_for_bags = array(3,21,26,32,49);
+            $status_array = array(5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+>>>>>>> parent of 76b81955fb (status changed as in master)
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $status_array);
@@ -703,7 +708,12 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
+<<<<<<< HEAD
         $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);        
+=======
+        $employee = Employee::where('trax_id' , $request->excel_employee_value)->first();
+        $status_array = array(5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
+>>>>>>> parent of 76b81955fb (status changed as in master)
         $names = [
             'tracking_number' => 'Tracking Number',
         ];
