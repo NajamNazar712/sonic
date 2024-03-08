@@ -5120,6 +5120,9 @@ class AdminCargoManifestController extends Controller
 
             $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
 
+            if (in_array($shipment->shipper_status_id,[23,25]))
+                return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
+
             if ($misroute_history_count == 0) //for support screen misroute
             {
                 if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
@@ -5450,12 +5453,16 @@ class AdminCargoManifestController extends Controller
 
     public  function receive_bag_shipments_details_return(Request $request) // receive return bag shipment
     {
-//        dd(1);
+
         $return_reattempt_flag = 0;
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
+            if (in_array($shipment->shipper_status_id,[23,25]))
+                return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
+
 
             if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
                 return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
