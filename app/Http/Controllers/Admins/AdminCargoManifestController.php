@@ -5112,7 +5112,7 @@ class AdminCargoManifestController extends Controller
         //        }
 
         // without restriction
-        $return_reattempt_flag = 1;
+        $return_reattempt_flag = 0;
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
