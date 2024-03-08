@@ -151,6 +151,10 @@
 
                         head.push('S.No');
                         head.push('Tracking No.');
+                        head.push('Responsible Person Trax ID');
+                        head.push('Responsible Person Name');
+                        head.push('Responsible Person Type');
+                        head.push('Responsible Person Status');
                         head.push('Shipper');
                         head.push('Origin');
                         head.push('Destination');
@@ -172,6 +176,10 @@
 
                             row.push(index + 1);
                             row.push(values.tracking_number);
+                            row.push(values.excel_responsible_person_id);
+                            row.push(values.excel_responsible_person_name);
+                            row.push(values.excel_responsible_person_type);
+                            row.push(values.excel_responsible_person_status);
                             row.push(values.shipper);
                             row.push(values.origin);
                             row.push(values.destination);

@@ -176,6 +176,72 @@ class LostShipmentsController extends Controller
                     }
                     
                 })
+
+                ->addColumn('excel_responsible_person_id', function ($shipment) {
+                    $trax_ids = [];
+                    $responsible_person_shipments = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->groupBy('user_id')->get();
+                    foreach($responsible_person_shipments as $responsible_person_shipment){
+                        if($responsible_person_shipment->user_type == 1){
+                            $admin = Admin::find($responsible_person_shipment->user_id)->trax_id;
+                            $trax_ids[] = $admin;
+                        }else{
+                            $rider = Rider::find($responsible_person_shipment->user_id)->trax_id;
+                            $trax_ids[] = $rider;
+                        }
+                    }
+                    $trax_ids = implode(' ,', $trax_ids);
+                    return $trax_ids;
+
+                })
+
+                ->addColumn('excel_responsible_person_name', function ($shipment) {
+                    $names = [];
+                    $responsible_person_shipments = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->groupBy('user_id')->get();
+                    foreach($responsible_person_shipments as $responsible_person_shipment){
+                        if($responsible_person_shipment->user_type == 1){
+                            $admin = Admin::find($responsible_person_shipment->user_id)->name;
+                            $names[] = $admin;
+                        }else{
+                            $rider = Rider::find($responsible_person_shipment->user_id)->name;
+                            $names[] = $rider;
+                        }
+                    }
+                    $names = implode(' ,', $names);
+                    return $names;
+
+                })
+                ->addColumn('excel_responsible_person_type', function ($shipment) {
+                    $types = [];
+                    $responsible_person_shipments = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->groupBy('user_id')->get();
+                    foreach($responsible_person_shipments as $responsible_person_shipment){
+                        if($responsible_person_shipment->user_type == 1){
+                            $admin = Admin::find($responsible_person_shipment->user_id)->employee->employee_type->name;
+                            $types[] = $admin;
+                        }else{
+                            $rider = Rider::find($responsible_person_shipment->user_id)->employee->employee_type->name;
+                            $types[] = $rider;
+                        }
+                    }
+                    $types = implode(' ,', $types);
+                    return $types;
+
+                })
+                ->addColumn('excel_responsible_person_status', function ($shipment) {
+                    $status = [];
+                    $responsible_person_shipments = LostShipmentResponsible::where('shipment_id', $shipment->responsible_person_shipment)->groupBy('user_id')->get();
+                    foreach($responsible_person_shipments as $responsible_person_shipment){
+                        if($responsible_person_shipment->user_type == 1){
+                            $admin = Admin::find($responsible_person_shipment->user_id)->employee->employee_status->name;
+                            $status[] = $admin;
+                        }else{
+                            $rider = Rider::find($responsible_person_shipment->user_id)->employee->employee_status->name;
+                            $status[] = $rider;
+                        }
+                    }
+                    $status = implode(' ,', $status);
+                    return $status;
+
+                })
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
                         $sub_query->where('shipments.booking_type_id', '!=', 4)

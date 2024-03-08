@@ -507,9 +507,12 @@ label.error {
                 '</thead>' +
                 '</table>' +              
                 '</form>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                '<span aria-hidden="true">Close</span>' +
-                '</button>' +
+                '<div class="row justify-content-center mt-3">'+
+                        '<div class="col-">'+
+                            '<button type="submit" class="btn btn-danger btn-block" class="close" data-dismiss="modal" aria-label="Close">Close</button>'+
+                        '</div>'+
+                    '</div>'+
+              
                 '</div>' +
                 '</div>' +
                 '</div>' +
