@@ -12,6 +12,121 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                @if (session('role_id') == 1 || in_array(944, session('permissions')))
+                    <input type="hidden" name="search_total_lost_shipments" id="search_total_lost_shipments">
+                    <input type="hidden" name="search_total_lost_approved_shipments" id="search_total_lost_approved_shipments">
+                    <input type="hidden" name="search_total_lost_pending_shipments" id="search_total_lost_pending_shipments">
+                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o"></span>
+                                    </span>
+                                </div>
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o"></span>
+                                    </span>
+                                </div>
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" >
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        </div>
+                    </form>
+              
+                    <div class="row justify-content-center" >
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer" id="search_total_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_shipments">
+                                                    {{ $lost_shipments }}
+                                                </h3>
+                                                <span>Total Lost Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="search_total_approved_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-check icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_approved_shipments">
+                                                    {{ ($total_of_approved_shipments) == 0 ? '0' : $total_of_approved_shipments  }}
+                                                </h3>
+                                                <span>Total Lost Approved Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_total_pending_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass-3 icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_pending_shipments">
+                                                    {{ ($total_of_pending_shipments) == 0 ? '0' : $total_of_pending_shipments}}
+                                                </h3>
+                                                <span>Total Lost Pending Shipments</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+
+                            <div class="card bg-gradient-directional-rejected_shipment pull-up cursor-pointer" id="total_shipment_rejection_count">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="rejection_shipments">
+                                                    {{ $total_of_rejected_shipments }}
+                                                </h3>
+                                                <span>Total Shipment Reject Count</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                @endif
+           
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -34,7 +149,10 @@
                         <th class="border-primary border-darken-1">Reference</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Lost confirmation status</th>
                         <th class="border-primary border-darken-1">Marked By</th>
+                        <th class="border-primary border-darken-1">Action</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -107,11 +225,33 @@
 
             </div>
         </div>
+
+    
+
     </div>
 
     <div class="modal fade text-left addLostResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog">        
 
     </div>
+
+    <div class="modal fade" id="rejectModal" data-backdrop="static" role="dialog" aria-labelledby="rejectModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Reject</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <button type="button" class="btn btn-info ml-2 confirm">Confirm</button>
+                    <button type="button" class="btn btn-info ml-2 re-attempt" >Re-Attempt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
 @endsection
 
@@ -119,7 +259,31 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <style>
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
 
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-rejected_shipment {
+            background-image: linear-gradient(45deg, #7f8b96, #f52f2f);
+            background-repeat: repeat-x;
+        }
+
+
+    </style>
 @endsection
 
 @section('js')
@@ -128,6 +292,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -169,6 +336,7 @@
                         head.push('Reference');
                         head.push('Arrival Date');
                         head.push('Status Date');
+                        head.push('Lost Confirmation Status');
                         head.push('Marked By');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -194,6 +362,7 @@
                             row.push(values.reference);
                             row.push(values.arrival);
                             row.push(values.current_status_date);
+                            row.push(values.lost_confirmation_status);
                             row.push(values.marked_by);
 
                             body.push(row);
@@ -205,83 +374,91 @@
                 return {body: body, header: head};
             }
         } );
+        var confirm_reattempt;
         var selected_rows = [];
+        var shipment_id;
+        var action_selected_shipment = [];
+        @if (session('role_id') == 1 || count(array_intersect([128, 129], session('permissions'))) !== 0)
+         confirm_reattempt = 1
+        @endif
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            @if (session('role_id') == 1 || count(array_intersect([128,129], session('permissions'))) !== 0)
 
             buttons: [
+                @if (session('role_id') == 1 || count(array_intersect([128, 129], session('permissions'))) !== 0)
                     @if (session('role_id') == 1 || in_array(128, session('permissions')))
-                {
-                    text: 'Confirm',
-                    className: 'btn btn-primary confirm',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-
-                        $('#ReturnConfirmReasonModal').modal('show');
-                        $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
-                            $('#return_reason_select').val(null).trigger('change');
-                        });
-                        $('#update_return_reason_form').validate({
-                            ignore: [],
-                            errorClass: 'danger',
-                            successClass: 'success',
-                            errorPlacement: function(error, element) {
-                                error.addClass('w-100').appendTo(element.parent('.form-group'));
-                            },
-                            normalizer: function(value) {
-                                return $.trim(value);
-                            },
-                            submitHandler: function(form) {
-                                var return_reason_select = $('#return_reason_select').val();
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Return-Confirm!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
+                        {
+                            text: 'Confirm',
+                            className: 'btn btn-primary confirm',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $('#ReturnConfirmReasonModal').modal('show');
+                                $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
+                                    $('#return_reason_select').val(null).trigger('change');
+                                });
+                                $('#update_return_reason_form').validate({
+                                    ignore: [],
+                                    errorClass: 'danger',
+                                    successClass: 'success',
+                                    errorPlacement: function(error, element) {
+                                        error.addClass('w-100').appendTo(element.parent('.form-group'));
                                     },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        blockPagePermanently();
-                                        $.ajax({
-                                            url:"{{route('admin.delivery.lost.confirm.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                'reason':return_reason_select,
-                                                '_token':'{{ csrf_token() }}'
+                                    normalizer: function(value) {
+                                        return $.trim(value);
+                                    },
+                                    submitHandler: function(form) {
+                                        var return_reason_select = $('#return_reason_select').val();
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes to change shipment status to Return-Confirm!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                $.ajax({
+                                                    url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
+                                                    method:'POST',
+                                                    data:{
+                                                        'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
+                                                        'reason':return_reason_select,
+                                                        '_token':'{{ csrf_token() }}'
+                                                    }
+                                                }).done(function (data) {
+                                                    UnblockPagePermanently();
+                                                    $('#ReturnConfirmReasonModal').modal('hide');
+                                                    selected_rows = [];
+                                                    action_selected_shipment = [];
+                                                    table.button('.reject').disable();
+                                                    table.button('.approve').disable();
+                                                    table.button('.re-attempt').disable();
+                                                    table.button('.confirm').disable();
+                                                    table.draw('false');
+                                                    table.rows().deselect();
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                });
                                             }
-                                        }).done(function (data) {
-                                            UnblockPagePermanently();
-                                            $('#ReturnConfirmReasonModal').modal('hide');
-                                            selected_rows = [];
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.draw('false');
-                                            table.rows().deselect();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                         });
                                     }
                                 });
                             }
-                        });
-                    }
-                },
+                        },
                     @endif
 
                     @if (session('role_id') == 1 || in_array(129, session('permissions')))
@@ -360,11 +537,12 @@
                     title: 'Lost Shipments',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                }, {
+                },
+                {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
-                    action : function(e) {
+                    action: function(e) {
                         e.preventDefault();
 
                         table.rows().nodes().each(function(index) {
@@ -372,27 +550,31 @@
 
                             if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                 id = parseInt(row.id());
+                                approval = row.data().approval;
+                                cleared = row.data().cleared;
+                                permission = row.data().permission;
+                                shipment_cleared = row.data().shipment_cleared;
 
                                 if (id) {
-                                    row.select();
-
                                     var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
+                                    // if ((index === -1 && approval >= 1 && cleared != 0) || (index === -1 && confirm_reattempt === 1) || (permission == 944 && shipment_cleared == null)) {
                                         selected_rows.push(id);
-                                    }
-
-                                    table.button('.confirm').enable();
-                                    table.button('.re-attempt').enable();
+                                        row.select();
+                                        table.button('.reject').enable();
+                                        table.button('.approve').enable();
+                                        table.button('.re-attempt').enable();
+                                        table.button('.confirm').enable();
+                                    // }
                                 }
                             }
                         });
                     }
-                }, {
+                },
+                {
                     extend: 'selectNone',
                     text: 'Select None',
                     className: 'select_none',
-                    action : function(e) {
+                    action: function(e) {
                         e.preventDefault();
 
                         table.rows().nodes().each(function(index) {
@@ -410,8 +592,10 @@
                                 }
 
                                 if (selected_rows.length == 0) {
-                                    table.button('.confirm').disable();
+                                    table.button('.reject').disable();
+                                    table.button('.approve').disable();
                                     table.button('.re-attempt').disable();
+                                    table.button('.confirm').disable();
                                 }
                             }
                         });
@@ -419,14 +603,8 @@
                 },
                 'reset'
             ],
-            @else
-            buttons:[{
-                extend: 'excel',
-                title: 'Lost Shipments',
-                className: 'btn btn-primary',
-                text: '<i class="la la-file-excel-o"></i> Excel',
-            },'reset'],
-            @endif
+
+           
             scrollX: true, scrollY: '500px',
             select: {
                 info: false,
@@ -442,7 +620,20 @@
                     processing: data_table_loader
                 },
             serverSide: true,
-            ajax: '{{ route('admin.delivery.lost.list') }}',
+            ajax: {
+                url: '{{ route('admin.delivery.lost.list') }}',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: function(d) {    
+                    d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
+                    d.search_total_lost_approved_shipments = $('#search_total_lost_approved_shipments').val();
+                    d.search_total_lost_pending_shipments = $('#search_total_lost_pending_shipments').val();
+                    d.search_from = $('input[name="from_date_formatted"]').val();
+                    d.search_to = $('input[name="to_date_formatted"]').val();
+                }
+            },
             rowId: 'shId',
             order: [[15, 'desc']],
             columns: [
@@ -464,11 +655,19 @@
                 {data: 'reference', name: 'shipments_journey.reference_1_id', class: 'align-middle reference'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'}
+                {data: 'lost_confirmation_status', name: 'lost_confirmation_status', class: 'align-middle lost_confirmation_status'},
+                {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'},
+                {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
             ],
             rowCallback: function(row, data, index) {
                 if (data.aging < 7) {
                     $('td:eq(0)', row).addClass('select-checkbox');
+                }
+                if (data.approval >= 1 && data.permission === 944 && data.cleared != 0) {
+                    $('td:eq(0)', row).removeClass('select-checkbox');
+                }
+                if ((data.approval == 0 && data.permission != 944 || (data.approval >= 1 && data.permission != 944  && data.cleared == 0))|| (data.permission != 944 && data.shipment_cleared == null)) {
+                    $('td:eq(0)', row).removeClass('select-checkbox');
                 }
                 var info = table.page.info();
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
@@ -489,8 +688,6 @@
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
-
-
                     if ($(header).is('.select') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
@@ -562,97 +759,340 @@
                 this.api().table().columns.adjust();
             }
         });
-
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-
             var id = parseInt($(this).parent('tr').attr('id'));
+            var rowData = table.row($(this).parents('tr')).data();
+            var index = $.inArray(id, selected_rows);
 
-                var index = $.inArray(id, selected_rows);
+            if ((index === -1 && rowData.approval != 1) ||  (index === -1 && confirm_reattempt === 1) || (index === -1 && rowData.approval >= 1 && rowData.cleared == 0)) {
+                selected_rows.push(id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+    
+            if (selected_rows.length > 0) {
+                table.button('.reject').enable();
+                table.button('.approve').enable();
+                table.button('.re-attempt').enable();
+                table.button('.confirm').enable();
+            }
+            else {
+                table.button('.reject').disable();
+                table.button('.approve').disable();
+                table.button('.re-attempt').disable();
+                table.button('.confirm').disable();
+            }
+        });
+      
 
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
 
-                if (selected_rows.length > 0) {
-                    table.button('.confirm').enable();
-                    table.button('.re-attempt').enable();
+        $('#rejectModal .confirm').click(function(){
+            $('#ReturnConfirmReasonModal').modal('show');
+            $('#ReturnConfirmReasonModal').on('hide.bs.modal', function () {
+                $('#return_reason_select').val(null).trigger('change');
+            });
+            $('#rejectModal').modal('hide');
+
+            $('#update_return_reason_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var return_reason_select = $('#return_reason_select').val();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Return. Note that either of these actions will apply towards the destination',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url: '{{ route('admin.delivery.lost.confirm.status.lost') }}',
+                                method:'POST',
+                                data:{
+                                    'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
+                                    'reason':return_reason_select,
+                                    '_token':'{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                $('#ReturnConfirmReasonModal').modal('hide');
+                                selected_rows = [];
+                                action_selected_shipment = [];
+                                table.rows().deselect();
+                                table.button('.reject').disable();
+                                table.button('.approve').disable();
+                                table.button('.re-attempt').disable();
+                                table.button('.confirm').disable();
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            });
+                        }
+                    });
                 }
-                else {
-                    table.button('.confirm').disable();
-                    table.button('.re-attempt').disable();
+            });
+		});
+
+     
+
+        $('#rejectModal .re-attempt').click(function() {
+            $('#add_remarks_modal').modal('show');
+            $('#add_remarks_modal').on('hide.bs.modal', function() {
+                $('#add_remarks_form input.add_remarks').val('');
+            });
+            $('#rejectModal').modal('hide');
+
+            $('#add_remarks_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var remarks = $('#add_remarks').val();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Reattempt. Note that either of these actions will apply towards the destination',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url: '{{ route('admin.delivery.lost.reattempt.status.lost') }}',
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
+                                    '_token': '{{ csrf_token() }}',
+                                    'remarks': remarks,
+                                }
+                            }).done(function(data) {
+                                UnblockPagePermanently();
+                                $('#add_remarks_modal').modal('hide');
+                                selected_rows = [];
+                                action_selected_shipment = [];
+                                // Assuming 'table' is defined somewhere and it's DataTable
+                                table.button('.reject').disable();
+                                table.button('.approve').disable();
+                                table.button('.re-attempt').disable();
+                                table.button('.confirm').disable();
+                                table.draw('false');
+                                table.rows().deselect();
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            });
+                        }
+                    });
                 }
+            })
+        });
+
+        $('#search_total_div').on('click', function() {
+            $('#search_total_lost_shipments').val(1);
+            $('#search_total_lost_approved_shipments').val('');
+            $('#search_total_lost_pending_shipments').val('');
+            table.draw();
+        });
+
+
+        $('#search_total_approved_div').on('click', function() {
+            $('#search_total_lost_shipments').val('');
+            $('#search_total_lost_approved_shipments').val(2);
+            $('#search_total_lost_pending_shipments').val('');
+            table.draw();
+        });
+
+        $('#search_total_pending_div').on('click', function() {
+            $('#search_total_lost_shipments').val('');
+            $('#search_total_lost_approved_shipments').val('');
+            $('#search_total_lost_pending_shipments').val(3);
+            table.draw();
+        });
+
+  
+        $('#datatable tbody').on('click', '.reject', function() {
+            $('#rejectModal').modal('show');
+            shipment_id = $(this).attr('data-id');
+            action_selected_shipment.push(shipment_id); 
+            selected_rows = [];
+            action_selected_shipment = $.grep(action_selected_shipment, function(value) {
+                return value !== null && value !== undefined;
+            });
 
         });
 
-        var shipment_id;
-        $('#datatable tbody').on('click', '.responsible_person_shipment', function() {
-            var shipment_id = $(this).attr('data-shipment-id');
-
-            // Make an AJAX request
-            $.ajax({
-                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
-                type: 'GET', 
-                data: { shipment_id: shipment_id }, 
-                success: function(response) {
-                    var modalContent =  
-                        '<div class="modal-dialog modal-xl" role="document">' +
-                        '<div class="modal-content">' +
-                        '<div class="modal-header bg-primary white">' +
-                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
-                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                        '<span aria-hidden="true">&times;</span>' +
-                        '</button>' +
-                        '</div>' +
-                        '<div class="modal-body text-center">' +
-                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
-                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
-                        '<thead>' +
-                        '<tr role="row" class="bg-primary white">' +
-                        '<th class="border-primary border-darken-1">S. No.</th>' +
-                        '<th class="border-primary border-darken-1">Employee ID</th>' +
-                        '<th class="border-primary border-darken-1">Employee Name</th>' +
-                        '<th class="border-primary border-darken-1">Employee Type</th>' +
-                        '<th class="border-primary border-darken-1">Employee Status</th>' +
-                        '</tr>' +
-                        '</thead>' +
-                        '<tbody>'; 
-
-                        var addedTraxIds = []; 
-                        $.each(response.details, function(index, item) {
-                            var employee = item;
-                            if (!addedTraxIds.includes(employee.trax_id)) { 
-                                modalContent += '<tr>';
-                                modalContent += '<td>' + (index + 1) + '</td>'; 
-                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
-                                modalContent += '<td>' + employee.name + '</td>'; 
-                                modalContent += '<td>' + employee.type + '</td>'; 
-                                modalContent += '<td>' + employee.status + '</td>'; 
-                                modalContent += '</tr>';
-                                addedTraxIds.push(employee.trax_id); 
-                            }
-                        });
-
-
-                    modalContent += '</tbody>' + // End of tbody
-                        '</table>' +
-                       
-                        '</div>' +
-                        '</div>' +
-                        '</div>' +
-                    $('.addLostResponsibleModal').html('');
-                    $('.addLostResponsibleModal').append(modalContent);
-                    $('.addLostResponsibleModal').modal('show');
+        $('#datatable tbody').on('click', '.approve', function() {
+            shipment_id = $(this).attr('data-id')
+            action_selected_shipment.push(shipment_id);
+            selected_rows = []; 
+            action_selected_shipment = $.grep(action_selected_shipment, function(value) {
+                return value !== null && value !== undefined;
+            });
+            swal({  
+                title: 'Are You Sure?',
+                text: 'Select yes to approve!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
                 },
-                error: function(xhr, status, error) {
-                    // Handle errors if any
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function(confirm) {
+                if (confirm) {
+                    blockPagePermanently();
+            
+                    $.ajax({
+                        url: '{!! route('admin.delivery.lost.approve.status.lost') !!}',
+                        method: 'POST',
+                        data: {
+                            'shipment_ids': (selected_rows.length == 0) ? action_selected_shipment : selected_rows,
+                            '_token': '{{ csrf_token() }}',
+                            'approve': '1',
+                        }
+                    }).done(function(data) {
+                        table.draw('false');
+                        if (data.status == 1) {
+                            UnblockPagePermanently();
+                            table.draw('false');
+                            selected_rows = [];
+                            action_selected_shipment = [];
+
+                            toastr.success(data.success,
+                                'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                        } else {
+                            UnblockPagePermanently();
+                            toastr.error(data.error,
+                                'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                        }
+
+                    });
                 }
             });
         });
+    
+        var today = new Date();
+        var max = '{{ Carbon\Carbon::now() }}';
+        var statusFilterFromDate, statusFilterToDate;
 
-   
+        if (today.getDate() >= 20) {
+            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth(), 20);
+            statusFilterToDate = new Date(today.getFullYear(), today.getMonth() + 1, 20);
+        } else {
+            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth() - 1, 20);
+            statusFilterToDate = new Date(today.getFullYear(), today.getMonth(), 20);
+        }
+
+
+        var from_date = $('#from_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            min: statusFilterFromDate,
+            max: statusFilterToDate,
+            format: 'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            editable: false, 
+            onOpen: function() {
+                $('#from_date_root').css('top', '40px');
+            },
+            onClose: function() {
+                var toDateInstance = $('#to_date').pickadate('picker');
+                if (toDateInstance.get('select') < this.get('select')) {
+                    toDateInstance.set('select', this.get('select'));
+                }
+            }
+        });
+
+        var to_date = $('#to_date').pickadate({
+            firstDay: 1,
+            clear: 'Clear',
+            max: max,
+            format: 'dd mmmm, yyyy',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            editable: false, 
+            onOpen: function() {
+                $('#to_date_root').css('top', '40px');
+            },
+            onClose: function() {
+                var fromDateInstance = $('#from_date').pickadate('picker');
+                if (fromDateInstance.get('select') > this.get('select')) {
+                    fromDateInstance.set('select', this.get('select'));
+                }
+            }
+        });
+
+        $('#search_filter_btn').on('click',function () {
+            table.draw();
+        });
     });
 
     </script>

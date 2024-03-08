@@ -1526,7 +1526,7 @@ class AdminTrackingController extends Controller
                                    
                             }
                         } 
-                        //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
+                        // shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
                         $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
                         if($shipment_pickup_journey_v3->exists())
                         {
