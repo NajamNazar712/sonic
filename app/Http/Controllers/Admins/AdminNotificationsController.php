@@ -504,87 +504,142 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['pickup_request_ID', 'shipper', 'date'];
         }
         else if ($id == 64){
-            $details['receiver'] = ['Shipper'];
+            $details['receiver'] = ['Role-(Department Head (Sales))','CC-(Role-(Department Head (Finance)))'];
 
             $details['fields'] = ['account_id', 'name'];
         }
         else if ($id == 65){
-            $details['receiver'] = ['Role-(Department Head (Sales))','CC-(Role-(Department Head (Finance)))'];
-
             $details['fields'] = ['request_id', 'case_nature', 'case_nature_type'];
         }
         else if ($id == 66){
             $details['fields'] = ['request_id', '[escalation].'];
         }
 		else if ($id == 67){
+            $details['receiver'] = ['sheharyar.majid@trax.pk,shafay.tariq@trax.pk,talha.motiwala@trax.pk'];
+
             $details['fields'] = ['zero_report'];
         }
 		else if ($id == 68 || $id == 69 ||  $id == 70 ||  $id == 71 || $id == 72){
+            if($id == 68) {
+                $details['receiver'] = ['Role-(Zonal Manager,Station Manager)','CC-(Role-(Department Head (Operations),Department Head (Customer Experience),Regional Manager,Manager Operation Intelligence,Debriefing Officer,Network Manager Debriefing & Ops Excellence))'];
+            } else if($id == 69) {
+                $details['receiver'] = ['Role-(Zonal Manager,Regional Manager)','CC-(Role-(Department Head (Operations),Department Head (Customer Experience),Regional Manager,Manager Operation Intelligence,Debriefing Officer,Network Manager Debriefing & Ops Excellence))'];
+            } else if ($id ==  70) {
+                $details['receiver'] = ['m.sohail@trax.pk','CC-(Role-(Department Head (Finance),Department Head (Operations),Department Head (Sales),Department Head (Customer Experience),Manager Operation Intelligence,Debriefing Officer,Network Manager Debriefing & Ops Excellence,Business Intelligence,Officer (Warehouse)))'];
+            } else if  ($id == 71) {
+                $details['receiver'] = ['fawad@outlook.com,shafay.tariq@trax.pk,faizan.ahmed@trax.pk'];
+            } else if  ($id == 72) {
+                $details['receiver'] = ['fawad@outlook.com,shafay.tariq@trax.pk,faizan.ahmed@trax.pk'];
+            }
+
             $details['fields'] = ['preview'];
         }
 		else if ($id == 73){
+            $details['receiver'] = ['Shipper','BCC-(Role-(Station Manager))'];
+
             $details['fields'] = ['pickup_request_id', 'tracking_numbers', 'company_name', 'pickup_city'];
         }
 		else if ($id == 74){
+            $details['receiver'] = ['fawad@outlook.com,talha.motiwala@trax.pk,wajiha.majeed@trax.pk'];
+
             $details['fields'] = ['preview','link'];
         }
 		else if ($id == 75){
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['name','address'];
         }
 		else if ($id == 76){
+            $details['receiver'] = ['Role-(Station Manager,Cashier)/aamir.sohail@trax.pk,fawad.ahmed@trax.pk','CC-(Role(Department Head (Finance,Operations),Regional Manager,Zonal Manager))'];
+
             $details['fields'] = ['hub','date','link'];
         }
 		else if ($id == 77){
+            $details['receiver'] = ['Pickup Address Phone Number'];
+
             $details['fields'] = ['rider_name','rider_phone'];
         }
 		else if ($id == 78){
+            $details['receiver'] = ['Role-(Regional Manager,Zonal Manager,Station Manager,Team Lead)'];
+
             $details['fields'] = ['hub','date'];
         }
 		else if ($id == 79){
+            $details['receiver'] = ['Role-(Regional Manager,Zonal Manager)'];
+
             $details['fields'] = ['zone','date'];
         }
 		else if ($id == 80){
+            $details['receiver'] = ['Role-(Department Head (Operations))'];
+
             $details['fields'] = ['date'];
         }
 		else if ($id == 81){
+            $details['receiver'] = ['Sales Person','CC-(waqas@trax.pk,khan.usama@trax.pk,shahrukh.raheem@trax.pk/nabeel.ahmed@trax.pk,ali.qureshi@trax.pk,adeel.ali@trax.pk)'];
+
             $details['fields'] = ['preview'];
         }
 		else if ($id == 82){
+            $details['receiver'] = ['syed.furqan@trax.pk,m.sohail@trax.pk,fawad.ahmed@trax.pk,aftab.qidwai@trax.pk,wajiha.majeed@trax.pk,huzaifa.aamir@trax.pk,mohsin.khan@trax.pk','BCC-(muhammad.waqas@trax.pk,noman.arshad@trax.pk)'];
+
             $details['fields'] = ['preview','link'];
         }
 		else if($id == 83)
 		{
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['shipment_picked_date','rider_name','shipper_name','requested_date','number'];
         }
 		else if ($id == 84){
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['date','tracking_number','shipper_name','product_description','cod_amount','origin', 'destination', 'status','preview'];
         }
 		else if ($id == 85){
+            $details['receiver'] = ['Admin/fawad@outlook.com,shafay.tariq@trax.pk,talha.motiwala@trax.pk'];
+
             $details['fields'] = ['preview'];
         }
 		else if ($id == 86 || $id == 87){
+            if($id == 86) {
+                $details['receiver'] = ['Role-(Department Head (Operations),Regional Manager,Zonal Manager,Station Manager,Supply Chain Executive)'];
+            } else if ($id == 87) {
+                $details['receiver'] = ['Role-(Zonal Manager,Station Manager,Supply Chain Executive)'];
+            }
             $details['fields'] = ['hub','date','link'];
         }
 		else if ($id == 88){
+            $details['receiver'] = ['syed.sharique@trax.pk'];
+
             $details['fields'] = ['runner','date','link'];
         }
         else if ($id == 89) {
+            $details['receiver'] = ['fawad@outlook.com,talha.motiwala@trax.pk'];
+
             $details['fields'] = ['link'];
         }
 		else if ($id == 90)
 		{
+            $details['receiver'] = ['fawad@outlook.com,talha.motiwala@trax.pk,usama.shahid@trax.pk,faizan.ahmed@trax.pk'];
+
             $details['fields'] = ['link'];
         }
 		else if ($id == 91)
 		{
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['pin'];
         }
         else if ($id == 92)
         {
+            $details['receiver'] = ['Shipper/wajiha.majeed@trax.pk','CC-(Sales person)'];
+
             $details['fields'] = ['shipper_name','payment_id'];
         }
         else if ($id == 96)
         {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['link'];
         }
         else if ($id == 98)
@@ -593,10 +648,14 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 99)
         {
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['sales_person','preview'];
         }
         else if ($id == 100)
         {
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['head_of_sales','preview'];
         }
         else if ($id == 101 || $id == 102)
