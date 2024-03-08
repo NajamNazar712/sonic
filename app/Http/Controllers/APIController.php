@@ -8560,7 +8560,7 @@ class APIController extends Controller
         $flag = null;
 
         // check if user_id is 2234 or not
-        if ($user_id != 2234) {
+        if ($user_id != 2234 || $user_id != 1049) {
             return "Invalid user";
         }
 
@@ -8653,7 +8653,7 @@ class APIController extends Controller
 
         $user_type = User::where('id', $user_id)->first();
 
-        if (($user_type['account_type_id'] == 1 || $user_type['account_type_id'] == 2) && $user_id == 2234) {
+        if (($user_type['account_type_id'] == 1 || $user_type['account_type_id'] == 2) && ($user_id == 2234 || $user_id == 1049)) {
             $pickup_address_id = $request->pickup_address_id;
             $userShippingInfoStoreAddress = UserShippingInfoStoreAddress::where('shipper_store_id', $pickup_address_id)->first();
             $rules = [

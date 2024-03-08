@@ -1105,7 +1105,7 @@ class ShipperDashboardController extends Controller
         $shipperStoreId = $request->input('shipper_store_id');
         $userShippingInfosId = $request->input('user_shipper_infos_id');
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
-        if ($userId != 2234){
+        if ($userId != 2234 || $userId != 1049){
             return response()->json(['error' => 'Invalid user']);
         } 
         if (!$shipperStoreId) {
@@ -1227,7 +1227,7 @@ class ShipperDashboardController extends Controller
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
             $add_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Store ID</div></button>';
             
-            if(auth()->user()->id == 2234){
+            if(auth()->user()->id == 2234 || auth()->user()->id == 1049){
                 $dropdown .= $add_store_id_button;
             }
             if ($pickup->default_address == 1) {
