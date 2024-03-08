@@ -39,6 +39,7 @@ Route::name('api.')->group(function () {
             Route::post('book/intl', 'APIController@shipment_book_international')->name('book.intl');
             Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
             Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');
+            Route::post('book/zellbury', 'APIController@shipment_book_zellbury')->name('book.zellbury');
 
             Route::prefix('status')->name('status.')->group(function () {
                 Route::get('', 'APIController@shipment_status')->name('status');
