@@ -72,9 +72,9 @@ trait LastMileAppReportTrait
                         self::countSub($minusTime,$check_summary);
 
                         $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
-                        $update_delivery_note_shipment->shipper_status_id = $this->shipper_status_id;
+                        $update_delivery_note_shipment->shipper_status_id = $shipper_status_id;
                         $update_delivery_note_shipment->updated_time = date('H:i:s');
-                        $update_delivery_note_shipment->updated_via = $this->via;
+                        $update_delivery_note_shipment->updated_via = $via;
                         $update_delivery_note_shipment->save();
                      }
                     
