@@ -238,6 +238,7 @@ class LostShipmentsController extends Controller
                     }
                     
                 })
+<<<<<<< HEAD
 
                 ->addColumn('excel_responsible_person_id', function ($shipment) {
                     $trax_ids = [];
@@ -343,6 +344,8 @@ class LostShipmentsController extends Controller
                     return '-';
 
                 })
+=======
+>>>>>>> parent of 0152d6934d (This Ticket All done, now merging related ticket to this (6596))
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
                         $sub_query->where('shipments.booking_type_id', '!=', 4)
