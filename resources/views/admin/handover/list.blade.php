@@ -19,7 +19,7 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
+                            <select name="R" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -301,6 +301,7 @@
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
+                            head.push('Total Shipment(s)');
                             head.push('Received Shipment(s)');
                             head.push('Remaining Shipment(s)');
                             head.push('Received By');
@@ -482,11 +483,11 @@
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'from', name: 'hr.admin_id', class: 'align-middle from'},
                     {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
-                    {data: 'from_dept_area_desg', name: 'handovers.from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
+                    {data: 'from_dept_area_desg', name: 'from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
                     {data: 'to', name: 'hor.admin_id', class: 'align-middle to'},
                     {data: 'user_type', name: 'user_type', class: 'align-middle user_type'},
                     {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
-                    {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
+                    {data: 'to_dept_area_desg', name: 'to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},
                     {data: 'shipment_count', name: 'handovers.shipments', class: 'align-middle text-center shipment_count'},

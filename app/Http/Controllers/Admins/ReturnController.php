@@ -2461,7 +2461,7 @@ class ReturnController extends Controller
                 if (!$dispute_check) {
                     return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                 }
-                ShipmentScanningJourneyController::add($shipment->id ,20,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+                ShipmentScanningJourneyController::add($shipment->id ,7,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 if($request->shipper_id != null){
                     $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if ($request->shipper_id != $shipment->user_id) {
@@ -5487,7 +5487,7 @@ class ReturnController extends Controller
                     
                         foreach($shipment_ids as $shipment_id)
                         {
-                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,65,66,52])->first();
+                            $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', [12,66,52])->first();
                             $already_assigned_state =  RvShipmentAssignAgent::where('shipment_id', $shipment_id);
                             if($already_assigned_state->exists()){
                                 $already_assigned_state =  $already_assigned_state->first();
@@ -7558,6 +7558,7 @@ class ReturnController extends Controller
         $unresponsive_invalid_shipments = [];
         $successfull_updated_shipments = [];
         $shipment_ids = explode(',',$request->shipment_id);
+        $unresponsive_shipments_error = false;
 
         foreach ($shipment_ids as $shipment_id) 
         {
@@ -7606,6 +7607,7 @@ class ReturnController extends Controller
             }
             else if($unresponsive_shipments){
                 $unresponsive_invalid_shipments[] = $shipment_id;
+                $unresponsive_shipments_error = true;
                 // return response()->json(['status' => 0, 'message' => 'Status of shipment cannot update to unresponsive right now']);
             }
             else if($unassigned_shipment)
@@ -7731,9 +7733,13 @@ class ReturnController extends Controller
         if (!empty($unresponsive_invalid_shipments)){
             if (!empty($unresponsive_invalid_shipments)) {
                 $unresponsive_invalid_shipments_Message = implode(', ', $unresponsive_invalid_shipments);
-                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' try to update the shipments within 24 hours And Rest Has Been updated';
+                $errorMessages = 'No Shipment Of These Numbers Are updated ' . $unresponsive_invalid_shipments_Message . ' try to update the shipments after 24 hours And Rest Has Been updated';
+                if($unresponsive_shipments_error)
+                {
+                    $errorMessages = 'Try to update the shipment after 24 hours';
+                }
             }
-            return response()->json(['status' => 0, 'message' => $errorMessages]);
+            return response()->json(['status' => 0, 'message' => $errorMessages, 'custom_check' => $unresponsive_shipments_error ? 1 : 0]);
         }
 
         // When call history of all shipments are updated without any error

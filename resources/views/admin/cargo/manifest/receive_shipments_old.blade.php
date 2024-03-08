@@ -21,19 +21,9 @@
                                     {!! session('received_html') !!}
                                 </div>
                             @endif
-                            @if(session('misrouted_html'))
-                                <div class="alert alert-danger">
-                                    {!! session('misrouted_html') !!}
-                                </div>
-                            @endif
                             @if(session('sr_html'))
                                 <div class="alert alert-danger">
                                     {!! session('sr_html') !!}
-                                </div>
-                            @endif
-                            @if(session('went_wrong'))
-                                <div class="alert alert-danger">
-                                    {!! session('went_wrong') !!}
                                 </div>
                             @endif
                             @if(session('already_received_shipments_html'))
@@ -49,8 +39,8 @@
                                 <input type="hidden" name="shipment_bag_type" id="shipment_bag_type">
                                 <div class="form-group mr-2">
                                     <select name="bag_type" id="bag_type" class="form-control select2" data-rule-required="true">
-                                       <option value="1">Normal</option>
-                                       <option value="2">Return</option>
+                                        <option value="1">Normal</option>
+                                        <option value="2">Return</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -89,7 +79,6 @@
                             <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo_manifest.receive.bag.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <input id="bag_type_for_receive" type="hidden" name="bag_type" class="bag_type">
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <input type="hidden" name="open_box_ids" class="open_box_ids" id="open_box_ids">
 
@@ -178,11 +167,11 @@
                 placeholder: "Select Bag Type",
                 width:'100%',
             }).bind('change', function() {
-              $('#shipment_bag_type').val(this.value);
-              console.log( $('#shipment_bag_type').val());
-              $('.tracking_number').attr('disabled',false);
-              $('#bag_type').attr('disabled',true);
-        });
+                $('#shipment_bag_type').val(this.value);
+                console.log( $('#shipment_bag_type').val());
+                $('.tracking_number').attr('disabled',false);
+                $('#bag_type').attr('disabled',true);
+            });
 
 
 
@@ -212,12 +201,6 @@
                     // var info = table.page.info();
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    var misroute = data[11]; // misroute veriable
-                    console.log('row',row.childNodes[7].innerText);
-                    if(misroute == 1)
-                    {
-                        // $(row).addClass('alert-danger');
-                    }
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
@@ -241,27 +224,13 @@
 
                     var tracking_number = $(form).find('input.tracking_number').val();
                     var shipment_bag_type = $(form).find('input#shipment_bag_type').val();
-                    var shipment_bag_type_route = null;
-
-                    $('#bag_type_for_receive').val(shipment_bag_type);
-                    console.log($('#bag_type_for_receive'));
-
-                    if(shipment_bag_type == 1)
-                    {
-                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details') !!}';
-                    }
-                    else
-                    {
-                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details.return') !!}';
-                    }
 
                     form.reset();
+
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
-
                         $.ajax({
-                            {{--url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',--}}
-                            url: shipment_bag_type_route,
+                            url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
@@ -288,7 +257,7 @@
                                         var rowNo = table.rows().count();
 
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type
-                                            ,open_box,data.details.misroute
+                                            ,open_box
                                         ])
                                             .node().id = data.details.id;
                                         // var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
