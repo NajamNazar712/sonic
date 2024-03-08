@@ -8560,7 +8560,7 @@ class APIController extends Controller
         $flag = null;
 
         // check if user_id is 2234 or not
-        if ($user_id != 2234 || $user_id != 1049) {
+        if ($user_id != 2234 && $user_id != 1049) {
             return "Invalid user";
         }
 
