@@ -150,6 +150,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\AgentSarNotification',
         'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
+
+        'App\Console\Commands\CalculateFranchiseCommission'
         ];
 
     /**
