@@ -660,34 +660,57 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 101 || $id == 102)
         {
+            if ($id == 101)
+            {
+                $details['receiver'] = ['Role-(Zonal Manager,Station Manager)'];
+
+            } else if($id == 102) {
+
+                $details['receiver'] = ['Role-(Regional Manager,Zonal Manager)'];
+            }
             $details['fields'] = ['hub','date','preview'];
         }
         else if ($id == 103)
         {
+            $details['receiver'] = ['Role-(Department Head (Operations))'];
+
             $details['fields'] = ['date','preview'];
         }
         else if ($id == 105)
         {
+            $details['receiver'] = ['Sales Person Phone Number'];
+
             $details['fields'] = ['sales_person','pickup_address','city_name','reason'];
         }
         else if ($id == 106)
         {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['old_rider_name','pickup_request_id','pickup_coordinator_name','new_rider_name'];
         }
         else if ($id == 107)
         {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['new_rider_name','pickup_request_id','pickup_coordinator_name','old_rider_name'];
         }
         else if ($id == 108 || $id == 109)
         {
+
+            $details['receiver'] = ['balaj.khan@trax.pk,syed.asif@trax.pk'];
+
             $details['fields'] = ['date','preview'];
         }
         else if ($id == 110 || $id == 111)
         {
+            $details['receiver'] = ['uzair.anees@trax.pk,shahbaz.abbasi@trax.pk'];
+
             $details['fields'] = ['link'];
         }
         else if ($id == 112)
         {
+            $details['receiver'] = ['syed.sharique@trax.pk,uzair.anees@trax.pk,balaj.khan@trax.pk'];
+
             $details['fields'] = ['preview'];
         }
         else if ($id == 113){
