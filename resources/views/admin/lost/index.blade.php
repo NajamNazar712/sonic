@@ -151,6 +151,7 @@
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Lost confirmation status</th>
                         <th class="border-primary border-darken-1">Marked By</th>
+                        <th class="border-primary border-darken-1">Marked At</th>
                         <th class="border-primary border-darken-1">Action</th>
 
                     </tr>
@@ -240,12 +241,14 @@
                 <div class="modal-header">
                     <h4 class="modal-title">Reject</h4>
 
+                    
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <button type="button" class="btn btn-info ml-2 confirm">Confirm</button>
+                    <span>Are You Sure you want to reject this lost request. Note that either of these actions will apply towards the destination. Please Confirm further status.</span> <br> <br>
+                    <button type="button" class="btn btn-info ml-2 confirm">Return Confirm</button>
                     <button type="button" class="btn btn-info ml-2 re-attempt" >Re-Attempt</button>
                 </div>
             </div>
@@ -338,6 +341,8 @@
                         head.push('Status Date');
                         head.push('Lost Confirmation Status');
                         head.push('Marked By');
+                        head.push('Marked At');
+
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -364,6 +369,7 @@
                             row.push(values.current_status_date);
                             row.push(values.lost_confirmation_status);
                             row.push(values.marked_by);
+                            row.push(values.marked_at);
 
                             body.push(row);
                         });
@@ -755,7 +761,8 @@
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'lost_confirmation_status', name: 'lost_confirmation_status', class: 'align-middle lost_confirmation_status'},
                 {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'},
-                {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
+                {data: 'marked_at', name: 'shipments_journey.updated_at', class: 'align-middle marked_at'}
+                {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false},
             ],
             rowCallback: function(row, data, index) {
                 if (data.aging < 7) {
