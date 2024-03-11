@@ -23,7 +23,7 @@
                         
                     </div>
                 </form>
-                @if( session('role_id') == 1|| in_array(890, session('permissions')))
+                @if( session('role_id') == 1 || in_array(890, session('permissions')) || in_array(944, session('permissions')))
                 <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
                     
 
