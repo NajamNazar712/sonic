@@ -403,7 +403,6 @@ class LostShipmentsController extends Controller
 //                    if (!$parcel->packaging_material_request) {
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         ShipmentChargesController::return ($shipment);
-                        $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);  
 
                         ShipmentsJourneyController::add($shipment, 20, 20, $request->reason, NULL, NULL, Auth::id());
 
@@ -429,6 +428,7 @@ class LostShipmentsController extends Controller
 //                    }
                     }
 
+                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);  
 
                 }
             }
@@ -467,7 +467,6 @@ class LostShipmentsController extends Controller
                                     $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
                                     $packaging_request_history->save();
 
-                                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
                                 }
                             }
                         }
@@ -479,7 +478,7 @@ class LostShipmentsController extends Controller
                             if ($packaging_material_shipment != null) {
                                 $packaging_material_shipment->status_id = 3;
                                 $packaging_material_shipment->save();
-    
+                                
                                 $packaging_request_history = new PackagingMaterialRequestHistory();
                                 $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
                                 $packaging_request_history->status = 3;
@@ -488,7 +487,8 @@ class LostShipmentsController extends Controller
                             }
                         }
                     }
-
+                    
+                    $this->updateLostShipmentApproval($shipment, 'rejection_count', 1);
                     
                 }
             }
@@ -652,7 +652,6 @@ class LostShipmentsController extends Controller
                                             $cargo_manifest->received_bags = $total_received_manifest_bags;
                                             $cargo_manifest->save();
                                         }
-                                        $this->updateLostShipmentApproval($shipment_details->id, 'lost_count', 0);
                                     }
                                 }
                                 else{
@@ -674,7 +673,8 @@ class LostShipmentsController extends Controller
                     ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
                     $lost_shipments_array[] = $shipment;
 
-
+                    //Pending Count For Lost Pending
+                    $this->updateLostShipmentApproval($shipment_details->id, 'lost_count', 0);
                     
                 }
             }
