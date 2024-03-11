@@ -143,6 +143,24 @@ class LostShipmentsController extends Controller
                 }
             }
 
+            if ($request->get('search_total_lost_shipments') === "1") {
+                $shipments;
+            }
+
+            if ($request->get('search_total_lost_approved_shipments') === "2") {
+                $shipments->where('shipments_journey.verification', '=', 1);
+            }
+
+            if ($request->get('search_total_lost_pending_shipments') === "3") {
+                $shipments->where('shipments_journey.verification', '=', 0);
+            }
+
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $shipments->whereBetween('shipments_journey.created_at',[$from, $to]);
+            }
+
             return Datatables::of($shipments)
                 ->editColumn('tracking_number_link', function ($shipments) {
                     $route = route('admin.tracking.index');

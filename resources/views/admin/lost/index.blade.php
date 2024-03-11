@@ -761,7 +761,7 @@
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'lost_confirmation_status', name: 'lost_confirmation_status', class: 'align-middle lost_confirmation_status'},
                 {data: 'marked_by', name: 'ad.name', class: 'align-middle marked_by'},
-                {data: 'marked_at', name: 'shipments_journey.updated_at', class: 'align-middle marked_at'}
+                {data: 'marked_at', name: 'shipments_journey.updated_at', class: 'align-middle marked_at'},
                 {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false},
             ],
             rowCallback: function(row, data, index) {
