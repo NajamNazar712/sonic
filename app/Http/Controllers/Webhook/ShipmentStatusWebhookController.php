@@ -74,6 +74,13 @@ class ShipmentStatusWebhookController extends Controller
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
 
         $notification_data = ['user_id' => $user_id, 'url' => $url];
+        $payload = [];
+        $payload['tracking_number'] = $tracking_number;
+        $payload['order_id'] = $orderId;
+        $payload['status'] = $status;
+        $payload['date_time'] = $date;
+        WebhookLogController::shipment_status_log($user_id, 901,json_encode($payload));
+
         for($i = 0; $i < $attempts; $i++){
             try{
 
@@ -88,12 +95,13 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
+                WebhookLogController::shipment_status_log($user_id, 900,json_encode($payload));
+
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
 
                 $status_code = $response->getStatusCode();
-                WebhookLogController::shipment_status_log($user_id, $status_code,json_encode($payload));
 
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
