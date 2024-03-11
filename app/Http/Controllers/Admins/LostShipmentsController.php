@@ -82,6 +82,22 @@ class LostShipmentsController extends Controller
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
 
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
+        
+    }
+
+    static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
+        $lost_shipment_approval = LostShipmentStatusCount::where('shipment_id', $shipment_id);
+        
+        if(!$lost_shipment_approval->exists()) {
+            LostShipmentStatusCount::create(['shipment_id'=> $shipment_id, $fieldToUpdate => 1, 'cleared' => $clearedValue]);
+        } else {
+            $lost_shipment_approval = $lost_shipment_approval->first();
+            $field_value = $lost_shipment_approval->$fieldToUpdate;
+            $lost_shipment_approval->update([
+                $fieldToUpdate => $field_value + 1,
+                'cleared' => $clearedValue
+            ]);
+        }
     }
     public function lost_shipments_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
