@@ -714,18 +714,28 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['preview'];
         }
         else if ($id == 113){
+            $details['receiver'] = ['Lead Email Address'];
+
             $details['fields'] = ['contact_person', 'link','sales_person','sales_person_contact'];
         }
         else if ($id == 114){
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['code'];
         }
         else if ($id == 115){
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipper','tracking_number'];
         }
         else if ($id == 116){
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipper','tracking_number'];
         }
         else if ($id == 117){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['data','status'];
         }
         else if ($id == 118){
@@ -735,188 +745,300 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['product','sku_id'];
         }
         else if ($id == 200){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
         }
         else if ($id == 201){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['admin','admin_user_name','full_name','department','designation'];
         }
         else if ($id == 202){
+            $details['receiver'] = ['Admin','CC-(Admin)'];
+
             $details['fields'] = ['admin','admin_user_name','trax_id','full_name','email','sonic_password','outlook_password'];
         }
         else if ($id == 203){
+            $details['receiver'] = ['waqas@trax.pk'];
+
             $details['fields'] = ['date','preview'];
         }
         else if ($id == 204){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['date','sale_person','preview'];
         }
 		else if ($id == 119){
+            $details['receiver'] = ['Sales Person Phone Number'];
+
             $details['fields'] = ['shipper_name','new_sale_person'];
         }
 		else if ($id == 120){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 121){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 122){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 123){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 124){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 125){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['date', 'link'];
         }
         else if ($id == 126){
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['tracking_number','location'];
         }
         else if ($id == 127){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['date','contact_person','preview'];
         }
 		else if ($id == 128){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['station_manager'];
         }
 		else if ($id == 129){
+            $details['receiver'] = ['Retail Phone Number'];
+
             $details['fields'] = ['name','code'];
         }
 		else if ($id == 130)
         {
+            $details['receiver'] = ['adnan.ahsan@trax.pk,fawad.ahmed@trax.pk,hammad.majid@trax.pk,m.sohail@trax.pk,ghazanfar.ali@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk)'];
+
             $details['fields'] = ['month','year','link'];
         }
 		else if ($id == 131)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['request_no'];
         }
 		else if ($id == 132)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp', 'consignee_name'];
         }
 		else if ($id == 133)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['erf_id','admin','date','link'];
         }
 		else if ($id == 134)
         {
+            $details['receiver'] = ['Pickup Address Email'];
+
             $details['fields'] = ['company_name','preview'];
         }
         else if ($id == 135)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp', 'consignee_name'];
         }
         else if ($id == 136)
         {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['shipper','message'];
         }
         else if ($id == 137)
         {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['rider_name','delivery_note','otp'];
         }
         else if ($id == 138)
         {
+            $details['receiver'] = ['Admin Phone Number'];
+
             $details['fields'] = ['name','code'];
         }
         else if ($id == 139 || $id == 140)
         {
+            if($id == 139) {
+                $details['receiver'] = ['Admin'];
+            } else if ($id == 140) {
+                $details['receiver'] = ['abdul.ahad@trax.pk'];
+            }
+
             $details['fields'] = ['preview'];
         }
         else if ($id == 141)
         {
+            $details['receiver'] = ['syed.furqan@trax.pk,m.sohail@trax.pk,fawad.ahmed@trax.pk,aftab.qidwai@trax.pk,wajiha.majeed@trax.pk,huzaifa.aamir@trax.pk,mohsin.khan@trax.pk','BCC-(muhammad.waqas@trax.pk,noman.arshad@trax.pk)'];
+
             $details['fields'] = ['preview','date','link'];
         }
         else if ($id == 142)
         {
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','channel','case_nature','case_nature_type','status','details'];
         }
         else if ($id == 143)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['preview'];
         }
         else if ($id == 144)
         {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['rider_name','otp'];
         }
 
 		else if ($id == 145)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['tracking_number','status','reason','link'];
         }
 		else if ($id == 146)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['emp_id','name','designation','link'];
         }
 		else if ($id == 147)
         {
+            $details['receiver'] = ['Role-(Department Head (Operations),Network Manager Debriefing & Ops Excellence)'];
+
             $details['fields'] = ['time','preview'];
         }
 		else if ($id == 148)
         {
+            $details['receiver'] = ['Role-(Zonal Manager,Station Manager,Supply Chain Executive)'];
+
             $details['fields'] = ['hub','date','link'];
         }
 		else if ($id == 149)
         {
+            $details['receiver'] = ['Sales Person,Finance Department'];
+
             $details['fields'] = ['Shipper','person_of_contact','Shipper name'];
         }
         else if ($id == 150){
+            $details['receiver'] = ['Sales Person','CC-(m.sohail@trax.pk,tauseef.sarfaraz@trax.pk,Shahrukh.raheem@trax.pk,Mohsin.khan@trax.pk,ops.excellence@trax.pk)'];
+
             $details['fields'] = ['preview'];
         }
         else if($id == 152 || $id == 153){
+
+            if($id == 152) {
+                $details['receiver'] = ['Shipper Phone Number'];
+
+            } else if ($id == 153) {
+                $details['receiver'] = ['Shipper'];
+
+            }
             $details['fields'] = ['shipper_name'];
         }
         else if ($id == 154){
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['shipment_no','Sales_Person','shipper_name'];
         }
         else if ($id == 155){
+            $details['receiver'] = ['abdul.ahad@trax.pk,saleem.abbas@trax.pk,nadeem.sarwar@trax.pk,hr.dept@trax.pk,ali.raza@trax.pk'];
+
             $details['fields'] = ['preview'];
         }
         else if ($id == 156)
         {
+            $details['receiver'] = ['adnan.ahsan@trax.pk,fawad.ahmed@trax.pk,hammad.majid@trax.pk,m.sohail@trax.pk,ghazanfar.ali@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk)'];
+
             $details['fields'] = ['month','year','link'];
         }
         else if ($id == 157)
         {
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['date', 'link'];
         }
 		else if ($id == 158)
         {
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['rider_name', 'otp'];
         }
         else if ($id == 160)
         {
+            $details['receiver'] = ['mohsin.ali@trax.pk,waqas@trax.pk,noman.aziz@trax.pk,fawad.ahmed@trax.pk,nadir.qureshi@trax.pk,m.sohail@trax.pk','BCC-(muhammad.waqas@trax.pk)'];
+
             $details['fields'] = ['date','preview', 'link'];
         }
         else if ($id == 162)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['user_name','otp'];
         }
         else if ($id == 163)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['tracking_no','status', 'reason'];
         }
         else if ($id == 165)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['consignee','tracking_no', 'otp'];
         }
         else if ($id == 167)
         {
+            $details['receiver'] = ['Shipper','CC-(Sales Person)'];
+
             $details['fields'] = ['status_code','link'];
         }
         else if ($id == 168)
         {
+            $details['receiver'] = ['talha.hussain@trax.p,syed.anam@trax.pk,waqas@trax.pk,ops.telenor@trax.pk'];
+
             $details['fields'] = ['preview','date'];
         }
         else if ($id == 166)
         {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['company_name','arrival_at','tracking_number','order_id','consignee_name','consignee_city'];
         }
         else if ($id == 169)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['consignee','tracking_number','brand_name','amount'];
         }
         else if ($id == 170)
         {
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['sale_person','preview'];
         }
         else if ($id == 171)
@@ -929,10 +1051,14 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 173)
         {
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['erf_id'];
         }
         else if ($id == 174)
         {
+            $details['receiver'] = ['m.sohail@trax.pk/hr.dept@trax.pk'];
+
             $details['fields'] = ['erf_id','admin'];
         }
         else if ($id == 175)
@@ -941,60 +1067,92 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 176)
         {
+            $details['receiver'] = ['Shipper Phone Number/Consignee Phone Number'];
+
             $details['fields'] = ['name','crm_request_id','comment'];
         }
 		else if ($id == 177)
         {
+            $details['receiver'] = ['Sales Person,Admin'];
+
             $details['fields'] = ['sales_person','shipper_name','pickup_request_no','remarks'];
         }
 		else if ($id == 178)
         {
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['name'];
         }else if ($id == 181)
         {
             $details['fields'] = ['name','reason'];
         }else if ($id == 182)
         {
+            $details['receiver'] = ['shahzad.ali@trax.pk,Line Manager'];
+
             $details['fields'] = ['link','emp_id','name','designation','joining_date'];
         }
 		elseif($id == 183){
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipper','tracking_number'];
         }
         elseif($id == 184){
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['consignee','tracking_number'];
         }
         elseif($id == 185){
+            $details['receiver'] = ['Rider Phone Number'];
+
             $details['fields'] = ['rider', 'amount', 'tracking_number'];
         }
         elseif($id == 186){
+            $details['receiver'] = ['faisal.hasan@trax.pk,muhammad.waqas@trax.pk'];
+
             $details['fields'] = ['admin', 'role'];
         }
         elseif($id == 191){
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['Shipper name'];
         }
         elseif($id == 192){
+            $details['receiver'] = ['Consignee Phone Number'];
+
             $details['fields'] = ['consignee_name', 'rider_name', 'tracking_number', 'otp'];
         }
         elseif($id == 205){
+            $details['receiver'] = ['Admin,talha.hussain@trax.pk'];
+
             $details['fields'] = ['admin', 'preview'];
         }
         else if ($id == 206)
         {
+            $details['receiver'] = ['adnan.ahsan@trax.pk,fawad.ahmed@trax.pk,hammad.majid@trax.pk,m.sohail@trax.pk,ghazanfar.ali@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk)'];
+
             $details['fields'] = ['month','year','link'];
         }
         else if ($id == 207)
         {
+            $details['receiver'] = ['adnan.ahsan@trax.pk,fawad.ahmed@trax.pk,hammad.majid@trax.pk,m.sohail@trax.pk,ghazanfar.ali@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk,asad.ahsan@trax.pk)'];
+
             $details['fields'] = ['month','year','link'];
         }
         elseif($id == 208)
         {
+            $details['receiver'] = ['Line Manager'];
+
             $details['fields'] = ['employee_name', 'emp_id'];
         }
         elseif($id == 209)
         {
+            $details['receiver'] = ['Line Manager'];
+
             $details['fields'] = ['line_manager','preview','link'];
         }
         else if ($id == 210) {
+            $details['receiver'] = ['ShipperNotificationEmail/Shipper'];
+
             $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
         }
         
@@ -1004,14 +1162,20 @@ class AdminNotificationsController extends Controller
         }
         elseif($id == 212)
         {
+            $details['receiver'] = ['Line Manager'];
+
             $details['fields'] = ['employee_name'];
         }
 		elseif($id == 213)
         {
+            $details['receiver'] = ['Role-(Department Head (Finance),Senior Officer (Finance))'];
+
             $details['fields'] = ['link'];
         }
         else if ($id == 214)
         {
+            $details['receiver'] = ['tanveer.malik@trax.pk,muhammad.jawwad@trax.pk,fawad.ahmed@trax.pk,waqas@trax.pk,huzaifa.aamir@trax.pk,hammad.majid@trax.pk,ghazanfar.ali@trax.pk','CC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk,asad.ahsan@trax.pk)'];
+
             $details['fields'] = ['link'];
         }
         else if ($id == 216)
@@ -1020,26 +1184,38 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 221)
         {
+            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+
             $details['fields'] = ['preview'];
         }
         else if($id == 222)
         {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['shipper', 'preview'];
         }
         else if($id == 223)
         {
+            $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
+
             $details['fields'] = ['preview'];
         }
         else if($id == 224)
         {
+            $details['receiver'] = ['Role-(Department Head (Operations),Zonal Manager,Manager Operation Intelligence,Network Manager Debriefing & Ops Excellence,Operation Excellence,Network Manager MMS,Debriefing Supervisor & Ops Excellence,Zonal Manager (Without Finance Access)/muhammad.ahmed@trax.pk,sahban.ghani@trax.pk)'];
+
             $details['fields'] = ['date_time', 'link'];
         }
         else if($id == 225)
         {
+            $details['receiver'] = ['Role-(Department Head (Operations),Zonal Manager,Manager Operation Intelligence,Network Manager Debriefing & Ops Excellence,Operation Excellence,Network Manager MMS,Debriefing Supervisor & Ops Excellence,Zonal Manager (Without Finance Access)/muhammad.ahmed@trax.pk,sahban.ghani@trax.pk)'];
+
             $details['fields'] = ['date_time', 'link'];
         }
         else if($id == 220)
         {
+            $details['receiver'] = ['Shipper'];
+
             $details['fields'] = ['preview', 'link'];
         }
         else if($id == 228)
