@@ -109,7 +109,7 @@
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                <i class="la la-close text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="rejection_shipments">
