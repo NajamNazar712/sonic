@@ -267,6 +267,45 @@ class LostShipmentsController extends Controller
                     return $status;
 
                 })
+                ->addColumn('permission',function ($shipment){
+                    if (in_array(944, session('permissions'))){
+                        return 944;
+                    }
+                })
+                ->addColumn('lost_confirmation_status', function($shipment){
+                    if($shipment->approval >= 1 && $shipment->cleared === 1){
+                        return 'Approved';
+                    }else if($shipment->approval >= 0 && $shipment->cleared === 0){
+                        return 'Pending';
+                    }
+                })
+                ->addColumn('action', function ($shipment) {
+                    if (session('role_id') == 1 || in_array(944, session('permissions'))) {
+
+                        $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm accounts">
+                        ';
+                
+                        if($shipment->verification != 1){
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Approve Lost Shipment</div></div></button>';
+                        }
+
+                        if($shipment->verification == 0){
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-id="' . $shipment->shId . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1 reject">Reject Lost Shipment</div></div></button>';
+                        }
+                        $dropdown .= '
+                            </div>
+                        </div>
+                        ';
+                    
+                        return $dropdown;
+                    }
+                    
+                    return '-';
+
+                })
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {
                         $sub_query->where('shipments.booking_type_id', '!=', 4)
