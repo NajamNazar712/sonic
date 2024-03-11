@@ -1680,6 +1680,11 @@
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
+                var sms_charges_select = '<select name="sms_charges_select" id="sms_charges_select" class="select2 form-control">' +
+                    '<option value="0">None</option>' +
+                    '<option value="1">Fixed</option>' +
+                    '<option value="2">Per SMS</option>' +
+                    '</select>';
                 var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
                 var payment_cycle_select =
                         '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
@@ -1717,7 +1722,12 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
+                    }else if($(header).is('.sms_charges_type_id')){
+                        $(sms_charges_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1735,6 +1745,12 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                $("#sms_charges_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',

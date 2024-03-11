@@ -9400,9 +9400,18 @@ class AdminDashboardController extends Controller
                 if ($users->sms_charges_type_id == 1) {
                     return "Fixed";
                 } elseif ($users->sms_charges_type_id == 2) {
-                    return "Per-SMS";
+                    return "Per SMS";
                 } else {
                     return "None";
+                }
+            })
+            ->filterColumn('users.sms_charges_type_id', function ($query, $keyword) {
+                if ($keyword == 0) {
+                    $query->whereRaw('users.sms_charges_type_id IS NULL');
+                } elseif ($keyword == 1 || $keyword == 2) {
+                    $query->where('users.sms_charges_type_id', '=', $keyword);
+                } else {
+                    $query->whereRaw('false');
                 }
             })
             ->editColumn('international_rejected_reason', function ($users) {
@@ -9998,9 +10007,18 @@ class AdminDashboardController extends Controller
                 if ($users->sms_charges_type_id == 1) {
                     return "Fixed";
                 } elseif ($users->sms_charges_type_id == 2) {
-                    return "Per-SMS";
+                    return "Per SMS";
                 } else {
                     return "None";
+                }
+            })
+            ->filterColumn('users.sms_charges_type_id', function ($query, $keyword) {
+                if ($keyword == 0) {
+                    $query->whereRaw('users.sms_charges_type_id IS NULL');
+                } elseif ($keyword == 1 || $keyword == 2) {
+                    $query->where('users.sms_charges_type_id', '=', $keyword);
+                } else {
+                    $query->whereRaw('false');
                 }
             })
             ->editColumn('international_rejected_reason', function ($users) {

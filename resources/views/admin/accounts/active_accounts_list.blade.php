@@ -1734,6 +1734,11 @@ function checkboxStatus() {
                     '<option value="2">Approved</option>' +
                     '<option value="3">Rejected</option>' +
                     '</select>';
+                var sms_charges_select = '<select name="sms_charges_select" id="sms_charges_select" class="select2 form-control">' +
+                    '<option value="0">None</option>' +
+                    '<option value="1">Fixed</option>' +
+                    '<option value="2">Per SMS</option>' +
+                    '</select>';
                 var intl_drop_select = '<select name="intl_rate_status_select" id="intl_rate_status_select" class="select2 form-control">' +
                     '<option value="1">Approved</option>' +
                     '<option value="2">Requested</option>' +
@@ -1781,7 +1786,12 @@ function checkboxStatus() {
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
+                    }else if($(header).is('.sms_charges_type_id')){
+                        $(sms_charges_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -1819,6 +1829,13 @@ function checkboxStatus() {
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+                $("#sms_charges_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                
                 var data1 = $.map({!! $products !!}, function (obj) {
                     obj.id = obj.id // replace pk with your identifier
 
