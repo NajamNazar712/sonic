@@ -22,11 +22,11 @@
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.rv_disable_shippers.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="col-12 form-group">
-                                            <label class="mr-2 font-small-3"><b>All Shippers: </b></label>
+                                            <label class="mr-2 font-medium-4"><b>Disable All Shippers: </b></label>
                                             <input type="checkbox" name="all_shipper_toggle" id="all_shipper_toggle" class="switchery all_shipper_toggle" data-size="sm" data-switchery="true" @if(isset($all_shippers->setting_value) && $all_shippers->setting_value == 1) checked @endif>
                                         </div>
                                         <div class="col-12 form-group" id="excluded_users_container">
-                                            <label class="mr-2 font-small-3"><b>Exclude Shipper(s) </b></label>
+                                            <label class="mr-2 font-medium-2"><b>Enabled Shipper(s) </b></label>
                                             <select name="excluded_users[]" id="excluded_users" class="form-control select2" multiple="multiple">
                                                 @foreach($shippers as $shipper)
                                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
@@ -35,7 +35,7 @@
                                         </div>
 
                                         <div class="col-12 form-group" id="only_users_container">
-                                            <label class="mr-2 font-small-3"><b>Only Shipper(s) </b></label>
+                                            <label class="mr-2 font-medium-2"><b>Disabled Shipper(s) </b></label>
                                             <select name="only_users[]" id="only_users" class="form-control select2" data-rule-required="true"  data-msg-required="This Field is required" style="width: 100%" multiple="multiple">
                                                 @foreach($shippers as $shipper)
                                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
