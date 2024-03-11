@@ -128,9 +128,11 @@ class LostShipmentsController extends Controller
                 ->leftJoin('lost_shipment_status_counts as lssc', 'lssc.shipment_id', '=', 'shipments.id')
 
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number','shipments.user_id as shipper_id', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc', 'shipments_journey.reference_1_id as reference','ad.name as marked_by', 'lsr.shipment_id as responsible_person_shipment','shipments_journey.updated_at as marked_at','lssc.approval_count as approval','lssc.cleared as cleared','lssc.shipment_id as shipment_cleared', 'shipments_journey.verification as verification')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18)->groupBy('shipments.id');
+
+                // dd($shipments->get());
                 // ->where(function ($sub_query) {
                 //     $sub_query->where('shipments.payment_status_id', '=', null)
                 //         ->orWhere('shipments.payment_status_id', '>', 1);
@@ -165,11 +167,11 @@ class LostShipmentsController extends Controller
             }
 
             if ($request->get('search_total_lost_approved_shipments') === "2") {
-                $shipments->where('shipments_journey.verification', '=', 1);
+                $shipments->where('shipments_journey.verification', 1);
             }
 
             if ($request->get('search_total_lost_pending_shipments') === "3") {
-                $shipments->where('shipments_journey.verification', '=', 0);
+                $shipments->where('shipments_journey.verification', 0);
             }
 
             if ($request->get('search_from') && $request->get('search_to')) {
@@ -677,15 +679,18 @@ class LostShipmentsController extends Controller
                 NotificationsController::send(150, $lost_shipments_array);
             }
 
-         
+
             $traxIdArray = json_decode($request->trax_id, true);
             $LostShipmentResponsible = [];
-            foreach ($traxIdArray as $key => $values) {
-                $LostShipmentResponsible[$key] = implode(', ', array_column($values, 'value'));
-            }  
+            
+            if(isset($traxIdArray)){
+                foreach ($traxIdArray as $key => $values) {
+                    $LostShipmentResponsible[$key] = implode(', ', array_column($values, 'value'));
+                }  
 
-            if(count($LostShipmentResponsible) > 0){
-                $this->LostShipmentResponsible($LostShipmentResponsible);
+                if(count($LostShipmentResponsible) > 0){
+                    $this->LostShipmentResponsible($LostShipmentResponsible);
+                }
             }
 
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
