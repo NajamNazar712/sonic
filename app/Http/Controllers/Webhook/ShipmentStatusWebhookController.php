@@ -79,7 +79,6 @@ class ShipmentStatusWebhookController extends Controller
         $payload['order_id'] = $orderId;
         $payload['status'] = $status;
         $payload['date_time'] = $date;
-        Log::channel('last_mile_app_report_log')->info('first'.$user_id, 901,json_encode($payload));
         WebhookLogController::shipment_status_log($user_id, 901,json_encode($payload));
 
         for($i = 0; $i < $attempts; $i++){
@@ -96,8 +95,6 @@ class ShipmentStatusWebhookController extends Controller
                 if($otp){
                     $payload['otp'] = $otp;
                 }
-                Log::channel('last_mile_app_report_log')->info('mid'.$user_id, 901,json_encode($payload));
-
                 WebhookLogController::shipment_status_log($user_id, 900,json_encode($payload));
 
                 $response = $client->post('', [
@@ -105,7 +102,6 @@ class ShipmentStatusWebhookController extends Controller
                 ]);
 
                 $status_code = $response->getStatusCode();
-                Log::channel('last_mile_app_report_log')->info('last'.$user_id, $status_code,json_encode($payload));
 
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
