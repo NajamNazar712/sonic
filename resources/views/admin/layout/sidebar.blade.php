@@ -1752,7 +1752,7 @@
                         @endif --}}
 
                          @if (session('role_id') == 1 || in_array(933, session('permissions')))
-{{--                        <li><a class="menu-item" href="{{ route('admin.reports.cargo_manifest.index') }}">Cargo Manifest Report</a></li>--}}
+                           <li><a class="menu-item" href="{{ route('admin.reports.cargo_manifest.index') }}">Cargo Manifest Report</a></li>
                         @endif
                     </ul>
                 </li>
