@@ -79,7 +79,7 @@ class ShipmentStatusWebhookController extends Controller
 
                 $payload = [];
                 $payload['tracking_number'] = $tracking_number;
-                $payload['order_id'] = $orderId ?? '-';
+                $payload['order_id'] = $orderId;
                 $payload['status'] = $status;
                 $payload['date_time'] = $date;
                 if($reason){
@@ -91,9 +91,10 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
-                
+
                 $status_code = $response->getStatusCode();
-                
+                WebhookLogController::shipment_status_log($user_id, $status_code,json_encode($payload));
+
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
