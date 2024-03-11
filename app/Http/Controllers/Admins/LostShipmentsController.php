@@ -710,7 +710,7 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
-        $employee = Employee::where('trax_id' , $request->excel_employee_value)->first();
+        // $employee = Employee::where('trax_id' , $request->excel_employee_value)->first();
         $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
         $names = [
             'tracking_number' => 'Tracking Number',
