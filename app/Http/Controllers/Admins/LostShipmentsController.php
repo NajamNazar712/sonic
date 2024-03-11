@@ -78,7 +78,10 @@ class LostShipmentsController extends Controller
         $total_of_pending_shipments = $shipmentsCounts->pending;
         $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
 
-        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments]);
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+
+        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
     }
     public function lost_shipments_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
