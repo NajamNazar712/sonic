@@ -1132,64 +1132,114 @@
             });
         });
     
-        var today = new Date();
-        var max = '{{ Carbon\Carbon::now() }}';
-        var statusFilterFromDate, statusFilterToDate;
-
-        if (today.getDate() >= 20) {
-            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth(), 20);
-            statusFilterToDate = new Date(today.getFullYear(), today.getMonth() + 1, 20);
-        } else {
-            statusFilterFromDate = new Date(today.getFullYear(), today.getMonth() - 1, 20);
-            statusFilterToDate = new Date(today.getFullYear(), today.getMonth(), 20);
-        }
-
-
+        var thirtydays = '{{ $thirtyday }}';
+        var today = '{{ $today }}';
         var from_date = $('#from_date').pickadate({
             firstDay: 1,
             clear: 'Clear',
-            min: statusFilterFromDate,
-            max: statusFilterToDate,
-            format: 'dd mmmm, yyyy',
+            max : new Date(today),
+            format:'dd mmmm, yyyy',
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 00:00:00',
             hiddenSuffix: '_formatted',
-            editable: false, 
             onOpen: function() {
-                $('#from_date_root').css('top', '40px');
+                $('#from_date_root').css('top','40px');
             },
-            onClose: function() {
-                var toDateInstance = $('#to_date').pickadate('picker');
-                if (toDateInstance.get('select') < this.get('select')) {
-                    toDateInstance.set('select', this.get('select'));
-                }
+            onSet: function(context) {
+                var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                var contractMoment = moment(old_date_formatted);
+                var current = moment(contractMoment).add(30, 'days');
+                to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
             }
         });
-
         var to_date = $('#to_date').pickadate({
             firstDay: 1,
             clear: 'Clear',
-            max: max,
-            format: 'dd mmmm, yyyy',
+            max : new Date(today),
+            format:'dd mmmm, yyyy',
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
             hiddenSuffix: '_formatted',
-            editable: false, 
             onOpen: function() {
                 $('#to_date_root').css('top', '40px');
             },
-            onClose: function() {
-                var fromDateInstance = $('#from_date').pickadate('picker');
-                if (fromDateInstance.get('select') > this.get('select')) {
-                    fromDateInstance.set('select', this.get('select'));
-                }
+            onSet: function(context) {
+                // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
             }
         });
 
         $('#search_filter_btn').on('click',function () {
             table.draw();
+        });
+
+        var shipment_id;
+        $('#datatable tbody').on('click', '.responsible_person_shipment', function() {
+            var shipment_id = $(this).attr('data-shipment-id');
+
+            // Make an AJAX request
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
+                type: 'GET', 
+                data: { shipment_id: shipment_id }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">Employee ID</th>' +
+                        '<th class="border-primary border-darken-1">Employee Name</th>' +
+                        '<th class="border-primary border-darken-1">Employee Type</th>' +
+                        '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; 
+
+                        var addedTraxIds = []; 
+                        $.each(response.details, function(index, item) {
+                            var employee = item;
+                            if (!addedTraxIds.includes(employee.trax_id)) { 
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
+                                modalContent += '<td>' + employee.name + '</td>'; 
+                                modalContent += '<td>' + employee.type + '</td>'; 
+                                modalContent += '<td>' + employee.status + '</td>'; 
+                                modalContent += '</tr>';
+                                addedTraxIds.push(employee.trax_id); 
+                            }
+                        });
+
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
+                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('.addLostResponsibleModal').html('');
+                    $('.addLostResponsibleModal').append(modalContent);
+                    $('.addLostResponsibleModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
         });
     });
 
