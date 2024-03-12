@@ -120,7 +120,6 @@ use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 
@@ -1106,7 +1105,7 @@ class ShipperDashboardController extends Controller
         $shipperStoreId = $request->input('shipper_store_id');
         $userShippingInfosId = $request->input('user_shipper_infos_id');
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
-        if ($userId != 2234 && $userId != 1049){
+        if ($userId != 2234 && $userId != 1049 &&  $userId != 10364){
             return response()->json(['error' => 'Invalid user']);
         } 
         if (!$shipperStoreId) {
@@ -1146,14 +1145,8 @@ class ShipperDashboardController extends Controller
             $user_id = session('user_id');
             $pin = rand(1000,9999);
             NotificationsController::send(91,$user_id,$pin);
-             // Get the profile_otp from SMS model
-            $profile_otp = AdminShipperVerificationPinCode::where('otp', $pin)->first();
-            if ($profile_otp) {
-                    $data['code'] = $pin;
-                    return json_encode($data);
-            }
-             // $data['code'] = $pin;
-             // return json_encode($data);
+            $data['code'] = $pin;
+            return json_encode($data);
         }
     }
 
@@ -1239,10 +1232,10 @@ class ShipperDashboardController extends Controller
             //     $dropdown .= $add_store_id_button;
             // }
 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
             } 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
 
