@@ -144,8 +144,18 @@ trait LastMileAppReportTrait
                          $check_existing_note = $check_existing_note->first();
                          $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
                          $check_existing_note->save();
+                         DeliveryNoteErrorLog::create([
+                            'delivery_note_id' => $delivery_note_id,
+                            'shipment_id' => $shipment_id,
+                            'message' => !$check_existing_shipment->exist(),
+                        ]);
                          if(!$check_existing_shipment->exist())
                          {
+                            DeliveryNoteErrorLog::create([
+                                'delivery_note_id' => $delivery_note_id,
+                                'shipment_id' => $shipment_id,
+                                'message' => $check_existing_shipment->exist(),
+                            ]);
                             $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                             $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
                             $new_delivery_note_shipment->rwdn_id = $check_existing_note->id;
