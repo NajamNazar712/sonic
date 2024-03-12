@@ -30,7 +30,9 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShippingMode;
 use App\Jobs\ProcessRetailShipmentBookingDB;
+use App\RetailShipperNameVerification;
 use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -542,6 +544,8 @@ class RetailShipmentBookController extends Controller
         $retail_reference->shipment_id = $shipment_id;
         $retail_reference->ref = $ref;
         $retail_reference->save();
+
+        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address);
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
@@ -2200,4 +2204,53 @@ class RetailShipmentBookController extends Controller
       return response()->json(['status'=>'true']);
 
   }
+
+    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address)
+    {
+        $phone_number = str_replace('-', '', $phone_number);
+        $shipper_cnic = str_replace('-', '', $shipper_cnic);
+//        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
+//        {
+//            return 0;
+//        }
+//        else
+//        {
+            $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
+            if($record_exist->exists())
+            {
+                $record_exist = $record_exist->first();
+                $record_exist->shipper_cnic = $shipper_cnic;
+                $record_exist->shipper_address = $shipper_address;
+                $record_exist->save();
+            }
+            else
+            {
+                $update_shipper = new RetailShipperNameVerification();
+                $update_shipper->phone_number = $phone_number;
+                $update_shipper->shipper_name = $shipper_name;
+                $update_shipper->shipper_cnic = $shipper_cnic;
+                $update_shipper->shipper_address = $shipper_address;
+                $update_shipper->save();
+            }
+//        }
+    }
+
+    public function previous_names_verify(Request $request)
+    {
+        $retail_shipper = array();
+        $phone_number = $request->phone_number;
+        $phone_number_without_hyphen = str_replace('-', '', $phone_number);
+        $phone_number_without_hyphen = str_replace('_', '', $phone_number_without_hyphen);
+        $length = strlen($phone_number_without_hyphen);
+
+        if ($length == 11)
+        {
+            $retail_shipper = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+            return response()->json(['status' => 1, 'success' => 'Shipper info found: ', 'data' => $retail_shipper]);
+        }
+        else
+        {
+            return response()->json(['status' => 0, 'error' => 'Not found: ', 'data' => $retail_shipper]);
+        }
+    }
 }
