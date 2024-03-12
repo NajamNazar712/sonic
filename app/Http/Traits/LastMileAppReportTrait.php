@@ -54,22 +54,24 @@ trait LastMileAppReportTrait
                  ->select('delivery_notes.created_at as created_at', 'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments', 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name','delivery_notes.created_at as delivery_note_creation_date')
                  ->where('delivery_notes.id', $delivery_note_id)
                  ->whereDate('delivery_notes.created_at', $today);
-             if($delivery_note_data->exists()){
+                
+                 if($delivery_note_data->exists()){
                  $delivery_note_data = $delivery_note_data->first();
-
+                 
                  $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
-
+                 
                  if($check_summary->exists())
                  {
-                     $check_summary = $check_summary->first();
+                                         $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
-                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
-                     
-                     if($check_existing_shipment->exist())
+                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today);
+                     if($check_existing_shipment->exists())
                      {
+                       
+                        
                         $update_delivery_note_shipment = $check_existing_shipment->first();
                         $minusTime = $update_delivery_note_shipment->updated_time;
-                        // self::countSub($minusTime,$check_summary);
+                        $this->countSub($minusTime,$check_summary);
 
                         $update_delivery_note_shipment->id = $update_delivery_note_shipment->id;  
                         $update_delivery_note_shipment->shipper_status_id = $shipper_status_id;
@@ -81,7 +83,7 @@ trait LastMileAppReportTrait
                      $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
                      $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
                      $check_summary->save();
-                     
+
                      if ($time <= '10:59:59') {
                          $check_summary->before_11_count = $check_summary->before_11_count + 1;
                      } elseif ($time > '10:59:59' && $time <= '11:59:59') {
@@ -112,10 +114,11 @@ trait LastMileAppReportTrait
                          $check_summary->after_23_count = $check_summary->after_23_count + 1;
                      }
                     $check_summary->save();
-
+                    
                      $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
-                     if (!$check_existing_note->exists())
+                     if(!$check_existing_note->exists())
                      {
+                        
                          $check_summary->delivery_note_count = $check_summary->delivery_note_count + 1;
                          $check_summary->delivery_note_shipments_count = $check_summary->delivery_note_shipments_count + $delivery_note_data->total_shipments;
 
@@ -144,7 +147,7 @@ trait LastMileAppReportTrait
                          $check_existing_note = $check_existing_note->first();
                          $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
                          $check_existing_note->save();
-                         if(!$check_existing_shipment->exist())
+                         if(!$check_existing_shipment->exists())
                          {
                             $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                             $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
@@ -154,7 +157,7 @@ trait LastMileAppReportTrait
                             $new_delivery_note_shipment->updated_time = $time;
                             $new_delivery_note_shipment->updated_via = $via;
                             $new_delivery_note_shipment->save();
-                         }   
+                        }  
                          
                      }
 
@@ -162,6 +165,7 @@ trait LastMileAppReportTrait
                  }
                  else
                  {
+                        
                      $new_summary = new RiderWiseDeliveryNoteSummary();
                      $new_summary->delivery_date = $rider_delivery_date ?? '00:00:00 00:00:00';
                      $new_summary->rider_id = $rider_id;
@@ -202,7 +206,7 @@ trait LastMileAppReportTrait
                          $new_summary->after_23_count = 1;
                      }
                      $new_summary->save();
-
+                     
                      $new_delivery_note = new RiderWiseDeliveryNote();
                      $new_delivery_note->rwdnsum_id = $new_summary->id;
                      $new_delivery_note->delivery_note_id = $delivery_note_id;
@@ -213,7 +217,7 @@ trait LastMileAppReportTrait
                      $new_delivery_note->zone_id = $delivery_note_data->zone_id;
                      $new_delivery_note->zone_name = $delivery_note_data->zone_name;
                      $new_delivery_note->save();
-
+                     
                      $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                      $new_delivery_note_shipment->rwdnsum_id = $new_summary->id;
                      $new_delivery_note_shipment->rwdn_id = $new_delivery_note->id;
@@ -222,7 +226,7 @@ trait LastMileAppReportTrait
                      $new_delivery_note_shipment->updated_time = $time;
                      $new_delivery_note_shipment->updated_via = $via;
                      $new_delivery_note_shipment->save();
-                 }
+                    }
              }
 
 
@@ -231,7 +235,7 @@ trait LastMileAppReportTrait
     
     private function countSub($time,$check_summary)
     {
-
+       
         if(!empty($check_summary->before_11_count) && $time <= '10:59:59')
         {
             $check_summary->before_11_count = $check_summary->before_11_count - 1;
@@ -278,6 +282,7 @@ trait LastMileAppReportTrait
             $check_summary->after_23_count = $check_summary->after_23_count - 1;
             $check_summary->save();
         }
+       
         $check_summary->shipment_update_count = $check_summary->shipment_update_count - 1;
         $check_summary->via_rider_count = $check_summary->via_rider_count - 1;
         $check_summary->save();
