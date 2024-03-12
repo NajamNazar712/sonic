@@ -125,7 +125,8 @@
 											<button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
 											<button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
 										</div>
-										@foreach($hubs as $hub)
+
+										{{-- @foreach($hubs as $hub)
 											<fieldset class="d-inline-block m-1">
 												@if (in_array($hub->id, $user_hubs))
 													<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
@@ -134,6 +135,31 @@
 												@endif
 												<label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
 											</fieldset>
+										@endforeach --}}
+
+										@foreach ($categories as $category)
+											<h4 class="form-section mb-2">{{ $category->name }} Hub</h4>
+											@foreach ($hubs as $hub)
+												@if ($hub->business_category_id == 1 && $category->id == 1)
+													<fieldset class="d-inline-block m-1">
+														@if (in_array($hub->id, $user_hubs))
+															<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
+														@else
+															<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+														@endif
+														<label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
+													</fieldset>
+												@elseif($hub->business_category_id == 2 && $category->id == 2)
+													<fieldset class="d-inline-block m-1">
+														@if (in_array($hub->id, $user_hubs))
+															<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
+														@else
+															<input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+														@endif
+														<label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
+													</fieldset>
+												@endif
+											@endforeach
 										@endforeach
 									</div>
 

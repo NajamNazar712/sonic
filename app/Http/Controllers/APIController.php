@@ -919,6 +919,9 @@ class APIController extends Controller
                 if (!$consignee_city->zone_id) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
+                if (!$consignee_city->booking_enable_status) {
+                    return response()->json(['status' => 1, 'message' => 'Delivery is not available for this City.']);
+                }
 
                 $pickup_city_id = $user_shipping_info->city_id;
 
@@ -8560,7 +8563,7 @@ class APIController extends Controller
         $flag = null;
 
         // check if user_id is 2234 or not
-        if ($user_id != 2234 && $user_id != 1049) {
+        if ($user_id != 2234 && $user_id != 1049 && $user_id != 10364) {
             return "Invalid user";
         }
 
@@ -8653,7 +8656,7 @@ class APIController extends Controller
 
         $user_type = User::where('id', $user_id)->first();
 
-        if (($user_type['account_type_id'] == 1 || $user_type['account_type_id'] == 2) && ($user_id == 2234 || $user_id == 1049)) {
+        if (($user_type['account_type_id'] == 1 || $user_type['account_type_id'] == 2) && ($user_id == 2234 || $user_id == 1049|| $user_id == 10364)) {
             $pickup_address_id = $request->pickup_address_id;
             $userShippingInfoStoreAddress = UserShippingInfoStoreAddress::where('shipper_store_id', $pickup_address_id)->first();
             $rules = [
@@ -8664,7 +8667,7 @@ class APIController extends Controller
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
 
-                'pickup_address_id' => ['required', 'integer', Rule::exists('user_shipping_info_store_addresses', 'shipper_store_id')->where(function ($query) use ($userShippingInfoStoreAddress) {
+                'pickup_address_id' => ['required', Rule::exists('user_shipping_info_store_addresses', 'shipper_store_id')->where(function ($query) use ($userShippingInfoStoreAddress) {
                     $query->where('shipper_store_id', $userShippingInfoStoreAddress ? $userShippingInfoStoreAddress->shipper_store_id : null);
                 })],
 
