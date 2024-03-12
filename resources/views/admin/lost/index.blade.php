@@ -247,7 +247,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <span>Are You Sure you want to reject this lost request. Note that either of these actions will apply towards the destination. Please Confirm further status.</span> <br> <br>
+                    <span>Are You Sure you want to reject this lost request Note that either of these actions will apply towards the destination. Please Confirm further status.</span> <br> <br>
                     <button type="button" class="btn btn-info ml-2 confirm">Return Confirm</button>
                     <button type="button" class="btn btn-info ml-2 re-attempt" >Re-Attempt</button>
                 </div>
@@ -316,6 +316,10 @@
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.lost.list') }}',
                     data: params,
+                    method: 'POST', 
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
                     success: function (result) {
                         head = [];
 
@@ -913,7 +917,7 @@
                     var return_reason_select = $('#return_reason_select').val();
                     swal({
                         title: 'Are You Sure?',
-                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Return. Note that either of these actions will apply towards the destination',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Return.',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -985,7 +989,7 @@
                     var remarks = $('#add_remarks').val();
                     swal({
                         title: 'Are You Sure?',
-                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Reattempt. Note that either of these actions will apply towards the destination',
+                        text: 'You are rejecting the Shipment Lost status, please confirm if you want to proceed this for Reattempt.',
                         icon: 'warning',
                         buttons: {
                             cancel: {

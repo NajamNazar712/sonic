@@ -265,7 +265,6 @@ label.error {
                 // Create a new FormData object
                 var formData = new FormData();
                 formData.append('excel', file);
-                console.log(shipment_ids);
                 // Make the AJAX request
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
@@ -291,7 +290,6 @@ label.error {
                                         var index = $.inArray(id, shipment_ids);
                                         shipment = shipmentData[id];
                                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
-                                            console.log(shipment.tracking_number);
                                             var rowNo = table.rows().count();
        
                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
@@ -440,7 +438,7 @@ label.error {
                         emptyFields.push(shipmentId); 
                     }
                 } else {
-                    console.log(Object.keys(change).length);
+                    // console.log(Object.keys(change).length);
                     // Remove validation rule if shipmentId is in change array
                     $('[name="remarks[' + shipmentId + ']"]').rules('remove', 'required');
                 }
@@ -478,17 +476,18 @@ label.error {
             delete change[shipment_id_remove];
 
         });
+
+        var shipment_id;
         $('body').on('click', '.add_lost_responsible', function () {
-            var shipment_id = $(this).attr('data-id');
+            shipment_id = $(this).attr('data-id');
             var modalId = 'addLostResponsibleModal_' + shipment_id;
+            var modalButton = 'addLostResponsibleModalBtn_' + shipment_id;
             var modalContent = '<div class="modal fade text-left addLostResponsible" id="' + modalId + '" data-backdrop="static" tabindex="-1" role="dialog">' +
                 '<div class="modal-dialog modal-xl" role="document">' +
                 '<div class="modal-content">' +
                 '<div class="modal-header bg-primary white">' +
                 '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                '<span aria-hidden="true">&times;</span>' +
-                '</button>' +
+               
                 '</div>' +
                 '<div class="modal-body text-center">' +
                 '<form id="addLostResponsibleForm_' + shipment_id + '" class="form" method="post" enctype="multipart/form-data">' +
@@ -509,7 +508,7 @@ label.error {
                 '</form>' +
                 '<div class="row justify-content-center mt-3">'+
                         '<div class="col-">'+
-                            '<button type="submit" class="btn btn-danger btn-block" class="close" data-dismiss="modal" aria-label="Close">Close</button>'+
+                            '<button class="btn btn-info btn-block" class="close close_btn" id="' + modalButton + '" data-dismiss="modal" aria-label="Close">Save</button>'+
                         '</div>'+
                     '</div>'+
               
@@ -517,6 +516,7 @@ label.error {
                 '</div>' +
                 '</div>' +
                 '</div>';
+
 
             $('.addLostResponsibleModal').append(modalContent);
             $('#' + modalId).modal('show');
@@ -558,26 +558,35 @@ label.error {
                     });
                 }
             });
+           
         });
         var rows_count = 0;
+        var rows_count_1 = 0;
         var selected_rows = [];
         var change = {};
+        var new_array = [];
         var selected_trax_id = [];
         var trax_index;
         function add_row(shipment_id) {
             rows_count++;
-            var user_input = '<input class="form-control user-input" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
+            rows_count_1++;
+            var user_input = '<input class="form-control user-input" placeholder="Enter TraxID (s)" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '">';
             var user_name = '<input class="form-control user-name" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
             var user_type = '<input class="form-control user-type" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
             var user_status = '<input class="form-control user-status" data-shipment_id="' + shipment_id + '" data-row="' + rows_count + '" readonly>';
 
             var remove = '<a href="javascript:void(0);" data-shipment_id="' + shipment_id + '" class="btn btn-icon btn-sm btn-danger remove_row ' + rows_count + '" data-trax_id=""><i class="la la-close"></i></a>';
         
-            addLostResponsible.row.add([0, user_input, user_name, user_type, user_status,remove]).node().id = rows_count;
+            addLostResponsible.row.add([0, user_input, user_name, user_type, user_status, remove]).node().id = rows_count;
             addLostResponsible.draw(true);
             selected_rows.push(rows_count);
 
-            
+            if (!new_array[shipment_id]) {
+                new_array[shipment_id] = [];
+            }   
+            new_array[shipment_id].push({
+                value: rows_count_1,
+            });
             $('.user-input[data-shipment_id="' + shipment_id + '"][data-row="' + rows_count + '"]').on('keypress', function(event) {
                 if (event.which === 13 || event.keyCode === 13) {
                     var inputValue = $(this).val();
@@ -588,7 +597,6 @@ label.error {
                         });
                     }
 
-                    console.log(trax_index);
                     if (trax_index == -1 || trax_index === undefined || change.length === 0 ) {
                         $('.remove_row.' + rows_count).attr('data-trax_id', inputValue);
                         $.ajax({
@@ -620,6 +628,7 @@ label.error {
                                     }
 
                                     $('#update_lost_form input#trax_id').val(JSON.stringify(change));
+                                    // $('#addLostResponsibleModalBtn_' + shipment_id).prop('disabled', false);
 
                                 }else{
                                     toastr.error('Employee Doesnt Exists !!', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -643,13 +652,13 @@ label.error {
             var rid = parseInt($(this).parents('tr').attr('id'));
             var shipment_id_remove = $(this).attr('data-shipment_id');
             var trax_id = $(this).attr('data-trax_id');
-
+            rows_count_1 = rows_count_1;
 
             if (index !== -1) {
                 selected_rows.splice(index, 1);
             }
             addLostResponsible.row($(this).parents('tr')).remove().draw();
-            if (change[shipment_id_remove]) {
+            if (change[shipment_id_remove] && change[shipment_id_remove] !== undefined && typeof change[shipment_id_remove] === 'object') {
                 change[shipment_id_remove] = change[shipment_id_remove].filter(function(item) {
                     return item.value !== trax_id;
                 });
@@ -659,14 +668,66 @@ label.error {
                     delete change[shipment_id_remove];
                 }
             }
-
-            console.log(change);
-            if(addLostResponsible.row().length === 0){
+            
+            if(addLostResponsible.row().length >= 0 && change[shipment_id_remove] !== undefined){
                 addLostResponsible.button(0).enable();
+            }else if (addLostResponsible.row().length == 0){
+                addLostResponsible.button(0).enable();
+            }else{
+                addLostResponsible.button(0).disable();
             }
 
+           // Find the index of the object in the array with the specified value
+            var indexToRemove = new_array[shipment_id_remove].findIndex(function(item) {
+                return item.value !== rows_count_1;
+            });
 
-        });     
+            if (indexToRemove !== -1) {
+                new_array[shipment_id_remove].splice(indexToRemove, 1);
+            }
+
+            if(addLostResponsible.row().length === 0){
+                new_array[shipment_id_remove] = [];
+            }
+
+        });  
+
+        $(document).on('hide.bs.modal','.addLostResponsible', function (e) {
+             
+            if (!new_array[shipment_id]) {
+                new_array[shipment_id] = [];
+            }   
+
+            if (!change[shipment_id]) {
+                change[shipment_id] = [];
+            }
+            if(new_array[shipment_id] != undefined || change[shipment_id] != undefined || addLostResponsible.row().length === 0){
+                var truee = new_array[shipment_id].length === change[shipment_id].length;
+                var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+
+                if(addLostResponsible.row().length === 0){
+                    delete change[shipment_id];
+                    if ($.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) {
+                        $('#addLostResponsibleTable_' + shipment_id).DataTable().destroy(); 
+                    }                                       
+                    return;
+                }else if (truee === true){
+                    if ($.fn.DataTable.isDataTable('#addLostResponsibleTable_' + shipment_id)) {
+                        $('#addLostResponsibleTable_' + shipment_id).DataTable().destroy(); 
+                    }
+                    return;
+                }else if (falsee !== false){
+                    e.preventDefault();
+                  
+                    toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            }else{
+                e.preventDefault();
+                toastr.error('Please Fill The Field !!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+
+            
+        });
     });
     </script>
 @endsection
