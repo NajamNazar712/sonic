@@ -7535,7 +7535,7 @@ class ReturnController extends Controller
             $sar_unresponsive_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 3)->where('updated_type_id', 3)->where('unresponsive_count', 2)->latest()->first();
             $completed_shipment = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->whereIn('rv_state_id', [3,4])->where('unresponsive_count','>=', 2)->latest()->first();
             $completed_shipment_first_unresponsive = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', 2)->where('rv_state_id', 4)->where('unresponsive_count', 0)->latest()->first();
-            $old_completed_shipments = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->whereNotIn('rv_assign_agent_status_id', [6, 7])->whereIn('rv_state_id', [2, 4])->latest()->first();
+            $old_completed_shipments = RvShipmentAssignAgent::where('shipment_id',$shipment_id)->where('rv_assign_agent_status_id', '!=' , 6)->whereIn('rv_state_id', [2, 4])->latest()->first();
 
             
             if($exist_shipment){

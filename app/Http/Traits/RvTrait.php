@@ -1744,7 +1744,7 @@ trait RvTrait
             {
                 $agent_unassign_shipment = RvShipmentAssignAgent::where('rv_state_id', 3)->where('shipment_id',$data['shipment_id'])->whereNotNull('rv_assign_agent_status_id')->first();
                 $rv_customer_experience_agent = RvShipmentAssignAgent::where('rv_state_id', 1)->where('shipment_id',$data['shipment_id'])->where('assigned_to_type_id', 1)->where('agent_id',$data['agent_id'])->first();
-                $existing_completed_shipment = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->whereNotIn('rv_assign_agent_status_id', [6, 7])->whereIn('rv_state_id', [2, 4])->latest()->first();
+                $existing_completed_shipment = RvShipmentAssignAgent::where('shipment_id',$data['shipment_id'])->where('rv_assign_agent_status_id', '!=' , 6)->whereIn('rv_state_id', [2, 4])->latest()->first();
 
                 if($agent_unassign_shipment){
                     $agent_unassign_shipment->agent_id = $data['agent_id'];
