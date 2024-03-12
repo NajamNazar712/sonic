@@ -21,6 +21,7 @@ use App\RiderWiseDeliveryNote;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\PickupNote;
 use App\Jobs\LastMileAppReport;
+use App\Jobs\LastMileApp;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RiderPickup;
@@ -167,12 +168,7 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TempRiderDelivery;
 use App\Http\Models\HR\EducationList;
 use App\Http\Models\NotificationSetting;
-// use App\ReturnDeliveredToShipperSms;
-// use App\RiderWiseDeliveryNote;
-// use App\RiderWiseDeliveryNoteShipment;
-// use App\Http\Traits\LastMileAppReportTrait;
-// use App\Jobs\LastMileAppReport;
-use Illuminate\Support\Facades\Log;
+
 class RiderAPIController extends Controller
 {
     use LastMileAppReportTrait;
@@ -8950,7 +8946,7 @@ class RiderAPIController extends Controller
             'replacement_image' => ['nullable', 'mimes:png,jpeg,jpg'],
             'dbf_otp_entered' => ['nullable', 'integer'],
         ];
-
+       
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -8970,12 +8966,13 @@ class RiderAPIController extends Controller
                 ->where('delivery_note_shipments.delivery_note_id', $request->delivery_note_id)
                 ->select('nss.id', 'delivery_note_shipments.shipment_id', 'ns.shipper_toggle')
                 ->first();
-
+                
                 $user_excluded_otp_shippers = $user_excluded_otp_shippers['shipper_toggle'] ? $user_excluded_otp_shippers['shipper_toggle'] : 0;
                 
                 $rider_id = $request->rider_id;
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+                
                 //$added_at = $request->added_at;
                 if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                     if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
@@ -9110,6 +9107,8 @@ class RiderAPIController extends Controller
                                         ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                     
                                         //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                        // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2));
+
                                         LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
 
                                     }
@@ -9118,6 +9117,8 @@ class RiderAPIController extends Controller
                                     $shipment->shipper_status_id = 30;
                                     $shipment->consignee_status_id = 30;
                                     $shipment->received_amount = $shipment->amount;
+                                    // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,$shipment->shipper_status_id,$added_at,$rider_delivery,2));
+
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
 
@@ -9127,6 +9128,7 @@ class RiderAPIController extends Controller
                                     $rider_delivery->rider_status_id = 30;
 
                                     //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
+
                                     LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
                                 }
                                 else if ($shipment->booking_type_id == 3) {
@@ -9144,6 +9146,8 @@ class RiderAPIController extends Controller
                                     $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
                                     $delivered_parcels = count($item_ids);
                                     if ($total_parcels == $delivered_parcels) {
+                                        // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2));
+
                                         Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                         ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                         $rider_delivery->rider_status_id = 36;
@@ -9151,6 +9155,8 @@ class RiderAPIController extends Controller
                                         //$this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
                                         LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
                                     } else {
+                                        // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,$shipment->shipper_status_id,$added_at,$rider_delivery,2));
+
                                         Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                         ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                         $rider_delivery->rider_status_id = 37;
@@ -9161,6 +9167,8 @@ class RiderAPIController extends Controller
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
                                 }
                                 else if ($shipment->booking_type_id == 4) {
+                                    // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2));
+
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                 
                                     if ($shipment->charges_mode_id == 1) {
@@ -9182,6 +9190,8 @@ class RiderAPIController extends Controller
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
+                                    // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,$shipment->shipper_status_id,$added_at,$rider_delivery,2));
+
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
 
@@ -9215,6 +9225,7 @@ class RiderAPIController extends Controller
                         $message = 'Shipment is marked as delivered already';
                     }
                 }
+                
                 $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
                 if(count($delivered_shipment_ids) > 0){
                     $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
@@ -9237,7 +9248,6 @@ class RiderAPIController extends Controller
 
                 return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id, 'user_excluded_otp_shippers'=>$user_excluded_otp_shippers, 'success' => $success_flag]);
             } catch (\Throwable $th) {
-
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
                 return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
 
@@ -11567,6 +11577,7 @@ class RiderAPIController extends Controller
                                             if ($request->has('remarks_id')) {
                                                 $remarks_id = $request->remarks_id;
                                             }
+                                            // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,$shipment->shipper_status_id,$added_at,$rider_delivery,2));
 
                                             ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
                                             DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
@@ -11677,7 +11688,7 @@ class RiderAPIController extends Controller
 
                 $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
                 //$added_at = $request->added_at;
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
                 if ($shipment_journey->exists()) {
                     $shipment_journey = $shipment_journey->first();
                     if ($shipment_journey->shipper_status_id == 5) {
@@ -11815,6 +11826,7 @@ class RiderAPIController extends Controller
                                                 $rider_delivery_note_status->status = 2;
                                                 $rider_delivery_note_status->save();
                                             }
+                                            // dispatch(new LastMileApp($shipment->id,$request->delivery_note_id,$rider_id,$shipment->shipper_status_id,$added_at,$rider_delivery,2));
 
                                             //$this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, $request->shipper_status_id, $added_at, $rider_delivery, 2);
                                             LastMileAppReport::dispatch($shipment->id,$request->delivery_note_id,$rider_id,$shipper_status_id,$added_at,$rider_delivery,2);
