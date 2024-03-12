@@ -1105,15 +1105,15 @@ class ShipperDashboardController extends Controller
         $shipperStoreId = $request->input('shipper_store_id');
         $userShippingInfosId = $request->input('user_shipper_infos_id');
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
-        if ($userId != 2234 && $userId != 1049){
+        if ($userId != 2234 && $userId != 1049 &&  $userId != 10364){
             return response()->json(['error' => 'Invalid user']);
         } 
         if (!$shipperStoreId) {
             return response()->json(['error' => 'Please enter a store ID']);
         }
-        if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
-            return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
-        }
+        // if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
+        //     return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
+        // }
 
         $status = null;
         if ($userShippingInfosStatus == "Enabled") {
@@ -1232,10 +1232,10 @@ class ShipperDashboardController extends Controller
             //     $dropdown .= $add_store_id_button;
             // }
 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
             } 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
 
@@ -1291,6 +1291,9 @@ class ShipperDashboardController extends Controller
         })
         ->editColumn('status', function ($pickup) {
             return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
+        })
+        ->filterColumn('shipper_store_id', function ($query, $keyword) {
+            $query->where('usisa.shipper_store_id', 'LIKE', '%' . $keyword . '%');
         })
         ->make(true);
     }

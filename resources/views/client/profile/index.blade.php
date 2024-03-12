@@ -192,7 +192,7 @@
 
                                                 <th class="border-primary border-darken-1">S.No</th>
                                                 <th class="border-primary border-darken-1">Pickup Address ID</th>
-                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 1049)
+                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364)
                                                     <th class="border-primary border-darken-1">Shipper Store ID</th>
                                                 @endif
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
@@ -531,7 +531,7 @@
                             <div class="row">
                                 <input type="hidden" name="id" id="edit_user_shipping_info_id" value="">
                                 <div class="col-12 form-group">
-                                    <input type="number" name="shipper_store_id" id="add_shipper_store_id" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Shipper Store ID is required" placeholder="Shipper Store ID" required>
+                                    <input type="text" name="shipper_store_id" id="add_shipper_store_id" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Shipper Store ID is required" placeholder="Shipper Store ID" required>
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -903,7 +903,7 @@
                 columns: [
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
-                    @if($userId == 2234 || $userId == 1049)
+                    @if($userId == 2234 || $userId == 1049 || $userId == 10364)
                         { data: 'shipper_store_id', name: 'shipper_store_id', class:'shipper_store_id' },
                     @endif
                     {data: 'pickup_address', name: 'pickup_address'},
@@ -1200,7 +1200,7 @@
                     });
                     var id = parseInt($(this).parents('tr').attr('id'));
                     var shipper_status = $(this).closest('tr').find('.status').text();
-                    if (userId == 2234 || userId == 1049) {
+                    if (userId == 2234 || userId == 1049 || userId == 10364) {
                         $("#shipperStoreIdModal").modal('show');
                         $("#addStoreID").on('click', function (event) {
                             if ($('#add_shipper_store_id').val() == ''){
