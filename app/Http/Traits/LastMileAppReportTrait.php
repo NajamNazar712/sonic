@@ -67,6 +67,11 @@ trait LastMileAppReportTrait
                      
                      if($check_existing_shipment->exist())
                      {
+                        DeliveryNoteErrorLog::create([
+                            'delivery_note_id' => $delivery_note_id,
+                            'shipment_id' => $shipment_id,
+                            'message' => 'first',
+                        ]);
                         $update_delivery_note_shipment = $check_existing_shipment->first();
                         $minusTime = $update_delivery_note_shipment->updated_time;
                         // self::countSub($minusTime,$check_summary);
@@ -112,7 +117,11 @@ trait LastMileAppReportTrait
                          $check_summary->after_23_count = $check_summary->after_23_count + 1;
                      }
                     $check_summary->save();
-
+                    DeliveryNoteErrorLog::create([
+                        'delivery_note_id' => $delivery_note_id,
+                        'shipment_id' => $shipment_id,
+                        'message' => 'mid',
+                    ]);
                      $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
                      if (!$check_existing_note->exists())
                      {
@@ -147,7 +156,7 @@ trait LastMileAppReportTrait
                          DeliveryNoteErrorLog::create([
                             'delivery_note_id' => $delivery_note_id,
                             'shipment_id' => $shipment_id,
-                            'message' => !$check_existing_shipment->exist(),
+                            'message' => 'second mid',
                         ]);
                          if(!$check_existing_shipment->exist())
                          {
