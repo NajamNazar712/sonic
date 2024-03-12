@@ -127,6 +127,10 @@
                                             <input type="text" name="order_id" id="order_id" class="form-control" placeholder="Order ID">
                                         </div>
                                     </div>
+                                    <div class="form-group col-6 previous-names">
+                                        <select name="previous_name" id="previous_name" class="select2 form-control">
+                                        </select>
+                                    </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
                                     </div>
@@ -1454,6 +1458,62 @@
 
             $('#AutoFetchConsignee').on('hidden.bs.modal', function () {
                 $('#consignee_table').html('');   
+
+            });
+
+            $('#previous_name').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Previous Name",
+                allowClear:true
+            });
+
+            $('#shipper_phone_no').keyup(function () {
+
+                var phone_number = $(this).val();
+                var cleaned_phone_number = phone_number.replace(/[-_]/g, '');
+
+                if (cleaned_phone_number.length === 11)
+                {
+                    $.ajax({
+                        url: '{!! route('retail.shipment.book.previous_names_verify') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'phone_number': phone_number
+                        },
+                    })
+                        .done(function (data) {
+                            if (data.status === 1) {
+
+                                var previousNames = data.data;
+
+                                $('#previous_name').empty();
+
+                                previousNames.forEach(function (data) {
+                                    console.log(data);
+                                    $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'" data-value1="'+ data.shipper_address+'" data-value2="'+ data.shipper_name+'">' + data.shipper_name + '</option>');
+                                });
+
+                                $('#previous_name').trigger('change');
+                                $('#shipper_cnic').val('');
+                                $('#shipper_address').val('');
+                                $('#shipper_name').val('');
+                            }
+                        });
+                }
+            });
+
+            $('#previous_name').on('change', function() {
+
+                var selectedOption  = $('#previous_name option:selected');
+                var selectedValue = selectedOption.val();
+                var cnic = selectedOption.data('value');
+                var address = selectedOption.data('value1');
+                var name = selectedOption.data('value2');
+
+                $('#shipper_cnic').val(cnic);
+                $('#shipper_address').val(address);
+                $('#shipper_name').val(name);
 
             });
         });
