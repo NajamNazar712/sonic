@@ -16,6 +16,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1" >S No.</th>
                                     <th class="border-primary border-darken-1" >City Name</th>
                                     <th class="border-primary border-darken-1" >City Code</th>
@@ -34,6 +35,7 @@
                                     <th class="border-primary border-darken-1" >Hub Location</th>
                                     <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
+                                    <th class="border-primary border-darken-1" >Booking Enable Status</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
                                 </thead>
@@ -104,6 +106,7 @@
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -111,6 +114,27 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            var selected_rows = [];
+            $('#datatable').on('click', 'td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if(selected_rows.length > 0){
+                    table.button('.booking_enable').enable()
+                    table.button('.booking_disable').enable()
+                }else{
+                    table.button('.booking_enable').disable()
+                    table.button('.booking_disable').disable()
+                }
+                
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -138,6 +162,7 @@
                             head.push('Updated By');
                             head.push('Updated At');
                             head.push('Address');
+                            head.push('Booking Enable Status');
 
 
                             $.each(result.data, function(index, values) {
@@ -158,6 +183,7 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.address);
+                                row.push(values.booking_enable_status);
 
                                 body.push(row);
                             });
@@ -209,7 +235,111 @@
                     title: 'City Management',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
+                    },{
+                        text: '<i class="la la-enable"></i> Booking Enable',
+                        className: 'btn btn-primary booking_enable',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { 
+                                swal({
+                                    title: 'Booking Enable',
+                                    text: 'Are you sure you want to enable booking?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, enable it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: "{!! route('admin.management.enable_booking_status') !!}",
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '200') {
+                                                    swal('Booking Enabled!', {
+                                                        icon: 'success',
+                                                    });
+                                                    table.draw();
+
+                                                }else{
+                                                    swal(res.status, {
+                                                        icon: 'warning',
+                                                    });
+
+                                                    table.draw();
+                                                }
+                                            },
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
+                                            }
+                                        });
+                                      
+                                    } else {
+                                        swal('Booking is not enabled.');
+                                    }
+                                });
+                            }
+                        }
+                    },{
+                        text: '<i class="la la-disable"></i> Booking Disable',
+                        className: 'btn btn-primary booking_disable',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { 
+                                swal({
+                                    title: 'Booking Disable',
+                                    text: 'Are you sure you want to disable booking?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, disable it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+                                            url: "{!! route('admin.management.disable_booking_status') !!}",
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '200') {
+                                                    swal('Booking Disabled!', {
+                                                        icon: 'success',
+                                                    });
+
+                                                    table.draw();
+                                                }else{
+                                                    swal(res.status, {
+                                                        icon: 'warning',
+                                                    });
+
+                                                    table.draw();
+                                                }
+                                            }, 
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
+                                            }
+                                        });
+                                      
+                                    } else {
+                                        swal('Booking is not disabled.');
+                                    }
+                                });
+                            }
+                        }
+                    },
+
+                        'reset'],
                 @else
                 buttons: [{
                     extend: 'excel',
@@ -227,12 +357,19 @@
                 language: {
                     processing: data_table_loader
                 },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
                rowId: 'id',
                 order: [[13, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
                     {data: 'city_code', name: 'cities.city_code', class: 'align-middle city_code'},
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
@@ -250,12 +387,14 @@
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
                     {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
+                    {data: 'booking_enable_status', name: 'cities.booking_enable_status', class: 'align-middle booking_enable_status'},
+
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
                    var info = table.page.info();
 
-                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                   $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
                },
                initComplete: function() {
@@ -284,8 +423,8 @@
                    this.api().columns().every(function(column_id) {
                        var column = this;
                        var header = column.header();
-
-                       if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
+             
+                       if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.location')  || $(header).is('.hub_location') || $(header).is('.latitude') || $(header).is('.longitude')) {
                            $(td).appendTo($(search));
                        }else if($(header).is('.status')){
                            $(status_select).appendTo($(search))
@@ -353,6 +492,9 @@
                 checkboxClass: 'icheckbox_squaret-red',
                 radioClass: 'iradio_square-red'
             });
+            
+     
+
         });
         {{--$('#datatable tbody').on('click', 'tr td.modes button', function() {--}}
         {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
@@ -442,6 +584,7 @@
                 });
             }
         });
+        
         $('body').on('click','#datatable tbody tr td.osa_list button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#osa_modal .modal-body').html('');
@@ -477,6 +620,8 @@
                     }
                 });
             });
+
+            
         $('body').on('click','.deactivate',function (e) {
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
@@ -622,7 +767,6 @@
             }
 
         });
-
 
 
     </script>

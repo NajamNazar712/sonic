@@ -919,6 +919,9 @@ class APIController extends Controller
                 if (!$consignee_city->zone_id) {
                     return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id') . ' is deactivated']);
                 }
+                if (!$consignee_city->booking_enable_status) {
+                    return response()->json(['status' => 1, 'message' => 'Delivery is not available for this City.']);
+                }
 
                 $pickup_city_id = $user_shipping_info->city_id;
 
