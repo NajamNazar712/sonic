@@ -231,10 +231,6 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->save();
         }
 
-        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-        self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
-        self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
-
         //Existing Coordinates
 //        if($pieces > 1){
 //            $user = User::where('id', $user_id)->where('multipiece_status', 0);
@@ -882,6 +878,7 @@ class ShipperShipmentBookController extends Controller
                     $shipment_try_and_buy->amount = $try_and_buy_cod_amount;
                     $shipment_try_and_buy->save();
                 }
+                self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
                 NotificationsController::send(2, $shipment_id);
 
@@ -3769,9 +3766,6 @@ class ShipperShipmentBookController extends Controller
 //            }
 //        }
 
-        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-        self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
-        self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
     }
@@ -4280,6 +4274,8 @@ class ShipperShipmentBookController extends Controller
                 $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
             }
 
+            self::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+            
             NotificationsController::send(2, $shipment_id);
             $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
             $now = Carbon::now()->format('H:i:s');
@@ -8629,4 +8625,10 @@ class ShipperShipmentBookController extends Controller
 
     }
 
+    static function addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address)
+    {
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+        self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
+    }
 }

@@ -205,9 +205,7 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
-                            head.push('Location Status');
-                            head.push('Latitude');
-                            head.push('Longitude');	
+                         	
 							
                     
 
