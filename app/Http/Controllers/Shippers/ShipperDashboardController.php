@@ -1111,9 +1111,9 @@ class ShipperDashboardController extends Controller
         if (!$shipperStoreId) {
             return response()->json(['error' => 'Please enter a store ID']);
         }
-        if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
-            return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
-        }
+        // if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
+        //     return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
+        // }
 
         $status = null;
         if ($userShippingInfosStatus == "Enabled") {
@@ -1291,6 +1291,9 @@ class ShipperDashboardController extends Controller
         })
         ->editColumn('status', function ($pickup) {
             return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
+        })
+        ->filterColumn('shipper_store_id', function ($query, $keyword) {
+            $query->where('usisa.shipper_store_id', 'LIKE', '%' . $keyword . '%');
         })
         ->make(true);
     }
