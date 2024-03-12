@@ -35,7 +35,7 @@ class ProcessShipmentStatusWebhook implements ShouldQueue
         $user_id = $this->shipment['user_id'];
         $tracking_number = $this->shipment['tracking_number'];
         $status = $this->shipment['status'];
-        $orderId = $this->shipment['order_id'];
+        $orderId = $this->shipment['order_id'] ?? '-';
         $url = $this->shipment['url'];
         $date = $this->shipment['date_time'];
         $reason = $this->shipment['reason'];
