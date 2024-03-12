@@ -1105,7 +1105,7 @@ class ShipperDashboardController extends Controller
         $shipperStoreId = $request->input('shipper_store_id');
         $userShippingInfosId = $request->input('user_shipper_infos_id');
         $userShippingInfosStatus = $request->input('user_shipper_infos_status');
-        if ($userId != 2234 && $userId != 1049 &&  $userId != 10364){
+        if ($userId != 2234 && $userId != 1049){
             return response()->json(['error' => 'Invalid user']);
         } 
         if (!$shipperStoreId) {
@@ -1232,10 +1232,10 @@ class ShipperDashboardController extends Controller
             //     $dropdown .= $add_store_id_button;
             // }
 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364) && $pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
             } 
-            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364)  && !$pickup->shipper_store_id) {
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
 
