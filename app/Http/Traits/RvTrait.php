@@ -1050,6 +1050,7 @@ trait RvTrait
                         'assigned_by' => null,
                     ];
                     
+                    dd(1,'found');
                     // creating a new record
                     $this->rv_shipment_assign($data);
                     break;
