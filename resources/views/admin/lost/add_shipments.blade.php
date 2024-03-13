@@ -652,6 +652,7 @@ label.error {
             var rid = parseInt($(this).parents('tr').attr('id'));
             var shipment_id_remove = $(this).attr('data-shipment_id');
             var trax_id = $(this).attr('data-trax_id');
+            
             rows_count_1 = rows_count_1;
 
             if (index !== -1) {
@@ -668,16 +669,7 @@ label.error {
                     delete change[shipment_id_remove];
                 }
             }
-            
-            if(addLostResponsible.row().length >= 0 && change[shipment_id_remove] !== undefined){
-                addLostResponsible.button(0).enable();
-            }else if (addLostResponsible.row().length == 0){
-                addLostResponsible.button(0).enable();
-            }else{
-                addLostResponsible.button(0).disable();
-            }
 
-           // Find the index of the object in the array with the specified value
             var indexToRemove = new_array[shipment_id_remove].findIndex(function(item) {
                 return item.value !== rows_count_1;
             });
@@ -689,6 +681,22 @@ label.error {
             if(addLostResponsible.row().length === 0){
                 new_array[shipment_id_remove] = [];
             }
+
+            var truee = new_array[shipment_id].length === change[shipment_id].length;
+            var falsee = new_array[shipment_id].length !== change[shipment_id].length;
+
+            if(addLostResponsible.row().length >= 0 && change[shipment_id_remove] !== undefined){
+                if(truee === true){
+                    addLostResponsible.button(0).enable();
+                }else if(falsee !== false){
+                    addLostResponsible.button(0).disable();
+                }
+            }else if (addLostResponsible.row().length == 0){
+                addLostResponsible.button(0).enable();
+            }else{
+                addLostResponsible.button(0).disable();
+            }
+
 
         });  
 
