@@ -133,7 +133,7 @@ class AdminZonalManagementController extends Controller
 
     public function update_index($id) {
         $zone_cities_gst = array();
-        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
+        $cities = City::where(['status' => 1, 'business_category_id' => 1, 'zone_id' => $id])->get();
         $zone = Zone::find($id);
         $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 1])->pluck('class', 'city_id');
         $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'zone_classification_id' => 2])->pluck('class', 'city_id');
