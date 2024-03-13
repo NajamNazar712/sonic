@@ -956,6 +956,7 @@ class LostShipmentsController extends Controller
                 $details[$key]['trax_id'] = $rider->trax_id;
                 $details[$key]['name'] = $rider->name;
                 $details[$key]['type'] = $rider->employee->employee_type->name;
+                $details[$key]['status'] = $rider->employee->employee_status->name;
                 $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
             }
         }
