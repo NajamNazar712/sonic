@@ -62,9 +62,9 @@ trait LastMileAppReportTrait
                  
                  if($check_summary->exists())
                  {
-                                         $check_summary = $check_summary->first();
+                     $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
-                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->whereDate('created_at', $today);
+                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
                      if($check_existing_shipment->exists())
                      {
                        
