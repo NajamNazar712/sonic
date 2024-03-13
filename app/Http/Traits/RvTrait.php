@@ -1034,6 +1034,21 @@ trait RvTrait
                     if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->first())
                     {
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
+                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
+                        
+                        $data = [
+                            'agent_id' => $agent_id,
+                            'shipment_id' => $shipment->id,
+                            'shipments_journey_id' => $shipments_journey->id,
+                            'rv_state_id' => 1, //Assigned
+                            'rv_assign_agent_status_id' => null,
+                            'rv_assign_agent_sub_status_id' => null,
+                            'assigned_to_type_id' => null,
+                            'assigned_by' => null,
+                        ];
+                        
+                        //updating a row and creating new one
+                        $this->rv_shipment_assign($data);
                         break;
                     }
                     
