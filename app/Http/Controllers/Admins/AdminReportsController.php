@@ -147,6 +147,14 @@ class AdminReportsController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->join('shipment_status as hss', function($join) {
+                $join->on('hss.id', '=', DB::raw('(SELECT shipment_status.id
+                FROM shipments_journey
+                JOIN shipment_status ON shipments_journey.shipper_status_id = shipment_status.id
+                WHERE shipments_journey.shipment_id = shipments.id
+                ORDER BY shipments_journey.updated_at DESC
+                LIMIT 1 OFFSET 1)'));
+            })
             ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -244,7 +252,8 @@ class AdminReportsController extends Controller
                 'shipments.tracking_number',
                 'shipments.tracking_number as tracking_number_link',
                 'u.name as shipper',
-                'ss.name as history_status',
+                // 'ss.name as history_status',
+                'hss.name as history_status',
                 'bt.booking_type as service_type',
                 'sj.created_at as arrival',
                 'oc.name as origin',
