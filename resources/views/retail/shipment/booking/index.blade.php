@@ -622,7 +622,6 @@
                 placeholder:"Select Shipment Category*"
             }).bind('change',function(){
                 var id = parseInt($(this).val());
-                console.log(id);
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
@@ -916,9 +915,9 @@
                             var cod = data.cod;
                             if(data.status == 1){
                                 $('#shipper_phone_no').val(data.details.shipper_phone_no);
-                                $('#shipper_name').val(data.details.shipper_name);
+                                /*$('#shipper_name').val(data.details.shipper_name);
                                 $('#shipper_cnic').val(data.details.shipper_cnic);
-                                $('#shipper_address').val(data.details.shipper_address);
+                                $('#shipper_address').val(data.details.shipper_address);*/
                                 $('#iban_no').val(data.details.iban);
                                 $('#account_no').val(data.details.account_number);
                                 $('#bank').val(data.details.bank_id).trigger('change');
@@ -967,17 +966,14 @@
 
             var toggleValue = false;
             $('#admin_discount_type').change( function () {
-                console.log('clicked');
                 toggleValue = !toggleValue;
                 if(toggleValue)
                 {
                    $('#admin_discount_type1').val("1");
-                   console.log(toggleValue);
                 }
                 else
                 {
                     $('#admin_discount_type1').val("0");
-                    console.log(toggleValue);
                 }
             });
 
@@ -1317,7 +1313,6 @@
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
-                console.log($(this).val());
                 if ($(this).val() === 'other') {
                     $('#other_city_domestics').removeClass('d-none');
                 }
@@ -1329,7 +1324,6 @@
                 width:'100%',
                 placeholder:"Select City*"
             }).bind('change', function() {
-                console.log($(this).val());
 
                 if ($(this).val() === 'other') {
                     $('#other_cities_internationals').removeClass('d-none');
@@ -1431,7 +1425,6 @@
                             }else{
                                 $('#black_listed_employee').removeClass('d-none');
                             }
-                            console.log(data);
                             $('#AutoFetchConsignee').modal('show');
                             var html = '';
                             $.each(data.consignee, function (index, details) {
@@ -1468,9 +1461,15 @@
             });
 
             $('#shipper_phone_no').keyup(function () {
-
                 var phone_number = $(this).val();
                 var cleaned_phone_number = phone_number.replace(/[-_]/g, '');
+                if (cleaned_phone_number.length !== 11)
+                {
+                    $('#previous_name').empty();
+                    $('#shipper_cnic').val('');
+                    $('#shipper_address').val('');
+                    $('#shipper_name').val('');
+                }
 
                 if (cleaned_phone_number.length === 11)
                 {
@@ -1484,13 +1483,10 @@
                     })
                         .done(function (data) {
                             if (data.status === 1) {
-
                                 var previousNames = data.data;
-
                                 $('#previous_name').empty();
-
+                                $('#previous_name').append('<option value="" selected="selected">Select Previous Name</option>');
                                 previousNames.forEach(function (data) {
-                                    console.log(data);
                                     $('#previous_name').append('<option value="' + data.id + '" data-value="'+ data.shipper_cnic+'" data-value1="'+ data.shipper_address+'" data-value2="'+ data.shipper_name+'">' + data.shipper_name + '</option>');
                                 });
 
