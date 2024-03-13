@@ -9665,8 +9665,8 @@ class AdminReportsController extends Controller
                 'z.name as zone',
                 'h.name as hub',
                 'r.name as rider_name',
-                DB::raw('(select count(DISTINCT shipment_id) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
-                DB::raw('(select count(DISTINCT shipment_id) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin')
+                DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
+                DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin')
             );
 
         $datatable = Datatables::of($new_deliveries)
