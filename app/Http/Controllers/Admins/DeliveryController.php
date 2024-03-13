@@ -3713,6 +3713,7 @@ class DeliveryController extends Controller
     // Check
     public function receive_delivery_verify_status_submit(Request $request)
     {
+    try {
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
         $rcp_sms_setting = GlobalSettings::where('type', 'return_confirmation_pending_sms')->first();
@@ -3764,6 +3765,7 @@ class DeliveryController extends Controller
                         $remarks_input = "remarks.$shipment";
                         $shipper_status_id = NULL;
                         $shipment_journey_remarks = NULL;
+
                         if ($request->has($status_drop)) {
                             $shipper_status_id = $request->status_drop[$shipment];
                         }
@@ -4269,6 +4271,10 @@ class DeliveryController extends Controller
             }
         } else {
             return redirect()->back()->with('error', 'Shipments count does not match!');
+        }
+    }catch (\Throwable $th)
+        {
+            return redirect()->back()->with('error', 'Something Went Wrong !');
         }
     }
 
