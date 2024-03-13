@@ -934,20 +934,29 @@ class LostShipmentsController extends Controller
     public function lost_responsible_list(Request $request){
         $shipment_id = $request->shipment_id;
         $details = [];
-        $lost_responsible_shipments = LostShipmentResponsible::where('shipment_id', $shipment_id)->get();
-        foreach($lost_responsible_shipments as $key => $lost_responsible_shipment){
+        $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id) {
+            $query->selectRaw('MAX(id)')
+                  ->from('lost_shipment_responsibles')
+                  ->where('shipment_id', $shipment_id)
+                  ->groupBy('user_id');
+        })->get();
+        
+        foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
             if($lost_responsible_shipment->user_type == 1){
                 $admin = Admin::find($lost_responsible_shipment->user_id);
                 $details[$key]['trax_id'] = $admin->trax_id;
                 $details[$key]['name'] = $admin->name;
                 $details[$key]['type'] = $admin->employee->employee_type->name;
                 $details[$key]['status'] = $admin->employee->employee_status->name;
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+
+
             }else{
                 $rider = Rider::find($lost_responsible_shipment->user_id);
                 $details[$key]['trax_id'] = $rider->trax_id;
                 $details[$key]['name'] = $rider->name;
                 $details[$key]['type'] = $rider->employee->employee_type->name;
-                $details[$key]['status'] = $rider->employee->employee_status->name;            
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
             }
         }
 
