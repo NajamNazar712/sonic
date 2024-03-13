@@ -1029,6 +1029,13 @@ trait RvTrait
                         $shipment_assigned_assigned_agent->first();
                         break;
                     }
+
+                    //  if shipment is found and unassigned(2) or completed(4) then update the current records
+                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->first())
+                    {
+                        // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
+                        break;
+                    }
                     
                     // Shipment is found and already in working state or return is completed, new shipment will get to agent
                     $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
@@ -1050,7 +1057,6 @@ trait RvTrait
                         'assigned_by' => null,
                     ];
                     
-                    dd(1,'found');
                     // creating a new record
                     $this->rv_shipment_assign($data);
                     break;
