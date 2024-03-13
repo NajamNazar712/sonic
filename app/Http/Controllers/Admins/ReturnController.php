@@ -7585,7 +7585,7 @@ class ReturnController extends Controller
                     $open_unresponsive_shipment->updated_by_id = Auth::id();
                     $open_unresponsive_shipment->save();
     
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7616,7 +7616,7 @@ class ReturnController extends Controller
                     $completed_shipment->call_to_id = $request->call_to_id;
                     $completed_shipment->save();
     
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7641,7 +7641,7 @@ class ReturnController extends Controller
                     $sar_unresponsive_shipment->save();
     
                     
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7672,7 +7672,7 @@ class ReturnController extends Controller
                     $completed_shipment_first_unresponsive->call_to_id = $request->call_to_id;
                     $completed_shipment_first_unresponsive->save();
     
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7706,7 +7706,7 @@ class ReturnController extends Controller
                     $old_completed_shipments->save();
     
                     
-                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                    $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
                     $new_call_history = $this->unresponsive($request);
@@ -7741,7 +7741,7 @@ class ReturnController extends Controller
                 $add_call_status->save();
 
                 
-                $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->call_finding_id]);
+                $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                 
                 //adding new row in rv_agent_call_histories and updating unresposive count
                 $new_call_history = $this->unresponsive($request);
