@@ -1217,23 +1217,22 @@
                         '<th class="border-primary border-darken-1">Employee Name</th>' +
                         '<th class="border-primary border-darken-1">Employee Type</th>' +
                         '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '<th class="border-primary border-darken-1">Marked At</th>' +
+
                         '</tr>' +
                         '</thead>' +
                         '<tbody>'; 
 
-                        var addedTraxIds = []; 
                         $.each(response.details, function(index, item) {
                             var employee = item;
-                            if (!addedTraxIds.includes(employee.trax_id)) { 
                                 modalContent += '<tr>';
                                 modalContent += '<td>' + (index + 1) + '</td>'; 
                                 modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
                                 modalContent += '<td>' + employee.name + '</td>'; 
                                 modalContent += '<td>' + employee.type + '</td>'; 
-                                modalContent += '<td>' + employee.status + '</td>'; 
-                                modalContent += '</tr>';
-                                addedTraxIds.push(employee.trax_id); 
-                            }
+                                modalContent += '<td>' + employee.status + '</td>';
+                                modalContent += '<td>' + employee.marked_at + '</td>'; 
+                                modalContent += '</tr>';                            
                         });
 
 
