@@ -77,28 +77,45 @@ class LostShipmentsController extends Controller
         $total_of_approved_shipments = $shipmentsCounts->approved;
         $total_of_pending_shipments = $shipmentsCounts->pending;
         $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
+        $total_approval = LostShipmentStatusCount::sum('approval_count');
 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
 
-        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_of_approved_shipments, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
+        return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_approval, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
         
     }
 
-    static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
-        $lost_shipment_approval = LostShipmentStatusCount::where('shipment_id', $shipment_id);
+    // static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
+    //     $lost_shipment_approval = LostShipmentStatusCount::where('shipment_id', $shipment_id);
         
-        if(!$lost_shipment_approval->exists()) {
-            LostShipmentStatusCount::create(['shipment_id'=> $shipment_id, $fieldToUpdate => 1, 'cleared' => $clearedValue]);
+    //     if(!$lost_shipment_approval->exists()) {
+    //         LostShipmentStatusCount::create(['shipment_id'=> $shipment_id, $fieldToUpdate => 1, 'cleared' => $clearedValue]);
+    //     } else {
+    //         $lost_shipment_approval = $lost_shipment_approval->first();
+    //         $field_value = $lost_shipment_approval->$fieldToUpdate;
+    //         $lost_shipment_approval->update([
+    //             $fieldToUpdate => in_array(944, session('permission')) ?  $field_value + 1 : $field_value,
+    //             'cleared' => $clearedValue
+    //         ]);
+    //     }
+    // }
+
+    static public function updateLostShipmentApproval($shipment_id, $fieldToUpdate, $clearedValue) {
+        $lost_shipment_approval = LostShipmentStatusCount::where('shipment_id', $shipment_id)->first();
+        
+        if(!$lost_shipment_approval) {
+            LostShipmentStatusCount::create(['shipment_id' => $shipment_id, $fieldToUpdate => 1, 'cleared' => $clearedValue]);
         } else {
-            $lost_shipment_approval = $lost_shipment_approval->first();
             $field_value = $lost_shipment_approval->$fieldToUpdate;
+            $newValue = in_array(944, session('permissions')) ? $field_value + 1 : $field_value;
             $lost_shipment_approval->update([
-                $fieldToUpdate => $field_value + 1,
+                $fieldToUpdate => $newValue,
                 'cleared' => $clearedValue
             ]);
         }
     }
+    
     public function lost_shipments_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -166,9 +183,9 @@ class LostShipmentsController extends Controller
                 $shipments;
             }
 
-            if ($request->get('search_total_lost_approved_shipments') === "2") {
-                $shipments->where('shipments_journey.verification', 1);
-            }
+            // if ($request->get('search_total_lost_approved_shipments') === "2") {
+            //     $shipments->where('shipments_journey.verification', 1);
+            // }
 
             if ($request->get('search_total_lost_pending_shipments') === "3") {
                 $shipments->where('shipments_journey.verification', 0);
@@ -964,6 +981,38 @@ class LostShipmentsController extends Controller
         return response()->json(['status' => 1, 'details'=> $details]);
 
     }
+    public function lost_data(Request $request)
+    {
+        $details = [
+            'total' => 0,
+            'total_of_approved_shipments' => 0,
+            'total_of_pending_shipments' => 0,
+        ];
 
+        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
+            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        })
+            ->where('shipments.shipper_status_id', 18)->whereBetween('shipments_journey.created_at',[$request->from_date, $request->to_date]);;
+
+        $shipmentsCounts = $shipments
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(IF(shipments_journey.verification = 1, 1, 0)) as approved,
+                SUM(IF(shipments_journey.verification = 0, 1, 0)) as pending
+            ')
+            ->first();
+
+        $total_rejections = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('rejection_count');
+        $total_approval = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('approval_count');
+
+        $details['total'] = $shipmentsCounts->total;
+        $details['total_of_approved_shipments'] = $total_approval;
+        $details['total_of_pending_shipments'] = $shipmentsCounts->pending;
+        $details['total_rejections'] = $total_rejections;
+
+
+        return response()->json(['status' => 1, 'details' => $details]);
+    }
 
 }

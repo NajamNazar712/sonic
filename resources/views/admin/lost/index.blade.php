@@ -24,7 +24,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value = {{ Carbon\Carbon::now() }}>
                             </div>
                         </div>
                         <div class="col-4">
@@ -34,7 +34,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" >
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value = {{ Carbon\Carbon::now()->addDays(30) }}>
                             </div>
                         </div>
                         <div class="col-2">
@@ -1054,7 +1054,7 @@
             $('#search_total_lost_shipments').val('');
             $('#search_total_lost_approved_shipments').val(2);
             $('#search_total_lost_pending_shipments').val('');
-            table.draw();
+            // table.draw();
         });
 
         $('#search_total_pending_div').on('click', function() {
@@ -1251,6 +1251,35 @@
                 }
             });
         });
+
+        $('#search_filter_btn').click(function() {
+            var from_date =$('input[name="from_date_formatted"]').val();
+            var to_date =  $('input[name="to_date_formatted"]').val();
+           
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.lost_data') }}',
+                method: 'POST',
+                data: {
+                    from_date: from_date,
+                    to_date: to_date,
+                    '_token': '{{ csrf_token() }}',
+                },
+                success: function(response) {
+                    console.log(response);
+
+                    $('#total_of_pending_shipments').text(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments);
+                    $('#total_of_approved_shipments').text(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments);
+                    $('#total_of_shipments').text(response.details.total == null ? 0 : response.details.total);
+                    $('#rejection_shipments').text(response.details.total_rejections == null ? 0 : response.details.total_rejections);
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX request failed');
+                    console.error('Status:', status);
+                    console.error('Error:', error);
+                }
+            });
+        });
+
     });
 
     </script>
