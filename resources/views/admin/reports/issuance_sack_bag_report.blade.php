@@ -1,11 +1,11 @@
 @extends('admin.layout.master')
 
-@section('title', 'Issuance of Sack Bag')
+@section('title', 'Issuance of Canvas Bag')
 
 
 @section('content')
     <h1 class="mb-1">
-        Issuance of Sack Bag 
+        Issuance of Canvas Bag
     </h1>
 
     <div class="card">
@@ -57,7 +57,7 @@
                             {{-- <th class="border-primary border-darken-1">Date</th>  --}}
                             <th class="border-primary border-darken-1">Origin</th>
                             {{-- <th class="border-primary border-darken-1">Address</th> --}}
-                            <th class="border-primary border-darken-1">Issuance Sack Bag</th>
+                            <th class="border-primary border-darken-1">Issuance Canvas Bag</th>
                             {{-- <th class="border-primary border-darken-1">Re-used Sack Bag</th> --}}
                             {{-- <th class="border-primary border-darken-1">Rider Picked</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
@@ -79,7 +79,7 @@
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Sack Bag List</h4>
+                <h4 class="modal-title white">Canvas Bag List</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -90,7 +90,7 @@
                             <thead>
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                        <th class="border-primary border-darken-1">Canvas Bag No#</th>
                                         <th class="border-primary border-darken-1">Created At</th>
 
                                     </tr>

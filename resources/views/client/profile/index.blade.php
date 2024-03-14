@@ -531,7 +531,7 @@
                             <div class="row">
                                 <input type="hidden" name="id" id="edit_user_shipping_info_id" value="">
                                 <div class="col-12 form-group">
-                                    <input type="number" name="shipper_store_id" id="add_shipper_store_id" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Shipper Store ID is required" placeholder="Shipper Store ID" required>
+                                    <input type="text" name="shipper_store_id" id="add_shipper_store_id" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Shipper Store ID is required" placeholder="Shipper Store ID" required>
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -674,11 +674,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Verification Pin</h4>
+                    <h4 class="modal-title" id="">Enter Verification Pin</h4>
                 </div>
 
                 <div class="modal-body">
-                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code*"/>
+                    <input name="pincode" id="pincode" class="form-control" maxlength="4" placeholder="Enter Pin Code"/>
                     <input type="hidden" id="code" name="code"/>
                 </div>
                 <div class="modal-footer">
@@ -1614,7 +1614,7 @@
                             var code    = $('#code').val();
                             if(pincode == code)
                             {
-                                // $('#AddBankModal').modal('show');
+                                $('#AddBankModal').modal('show');
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Your bank is being added!',
