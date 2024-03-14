@@ -117,11 +117,21 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 
 
 class AdminFinanceController extends Controller
 {
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
     static private function amount_to_words($amount)
     {
 
@@ -1545,6 +1555,10 @@ class AdminFinanceController extends Controller
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
+
+        //StationDepositeNoteActionLog
+        self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }
 
