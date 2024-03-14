@@ -481,11 +481,10 @@ trait RvTrait
     // Description:
     protected function return_confirm($request,$globalAdminId = null)
     {   
-        $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
+        // $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
+        $remarks = $request->remarks;
         $parcel = Shipment::find($request->shipment_id);
         
-        dd($remarks,$request->remarks,$request['remarks']);
-
         $rv_sub_status = null;
         $shipment_status_reason = null;
 
