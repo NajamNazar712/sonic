@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Sack Bag')
+@section('title', 'Canvas Bag')
 
 @section('content')
     <div class="app-content content">
@@ -20,7 +20,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Sack Bag No#</th>
+                                    <th class="border-primary border-darken-1">Canvas Bag No#</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Remark</th>
                                     <th class="border-primary border-darken-1">User</th>
@@ -432,7 +432,7 @@
                                     form.submit();
                                 }else{
                                     scan_sound(2);
-                                    toastr.error("Sack Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error("Canvas Bag No# already exist!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             }
                 });
@@ -455,7 +455,7 @@
                               sack_bag_no_check(sack_bag_no,tr_index);
                             }else{
                                 scan_sound(2);
-                                toastr.error("Please fill Sack Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                toastr.error("Please fill Canvas Bag No!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
                     }
                       
@@ -497,7 +497,7 @@
                         {   
                            
                             scan_sound(2);
-                            toastr.error("Sack Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});  scan_sound(2);
+                            toastr.error("Canvas Bag Already Added!", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});  scan_sound(2);
                             // $(sack_bag_no).closest('tr').find('#sack_bag_no_id').val('');
                             $(sack_bag_no).closest('tr').remove();
                             $("#sack_bag_no_check").val(1);
