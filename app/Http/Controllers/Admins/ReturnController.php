@@ -7703,6 +7703,11 @@ class ReturnController extends Controller
                     $old_completed_shipments->call_to_id = $request->call_to_id;
                     $old_completed_shipments->assigned_to_type_id = 0;
                     $old_completed_shipments->assigned_by = 0;
+
+                    if ($request->call_finding_id == 6 && $old_completed_shipments->unresponsive_count > 2) {
+                        $old_completed_shipments->rv_assign_agent_status_id = 1; //set status to return confirm
+                    }
+
                     $old_completed_shipments->save();
     
                     
