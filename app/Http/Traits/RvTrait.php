@@ -484,6 +484,8 @@ trait RvTrait
         $remarks = (is_array($request) && isset($request['remarks']) && $request['remarks'] !== null)  ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
         
+        dd($remarks,$request->remarks,$request['remarks']);
+
         $rv_sub_status = null;
         $shipment_status_reason = null;
 
