@@ -7687,7 +7687,6 @@ class ReturnController extends Controller
                 }
                 
                 else if($old_completed_shipments){
-                    dump(1,'found',$old_completed_shipments);
                     $old_completed_shipments->agent_id = Auth::id();
                     $old_completed_shipments->shipment_id = $shipment_id;
                     $old_completed_shipments->shipments_journey_id = $shipments_journey->id;
@@ -7705,16 +7704,13 @@ class ReturnController extends Controller
                     $old_completed_shipments->assigned_to_type_id = 0;
                     $old_completed_shipments->assigned_by = 0;
 
-                    dump(2,'before updating',$old_completed_shipments);
                     //if admin marks unresponsive 3rd time after reattempt from agent on 3rd Call then set rv_assign_agent_status_id to 1 (return)
-                    if ($request->call_finding_id == 6 && $old_completed_shipments->unresponsive_count > 2) {
+                    if ($request->call_finding_id == 6 && $old_completed_shipments->unresponsive_count >= 2) {
                         $old_completed_shipments->rv_assign_agent_status_id = 1; //set status to return confirm
                     }
-                    dump(3,'after updating',$old_completed_shipments);
+
                     $old_completed_shipments->save();
     
-                    dd(4,'after saving',$old_completed_shipments);
-                    
                     $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => 0, 'rv_fake_status_id' => 0, 'rv_assign_agent_sub_status_id' => $request->sub_status_call_finding_id]);
                     
                     //adding new row in rv_agent_call_histories and updating unresposive count
