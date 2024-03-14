@@ -120,7 +120,6 @@ use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 
@@ -1112,9 +1111,9 @@ class ShipperDashboardController extends Controller
         if (!$shipperStoreId) {
             return response()->json(['error' => 'Please enter a store ID']);
         }
-        if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
-            return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
-        }
+        // if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
+        //     return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
+        // }
 
         $status = null;
         if ($userShippingInfosStatus == "Enabled") {
@@ -1146,14 +1145,8 @@ class ShipperDashboardController extends Controller
             $user_id = session('user_id');
             $pin = rand(1000,9999);
             NotificationsController::send(91,$user_id,$pin);
-             // Get the profile_otp from SMS model
-            $profile_otp = AdminShipperVerificationPinCode::where('otp', $pin)->first();
-            if ($profile_otp) {
-                    $data['code'] = $pin;
-                    return json_encode($data);
-            }
-             // $data['code'] = $pin;
-             // return json_encode($data);
+            $data['code'] = $pin;
+            return json_encode($data);
         }
     }
 
@@ -1298,6 +1291,9 @@ class ShipperDashboardController extends Controller
         })
         ->editColumn('status', function ($pickup) {
             return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
+        })
+        ->filterColumn('shipper_store_id', function ($query, $keyword) {
+            $query->where('usisa.shipper_store_id', 'LIKE', '%' . $keyword . '%');
         })
         ->make(true);
     }
