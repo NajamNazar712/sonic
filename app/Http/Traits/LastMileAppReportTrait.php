@@ -70,6 +70,7 @@ trait LastMileAppReportTrait
                      if($check_existing_shipment->exists())
                      {
                          $this->createDeliveryNoteErrorLog($delivery_note_id,$shipment_id,'Sec-'.$check_existing_shipment->exists());
+                         $this->createDeliveryNoteErrorLog($delivery_note_id,$shipment_id,'Sec-'.$check_existing_shipment->exists());
                        
                         
                         $update_delivery_note_shipment = $check_existing_shipment->first();
