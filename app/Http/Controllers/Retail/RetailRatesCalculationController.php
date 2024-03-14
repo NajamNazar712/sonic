@@ -8,6 +8,7 @@ use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalStandardRetailRates;
 use App\Http\Models\RetailStandardRates;
 use App\Http\Models\Zone;
+use App\Http\Models\ZoneCitiesGst;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
 
@@ -163,7 +164,17 @@ class RetailRatesCalculationController extends Controller
                 }
             }
 
-            $gst = 1 + $pickup_city->zone->gst;
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$pickup_city->zone->id)->where('city_id',$pickup_city);
+            if ($zone_city_gst->exists())
+            {
+                $zone_city_gst = $zone_city_gst->first();
+                $gst = 1 + $zone_city_gst->gst;
+            }
+            else
+            {
+                $gst = 1 + $pickup_city->zone->gst;
+            }
+
             $charges_without_gst = round($charges / $gst, 2); //
             $gst_amount = round($charges - $charges_without_gst, 2);
             $discount_amount = ($discount > 0) ? round($charges_without_gst * $discount, 2) : 0;
@@ -171,7 +182,6 @@ class RetailRatesCalculationController extends Controller
             $charges_with_discount_and_gst = $charges_with_discount + $gst_amount;
             $packaging_and_insurance_charges = $insurance_amount + $packaging;
             $total_charges = round($charges_with_discount_and_gst + $packaging_and_insurance_charges, 0, PHP_ROUND_HALF_UP);
-
         } elseif ($business_category_id == 2) {
 
             if ($shipping_mode_id == 8) {
@@ -195,7 +205,16 @@ class RetailRatesCalculationController extends Controller
                     $charges = $weight_charge[$zone_id];
 
                     $city = City::find($pickup_city_id);
-                    $gst = 1 + $city->zone->gst;
+                    $zone_city_gst = ZoneCitiesGst::where('zone_id',$city->zone->id)->where('city_id',$city->id);
+                    if ($zone_city_gst->exists())
+                    {
+                        $zone_city_gst = $zone_city_gst->first();
+                        $gst = 1 + $zone_city_gst->gst;
+                    }
+                    else
+                    {
+                        $gst = 1 + $city->zone->gst;
+                    }
                     // $gst_charges = round($charges * $gst,2);
                     // $charges = round($charges - $gst_charges,2);
 

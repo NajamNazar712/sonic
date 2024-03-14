@@ -413,6 +413,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
             Route::post('duplicate_zone', 'Admins\AdminZonalManagementController@duplicate_zone')->name('duplicate_zone');
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
+
+            Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -829,6 +831,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('petty_cash_detail', 'Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
 
             Route::post('status_logs', 'Admins\DeliveryController@sdn_status_logs')->name('status_logs');
+
+            Route::post('sdn_actions', 'Admins\DeliveryController@sdn_actions')->name('sdn_actions');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('{id}/details', 'Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
@@ -2487,6 +2491,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}/edit', 'Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
                 Route::put('update', 'Admins\GlobalSettingsController@status_webhook_update')->name('update');
             });
+
+            // Route::prefix('mobile_check')->name('mobile_check.')->group(function() {
+            //     Route::get('', 'Admins\Settings\GeneralSettingController@mobile_check_index')->name('index');
+            //     Route::post('store', 'Admins\Settings\GeneralSettingController@mobile_check_store')->name('store');
+            // });
 
             Route::prefix('bypass_weight')->name('bypass_weight.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');

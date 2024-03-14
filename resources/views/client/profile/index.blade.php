@@ -192,7 +192,7 @@
 
                                                 <th class="border-primary border-darken-1">S.No</th>
                                                 <th class="border-primary border-darken-1">Pickup Address ID</th>
-                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 1049 || auth()->user()->id == 10364)
+                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 1049)
                                                     <th class="border-primary border-darken-1">Shipper Store ID</th>
                                                 @endif
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
@@ -903,7 +903,7 @@
                 columns: [
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
-                    @if($userId == 2234 || $userId == 1049 || $userId == 10364)
+                    @if($userId == 2234 || $userId == 1049)
                         { data: 'shipper_store_id', name: 'shipper_store_id', class:'shipper_store_id' },
                     @endif
                     {data: 'pickup_address', name: 'pickup_address'},
@@ -1200,7 +1200,7 @@
                     });
                     var id = parseInt($(this).parents('tr').attr('id'));
                     var shipper_status = $(this).closest('tr').find('.status').text();
-                    if (userId == 2234 || userId == 1049 || userId == 10364) {
+                    if (userId == 2234 || userId == 1049) {
                         $("#shipperStoreIdModal").modal('show');
                         $("#addStoreID").on('click', function (event) {
                             if ($('#add_shipper_store_id').val() == ''){
@@ -1614,7 +1614,7 @@
                             var code    = $('#code').val();
                             if(pincode == code)
                             {
-                                $('#AddBankModal').modal('show');
+                                //$('#AddBankModal').modal('show');
                                 swal({
                                     title: 'Please Wait!',
                                     text: 'Your bank is being added!',
