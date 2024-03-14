@@ -312,7 +312,7 @@ label.error {
                                         scan_sound(1);
                                         table.order([0, 'desc']).draw();
 
-                                        shipment_ids.push(id);
+                                        shipment_ids.push(shipment.id);
                                         shipmentAdded = true;
                                         validateRows(shipment_ids, change);                                        
                                         toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });

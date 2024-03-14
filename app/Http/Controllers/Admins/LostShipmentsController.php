@@ -687,7 +687,7 @@ class LostShipmentsController extends Controller
                     $shipment_status_reason_for_shipment_lost_id = DB::table('shipment_status_reason')->where('name', '=','Shipment Lost - Requested')->first()->id;
 
                     $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id] ? $remarks[$shipment_details->id] : NULL ,NULL,Auth::id(), NULL, NULL, 0);
+                    ShipmentsJourneyController::add($shipment_details->id, 18, NULL, $shipment_status_reason_for_shipment_lost_id, $remarks[$shipment_details->id],NULL,Auth::id(), NULL, NULL, 0);
                     $lost_shipments_array[] = $shipment;
 
                     //Pending Count For Lost Pending
