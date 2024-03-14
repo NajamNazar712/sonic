@@ -118,19 +118,20 @@ trait RvTrait
             }
             else
             {
-                $rv_shipment_assign_agent = new RvShipmentAssignAgent();
-                $rv_shipment_assign_agent->agent_id = $data['agent_id'];
-                $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
-                $rv_shipment_assign_agent->last_shipments_journey_id = $data['shipments_journey_id'];
-                $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
-                $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $data['rv_assign_agent_sub_status_id'];
-                $rv_shipment_assign_agent->rv_state_id = $data['rv_state_id'];
-                $rv_shipment_assign_agent->updated_type_id = Auth::guard('agent')->check() ? 2 : 1;
-                $rv_shipment_assign_agent->updated_by_id = Auth::id();
-                $rv_shipment_assign_agent->assigned_to_type_id = $data['assigned_to_type_id'] ?? 0;
-                $rv_shipment_assign_agent->assigned_by = $data['assigned_by'] ?? 0;
-                $rv_shipment_assign_agent->created_at = Carbon::now();
-                $rv_shipment_assign_agent->save();
+                $rv_shipment_assign_agent = RvShipmentAssignAgent::create([
+                        'shipment_id' => $data['shipment_id'],
+                        'agent_id' => $data['agent_id'],
+                        'shipments_journey_id' => $data['shipments_journey_id'],
+                        'last_shipments_journey_id' => $data['shipments_journey_id'],
+                        'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'],
+                        'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'],
+                        'rv_state_id' => $data['rv_state_id'],
+                        'updated_type_id' => Auth::guard('agent')->check() ? 2 : 1,
+                        'updated_by_id' => Auth::id(),
+                        'assigned_to_type_id' => $data['assigned_to_type_id'] ?? 0,
+                        'assigned_by' => $data['assigned_by'] ?? 0,
+                        'created_at' => Carbon::now(),
+                ]);
             }
 
             // $rv_shipment_assign_agent = RvShipmentAssignAgent::updateOrCreate(
