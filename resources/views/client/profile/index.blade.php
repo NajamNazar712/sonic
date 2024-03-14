@@ -192,6 +192,9 @@
 
                                                 <th class="border-primary border-darken-1">S.No</th>
                                                 <th class="border-primary border-darken-1">Pickup Address ID</th>
+                                                @if (auth()->user()->id == 2234 || auth()->user()->id == 1049)
+                                                    <th class="border-primary border-darken-1">Shipper Store ID</th>
+                                                @endif
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
                                                 <th class="border-primary border-darken-1">Person of Contact</th>
                                                 <th class="border-primary border-darken-1">Vendor</th>
@@ -509,6 +512,40 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="shipperStoreIdModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="shipperStoreIdModal"
+            aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Shipper Store ID</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="shipper_store_id_form" action="#" method="post">
+                        @method('POST')
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <input type="hidden" name="id" id="edit_user_shipping_info_id" value="">
+                                <div class="col-12 form-group">
+                                    <input type="text" name="shipper_store_id" id="add_shipper_store_id" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Shipper Store ID is required" placeholder="Shipper Store ID" required>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="addStoreID" class="btn btn-primary btn-block">Add Shipper Store ID</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{--Add Stock Modal--}}
 
     {{--Edit Email Modal--}}
@@ -835,9 +872,9 @@
             // $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             // $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-
-
-
+            @php
+                $userId = auth()->user()->id;
+            @endphp
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -866,6 +903,9 @@
                 columns: [
                     {orderable: false,searchable: false,data: 'serial_number',  name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
+                    @if($userId == 2234 || $userId == 1049)
+                        { data: 'shipper_store_id', name: 'shipper_store_id', class:'shipper_store_id' },
+                    @endif
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'vendor', name: 'vendor'},
@@ -1151,8 +1191,74 @@
                     });
 
                 }
-            });
 
+                if ($(this).hasClass('add_store_id')) {
+                    var userId = {!! auth()->user()->id !!};
+                    var previous_shipper_store_id = $(this).closest('tr').find('.shipper_store_id').text();
+                    $('#shipperStoreIdModal').on('shown.bs.modal', function () {
+                        $('#add_shipper_store_id').val(previous_shipper_store_id);
+                    });
+                    var id = parseInt($(this).parents('tr').attr('id'));
+                    var shipper_status = $(this).closest('tr').find('.status').text();
+                    if (userId == 2234 || userId == 1049) {
+                        $("#shipperStoreIdModal").modal('show');
+                        $("#addStoreID").on('click', function (event) {
+                            if ($('#add_shipper_store_id').val() == ''){
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                return;
+                            }
+                            event.preventDefault();
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Add to add Store ID',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Add',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if(confirm){
+                                    if(userId){
+                                        $.ajax({
+                                            url: '{!! route('cod.add.shipper_id') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'userId': userId,
+                                                'user_shipper_infos_id': id,
+                                                'user_shipper_infos_status': shipper_status,
+                                                'shipper_store_id': $('#add_shipper_store_id').val(),
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            if (data.success) {
+                                                $("#shipperStoreIdModal").modal('hide');
+                                                $('#add_shipper_store_id').val('');
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+        });
 
             $('#city_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select City',
@@ -1500,7 +1606,6 @@
 
                     $(document).on('click', '#verify_pincode', function(){
                         var pincode = $('#pincode').val();
-                        console.log(pincode);
                         if(!pincode)
                         {
                             toastr.info('Please input Pin code', 'Info!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

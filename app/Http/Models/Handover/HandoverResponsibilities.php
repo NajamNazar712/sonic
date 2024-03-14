@@ -10,4 +10,9 @@ class HandoverResponsibilities extends Model
     {
         return $this->belongsTo('App\Http\Models\CityArea','city_area_id','id');
     }
+
+    public function admin()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\Admin','admin_id','id');
+    }
 }

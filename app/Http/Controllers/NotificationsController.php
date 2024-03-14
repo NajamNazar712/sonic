@@ -118,6 +118,7 @@ use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipperVerificationPinCode;
@@ -147,6 +148,15 @@ class NotificationsController extends Controller
     static private function verifyShipperOtpCode($user_id, $otp, $notification_id)
     {
         $shipper_code = new ShipperVerificationPinCode();
+        $shipper_code->user_id = $user_id; 
+        $shipper_code->otp = $otp; 
+        $shipper_code->notification_id = $notification_id;
+        $shipper_code->save();
+    }
+
+    static private function verifyShipperOtpCode($user_id, $otp, $notification_id)
+    {
+        $shipper_code = new AdminShipperVerificationPinCode();
         $shipper_code->user_id = $user_id; 
         $shipper_code->otp = $otp; 
         $shipper_code->notification_id = $notification_id;
@@ -225,10 +235,11 @@ class NotificationsController extends Controller
 
     static private function email($subject, $body, $to, $cc = null, $bcc = null, $from = null)
     {
+          
         if ($to) {
 
             if (is_array($to)) {
-                //                dd($to);
+       
                 $to = array_values(array_filter($to));
                 if (empty($to)) {
                     return false;
@@ -253,7 +264,7 @@ class NotificationsController extends Controller
 
         
             $mail = Mail::to($to);
-
+            
             if ($cc) {
                 $mail->cc($cc);
             }
@@ -262,7 +273,6 @@ class NotificationsController extends Controller
                 $mail->bcc($bcc);
             }
             
-
             $mail->send(new Notifications($subject, $body, $from));
         }
     }
@@ -4086,6 +4096,8 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);
 
                     $to[] = 'muhammad.waqas@trax.pk';
+                    $to[] = 'shoaib.ameen@trax.pk';
+
                     foreach ($to as $email) {
                         self::email($subject, $body, $email);
                     }
@@ -10960,10 +10972,11 @@ class NotificationsController extends Controller
             }
         }
     }
-    static public function custom($type, $subject, $body, $to)
+    static public function custom($type, $subject, $body, $to,$from=null)
     {
+     
         if ($type == 1) {
-            self::email($subject, $body, $to);
+            self::email($subject, $body, $to,null,null,$from);
         }
     }
     static public function custom_sms($body, $to)
