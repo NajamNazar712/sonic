@@ -117,7 +117,7 @@ use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\Admin\Settings\GeneralSetting;
-
+use Illuminate\Support\Facades\Response;
 
 class AdminFinanceController extends Controller
 {
@@ -3462,6 +3462,77 @@ class AdminFinanceController extends Controller
         }
 
     }
+
+    public function view_change_shipment_weight_excel_store(Request $request)
+    {
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'actual_weight' => 'Actual Weight',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid / not ready for update.',
+        ];
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query) {
+                $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
+            })],
+            'actual_weight' => ['required', 'numeric', 'between:0.01,100000'],
+        ];
+
+        $fields = [0 => 'tracking_number', 1 => 'actual_weight'];
+
+        if ($file = $request->file('view_shipments')){
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Actual Weight'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if ($index == 2) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+                        break;
+                    }
+                }
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            $trackingNumberCount = count($spreadsheet);
+            if ($trackingNumberCount > 500) {
+                return redirect()->back()->with('error', 'Number of tracking numbers exceeds 500.');
+            }
+            $downloadUrl = url('/file/Carrefour Bulk Delivery.xlsx');
+            // dd(
+            //     $downloadUrl
+            // );
+            $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '">Download Excel Sheet</a>';
+            return redirect()->back()->with('success', $message);
+        }
+    }
+
+
+    // public function download_bulk_shipment_excel()
+    // {
+    //     $directory = public_path('finance');
+    //     if (!file_exists($directory)) {
+    //         mkdir($directory, 0755, true);
+    //     }
+    //     $file_name = "/finance/change_shipment_weight.xlsx";
+    //     $file = public_path() . $file_name;
+    //     $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    //     return Response::download($file, 'change_shipment_weight.xlsx', $headers);
+    // }
 
 
     static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL)
