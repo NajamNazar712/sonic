@@ -144,15 +144,6 @@ class NotificationsController extends Controller
         }
     }
 
-    static private function verifyShipperOtpCode($user_id, $otp, $notification_id)
-    {
-        $shipper_code = new AdminShipperVerificationPinCode();
-        $shipper_code->user_id = $user_id; 
-        $shipper_code->otp = $otp; 
-        $shipper_code->notification_id = $notification_id;
-        $shipper_code->save();
-    }
-
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
         $notification_history = new EmployeeNotificationHistory();
