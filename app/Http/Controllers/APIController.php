@@ -8664,7 +8664,7 @@ class APIController extends Controller
                     $query->where('user_id', $user_id)->where('status', 1);
                 })],
 
-                'pickup_address_id' => ['required', 'integer', Rule::exists('user_shipping_info_store_addresses', 'shipper_store_id')->where(function ($query) use ($userShippingInfoStoreAddress) {
+                'pickup_address_id' => ['required', Rule::exists('user_shipping_info_store_addresses', 'shipper_store_id')->where(function ($query) use ($userShippingInfoStoreAddress) {
                     $query->where('shipper_store_id', $userShippingInfoStoreAddress ? $userShippingInfoStoreAddress->shipper_store_id : null);
                 })],
 

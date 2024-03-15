@@ -59,16 +59,17 @@ trait LastMileAppReportTrait
                  $delivery_note_data = $delivery_note_data->first();
                  
                  $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)->whereDate('delivery_date', $today);
-                 
                  if($check_summary->exists())
                  {
                      $check_summary = $check_summary->first();
                      $rwdnsum_id = $check_summary->id;
-                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
+                     $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
+                     
+                     $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->where('rwdn_id',$check_existing_note->latest()->first()->id)->whereDate('created_at', $today);
+
                      if($check_existing_shipment->exists())
-                     {
-                       
-                        
+                     {                       
+                          
                         $update_delivery_note_shipment = $check_existing_shipment->first();
                         $minusTime = $update_delivery_note_shipment->updated_time;
                         $this->countSub($minusTime,$check_summary);
@@ -115,7 +116,6 @@ trait LastMileAppReportTrait
                      }
                     $check_summary->save();
                     
-                     $check_existing_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
                      if(!$check_existing_note->exists())
                      {
                         
