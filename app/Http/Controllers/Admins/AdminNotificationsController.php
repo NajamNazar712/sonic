@@ -1199,6 +1199,10 @@ class AdminNotificationsController extends Controller
 
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
+        else if ($id == 218)
+        {
+            $details['receiver'] = ['Admin'];
+        }
         else if($id == 221)
         {
             $details['receiver'] = ['mohsin.khan@trax.pk','CC-(shahrukh.raheem@trax.pk)'];
