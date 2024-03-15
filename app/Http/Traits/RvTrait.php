@@ -113,7 +113,6 @@ trait RvTrait
                 $rv_shipment_assign_agent->updated_by_id = Auth::id();
                 $rv_shipment_assign_agent->assigned_to_type_id = $data['assigned_to_type_id'] ?? 0;
                 $rv_shipment_assign_agent->assigned_by = $data['assigned_by'] ?? 0;
-                $rv_shipment_assign_agent->created_at = Carbon::now();
                 $rv_shipment_assign_agent->save();
             }
             else
@@ -901,6 +900,7 @@ trait RvTrait
     {
         $connection = 'reports_2';
         $shipment = null;
+        $dateToday = Carbon::today();
 
         //this wont be null if admin is assigning shipment to an agent
         if($agent_shipment_id)
@@ -943,11 +943,11 @@ trait RvTrait
         if (!empty($included_shippers)) {
 
             $shipments = DB::connection($connection)->table('shipments')
-            ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
+            ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) use ($dateToday) {
                 $join->on('rvsaa.shipment_id', '=', 'shipments.id')
                         ->where('rvsaa.rv_assign_agent_status_id', 6)
                         ->where('rvsaa.rv_state_id', 2)
-                        ->whereDate('unresponsive_attempt_time', Carbon::today());
+                        ->whereDate('unresponsive_attempt_time', $dateToday);
             })
             ->whereIn('shipments.user_id', $included_shippers)
             ->whereIn('shipments.shipper_status_id', [12,66,52])
@@ -986,11 +986,11 @@ trait RvTrait
             if (!empty($result)){
                 
                 $shipments = DB::connection($connection)->table('shipments')
-                ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) {
+                ->leftJoin('rv_shipment_assign_agents as rvsaa', function($join) use ($dateToday) {
                     $join->on('rvsaa.shipment_id', '=', 'shipments.id')
                             ->where('rvsaa.rv_assign_agent_status_id', 6)
                             ->where('rvsaa.rv_state_id', 2)
-                            ->whereDate('unresponsive_attempt_time', Carbon::today());
+                            ->whereDate('unresponsive_attempt_time', $dateToday);
                 })
                 ->whereIn('shipments.shipper_status_id', [12,66,52])
                 ->whereNull('rvsaa.shipment_id')
@@ -1066,7 +1066,7 @@ trait RvTrait
                     }
 
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
-                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->first())
+                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at','!=',$dateToday)->whereIn('rv_state_id', [2,4])->exists())
                     {
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
