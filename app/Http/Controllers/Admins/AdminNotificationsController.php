@@ -509,9 +509,13 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['account_id', 'name'];
         }
         else if ($id == 65){
+            $details['receiver'] = ['Admin'];
+
             $details['fields'] = ['request_id', 'case_nature', 'case_nature_type'];
         }
         else if ($id == 66){
+            $details['receiver'] = ['CrmEscalationTaggingLevelEmail STATUS-1','CC-(CrmEscalationTaggingLevelEmail STATUS-2)','BCC-(CrmEscalationTaggingLevelEmail STATUS-3)'];
+
             $details['fields'] = ['request_id', '[escalation].'];
         }
 		else if ($id == 67){
@@ -1043,10 +1047,14 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 171)
         {
+            $details['receiver'] = ['Employee Phone Number'];
+
             $details['fields'] = ['name'];
         }
 		else if ($id == 172)
         {
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipper_name','total_amount','status_link','updated_at'];
         }
         else if ($id == 173)
@@ -1063,6 +1071,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 175)
         {
+            $details['receiver'] = ['Sales Person'];
+
             $details['fields'] = ['link'];
         }
 		else if ($id == 176)
@@ -1084,7 +1094,10 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['name'];
         }else if ($id == 181)
         {
+            $details['receiver'] = ['Lead Phone Number'];
+
             $details['fields'] = ['name','reason'];
+
         }else if ($id == 182)
         {
             $details['receiver'] = ['shahzad.ali@trax.pk,Line Manager'];
@@ -1158,6 +1171,8 @@ class AdminNotificationsController extends Controller
         
         elseif($id == 211)
         {
+            $details['receiver'] = ['Employee'];
+
             $details['fields'] = ['Date&Day'];
         }
         elseif($id == 212)
@@ -1180,6 +1195,8 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 216)
         {
+            $details['receiver'] = ['Shipper Phone Number'];
+
             $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
         else if($id == 221)
@@ -1220,6 +1237,8 @@ class AdminNotificationsController extends Controller
         }
         else if($id == 228)
         {
+            $details['receiver'] = ['Role-(Senior HR Executive,HR Executive (Without Payslip),Department Head (HR & Internal Audit))'];
+
             $details['fields'] = ['employee_name', 'employee_type', 'depatment', 'updated_by'];
         }
         return $details;
