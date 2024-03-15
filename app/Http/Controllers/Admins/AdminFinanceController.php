@@ -3512,27 +3512,219 @@ class AdminFinanceController extends Controller
             if ($trackingNumberCount > 500) {
                 return redirect()->back()->with('error', 'Number of tracking numbers exceeds 500.');
             }
-            $downloadUrl = url('/file/Carrefour Bulk Delivery.xlsx');
-            // dd(
-            //     $downloadUrl
-            // );
-            $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '">Download Excel Sheet</a>';
-            return redirect()->back()->with('success', $message);
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $tracking_ids = array();
+                $tracking_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                    if (empty($errors['Row #' . $row_id])) {
+                        if (!empty(trim($row['tracking_number']))) {
+                            if (empty($tracking_ids)) {
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            } else {
+                                if (in_array($row['tracking_number'], $tracking_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                                } else {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                }
+                            }
+                        }
+                        if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
+                            $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
+                        }
+                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
+                            $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
+                        }
+                    }
+                }
+                if (empty($errors)) {
+                    $tracking_numbers = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $tracking = trim($row['tracking_number']);
+                        $weight = $row['actual_weight'];
+                        $shipment = Shipment::where('tracking_number', $tracking)->first();
+                        $shipment_id = $shipment->id;
+                        $replacement_weight = null;
+
+                        if ($shipment->booking_type_id == 2) {
+                            continue;
+                        }
+
+                        $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+
+                        if ($shipment->actual_weight == null) {
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+                        }
+
+                        $old_shipment_weight = $shipment->actual_weight;
+
+
+                        $shipment->actual_weight = $weight;
+                        $shipment->save();
+
+
+                        ShipmentChargesController::weight($shipment_id);
+                        ShipmentChargesController::fuel_surcharge($shipment_id);
+
+                        $shipment = $shipment->refresh();
+                        $new_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
+
+                        $change_shipment_weight = new ChangeShipmentWeightLog();
+
+                        $change_shipment_weight->shipment_id = $shipment->id;
+                        $change_shipment_weight->old_weight = $old_shipment_weight;
+                        $change_shipment_weight->new_weight = $weight;
+                        $change_shipment_weight->admin_id = Auth::id();
+                        $change_shipment_weight->old_charges = $previous_weight_charges;
+                        $change_shipment_weight->new_charges = $new_weight_charges;
+                        $change_shipment_weight->save();
+
+                        $adjustment_amount = $previous_weight_charges - $new_weight_charges;
+
+                        $pending_payment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+
+                        if ($pending_payment->exists()) {
+                            $pending_payment = $pending_payment->first();
+
+                            $previous_gst = $pending_payment->gst;
+                            if ($shipment->business_category_id == 1) {
+                                $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                            } else {
+                                $new_gst = ROUND(($new_weight_charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                            }
+
+                            $adjustment_amount += $previous_gst - $new_gst;
+
+                            self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
+                        } else {
+                            $done_payment = DonePaymentShipment::where('shipment_id', $shipment->id);
+                            if ($done_payment->exists()) {
+                                $done_payment = $done_payment->first();
+
+                                $previous_gst = $done_payment->gst;
+
+                                if ($shipment->business_category_id == 1) {
+                                    $new_gst = ROUND(($new_weight_charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                                } else {
+                                    $new_gst = ROUND(($new_weight_charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
+                                }
+
+                                $adjustment_amount += $previous_gst - $new_gst;
+
+                                self::add_adjustment($shipment->id, $adjustment_amount, 'Change Shipment Weight Adjustment', 12, $new_weight_charges);
+                            }
+                        }
+
+
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
+
+                    }
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+
+                    // Create a new Excel instance
+                    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                    $sheet = $spreadsheet->getActiveSheet();
+
+                    // New column names to add
+                    $newHeaders = [
+                        'amount' => 'Amount',
+                        'weight_charges' => 'Weight Charges',
+                        'cash_handling_charges' => 'Cash Handling Charges',
+                        'insurance_charges' => 'Insurance Charges',
+                        'return_charges' => 'Return Charges',
+                        'fuel_surcharge' => 'Fuel Surcharge',
+                        'replacement_charges' => 'Replacement Charges',
+                        'try_and_buy_charges' => 'Try and Buy Charges',
+                        'intercept_charges' => 'Intercept Charges',
+                        'nsa_osa_charges' => 'NSA OSA Charges',
+                    ];
+
+                    // Merge the existing and new column names
+                    $headers = array_merge(array_values($names), array_values($newHeaders));
+
+                    // Write headers to first row
+                    $sheet->fromArray([$headers], NULL, 'A1');
+
+                    // Write data rows starting from second row
+                    foreach ($rows as $key => $row) {
+                        $rowData = [
+                            $row['tracking_number'],
+                            $row['actual_weight'],
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                            '',
+                        ];
+
+                        // Write each row of data
+                        $sheet->fromArray([$rowData], NULL, 'A' . ($key + 2));
+                    }
+
+                    // Save the Excel file
+                    $fileName = 'modified_shipment_weight_charges.xlsx';
+                    $directory = public_path('finance');
+                    if (!file_exists($directory)) {
+                        mkdir($directory, 0755, true);
+                    }
+                    $filePath = $directory . '/' . $fileName;
+                    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+                    $writer->save($filePath);
+
+                    // Generate the download URL for the modified file
+                    $downloadUrl = url('finance/' . $fileName);
+                    $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel Sheet</a>';
+                    return redirect()->back()->with('success', $message);
+
+
+
+
+                    
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            } else {
+                return redirect()->back()->with('error', 'No Shipments in File');
+            }
         }
     }
-
-
-    // public function download_bulk_shipment_excel()
-    // {
-    //     $directory = public_path('finance');
-    //     if (!file_exists($directory)) {
-    //         mkdir($directory, 0755, true);
-    //     }
-    //     $file_name = "/finance/change_shipment_weight.xlsx";
-    //     $file = public_path() . $file_name;
-    //     $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    //     return Response::download($file, 'change_shipment_weight.xlsx', $headers);
-    // }
 
 
     static public function add_adjustment($shipment_id, $payable, $payable_remarks = '', $adjustment_type = NULL, $charges = NULL)

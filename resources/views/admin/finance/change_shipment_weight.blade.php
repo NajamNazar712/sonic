@@ -15,7 +15,31 @@
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
-							@include('admin.inc.messages')
+							{{-- @include('admin.inc.messages') --}}
+							@if(count($errors) > 0)
+								@foreach($errors->all() as $error)
+									<div class="alert alert-danger">
+										{{$error}}
+									</div>
+								@endforeach
+							@endif
+						
+							@if(session('success'))
+								<div class="alert alert-success">
+									{!! session('success') !!}
+								</div>
+							@endif
+							
+							@if(session('error'))
+								<div class="alert alert-danger">
+									{{session('error')}}
+								</div>
+							@endif
+							@if(session('info'))
+								<div class="alert alert-warning">
+									{{session('info')}}
+								</div>
+							@endif
 
 							<form id="shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
@@ -43,7 +67,6 @@
 									</div>
 								</div>
 							</form>
-
 							<form id="view_shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.view_excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
