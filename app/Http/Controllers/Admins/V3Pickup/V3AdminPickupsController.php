@@ -364,7 +364,7 @@ class V3AdminPickupsController extends Controller
 
         foreach ($pickup_statuses as $pickup_status) {
             $statuses[$pickup_status->id]['name'] = $pickup_status->name;
-            $statuses[$pickup_status->id]['count'] = V3PickupRequest::whereDate('pickup_date', Carbon::today())->where('status_id', $pickup_status->id)->count();
+            $statuses[$pickup_status->id]['count'] = V3PickupRequest::whereDate('pickup_date', Carbon::today())->where('status_id', $pickup_status->id)->whereIn('city_id',session('hubs'))->count();
         }
 
         $additional_services = V3PickupService::all();
@@ -944,7 +944,7 @@ class V3AdminPickupsController extends Controller
 
         foreach ($pickup_statuses as $pickup_status) {
             $statuses[$pickup_status->id]['name'] = $pickup_status->name;
-            $statuses[$pickup_status->id]['count'] = V3PickupRequest::where('status_id', $pickup_status->id)->count();
+            $statuses[$pickup_status->id]['count'] = V3PickupRequest::where('status_id', $pickup_status->id)->whereIn('city_id',session('hubs'))->count();
         }
         // 'pickup_statuses' => $pickup_statuses
 
