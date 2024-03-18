@@ -13997,7 +13997,7 @@ class AdminDashboardController extends Controller
 
             if(isset($request->tier_id[$row_id]) && (isset($request->user_id[$row_id])) && $request->tier_id[$row_id] == 3){
                 if (!$sale_tier_tag->exists()) {
-                    $sale_tier_object = new SaleTierTag;
+                    $sale_tier_object = new SaleTierTag();
                     $sale_tier_object->user_id = $shipper_id;
                     $sale_tier_object->kam = $request->user_id[$row_id];
                     $sale_tier_object->save();
