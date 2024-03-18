@@ -13845,6 +13845,7 @@ class AdminDashboardController extends Controller
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
     {
+
         $shipper_ids = explode(',', $shipper_ids);
         foreach($shipper_ids as $shipper_id)
         {
@@ -13991,6 +13992,21 @@ class AdminDashboardController extends Controller
             }
 
             self::balance_count_commission($shipper_id);
+
+            $sale_tier_tag = SaleTierTag::where('user_id', $shipper_id);
+
+            if(isset($request->tier_id[$row_id]) && (isset($request->user_id[$row_id])) && $request->tier_id[$row_id] == 3){
+                if (!$sale_tier_tag->exists()) {
+                    $sale_tier_object = new SaleTierTag;
+                    $sale_tier_object->user_id = $shipper_id;
+                    $sale_tier_object->kam = $request->user_id[$row_id];
+                    $sale_tier_object->save();
+                } else {
+                    $sale_tier_object = $sale_tier_tag->first(); 
+                    $sale_tier_object->kam = $request->user_id[$row_id]; 
+                    $sale_tier_object->save();
+                }
+            }
         }
 
         return back()->with('success', 'Commission Has Been Added !!');
