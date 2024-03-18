@@ -68,10 +68,8 @@ trait LastMileAppReportTrait
                      $check_existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id)->where('rwdn_id',$check_existing_note->latest()->first()->id)->whereDate('created_at', $today);
 
                      if($check_existing_shipment->exists())
-                     {
-                         $this->createDeliveryNoteErrorLog($delivery_note_id,$shipment_id,'Sec-'.$check_existing_shipment->exists());
-                       
-                        
+                     {                       
+                          
                         $update_delivery_note_shipment = $check_existing_shipment->first();
                         $minusTime = $update_delivery_note_shipment->updated_time;
                         $this->countSub($minusTime,$check_summary);
