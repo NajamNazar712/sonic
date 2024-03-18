@@ -1083,7 +1083,6 @@ trait RvTrait
                     {
                         if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at', date('Y-m-d'))->first())
                         {
-                            error_log('new shipment record already updated | shipment -> id ='.print_r($shipment->id.'| rv_record ='.$data,true));
                             $shipment = null;
                             continue; 
                         }
