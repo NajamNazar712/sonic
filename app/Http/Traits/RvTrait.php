@@ -1080,10 +1080,10 @@ trait RvTrait
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
                     if($data = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->latest()->first())
                     {
-                        error_log('1: date test'.print_r(Carbon::parse($data->updated_at)->format('Y-m-d').' | today =  '.$dateToday,true));
-                        if(Carbon::parse($data->updated_at)->format('Y-m-d') == $dateToday)
+                        error_log('1: date test'.print_r(Carbon::parse($data->updated_at)->format('Y-m-d').' | today =  '.date('Y-m-d'),true));
+                        if(Carbon::parse($data->updated_at)->format('Y-m-d') == date('Y-m-d'))
                         {
-                            error_log('2: date test'.print_r(Carbon::parse($data->updated_at)->format('Y-m-d').' | today =  '.$dateToday,true));
+                            error_log('2: date test'.print_r(Carbon::parse($data->updated_at)->format('Y-m-d').' | today =  '.date('Y-m-d'),true));
                             $shipment = null;
                             continue;
                         }
