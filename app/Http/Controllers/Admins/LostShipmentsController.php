@@ -74,13 +74,17 @@ class LostShipmentsController extends Controller
             ->first();
         
         $lost_shipments = $shipmentsCounts->total;
-        $total_of_approved_shipments = $shipmentsCounts->approved;
+        // $total_of_approved_shipments = $shipmentsCounts->approved;
         $total_of_pending_shipments = $shipmentsCounts->pending;
-        $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
-        $total_approval = LostShipmentStatusCount::sum('approval_count');
-
+        // $total_of_rejected_shipments = LostShipmentStatusCount::sum('rejection_count');
+        
+        
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+        $thirtyOneDays = Carbon::now()->subDays(31)->startOfDay();
+
+        $total_of_rejected_shipments = LostShipmentStatusCount::where('updated_at','>=', $thirtyOneDays)->sum('rejection_count');
+        $total_approval = LostShipmentStatusCount::where('updated_at','>=', $thirtyOneDays)->sum('approval_count');
 
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons,'lost_shipments'=>$lost_shipments, 'total_of_approved_shipments'=>$total_approval, 'total_of_pending_shipments'=>$total_of_pending_shipments, 'total_of_rejected_shipments'=> $total_of_rejected_shipments, 'today' => $today, 'thirtyday' => $thirtyDays]);
         
@@ -194,7 +198,7 @@ class LostShipmentsController extends Controller
             if ($request->get('search_from') && $request->get('search_to')) {
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
-                $shipments->whereBetween('shipments_journey.created_at',[$from, $to]);
+                $shipments->whereBetween('shipments_journey.updated_at',[$from, $to]);
             }
 
             return Datatables::of($shipments)
@@ -993,7 +997,7 @@ class LostShipmentsController extends Controller
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                 ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
-            ->where('shipments.shipper_status_id', 18)->whereBetween('shipments_journey.created_at',[$request->from_date, $request->to_date]);;
+            ->where('shipments.shipper_status_id', 18)->whereBetween('shipments_journey.updated_at',[$request->from_date, $request->to_date]);
 
         $shipmentsCounts = $shipments
             ->selectRaw('
@@ -1003,9 +1007,10 @@ class LostShipmentsController extends Controller
             ')
             ->first();
 
+
         $total_rejections = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('rejection_count');
         $total_approval = LostShipmentStatusCount::whereBetween('updated_at', [$request->from_date, $request->to_date])->sum('approval_count');
-
+          
         $details['total'] = $shipmentsCounts->total;
         $details['total_of_approved_shipments'] = $total_approval;
         $details['total_of_pending_shipments'] = $shipmentsCounts->pending;

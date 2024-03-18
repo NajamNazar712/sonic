@@ -24,7 +24,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value = {{ Carbon\Carbon::now() }}>
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
                             </div>
                         </div>
                         <div class="col-4">
@@ -34,7 +34,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                 </div>
-                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value = {{ Carbon\Carbon::now()->addDays(30) }}>
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
                             </div>
                         </div>
                         <div class="col-2">
@@ -64,7 +64,7 @@
                         </div>
             
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="search_total_approved_div">
+                            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer" id="search_total_approved_div" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="Total Lost Approved Count Is Of Last 31 Days">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -84,7 +84,7 @@
                         </div>
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_total_pending_div">
+                            <div class="card bg-gradient-directional-destination pull-up cursor-pointer" id="search_total_pending_div" >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -104,7 +104,7 @@
                         </div>
                         <div class="col-3">
 
-                            <div class="card bg-gradient-directional-rejected_shipment pull-up cursor-pointer" id="total_shipment_rejection_count">
+                            <div class="card bg-gradient-directional-rejected_shipment pull-up cursor-pointer" id="total_shipment_rejection_count" data-toggle="tooltip" data-trigger="hover" data-placement="top" data-title="Total Lost Rejection Count Is Of Last 31 Days">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -1255,29 +1255,30 @@
         $('#search_filter_btn').click(function() {
             var from_date =$('input[name="from_date_formatted"]').val();
             var to_date =  $('input[name="to_date_formatted"]').val();
-           
-            $.ajax({
-                url:  '{{ route('admin.delivery.lost.lost_data') }}',
-                method: 'POST',
-                data: {
-                    from_date: from_date,
-                    to_date: to_date,
-                    '_token': '{{ csrf_token() }}',
-                },
-                success: function(response) {
-                    console.log(response);
 
-                    $('#total_of_pending_shipments').text(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments);
-                    $('#total_of_approved_shipments').text(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments);
-                    $('#total_of_shipments').text(response.details.total == null ? 0 : response.details.total);
-                    $('#rejection_shipments').text(response.details.total_rejections == null ? 0 : response.details.total_rejections);
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX request failed');
-                    console.error('Status:', status);
-                    console.error('Error:', error);
-                }
-            });
+            if(from_date != '' && to_date !=''){
+                    $.ajax({
+                    url:  '{{ route('admin.delivery.lost.lost_data') }}',
+                    method: 'POST',
+                    data: {
+                        from_date: from_date,
+                        to_date: to_date,
+                        '_token': '{{ csrf_token() }}',
+                    },
+                    success: function(response) {
+                        $('#total_of_pending_shipments').text(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments);
+                        $('#total_of_approved_shipments').text(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments);
+                        $('#total_of_shipments').text(response.details.total == null ? 0 : response.details.total);
+                        $('#rejection_shipments').text(response.details.total_rejections == null ? 0 : response.details.total_rejections);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX request failed');
+                        console.error('Status:', status);
+                        console.error('Error:', error);
+                    }
+                });
+            }
+       
         });
 
     });
