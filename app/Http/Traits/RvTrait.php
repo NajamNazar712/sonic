@@ -104,6 +104,7 @@ trait RvTrait
             if($rv_shipment_assign_agent)
             {
                 $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+                
                 $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->last_shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -1065,9 +1066,26 @@ trait RvTrait
                         break;
                     }
 
+                     // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
+                    //  $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 1)->first();
+                    //  if ($shipment_assigned_assigned_agent) {
+                    //     if($shipment_assigned_assigned_agent->agent_id == Auth::id()) // if shipment is already assigned to this user then pass this shipment to get ticket
+                    //     {
+                    //         break;
+                    //     }
+                    //         //otherwise skip this shipment (because this shipment is in process of another agent)
+                    //         continue;
+                    //  }
+
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
-                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at','!=',$dateToday)->whereIn('rv_state_id', [2,4])->exists())
+
+                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->exists())
                     {
+                        if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at', date('Y-m-d'))->exists())//if updated_at is already updated today due to any reason () by any agent then skip this shipment for all agents
+                        {
+                            $shipment = null;
+                            continue; 
+                        }
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                         
