@@ -3,6 +3,7 @@
 namespace App\Http\Traits;
 
 use App\BoltUndeliveredReasonMapCount;
+use App\DeliveryNoteErrorLog;
 use Carbon\Carbon;
 use App\RvShipmentAgent;
 use App\RvAgentCallHistory;
@@ -104,6 +105,7 @@ trait RvTrait
             if($rv_shipment_assign_agent)
             {
                 $rv_shipment_assign_agent->agent_id = $data['agent_id'];
+                
                 $rv_shipment_assign_agent->shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->last_shipments_journey_id = $data['shipments_journey_id'];
                 $rv_shipment_assign_agent->rv_assign_agent_status_id = $data['rv_assign_agent_status_id'];
@@ -901,6 +903,12 @@ trait RvTrait
         $connection = 'reports_2';
         $shipment = null;
         $dateToday = Carbon::today();
+        // error_log('date_today in include shippers');
+        DeliveryNoteErrorLog::create([
+            'delivery_note_id' => 1234521,
+            'shipment_id' => $agent_id,
+            'message' => 'dateToday ='.$dateToday,
+        ]);
 
         //this wont be null if admin is assigning shipment to an agent
         if($agent_shipment_id)
@@ -1065,8 +1073,20 @@ trait RvTrait
                         break;
                     }
 
+                     // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
+                    //  $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 1)->first();
+                    //  if ($shipment_assigned_assigned_agent) {
+                    //     if($shipment_assigned_assigned_agent->agent_id == Auth::id()) // if shipment is already assigned to this user then pass this shipment to get ticket
+                    //     {
+                    //         break;
+                    //     }
+                    //         //otherwise skip this shipment (because this shipment is in process of another agent)
+                    //         continue;
+                    //  }
+
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
-                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at','!=',$dateToday)->whereIn('rv_state_id', [2,4])->exists())
+                    // if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at','!=',$dateToday)->whereIn('rv_state_id', [2,4])->exists())
+                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->exists())
                     {
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
@@ -1090,6 +1110,7 @@ trait RvTrait
                     // Shipment is found and already in working state or return is completed, new shipment will get to agent
                     $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                     if ($find_shipment_assigned_agent ) {
+
                         $shipment = null;
                         continue;
                     }
