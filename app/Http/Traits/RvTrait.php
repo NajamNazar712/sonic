@@ -1079,9 +1079,9 @@ trait RvTrait
 
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
 
-                    if($data = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->latest()->first())
+                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->exists())
                     {
-                        if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at', date('Y-m-d'))->first())
+                        if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at', date('Y-m-d'))->exists())
                         {
                             $shipment = null;
                             continue; 
