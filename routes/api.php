@@ -54,7 +54,7 @@ Route::name('api.')->group(function () {
 
             Route::get('charges', 'APIController@shipment_charges')->name('charges');
             Route::get('payment_status', 'APIController@shipment_payment_status')->name('payment_status');
-            Route::get('payments', 'APIController@shipment_payments')->name('payments');
+            Route::get('payment', 'APIController@shipment_payments')->name('payment');
             Route::post('cancel', 'APIController@shipment_cancel')->name('cancel');
 
             Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
