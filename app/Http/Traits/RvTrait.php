@@ -1078,8 +1078,15 @@ trait RvTrait
                     //  }
 
                     //  if shipment is found and unassigned(2) or completed(4) then update the current records
-                    if(RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereDate('updated_at','!=',$dateToday)->whereIn('rv_state_id', [2,4])->exists())
+                    if($data = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->whereIn('rv_state_id', [2,4])->latest()->first())
                     {
+                        
+                        if(Carbon::parse($data->updated_at)->format('Y-m-d') == $dateToday)
+                        {
+                            error_log('date test'.print_r(Carbon::parse($data->updated_at)->format('Y-m-d').' | today =  '.$dateToday,true));
+                            $shipment = null;
+                            continue;
+                        }
                         // if shipment is not found in RvShipmentAssignAgent then assign this shipment to agent
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->whereIn('shipper_status_id', [12,66,52])->latest()->first();
                         
