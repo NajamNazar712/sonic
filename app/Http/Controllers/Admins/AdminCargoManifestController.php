@@ -5118,16 +5118,17 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
+            // disabled this because ali requirment
+            //  $misroute_history_count = $shipment->shipment_journey->where('shipper_status_id', 49)->count();
 
             if (in_array($shipment->shipper_status_id,[23,25]))
                 return ['status' => 1, 'error' => 'Shipment is at dispatched or delivered to shipper !'];
-
-            if ($misroute_history_count == 0) //for support screen misroute
-            {
-                if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
-                    return ['status' => 1, 'error' => 'Shipment`s origin and destination are same or Bag type is not relevant !'];
-            }
+            // disabled this because ali requirment
+            //   if ($misroute_history_count == 0) //for support screen misroute
+            //   {
+            //       if (($shipment->pickup_address->city->id == $shipment->destination_city->id) && ($shipment->intercepted != 1))
+            //           return ['status' => 1, 'error' => 'Shipment`s origin and destination are same or Bag type is not relevant !'];
+            //   }
 
             if (in_array($shipment->shipper_status_id, [5, 14, 25, 31, 36, 38])) // all delivered statuses
                 return ['status' => 1, 'error' => 'Shipment is on out for delivery !'];
@@ -5477,6 +5478,9 @@ class AdminCargoManifestController extends Controller
                         return ['status' => 1, 'error' => 'Tracking Number is of return type while bag type is normal !'];
                     }
                 } else {
+
+                    //add this flag because shipment show in return screen but shipment status is arrived at origin
+                    $return_reattempt_flag = 1;
 
                     // check that is shipment return reattempt or not                    
                     $return_confirm_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
