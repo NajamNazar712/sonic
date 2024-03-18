@@ -3694,8 +3694,19 @@ class AdminFinanceController extends Controller
                         $sheet->fromArray([$rowData], NULL, 'A' . ($key + 2));
                     }
 
+                    // Set number format for tracking number column
+                    $sheet->getStyle('A2:A' . ($trackingNumberCount + 1))->getNumberFormat()->setFormatCode('0');
+
+                    $columnWidths = [
+                        'A' => 14,
+                    ];
+
+                    foreach ($columnWidths as $column => $width) {
+                        $sheet->getColumnDimension($column)->setWidth($width);
+                    }
+
                     // Save the Excel file
-                    $fileName = 'for_bulk_shipment_view.xlsx';
+                    $fileName = 'Shipment Charges View.xlsx';
                     $directory = public_path('finance');
                     if (!file_exists($directory)) {
                         mkdir($directory, 0755, true);
