@@ -5478,6 +5478,9 @@ class AdminCargoManifestController extends Controller
                     }
                 } else {
 
+                    //add this flag because shipment show in return screen but shipment status is arrived at origin
+                    $return_reattempt_flag = 1;
+
                     // check that is shipment return reattempt or not                    
                     $return_confirm_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
                         ->where('shipper_status_id', 20);
