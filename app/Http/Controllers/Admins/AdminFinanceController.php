@@ -3485,7 +3485,7 @@ class AdminFinanceController extends Controller
 
         $fields = [0 => 'tracking_number', 1 => 'actual_weight'];
 
-        if ($file = $request->file('view_shipments')){
+        if ($file = $request->file('shipments')){
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
@@ -3674,19 +3674,20 @@ class AdminFinanceController extends Controller
 
                     // Write data rows starting from second row
                     foreach ($rows as $key => $row) {
+                        $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
                         $rowData = [
                             $row['tracking_number'],
                             $row['actual_weight'],
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
-                            '',
+                            $shipment->amount,
+                            $shipment->weight_charges,
+                            $shipment->cash_handling_charges,
+                            $shipment->insurance_charges,
+                            $shipment->return_charges,
+                            $shipment->fuel_surcharge,
+                            $shipment->replacement_charges,
+                            $shipment->try_and_buy_charges,
+                            $shipment->intercept_charges,
+                            $shipment->nsa_osa_charges,
                         ];
 
                         // Write each row of data
@@ -3694,7 +3695,7 @@ class AdminFinanceController extends Controller
                     }
 
                     // Save the Excel file
-                    $fileName = 'modified_shipment_weight_charges.xlsx';
+                    $fileName = 'for_bulk_shipment_view.xlsx';
                     $directory = public_path('finance');
                     if (!file_exists($directory)) {
                         mkdir($directory, 0755, true);
@@ -3705,13 +3706,8 @@ class AdminFinanceController extends Controller
 
                     // Generate the download URL for the modified file
                     $downloadUrl = url('finance/' . $fileName);
-                    $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel Sheet</a>';
+                    $message = 'Total ' . $trackingNumberCount . ' Shipment(s). <a href="' . $downloadUrl . '" download>Download Excel</a>';
                     return redirect()->back()->with('success', $message);
-
-
-
-
-                    
                 } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);

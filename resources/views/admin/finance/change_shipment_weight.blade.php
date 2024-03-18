@@ -67,6 +67,7 @@
 									</div>
 								</div>
 							</form>
+
 							<form id="view_shipment_weight_excel_form" class="form-horizontal" method="POST" action="{{ route('admin.finance.change_shipment_weight.view_excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
@@ -76,7 +77,7 @@
 									</div>
 									<div class="col-4">
 										<div class="form-group">
-											<input type="file" name="view_shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
 										</div>
 									</div>
 
