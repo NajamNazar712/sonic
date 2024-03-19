@@ -568,6 +568,7 @@
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                         {name: 'tracking_number', class: 'align-middle tracking_numbers', orderable: false},
+                        {name: 'aging', class: 'align-middle aging', orderable: false},
                         {name: 'delivery_note_id', class: 'align-middle delivery_note_id', orderable: false},
                         {name: 'complaint', class: 'align-middle complaint', orderable: false},
                         {name: 'current_status', class: 'align-middle current_status', orderable: false},
@@ -580,7 +581,6 @@
                         {name: 'shipper', class: 'align-middle shipper', orderable: false},
                         {name: 'consignee_name', class: 'align-middle consignee_name', orderable: false},
                         {name: 'consignee_address', class: 'align-middle consignee_address', orderable: false},
-                        {name: '', class: '', orderable: false}
                     ],
                     rowCallback: function(row, data, index) {
                         var complaint_id = $(row).find("td:eq(3)").html();
@@ -620,7 +620,6 @@
                             '<span aria-hidden="true">×</span>\n' +
                             '</button>';
 
-                               
                     if (data[9] !== undefined && data[9].length > 0) {
                         junctions = data[9].join(',');
                     } else {
@@ -752,14 +751,14 @@
                                     '_token': '{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
-
                                 if(data.status == 0){
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     scan_sound(2);
                                 }else{
                                     var rowNo = table.rows().count();
                                     updateRemarks(tracking, 'multiple')
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.aging,data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    table.row.add([
+                                        rowNo+1,parseInt(data.details.tracking_number),data.details.aging,data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -784,7 +783,7 @@
                                     }else{
                                         var rowNo = table.rows().count();
                                         updateRemarks(tracking, 'multiple')
-                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.aging,data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -831,6 +830,7 @@
 
                                 scan_sound(1);
                                 $('#single_div p.track').text(data.details.tracking_number);
+                                $('#single_div p.aging').text(data.details.aging);
                                 $('#single_div p.status').text(data.details.status);
                                 if(data.details.complaint == null){
                                     $('#single_div p.case_nature').text('No Complaint');
@@ -843,7 +843,6 @@
                                 $('#single_div p.amount').text(data.details.amount);
                                 $('#single_div p.shipper').text(data.details.shipper);
                                 $('#single_div p.consignee_name').text(data.details.consignee_name);
-                                $('#single_div p.aging').text(data.details.aging);
                                 $('#single_div p.consignee_address').text(data.details.consignee_address);
                                 if(data.details.reason == null){
                                     $('#single_div p.reason').text('No Reason');
