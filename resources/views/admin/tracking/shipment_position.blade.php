@@ -301,8 +301,8 @@
                     {data: 'handover_received_by', name: 'shipment_positions.handover_received_by', class: 'align-middle handover_received_by'},
                     {data: 'handover_received_at', name: 'shipment_positions.handover_received_at', class: 'align-middle handover_received_at'},
                     {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
-                    {data: 'consignee_address', name: 'consignee_address', class: 'align-middle action'},
-                    {data: 'actual_weight', name: 'actual_weight', class: 'align-middle action'},
+                    {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle action'},
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle action'},
 
                 ],
                 rowCallback: function(row, data, index) {
