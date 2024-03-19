@@ -2897,9 +2897,10 @@ class ShipperShipmentBookController extends Controller
                 return false;
             } elseif ($service_type_id != 2 && ($value < 1 || $value > 10000)) {
                 return false;
+            }else{
+                return true;
             }
         
-            return true;
         });
 
 
