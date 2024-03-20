@@ -138,6 +138,16 @@
                     </div>
 
                     <div class="col-3">
+                        <div class="form-group">
+                            <select name="ref_name_select" id="ref_name_select" class="select2">
+                                @foreach($referral_names as $referral_name)
+                                    <option value="{{$referral_name->id}}">{{$referral_name->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -244,6 +254,7 @@
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">Referral Name</th>
                         <th class="border-primary border-darken-1">Special Instructions</th>
                     </tr>
                     </thead>
@@ -379,7 +390,13 @@
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Sub Segment*'
+                placeholder: 'Sub Segment',
+                allowClear:true
+            });
+             $('#ref_name_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Referral Name',
+                allowClear:true
             });
             $('#search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -552,6 +569,7 @@
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
                             head.push('Sales Person');
+                            head.push('Referral Name');
                             head.push('Reason');
                             head.push('Special Instructions');
                             $.each(result.data, function(index, values) {
@@ -612,6 +630,7 @@
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
+                                row.push(values.ref);
                                 row.push(values.reason);
                                 row.push(values.special_instructions);
 
@@ -660,6 +679,7 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
                         d.sub_segment = $('#sub_segment_select').val();
+                        d.ref = $('#ref_name_select').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_business_category = $('#search_business_category').val();
@@ -730,6 +750,7 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
+                    { data: 'ref', name: 'r.name', class: 'align-middle ref'},
                     { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'}
                 ],
                 rowCallback: function(row, data, index) {
