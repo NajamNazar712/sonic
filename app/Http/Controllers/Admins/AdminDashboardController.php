@@ -9129,6 +9129,17 @@ class AdminDashboardController extends Controller
                 }
 
             })
+            ->addColumn('lead_id_link', function($user) {
+                
+                if($user->lead_id)
+                {
+                    return '<a href="' . route('admin.leads.view_remarks',['id' =>$user->lead_id]) . '" style="text-decoration: underline;" target="_blank">' . $user->lead_id . '</a>';
+
+                }  else {
+                   return '';
+                }
+
+            })
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
@@ -14146,4 +14157,3 @@ class AdminDashboardController extends Controller
     }
     
 }
-

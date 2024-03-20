@@ -148,7 +148,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
         'App\Console\Commands\AgentSarNotification',
-
+        'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
         ];
 
@@ -181,6 +181,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
         $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
+
+        // Sackback or Canvas schedule
+        $schedule->command('sackbag:statusupdate')->dailyAt('06:00')->runInBackground();
 
         //Operations Report
         //11th of every month
