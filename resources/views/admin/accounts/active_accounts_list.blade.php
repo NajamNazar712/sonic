@@ -2257,6 +2257,14 @@ function checkboxStatus() {
 
                                 var baseURL = "{{ url('admin/accounts') }}";
                                 var html = '<table class="table table-bordered">';
+                                html += '<thead>';
+                                html += '<tr>' +
+                                    '<th><strong>User Information</strong></th>' +
+                                    '<th><strong>User Attributes</strong></th>' +
+                                    '<th><strong>User Id</strong></th>' +
+                                    '</tr>';
+                                html += '</thead>';
+                                html += '<tbody>';
                                 html += '<tr>' +
                                     '<td><strong>Phone</strong></td>' +
                                     '<td>' + data.info.phone + '</td>' +
@@ -2293,6 +2301,7 @@ function checkboxStatus() {
                                     '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
                                         generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
                                     '</tr>';
+                                html += '</tbody>';
                                 html += '</table>';
 
                                 function generateLinks(ids, baseURL, type) {

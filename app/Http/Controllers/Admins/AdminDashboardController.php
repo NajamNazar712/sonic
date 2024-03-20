@@ -8973,24 +8973,28 @@ class AdminDashboardController extends Controller
             ->toArray();
     
         // Get user IDs with same name
-        $similarUsersName = User::where('name', $duplicate->name)
-            ->where('id', '!=', $shipper_id)
-            ->pluck('id')
-            ->toArray();
-    
-        // Get user IDs with same IBAN
-        $ibanCollection = $user->bank->pluck('iban')->toArray();
-        $similarUsersIban = UserBankInfo::whereIn('iban', $ibanCollection)
+        $similarUsersName = DuplicateUser::where('name', $duplicate->name)
             ->where('user_id', '!=', $shipper_id)
             ->pluck('user_id')
             ->toArray();
-    
+
+        // Get all IBANs associated with the user
+        $ibanCollection = DuplicateUser::where('user_id', $user->id)
+        ->pluck('iban')
+        ->toArray();
+
+        // Get user IDs with same IBANs
+        $similarUsersIban = DuplicateUser::whereIn('iban', $ibanCollection)
+        ->where('user_id', '!=', $shipper_id)
+        ->pluck('user_id')
+        ->toArray();
+
         // Get the duplicated IBANs
-        $duplicatedIbans = UserBankInfo::whereIn('user_id', $similarUsersIban)
-            ->whereIn('iban', $ibanCollection)
-            ->pluck('iban')
-            ->toArray();
-    
+        $duplicatedIbans = DuplicateUser::whereIn('user_id', $similarUsersIban)
+        ->whereIn('iban', $ibanCollection)
+        ->pluck('iban')
+        ->toArray();
+
         // Get user IDs with same NTN
         $similarUsersNtn = [];
         if ($user->ntn_no) {
