@@ -7112,9 +7112,6 @@ class AdminDashboardController extends Controller
             'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
 
         ];
-
-        dd(2);
-
         $validations = array();
         $on_validations = array();
         $ol_validations = array();
@@ -12967,7 +12964,6 @@ class AdminDashboardController extends Controller
         ->join('admins as send_by','send_by.id','disable_account_intimation_send_surveys.send_by')
         ->select(['users.name as shipper_name','users.email','users.phone','disable_account_intimation_send_surveys.random_id','disable_account_intimation_send_surveys.send_via','send_by.name as send_by','disable_account_intimation_send_surveys.status','disable_account_intimation_send_surveys.url','disable_account_intimation_send_surveys.created_at']);
         
-        // dd($surveyReport);
 
         return Datatables::of($surveyReport)
             ->editColumn('status', function ($surveyReport) {
@@ -13012,7 +13008,6 @@ class AdminDashboardController extends Controller
         ->select(['questions.id','questions.questions','questions.option1','questions.option2','questions.option3','questions.option4','disable_account_intimation_submit_surveys.selected_option'])
         ->where('disable_account_intimation_submit_surveys.survey_id',$survey_id);
 
-        // dd($submit_survey_answers->get());
 
         if($submit_survey_answers->exists())
         {
