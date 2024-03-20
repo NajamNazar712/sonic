@@ -1239,16 +1239,12 @@ class ShipperDashboardController extends Controller
             // if((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $store_id_check){
             //     $dropdown .= $add_store_id_button;
             // }
-
             if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
             } 
             if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
                 $dropdown .= $add_store_id_button;
             }
-
-
-
             if ($pickup->default_address == 1) {
                 $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
@@ -1317,22 +1313,36 @@ class ShipperDashboardController extends Controller
                 if($shipping_info->status == 0){
                     $shipping_info->status = 1;
                     $shipping_info->save();
-                    $shipper_store_id->status = 1;
-                    $shipper_store_id->save();
+                    if ($shipper_store_id !== null && (auth()->user()->id == 2234 || auth()->user()->id == 1049)) {
+                        $shipper_store_id->status = 1;
+                        $shipper_store_id->save();
+                    }
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now enabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already enabled!"]);
                 }
             }else if($status == 'disable'){
-                if(UserShippingInfo::where('user_id',$shipping_info->user_id)->count()==1)
-                {
+                // if(UserShippingInfo::where('user_id',$shipping_info->user_id)->count()==1)
+                // {
+                //     return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
+                // }
+
+                $active_status_count = UserShippingInfo::where('user_id',$shipping_info->user_id)
+                    ->where('status', 1)
+                    ->where('hidden', 0)
+                    ->count();
+                if($active_status_count == 1){
                     return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
                 }
+
                 if($shipping_info->status == 1){
                     $shipping_info->status = 0;
                     $shipping_info->save();
-                    $shipper_store_id->status = 0;
-                    $shipper_store_id->save();
+                    if ($shipper_store_id !== null && (auth()->user()->id == 2234 || auth()->user()->id == 1049)) {
+                        $shipper_store_id->status = 0;
+                        $shipper_store_id->save();
+                    }
+
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now disabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already disabled!"]);
