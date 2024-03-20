@@ -1239,6 +1239,16 @@ class ShipperDashboardController extends Controller
             // if((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $store_id_check){
             //     $dropdown .= $add_store_id_button;
             // }
+
+            $active_status_count = UserShippingInfo::where('user_id',$pickup->user_id)
+            ->where('status', 1)
+            ->where('hidden', 0)
+            ->count();
+
+            if ($active_status_count == 1) {
+                $disable_button = '<button type="button" class="dropdown-item disable btn btn-danger text-white" disabled><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            }
+
             if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
                 $dropdown .= $edit_store_id_button;
             } 
