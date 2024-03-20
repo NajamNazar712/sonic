@@ -765,7 +765,17 @@
                                 });
                                 $('#update_call_status_modal').modal('hide');
                                 window.reaload();
-                            } else {
+                            }
+                            else if(response.custom_check == 1) {
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: response.message,
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            } 
+                            else {
                                 swal({
                                     title: 'Something Went Wrong!',
                                     text: 'Please Update Status Again',
@@ -801,7 +811,7 @@
 
             $("#sub_status_call_finding").change(function() {
                 var selectedValue = $(this).val();
-                if (selectedValue === '32') {
+                if (selectedValue === '1') {
                     $('.custom_remark_container').removeClass('d-none');
                     $('#custom_remark').attr('data-rule-required', true);
                     $('#custom_remark').attr('data-msg-required', 'Other Remarks is required');
@@ -1574,8 +1584,7 @@
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
                                 shipment += '<div class="border table-responsive">';
-                                shipment +=
-                                    '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
@@ -1585,6 +1594,7 @@
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
                                 shipment += '<th><strong>City</strong></th>';
+                                shipment += '<th><strong>Location</strong></th>'
                                 shipment += '<th><strong>Received/Refused By</strong></th>';
                                 shipment += '<th><strong>IP Address</strong></th>';
                                 shipment += '<th><strong>Rider</strong></th>';
@@ -1592,6 +1602,10 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
+                                    var googleMapsUrl = '';
+                                    if (history.area_log && history.area_log.latitude && history.area_log.longitude) {
+                                        googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
+                                    }
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
                                     shipment += '<tr>';
                                     shipment += '<td>' + formattedDateTime + '</td>';
@@ -1601,6 +1615,7 @@
                                     shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
                                     shipment += '<td>' + history.city + '</td>';
+                                    shipment += '<td>' + (history.area_log ? history.area_log.location_status + ' | (' + history.area_log.area + ') | <a href="' + googleMapsUrl + '" target="_blank"><i class="la la-map-marker"></i></a>' : '') + '</td>';
                                     shipment += '<td>' + history.received_or_refused_by + '</td>';
                                     shipment += '<td>' + history.ip + '</td>';
                                     shipment += '<td>' + history.rider + '</td>';
@@ -1647,7 +1662,7 @@
                                     shipment += '</div>';
                                 }
 
-                                if ('pickup_history' in details) {
+                                if ('pickup_history_v2' in details) {
                                     shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4><u>Pickup History (V2)</u></h4>';
                                     shipment += '<div class="border table-responsive">';
@@ -1664,7 +1679,39 @@
                                     shipment += '</thead>';
                                     shipment += '<tbody>';
 
-                                    $.each(details.pickup_history, function(index, history) {
+                                    $.each(details.pickup_history_v2, function(index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.reason + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                } else if ('pickup_history_v3' in details)
+                                {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Pickup History (V3)</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment +=
+                                        '<table class="table table-sm table-borderless datatable pickup_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Reason</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.pickup_history_v3, function(index, history) {
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';

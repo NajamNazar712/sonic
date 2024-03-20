@@ -1206,6 +1206,8 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $corporate_rate_types = CorporateRateType::all();
+        $payment_cycles = PaymentCycle::all();
+
         $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
         $commission_percentage = '';
             $settings = GlobalSettings::where('type', 'commission_percentage');
@@ -1237,7 +1239,7 @@ class AdminDashboardController extends Controller
             $all_users['pagination']['more'] = true;
 
         $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users]);
+        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'payment_cycles'=>$payment_cycles]);
     }
 
     public function activeAccountsList()
@@ -8950,6 +8952,10 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as dab', 'dab.id', '=', 'uda.approved_by')
             ->leftjoin('admins as drb', 'drb.id', '=', 'uda.rejected_by')
             ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('sales_commissions as sc', 'sc.shipper_id', '=', 'users.id')
+            ->leftjoin('sales_commission_users as scu', 'sc.id', '=', 'scu.sales_commission_id')
+            ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
+            ->leftjoin('riders as scun_r', 'scun_r.id', '=', 'scu.user_id')
             ->leftjoin('admins as poc', 'poc.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
@@ -8958,9 +8964,10 @@ class AdminDashboardController extends Controller
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->select(['users.blacklist', 'users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso'])
+            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id'])
             ->whereIn('users.status', [3, 4])
-            ->where('users.blacklist', 0);
+            ->where('users.blacklist', 0)
+            ->groupBy('users.id');
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -9009,6 +9016,17 @@ class AdminDashboardController extends Controller
                     $numberDays = intval($numberDays);
 
                     return $numberDays;
+                }
+
+            })
+            ->addColumn('lead_id_link', function($user) {
+                
+                if($user->lead_id)
+                {
+                    return '<a href="' . route('admin.leads.view_remarks',['id' =>$user->lead_id]) . '" style="text-decoration: underline;" target="_blank">' . $user->lead_id . '</a>';
+
+                }  else {
+                   return '';
                 }
 
             })
@@ -9184,37 +9202,23 @@ class AdminDashboardController extends Controller
                     return $users->kam;
                 }
             })
+            ->filterColumn('r.name', function ($query, $keyword) {
+                $query->where('r.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
 
-            // ->editColumn('admin_tag_id', function ($users) {
-            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-            //     if (isset($shipper, $sales_tiers)) {
-            //         $sales_commission_users = DB::table('sales_commission_users')
-            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-            //         ->get();
-                    
-            //         if ($sales_commission_users->isNotEmpty()) {
-            //             $array = [];
-            //             foreach ($sales_commission_users as $sales_commission_user) {
-            //                 $type = $sales_commission_user->user_type;
-            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-            //                 if ($admins) {
-            //                     $array[] = $admins->name;
-            //                 } else {
-            //                     return '-';
-            //                 }
-            //             }
-            //             $array = implode(', ', $array);
-            //             return $array;
-            //         } else {
-            //             return '-';
-            //         }
-            //     } else {
-            //         return '-';
-            //     }
 
-            // })
+            ->filterColumn('k.name', function ($query, $keyword) {
+                $query->where('k.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
+
+  
+            ->filterColumn('poc.name', function ($query, $keyword) {
+                $query->where('poc.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
+
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword == 3 || $keyword == 4) {
                     $query->where('users.status', '=', $keyword);
@@ -9546,7 +9550,6 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
@@ -9570,13 +9573,17 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as drb', 'drb.id', '=', 'uda.rejected_by')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
             ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('sales_commissions as sc', 'sc.shipper_id', '=', 'users.id')
+            ->leftjoin('sales_commission_users as scu', 'sc.id', '=', 'scu.sales_commission_id')
+            ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
+            ->leftjoin('riders as scun_r', 'scun_r.id', '=', 'scu.user_id')
             ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
+            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)->groupBy('users.id');
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -9608,6 +9615,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
+        
             ->addColumn('lead_id_link', function ($users) {
                 if($users->lead_id) {
                     $route = route('admin.leads.view_remarks', ['id' => $users->lead_id]);
@@ -9750,6 +9758,7 @@ class AdminDashboardController extends Controller
                 }
 
             })
+            
             ->editColumn('kam', function ($users) {
                 $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
                 $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
@@ -9782,36 +9791,23 @@ class AdminDashboardController extends Controller
             })
 
 
-            // ->editColumn('admin_tag_id', function ($users) {
-            //     $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%Sales Person%')->orWhere('tier_name', 'LIKE', '%sales person%')->first()->id ?? null;
-            //     $shipper = DB::table('sales_commissions')->where('shipper_id', $users->id)->first();
-                
-            //     if (isset($shipper, $sales_tiers)) {
-            //         $sales_commission_users = DB::table('sales_commission_users')
-            //         ->where(['tier_id' => $sales_tiers, 'sales_commission_id' => $shipper->id])
-            //         ->get();
-                    
-            //         if ($sales_commission_users->isNotEmpty()) {
-            //             $array = [];
-            //             foreach ($sales_commission_users as $sales_commission_user) {
-            //                 $type = $sales_commission_user->user_type;
-            //                 $admins = ($type == 1) ? Admin::find($sales_commission_user->user_id) : Rider::find($sales_commission_user->user_id);
-            //                 if ($admins) {
-            //                     $array[] = $admins->name;
-            //                 } else {
-            //                     return '-';
-            //                 }
-            //             }
-            //             $array = implode(', ', $array);
-            //             return $array;
-            //         } else {
-            //             return '-';
-            //         }
-            //     } else {
-            //         return '-';
-            //     }
+            ->filterColumn('r.name', function ($query, $keyword) {
+                $query->where('r.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
 
-            // })
+
+            ->filterColumn('k.name', function ($query, $keyword) {
+                $query->where('k.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
+
+  
+            ->filterColumn('p.name', function ($query, $keyword) {
+                $query->where('p.name', $keyword)
+                ->orWhere('scun.name', $keyword)->orWhere('scun_r.name', $keyword);
+            })
+           
             ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -9855,7 +9851,6 @@ class AdminDashboardController extends Controller
                 }
             })
             ->filterColumn('product_type', function ($query, $keyword) {
-
                 if ($keyword != '' || $keyword != 24) {
                     $query->where('products.id', $keyword);
                 } else {
@@ -10101,6 +10096,8 @@ class AdminDashboardController extends Controller
 
     public function blockAccountListAjax(Request $request)
     {
+        $globalArray = [];
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 276);
         }
@@ -14014,4 +14011,3 @@ class AdminDashboardController extends Controller
     }
     
 }
-

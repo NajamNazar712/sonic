@@ -51,7 +51,7 @@
                                                     <span class="la la-calendar-o small-calender-icon"></span>
                                                 </span>
                                             </div>
-                                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
+                                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)"  data-value="{{ \Carbon\Carbon::now() }}">
                                         </div>
                                     </div>
 
@@ -86,12 +86,12 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Area</th>
-                                    <th class="border-primary border-darken-1">Consignee Name</th>
-                                    <th class="border-primary border-darken-1">Number</th>
-                                    <th class="border-primary border-darken-1">Address</th>
+                                    {{-- <th class="border-primary border-darken-1">Area</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Consignee Name</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Number</th> --}}
+                                    {{-- <th class="border-primary border-darken-1">Address</th> --}}
                                     <th class="border-primary border-darken-1">COD Amount</th>
-                                    <th class="border-primary border-darken-1">Weight</th>
+                                    {{-- <th class="border-primary border-darken-1">Weight</th> --}}
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
@@ -102,6 +102,7 @@
                                     <th class="border-primary border-darken-1">Action Updated By</th>
                                     <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">RV Status</th>
+                                    <th class="border-primary border-darken-1">RV Reason</th>
                                     <th class="border-primary border-darken-1">RV Status Date</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
@@ -396,7 +397,7 @@
                     var current = moment(contractMoment).add(31, 'days');
                     search_date_to.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                     search_date_to.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
-                    search_date_to.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                    search_date_to.pickadate('picker').set('select', new Date(old_date_formatted),{muted:true});
                 }
             });
 
@@ -443,22 +444,23 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Area');
-                            head.push('Consignee');
-                            head.push('Number');
-                            head.push('Address');
+                            // head.push('Area');
+                            // head.push('Consignee');
+                            // head.push('Number');
+                            // head.push('Address');
                             head.push('COD Amount');
-                            head.push('Weight');
+                            // head.push('Weight');
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Arrival Date');
-                            head.push('RV Status');
+                            head.push('Action');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Action Date');
                             head.push('Action Updated By');
                             head.push('RCP Agent Updated By');
-                            head.push('RV Action');
+                            head.push('RV Status');
+                            head.push('RV Reason');
                             head.push('RV Status Date');
                             head.push('Current Status');
                             head.push('Current Status Date');
@@ -476,22 +478,18 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.area);
-                                row.push(values.consignee_name);
-                                row.push(values.number);
-                                row.push(values.address);
                                 row.push(values.cod_amount);
-                                row.push(values.weight);
                                 row.push(values.shipping_mode);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
-                                row.push(values.rv_status);
+                                row.push(values.action);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.action_date);
                                 row.push(values.action_updated_by);
                                 row.push(values.rcp_agent_updated_by);
                                 row.push(values.rv_status_name);
+                                row.push(values.rv_reason);
                                 row.push(values.rv_status_date);
                                 row.push(values.current_status);
                                 row.push(values.current_status_date);
@@ -545,8 +543,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                // rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle tracking_number',searchable: false},
@@ -554,22 +551,18 @@
                     {data: 'origin', name: 'origin', class: 'text-center align-middle origin',searchable: false},
                     {data: 'destination', name: 'destination', class: 'align-middle destination',searchable: false},
                     {data: 'hub', name: 'hub', class: 'align-middle hub',searchable: false},
-                    {data: 'area', name: 'area', class: 'align-middle area',searchable: false},
-                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name',searchable: false},
-                    {data: 'number', name: 'number', class: 'align-middle number',searchable: false},
-                    {data: 'address', name: 'address', class: 'align-middle address',searchable: false},
                     {data: 'cod_amount', name: 'cod_amount', class: 'align-middle cod_amount',searchable: false},
-                    {data: 'weight', name: 'weight', class: 'align-middle dweightesignation',searchable: false},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode',searchable: false},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type',searchable: false},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date',searchable: false},
-                    {data: 'rv_status', name: 'rv_status', class: 'align-middle rv_status',searchable: false},
+                    {data: 'action', name: 'action', class: 'align-middle action',searchable: false},
                     {data: 'reason', name: 'reason', class: 'align-middle reason',searchable: false},
                     {data: 'remarks', name: 'remarks', class: 'align-middle remarks',searchable: false},
                     {data: 'action_date', name: 'action_date', class: 'align-middle action_date',searchable: false},
                     {data: 'action_updated_by', name: 'action_updated_by', class: 'align-middle action_updated_by',searchable: false},
                     {data: 'rcp_agent_updated_by', name: 'ad.name', class: 'align-middle rcp_agent_updated_by',searchable: false},
                     {data: 'rv_status_name', name: 'rv_status.name', class: 'align-middle rv_status_name',searchable: false},
+                    {data: 'rv_reason', name: 'rv_reason.name', class: 'align-middle rv_reason',searchable: false},
                     {data: 'rv_status_date', name: 'sj.updated_at', class: 'align-middle rv_status_date',searchable: false},
                     {data: 'current_status', name: 's_status.name', class: 'align-middle current_status',searchable: false},
                     {data: 'current_status_date', name: 'shipments.updated_at', class: 'align-middle current_status_date',searchable: false},
@@ -627,7 +620,6 @@
                         $("#unresponsive_count").modal('show');
                     },
                     error: function(xhr, status, error) {
-                        // Handle errors here
                         console.error(xhr, status, error);
                     }
                 });

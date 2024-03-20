@@ -1205,9 +1205,9 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment_id);
 
                 }
-                $process_one_link['shipment_ids'] = $valid_shipments;
-                $process_one_link['delivery_note_id'] = $note->id;
-                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+//                $process_one_link['shipment_ids'] = $valid_shipments;
+//                $process_one_link['delivery_note_id'] = $note->id;
+//                dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
                     NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
@@ -1604,14 +1604,14 @@ class DeliveryController extends Controller
                     }
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+//                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
 
                         $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
                         if (count($unique_codes) > 0) {
                             dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
                         }
                     } else {
-                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
+//                        dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
 
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
@@ -1633,7 +1633,7 @@ class DeliveryController extends Controller
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
 
-                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+//                        dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
 
                         $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
                         if (count($unique_codes) > 0) {
@@ -2650,13 +2650,13 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-                    if ($selected_status != 14) {
-                        //auto agent assigning
-                        $data = array();
-                        $data['delivery_note_id'] = $delivery_note_id;
-                        $data['shipment_id'] = $shipment;
-                        dispatch(new ProcessAgentCallMonitoring($data));
-                    }
+//                    if ($selected_status != 14) {
+//                        //auto agent assigning
+//                        $data = array();
+//                        $data['delivery_note_id'] = $delivery_note_id;
+//                        $data['shipment_id'] = $shipment;
+//                        dispatch(new ProcessAgentCallMonitoring($data));
+//                    }
                 }
             }
 
@@ -2688,7 +2688,7 @@ class DeliveryController extends Controller
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
 
-            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+//            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
             if (count($unique_codes) > 0) {
@@ -2911,10 +2911,10 @@ class DeliveryController extends Controller
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
                         }
-                        $data = array();
-                        $data['delivery_note_id'] = $delivery_note_id;
-                        $data['shipment_id'] = $shipment;
-                        dispatch(new ProcessAgentCallMonitoring($data));
+//                        $data = array();
+//                        $data['delivery_note_id'] = $delivery_note_id;
+//                        $data['shipment_id'] = $shipment;
+//                        dispatch(new ProcessAgentCallMonitoring($data));
                     }
                 }
                 //                ShipmentsJourney::where('shipment_id', $shipment)->update(['cnic' => isset($consignee_cnic[$key]) ? $consignee_cnic[$key] : '','relation' => isset($consignee_relation[$key]) ? $consignee_relation[$key] : '']);
@@ -2949,7 +2949,7 @@ class DeliveryController extends Controller
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
 
-            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+//            dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
 
             $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
             if (count($unique_codes) > 0) {
@@ -5903,7 +5903,7 @@ class DeliveryController extends Controller
                     $dropdown .= $closed_status;
                 }
 
-                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status != 2) {
+                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) <= 0 && $result->status != 2) {
                     $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
                     $dropdown .= $reconcile_to_resolved;
                 }
@@ -7245,6 +7245,7 @@ class DeliveryController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
+        $deliveryNoteNumbers= explode(',',$request->get('delivery_note_numbers'));
         $connection = 'reports_2';
         $deliveries = DB::connection($connection)->table('delivery_notes')
             ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
@@ -7274,6 +7275,9 @@ class DeliveryController extends Controller
             'delivery_notes.created_via_app as created_via', 'riders.operation_rider_id', 'ca.name as area','one_link_cash.transaction_amount as one_link_amount'])
 
             ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
+            ->when($request->get('delivery_note_numbers'),function($data) use ($deliveryNoteNumbers){
+                return $data->whereIn('delivery_notes.id',$deliveryNoteNumbers);
+            })
             ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -9430,7 +9434,7 @@ class DeliveryController extends Controller
         $station_deposit_note = StationDepositNote::find($request->sdn_id);
 
         if ($station_deposit_note) {
-            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) <= 0) {
                 $station_deposit_note->status = 2;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
@@ -9478,7 +9482,7 @@ class DeliveryController extends Controller
         if ($station_deposit_notes->exists()) {
             $station_deposit_notes = $station_deposit_notes->get();
             foreach ($station_deposit_notes as $station_deposit_note) {
-                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) <= 0) {
                     $station_deposit_note->status = 2;
                     $station_deposit_note->closed_at = Carbon::now();
                     $station_deposit_note->save();
@@ -9841,9 +9845,9 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    $process_one_link['shipment_ids'] = $valid_shipments;
-                    $process_one_link['delivery_note_id'] = $note->id;
-                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+//                    $process_one_link['shipment_ids'] = $valid_shipments;
+//                    $process_one_link['delivery_note_id'] = $note->id;
+//                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
                 }
                 NotificationsController::send(40, $note->id);
                 if ($normal_rider) {
