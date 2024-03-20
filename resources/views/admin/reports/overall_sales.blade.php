@@ -67,6 +67,28 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_zone" id="search_origin_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+         
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -199,11 +221,11 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination</th>
-{{--                        <th class="border-primary border-darken-1">Consignee Address</th>--}}
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
-                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Origin Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -376,6 +398,17 @@
                 placeholder: 'Referral Name',
                 allowClear:true
             });
+            $('#search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Hub',
+                allowClear:true,
+            });
+            $('#search_origin_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Zone',
+                allowClear:true,
+            });
+        
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -504,11 +537,11 @@
                             head.push('Arrival Date');
                             head.push('Rider');
                             head.push('Origin');
+                            head.push('Origin Hub');
                             head.push('Destination');
-                            // head.push('Consignee Address');
-                            head.push('Hub');
+                            head.push('Destination Hub');
                             head.push('Return City');
-                            head.push('Zone');
+                            head.push('Origin Zone');
                             head.push('Class');
                             head.push('Attempts');
                             head.push('Shipping Mode');
@@ -565,8 +598,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.ridername);
                                 row.push(values.origin);
+                                row.push(values.origin_hub);
                                 row.push(values.destination);
-                                // row.push(values.consignee_address);
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -653,6 +686,9 @@
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_origin_zone = $('#search_origin_zone').val();
+
                     }
                 },
                 order: [[14, 'desc']],
@@ -680,6 +716,7 @@
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'origin_hub' ,name: 'och.name', class: 'align-middle origin_hub'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     // { data:'consignee_address' ,name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},

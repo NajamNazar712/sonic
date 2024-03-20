@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\Shipper\User;
 use Auth;
 use Carbon\Carbon;
+use App\Http\Models\Shipper\User;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
@@ -229,7 +230,41 @@ class GeneralSettingController extends Controller
            });
         return $datatables->make(true);
     }
-    
+ 	// public function mobile_check_index() {
+
+    //         $shipper_ids = null;
+
+    //         $shippers = User::select(['id','name'])->where('status',3)->get();
+
+    //         $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //         if($setting->exists()) {
+    //             $setting = $setting->first();
+    //             $shipper_ids = explode(',',$setting->setting_value);
+    //         } 
+
+    //     return view("admin.settings.shipper.mobile_number_check")->with(['shippers' => $shippers,'shipper_ids' => $shipper_ids]);
+    // }
+
+    // public function mobile_check_store(Request $request) {
+
+    //     $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //     if($setting->exists()) 
+    //     {
+    //         $setting =  $setting->first();
+    //     } else {
+    //         $setting = new GeneralSetting();
+    //         $setting->type = 'shipper_mobile_check';
+    //     }
+
+    //     $shipper_ids = implode(',',$request->shipper_ids);
+    //     $setting->setting_value =  $shipper_ids;
+    //     $setting->save();
+    //     return redirect()->back()->with('success', 'Settings Updated!');
+
+       
+
+      
+    // }    
 
     function shipper_cap_store(Request $request)
     {
