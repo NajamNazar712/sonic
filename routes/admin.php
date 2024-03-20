@@ -3318,6 +3318,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
         });
 
+        Route::prefix('mms_excel_booking_setting')->name('mms_excel_booking_setting.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_store')->name('store');
+        });
         Route::prefix('shipper_cap')->name('shipper_cap.')->group(function () {
             Route::get('', 'Admins\Settings\GeneralSettingController@shipper_cap_index')->name('index');
             Route::get('list', 'Admins\Settings\GeneralSettingController@shipper_cap_list')->name('list');
