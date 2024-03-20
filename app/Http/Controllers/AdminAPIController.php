@@ -9189,7 +9189,7 @@ class AdminAPIController extends Controller
                             }
                     } else
                         if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
-                            $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+                            $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60,22);
                             if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
                                 if ($shipment->return_address_id != NULL) {
                                     $destination_city_id = $shipment->return_address->city_id;
