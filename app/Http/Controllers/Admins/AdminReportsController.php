@@ -3708,7 +3708,7 @@ class AdminReportsController extends Controller
             $datatable->where('shipments.business_category_id', '=', $search_business_category);
         }
 
-        $sales_tiers = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%REF%')->orWhere('tier_name', 'LIKE', '%ref%')->first()->id ?? null;
+        $sales_tiers = DB::table('sales_tiers')->where('tier_name' , 'Referral')->orWhere('tier_name', 'REF')->orWhere('tier_name', 'ref')->first()->id ?? null;
         
         if ($request->get('rider_type_referral') == 1) {
             $datatable->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 2]);
