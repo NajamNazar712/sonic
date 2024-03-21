@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admins\Settings;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\admins\ActivityTrailController;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Shipper\User;
+use Auth;
 use Carbon\Carbon;
 use App\Http\Models\Shipper\User;
 use Yajra\Datatables\Datatables;
@@ -165,6 +168,42 @@ class GeneralSettingController extends Controller
         
         $settings->save();
 
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function mms_excel_booking_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 747);
+        $users= User::where('status',3)->where('blacklist' ,0 )->where('account_type_id',2)->select('id' , 'name')->get();
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+        $mms_excel_booking_setting = array();
+        if ($settings->exists())
+        {
+            $settings = $settings->first();
+            $mms_excel_booking_setting = array_map('intval',explode(',' , $settings->description));
+        }
+        return view('admin.settings.mms_excel_booking_shippers')->with(['users' => $users , 'mms_excel_booking_setting' =>$mms_excel_booking_setting]);
+    }
+    
+    public function mms_excel_booking_setting_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 748);
+        if ($request->has('users') && count($request->users) > 0) {
+            $users = implode(',', $request->users);
+        } else{
+            $users = null;
+        }
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+    
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GeneralSetting();
+    
+            $settings->type = 'mms_excel_booking_setting';
+        }
+            $settings->description = $users;
+            $settings->save();
+            
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
