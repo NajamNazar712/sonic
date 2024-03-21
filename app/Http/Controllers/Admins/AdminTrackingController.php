@@ -665,8 +665,20 @@ class AdminTrackingController extends Controller
                 }
                 if ((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
 
-                    $details = array();
+                    $arrive_at_origin_statuses = ShipmentsJourney::where('shipment_id', $shipment->id)
+                        ->where('shipper_status_id', 2)
+                        ->pluck('created_at');
+                        $aging = '-';
+                        if ($arrive_at_origin_statuses->isNotEmpty()) {
+                            $origin = Carbon::parse($arrive_at_origin_statuses->first());
+                            $aging = Carbon::now()->diffInDays($origin);
+                            if ($aging >= 90) {
+                                $aging = '90+';
+                            }
+                        }
 
+                    $details = array();
+                    $details['aging'] = $aging;
                     $details['complaint'] = '-';
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
@@ -1100,8 +1112,9 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
-
-                                $details['shipper']['name'] = $shipper->shipper_name;
+                                $shipment_name_verification = \DB::table('retail_shipments')->where('shipment_id', $retail_shipment->shipment_id)->first();
+                                // $details['shipper']['name'] = $shipper->shipper_name;
+                                $details['shipper']['name'] = $shipment_name_verification->shipper_name;
                                 $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                                 $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
                                 $details['shipper']['sales_person'] = $sales_person_name;

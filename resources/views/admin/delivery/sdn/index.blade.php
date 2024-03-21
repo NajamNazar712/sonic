@@ -600,6 +600,26 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="sdn_action_log" data-backdrop="static" role="dialog"
+            aria-labelledby="sdn_action_log" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="sdn_action_log_title">SDN <span></span></h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -805,11 +825,26 @@
                             head.push('Trax Pay Amount');
                             head.push('Cash Amount');
                             head.push('Aging');
+                             var sdnDepositAmount =0;
+                             var adjustmentAmount =0;
+                             var hblAmount =0;
+                             var oneLinkAmount =0;
+                             var traxPayAmount =0;
+                             var difference_amount =0;
+                             var cash_amount =0;
 
                             $.each(result.data, function (index, values) {
+                                sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                                adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                                hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
+                                oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
+                                traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
+                                difference_amount = ( sdnDepositAmount - adjustmentAmount);
+                                cash_amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
+                               
+
                                 row = [];
-
-
+                         
                                 row.push(index + 1);
                                 row.push(values.sdn_id_padded);
                                 row.push(values.sdn_type);
@@ -827,11 +862,11 @@
                                 row.push(values.adjustment_date);
                                 row.push(values.adjustment_amount);
                                 row.push(values.adjustment_ref);
-                                row.push(values.difference_amount);
+                                row.push(difference_amount);
                                 row.push(values.hbl_amount);
                                 row.push(values.one_link_amount);
                                 row.push(values.Trax_pay_amount);
-                                row.push(values.cash_amount);
+                                row.push(cash_amount);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -1123,7 +1158,13 @@
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        render: function (data, type, row) {
+                            sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                            adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                            difference_amount = ( sdnDepositAmount - adjustmentAmount );
+                            return difference_amount.toLocaleString();
+                        }
                     },
                     {
                         data: 'hbl_amount',
@@ -1151,7 +1192,16 @@
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        render: function (data, type, row) {
+                             sdnDepositAmount = parseFloat(row.sdn_deposit_amount.toString().replace(/,/g, '')) || 0;
+                             adjustmentAmount = parseFloat(row.adjustment_amount.toString().replace(/,/g, '')) || 0;
+                             hblAmount = parseFloat(row.hbl_amount.toString().replace(/,/g, '')) || 0;
+                             oneLinkAmount = parseFloat(row.one_link_amount.toString().replace(/,/g, '')) || 0;
+                             traxPayAmount = parseFloat(row.trax_pay_amount.toString().replace(/,/g, '')) || 0;
+                             cash_amount = ( sdnDepositAmount - adjustmentAmount - hblAmount - oneLinkAmount - traxPayAmount);
+                            return cash_amount.toLocaleString();
+                        }
                     },
                     {
                         data: 'deposit_slip',
@@ -1531,7 +1581,6 @@
                 else {
                     selected_rowsx.splice(index, 1);
                 }
-                console.log(selected_rowsx);
 
 
                 if (selected_rowsx.length > 0) {
@@ -2732,6 +2781,58 @@
                             html += '</tbody></table></div></div>';
                             $('#status_logs_modal .modal-body').html(html);
                         }
+                        else{
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click', 'tr td button.view_sdn_action_log', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.sdn_actions') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            $('#sdn_action_log .modal-body').html('');
+                            $('#sdn_action_log').modal('show');
+                            $('#sdn_action_log_title span').text(data.sdn_id);
+                                var html = '<div class="row">' +
+                                            '<div class="col-12">' +
+                                            '<table class="table table-sm table-bordered border">' +
+                                            '<thead>' +
+                                            '<tr>' +
+                                            '<th class="color primary text-center">Action</th>' +
+                                            '<th class="color primary">Updated By</th>' +
+                                            '<th class="color primary">Updated At</th>' +
+                                            '</tr>' +
+                                            '</thead>' +
+                                            '<tbody>';
+                            if (data.logs) {
+                                $.each(data.logs, function (index, value) {
+                                    html += '<tr>' +
+                                            '<td>' + value.status + '</td>' +
+                                            '<td>' + value.updated_by + '</td>' +
+                                            '<td>' + value.date + '</td>' +
+                                            '</tr>';
+                                });
+                            }
+                            html += '</tbody>' + 
+                                    '</table>' + 
+                                    '</div>' + 
+                                    '</div>';
+                            $('#sdn_action_log .modal-body').html(html);
+                        }
+
                         else{
                             toastr.error(data.message, 'Error!', {
                                 positionClass: 'toast-top-center',

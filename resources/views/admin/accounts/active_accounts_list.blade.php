@@ -106,6 +106,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Expected Average Shipments</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -923,8 +924,8 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
+									// console.log(index);	
+									// console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1028,6 +1029,7 @@ function checkboxStatus() {
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Expected Average Shipments');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -1080,6 +1082,7 @@ function checkboxStatus() {
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.expected_average_shipments);
                             body.push(row);
                         });
                     },
@@ -1702,6 +1705,7 @@ function checkboxStatus() {
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -2928,7 +2932,7 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            console.log(value,value.admin);
+                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){

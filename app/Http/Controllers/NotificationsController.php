@@ -121,6 +121,7 @@ use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\ShipperVerificationPinCode;
 
 class NotificationsController extends Controller
 {
