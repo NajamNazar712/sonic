@@ -84,247 +84,10 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="assign_to_rider" data-backdrop="static" role="dialog"
-                     aria-labelledby="assign_to_rider_title" aria-hidden="true">
-                    <div class="modal-dialog modal-sm" role="document">
-                        <div class="modal-content">
-                            <form class="form-horizontal" action="{{route('admin.v3_pickups.pending.assign')}}"
-                                  method="post">
-                                @csrf
-
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="assign_to_rider_title">Assign to Rider</h4>
-                                </div>
-                                <input type="hidden" name="pickup_request_ids" id="assign_pickup_request_ids">
-                                <div class="modal-body">
-                                    <div class="form-group m-0">
-                                        <select name="rider" class="select2 rider" data-rule-required="true"
-                                                data-msg-required="Rider is required">
-                                            @foreach($riders as $rider)
-                                                @if($rider->trax_id)
-                                                    <option value="{{ $rider->id }}">{{ $rider->name }}
-                                                        - {{ $rider->trax_id }}</option>
-                                                @else
-                                                    <option value="{{ $rider->id }}">{{ $rider->name }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary ml-auto">Assign</button>
-                                </div>
-
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!--Shipments popup -->
-                <div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog"
-                     aria-labelledby="bookings_modal" aria-hidden="true">
-                    <div class="modal-dialog modal-sm" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
-
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
-                            </div>
-                            <div class="modal-body text-center">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--Shipments popup -->
-                <!--Shipments popup pending booking-->
-                <div class="modal fade" id="pending_bookings_modal" data-backdrop="static" role="dialog"
-                     aria-labelledby="pending_bookings_modal" aria-hidden="true">
-                    <div class="modal-dialog modal-sm" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="pending_bookings_modal_title">Received Shipment(s)</h4>
-
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
-                            </div>
-                            <div class="modal-body text-center">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--Shipments popup -->
-
             </div>
         </div>
     </div>
 
-    {{--   Modal Popup --}}
-    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog"
-         aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Return Confirm Reason</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center"
-                          novalidate="novalidate">
-                        <input type="hidden" id="return_reason_shipment_id">
-                        <input type="hidden" id="return_reason_shipment_remarks">
-
-
-                        <div class="form-group ml-1">
-                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm"
-                                    id="single_reason_update_btn">Update To Return Confirm
-                            </button>
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                        </div>
-                    </form>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Remarks</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form method="post" id="add_remarks_form"
-                          action="{{ route('admin.v2_pickups.pending.add_remarks') }}"
-                          class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-                        @csrf
-                        <input type="hidden" id="add_remarks_pickup_note_id" name="v2_pickup_req_id">
-                        <div class="form-group ml-1">
-                            <input type="text" name="add_remark" id="add_remark" class="form-control"
-                                   data-rule-required="true" data-msg-required="Remarks is required"
-                                   placeholder="Add Remarks*">
-
-                        </div>
-
-
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary">Add</button>
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
-
-                        </div>
-                    </form>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="AllRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AllRemarksModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">All Remarks</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <table class="table table-bordered" id="all_remarks_tabel">
-                        <tbody>
-                        <tr>
-                            <td>Rider Remarks:</td>
-                            <td id="rider_remarks_td"></td>
-                        </tr>
-                        <tr>
-                            <td>Shipper Remarks:</td>
-                            <td id="shipper_remarks_td"></td>
-                        </tr>
-                        <tr>
-                            <td>Trax Reason:</td>
-                            <td id="trax_reason_td"></td>
-                        </tr>
-                        <tr>
-                            <td>Trax Remarks:</td>
-                            <td id="trax_remarks_td"></td>
-                        </tr>
-                        <tr>
-                            <td>Reverse Pickup Remarks:</td>
-                            <td id="remarks_td"></td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-
- 
-
-    <!---- start of show additional services modal---->
-<div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AdditionalServiceModal"
-        aria-hidden="true">
-   <div class="modal-dialog modal-lg" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Additional Services</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <div class="container">
-                   <table class="table table-bordered">
-                        <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Service</th>
-                                    <th class="border-primary border-darken-1">Qty</th>
-                                </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-
-                    </table>
-                   <!-- end additional services -->
-                 
-               </div>
-           </div>
-       </div>
-   </div>
-</div>
-    <!----end of show additional services modal --->
 
       <!---- start  reschedule days modal---->
     <div class="modal fade text-left" id="RescheduleDaysModal" data-backdrop="static" tabindex="-1" role="dialog"
@@ -552,316 +315,88 @@
 
 
         $(document).ready(function () {
-            $('#estimated_weight').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-            });
-            $('#shipments_count').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-            });
+            {{--jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {--}}
+            {{--    if (this.context.length) {--}}
+            {{--        body = [];--}}
+            {{--        var params = table.ajax.params();--}}
+            {{--        params.start = 0;--}}
+            {{--        params.length = -1;--}}
+            {{--        params.excel = true;--}}
+            {{--        var jsonResult = $.ajax({--}}
+            {{--            url: '{{ route('admin.v3_pickups.history.list') }}',--}}
+            {{--            data: params,--}}
+            {{--            success: function (result) {--}}
+            {{--                dd(result);--}}
+            {{--                head = [];--}}
 
-            $('#total_pieces_count').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-            });
-            var booking_from_date = $('#requested_from_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function (context) {
-                    if (context.select) {
-                        $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            var booking_to_date = $('#requested_to_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function (context) {
-                    if (context.select) {
-                        $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            var shipper_pickup_addresses = [];
-            $('#shippers_select').prepend('<option value="" selected="selected">Select Shippers</option>').select2({
-                placeholder: 'Select Customer',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request')
-            }).bind('select2:select', function () {
-                var shipper_id = parseInt($(this).val());
-                if (shipper_id) {
-                    $('#pickup_address_id').empty();
-
-                    $.ajax({
-                        url: '{{ route('admin.v3_pickups.pending.shipper_info') }}',
-                        method: 'POST',
-                        data: {
-                            'shipper_id': shipper_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status == 0) {
-                            shipper_pickup_addresses = data.pickup_addresses;
-                            $.each(data.pickup_addresses,function(key,value) {
-                                var name = value.city.name + ' - ' + value.pickup_address;
-                                var pickup = new Option(name, value.id, false, false);
-                                $('#pickup_address_id').append(pickup).trigger('change');
-                            });
-                            $('#pickup_address_id').select2({
-                                placeholder: 'Select Pickup Address',
-                                width: '100%'
-                            }).val(null).trigger('change');
-                            $('#product_select').val(data.product_id).trigger('change');
-                            $('#product_select').attr('disabled', true);
-                        } else {
-                            toastr.error('No pickup address found!', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-                }
-            });
-
-            $('#reg_phone').inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-            $('#pickup_address_id').prepend('<option value="" selected="selected">Select Pickup Address</option>').select2({
-               placeholder: 'Select Pickup Address',
-               width: '100%'
-            }).bind('select2:select', function () {
-                var address_id = parseInt($(this).val());
-
-                $.each(shipper_pickup_addresses, function(key,value) {
-                    if(value.id == address_id){
-                        $('#reg_address').val(value.pickup_address);
-                        $('#reg_phone').val(value.phone);
-                        $('#poc').text(value.poc);
-                        $('#poc_phone').text(value.phone);
-                    }
-                });
-            });
-
-            var services = @json($services);
-            $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
-                placeholder: 'Select Product',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request')
-            }).bind('change', function () {
-                var product_id = parseInt($(this).val());
-                $('#service_select').empty();
-                $.each(services, function(key,value) {
-                    if(value.segment_id == product_id){
-                        var name = value.name;
-                        var service_option = new Option(name, value.id, false, false);
-                        $('#service_select').append(service_option).trigger('change');
-                    }
-                });
-                $('#service_select').select2({
-                    placeholder: 'Select Service',
-                    width: '100%',
-                    dropdownParent:$('#add_pickup_request')
-                }).val(null).trigger('change');
-            });
-
-            $('#edit_product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
-                placeholder: 'Select Product',
-                width: '100%',
-                dropdownParent:$('#update_pickup_request')
-            }).bind('change', function () {
-                var product_id = parseInt($(this).val());
-                $('#edit_service_select').empty();
-                $.each(services, function(key,value) {
-                    if(value.segment_id == product_id){
-                        var name = value.name;
-                        var service_option = new Option(name, value.id, false, false);
-                        $('#edit_service_select').append(service_option).trigger('change');
-                    }
-                });
-                $('#edit_service_select').select2({
-                    placeholder: 'Select Service',
-                    width: '100%',
-                    dropdownParent:$('#update_pickup_request')
-                }).val(null).trigger('change');
-            });
-            
-            
-
-            $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-                placeholder: 'Select Service',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request')
-            });
-            $("#edit_service_select").prepend('<option value="" selected="selected">Select Service</option>').select2({
-                placeholder: 'Select Service',
-                width: '100%',
-                dropdownParent:$('#update_pickup_request')
-            });
-
-            $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request')
-            });
-            $('#edit_shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
-                width: '100%',
-                dropdownParent:$('#update_pickup_request')
-            });
-            
-
-            $('#preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
-                placeholder: 'Select Pickup Time*',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request') 
-            });
-            $('#edit_preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
-                placeholder: 'Select Pickup Time*',
-                width: '100%',
-                dropdownParent:$('#update_pickup_request') 
-            });
-            
-            
-            var pickup_date = $('#pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::today() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
-            var edit_pickup_date = $('#edit_pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::today() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
-
-            $('#customer_type').on('click', 'a',function (){
-                if($(this).hasClass('registered')){
-                    $('#pickup_type_id').val(1);
-                }
-                else if($(this).hasClass('walk_in')){
-                    $('#pickup_type_id').val(2);
-                }
-            });
-            $('#regular_section').on('click', 'a',function (){
-                if($(this).hasClass('onetime')){
-                    $('#regular_pickup').val(1);
-                }
-                else if($(this).hasClass('schedule')){
-                    $('#regular_pickup').val(2);
-                }
-            });
-        
-        
-
-            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
-                if (this.context.length) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.v3_pickups.history.list') }}',
-                        data: params,
-                        success: function (result) {
-                            dd(result);
-                            head = [];
-
-                            head.push('S.No');
-                            head.push('Pickup Request ID');
-                            head.push('Requested Date');
-                            head.push('Current Rider');
-                            head.push('Last Rider');
-                            head.push('Pickup Note ID');
-                            head.push('Shipment(s) Booked');
-                            head.push('Shipment(s) Rider Picked');
-                            // head.push('Shipment(s) Received');
-                            head.push('Shipper');
-                            head.push('Territory');
-                            head.push('Contact Person');
-                            head.push('Vendor');
-                            head.push('Brand Name');
-                            head.push('Contact No(s).');
-                            head.push('Address');
-                            head.push('City');
-                            head.push('Status');
-                            head.push('Trax Reason');
-                            head.push('Trax Remark(s)');
-                            head.push('Shipper Remark(s)');
-                            head.push('Rider Remark(s)');
-                            head.push('Assigned Date');
-                            head.push('Attempt Date');
-                            head.push('Aging');
-                            head.push('Attempt(s)');
+            {{--                head.push('S.No');--}}
+            {{--                head.push('Pickup Request ID');--}}
+            {{--                head.push('Requested Date');--}}
+            {{--                head.push('Current Rider');--}}
+            {{--                head.push('Last Rider');--}}
+            {{--                head.push('Pickup Note ID');--}}
+            {{--                head.push('Shipment(s) Booked');--}}
+            {{--                head.push('Shipment(s) Rider Picked');--}}
+            {{--                // head.push('Shipment(s) Received');--}}
+            {{--                head.push('Shipper');--}}
+            {{--                head.push('Territory');--}}
+            {{--                head.push('Contact Person');--}}
+            {{--                head.push('Vendor');--}}
+            {{--                head.push('Brand Name');--}}
+            {{--                head.push('Contact No(s).');--}}
+            {{--                head.push('Address');--}}
+            {{--                head.push('City');--}}
+            {{--                head.push('Status');--}}
+            {{--                head.push('Trax Reason');--}}
+            {{--                head.push('Trax Remark(s)');--}}
+            {{--                head.push('Shipper Remark(s)');--}}
+            {{--                head.push('Rider Remark(s)');--}}
+            {{--                head.push('Assigned Date');--}}
+            {{--                head.push('Attempt Date');--}}
+            {{--                head.push('Aging');--}}
+            {{--                head.push('Attempt(s)');--}}
 
 
-                            $.each(result.data, function (index, values) {
-                                row = [];
+            {{--                $.each(result.data, function (index, values) {--}}
+            {{--                    row = [];--}}
 
-                                row.push(index + 1);
-                                row.push(values.pickup_request_id);
-                                row.push(values.requested_date);
-                                row.push(values.current_rider);
-                                row.push(values.last_rider);
-                                row.push(values.pickup_note_id);
-                                row.push(values.booked);
-                                row.push(values.shipments_rider_picked);
-                                // row.push(values.received);
-                                row.push(values.shipper);
-                                row.push(values.territory);
-                                row.push(values.contact_person);
-                                row.push(values.vendor_name);
-                                row.push(values.brand_name);
-                                row.push(values.contact_number);
-                                row.push(values.address);
-                                row.push(values.city);
-                                row.push(values.pickup_status);
-                                row.push(values.trax_reason);
-                                row.push(values.trax_remarks);
-                                row.push(values.shipper_remarks);
-                                row.push(values.rider_remarks);
-                                row.push(values.assigned_date);
-                                row.push(values.attempted_date);
-                                row.push(values.aging);
-                                row.push(values.attempts);
+            {{--                    row.push(index + 1);--}}
+            {{--                    row.push(values.pickup_request_id);--}}
+            {{--                    row.push(values.requested_date);--}}
+            {{--                    row.push(values.current_rider);--}}
+            {{--                    row.push(values.last_rider);--}}
+            {{--                    row.push(values.pickup_note_id);--}}
+            {{--                    row.push(values.booked);--}}
+            {{--                    row.push(values.shipments_rider_picked);--}}
+            {{--                    // row.push(values.received);--}}
+            {{--                    row.push(values.shipper);--}}
+            {{--                    row.push(values.territory);--}}
+            {{--                    row.push(values.contact_person);--}}
+            {{--                    row.push(values.vendor_name);--}}
+            {{--                    row.push(values.brand_name);--}}
+            {{--                    row.push(values.contact_number);--}}
+            {{--                    row.push(values.address);--}}
+            {{--                    row.push(values.city);--}}
+            {{--                    row.push(values.pickup_status);--}}
+            {{--                    row.push(values.trax_reason);--}}
+            {{--                    row.push(values.trax_remarks);--}}
+            {{--                    row.push(values.shipper_remarks);--}}
+            {{--                    row.push(values.rider_remarks);--}}
+            {{--                    row.push(values.assigned_date);--}}
+            {{--                    row.push(values.attempted_date);--}}
+            {{--                    row.push(values.aging);--}}
+            {{--                    row.push(values.attempts);--}}
 
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+            {{--                    body.push(row);--}}
+            {{--                });--}}
+            {{--            },--}}
+            {{--            async: false--}}
+            {{--        });--}}
 
-                    return {body: body, header: head};
-                }
-            });
+            {{--        return {body: body, header: head};--}}
+            {{--    }--}}
+            {{--});--}}
 
             var days_map={
                 1: 'Mo',
@@ -876,12 +411,12 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
               
                 buttons: [
-                    {
-                        extend: 'excel',
-                        title: 'Schedule Pickups',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
+                    // {
+                    //     extend: 'excel',
+                    //     title: 'Schedule Pickups',
+                    //     className: 'btn btn-primary',
+                    //     text: '<i class="la la-file-excel-o"></i> Excel',
+                    // },
                     'reset'
                 ],
               

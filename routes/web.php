@@ -3198,6 +3198,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
 
+        Route::prefix('admin_product')->name('admin_product.')->group(function (){
+            Route::get('', 'Admins\GlobalSettingsController@admin_product_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@admin_product_list')->name('list');
+            Route::post('', 'Admins\GlobalSettingsController@admin_product_store')->name('store');
+            Route::post('edit', 'Admins\GlobalSettingsController@admin_product_edit')->name('edit');
+            Route::post('update', 'Admins\GlobalSettingsController@admin_product_update')->name('update');
+
+        });
+
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');

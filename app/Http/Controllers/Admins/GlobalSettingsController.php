@@ -72,6 +72,7 @@ use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 
+use App\Http\Models\AdminProduct;
 use App\Http\Models\Blacklist\BlacklistCondition;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
@@ -107,6 +108,7 @@ use App\Http\Models\Notification;
 use App\Http\Models\NotificationSetting;
 use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
+use App\Http\Models\PmsAdminProduct;
 use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
@@ -363,6 +365,110 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function admin_product_index()
+    {
+        $admins = Admin::select('id','name','trax_id')->where('status',1)->get();
+        $products = Segment::all();
+        return view('admin.settings.admin_products',compact('admins','products'));
+    }
+
+    public function admin_product_list(Request  $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 367);
+        }
+        $admin_products = PmsAdminProduct::join('admins as ad',function ($query){
+            $query->on('ad.id','=','pms_admin_products.user_id')->where('type',1);
+        })->join('segments as s','s.id','=','pms_admin_products.product_id')
+        ->select('pms_admin_products.id','pms_admin_products.user_id','ad.name','ad.trax_id','s.name as product_name','s.id as product_id');
+
+        $datatables = Datatables::of($admin_products)
+            ->addColumn('action', function ($roles) {
+                if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if ($roles->status == 1) {
+
+                        $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    } else {
+
+                        $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+
+                    $dropdown .= '</div>
+                  </div>
+          ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function admin_product_store(Request  $request)
+    {
+
+
+        $validator = Validator::make($request->all(),[
+            'admin_id'=> ['required','integer'],
+            'product_id'=>['required','integer'],
+        ]);
+
+        if($validator->fails()) {
+            return redirect()->back()->with('error','Failed to attach admin with product!');
+        }
+
+        $admin_product = new PmsAdminProduct();
+        $admin_product->user_id = $request->admin_id;
+        $admin_product->product_id = $request->product_id;
+        $admin_product->created_by = Auth::id();
+        $admin_product->save();
+        return redirect()->back()->with('success','Admin attached with product successfully!');
+
+    }
+
+    public function admin_product_edit(Request $request)
+    {
+        if($request->admin_product_id)
+        {
+            $pms_admin_product = PmsAdminProduct::find($request->admin_product_id);
+            if($pms_admin_product)
+            {
+                return response()->json(['status'=> 1, 'pms_admin_product'=>$pms_admin_product]);
+            }
+            return response()->json(['status'=>0,'error'=>'Admin Product not found!']);
+        }
+    }
+
+    public  function admin_product_update(Request $request)
+    {
+        $validate =  Validator::make($request->all(),[
+            'admin_product_id'=> ['required','integer'],
+            'edit_product_id'=>['required','integer'],
+            'edit_admin_id'=>['required','integer']
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->with('error','Failed to update admin product!');
+        }
+        $pms_admin_product = PmsAdminProduct::find($request->admin_product_id);
+        if($pms_admin_product)
+        {
+            $pms_admin_product->product_id = $request->edit_product_id;
+            $pms_admin_product->user_id = $request->edit_admin_id;
+            $pms_admin_product->save();
+            return redirect()->back()->with('success','Admin product update successfully!');
+        }
+        return redirect()->back()->with('error','Admin Product not found!');
+    }
     public function petty_cash_heads_index()
     {
         return view('admin.settings.petty_cash.account_head');
