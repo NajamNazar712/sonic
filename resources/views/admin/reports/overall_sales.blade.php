@@ -374,7 +374,16 @@
             $('#rider_types_referral').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Rider Type Referral*'
+            }).on('change', function() {
+                var rider_type = $(this).val();
+                if (rider_type == 3) {
+                    $('#ref_name_select').prop('disabled', true); 
+                } else {
+                    $('#ref_name_select').prop('disabled', false); 
+                }
             });
+
+            
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
