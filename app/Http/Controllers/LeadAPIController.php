@@ -95,7 +95,7 @@ class LeadAPIController extends Controller
             $reference_id = $lead_reference->id;
         }
 
-        try {
+//        try {
             $new_lead = new Lead();
             $new_lead->contact_person = $request->contact_person;
             $new_lead->phone_number = $request->phone_number;
@@ -123,9 +123,9 @@ class LeadAPIController extends Controller
             }
             return response()->json(['status' => 0,'success' => 'Lead added successfully']);
 
-        } catch (\Exception $e) {
-            return response()->json(['status' => 1,'error' => 'Something went wrong!']);
-        }
+//        } catch (\Exception $e) {
+//            return response()->json(['status' => 1,'error' => 'Something went wrong!']);
+//        }
     }
 
     /**
