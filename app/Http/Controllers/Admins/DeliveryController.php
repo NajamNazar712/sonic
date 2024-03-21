@@ -5787,18 +5787,17 @@ class DeliveryController extends Controller
                 return number_format($shipment->sdn_net_amount);
             })
             ->editColumn('sdn_deposit_amount', function ($shipment) {
-              
                 if ($shipment->sdn_deposit_amount) {
                     return number_format($shipment->sdn_deposit_amount);
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('sdn_adjustment_amount', function ($shipment) {
                 if ($shipment->adjustment_amount) {
                     return number_format($shipment->adjustment_amount);
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('sdn_id_padded', function ($sdn) {
@@ -5831,12 +5830,10 @@ class DeliveryController extends Controller
                 return $date;
             })
             ->addColumn('difference_amount', function ($sdn) {
-                // $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
-                // $difference_amount = 0;
+                $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
+                $difference_amount = 0;
 
-                // $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
-                // return number_format($difference_amount);
-                $difference_amount =  ($sdn->sdn_deposit_amount - $sdn->adjustment_amount);
+                $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
                 return number_format($difference_amount);
             })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
@@ -6013,10 +6010,10 @@ class DeliveryController extends Controller
                         $hbl_amount = $hbl_amount->get();
                         return $hbl_amount->sum('transactions_amount');
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
 
             })
@@ -6042,13 +6039,13 @@ class DeliveryController extends Controller
                         }
                         else
                         {
-                            return 0;
+                            return '-';
                         }
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('trax_pay_amount', function ($sdn) {
@@ -6070,80 +6067,79 @@ class DeliveryController extends Controller
                         }
                         else
                         {
-                            return 0;
+                            return '-';
                         }
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('cash_amount', function ($sdn) {
-                return  0;
-                // $id = $sdn->sdn;
-                // $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
+                $id = $sdn->sdn;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
-                // if ($delivery_note->exists()) {
-                //     $delivery_note = $delivery_note->get();
-                //     $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                if ($delivery_note->exists()) {
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                //     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
-                //     if ($one_link_amount->exists()) {
-                //         $one_link_amount = $one_link_amount->get();
-                //         $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
+                    if ($one_link_amount->exists()) {
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
 
-                //         $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
 
-                //         if($cod->exists())
-                //         {
-                //             $cod = $cod->get();
-                //             $a = $cod = $cod->sum('amount');
-                //         }
-                //         else
-                //         {
-                //             $a = 0;
-                //         }
-                //     }
-                //     else {
-                //         $a = 0;
-                //     }
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            $a = $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            $a = 0;
+                        }
+                    }
+                    else {
+                        $a = 0;
+                    }
 
-                //     $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
-                //     if ($hbl_amount->exists()) {
-                //         $hbl_amount = $hbl_amount->get();
-                //         $b = $hbl_amount->sum('transactions_amount');
-                //     } else {
-                //         $b = 0;
-                //     }
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    if ($hbl_amount->exists()) {
+                        $hbl_amount = $hbl_amount->get();
+                        $b = $hbl_amount->sum('transactions_amount');
+                    } else {
+                        $b = 0;
+                    }
 
-                //     $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
-                //     if ($trax_pay_amount->exists()) {
-                //         $trax_pay_amount = $trax_pay_amount->get();
-                //         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
-                //         $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
-                //         if($fintech_payment_detail->exists())
-                //         {
-                //             $c = $fintech_payment_detail->sum('cod_amount');
-                //         }
-                //         else {
-                //             $c = 0;
-                //         }
-                //     } else {
-                //         $c = 0;
-                //     }
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
+                    if ($trax_pay_amount->exists()) {
+                        $trax_pay_amount = $trax_pay_amount->get();
+                        $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
+                        $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
+                        if($fintech_payment_detail->exists())
+                        {
+                            $c = $fintech_payment_detail->sum('cod_amount');
+                        }
+                        else {
+                            $c = 0;
+                        }
+                    } else {
+                        $c = 0;
+                    }
 
-                //     $sum = $a + $b + $c;
+                    $sum = $a + $b + $c;
 
-                //     if ($sum > 0) {
-                //         $total = $sdn->sdn_amount - $sum;
-                //         return $total;
-                //     } else {
-                //         return '-';
-                //     }
-                // } else {
-                //     return '-';
-                // }
+                    if ($sum > 0) {
+                        $total = $sdn->sdn_amount - $sum;
+                        return $total;
+                    } else {
+                        return '-';
+                    }
+                } else {
+                    return '-';
+                }
             });
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
