@@ -116,6 +116,15 @@
                     </div>
 
                     <div class="col-3">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="col-3">
 
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -359,6 +368,7 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+            
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -395,6 +405,12 @@
                         }
                     }
                 }
+            });
+
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
             });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
@@ -633,6 +649,7 @@
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.service_type_select = $('#service_type_select').val()
                     }
                 },
                 order: [[14, 'desc']],
