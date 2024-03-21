@@ -1,14 +1,27 @@
 <?php
 
-namespace App\Http\Controllers\admins\settings;
+namespace App\Http\Controllers\Admins\Settings;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\admins\ActivityTrailController;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Shipper\User;
+use Auth;
 use Carbon\Carbon;
+use App\Http\Models\Shipper\User;
+use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use Illuminate\Support\Facades\Auth;
+
+
 
 class GeneralSettingController extends Controller
 {
+
+
+   
 
     public function __construct()
     {
@@ -69,7 +82,8 @@ class GeneralSettingController extends Controller
     }
 
     function formatDateTime($date)
-    {   if(!is_null($date))
+    {   
+        if(!is_null($date))
         {
             $date= Carbon::parse($date);
             $formattedDate = $date->format('Y-m-d');
@@ -156,7 +170,168 @@ class GeneralSettingController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+    public function mms_excel_booking_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 747);
+        $users= User::where('status',3)->where('blacklist' ,0 )->where('account_type_id',2)->select('id' , 'name')->get();
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+        $mms_excel_booking_setting = array();
+        if ($settings->exists())
+        {
+            $settings = $settings->first();
+            $mms_excel_booking_setting = array_map('intval',explode(',' , $settings->description));
+        }
+        return view('admin.settings.mms_excel_booking_shippers')->with(['users' => $users , 'mms_excel_booking_setting' =>$mms_excel_booking_setting]);
+    }
+    
+    public function mms_excel_booking_setting_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 748);
+        if ($request->has('users') && count($request->users) > 0) {
+            $users = implode(',', $request->users);
+        } else{
+            $users = null;
+        }
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+    
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GeneralSetting();
+    
+            $settings->type = 'mms_excel_booking_setting';
+        }
+            $settings->description = $users;
+            $settings->save();
+            
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    function shipper_cap_index()
+    {
+         ActivityTrailController::createActivityTrailLog(Auth::id(), 752);
+        return view('admin.settings.add_shipper_cap');
+    }
+
+    function shipper_cap_list()
+    {
+        $shipper_cap = GeneralSetting::select('id','type','setting_value','description')->where('type','shipper_cap');
+        $datatables = Datatables::of($shipper_cap)
+           ->addColumn('action', function ($shipper_cap){
+                    $dropdown = '<div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                     <button type="button" class="dropdown-item edit_shipper_cap_btn" data-target-id='.$shipper_cap->id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
+                                </div></div>';
+
+                    
+
+                    return $dropdown;
+           });
+        return $datatables->make(true);
+    }
+ 	// public function mobile_check_index() {
+
+    //         $shipper_ids = null;
+
+    //         $shippers = User::select(['id','name'])->where('status',3)->get();
+
+    //         $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //         if($setting->exists()) {
+    //             $setting = $setting->first();
+    //             $shipper_ids = explode(',',$setting->setting_value);
+    //         } 
+
+    //     return view("admin.settings.shipper.mobile_number_check")->with(['shippers' => $shippers,'shipper_ids' => $shipper_ids]);
+    // }
+
+    // public function mobile_check_store(Request $request) {
+
+    //     $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //     if($setting->exists()) 
+    //     {
+    //         $setting =  $setting->first();
+    //     } else {
+    //         $setting = new GeneralSetting();
+    //         $setting->type = 'shipper_mobile_check';
+    //     }
+
+    //     $shipper_ids = implode(',',$request->shipper_ids);
+    //     $setting->setting_value =  $shipper_ids;
+    //     $setting->save();
+    //     return redirect()->back()->with('success', 'Settings Updated!');
+
+       
+
+      
+    // }    
+
+    function shipper_cap_store(Request $request)
+    {
+       try {
+
+            $shipper_cap = new GeneralSetting();
+            $shipper_cap->type = 'shipper_cap';
+            $shipper_cap->setting_value = $request->shipper_cap_limit;
+            $shipper_cap->description = 'Shipper Paybal Cap Setting';
+            $shipper_cap->save();
+            return redirect()->back()->with(['status'=>0, 'success'=>'Shipper Cap Inserted successfully']);
 
 
+       } catch (\Exception $th) {
+            return redirect()->back()->with(['status' => 1,  'error' => 'Unable to Insert Shipper Cap']);
+       }
+        
+    }
+
+    function shipper_cap_edit(Request $request)
+    {
+        if($request->shipper_cap_id)
+        {
+            $shipper_cap_id = $request->shipper_cap_id;
+            $shipper_cap = GeneralSetting::where('id',$shipper_cap_id)->where('type','shipper_cap');
+            if($shipper_cap->exists())
+            {
+                 $shipper_cap = $shipper_cap->first();
+                 return response()->json(['status'=>0, 'shipper_cap'=>$shipper_cap]);
+
+            } else {
+                 return response()->json(['status'=>1, 'error'=>'Shipper Cap not exists']);
+            }
+
+
+        }
+        else {
+            return response()->json(['status'=>1, 'error'=>'Something went wrong']);
+        }
+    }
+
+    function shipper_cap_update(Request $request)
+    {
+
+        $validate = Validator::make($request->all(),[
+            'edit_shipper_cap_id' => ['required','integer'],
+            'edit_shipper_cap_limit' => ['required', 'integer']
+        ]);
+
+       if ($validate->fails()) {
+            return redirect()->back()->with(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }else {
+             $shipper_cap_id = $request->edit_shipper_cap_id;
+             $shipper_cap = GeneralSetting::where('id',$shipper_cap_id)->where('type','shipper_cap');
+
+             if($shipper_cap->exists())
+             {
+                $shipper_cap = $shipper_cap->first();
+                $shipper_cap->setting_value = $request->edit_shipper_cap_limit;
+                $shipper_cap->save();
+                return redirect()->back()->with(['status'=>0, 'success'=>'Shipper Cap updated successfully']);
+
+             } else {
+                 return redirect()->back()->with(['status'=>1, 'error'=>'Shipper Cap not exists']);
+             }
+
+        }
+    }
     
 }

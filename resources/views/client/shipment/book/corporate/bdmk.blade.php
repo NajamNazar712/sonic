@@ -17,7 +17,16 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             <div class="alert alert-info">Destination Address of the Selected Cities, <br> May have the Following Issues. <br> For assistance, Call: 021-38772222</div>
-                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.corporate_excel_store') }}" novalidate="novalidate">
+                            @if(isset($type) && $type == 'mms')
+                                @php
+                                    $routeUrl = route('cod.shipment.book.corporate_excel_mms.store');
+                                @endphp
+                            @else
+                                @php
+                                    $routeUrl = route('cod.shipment.book.corporate_excel_store');
+                                @endphp
+                            @endif
+                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ $routeUrl }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <input type="hidden" name="excel_nsa" value="1">
                                 <input type="hidden" name="excel_bdmk" value="1">

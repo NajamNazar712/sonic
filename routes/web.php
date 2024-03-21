@@ -122,6 +122,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+
+                Route::get('/mms', 'Shippers\ShipperShipmentBookController@corporate_excel_mms_index')->name('mms');
+                Route::post('/mms', 'Shippers\ShipperShipmentBookController@corporate_excel_mms_store')->name('mms.store');
+
                 Route::get('/index', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_index')->name('distribution');
                 Route::post('/store', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_store')->name('distribution.store');
             });
@@ -428,6 +432,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/terms/success', 'Auth\RegisterController@register_success')->name('terms.success');
 
     //user profile
+    Route::post('add_shipper_id', 'Shippers\ShipperDashboardController@storeShipperId')->name('add.shipper_id');
     Route::get('/profile', 'Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
     Route::post('updateprofile', 'Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
     Route::post('update/profile/password', 'Shippers\ShipperDashboardController@update_profile_password')->name('update.profile.password');
