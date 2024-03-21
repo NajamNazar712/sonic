@@ -50,7 +50,7 @@ class LeadAPIController extends Controller
             // ->join('territories as t', 't.id', '=', 'leads.territory_id')
             // ->join('area_territories as at', 'at.id', '=', 'leads.territory_area_id')
             ->join('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
-            ->select('leads.id as id', 'leads.contact_person', 'sl.name as service_name', 'sl.id as service_id', 'ls.name as status', 'ls.id as status_id');
+            ->select('leads.id as id', 'leads.contact_person', 'sl.name as service_name', 'sl.id as service_id', 'ls.name as status', 'ls.id as status_id')->orderByDesc('id');
 
         if ($leads->exists()) {
             $leads = $leads->get();
@@ -115,13 +115,12 @@ class LeadAPIController extends Controller
             $new_lead->address = $request->address;
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
-
-          
-                NotificationsController::send(113, $new_lead);
-                if($new_lead->sales_person_id)
-                {
-                    NotificationsController::send(204, $new_lead);
-                }
+            NotificationsController::send(113, $new_lead);
+            if($new_lead->sale_person_id)
+            {
+                $new_lead = $new_lead->get();
+                NotificationsController::send(204, $new_lead,$sales_person_id);
+            }
             return response()->json(['status' => 0,'success' => 'Lead added successfully']);
 
         } catch (\Exception $e) {

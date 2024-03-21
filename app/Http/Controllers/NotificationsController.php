@@ -7185,6 +7185,7 @@ class NotificationsController extends Controller
                                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Message</th>';
                         $html .= '</tr></thead><tbody>';
                         $serial = 1;
+
                         foreach ($leads as $lead) {
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
