@@ -4,16 +4,13 @@ namespace App\Http\Controllers\Admins\Settings;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\admins\ActivityTrailController;
 use App\Http\Models\Admin\Settings\GeneralSetting;
-use App\Http\Models\Shipper\User;
 use Auth;
 use Carbon\Carbon;
 use App\Http\Models\Shipper\User;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use Illuminate\Support\Facades\Auth;
 
 
 
@@ -35,49 +32,48 @@ class GeneralSettingController extends Controller
         $admin_ticker = null;
         $shipper_ticker = null;
 
-        $settings = GeneralSetting::where('type', 'admin_ticker');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-          
-            $startformated = $this->formatDateTime($settings->start_date);
-            $endformated = $this->formatDateTime($settings->end_date);
-
-            $admin_ticker = [
-                'description' => $settings->description,
-                'start_date' => $startformated['date'],
-                'start_time' =>  $startformated['time'],
-                'start_time_formatted'=>  $startformated['time_formatted'],
-                'end_date' => $endformated['date'], 
-                'end_time' => $endformated['time'], 
-                'end_time_formatted'=> $endformated['time_formatted']
-            ];  
-        }
-
-        $settings = GeneralSetting::where('type', 'shipper_ticker');
-        
-      
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $startformated = $this->formatDateTime($settings->start_date);
-            $endformated = $this->formatDateTime($settings->end_date);
-           
-                $shipper_ticker = [
-                    'description' => $settings->description,
-                    'start_date' => $startformated['date'],
-                    'start_time' =>  $startformated['time'],
-                    'start_time_formatted'=>  $startformated['time_formatted'],
-                    'end_date' => $endformated['date'], 
-                    'end_time' => $endformated['time'], 
-                    'end_time_formatted'=> $endformated['time_formatted']
-                ];  
-          
-
-        }
+//        $settings = GeneralSetting::where('type', 'admin_ticker');
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $startformated = $this->formatDateTime($settings->start_date);
+//            $endformated = $this->formatDateTime($settings->end_date);
+//
+//            $admin_ticker = [
+//                'description' => $settings->description,
+//                'start_date' => $startformated['date'],
+//                'start_time' =>  $startformated['time'],
+//                'start_time_formatted'=>  $startformated['time_formatted'],
+//                'end_date' => $endformated['date'],
+//                'end_time' => $endformated['time'],
+//                'end_time_formatted'=> $endformated['time_formatted']
+//            ];
+//        }
+//
+//        $settings = GeneralSetting::where('type', 'shipper_ticker');
+//
+//
+//        if ($settings->exists()) {
+//            $settings = $settings->first();
+//
+//            $startformated = $this->formatDateTime($settings->start_date);
+//            $endformated = $this->formatDateTime($settings->end_date);
+//
+//                $shipper_ticker = [
+//                    'description' => $settings->description,
+//                    'start_date' => $startformated['date'],
+//                    'start_time' =>  $startformated['time'],
+//                    'start_time_formatted'=>  $startformated['time_formatted'],
+//                    'end_date' => $endformated['date'],
+//                    'end_time' => $endformated['time'],
+//                    'end_time_formatted'=> $endformated['time_formatted']
+//                ];
+//
+//
+//        }
        
        
-
         return view('admin.settings.ticker')->with(['admin_ticker' => $admin_ticker,'shipper_ticker' => $shipper_ticker]);
     }
 
