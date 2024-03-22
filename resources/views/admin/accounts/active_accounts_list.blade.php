@@ -746,7 +746,7 @@ aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="">Block Disable Reason Remarks</h4>
+                <h4 class="modal-title" id="BlockDisableReasonModalHeading"></h4>
             </div>
             <div class="modal-body">
                 <input type="text" class="form-control mb-1" placeholder="Enter Remarks" name="block_disable_remarks" id="block_disable_remarks">
@@ -1913,6 +1913,7 @@ function checkboxStatus() {
         
         $('body').on('click', 'button.blacklist', function () {
             $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Block Reason Remarks');
             block_user_id = $(this).data('id');
             block_user_status = $(this).attr('rel');
             disable_user_id = null; 
@@ -1920,6 +1921,7 @@ function checkboxStatus() {
 
         $('body').on('click', 'button.userdisable', function () {
             $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Disable Reason Remarks');
             disable_user_id = $(this).data('id');
             disable_user_status = 'disable';
             block_user_id = null; 
