@@ -213,6 +213,40 @@
                 </li>
             @endif
 
+            {{--Add Logistic routes not create permission yet--}}
+            @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670, 830], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
+                                    class="la la-cubes"></i>Logistic</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            <li  class="menu-item">
+                                <a href="{{ route('admin.logistic.create') }}">Logistic Book</a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            <li  class="menu-item">
+                                <a href="{{ route('admin.logistic.shipment_manifest.create') }}">Shipment Manifest</a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            <li  class="menu-item">
+                                <a href="{{ route('admin.logistic.rbag_manifest.create') }}">Rbag Manifest</a>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            <li  class="menu-item">
+                                <a href="{{ route('admin.logistic.transit_manifest.create') }}">Only Transit Manifest</a>
+                            </li>
+                        @endif
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.cn.issue_area_store.index') }}">CN Issue Area Store</a>
+                                </li>
+                            @endif
+                    </ul>
+
+                </li>
+            @endif
 
             @if (session('role_id') == 1 ||
                     count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670, 830], session('permissions'))) !== 0)
@@ -2005,6 +2039,7 @@
                                 </ul>
                             </li>
                         @endif
+
 
                         @if (session('role_id') == 1 || count(array_intersect([104, 326, 761, 828], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">First Mile</span></a>

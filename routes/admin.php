@@ -4142,4 +4142,43 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('store', 'Admins\AdminCargoManifestController@add_sack_bag')->name('store');
         Route::post('sack_bag_check', 'Admins\AdminCargoManifestController@sack_bag_no_check')->name('sack_bag_check');
     });
+
+    //New Moudles Routes
+    Route::prefix('logistic')->name('logistic.')->group(function(){
+        Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
+        Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
+        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');
+
+        Route::post('shipper_info','Admins\Logistic\AdminLogisticBookingController@get_shipper_info')->name('shipper_info');
+        Route::post('product_services','Admins\Logistic\AdminLogisticBookingController@get_product_services')->name('product_services');
+
+        //child routes
+        Route::prefix('shipment_manifest')->name('shipment_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\ShipmentManifest\AdminShipmentManifestContoller@create')->name('create');
+            Route::post('store','Admins\Logistic\ShipmentManifest\AdminShipmentManifestContoller@store')->name('store');
+        });
+
+        Route::prefix('rbag_manifest')->name('rbag_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\RbagManifest\AdminRbagManifestController@create')->name('create');
+        });
+        Route::prefix('transit_manifest')->name('transit_manifest.')->group(function(){
+            Route::get('create','Admins\Logistic\TransitManifest\AdminTransitManifestController@create')->name('create');
+        });
+
+        Route::prefix('cn')->name('cn.')->group(function(){
+            Route::prefix('issue_area_store')->name('issue_area_store.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_area_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_area_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@add_cn_area_store')->name('store');
+            });
+//            Route::prefix('issue_to_rider')->name('issue_to_rider.')->group(function(){
+//
+//            });
+//            Route::prefix('receive_admin_store')->name('receive_admin_store.')->group(function(){
+//
+//            });
+
+        });
+
+    });
 });
