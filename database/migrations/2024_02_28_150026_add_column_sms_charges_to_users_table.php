@@ -28,7 +28,9 @@ class AddColumnSmsChargesToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn('sms_charges_type_id');
+            $table->dropColumn('sms_charges');
+            $table->dropColumn('sms_charges_status');
         });
     }
 }

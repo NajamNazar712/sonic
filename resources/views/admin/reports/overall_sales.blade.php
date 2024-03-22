@@ -213,6 +213,8 @@
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
+                        <th class="border-primary border-darken-1">SMS Charges</th>
+                        <th class="border-primary border-darken-1">SMS Fixed Charges</th>
                         <th class="border-primary border-darken-1">Intercept Charges</th>
                         <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
@@ -511,6 +513,8 @@
                             head.push('Try & Buy Charges');
                             head.push('NSA/OSA Charges');
                             head.push('GST');
+                            head.push('SMS Charges');
+                            head.push('SMS Fixed Charges');
                             head.push('Intercept Charges');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
@@ -571,6 +575,8 @@
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.p_gst);
+                                row.push(values.pps_sms_charges);
+                                row.push(values.pps_flag);
                                 row.push(values.intercept_charges);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
@@ -684,6 +690,8 @@
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
                     { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
+                    { data:'pps_sms_charges' ,name: 'pps.pps_sms_charges', class: 'align-middle pps_sms_charges',sortable:false},
+                    { data:'pps_flag' ,name: 'pps.pps_flag', class: 'align-middle pps_flag',sortable:false},
                     { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
                     { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
