@@ -172,6 +172,8 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
+            ->leftjoin('admins as admin', 'admin.id', '=', 'journey.admin_id')
+
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'journey.status_reason_id')
             ->leftjoin('shipment_items as si', function ($join) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
@@ -241,6 +243,39 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
                     );
             })
+            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
+                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+                    ->whereRaw('ssj.id = (
+                        select max(id) 
+                        from shipment_scanning_journeys 
+                        where shipment_scanning_journeys.shipment_id = journey.shipment_id 
+                        and (
+                            case 
+                                when admin.role_id != 1 then
+                                    (journey.shipper_status_id = 2 and screen_location_id = 1) 
+                                    or (journey.shipper_status_id = 3 and screen_location_id = 2) 
+                                    or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
+                                    or (journey.shipper_status_id = 5 and screen_location_id = 4)
+                                    or (journey.shipper_status_id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21))
+                                    or (journey.shipper_status_id = 21 and screen_location_id = 2)
+                                    or (journey.shipper_status_id = 22 and screen_location_id = 20)
+                                    or (journey.shipper_status_id = 23 and screen_location_id = 7)
+                                    or (journey.shipper_status_id = 26 and screen_location_id = 2)
+                                    or (journey.shipper_status_id = 27 and screen_location_id = 20)
+                                    or (journey.shipper_status_id = 28 and screen_location_id = 7)
+                                    or (journey.shipper_status_id = 32 and screen_location_id = 2)
+                                    or (journey.shipper_status_id = 33 and screen_location_id = 20)
+                                    or (journey.shipper_status_id = 34 and screen_location_id = 7)
+                                    or (journey.shipper_status_id = 53 and screen_location_id = 31)
+                                else NULL
+                            end
+                        )
+                    )');
+            })
+            
+            
+            
+            ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -288,7 +323,9 @@ class AdminReportsController extends Controller
                 'sjrp.created_at as rider_picked_status_date',
                 'sjl.shipment_id as journey_latest_id',
                 'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
+                'sjl.shipper_status_id as latest_shipper_status_id',
+                'ssj.id as ssj_id',
+                'ssjal.location_status as location_status',
             ])
             ->groupBy('shipments.id');
 
@@ -339,6 +376,14 @@ class AdminReportsController extends Controller
                     return $shipment->shipper . ' (' . $shipment->poc . ')';
                 } else {
                     return $shipment->shipper;
+                }
+            })
+
+            ->editColumn('location_status', function ($shipment) {
+                if(isset($shipment->location_status)){
+                    return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
                 }
             })
             ->editColumn('current_hub', function ($shipment) {
@@ -8196,9 +8241,11 @@ class AdminReportsController extends Controller
                 DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'),
                 'rt.name as rider_type',
                 'delivery_notes.id as delivery_note',
-                'r.trax_id as rider_trax_id'
+                'r.trax_id as rider_trax_id',
+                'r.id as rider_id'
             )
             ->groupBy('r.id');
+
 
 
         $datatables = Datatables::of($route_distribution_summary)
@@ -8286,7 +8333,18 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('rider_city_area', function ($entry) {
+                if ($entry->rider_id) {
+                    $rider = Rider::find($entry->rider_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }
             });
+
 
         if ($rider = $request->get('search_rider')) {
             $datatables = $datatables->where('r.id', '=', $rider);

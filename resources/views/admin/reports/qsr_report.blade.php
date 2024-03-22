@@ -176,6 +176,7 @@
                         <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
@@ -612,6 +613,7 @@
                     {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
