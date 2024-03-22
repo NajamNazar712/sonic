@@ -29,8 +29,24 @@ class GeneralSettingController extends Controller
 
     public function ticker_index()
     {
-        $admin_ticker = null;
-        $shipper_ticker = null;
+        $admin_ticker = [
+            'description' => '',
+            'start_date' => '',
+            'start_time' =>  '',
+            'start_time_formatted'=> '',
+            'end_date' => '',
+            'end_time' => '',
+            'end_time_formatted'=> ''
+        ];
+        $shipper_ticker = [
+            'description' => '',
+            'start_date' => '',
+            'start_time' =>  '',
+            'start_time_formatted'=> '',
+            'end_date' => '',
+            'end_time' => '',
+            'end_time_formatted'=> ''
+        ];
 
         $settings = GeneralSetting::where('type', 'admin_ticker');
 
