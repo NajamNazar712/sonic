@@ -169,6 +169,16 @@
             </div>
         </div>
     </div>
+    <div class='row' id="allow_delivered_row"> 
+        <div class="col text-center">
+                <label class="font-medium-2 font-weight-bold block">This rider will mark delivered status?</label>
+                <div class="form-group">
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 mr-1">No</label>
+                    <input type="checkbox" name="allow_delivered_status" id="allow_delivered_status" class="checkbox allow_delivered_status" data-size="sm" data-switchery="true">
+                    <label for="allow_delivered_status" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                </div>
+        </div>
+    </div>
 </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add Rider</button>
@@ -184,7 +194,12 @@
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);
         @endif
+        var allow_elem = document.querySelector('.allow_delivered_status');
+        var allow_switchery = new Switchery(allow_elem);
+        
         $('#incentive_amount_div').addClass('d-none');
+        $('#allow_delivered_row').addClass('d-none');
+
 
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select City',
@@ -201,6 +216,14 @@
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
+        }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id == 2){
+                    $('#allow_delivered_row').removeClass('d-none');
+                }else{
+                    $('#allow_delivered_status').prop('checked', false)
+                    $('#allow_delivered_row').addClass('d-none');
+                }
         });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Rider Sub-Category',
