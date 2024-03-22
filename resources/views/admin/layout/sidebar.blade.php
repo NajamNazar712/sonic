@@ -620,10 +620,16 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885, 943], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.return.dashboard') }}">Dashboard</a>
+                                        </li>
+                                    @endif
+                                    
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.index') }}">Shipment - Reason Validation Required</a>
