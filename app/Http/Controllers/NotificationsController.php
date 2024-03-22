@@ -10980,7 +10980,7 @@ class NotificationsController extends Controller
                         }
                         $to = array_merge($to, $lead_email);
                         
-                        if (!is_null($sale_person_tag_email)) {
+                        if (!is_null($sale_person_tag_email) && isset($sale_person_tag_email)) {
                             $to[] = $sale_person_tag_email;
                         }
                         $to = array_merge($to , ['ali.qureshi@trax.pk', 'tanveer.malik@trax.pk', 'khan.usama@trax.pk', 'waqas@trax.pk']);
