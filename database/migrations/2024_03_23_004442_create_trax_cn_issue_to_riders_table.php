@@ -16,7 +16,6 @@ class CreateTraxCnIssueToRidersTable extends Migration
         Schema::create('trax_cn_issue_to_riders', function (Blueprint $table) {
             $table->increments('id');
             $table->string('company_code')->nullable();
-            $table->date('issue_date');
             $table->integer('rider_id');
             $table->integer('segment_id');
             $table->bigInteger('cn_from');
@@ -24,6 +23,7 @@ class CreateTraxCnIssueToRidersTable extends Migration
             $table->integer('quantity')->nullable();
             $table->smallInteger('item_type')->nullable();
             $table->smallInteger('status')->default(1);
+            $table->date('issue_date');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();

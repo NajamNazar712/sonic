@@ -243,6 +243,17 @@
                                     <a href="{{ route('admin.logistic.cn.issue_area_store.index') }}">CN Issue Area Store</a>
                                 </li>
                             @endif
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.cn.receive_admin_store.index') }}">CN Receive Admin Store</a>
+                                </li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.cn.issue_to_rider.index') }}">CN Issue to Rider</a>
+                                </li>
+                            @endif
+
                     </ul>
 
                 </li>

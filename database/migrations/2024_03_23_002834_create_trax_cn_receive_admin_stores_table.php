@@ -13,9 +13,8 @@ class CreateTraxCnReceiveAdminStoresTable extends Migration
      */
     public function up()
     {
-        Schema::create('trax_cn_receive_admin_store', function (Blueprint $table) {
+        Schema::create('trax_cn_receive_admin_stores', function (Blueprint $table) {
             $table->increments('id');
-            $table->date('receive_date');
             $table->string('company_code')->nullable();
             $table->string('area_code')->nullable();
             $table->integer('segment_id')->nullable();
@@ -25,6 +24,7 @@ class CreateTraxCnReceiveAdminStoresTable extends Migration
             $table->smallInteger('item_type')->nullable();
             $table->integer('user_id')->nullable();
             $table->smallInteger('status')->default(1);
+            $table->date('receive_date');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();
@@ -38,6 +38,6 @@ class CreateTraxCnReceiveAdminStoresTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('trax_cn_receive_admin_store');
+        Schema::dropIfExists('trax_cn_receive_admin_stores');
     }
 }

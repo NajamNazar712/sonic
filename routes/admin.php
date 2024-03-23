@@ -4171,12 +4171,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list','Admins\Logistic\AdminCnController@cn_area_store_list')->name('list');
                 Route::post('store','Admins\Logistic\AdminCnController@add_cn_area_store')->name('store');
             });
-//            Route::prefix('issue_to_rider')->name('issue_to_rider.')->group(function(){
-//
-//            });
-//            Route::prefix('receive_admin_store')->name('receive_admin_store.')->group(function(){
-//
-//            });
+            Route::prefix('issue_to_rider')->name('issue_to_rider.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_issue_to_rider_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_issue_to_rider_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_issue_to_rider_store')->name('store');
+            });
+            Route::prefix('receive_admin_store')->name('receive_admin_store.')->group(function(){
+                Route::get('','Admins\Logistic\AdminCnController@cn_receive_admin_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_receive_admin_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_receive_admin_store_store')->name('store');
+            });
 
         });
 

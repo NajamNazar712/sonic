@@ -15,7 +15,6 @@ class CreateTraxCnIssueAreaStoresTable extends Migration
     {
         Schema::create('trax_cn_issue_area_stores', function (Blueprint $table) {
             $table->increments('id');
-            $table->date('issue_date');
             $table->string('company_code')->nullable();
             $table->string('area_code')->nullable();
             $table->integer('segment_id')->nullable();
@@ -24,6 +23,7 @@ class CreateTraxCnIssueAreaStoresTable extends Migration
             $table->integer('quantity')->nullable();
             $table->smallInteger('item_type')->nullable();
             $table->smallInteger('status')->default(1);
+            $table->date('issue_date');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();

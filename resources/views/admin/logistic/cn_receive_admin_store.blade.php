@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'CN Issue Area Store')
+@section('title', 'CN Receive Admin Store')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    CN Issue Area Store
+                    CN Receive Admin Store
                 </h1>
 
                 <div class="card">
@@ -39,12 +39,12 @@
 
 
 
-    <div class="modal fade" id="AddCNIssueAreaStoreModal" data-backdrop="static" role="dialog" aria-labelledby="AddCNIssueAreaStoreModal"
+    <div class="modal fade" id="AddCNReceiveAdminStoreModal" data-backdrop="static" role="dialog" aria-labelledby="AddCNReceiveAdminStoreModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add CN Issue Area Store</h4>
+                    <h4 class="modal-title">Add CN Receive Admin Store</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -55,8 +55,8 @@
 
                     </div>
 
-                    <form method="post" id="add_cn_area_store_form"
-                          action="{{ route('admin.logistic.cn.issue_area_store.store') }}"
+                    <form method="post" id="add_cn_receive_admin_store_form"
+                          action="{{ route('admin.logistic.cn.receive_admin_store.store') }}"
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
@@ -69,7 +69,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Issue Date</label>
-                                    <input type="text" name="issue_date" class="form-control issue_date whitebackground" id="issue_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                    <input type="text" name="receive_date" class="form-control receive_date whitebackground" id="receive_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">
 
                                 </div>
                             </div>
@@ -118,7 +118,6 @@
                         </div>
 
                         <div class="form-group ml-1">
-                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
 
                             <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -300,7 +299,7 @@
             color: #fff;
             background-color: #649bc8;
         }
-        #add_cn_area_store_form label {
+        #add_cn_receive_admin_store_form label {
             float: left;
         }
         .whitebackground{
@@ -328,7 +327,7 @@
         $(document).ready(function () {
 
 
-          $('#issue_date_datepicker').pickadate({
+          $('#receive_date_datepicker').pickadate({
                 firstDay: 1,
                 clear: '',
                 min: '{{ Carbon\Carbon::today() }}',
@@ -343,13 +342,13 @@
             $('#segment_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
                 width: '100%',
-                dropdownParent:$('#AddCNIssueAreaStoreModal')
+                dropdownParent:$('#AddCNReceiveAdminStoreModal')
             });
 
             $('#area_code_select').prepend('<option value="" selected="selected">Select Area</option>').select2({
                 placeholder: 'Select Area',
                 width: '100%',
-                dropdownParent:$('#AddCNIssueAreaStoreModal')
+                dropdownParent:$('#AddCNReceiveAdminStoreModal')
             });
 
 
@@ -367,7 +366,7 @@
                             // $("#add_sack_bag_form")[0].reset();
                             // $("#sackbag_detail tr:not(:first-child)").empty();
                             // $("#add_sack_bag_form select").val(null).trigger('change.select2');
-                            $('#AddCNIssueAreaStoreModal').modal('show');
+                            $('#AddCNReceiveAdminStoreModal').modal('show');
 
                         }
                     },
@@ -395,7 +394,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.logistic.cn.issue_area_store.list') }}',
+                    url: '{{ route('admin.logistic.cn.receive_admin_store.list') }}',
 
                 },
                 rowId: 'id',
@@ -419,7 +418,7 @@
                     {data: 'cn_from', name: 'cn_from', class: 'align-middle cn_from'},
                     {data: 'cn_to', name: 'cn_to', class: 'align-middle cn_to'},
                     {data: 'quantity', name: 'quantity', class: 'align-middle quantity'},
-                    {data: 'issue_date', name: 'issue_date', class: 'align-middle issue_date'},
+                    {data: 'receive_date', name: 'receive_date', class: 'align-middle receive_date'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -458,7 +457,7 @@
             });
 
 
-            $("#add_cn_area_store_form").validate({
+            $("#add_cn_receive_admin_store_form").validate({
                 errorClass: "danger",
                 successClass: 'success',
                 errorPlacement: function (error, element) {
