@@ -235,66 +235,34 @@ class AdminReportsController extends Controller
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
 
-          
+            ->leftJoin('shipment_status_screen_locations as sssl', 'sssl.shipment_status_id', '=', 'journey.shipper_status_id')
+            ->leftJoin('shipment_status_screen_locations as sssl_hss', 'sssl_hss.shipment_status_id', '=', 'hss.id')
+
             ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
                 $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                    ->whereRaw('ssj.id = (
+                     ->whereRaw('ssj.id = (
                         select max(id) 
                         from shipment_scanning_journeys 
-                        where shipment_scanning_journeys.shipment_id = journey.shipment_id 
-                        and (
-                            (admin.role_id != 1 and (
-                                (journey.shipper_status_id = 2 and screen_location_id = 1) 
-                                or (journey.shipper_status_id = 3 and screen_location_id = 2) 
-                                or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
-                                or (journey.shipper_status_id = 5 and screen_location_id = 4)
-                                or (journey.shipper_status_id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21))
-                                or (journey.shipper_status_id = 21 and screen_location_id = 2)
-                                or (journey.shipper_status_id = 22 and screen_location_id = 20)
-                                or (journey.shipper_status_id = 23 and screen_location_id = 7)
-                                or (journey.shipper_status_id = 26 and screen_location_id = 2)
-                                or (journey.shipper_status_id = 27 and screen_location_id = 20)
-                                or (journey.shipper_status_id = 28 and screen_location_id = 7)
-                                or (journey.shipper_status_id = 32 and screen_location_id = 2)
-                                or (journey.shipper_status_id = 33 and screen_location_id = 20)
-                                or (journey.shipper_status_id = 34 and screen_location_id = 7)
-                                or (journey.shipper_status_id = 53 and screen_location_id = 31)
-                            ))
-                        )
+                        where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                        and shipment_scanning_journeys.screen_location_id = sssl.screen_location_id and
+                        admin.role_id != 1
                     )');
             })
-            
 
             ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
                 $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
                      ->whereRaw('ssj_hss.id = (
-                            select max(id) 
-                            from shipment_scanning_journeys 
-                            where shipment_scanning_journeys.shipment_id = journey.shipment_id 
-                            and (
-                                (admin.role_id != 1 and (
-                                        (hss.id = 2 and screen_location_id = 1) 
-                                        or (hss.id = 3 and screen_location_id = 2) 
-                                        or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
-                                        or (hss.id = 5 and screen_location_id = 4) 
-                                        or (hss.id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21)) 
-                                        or (hss.id = 21 and screen_location_id = 2) 
-                                        or (hss.id = 22 and screen_location_id = 20) 
-                                        or (hss.id = 23 and screen_location_id = 7) 
-                                        or (hss.id = 26 and screen_location_id = 2) 
-                                        or (hss.id = 27 and screen_location_id = 20) 
-                                        or (hss.id = 28 and screen_location_id = 7) 
-                                        or (hss.id = 32 and screen_location_id = 2) 
-                                        or (hss.id = 33 and screen_location_id = 20) 
-                                        or (hss.id = 34 and screen_location_id = 7) 
-                                        or (hss.id = 53 and screen_location_id = 31)
-                                    )
-                                )
-                            )
-                        )');
+                        select max(id) 
+                        from shipment_scanning_journeys 
+                        where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                        and shipment_scanning_journeys.screen_location_id = sssl_hss.screen_location_id and 
+                        sssl_hss.shipment_status_id = hss.id  and admin.role_id != 1
+               
+                    )');
             })
-            ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
-            ->leftjoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -342,9 +310,10 @@ class AdminReportsController extends Controller
                 'sjrp.created_at as rider_picked_status_date',
                 'ssjal.location_status as location_status',
                 'ssjal_hss.location_status as location_status_hss',
+
             ])
             ->groupBy('shipments.id');
-            dd($shipments->toSql());
+
 
         $type = $request->get('search_types');
 
