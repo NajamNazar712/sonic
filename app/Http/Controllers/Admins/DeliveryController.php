@@ -3798,6 +3798,17 @@ class DeliveryController extends Controller
                                         //                                    continue;
                                     }
                                 }
+
+                                // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
+                                // 27 = Shipment Damaged
+                                // 35 = Delivery Stopped
+                                if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                                    $data = collect([
+                                        'shipment_id' => $shipment
+                                    ]);
+                                    $globalAdminId = 346;
+                                    $this->return_confirm($data,$globalAdminId);
+                                }
                             }
                         }
                         $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
