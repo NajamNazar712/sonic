@@ -275,6 +275,7 @@ class AdminReportsController extends Controller
                                 (admin.role_id != 1 and (
                                         (hss.id = 2 and screen_location_id = 1) 
                                         or (hss.id = 3 and screen_location_id = 2) 
+                                        or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
                                         or (hss.id = 5 and screen_location_id = 4) 
                                         or (hss.id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21)) 
                                         or (hss.id = 21 and screen_location_id = 2) 
@@ -343,7 +344,7 @@ class AdminReportsController extends Controller
                 'ssjal_hss.location_status as location_status_hss',
             ])
             ->groupBy('shipments.id');
-            // dd($shipments->where('shipments.tracking_number', '202223000137')->get());
+            dd($shipments->toSql());
 
         $type = $request->get('search_types');
 
