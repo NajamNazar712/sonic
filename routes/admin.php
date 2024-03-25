@@ -4145,6 +4145,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //New Moudles Routes
     Route::prefix('logistic')->name('logistic.')->group(function(){
+        Route::get('', 'Admins\Logistic\AdminLogisticBookingController@index')->name('index');
+        Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
         Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
         Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
         Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');

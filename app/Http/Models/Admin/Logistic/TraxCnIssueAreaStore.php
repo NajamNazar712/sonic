@@ -1,6 +1,6 @@
 <?php
 
-namespace App\http\models\Logistic;
+namespace  App\Http\Models\Admin\Logistic;
 
 use Illuminate\Database\Eloquent\Model;
 

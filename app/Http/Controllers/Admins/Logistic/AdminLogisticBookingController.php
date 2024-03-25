@@ -16,6 +16,7 @@ use App\Http\Models\SubCategorySegment;
 use App\User;
 use CreateItemsRefernceTrackTable;
 use Illuminate\Support\Facades\Validator;
+use Yajra\Datatables\Datatables;
 
 class AdminLogisticBookingController extends Controller
 {
@@ -32,7 +33,22 @@ class AdminLogisticBookingController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.logistic.logistics');
+    }
+
+    public function list()
+    {
+        $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
+            ->join('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
+            ->join('segments as s','s.id','=','trax_logistic_bookings.product_id')
+            ->join('sub_category_segments as sb','sb.id','=','trax_logistic_bookings.service_id')
+            ->join('cities as oc','oc.id','trax_logistic_bookings.origin_id')
+            ->join('cities as dc','dc.id','trax_logistic_bookings.destination_id')
+            ->select('trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address');
+
+        $datatables = Datatables::of($logistic_bookings);
+
+        return $datatables->make(true);
     }
 
     /**
@@ -93,6 +109,7 @@ class AdminLogisticBookingController extends Controller
         $logistic_booking->booking_weight=$request->booking_weight;
         $logistic_booking->dense_weight=$request->dense_weight;
         $logistic_booking->volumetric_weight=$request->volumetric_weight;
+        $logistic_booking->consignee_name=$request->consignee_name;
         $logistic_booking->shipper_address_id=$request->shipper_address_id;
         $logistic_booking->consignee_address=$request->consignee_address;
         $logistic_booking->consignee_phone_1=$request->consignee_phone_1;
@@ -124,7 +141,7 @@ class AdminLogisticBookingController extends Controller
                         'no_piece' => $value,
                         'created_by'=>$admin_id,
                         'updated_by'=>$admin_id,
-                        'type'=>1
+                        'user_type'=>1
                     ]);
                 }
                  

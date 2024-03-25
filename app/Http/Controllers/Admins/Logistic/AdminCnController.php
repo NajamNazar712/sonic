@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Models\City;
-use App\http\models\Logistic\TraxCnIssueAreaStore;
-use App\http\models\Logistic\TraxCnIssueToRider;
-use App\http\models\Logistic\TraxCnReceiveAdminStore;
+use App\Http\Models\Admin\Logistic\TraxCnIssueAreaStore;
+use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
+use App\Http\Models\Admin\Logistic\TraxCnReceiveAdminStore;
 use App\Http\Models\Rider;
 use App\Http\Models\Segment;
 use Illuminate\Http\Request;

@@ -220,7 +220,7 @@
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(446, session('permissions')))
                             <li  class="menu-item">
-                                <a href="{{ route('admin.logistic.create') }}">Logistic Book</a>
+                                <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>
                             </li>
                         @endif
                         @if (session('role_id') == 1 || in_array(446, session('permissions')))
