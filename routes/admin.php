@@ -146,6 +146,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\AdminDashboardController@payment_cycle_submit')->name('submit');
         });
 
+        // shippper_exclude_route
+        Route::post('/store_shipper_exclude', 'Admins\AdminDashboardController@shipperExclude')->name('store_shipper_exclude');
+
         //user profile
         Route::get('/{id}/view', 'Admins\AdminDashboardController@userProfile')->name('view.profile');
         Route::post('/updateprofile', 'Admins\AdminDashboardController@updateProfile')->name('update.profile');
@@ -2531,7 +2534,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
         });
-
         Route::prefix('auto_account_disabled_days')->name('auto_account_disabled_days.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_account_disabled_days_index')->name('auto_index');
             Route::post('', 'Admins\GlobalSettingsController@auto_account_disabled_days_store')->name('auto_store');
