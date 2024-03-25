@@ -84,21 +84,43 @@ use Validator;
 class ShipperShipmentBookController extends Controller
 {
 
+    // private function unique_order_id($order_id)
+    // {
+    //     if (is_numeric($order_id)) {
+    //         $length = strlen(session('prefix'));
+    //         $check_order_id = str_split($order_id, $length);
+    //         if (session('prefix') == $check_order_id[0]) {
+    //             if (array_key_exists(1, $check_order_id)) {
+    //                 return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+    //             } else {
+    //                 return false;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
     private function unique_order_id($order_id)
     {
         if (is_numeric($order_id)) {
-            $length = strlen(session('prefix'));
-            $check_order_id = str_split($order_id, $length);
-            if (session('prefix') == $check_order_id[0]) {
-                if (array_key_exists(1, $check_order_id)) {
-                    return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
-                } else {
-                    return false;
+            $prefixes = session('prefix', []);
+            foreach ($prefixes as $prefix) {
+                $length = strlen($prefix);
+                $check_order_id = str_split($order_id, $length);
+                if ($prefix == $check_order_id[0]) {
+                    if (array_key_exists(1, $check_order_id)) {
+                        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+                    } else {
+                        return false;
+                    }
                 }
-            } else {
-                return false;
             }
-        } else {
+            return false;
+        }
+        else {
             return false;
         }
     }
