@@ -16,8 +16,8 @@ class CreateShipmentSmsLogsTable extends Migration
         Schema::create('shipment_sms_logs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('sms_id')->index();
-            $table->integer('shipment_id')->index();
-            $table->integer('notification_id')->index();
+            $table->integer('shipment_id')->nullable()->default(0)->index();
+            $table->integer('notification_id')->nullable()->default(NULL)->index();
             $table->boolean('paid');
             $table->timestamps();
         });

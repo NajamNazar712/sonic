@@ -7654,8 +7654,6 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-        // dd($current_date_string);
-//        $cities = City::all();
         $users = User::where('account_type_id', 2)->get();
 
         foreach ($users as $user) {
@@ -7807,7 +7805,7 @@ class AdminFinanceController extends Controller
                             if($fixed_sms_charges->exists()){
                                 $fixed_sms_charges = $fixed_sms_charges->first();
                                 $total_fixed_sms_charges = $fixed_sms_charges->fixed_sms_charges;
-                                CorporateFixedSmsChargeFlag::where('id',$total_fixed_sms_charges->id)->delete();
+                                CorporateFixedSmsChargeFlag::where('id',$fixed_sms_charges->id)->delete();
                             }
                         }
 
