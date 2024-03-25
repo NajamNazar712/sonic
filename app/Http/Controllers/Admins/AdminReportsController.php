@@ -346,14 +346,8 @@ class AdminReportsController extends Controller
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
                 'sjrp.created_at as rider_picked_status_date',
-                'sjl.shipment_id as journey_latest_id',
-                'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id',
-                'ssj.id as ssj_id',
                 'ssjal.location_status as location_status',
-                'ssj_hss.id as ssj_hss_id',
                 'ssjal_hss.location_status as location_status_hss',
-                
             ])
             ->groupBy('shipments.id');
             // dd($shipments->where('shipments.tracking_number', '202223000137')->get());
