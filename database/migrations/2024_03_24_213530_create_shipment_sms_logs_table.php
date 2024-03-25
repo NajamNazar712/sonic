@@ -17,6 +17,7 @@ class CreateShipmentSmsLogsTable extends Migration
             $table->increments('id');
             $table->integer('sms_id')->index();
             $table->integer('shipment_id')->index();
+            $table->integer('notification_id')->index();
             $table->boolean('paid');
             $table->timestamps();
         });

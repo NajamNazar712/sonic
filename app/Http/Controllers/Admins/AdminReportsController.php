@@ -96,7 +96,7 @@ use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Traits\RvTrait;
 use DateTime;
-
+use App\Http\Models\Notification;
 
 class AdminReportsController extends Controller
 {
@@ -14093,6 +14093,46 @@ class AdminReportsController extends Controller
                     return number_format($result, 2) . ' %';
                 }
             });
+        return $datatable->make(true);
+    }
+
+    public function sms_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 753);
+        $notifications = Notification::where('type_id',2)->get();
+        return view('admin.reports.sms_count_report')->with(['notifications'=> $notifications]);
+    }
+
+    public function sms_report_list(Request $request)
+    {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 754);
+        }
+
+        if($search_month = $request->get('search_month')) {
+            $year = Carbon::parse($search_month)->year;
+            $month = Carbon::parse($search_month)->month;
+        }else{
+            $year = Carbon::now()->year;
+            $month = Carbon::now()->month;
+        }
+        $notifications = DB::table('shipment_sms_logs')
+        ->join('notifications', 'shipment_sms_logs.notification_id', '=', 'notifications.id')
+        ->select('notifications.name', 
+                DB::raw('COUNT(shipment_sms_logs.notification_id) as notification_count'),
+                DB::raw('DATE_FORMAT(shipment_sms_logs.created_at, "%Y-%m") as created_year_month'))
+        ->whereMonth('shipment_sms_logs.created_at', $month)
+        ->whereYear('shipment_sms_logs.created_at', $year);
+        
+        if($search_type = $request->get('search_type')) {
+            $notifications->whereIn('shipment_sms_logs.notification_id', $search_type);
+        }
+
+        $notifications->groupBy('notifications.name', 'created_year_month');
+
+        $datatable = Datatables::of($notifications);
+ 
         return $datatable->make(true);
     }
 }

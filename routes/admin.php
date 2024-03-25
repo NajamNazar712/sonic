@@ -2421,6 +2421,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_manifest_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_manifest_list')->name('list');
         });
+
+        Route::prefix('sms')->name('sms.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@sms_report_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@sms_report_list')->name('list');
+        });
     });
 
     //Reports end

@@ -1434,6 +1434,7 @@ class Permission
             'settings.parcel_value_bypass.index' => 910,
             'settings.logistic_report.index' =>932,
 			'reports.cargo_manifest.index' => 933,
+            'reports.sms.index' => 945,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

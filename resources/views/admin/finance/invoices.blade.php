@@ -105,6 +105,8 @@
 						<th class="border-primary border-darken-1">City</th>
 						<th class="border-primary border-darken-1">Total Charges</th>
 						<th class="border-primary border-darken-1">Total GST</th>
+						<th class="border-primary border-darken-1">SMS Charges</th>
+						<th class="border-primary border-darken-1">SMS Fixed Charges</th>
 						<th class="border-primary border-darken-1">Total Invoice Amount</th>
 						<th class="border-primary border-darken-1">Balance Amount</th>
 						<th class="border-primary border-darken-1">Generation Date</th>
@@ -512,6 +514,8 @@
 									head.push('City');
 									head.push('Total Charges');
 									head.push('Total GST');
+									head.push('SMS Charges');
+									head.push('SMS Fixed Charges');
 									head.push('Total Invoice Amount');
 									head.push('Balance Amount');
 									head.push('Generation Date');
@@ -545,6 +549,8 @@
 										row.push(values.city);
 										row.push(values.total_charges);
 										row.push(values.total_gst);
+										row.push(values.sms_charges);
+										row.push(values.sms_fixed_charges);
 										row.push(values.total_invoice_amount);
 										row.push(values.balance_amount);
 										row.push(values.created_at);
@@ -748,6 +754,8 @@
 							{data:'city', name: 'city', class: 'align-middle text-center city'},
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
 							{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
+							{data:'sms_charges', name: 'sms_charges', class: 'align-middle text-center sms_charges'},
+							{data:'sms_fixed_charges', name: 'sms_fixed_charges', class: 'align-middle text-center sms_fixed_charges'},
 							{data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
 							{data:'balance_amount', name: 'balance_amount', class: 'align-middle text-center balance_amount',orderable: false, searchable: false},
 							{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
