@@ -272,10 +272,57 @@ class AdminReportsController extends Controller
                         )
                     )');
             })
+
+            ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
+                $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
+                    ->whereRaw('ssj_hss.id = (
+                        select max(id) 
+                        from shipment_scanning_journeys 
+                        where shipment_scanning_journeys.shipment_id = journey.shipment_id 
+                        and (
+                            case 
+                                when admin.role_id != 1 then
+                                    (
+                                        hss.id = 2 and screen_location_id = 1
+                                    ) or (
+                                        hss.id = 3 and screen_location_id = 2
+                                    ) or (
+                                        hss.id = 5 and screen_location_id = 4
+                                    ) or (
+                                        hss.id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21)
+                                    ) or (
+                                        hss.id = 21 and screen_location_id = 2
+                                    ) or (
+                                        hss.id = 22 and screen_location_id = 20
+                                    ) or (
+                                        hss.id = 23 and screen_location_id = 7
+                                    ) or (
+                                        hss.id = 26 and screen_location_id = 2
+                                    ) or (
+                                        hss.id = 27 and screen_location_id = 20
+                                    ) or (
+                                        hss.id = 28 and screen_location_id = 7
+                                    ) or (
+                                        hss.id = 32 and screen_location_id = 2
+                                    ) or (
+                                        hss.id = 33 and screen_location_id = 20
+                                    ) or (
+                                        hss.id = 34 and screen_location_id = 7
+                                    ) or (
+                                        hss.id = 53 and screen_location_id = 31
+                                    )
+                                else NULL
+                            end
+                        )
+                    )');
+            })
+            
             
             
             
             ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+            ->leftjoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -326,8 +373,12 @@ class AdminReportsController extends Controller
                 'sjl.shipper_status_id as latest_shipper_status_id',
                 'ssj.id as ssj_id',
                 'ssjal.location_status as location_status',
+                'ssj_hss.id as ssj_hss_id',
+                'ssjal_hss.location_status as location_status_hss',
+                
             ])
             ->groupBy('shipments.id');
+            // dd($shipments->where('shipments.tracking_number', '202223000137')->get());
 
         $type = $request->get('search_types');
 
@@ -378,10 +429,16 @@ class AdminReportsController extends Controller
                     return $shipment->shipper;
                 }
             })
-
             ->editColumn('location_status', function ($shipment) {
                 if(isset($shipment->location_status)){
                     return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })
+            ->editColumn('location_status_hss', function ($shipment) {
+                if(isset($shipment->location_status_hss)){
+                    return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
                 }else{
                     return '-';
                 }

@@ -181,6 +181,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
+                        <th class="border-primary border-darken-1">History Status Location</th>
                         <th class="border-primary border-darken-1">Cargo Status</th>
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
@@ -618,6 +619,7 @@
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
+                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss'},
                     {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
                     {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},
