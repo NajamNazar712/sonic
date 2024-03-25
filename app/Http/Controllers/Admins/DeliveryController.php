@@ -4204,8 +4204,6 @@ class DeliveryController extends Controller
                             $globalAdminId = 346;
 
                             Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                            NotificationsController::send(15, 0, $shipment);
-                            NotificationsController::send(16, 0, $shipment);
 
                             if ($shipment_details->shipment_type == 1) {
                                 if ($shipment_details->booking_type_id != 4) {
@@ -4221,7 +4219,7 @@ class DeliveryController extends Controller
                                 }
                             }
                             
-                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, null, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                         }
                     }
 
