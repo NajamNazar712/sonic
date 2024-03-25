@@ -250,79 +250,57 @@ class AdminReportsController extends Controller
                         from shipment_scanning_journeys 
                         where shipment_scanning_journeys.shipment_id = journey.shipment_id 
                         and (
-                            case 
-                                when admin.role_id != 1 then
-                                    (journey.shipper_status_id = 2 and screen_location_id = 1) 
-                                    or (journey.shipper_status_id = 3 and screen_location_id = 2) 
-                                    or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
-                                    or (journey.shipper_status_id = 5 and screen_location_id = 4)
-                                    or (journey.shipper_status_id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21))
-                                    or (journey.shipper_status_id = 21 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 22 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 23 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 26 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 27 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 28 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 32 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 33 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 34 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 53 and screen_location_id = 31)
-                                else NULL
-                            end
+                            (admin.role_id != 1 and (
+                                (journey.shipper_status_id = 2 and screen_location_id = 1) 
+                                or (journey.shipper_status_id = 3 and screen_location_id = 2) 
+                                or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
+                                or (journey.shipper_status_id = 5 and screen_location_id = 4)
+                                or (journey.shipper_status_id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21))
+                                or (journey.shipper_status_id = 21 and screen_location_id = 2)
+                                or (journey.shipper_status_id = 22 and screen_location_id = 20)
+                                or (journey.shipper_status_id = 23 and screen_location_id = 7)
+                                or (journey.shipper_status_id = 26 and screen_location_id = 2)
+                                or (journey.shipper_status_id = 27 and screen_location_id = 20)
+                                or (journey.shipper_status_id = 28 and screen_location_id = 7)
+                                or (journey.shipper_status_id = 32 and screen_location_id = 2)
+                                or (journey.shipper_status_id = 33 and screen_location_id = 20)
+                                or (journey.shipper_status_id = 34 and screen_location_id = 7)
+                                or (journey.shipper_status_id = 53 and screen_location_id = 31)
+                            ))
                         )
                     )');
             })
+            
 
             ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
                 $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
-                    ->whereRaw('ssj_hss.id = (
-                        select max(id) 
-                        from shipment_scanning_journeys 
-                        where shipment_scanning_journeys.shipment_id = journey.shipment_id 
-                        and (
-                            case 
-                                when admin.role_id != 1 then
-                                    (
-                                        hss.id = 2 and screen_location_id = 1
-                                    ) or (
-                                        hss.id = 3 and screen_location_id = 2
-                                    ) or (
-                                        hss.id = 5 and screen_location_id = 4
-                                    ) or (
-                                        hss.id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21)
-                                    ) or (
-                                        hss.id = 21 and screen_location_id = 2
-                                    ) or (
-                                        hss.id = 22 and screen_location_id = 20
-                                    ) or (
-                                        hss.id = 23 and screen_location_id = 7
-                                    ) or (
-                                        hss.id = 26 and screen_location_id = 2
-                                    ) or (
-                                        hss.id = 27 and screen_location_id = 20
-                                    ) or (
-                                        hss.id = 28 and screen_location_id = 7
-                                    ) or (
-                                        hss.id = 32 and screen_location_id = 2
-                                    ) or (
-                                        hss.id = 33 and screen_location_id = 20
-                                    ) or (
-                                        hss.id = 34 and screen_location_id = 7
-                                    ) or (
-                                        hss.id = 53 and screen_location_id = 31
+                     ->whereRaw('ssj_hss.id = (
+                            select max(id) 
+                            from shipment_scanning_journeys 
+                            where shipment_scanning_journeys.shipment_id = journey.shipment_id 
+                            and (
+                                (admin.role_id != 1 and (
+                                        (hss.id = 2 and screen_location_id = 1) 
+                                        or (hss.id = 3 and screen_location_id = 2) 
+                                        or (hss.id = 5 and screen_location_id = 4) 
+                                        or (hss.id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21)) 
+                                        or (hss.id = 21 and screen_location_id = 2) 
+                                        or (hss.id = 22 and screen_location_id = 20) 
+                                        or (hss.id = 23 and screen_location_id = 7) 
+                                        or (hss.id = 26 and screen_location_id = 2) 
+                                        or (hss.id = 27 and screen_location_id = 20) 
+                                        or (hss.id = 28 and screen_location_id = 7) 
+                                        or (hss.id = 32 and screen_location_id = 2) 
+                                        or (hss.id = 33 and screen_location_id = 20) 
+                                        or (hss.id = 34 and screen_location_id = 7) 
+                                        or (hss.id = 53 and screen_location_id = 31)
                                     )
-                                else NULL
-                            end
-                        )
-                    )');
+                                )
+                            )
+                        )');
             })
-            
-            
-            
-            
             ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftjoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
-
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
