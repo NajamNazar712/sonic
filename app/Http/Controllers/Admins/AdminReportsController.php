@@ -235,14 +235,7 @@ class AdminReportsController extends Controller
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
 
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
-                    );
-            })
+          
             ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
                 $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
                     ->whereRaw('ssj.id = (
