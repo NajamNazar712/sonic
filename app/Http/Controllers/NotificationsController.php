@@ -10997,45 +10997,45 @@ class NotificationsController extends Controller
                         ->pluck('contact_person')
                         ->toArray();
 
-                        $sale_person_name = array_merge($admin_name, $lead_name);
-                        $sale_person_name = implode(' ,', $sale_person_name);
+                        $sale_person_name_array = array_merge($admin_name, $lead_name);
+                        $sale_person_name = implode(' ,', $sale_person_name_array);
 
                         $status = $user->blacklist == 1 ? 'Blocked' : ' Disabled';
                         $status = $status == 'Blocked' ? 'Block' : 'Disable';
-
-                        // Table for User Disable/Block Accounts
-                        $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
-                        $html .= '<thead>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Shipper Name</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Tagged Sale Person</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Activation Date</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Date</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">' . ($status) . ' Reason</th>';
-                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Remarks</th>';
-
-                        $html .= '</thead>';
-                        $html .= '<tbody>';
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$user->name.'</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$sale_person_name.'</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? Carbon::parse($user->blocked_at) : Carbon::parse($user->disable_at))  .'</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name : BlockDisableReasonUser::where('id', $user->disable_reason_1)->first()->name).'</td>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? $user->blacklist_reason : $user->disable_reason) .'</td>';
-
-                        $html .= '</tr>';
-                        $html .= '<tbody>';
-                        $html .= '</table>';
-
-                        
-                        $subject = str_replace('[subject_status]', $status, $subject);
-                        $body = str_replace('[preview]', $html, $body);
-                        $body = str_replace('[status]', $status, $body);
-
-                        self::email($subject, $body, $to);
-                    }else{
-                        return;
                     }
+
+                    // Table for User Disable/Block Accounts
+                    $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<thead>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Shipper Name</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Tagged Sale Person</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account Activation Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Date</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">' . ($status) . ' Reason</th>';
+                    $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Account ' . ($status) . ' Remarks</th>';
+
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.$user->name.'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. count($sale_person_name_array) > 0 ? $sale_person_name : '-' .'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.Carbon::parse($user->activated_at).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? Carbon::parse($user->blocked_at) : Carbon::parse($user->disable_at))  .'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? BlockDisableReasonUser::where('id', $user->blacklist_reason_1)->first()->name : BlockDisableReasonUser::where('id', $user->disable_reason_1)->first()->name).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'. ($status == 'Block' ? $user->blacklist_reason : $user->disable_reason) .'</td>';
+
+                    $html .= '</tr>';
+                    $html .= '<tbody>';
+                    $html .= '</table>';
+
+                    
+                    $subject = str_replace('[subject_status]', $status, $subject);
+                    $body = str_replace('[preview]', $html, $body);
+                    $body = str_replace('[status]', $status, $body);
+
+                    self::email($subject, $body, $to);
+                    
+                    
                
                 } 
             }
