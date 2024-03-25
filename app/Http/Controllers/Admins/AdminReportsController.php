@@ -315,6 +315,7 @@ class AdminReportsController extends Controller
             ->groupBy('shipments.id');
 
 
+
         $type = $request->get('search_types');
 
         if ($type && $type == 2) {

@@ -1463,7 +1463,7 @@ class AdminTrackingController extends Controller
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
-                            if($journey->admin['role_id'] != 1){
+                            if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1){
                                 switch ($journey->shipper_status_id) {
                                     case 2:
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
@@ -1498,7 +1498,7 @@ class AdminTrackingController extends Controller
                                     case 28:
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 7)->latest()->first();
                                         break;
-                                    case 32:
+                                    case 32:f
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 2)->latest()->first();
                                         break;
                                     case 33:
@@ -2409,7 +2409,7 @@ class AdminTrackingController extends Controller
                                 $shipment_position->handover_received_by = $handover_received_by;
                                 $shipment_position->handover_received_at =  $handover_received_at != '-' ? Carbon::parse($handover_received_at)->format('Y-m-d H:i:s') : '-';
                                 $shipment_position->last_action = $last_action;
-                                $shipment_position->tracked_by = Auth::id();
+                                $shipment_position->tracked_bfy = Auth::id();
                                 $shipment_position->save();
                             }
 
@@ -2468,40 +2468,24 @@ class AdminTrackingController extends Controller
                 );
         })
         ->leftjoin('admins as admin', 'admin.id', '=', 'journey.admin_id')
+        ->leftJoin('shipment_status_screen_locations as sssl', 'sssl.shipment_status_id', '=', 'journey.shipper_status_id')
         ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
-                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
-                    ->whereRaw('ssj.id = (
-                        select max(id) 
-                        from shipment_scanning_journeys 
-                        where shipment_scanning_journeys.shipment_id = journey.shipment_id 
-                        and (
-                            case 
-                                when admin.role_id != 1 then
-                                    (journey.shipper_status_id = 2 and screen_location_id = 1) 
-                                    or (journey.shipper_status_id = 3 and screen_location_id = 2) 
-                                    or (journey.shipper_status_id = 4 and (screen_location_id = 20 or screen_location_id = 21))
-                                    or (journey.shipper_status_id = 5 and screen_location_id = 4)
-                                    or (journey.shipper_status_id = 11 and (screen_location_id = 3 or screen_location_id = 10 or screen_location_id = 20 or screen_location_id = 21))
-                                    or (journey.shipper_status_id = 21 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 22 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 23 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 26 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 27 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 28 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 32 and screen_location_id = 2)
-                                    or (journey.shipper_status_id = 33 and screen_location_id = 20)
-                                    or (journey.shipper_status_id = 34 and screen_location_id = 7)
-                                    or (journey.shipper_status_id = 53 and screen_location_id = 31)
-                                else NULL
-                            end
-                        )
-                    )');
+            $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+                 ->whereRaw('ssj.id = (
+                    select max(id) 
+                    from shipment_scanning_journeys 
+                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                    and shipment_scanning_journeys.screen_location_id = sssl.screen_location_id and
+                    admin.role_id != 1
+                )');
         })
-        ->leftjoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+        ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+        ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
         'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id', 'ssj.id as ssj_id',
-        'ssjal.location_status as location_status'
+        'ssjal.location_status as location_status', 'ssjal_hss.location_status as location_status_hss'
+
         ])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
 
@@ -2569,6 +2553,12 @@ class AdminTrackingController extends Controller
             ->editColumn('location_status', function ($shipment) {
                 if(isset($shipment->location_status)){
                     return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            }) ->editColumn('location_status_hss', function ($shipment) {
+                if(isset($shipment->location_status_hss)){
+                    return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
                 }else{
                     return '-';
                 }
