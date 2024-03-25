@@ -13994,8 +13994,9 @@ class AdminDashboardController extends Controller
             self::balance_count_commission($shipper_id);
 
             $sale_tier_tag = SaleTierTag::where('user_id', $shipper_id);
+            $sales_tiers_kam = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
 
-            if(isset($request->tier_id[$row_id]) && (isset($request->user_id[$row_id])) && $request->tier_id[$row_id] == 3){
+            if(isset($request->tier_id[$row_id]) && (isset($request->user_id[$row_id])) && $request->tier_id[$row_id] == $sales_tiers_kam){
                 if (!$sale_tier_tag->exists()) {
                     $sale_tier_object = new SaleTierTag();
                     $sale_tier_object->user_id = $shipper_id;
