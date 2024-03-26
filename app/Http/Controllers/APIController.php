@@ -788,12 +788,20 @@ class APIController extends Controller
             }
         }
 
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-        if ($shipment_pre_book->exists()) {
+        // $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        // if ($shipment_pre_book->exists()) {
+        //     $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+        //         $query->where('user_id', $user_id);
+        //     })];
+        // }
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
+        if ($shipment_pre_book->isNotEmpty()) {
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })];
-        } else {
+        }
+        
+        else {
             if ($user_type['restrict_order_id'] == 1) {
                 $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -862,18 +870,40 @@ class APIController extends Controller
             }
             $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
-            if ($shipment_pre_book->exists()) {
-                $shipment_pre_book = $shipment_pre_book->first();
-                $length = strlen($shipment_pre_book->prefix);
-                $check_order_id = str_split($request->input('order_id'), $length);
-                if ($shipment_pre_book->prefix != $check_order_id[0]) {
-                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-                } else {
-                    if (!array_key_exists(1, $check_order_id)) {
-                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            
+            // if ($shipment_pre_book->exists()) {
+            //     $shipment_pre_book = $shipment_pre_book->first();
+            //     $length = strlen($shipment_pre_book->prefix);
+            //     $check_order_id = str_split($request->input('order_id'), $length);
+            //     if ($shipment_pre_book->prefix != $check_order_id[0]) {
+            //         return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //     } else {
+            //         if (!array_key_exists(1, $check_order_id)) {
+            //             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //         }
+            //     }
+            // }
+
+            if ($shipment_pre_book->isNotEmpty()) {
+                $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
+                $order_id = $request->input('order_id');
+                $prefix_matched = false;
+                foreach ($shipment_pre_book as $prefix) {
+                    $length = strlen($prefix);
+                    $check_order_id = str_split($order_id, $length);
+                    if ($prefix == $check_order_id[0]) {
+                        $prefix_matched = true;
+                        if (!array_key_exists(1, $check_order_id)) {
+                            return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                        }
+                        break;
                     }
                 }
-            } else {
+                if (!$prefix_matched) {
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+            }
+            else {
                 $shipment_pre_book = null;
             }
             if ($service_type_id != 5) {
