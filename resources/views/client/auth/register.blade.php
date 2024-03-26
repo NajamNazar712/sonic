@@ -350,19 +350,19 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label for="sub_segments">Sub Segments:
-                                                                <span class="danger">*</span>
-                                                            </label>
-                                                            <div>
-                                                                <select name="sub_segments" id="sub_segments"
-                                                                    class="select2 form-control required"
-                                                                    style="width: 100%">
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+{{--                                                    <div class="col-md-6">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <label for="sub_segments">Sub Segments:--}}
+{{--                                                                <span class="danger">*</span>--}}
+{{--                                                            </label>--}}
+{{--                                                            <div>--}}
+{{--                                                                <select name="sub_segments" id="sub_segments"--}}
+{{--                                                                    class="select2 form-control required"--}}
+{{--                                                                    style="width: 100%">--}}
+{{--                                                                </select>--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label for="referral">Referral:
@@ -1096,9 +1096,12 @@
         /*$('select[name="sub_segments"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Sub Segments',
         });*/
-        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Segment',
-        });
+        // $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+        //     placeholder:'Select Segment',
+        // }).bind('change',function(){
+        //     var segment_id = $(this).val();
+        //   console.log();
+        // });
         
         
         
