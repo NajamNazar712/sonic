@@ -339,17 +339,26 @@ class ReturnController extends Controller
 
         $number_of_pending_second_call_percentage = ($number_of_pending_second_call / ($reason_validation_required) * 100);
 
+        //Total Agents Online Today
+       $number_of_available_agents = Employee::join('employee_attendances','employees.id','employee_attendances.employee_id')
+       ->whereDate('employee_attendances.attendance_date', '=', now()->format('Y-m-d'))
+       ->whereNotNull('employee_attendances.clock_in')
+       ->where('employees.employee_type_id', 1)
+       ->where('employees.staff_category_id', 3)
+       ->where('employees.is_line_manager', 0)
+       ->where('employees.status_id', '!=', 2)
+       ->pluck('employees.id')->toArray();
 
-       $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->where('status_id', '!=', 2)->pluck('id')->toArray();
+
+       //Online Available Agents
        $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-           ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+        //    ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
            ->whereIn('id', function ($query) {
                $query->select(DB::raw('MAX(id)'))
                    ->from('employee_attendances')
                    ->groupBy('employee_attendances.employee_id');
            })
-           ->whereNotNull('clock_in')
-           ->whereNull('clock_out')
+           ->whereNull('clock_out') //if clockout is null means user has not logged out yet
            ->count();
 
 
@@ -367,8 +376,8 @@ class ReturnController extends Controller
         $stats['number_of_pending_first_call_percentage'] = round($number_of_pending_first_call_percentage);
         $stats['number_of_pending_second_call'] = $number_of_pending_second_call;
         $stats['number_of_pending_second_call_percentage'] = round($number_of_pending_second_call_percentage);
-        $stats['online_agents'] = $online_agents;
         $stats['number_of_available_agents'] = count($number_of_available_agents);
+        $stats['online_agents'] = $online_agents;
         $stats['average_aging'] = $averageHours;
         
         return response()->json(['status' => 1, 'stats' => $stats]);

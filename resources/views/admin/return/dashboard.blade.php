@@ -145,9 +145,9 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="online_agents"></span> / <span id="number_of_available_agents"></span>
+                                                    <span id="number_of_available_agents"></span>
                                                 </h3>
-                                                <span>Total Agents </span>
+                                                <span>Total Agents Today</span>
                                             </div>
                                         </div>
                                     </div>
@@ -165,9 +165,9 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="average_aging"></span>
+                                                    <span id="online_agents"></span>
                                                 </h3>
-                                                <span>Online/ Available Agents.</span>
+                                                <span>Online / Available Agents.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -401,8 +401,8 @@
                             $('#number_of_pending_first_call_percentage').text(data.stats.number_of_pending_first_call_percentage);
                             $('#number_of_pending_second_call').text(data.stats.number_of_pending_second_call);
                             $('#number_of_pending_second_call_percentage').text(data.stats.number_of_pending_second_call_percentage);
-                            $('#online_agents').text(data.stats.online_agents);
                             $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+                            $('#online_agents').text(data.stats.online_agents);
 
                             var averageAging = parseFloat(data.stats.average_aging);
                             var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
