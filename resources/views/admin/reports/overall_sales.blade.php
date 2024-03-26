@@ -576,7 +576,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_number_excel);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);

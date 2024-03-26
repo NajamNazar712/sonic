@@ -2245,7 +2245,17 @@ class RetailShipmentBookController extends Controller
 
         if ($length == 11)
         {
-            $retail_shipper = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+
+            $retail_shipper_verification = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+            $retail_shipper_info = RetailShipperInfo::where('shipper_phone_no',$phone_number)->get();
+            $verify_retail_array = $retail_shipper_verification->pluck('phone_number')->toArray();
+
+            //if(in_array($phone_number_without_hyphen,$verify_retail_array) == true){
+            if(isset($retail_shipper_verification[0]->phone_number)){
+                $retail_shipper = $retail_shipper_verification;
+            }else{
+                $retail_shipper = $retail_shipper_info;
+            }
             return response()->json(['status' => 1, 'success' => 'Shipper info found: ', 'data' => $retail_shipper]);
         }
         else
