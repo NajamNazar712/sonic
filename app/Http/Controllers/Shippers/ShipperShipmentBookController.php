@@ -3361,17 +3361,33 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);                    
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = str_split($row['order_id'], $length);
+                    
+                            if ($prefix !== $check_order_id[0] || !array_key_exists(1, $check_order_id)) {
+                                $errors[$row_id]['order_id'] = 'Invalid Order ID';
+                                break;
                             }
                         }
+                    } else {
+                        $errors[$row_id]['order_id'] = 'Invalid Order ID';
                     }
+                    
 
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
@@ -6156,17 +6172,37 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 if (empty($errors[$row_id])) {
+                    // if (Session::has('prefix')) {
+                    //     $length = strlen(session('prefix'));
+                    //     $check_order_id = str_split($row['order_id'], $length);
+                    //     if (session('prefix') != $check_order_id[0]) {
+                    //         $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //     } else {
+                    //         if (!array_key_exists(1, $check_order_id)) {
+                    //             $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                    //         }
+                    //     }
+                    // }
+
                     if (Session::has('prefix')) {
-                        $length = strlen(session('prefix'));
-                        $check_order_id = str_split($row['order_id'], $length);
-                        if (session('prefix') != $check_order_id[0]) {
-                            $errors[$row_id]['order_id'] = 'In-Valid Order ID';
-                        } else {
-                            if (!array_key_exists(1, $check_order_id)) {
-                                $errors[$row_id]['order_id'] = 'In-Valid Order ID';
+                        $prefixes = session('prefix', []);
+                        $isValid = false;
+                        foreach ($prefixes as $prefix) {
+                            $length = strlen($prefix);
+                            $check_order_id = substr($row['order_id'], 0, $length);
+                            if ((string)$prefix === $check_order_id) {
+                                $isValid = true;
+                                break;
                             }
                         }
+                    
+                        if (!$isValid) {
+                            $errors[$row_id]['order_id'] = 'Invalid Order ID';
+                        }
+                    } else {
+                        $errors[$row_id]['order_id'] = 'Invalid Order ID';
                     }
+
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
                             $order_ids[] = $row['order_id'];
