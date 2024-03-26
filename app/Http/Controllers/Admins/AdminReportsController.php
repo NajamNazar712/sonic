@@ -260,9 +260,10 @@ class AdminReportsController extends Controller
                
                     )');
             })
+
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
-            
+
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -309,8 +310,7 @@ class AdminReportsController extends Controller
                 'sjfa.created_at as first_attempt_date',
                 'sjrp.created_at as rider_picked_status_date',
                 'ssjal.location_status as location_status',
-                'ssjal_hss.location_status as location_status_hss',
-
+                'ssjal_hss.location_status as location_status_hss'
             ])
             ->groupBy('shipments.id');
 
@@ -8326,17 +8326,17 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
-            })
-            ->addColumn('rider_city_area', function ($entry) {
-                if ($entry->rider_id) {
-                    $rider = Rider::find($entry->rider_id);
-                    if(isset($rider->area)){
-                        return $rider->area->name;
-                    }else{
-                        return '-';
-                    }
-                }
             });
+            // ->addColumn('rider_city_area', function ($entry) {
+            //     if ($entry->rider_id) {
+            //         $rider = Rider::find($entry->rider_id);
+            //         if(isset($rider->area)){
+            //             return $rider->area->name;
+            //         }else{
+            //             return '-';
+            //         }
+            //     }
+            // });
 
 
         if ($rider = $request->get('search_rider')) {
