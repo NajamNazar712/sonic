@@ -340,7 +340,7 @@ class V3AdminPickupsController extends Controller
             $admin_product = PmsAdminProduct::where('user_id',session('id'))->where('type',1)->where('status',1);
             if($admin_product->exists()) {
                 $admin_product = $admin_product->first();
-                $shippers = User::where('status', 3)->where('segment_id',$admin_product->product_id)->get();
+                $shippers = User::where('status', 3)->where('segment_id',$admin_product->segment_id)->get();
             } else {
                 $shippers = User::where('status', 3)->get();
             }
@@ -379,7 +379,7 @@ class V3AdminPickupsController extends Controller
             foreach ($pickup_statuses as $pickup_status) {
                 $statuses[$pickup_status->id]['name'] = $pickup_status->name;
                 $statuses[$pickup_status->id]['count'] = V3PickupRequest::join('users as u',function ($query) use ($admin_product) {
-                    $query->on('u.id','=','v3_pickup_requests.shipper_id')->where('u.segment_id', $admin_product->product_id);
+                    $query->on('u.id','=','v3_pickup_requests.shipper_id')->where('u.segment_id', $admin_product->segment_id);
                 })->whereDate('v3_pickup_requests.pickup_date', Carbon::today())->where('v3_pickup_requests.status_id', $pickup_status->id)->whereIn('v3_pickup_requests.city_id',session('hubs'))->count();
             }
         } else {
@@ -463,7 +463,7 @@ class V3AdminPickupsController extends Controller
         if ($admin_product->exists() && session('role_id') != 1)
         {
             $admin_product = $admin_product->first();
-            $pickup_requests = $pickup_requests->where('u.segment_id', $admin_product->product_id);
+            $pickup_requests = $pickup_requests->where('u.segment_id', $admin_product->segment_id);
         }
         if (session('role_id') != 1) {
             $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
@@ -766,7 +766,7 @@ class V3AdminPickupsController extends Controller
         if ($admin_product->exists() && session('role_id') != 1)
         {
             $admin_product = $admin_product->first();
-            $pickup_requests = $pickup_requests->where('u.segment_id', $admin_product->product_id);
+            $pickup_requests = $pickup_requests->where('u.segment_id', $admin_product->segment_id);
         }
 
         if (session('role_id') != 1) {
@@ -1005,7 +1005,7 @@ class V3AdminPickupsController extends Controller
             foreach ($pickup_statuses as $pickup_status) {
                 $statuses[$pickup_status->id]['name'] = $pickup_status->name;
                 $statuses[$pickup_status->id]['count'] = V3PickupRequest::join('users as u',function ($query) use ($admin_product) {
-                    $query->on('u.id','=','v3_pickup_requests.shipper_id')->where('u.segment_id', $admin_product->product_id);
+                    $query->on('u.id','=','v3_pickup_requests.shipper_id')->where('u.segment_id', $admin_product->segment_id);
                 })->whereDate('v3_pickup_requests.pickup_date', Carbon::today())->where('v3_pickup_requests.status_id', $pickup_status->id)->whereIn('v3_pickup_requests.city_id',session('hubs'))->count();
             }
         } else {
@@ -1083,7 +1083,7 @@ class V3AdminPickupsController extends Controller
         if ($admin_product->exists() && session('role_id') != 1)
         {
             $admin_product = $admin_product->first();
-            $pickup_requests = $pickup_requests->where('u.segment_id','=',$admin_product->product_id);
+            $pickup_requests = $pickup_requests->where('u.segment_id','=',$admin_product->segment_id);
 
         }
 

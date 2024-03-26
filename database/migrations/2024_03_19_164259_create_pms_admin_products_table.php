@@ -17,7 +17,7 @@ class CreatePmsAdminProductsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->nullable();
             $table->integer('type')->default(1)->nullable(); //1-admin 2-user
-            $table->integer('product_id')->nullable();
+            $table->integer('segment_id')->nullable();
             $table->string('area')->nullable();
             $table->integer('status')->default(1)->nullable();
             $table->integer('created_by')->nullable();
