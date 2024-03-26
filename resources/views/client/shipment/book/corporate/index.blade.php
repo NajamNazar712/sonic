@@ -2075,8 +2075,6 @@
                                 }
                             }
                         }
-                        // console.log(present.length);
-                        // console.log(present);
                         $.ajax({
                             url: '{!! route('cod.shipment.book.corporate_min_chargeable_weight') !!}',
                             method: 'POST',
