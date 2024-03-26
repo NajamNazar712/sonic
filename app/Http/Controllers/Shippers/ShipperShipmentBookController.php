@@ -6990,8 +6990,6 @@ class ShipperShipmentBookController extends Controller
                     //     }
                     // }
 
-
-
                     if (Session::has('prefix')) {
                         $prefixes = session('prefix', []);
                         $isValid = false;
@@ -7010,8 +7008,6 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $errors[$row_id]['order_id'] = 'Invalid Order ID';
                     }
-
-
 
                     if (!empty(trim($row['order_id']))) {
                         if (empty($order_ids)) {
