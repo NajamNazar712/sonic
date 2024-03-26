@@ -19,8 +19,5 @@ class ActivityTrailForInterceptionRestriction extends Seeder
             array('id' => 946, 'name' => 'Interception Restriction Setting - View', 'module_id' => 14)
         ));
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
-        // DB::table('admins_screen_list')->insert(
-        //     array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > Interception Restriction', 'url'=>'admin.settings.intercept_restriction.shipper_index', 'permission_id' => 941)
-        // );
     }
 }
