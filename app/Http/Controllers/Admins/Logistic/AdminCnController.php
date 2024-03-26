@@ -36,7 +36,8 @@ class AdminCnController extends Controller
         //            ActivityTrailController::createActivityTrailLog(Auth::id(), 740);
         //        }
         $trax_cn_issue_area_stores = TraxCnIssueAreaStore::Join('segments as s','trax_cn_issue_area_stores.segment_id','=','s.id')
-            ->SELECT('trax_cn_issue_area_stores.issue_date','trax_cn_issue_area_stores.company_code','trax_cn_issue_area_stores.area_code','trax_cn_issue_area_stores.segment_id','s.name as segment_name','trax_cn_issue_area_stores.cn_from','trax_cn_issue_area_stores.cn_to','trax_cn_issue_area_stores.quantity')
+            ->Join('cities as c','c.id','=','trax_cn_issue_area_stores.area_code')
+            ->SELECT('trax_cn_issue_area_stores.issue_date','trax_cn_issue_area_stores.company_code','trax_cn_issue_area_stores.area_code','c.name as area_name','trax_cn_issue_area_stores.segment_id','s.name as segment_name','trax_cn_issue_area_stores.cn_from','trax_cn_issue_area_stores.cn_to','trax_cn_issue_area_stores.quantity')
             ->where('trax_cn_issue_area_stores.status',1);
 
         // if (session('role_id') != 1) {
@@ -92,7 +93,8 @@ class AdminCnController extends Controller
     public  function cn_receive_admin_store_list(Request  $request)
     {
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('segments as s','trax_cn_receive_admin_stores.segment_id','=','s.id')
-            ->SELECT('trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','trax_cn_receive_admin_stores.segment_id','s.name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
+            ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
+            ->SELECT('trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.segment_id','s.name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
             ->where('trax_cn_receive_admin_stores.status',1);
 
 

@@ -21,7 +21,7 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Company Code</th>
-                                    <th class="border-primary border-darken-1">Area Code</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">CN From</th>
                                     <th class="border-primary border-darken-1">To From</th>
@@ -414,7 +414,7 @@
                         }
                     },
                     {data: 'company_code', name: 'company_code', class: 'align-middle company_code'},
-                    {data: 'area_code', name: 'area_code', class: 'align-middle area_code'},
+                    {data: 'area_name', name: 'c.name', class: 'align-middle area_name'},
                     {data: 'segment_name', name: 's.name', class: 'align-middle segment_name', orderable: false},
                     {data: 'cn_from', name: 'cn_from', class: 'align-middle cn_from'},
                     {data: 'cn_to', name: 'cn_to', class: 'align-middle cn_to'},
