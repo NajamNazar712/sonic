@@ -277,10 +277,15 @@ class ReturnController extends Controller
        $rv_tickets_count = RvShipmentAssignAgent::count();
        
        //Total Shipments
-       $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
-
-       $total_of_shipments = count($this->total_of_shipments_exclude);
-        
+    //    $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
+    
+       $number_of_shipments = Shipment::select(DB::raw('Count(shipments.shipper_status_id) as count_status'),'shipments.shipper_status_id')->whereIn('shipments.shipper_status_id', [12,65,66])->groupBy('shipments.shipper_status_id')->pluck('count_status','shipper_status_id');
+       $total_of_shipments = 0;
+       //looping for the sum of status id
+       foreach($number_of_shipments as $val){
+            $total_of_shipments += $val; 
+       }
+      
        //Average Hours
        $aging = RvShipmentAssignAgent::where('rv_state_id',1)->get(['created_at']);
        $totalSeconds = 0;
@@ -292,7 +297,7 @@ class ReturnController extends Controller
        $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
 
        //Reason Validation Required Count
-       $reason_validation_required = Shipment::where('shipper_status_id', 12)->count();
+       $reason_validation_required = $number_of_shipments[12] ?? 0;
 
        if ($total_of_shipments === 0) {
            $percentage_reason_validation_required = 0; // or any default value you prefer
@@ -301,7 +306,7 @@ class ReturnController extends Controller
        }
 
        //Shipper Advised Requested Count
-       $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->count();
+       $shipper_advised_requested = $number_of_shipments[65] ?? 0;
        if ($total_of_shipments === 0) {
            $percentage_shipper_advised_requested = 0; // or any default value you prefer
        } else {
@@ -309,7 +314,7 @@ class ReturnController extends Controller
        }
 
        //Re-attempt Call Requested Count
-        $reattempt_call_requested = Shipment::whereIn('shipper_status_id', [66,52])->count();
+        $reattempt_call_requested = $number_of_shipments[66] ?? 0;
 
         if ($total_of_shipments === 0) {
         $percentage_reattempt_call_requested = 0; // or any default value you prefer
@@ -348,48 +353,7 @@ class ReturnController extends Controller
            ->count();
 
 
-        //Average Response Time
-        $rvShipments = [];
-        //    $rvShipments = RvShipmentAssignAgent::with([
-        //     'shipment'=>function($shipment){
-        //         $shipment->with([
-        //             'latest_shipment_journey'=>function($query){
-        //                 $query->where('shipper_status_id', 12)->select('id','shipment_id','updated_at');
-        //         }])
-        //         ->select('id');
-        //    }])
-        //    ->get(['id','shipment_id','created_at'])->toArray();
-
-        //    $details = [];
-        //    $averageResponseTime = 0;
-        //    foreach ($rvShipments as $key => $rvShipment) {
-        //        $details['rv_shipment_created_at'][] = $rvShipment['created_at'];
-
-        //        $latestJourney =$rvShipment['shipment']['latest_shipment_journey'];
-
-        //        $details['shipment_journey_rcp_latest'][] = isset($latestJourney['updated_at']) ? $latestJourney['updated_at'] : '-';
-        //    }
-        //    if($details){
-        //        for ($i = 0; $i < count($details['shipment_journey_rcp_latest']); $i++) {
-        //            if($details['shipment_journey_rcp_latest'][$i] != null){
-        //                $created_at = new DateTime($details['rv_shipment_created_at'][$i]);
-        //                $updated_at = new DateTime($details['shipment_journey_rcp_latest'][$i]);
-        //                $interval = $created_at->diff($updated_at);
-        //                $averageResponseTime += $interval->s + $interval->i * 60 + $interval->h * 3600;
-        //            }
-        //        }
-        //        $averageResponseTimeInSeconds = $averageResponseTime / count($details['shipment_journey_rcp_latest']);
-        //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
-        //    }else{
-        //        $averageResponseTimeInSeconds = $averageResponseTime / 1;
-        //        $averageResponseTimeInHours = $averageResponseTimeInSeconds / 3600;
-        //    }
-
-       //Oldest Shipments
-    //    $oldest_shipments = RvShipmentAssignAgent::join('shipments','rv_shipment_assign_agents.shipment_id','shipments.id')
-    //    ->whereIn('shipments.id', $this->total_of_shipments_exclude)
-    //    ->count();
-    //    $oldest_shipments = $total_of_shipments - $oldest_shipments;
+        
 
         $stats = array();
         $stats['total_of_shipments'] = $total_of_shipments;
@@ -406,8 +370,6 @@ class ReturnController extends Controller
         $stats['online_agents'] = $online_agents;
         $stats['number_of_available_agents'] = count($number_of_available_agents);
         $stats['average_aging'] = $averageHours;
-        // $stats['average_response_time'] = $averageResponseTimeInHours;
-        // $stats['oldest_shipments'] = $oldest_shipments;
         
         return response()->json(['status' => 1, 'stats' => $stats]);
     }

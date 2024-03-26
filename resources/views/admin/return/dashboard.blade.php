@@ -12,11 +12,11 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
+            @if (session('role_id') == 1 || in_array(943, session('permissions')))
 
                 <div class="row justify-content-center" >
 
                     {{-- Cards --}}
-                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
 
                         <div class="col-3">
                             <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
@@ -147,7 +147,7 @@
                                                 <h3 class="text-white">
                                                     <span id="online_agents"></span> / <span id="number_of_available_agents"></span>
                                                 </h3>
-                                                <span>Online/ Available Agents </span>
+                                                <span>Total Agents </span>
                                             </div>
                                         </div>
                                     </div>
@@ -167,7 +167,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_aging"></span>
                                                 </h3>
-                                                <span>Average Aging.</span>
+                                                <span>Online/ Available Agents.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -187,7 +187,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_response_time"></span>
                                                 </h3>
-                                                <span>Average Response Time.</span>
+                                                <span>Total Get Ticket.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -215,10 +215,88 @@
                             </div>
                         </div> --}}
                     
-                @endif
                     
 
                 </div>
+                <div class="row justify-content-center" >
+                <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_of_shipments">
+                                                    0
+                                                </h3>
+                                                <span>Total Get Ticket.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3" id="search_rvr_div">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up ">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
+                                                </h3>
+                                                <span>Average Ticket Per Agent.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="search_sar_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-flag text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
+                                                </h3>
+                                                <span>Average First Call Time.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up " id="search_unresponsive_div">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="reattempt_call_requested">-</span> / <span id="percentage_reattempt_call_requested">-</span>%
+                                                </h3>
+                                                <span>Average Aging</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>            
+            @endif
 
             </div>
         </div>
