@@ -381,7 +381,7 @@ class ReturnController extends Controller
         $stats['number_of_available_agents'] = count($number_of_available_agents);
         $stats['online_agents'] = $online_agents;
         $stats['total_tickets_today'] = $total_tickets_today;
-        $stats['average_ticket_per_online_agent'] = $average_ticket_per_online_agent;
+        $stats['average_ticket_per_online_agent'] = round($average_ticket_per_online_agent);
         $stats['average_aging'] = $averageHours;
         
         return response()->json(['status' => 1, 'stats' => $stats]);
