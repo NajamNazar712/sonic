@@ -1023,7 +1023,7 @@
 						'oncomplete': function() {
 							var val = parseFloat($(this).val());
 							if (val > 10) {
-									var error = 'Number should be less than or equal to 10';
+									var error = 'Number should be less than or equal to 10 Kg';
 									toastr.error(error, 'Error!', {
 										positionClass: 'toast-top-center',
 										containerId: 'toast-top-center'
