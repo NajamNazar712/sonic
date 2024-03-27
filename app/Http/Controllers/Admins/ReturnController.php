@@ -274,7 +274,7 @@ class ReturnController extends Controller
 
     public function return_view_data()
     {
-       $rv_tickets_count = RvShipmentAssignAgent::count();
+        $total_tickets_today = RvShipmentAssignAgent::whereDate('created_at',date('Y-m-d'))->count();
        
        //Total Shipments
     //    $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
@@ -322,22 +322,22 @@ class ReturnController extends Controller
             $percentage_reattempt_call_requested = ($reattempt_call_requested / $total_of_shipments) * 100;
         }
 
-        //Pending First Call Tickets Count
-       $number_of_pending_first_call = Shipment::leftJoin('rv_shipment_assign_agents as rvsa','shipments.id','rvsa.shipment_id')
-       ->whereNull('rvsa.id')
-       ->where('shipments.shipper_status_id', 12)
-       ->count();
+        //Pending First And Second Call Tickets Count
+        $shipmentsQuery = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'shipments.id', 'rvsa.shipment_id')
+        ->where('shipments.shipper_status_id', 12);
 
-       $number_of_pending_first_call_percentage = ($number_of_pending_first_call / ($reason_validation_required) * 100);
+        $number_of_pending_tickets = $shipmentsQuery
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL THEN 1 END) AS pending_first_call_count')
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL THEN 1 END) AS pending_second_call_count')
+            ->first();
 
+        //Pending First Call
+        $number_of_pending_first_call = $number_of_pending_tickets->pending_first_call_count;
+        $number_of_pending_first_call_percentage = ($number_of_pending_first_call / $reason_validation_required) * 100;
 
-        //Pending Second Call Tickets Count
-        $number_of_pending_second_call = Shipment::leftJoin('rv_shipment_assign_agents as rvsa','shipments.id','rvsa.shipment_id')
-        ->whereNotNull('rvsa.id')
-        ->where('shipments.shipper_status_id', 12)
-        ->count();
-
-        $number_of_pending_second_call_percentage = ($number_of_pending_second_call / ($reason_validation_required) * 100);
+        //Pending Second Call
+        $number_of_pending_second_call = $number_of_pending_tickets->pending_second_call_count;
+        $number_of_pending_second_call_percentage = ($number_of_pending_second_call / $reason_validation_required) * 100;
 
         //Total Agents Online Today
        $number_of_available_agents = Employee::join('employee_attendances','employees.id','employee_attendances.employee_id')
@@ -362,6 +362,8 @@ class ReturnController extends Controller
            ->count();
 
 
+        //Average Ticket Per Agent
+        $average_ticket_per_online_agent = ($online_agents > 0) ? ($total_tickets_today / $online_agents) : 0;
         
 
         $stats = array();
@@ -378,6 +380,8 @@ class ReturnController extends Controller
         $stats['number_of_pending_second_call_percentage'] = round($number_of_pending_second_call_percentage);
         $stats['number_of_available_agents'] = count($number_of_available_agents);
         $stats['online_agents'] = $online_agents;
+        $stats['total_tickets_today'] = $total_tickets_today;
+        $stats['average_ticket_per_online_agent'] = $average_ticket_per_online_agent;
         $stats['average_aging'] = $averageHours;
         
         return response()->json(['status' => 1, 'stats' => $stats]);

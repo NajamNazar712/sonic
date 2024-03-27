@@ -105,7 +105,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="number_of_pending_first_call"></span> / <span id="number_of_pending_first_call_percentage"></span>%
+                                                    <span id="number_of_pending_first_call">-</span> / <span id="number_of_pending_first_call_percentage">-</span>%
                                                 </h3>
                                                 <span>Pending First Call</span>
                                             </div>
@@ -125,7 +125,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="number_of_pending_second_call"></span> / <span id="number_of_pending_second_call_percentage"></span>%
+                                                    <span id="number_of_pending_second_call">-</span> / <span id="number_of_pending_second_call_percentage">-</span>%
                                                 </h3>
                                                 <span>Pending Second Call</span>
                                             </div>
@@ -145,7 +145,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="number_of_available_agents"></span>
+                                                    <span id="number_of_available_agents">-</span>
                                                 </h3>
                                                 <span>Total Agents Today</span>
                                             </div>
@@ -165,7 +165,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="online_agents"></span>
+                                                    <span id="online_agents">-</span>
                                                 </h3>
                                                 <span>Online / Available Agents.</span>
                                             </div>
@@ -174,52 +174,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- <div class="col-3" >
-                            <div class="card bg-gradient-directional-delivered pull-up ">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white">
-                                                    <span id="average_response_time"></span>
-                                                </h3>
-                                                <span>Total Get Ticket.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> --}}
-
-                        {{-- <div class="col-3" >
-                            <div class="card bg-gradient-directional-oldest_shipment pull-up " id="number_of_oldest_shipments_div">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="oldest_shipments">
-                                                    0
-                                                </h3>
-                                                <span>Oldest Shipment Count.</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> --}}
-                    
-                    
-
-                </div>
-                <div class="row justify-content-center" >
-                <div class="col-3">
+                    </div>
+                    <div class="row justify-content-center" >
+                        <div class="col-3">
                             <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -228,10 +185,10 @@
                                                 <i class="icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_of_shipments">
-                                                    0
+                                                <h3 class="text-white">
+                                                    <span id="total_tickets_today">0</span>
                                                 </h3>
-                                                <span>Total Get Ticket.</span>
+                                                <span>Total Tickets Today</span>
                                             </div>
                                         </div>
                                     </div>
@@ -249,7 +206,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="total_rvr"></span> / <span id="percentage_reason_validation_required"></span>%
+                                                    <span id="average_ticket_per_online_agent">-</span> / <span> Agent</span>
                                                 </h3>
                                                 <span>Average Ticket Per Agent.</span>
                                             </div>
@@ -402,6 +359,8 @@
                             $('#number_of_pending_second_call').text(data.stats.number_of_pending_second_call);
                             $('#number_of_pending_second_call_percentage').text(data.stats.number_of_pending_second_call_percentage);
                             $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+                            $('#total_tickets_today').text(data.stats.total_tickets_today);
+                            $('#average_ticket_per_online_agent').text(data.stats.average_ticket_per_online_agent);
                             $('#online_agents').text(data.stats.online_agents);
 
                             var averageAging = parseFloat(data.stats.average_aging);
