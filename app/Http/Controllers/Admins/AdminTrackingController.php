@@ -1463,7 +1463,7 @@ class AdminTrackingController extends Controller
                             })
                             ->join('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'shipment_scanning_journeys.id')
                             ->where('shipment_scanning_journeys.updated_at', '<=', $journey->updated_at);
-                            if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1){
+                            if(isset($journey->admin['role_id']) && $journey->admin['role_id'] != 1 || isset($journey->rider_id)){
                                 switch ($journey->shipper_status_id) {
                                     case 2:
                                         $scanning_data = $shipment_scanning_query->where('screen_location_id', 1)->latest()->first();
