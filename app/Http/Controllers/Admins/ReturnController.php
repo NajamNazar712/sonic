@@ -285,16 +285,6 @@ class ReturnController extends Controller
        foreach($number_of_shipments as $val){
             $total_of_shipments += $val; 
        }
-      
-       //Average Hours
-       $aging = RvShipmentAssignAgent::where('rv_state_id',1)->get(['created_at']);
-       $totalSeconds = 0;
-       $count = count($aging);
-       foreach ($aging as $record) {
-           $totalSeconds += now()->diffInSeconds($record->created_at);
-       }
-       $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
-       $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
 
        //Reason Validation Required Count
        $reason_validation_required = $number_of_shipments[12] ?? 0;
@@ -364,7 +354,28 @@ class ReturnController extends Controller
 
         //Average Ticket Per Agent
         $average_ticket_per_online_agent = ($online_agents > 0) ? ($total_tickets_today / $online_agents) : 0;
-        
+
+
+        //Average First Call Time
+        $average_first_call_time = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+        ->whereDate('shipments_journey.created_at', date('Y-m-d'))
+        ->where('shipments_journey.shipper_status_id', 12)
+        ->whereDate('rv_shipment_assign_agents.created_at', date('Y-m-d'))
+        ->avg(DB::raw('TIMESTAMPDIFF(MINUTE, shipments_journey.created_at, rv_shipment_assign_agents.created_at)'));
+
+        $hours = floor($average_first_call_time / 60);
+        $minutes = ($average_first_call_time % 60);
+        $average_first_call_time = $hours . " h : ".$minutes. " m";
+
+        //Average Hours
+        $aging = RvShipmentAssignAgent::where('rv_state_id',1)->get(['created_at']);
+        $totalSeconds = 0;
+        $count = count($aging);
+        foreach ($aging as $record) {
+            $totalSeconds += now()->diffInSeconds($record->created_at);
+        }
+        $averageSeconds = ($count > 0) ? $totalSeconds / $count : 0;
+        $averageHours = ($averageSeconds > 0) ? $averageSeconds / 3600 : 0; // 1 hour = 3600 seconds
 
         $stats = array();
         $stats['total_of_shipments'] = $total_of_shipments;
@@ -382,6 +393,7 @@ class ReturnController extends Controller
         $stats['online_agents'] = $online_agents;
         $stats['total_tickets_today'] = $total_tickets_today;
         $stats['average_ticket_per_online_agent'] = round($average_ticket_per_online_agent);
+        $stats['average_first_call_time'] = $average_first_call_time;
         $stats['average_aging'] = $averageHours;
         
         return response()->json(['status' => 1, 'stats' => $stats]);

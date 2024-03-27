@@ -208,7 +208,7 @@
                                                 <h3 class="text-white">
                                                     <span id="average_ticket_per_online_agent">-</span> / <span> Agent</span>
                                                 </h3>
-                                                <span>Average Ticket Per Agent.</span>
+                                                <span>Average Ticket Per Agent</span>
                                             </div>
                                         </div>
                                     </div>
@@ -226,9 +226,9 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="shipper_advised_requested"></span> / <span id="percentage_shipper_advised_requested"></span>%
+                                                    <span id="average_first_call_time">-</span>
                                                 </h3>
-                                                <span>Average First Call Time.</span>
+                                                <span>Average First Call Time</span>
                                             </div>
                                         </div>
                                     </div>
@@ -362,6 +362,7 @@
                             $('#total_tickets_today').text(data.stats.total_tickets_today);
                             $('#average_ticket_per_online_agent').text(data.stats.average_ticket_per_online_agent);
                             $('#online_agents').text(data.stats.online_agents);
+                            $('#average_first_call_time').text(data.stats.average_first_call_time);
 
                             var averageAging = parseFloat(data.stats.average_aging);
                             var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
