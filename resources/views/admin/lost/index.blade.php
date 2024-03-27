@@ -779,7 +779,7 @@
                     $('td:eq(0)', row).removeClass('select-checkbox');
                 }
 
-                if((data.permission != 944 && data.verification == 1)){
+                if(data.null_shipment == null){
                     $('td:eq(0)', row).addClass('select-checkbox');
                 }
                 var info = table.page.info();
