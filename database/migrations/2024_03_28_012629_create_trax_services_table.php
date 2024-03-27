@@ -19,6 +19,9 @@ class CreateTraxServicesTable extends Migration
             $table->string('service_name');
             $table->integer('product_id');
             $table->integer('status')->default(1);
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

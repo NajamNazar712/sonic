@@ -89,7 +89,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product</label>
-                                    <select class="select select2 mb-1" name="segment_id" id="segment_id_select" data-rule-required="true" data-msg-required="Product is required">
+                                    <select class="select select2 mb-1" name="product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}">{{ $product->name }}</option>
                                         @endforeach
@@ -341,7 +341,7 @@
                 hiddenSuffix: '_formatted',
             });
 
-            $('#segment_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
+            $('#product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
                 width: '100%',
                 dropdownParent:$('#AddCNIssueRiderModal')

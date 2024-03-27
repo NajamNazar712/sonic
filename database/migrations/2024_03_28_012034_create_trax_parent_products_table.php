@@ -18,6 +18,9 @@ class CreateTraxParentProductsTable extends Migration
             $table->string('parent_code')->nullable();
             $table->string('parent_name');
             $table->integer('status')->default(1);
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

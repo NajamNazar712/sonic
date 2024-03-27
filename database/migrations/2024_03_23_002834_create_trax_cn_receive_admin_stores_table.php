@@ -17,7 +17,7 @@ class CreateTraxCnReceiveAdminStoresTable extends Migration
             $table->increments('id');
             $table->string('company_code')->nullable();
             $table->string('area_code')->nullable();
-            $table->integer('segment_id')->nullable();
+            $table->integer('product_id')->nullable();
             $table->bigInteger('cn_from');
             $table->bigInteger('cn_to');
             $table->integer('quantity')->nullable();
@@ -27,6 +27,7 @@ class CreateTraxCnReceiveAdminStoresTable extends Migration
             $table->date('receive_date');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
