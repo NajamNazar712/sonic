@@ -243,7 +243,7 @@
                                         <div class="media d-flex">
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="reattempt_call_requested">-</span> / <span id="percentage_reattempt_call_requested">-</span>%
+                                                    <span id="average_aging">-</span>
                                                 </h3>
                                                 <span>Average Aging</span>
                                             </div>
