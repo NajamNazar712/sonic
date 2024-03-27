@@ -19,7 +19,7 @@
                     {{-- Cards --}}
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
+                            <div class="card bg-gradient-directional-in_transit pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -38,7 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="col-3" id="search_rvr_div">
+                        <div class="col-3" >
                             <div class="card bg-gradient-directional-booked_shipments pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="search_sar_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -79,7 +79,7 @@
                         </div> 
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up " id="search_unresponsive_div">
+                            <div class="card bg-gradient-directional-destination pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -116,7 +116,7 @@
                         </div>
 
                         <div class="col-3" >
-                            <div class="card bg-gradient-directional-return_delivered pull-up " id="number_of_inprocess_tickets_div">
+                            <div class="card bg-gradient-directional-return_delivered pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -136,7 +136,7 @@
                         </div>
 
                         <div class="col-3" >
-                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="number_of_available_agents_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -177,7 +177,7 @@
                     </div>
                     <div class="row justify-content-center" >
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
+                            <div class="card bg-gradient-directional-in_transit pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -196,7 +196,7 @@
                             </div>
                         </div>
 
-                        <div class="col-3" id="search_rvr_div">
+                        <div class="col-3" >
                             <div class="card bg-gradient-directional-booked_shipments pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -217,7 +217,7 @@
                         </div>
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="search_sar_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -237,7 +237,7 @@
                         </div> 
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up " id="search_unresponsive_div">
+                            <div class="card bg-gradient-directional-destination pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
