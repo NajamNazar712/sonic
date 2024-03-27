@@ -5841,10 +5841,29 @@ class AdminHumanResourseController extends Controller
             $details['trax_id'] = $employee->trax_id;
             $details['designation'] = $employee->designation->name;
             $details['department'] = $employee->department->name;
+            $details['type'] = $employee->employee_type->name;
             $details['city'] = $employee->city->name;
             $details['manager'] = ($employee->line_manager_id != null) ? $employee->department->name:'-';
             $employee_confirmation = EmployeeConfirmation::where('employee_id',$employee->id)->first();
-            $details['review_period'] = $employee->joining_date . ' - ' .$employee_confirmation->probation_end_date;
+            $details['review_period'] = $employee->joining_date . ' - ' . $employee_confirmation->probation_end_date;
+
+            return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+        }
+    }
+
+    public function get_employee_info_name_type(Request $request){
+      
+        $employee = Employee::where('trax_id',$request->trax_id);
+        if($employee->exists()){
+            $employee = $employee->first();
+            $details = array();
+            $details['trax_id'] = $employee->trax_id;
+            $details['name'] = $employee->name;
+            $details['type'] = $employee->employee_type->name;
+            $details['status'] = $employee->employee_status->name;
 
             return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
         }

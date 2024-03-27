@@ -79,6 +79,15 @@
                                     </select>
                                 </fieldset>
                             </div>
+
+                            <div class="col-4">
+                                <select name="service_type_select" id="service_type_select" class="select2">
+                                    @foreach($service_types as $service_type)
+                                        <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+        
                             <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -381,6 +390,12 @@
                 placeholder:"Select Sub Segment",
                 allowClear:true,
             });
+
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
+            });
             var thirtydays = '{{ $thirtyday }}';
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
@@ -608,6 +623,8 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
+                        d.service_type_select = $('#service_type_select').val();
+
                     }
                 },
                 order: [[14, 'desc']],

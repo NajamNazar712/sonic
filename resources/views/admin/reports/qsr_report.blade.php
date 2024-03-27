@@ -113,6 +113,14 @@
                         </select>
                     </div>
 
+                    <div class="col-4">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -176,10 +184,12 @@
                         <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
+                        <th class="border-primary border-darken-1">History Status Location</th>
                         <th class="border-primary border-darken-1">Cargo Status</th>
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
@@ -331,6 +341,10 @@
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Sub Segment*'
+            });
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Service Type'
             });
 
             var from_max = '{{ Carbon\Carbon::now() }}';
@@ -597,6 +611,8 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.service_type_select = $('#service_type_select').val();
+
                     }
                 },
                 rowId: 'shId',
@@ -612,10 +628,12 @@
                     {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
+                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss'},
                     {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
                     {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},

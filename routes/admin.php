@@ -901,9 +901,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         //Lost Module Start
         Route::prefix('lost')->name('lost.')->group(function () {
             Route::get('', 'Admins\LostShipmentsController@lost_shipments_index')->name('index');
-            Route::get('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
-            Route::post('confirm/status', 'Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status');
-            Route::post('reattempt/status', 'Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status');
+            Route::post('list', 'Admins\LostShipmentsController@lost_shipments_list')->name('list');
+            Route::get('lost_responsible_list', 'Admins\LostShipmentsController@lost_responsible_list')->name('lost_responsible_list');
+
+            Route::post('confirm/status', 'Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status.lost');
+            Route::post('reattempt/status', 'Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status.lost');
+            Route::post('approve/status', 'Admins\LostShipmentsController@shipment_approve_status')->name('approve.status.lost');
+            Route::post('lost_data', 'Admins\LostShipmentsController@lost_data')->name('lost_data');
+
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('index', 'Admins\LostShipmentsController@lost_add_index')->name('index');
                 Route::post('shipment/info', 'Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
@@ -3971,6 +3976,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminHumanResourseController@employee_confirmation_edit')->name('edit');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_confirmation_reject')->name('reject');
             Route::post('get_info', 'Admins\AdminHumanResourseController@get_employee_info')->name('get_info');
+            Route::post('get_employee_info_name_type', 'Admins\AdminHumanResourseController@get_employee_info_name_type')->name('get_employee_info_name_type');
+
             Route::post('submit', 'Admins\AdminHumanResourseController@submit_employee_rating')->name('rating');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_confirmation_approve')->name('approve');
             Route::post('view', 'Admins\AdminHumanResourseController@view_employee_confirmation')->name('view');
