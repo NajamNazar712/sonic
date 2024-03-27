@@ -113,6 +113,14 @@
                         </select>
                     </div>
 
+                    <div class="col-4">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -333,6 +341,10 @@
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Sub Segment*'
+            });
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Service Type'
             });
 
             var from_max = '{{ Carbon\Carbon::now() }}';
@@ -599,6 +611,8 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.service_type_select = $('#service_type_select').val();
+
                     }
                 },
                 rowId: 'shId',
