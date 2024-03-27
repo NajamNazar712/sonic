@@ -3013,7 +3013,7 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
             'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
-            'estimated_weight_check' => 'The :attribute should be less than or equal to 10',       
+            'estimated_weight_check' => 'The :attribute should be less than or equal to 10 Kg',       
          ];
 
         $rules = [
