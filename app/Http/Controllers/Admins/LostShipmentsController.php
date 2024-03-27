@@ -334,12 +334,10 @@ class LostShipmentsController extends Controller
                     }
                 })
                 ->addColumn('lost_confirmation_status', function($shipment){
-                    if($shipment->approval >= 1 && $shipment->cleared === 1){
+                    if(($shipment->approval >= 1 && $shipment->cleared === 1) || $shipment->verification == 1){
                         return 'Approved';
                     }else if($shipment->approval >= 0 && $shipment->cleared === 0){
                         return 'Pending';
-                    }else if($shipment->verification == 1){
-                        return 'Approved';
                     }
                 })
                 ->addColumn('action', function ($shipment) {
