@@ -338,6 +338,8 @@ class LostShipmentsController extends Controller
                         return 'Approved';
                     }else if($shipment->approval >= 0 && $shipment->cleared === 0){
                         return 'Pending';
+                    }else if($shipment->verification == 1){
+                        return 'Approved';
                     }
                 })
                 ->addColumn('action', function ($shipment) {
