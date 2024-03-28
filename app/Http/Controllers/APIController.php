@@ -122,6 +122,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class APIController extends Controller
 {
@@ -4832,7 +4833,6 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
 
-
         $rules = [
             'type' => ['required', 'integer', 'digits_between:1,3'],
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
@@ -4976,12 +4976,19 @@ class APIController extends Controller
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
                 } elseif ($request->type == 3) {
+
                     $rules = [
                         'consignee_type' => ['required', 'integer', 'between:1,2'],
                     ];
                     $validate = Validator::make($request->all(), $rules, $this->messages);
 
                     $validate->setAttributeNames($this->names);
+
+                    $exclude_shipper = ShipperInterceptExclude::where('user_id', $user_id)->where('exclude_shipper', 1)->first();
+
+                    if($exclude_shipper){
+                        return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept, contact sales person']);
+                    }
 
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -4997,6 +5004,12 @@ class APIController extends Controller
                             $validate = Validator::make($request->all(), $rules, $this->messages);
 
                             $validate->setAttributeNames($this->names);
+
+                            $disable_same_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('same_consignee', 1)->first();
+                            if($disable_same_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - same consignee, contact sales person']);
+                            }
+
 
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -5090,7 +5103,9 @@ class APIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
                                 }
                             }
-                        } else {
+                        } 
+                        
+                        else {
                             //different consignee
                             $rules = [
 
@@ -5106,6 +5121,14 @@ class APIController extends Controller
                             $validate = Validator::make($request->all(), $rules, $this->messages);
 
                             $validate->setAttributeNames($this->names);
+
+
+                            $disable_different_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('different_consignee', 1)->first();
+                            if($disable_different_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - different consignee, contact sales person']);
+                            }
+
+
 
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
