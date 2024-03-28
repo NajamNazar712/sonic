@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rider\Logistic\Api;
 
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxService;
@@ -13,7 +14,7 @@ use App\Http\Controllers\Controller;
 
 class RiderLogisticApiController extends Controller
 {
-    public  function logistic_data(Request $request)
+    public function logistic_data(Request $request)
     {
 
         $rider_id = $request->rider_id;
@@ -50,5 +51,23 @@ class RiderLogisticApiController extends Controller
         ];
 
         return response()->json(['status'=>1,'logistic_data'=> $logistic_data]);
+    }
+
+    public function  logistic_booking(Request $request)
+    {
+        $logistic_booking = new TraxLogisticBooking();
+        $logistic_booking->shipper_id = $request->shipper_id;
+        $logistic_booking->cn_number = $request->cn_number;
+        $logistic_booking->product_id = $request->product_id;
+        $logistic_booking->service_id = $request->service_id;
+        $logistic_booking->destination_id = $request->destination_id;
+        $logistic_booking->shipper_reference = $request->shipper_reference;
+        $logistic_booking->consignee_name = $request->consignee_name;
+        $logistic_booking->total_pieces = $request->total_pieces;
+        $logistic_booking->consignee_phone_1 = $request->consignee_phone_1;
+        $logistic_booking->total_dense_weight = $request->total_dense_weight;
+        $logistic_booking->total_volumetric_weight = $request->total_volumetric_weight;
+        $logistic_booking->save();
+
     }
 }

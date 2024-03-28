@@ -116,7 +116,7 @@ class AdminLogisticBookingController extends Controller
         $logistic_booking->consignee_email=$request->consignee_email;
         $logistic_booking->payment_mode_id=$request->payment_mode_id;
         $logistic_booking->handling_inst=$request->handling_inst;
-        $logistic_booking->ship_ref_no=$request->ship_ref_no;
+//        $logistic_booking->ship_ref_no=$request->ship_ref_no;
         $logistic_booking->route_id=$request->route_id;
         // $logistic_booking->ot_service=$request->ot_service;
         // $logistic_booking->gst=$request->gst;
