@@ -192,10 +192,9 @@ class ShipperReturnController extends Controller
                     $dropdown .= $reattempt_button;
                 }
 				if (($result->shipper_status_id == 12 || $result->shipper_status_id == 52 || $result->shipper_status_id == 65) && $result->journey_shipper_status_id != 53 && $result->intercepted == 0) {
-                    $shipper_exclude_type = ShipperInterceptExclude::where('user_id', auth()->user()->id)
-                        ->where('exclude_shipper', 0)
-                        ->first();
-                    if ($shipper_exclude_type) {
+                    // $dropdown .= $intercept;
+                    $shipper_exclude_type = ShipperInterceptExclude::where('user_id', auth()->user()->id)->where('exclude_shipper', '<=', 1)->first();
+                    if (!$shipper_exclude_type || $shipper_exclude_type->exclude_shipper === 0) {
                         $dropdown .= $intercept;
                     }
                 }
