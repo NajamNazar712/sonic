@@ -433,6 +433,17 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
             $shipper_info->save();
+
+            if ($request->iban_no == null || $request->iban_no == ''){
+                return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
+            } else if ($request->account_no == null || $request->account_no == '') {
+                return redirect()->back()->with(['error' => 'Please provide the account number']);
+            } else if ($request->bank == null || $request->bank == ''){
+                return redirect()->back()->with(['error' => 'Please choose a bank']);
+            } else if (!$request->hasFile('cheque_image')){
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
+            } 
+
             if ($request->hasFile('cheque_image') && $request->iban_no != null && $request->account_no != null && $request->bank != null) {
                 $shipper_info->bank_id = $request->bank;
                 $shipper_info->iban = $request->iban_no;
