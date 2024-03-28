@@ -356,9 +356,12 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
 
-            Route::prefix('logistic')->name('logistic.')->group(function (){
-                Route::get('data','Rider\Logistic\Api\RiderLogisticApiController@logistic_data')->name('data');
+            Route::prefix('v1')->name('v1.')->group(function (){
+                Route::prefix('logistic')->name('logistic.')->group(function (){
+                    Route::get('data','Rider\Logistic\Api\RiderLogisticApiController@logistic_data')->name('data');
+                });
             });
+
         });
 
     });
