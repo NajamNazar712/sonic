@@ -139,6 +139,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_fintech_charges', 'Admins\AdminDashboardController@add_fintech_charges')->name('add_fintech_charges');
         Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges');
         Route::post('add_rate_commission_corporate_reimb/{shippers}', 'Admins\AdminDashboardController@add_rate_commission_corporate_reimb')->name('add_rate_commission_corporate_reimb');
+        Route::post('excluded_shippers', 'Admins\AdminDashboardController@excluded_shippers')->name('excluded_shippers');
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {

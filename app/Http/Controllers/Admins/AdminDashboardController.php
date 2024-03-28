@@ -14119,5 +14119,14 @@ class AdminDashboardController extends Controller
             $sales_commission->save();
         }
     }
-    
+
+    public function excluded_shippers(Request $request){
+        $user_id = $request->user_id;
+        $intercept_shipper = ShipperInterceptExclude::where('user_id', $user_id)->first();
+        if($intercept_shipper){
+            return response()->json(['intercept_shipper' => $intercept_shipper]);
+        }else {
+            return response()->json(['intercept_shipper' => null]);
+        }
+    }
 }
