@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ZoneCitiesGst;
 use Auth;
 use DateTime;
 use SnappyPDF;
@@ -116,9 +117,21 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+
 
 class AdminFinanceController extends Controller
 {
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
     static private function amount_to_words($amount)
     {
 
@@ -151,14 +164,35 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id)
+    static private function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
-
-        if ($zone) {
-            return $zone->gst;
-        } else {
-            return 0.13;
+        if (!is_null($city_id) && $city_id !== '') {
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
+                ->where('city_id',$city_id)
+                ->where('status',1)
+                ->select('gst');
+            if ($zone_city_gst->exists())
+            {
+                $zone_city_gst = $zone_city_gst->first();
+                return $zone_city_gst->gst;
+            }
+            else
+            {
+                if ($zone) {
+                    return $zone->gst;
+                } else {
+                    return 0.13;
+                }
+            }
+        }
+        else
+        {
+            if ($zone) {
+                return $zone->gst;
+            } else {
+                return 0.13;
+            }
         }
     }
 
@@ -1521,6 +1555,10 @@ class AdminFinanceController extends Controller
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
+
+        //StationDepositeNoteActionLog
+        self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }
 
@@ -3739,14 +3777,13 @@ class AdminFinanceController extends Controller
                 $crs = true;
             }
         }
-
         $amount = $shipment->amount;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -3761,7 +3798,7 @@ class AdminFinanceController extends Controller
                     $amount = 0;
                     $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -4581,7 +4618,15 @@ class AdminFinanceController extends Controller
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        $shipper_cap   =   GeneralSetting::where('type','shipper_cap');
+        if($shipper_cap->exists())
+        {
+             $shipper_cap = $shipper_cap->first();
+
+        }else{
+             $shipper_cap=0;
+        }
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'shipper_cap'=>$shipper_cap]);
     }
 
   
@@ -5476,17 +5521,17 @@ class AdminFinanceController extends Controller
         $company_bank = $request->get('company_bank_id');
 
         $done_payment_ids = array();
-//        $present_consolidation_shipments = array();
-//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
-//            foreach ($pending_payment_shipment_ids as $shipment_id){
-//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
-//                if($present->exists()){
-//                    $present = $present->first();
-//                    $consolidation_id = $present->consolidation_id;
-//
-//                }
-//            }
-//        }
+        //        $present_consolidation_shipments = array();
+        //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+        //            foreach ($pending_payment_shipment_ids as $shipment_id){
+        //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+        //                if($present->exists()){
+        //                    $present = $present->first();
+        //                    $consolidation_id = $present->consolidation_id;
+        //
+        //                }
+        //            }
+        //        }
 
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
@@ -5741,6 +5786,42 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function make_done_payment($done_payment_id,$user_id,$total_shipments,$delivered_shipments,$returned_shipments,$adjusted_shipments,$user_bank_id,$company_bank)
+    {
+        if(is_null($done_payment_id))
+        {
+           $done_payment = new DonePayment();
+
+           $done_payment->user_id = $user_id;
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+           $done_payment->user_bank_info_id = $user_bank_id;
+           $done_payment->company_bank_id = $company_bank;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        } else {
+
+           $done_payment = DonePayment::find($done_payment_id);
+
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        }
+        
+
+    }
+    
     public function make_payments_stats_calculate(Request $request)
     {
         $total_amount = 0;
@@ -15372,7 +15453,7 @@ class AdminFinanceController extends Controller
 
         $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
+                                    <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Invoice No.</strong></td>

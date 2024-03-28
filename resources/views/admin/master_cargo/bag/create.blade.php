@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Create Bag
+                    Create Bags
                 </h1>
 
                 <div class="card">

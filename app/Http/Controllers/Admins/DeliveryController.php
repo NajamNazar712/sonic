@@ -122,6 +122,7 @@ use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
 class DeliveryController extends Controller
@@ -2413,9 +2414,9 @@ class DeliveryController extends Controller
             $rider = DeliveryNote::where('id', $delivery_note_id)->select('rider_id');
             if ($rider->exists()) {
                 $rider = $rider->first();
-                $rider_type = Rider::where('id', $rider->rider_id)->select('operation_rider_id');
+                $rider_type = Rider::where('id', $rider->rider_id)->select('operation_rider_id','allow_delivered_status');
                 $rider_type = $rider_type->first();
-                if ($rider_type->operation_rider_id == 2) {
+                if ($rider_type->operation_rider_id == 2 && ($rider_type->allow_delivered_status == 0 || $rider_type->allow_delivered_status == NULL)) {
                     return ['status' => 2, 'error' => 'Cannot mark shipment(s) as delivered because of hold in operation delivery note !'];
                 }
             }
@@ -3713,6 +3714,7 @@ class DeliveryController extends Controller
     // Check
     public function receive_delivery_verify_status_submit(Request $request)
     {
+    try {
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
         $rcp_sms_setting = GlobalSettings::where('type', 'return_confirmation_pending_sms')->first();
@@ -3764,6 +3766,7 @@ class DeliveryController extends Controller
                         $remarks_input = "remarks.$shipment";
                         $shipper_status_id = NULL;
                         $shipment_journey_remarks = NULL;
+
                         if ($request->has($status_drop)) {
                             $shipper_status_id = $request->status_drop[$shipment];
                         }
@@ -3795,6 +3798,7 @@ class DeliveryController extends Controller
                                         //                                    continue;
                                     }
                                 }
+
                             }
                         }
                         $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
@@ -4192,6 +4196,31 @@ class DeliveryController extends Controller
                                 }
                             }
                         }
+
+                        // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
+                        // 27 = Shipment Damaged
+                        // 35 = Delivery Stopped
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                            $globalAdminId = 346;
+
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+
+                            if ($shipment_details->shipment_type == 1) {
+                                if ($shipment_details->booking_type_id != 4) {
+                                    ShipmentChargesController::return($shipment);
+                                    if ($shipment_details->packaging_material_request != 1) {
+                                        AdminFinanceController::add_payment($shipment, 1);
+                                    }
+                                } else {
+                                    ShipmentChargesController::walk_in_return($shipment);
+                                    $shipment_details->walk_in_status = 2;
+                                    $shipment_details->save();
+                                    AdminFinanceController::done_payment($shipment, 1);
+                                }
+                            }
+                            
+                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                        }
                     }
 
                     if ($verification == 1) {
@@ -4269,6 +4298,10 @@ class DeliveryController extends Controller
             }
         } else {
             return redirect()->back()->with('error', 'Shipments count does not match!');
+        }
+    }catch (\Throwable $th)
+        {
+            return redirect()->back()->with('error', 'Something Went Wrong !');
         }
     }
 
@@ -5384,6 +5417,9 @@ class DeliveryController extends Controller
                     $delivery_note->dncc_status = 1;
                     $delivery_note->update();
 
+                    //StationDepositeNoteActionLog
+                    self::sdn_action_logs($request->sdn_id, 1, Auth::id());
+
                     return back()->with(['success' => 'DNCC added to SDN']);
                 } else {
                     return back()->with(['error' => 'Can not add DNCC to SDN']);
@@ -5892,6 +5928,10 @@ class DeliveryController extends Controller
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
+                if(session('role_id') == 1 || in_array(941, session('permissions'))){
+                    $sdn_action_log = '<button type="button" class="dropdown-item view_sdn_action_log"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">SDN action log</div></button>';
+                }
+
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -5903,7 +5943,7 @@ class DeliveryController extends Controller
                     $dropdown .= $closed_status;
                 }
 
-                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status != 2) {
+                if (($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) <= 0 && $result->status != 2) {
                     $reconcile_to_resolved = '<button type="button" class="dropdown-item update_status_resolved"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Resolved</div></button>';
                     $dropdown .= $reconcile_to_resolved;
                 }
@@ -5948,6 +5988,9 @@ class DeliveryController extends Controller
                     }
                 }
                 $dropdown .= $view_logs;
+                if(session('role_id') == 1 || in_array(941, session('permissions'))){
+                    $dropdown .= $sdn_action_log;
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -6248,6 +6291,9 @@ class DeliveryController extends Controller
                     }
 
                     self::add_sdn_logs($station_deposit_note->id, 1, Auth::id());
+
+                    //StationDepositeNoteActionLog
+                    self::sdn_action_logs($station_deposit_note->id, 5, Auth::id());
                     return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Deposited']);
                 } else {
                 }
@@ -8611,7 +8657,8 @@ class DeliveryController extends Controller
                     }
                 }
 
-
+                //StationDepositeNoteActionLog
+                self::sdn_action_logs($sdn_id, 3, Auth::user()->id);
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
             } else {
                 return redirect()->back()->with(['error' => 'DNCC cannot be less/greater than sum of adjustment amount & deposit amount']);
@@ -9408,6 +9455,46 @@ class DeliveryController extends Controller
         }
     }
 
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
+    public function sdn_actions(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 751);
+        $sdn_id = $request->sdn_id;
+        if ($sdn_id) {
+            $sdn_actions_logs = array();
+            $logs = StationDepositeNoteActionLog::where('sdn_id', $sdn_id);
+            if ($logs->exists()) {
+                $logs = $logs->get();
+                foreach ($logs as $log) {
+                    if ($log->status_id == 1) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN amount';
+                    } else if ($log->status_id == 2) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited deposit slips';
+                    } else if ($log->status_id == 3) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Added SDN adjustment';
+                    } else if ($log->status_id == 4) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Edited SDN adjustment';
+                    } else if ($log->status_id == 5) {
+                        $sdn_actions_logs[$log->id]['status'] = 'Reverted from Resolved to Deposited';
+                    }
+                    $sdn_actions_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $sdn_actions_logs[$log->id]['date'] = Carbon::parse($log->updated_at)->toDateTimeString();
+                }
+
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $sdn_actions_logs]);
+            }
+            return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
     public function closed(Request $request)
     {
 
@@ -9434,7 +9521,7 @@ class DeliveryController extends Controller
         $station_deposit_note = StationDepositNote::find($request->sdn_id);
 
         if ($station_deposit_note) {
-            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+            if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) <= 0) {
                 $station_deposit_note->status = 2;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
@@ -9482,7 +9569,7 @@ class DeliveryController extends Controller
         if ($station_deposit_notes->exists()) {
             $station_deposit_notes = $station_deposit_notes->get();
             foreach ($station_deposit_notes as $station_deposit_note) {
-                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) == 0) {
+                if (($station_deposit_note->sdn_amount - ($station_deposit_note->sdn_deposit_amount + $station_deposit_note->adjustment_amount)) <= 0) {
                     $station_deposit_note->status = 2;
                     $station_deposit_note->closed_at = Carbon::now();
                     $station_deposit_note->save();
