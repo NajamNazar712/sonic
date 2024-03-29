@@ -1535,7 +1535,6 @@
 
                                 });
                         }
-                      
                     });
 				}
                 
@@ -1603,6 +1602,40 @@
                 $('#shipper_name').val(name);
 
             });
+
+            $('[name="book_and_print"]').on('click', function () {
+                var ibanNoValue = $('#iban_no').val();
+                var accountNoValue = $('#account_no').val();
+                var bankValue = $('#bank').val();
+                var chequeImageValue = $('#cheque_image').val();
+
+                if (ibanNoValue === '' || accountNoValue === '' || bankValue === '' || chequeImageValue === '') {
+                    if (ibanNoValue === '') {
+                        $('#iban_no').addClass('required');
+                    } else {
+                        $('#iban_no').removeClass('required');
+                    }
+
+                    if (accountNoValue === '') {
+                        $('#account_no').addClass('required');
+                    } else {
+                        $('#account_no').removeClass('required');
+                    }
+
+                    if (bankValue === '') {
+                        $('#bank').addClass('required');
+                    } else {
+                        $('#bank').removeClass('required');
+                    }
+
+                    if (chequeImageValue === '') {
+                        $('#cheque_image').addClass('required');
+                    } else {
+                        $('#cheque_image').removeClass('required');
+                    }
+                }
+            });
+
         });
     </script>
 @endsection
