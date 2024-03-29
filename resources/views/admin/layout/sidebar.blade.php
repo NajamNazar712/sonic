@@ -617,11 +617,6 @@
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Reason Validation</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
-                                        <li><a class="menu-item"
-                                                href="{{ route('admin.return.dashboard') }}">Dashboard</a>
-                                        </li>
-                                    @endif
 
                                     @if (session('role_id') == 1 || in_array(903, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
@@ -629,6 +624,12 @@
 
                                     @if (session('role_id') == 1 || in_array(927, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}">Rv Assigned Agent Shipments</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.return.dashboard') }}">Dashboard</a>
+                                        </li>
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))
