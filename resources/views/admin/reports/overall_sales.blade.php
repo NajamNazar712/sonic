@@ -146,7 +146,7 @@
                                   <span class="">Arrival Time From</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="From">
+                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from"  id="arrival_time_from" placeholder="From">
                         </div>
                     </div>
                     <div class="col-3">
@@ -156,7 +156,7 @@
                                   <span class="">Arrival Time To</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
+                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to"  id="arrival_time_to" placeholder="To">
                         </div>
                     </div>
                     <div class="col-2">
@@ -174,6 +174,8 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">First Attempt Date</th>
+                        <th class="border-primary border-darken-1">Item Quantity</th>
+                        <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remark</th>
@@ -339,7 +341,7 @@
                 allowClear:true
             });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
+                placeholder:'Select Destination Hub',
                 width:'100%',
                 allowClear:true
             });
@@ -421,8 +423,8 @@
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
                         // $('#arrival_time_from').pickatime('picker').clear();
                         // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                        // $('input[name="arrival_time_from"]').val('12:00 AM');
+                        // $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
@@ -439,8 +441,8 @@
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                         // $('#arrival_time_from').pickatime('picker').clear();
                         // $('#arrival_time_to').pickatime('picker').clear();
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                        // $('input[name="arrival_time_from"]').val('12:00 AM');
+                        // $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
@@ -470,6 +472,8 @@
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('First Attempt Date');
+                            head.push('Item Quantity');
+                            head.push('Pieces');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
@@ -528,6 +532,8 @@
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.first_attempt_date);
+                                row.push(values.item_quantity);
+                                row.push(values.pieces);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
@@ -639,6 +645,8 @@
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
+                    { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
+                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason' ,name:'reason', class: 'align-middle reason'},
                     { data: 'remark' ,name:'remark', class: 'align-middle remark'},

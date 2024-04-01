@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\ActivityTrailLog;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminRole;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Yajra\Datatables\Datatables;
-use Vectorface\Whip\Whip;
 use Session;
+use Vectorface\Whip\Whip;
+use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
+use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use Illuminate\Support\Facades\Auth;
+use App\ShipmentScanningJourneyAreaLog;
+use App\Http\Models\Admin\ActivityTrailLog;
+use App\Http\Controllers\NotificationsController;
 
 class ActivityTrailController extends Controller
 {
@@ -60,7 +61,7 @@ class ActivityTrailController extends Controller
         }
 
         $data = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
-           ->leftjoin('city_areas as ca' ,'ca.id' ,'=','a.area_id')
+            ->leftjoin('city_areas as ca' ,'ca.id' ,'=','a.area_id')
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'a.designation_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
@@ -78,7 +79,7 @@ class ActivityTrailController extends Controller
         }
 
         return Datatables::of($data)
-            ->make(true);
+        ->make(true);
 
     }
 

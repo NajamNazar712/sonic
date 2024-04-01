@@ -147,7 +147,7 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha',
+                // 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'referral' => '',
@@ -192,7 +192,7 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                'g-recaptcha-response' => 'required|captcha',
+                // 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'cycle_of_invoicing' => 'required',
@@ -205,17 +205,8 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-//        return $request;
-//         return var_dump($request);exit();
-       // dd($request);
-//        $products = implode(',',$request->product_type);
-//
-//        return $request;
-
         $this->validator($request->all())->validate();
         event(new Registered($user = $this->create($request->all())));
-
-        //$this->guard()->login($user);
         
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
@@ -418,15 +409,6 @@ class RegisterController extends Controller
         ]);
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
-
-        if ($lead_id) {
-            $lead = Lead::find($lead_id);
-
-            if ($lead) {
-                $lead->status_id = 12;
-                $lead->save();
-            }
-        }
 
         if($data['sale_person']){
             $sale_person = new SalePersonTag();

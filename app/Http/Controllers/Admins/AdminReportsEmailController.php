@@ -2994,7 +2994,7 @@ class AdminReportsEmailController extends Controller
         return $link;
     }
 
-    static public function qsr_daily_report($from, $to)
+    static public function qsr_daily_report($to)
     {
         $serial = 0;
 
@@ -3097,7 +3097,8 @@ class AdminReportsEmailController extends Controller
                 'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature',
                 'crcnt.type as crm_request_case_nature_type', 'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment',
                 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status', 'sjfa.created_at as first_attempt_date', 'sjrp.created_at as rider_picked_status_date'
-                ])->whereBetween('journey.created_at', [$from, $to])->get();
+                // ])->whereBetween('journey.created_at', [$to, $from])->get();
+                ])->where('journey.created_at','<=', $to)->get();
                 
                 
                 $deliveries = $deliveries->map(function ($delivery) {
@@ -3219,7 +3220,7 @@ class AdminReportsEmailController extends Controller
                 return url('/') . '/' . $file_name_without_path;
             }
         }
-    static public function pending_deliveries_daily_report($from, $to)
+    static public function pending_deliveries_daily_report($to)
     {
         $serial = 0;
 
@@ -3307,7 +3308,8 @@ class AdminReportsEmailController extends Controller
                 'prod.product_name as product_type', 'sts.status as star_status', 'ca.name as area', 'r.name as last_rider', 'z.name as d_zone', 'r.trax_id as rider_trax_id'
             )
             ->whereIn('shipments.shipper_status_id', $status)
-            ->whereBetween('shipments_journey.created_at', [$from, $to])->get();
+            // ->whereBetween('shipments_journey.created_at', [$from, $to])->get();
+            ->where('shipments_journey.created_at','<=', $to)->get();
 
             $pending_deliveries_report_array[] = ['Pending Deliveries Report'];
             $pending_deliveries_report_array['header'] = ['S. No.', 'Tracking No.', 'Shipper', 'Origin', 'Destination', 'Hub', 'Area', 
@@ -3348,7 +3350,6 @@ class AdminReportsEmailController extends Controller
                     $last_rider = $shipment->last_rider;
                     $rider_trax_id = $shipment->rider_trax_id;
                     $current_status_date = $shipment->current_status_date;
-                   
 
                     $pending_deliveries_report_array[] = ['S. No.' => $serial, 'Tracking No.' => $tracking_number, 'Shipper' => $shipper ,'Origin' => $origin ,'Destination' => $destination, 
                     'Hub' => $hub ,'Area' => $area ,'Consignee Name' => $consignee_name , 'Consignee Phone' => $consignee_phone , 'Reattempt By' => $reattempt_by, 'Address' => $consignee_address, 
@@ -3375,16 +3376,6 @@ class AdminReportsEmailController extends Controller
                 $sheet->getStyle("A" . $serial . ":N" . $serial)->applyFromArray($cell_st);
                 $sheet->setTitle('Quality of Service Report');
                 $sheet->mergeCells('A2:AL2');
-                
-                // $writer = new Xlsx($spreadsheet);
-                // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                // header('Content-Disposition: attachment;filename=pending_deliveries_report_.xlsx"');
-                // header('Cache-Control: max-age=0');
-                // $date_file_name = Carbon::today()->format('Y_m_d');
-                // $file_name_without_path = "reports/pending_deliveries_report_report_" . $date_file_name . ".xlsx";
-                // $file_name = public_path() . "/reports/pending_deliveries_report_report_" . $date_file_name . ".xlsx";
-                // $writer->save($file_name);
-                // return url('/') . '/' . $file_name_without_path;
 
                 $writer = new Xlsx($spreadsheet);
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

@@ -34,6 +34,15 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
@@ -55,15 +64,6 @@
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $destination)
                                     <option value="{{$destination->id}}">{{$destination->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_concerned_hub" id="search_concerned_hub" class="form-control select2">
-                                @foreach($hubs as $concerned_hub)
-                                    <option value="{{$concerned_hub->id}}">{{$concerned_hub->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -112,6 +112,7 @@
                             @endforeach
                         </select>
                     </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -190,6 +191,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Concerned Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
@@ -304,6 +306,11 @@
             });
             $('#search_qsr').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select QSR',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Zone',
                 width:'100%',
                 allowClear:true
             });
@@ -478,6 +485,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Area');
                             head.push('Concerned Hub');
                             head.push('Return City');
                             head.push('Zone');
@@ -493,14 +501,13 @@
                             head.push('Adjusted amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
+                                
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
-                                row.push(values.account_no);
                                 row.push(values.name);
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
@@ -520,6 +527,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.area);
                                 row.push(values.current_hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -581,16 +589,14 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
+                        d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
-                        // d.requested_from_date = $('#from_date1').val();
-                        // d.requested_to_date = $('#to_date1').val();
                         d.search_types = $('#search_types').val();
-                        d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
                 },
                 rowId: 'shId',
@@ -621,6 +627,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},

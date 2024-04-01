@@ -146,6 +146,9 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
+        // 'App\Console\Commands\AgentUnassignedTicket ',
+        'App\Console\Commands\AgentSarNotification',
+        'App\Console\Commands\SackBagStatusUpdate',
         'App\Console\Commands\AutoAssignCrmAgentNew',
         ];
 
@@ -179,6 +182,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
         $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
 
+        // Sackback or Canvas schedule
+        $schedule->command('sackbag:statusupdate')->dailyAt('06:00')->runInBackground();
+
         //Operations Report
         //11th of every month
         $schedule->command('reports:operations_performance_monthly')->monthlyOn(11, '23:00')->runInBackground();
@@ -192,17 +198,40 @@ class Kernel extends ConsoleKernel
             {
                 // run 1 hour before from the shift ends, to get save from the next day switch as well
                 $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
+                $schedule->command('employee:attendanceadjustment', [$shift->id, 'web'])
                 ->dailyAt($dailyAt)
                 ->runInBackground();
 
                 // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
                 $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
-                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
+                $schedule->command('employee:attendanceadjustment', [$shift->id, 'app'])
                 ->dailyAt($dailyAt)
                 ->runInBackground();
             }
         }
+        //rv agent cron jobs start
+        // $employee_shifts = EmployeeShift::where('shift_type_id', 2)->get();
+        // if(count($employee_shifts)){
+        //     foreach($employee_shifts as $employee_shift)
+        //     {
+        //         // run after 30 mins from the employee_shift ends, to unassign ticket from the contractual employees
+        //         $dailyAt = Carbon::parse($employee_shift->end_time)->addMinutes(30)->format('H:i:s');
+        //         $schedule->command('agent:unassignedTicket')->dailyAt('22:30')->runInBackground();
+        //     }
+        // }
+
+        $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+
+        //SarNotification Email Cron
+        $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
+        $agent_sar_notify_time = '23:00'; //11 pm
+        if ($agent_sar_settings->exists()) {
+            $sar_setting = $agent_sar_settings->first();
+            $agent_sar_notify_time = $sar_setting->setting_value . ':00';
+        }
+        $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
+
+        //rv agent cron jobs end
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -298,7 +327,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
         $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
 
-        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
+        $schedule->command('archive:returnnoteimage')->dailyAt('02:00')->runInBackground();
 
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
@@ -393,23 +422,23 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
-        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
-        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
-        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
-        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreport')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 
 
-        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
-        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(11, '01:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(21, '00:00')->runInBackground();
         $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
         $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();

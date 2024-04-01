@@ -180,9 +180,11 @@ class QAEvaluationController extends Controller
                     return '';
                 }
             });
-//        dd($request->get('evaluation_from_date'), $request->get('evaluation_to_date'));
+           
         if ($request->get('evaluation_from_date') && $request->get('evaluation_to_date')) {
-            $from = $request->get('evaluation_from_date');
+            
+            $from = Carbon::parse($request->get('evaluation_from_date'))->startOfDay();
+          
             $to = $request->get('evaluation_to_date');
             $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
             $datatables->whereBetween('q_a_evaluations.updated_at', [$from, $stop_date]);

@@ -114,6 +114,10 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
+use App\Http\Controllers\Admins\AdminDashboardController;
+use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+
 
 class AdminFinanceController extends Controller
 {
@@ -160,7 +164,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
+    static public function getCycleText($days, $dayMap, $cycleSuffix = 'Of The Week') {
         $dayNames = [];
     
         foreach ($days as $day) {
@@ -181,7 +185,7 @@ class AdminFinanceController extends Controller
         }
     } 
 
-    static private function getDayOfMonthText($day) {
+    static public function getDayOfMonthText($day) {
         if ($day % 100 >= 11 && $day % 100 <= 13) {
             return $day . 'th';
         } else {
@@ -3019,7 +3023,7 @@ class AdminFinanceController extends Controller
                         $details['consignee']['destination'] = $shipment->consignee_city->name;
                         $details['consignee']['address'] = $shipment->consignee_address;
 
-                        ShipmentScanningJourneyController::add($shipment->id, 13, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,13,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
@@ -3133,8 +3137,7 @@ class AdminFinanceController extends Controller
                 if ($shipment->booking_type_id == 2) {
                     $details['items'] = $shipment->items;
                 }
-
-                ShipmentScanningJourneyController::add($shipment->id, 14, 1, Auth::id(), null, null);
+                ShipmentScanningJourneyController::add($shipment->id ,14,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                 return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'warning' => $message, 'details' => $details];
             } else {
                 return ['status' => 1, 'error' => 'Shipment has already been Delivered'];
@@ -4580,7 +4583,15 @@ class AdminFinanceController extends Controller
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        $shipper_cap   =   GeneralSetting::where('type','shipper_cap');
+        if($shipper_cap->exists())
+        {
+             $shipper_cap = $shipper_cap->first();
+
+        }else{
+             $shipper_cap=0;
+        }
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'shipper_cap'=>$shipper_cap]);
     }
 
   
@@ -4592,7 +4603,7 @@ class AdminFinanceController extends Controller
         }
 
 //        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
-        $pending_payments = DB::connection('reports_2')->table('pending_payments')
+        $pending_payments = DB::connection('mysql')->table('pending_payments')
             ->join('users as u', 'pending_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->join('user_bank_infos as ubi', function ($join) {
@@ -4608,7 +4619,7 @@ class AdminFinanceController extends Controller
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status');
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id');
             // ->groupBy('pending_payments.id'); // removed by the instruction of waqas bhai
 
             // dd($pending_payments);
@@ -4660,6 +4671,31 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('u.payment_cycle_days', function ($query, $keyword) {
+                $keywordLower = strtolower($keyword);
+                $payment_cycle_days = AdminDashboardController::$paymentCycleDays;
+                
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($payment_cycle_days as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
+            })
             ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
@@ -4685,14 +4721,7 @@ class AdminFinanceController extends Controller
             ->editColumn('payment_cycle_days', function ($pending_payment) {
                 $payment_cycle = $pending_payment->payment_cycle_id;
                 $payment_cycle_days = $pending_payment->payment_cycle_days;
-                $dayMap = [
-                    1 => 'Monday',
-                    2 => 'Tuesday',
-                    3 => 'Wednesday',
-                    4 => 'Thursday',
-                    5 => 'Friday',
-                    6 => 'Saturday',
-                ];
+                $dayMap = AdminDashboardController::$paymentCycleDays;
             
                 if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
                     $payment_cycle_days = explode(',', $payment_cycle_days);
@@ -5087,7 +5116,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges');
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date','s.packaging_charges','u.id as shipper_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -5175,6 +5204,24 @@ class AdminFinanceController extends Controller
         return $datatables->make(true);
     }
 
+    public function fetch_shipper_ibft_charges(Request $request){
+        $shipper_ids = $request->selected_shippers_id;
+        $total_ibft_charges = 0;
+
+        foreach ($shipper_ids as $shipper_id) {
+            $fetch_ibft_charges = UserIbftCharge::where('user_id', $shipper_id)->first();
+            if ($fetch_ibft_charges && $fetch_ibft_charges->current_charges > 0) {
+                $ibft_charges = $fetch_ibft_charges->current_charges;
+                $total_ibft_charges += $ibft_charges;
+            } else {
+                $user_ibft_charges = GlobalSettings::where('type', 'ibft_charges')->select('setting_value')->first();
+                $ibft_charges = $user_ibft_charges->setting_value ?? 0;
+                $total_ibft_charges += $ibft_charges;
+            }
+        }
+        return $total_ibft_charges;
+    }
+
     public function make_payments_shipment_export_selected(Request $request)
     {
         $pending_payment_shipment_ids = explode(',', $request->ids);
@@ -5254,7 +5301,7 @@ class AdminFinanceController extends Controller
 
     public function make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;
@@ -5439,17 +5486,17 @@ class AdminFinanceController extends Controller
         $company_bank = $request->get('company_bank_id');
 
         $done_payment_ids = array();
-//        $present_consolidation_shipments = array();
-//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
-//            foreach ($pending_payment_shipment_ids as $shipment_id){
-//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
-//                if($present->exists()){
-//                    $present = $present->first();
-//                    $consolidation_id = $present->consolidation_id;
-//
-//                }
-//            }
-//        }
+        //        $present_consolidation_shipments = array();
+        //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+        //            foreach ($pending_payment_shipment_ids as $shipment_id){
+        //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+        //                if($present->exists()){
+        //                    $present = $present->first();
+        //                    $consolidation_id = $present->consolidation_id;
+        //
+        //                }
+        //            }
+        //        }
 
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
@@ -5491,12 +5538,18 @@ class AdminFinanceController extends Controller
                     $done_payment->company_bank_id = $company_bank;
 
 
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
+                    }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
                     }
 
                     $done_payment->save();
@@ -5574,13 +5627,21 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->user_bank_info_id = $user_bank_id;
                     $done_payment->company_bank_id = $company_bank;
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
-
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-
-                        $done_payment->ibft_charges = $settings->setting_value;
+                    
+                    $user_ibft_charge = UserIbftCharge::where('user_id', $pending_payment->user_id)->first();
+                    if($user_ibft_charge){
+                        $done_payment->ibft_charges = $user_ibft_charge->current_charges;
                     }
+                    else{
+                        $settings = GlobalSettings::where('type', 'ibft_charges');
+    
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+    
+                            $done_payment->ibft_charges = $settings->setting_value;
+                        }
+                    }
+
 
                     $done_payment->save();
 
@@ -5690,6 +5751,42 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function make_done_payment($done_payment_id,$user_id,$total_shipments,$delivered_shipments,$returned_shipments,$adjusted_shipments,$user_bank_id,$company_bank)
+    {
+        if(is_null($done_payment_id))
+        {
+           $done_payment = new DonePayment();
+
+           $done_payment->user_id = $user_id;
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+           $done_payment->user_bank_info_id = $user_bank_id;
+           $done_payment->company_bank_id = $company_bank;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        } else {
+
+           $done_payment = DonePayment::find($done_payment_id);
+
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        }
+        
+
+    }
+    
     public function make_payments_stats_calculate(Request $request)
     {
         $total_amount = 0;
@@ -5903,9 +6000,7 @@ class AdminFinanceController extends Controller
 
         $count = $count->count();
 
-        $done_payments = DonePayment::
-//        with('VisionSoftCodPaymentClear','shipment_payment_journey_last_status_two')
-        join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc', 'dpc.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('admins as ad', function ($join) {
@@ -5928,8 +6023,18 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
+            ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 'done_payments.updated_at as updated_at','sts.status as star_status');
+            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
+            'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
+            'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 
+            'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 
+            'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 
+            'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 
+            'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
+            'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
+            'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -5969,6 +6074,31 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('done_payments.id', function ($query, $keyword) {
                 return $query->where('done_payments.id', '=', $keyword);
+            })
+            ->filterColumn('u.payment_cycle_days', function ($query, $keyword) {
+                $keywordLower = strtolower($keyword);
+                $payment_cycle_days = AdminDashboardController::$paymentCycleDays;
+                
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($payment_cycle_days as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
             })
             ->editColumn('payment_id', function ($done_payment) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
@@ -6039,6 +6169,35 @@ class AdminFinanceController extends Controller
             })
             ->removeColumn('phone')
             ->removeColumn('phone2')
+            ->editColumn('payment_cycle_days', function ($pending_payment) {
+                $payment_cycle = $pending_payment->payment_cycle_id;
+                $payment_cycle_days = $pending_payment->payment_cycle_days;
+                $dayMap = AdminDashboardController::$paymentCycleDays;
+            
+                if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $cycleText = $this->getCycleText($payment_cycle_days, $dayMap);
+                    return $cycleText;
+                }
+            
+                if (($payment_cycle == 3 || $payment_cycle == 6) && $payment_cycle_days != '0') {//Monthly And Fortnightly
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    if (count($payment_cycle_days) == 1) {
+                        $day = (int)$payment_cycle_days[0];
+                        return $this->getDayOfMonthText($day);
+                    } elseif (count($payment_cycle_days) == 2) {
+                        $day1 = (int)$payment_cycle_days[0];
+                        $day2 = (int)$payment_cycle_days[1];
+                        return $this->getDayOfMonthText($day1) . " And " . $this->getDayOfMonthText($day2);
+                    }
+                }else{
+                    return '-';
+                }
+            
+                if ($payment_cycle == 1) {// Daily
+                    return '-';
+                }
+            })
             ->editColumn('status', function ($done_payment) {
                 if ($done_payment->status == 0) {
                     return 'Processed';
@@ -6193,6 +6352,37 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
+            if ($payment_filter = $request->get('payment_filter')) {
+                $datatables = $datatables->where(function ($query) use ($payment_filter) {
+                    if ($payment_filter == 1) {
+                        $dayOfWeek = Carbon::today()->dayOfWeek;
+                        $dayOfMonth = Carbon::today()->format('d');            
+                        $query->where(function ($sub_query) {
+                            $sub_query->where('u.payment_cycle_id', 1);
+                        })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                            $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
+                                ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                    $sub_query->where(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->where('u.payment_cycle_id', 2)
+                                            ->where('u.payment_cycle_days', $dayOfWeek);
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 3)
+                                            ->where('u.payment_cycle_days', $dayOfMonth);
+                                    })->orWhere(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->whereIn('u.payment_cycle_id', [4,5])
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 6)
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
+                                    });
+                                });
+                        });
+                    } else {
+                        $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
+                    }
+                });
+            }
+
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
@@ -6205,6 +6395,10 @@ class AdminFinanceController extends Controller
 
         if ($shipper = $request->get('search_shipper')) {
             $datatables->where('u.id', '=', $shipper);
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
         }
 
         if ($shipper_status = $request->get('search_shipper_status')) {
@@ -6225,6 +6419,30 @@ class AdminFinanceController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('done_payments.status_updated_at', [$from, $to]);
+        }
+
+        if ($request->get('payment_cycles') !== null) {
+            $payment_cycles = $request->get('payment_cycles');
+            if ($payment_cycles == 1) {
+                $datatables->where('u.payment_cycle_id', '=', 1);
+            } else if ($payment_cycles == 2) {
+                $datatables->where('u.payment_cycle_id', '=', 2);
+            } else if ($payment_cycles == 3) {
+                $datatables->where('u.payment_cycle_id', '=', 3);
+            } else if ($payment_cycles == 4) {
+                $datatables->where('u.payment_cycle_id', '=', 4);
+            }  else if ($payment_cycles == 5) {
+                $datatables->where('u.payment_cycle_id', '=', 5);
+            }  else if ($payment_cycles == 6) {
+                $datatables->where('u.payment_cycle_id', '=', 6);
+            }
+            else {
+                $datatables->whereRaw('false');
+            }
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
         }
 
         if($request->get('star_shipper_filter') == 1)
@@ -13187,7 +13405,7 @@ class AdminFinanceController extends Controller
 
     public function retail_make_payments_verify(Request $request)
     {
-        $settings = DB::connection('reports')->table('global_settings')->where('type', 'over_payment_limit')->first();
+        $settings = DB::connection('mysql')->table('global_settings')->where('type', 'over_payment_limit')->first();
 
         if ($settings) {
             $over_payment_limit = $settings->setting_value;
@@ -13361,13 +13579,15 @@ class AdminFinanceController extends Controller
                     $done_payment->user_bank_info_id = $user_bank_id;
 
 
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
 
                     if ($settings->exists()) {
                         $settings = $settings->first();
 
                         $done_payment->ibft_charges = $settings->setting_value;
                     }
+
 
                     $done_payment->save();
 
@@ -13432,13 +13652,15 @@ class AdminFinanceController extends Controller
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
                     $done_payment->user_bank_info_id = $user_bank_id;
-                    $settings = GlobalSettings::where('type', 'ibft_charges');
+                    // $settings = GlobalSettings::where('type', 'ibft_charges');
+                    $settings = GlobalSettings::where('type', 'ibft_charges_retail');
 
                     if ($settings->exists()) {
                         $settings = $settings->first();
 
                         $done_payment->ibft_charges = $settings->setting_value;
                     }
+
 
                     $done_payment->save();
 

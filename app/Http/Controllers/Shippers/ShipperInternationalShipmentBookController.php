@@ -252,6 +252,7 @@ class ShipperInternationalShipmentBookController extends Controller
         if($service_type_id == 1 && $pieces_quantity > 1){
             ShipperShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
         }
+        ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
 
         NotificationsController::send(2, $shipment_id);
         $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
@@ -705,6 +706,14 @@ class ShipperInternationalShipmentBookController extends Controller
 
                             if ($row['payment_mode_id'] == 4) {
                                 $row['amount'] = 0;
+                            }
+                            if(!isset($row['parcel_value'])){
+                                if($row['amount'] == 0){
+                                    $row['parcel_value'] = 1;
+                                }
+                                else{
+                                    $row['parcel_value'] = 0;
+                                }
                             }
 
                             $row['business_category_id'] = 2;

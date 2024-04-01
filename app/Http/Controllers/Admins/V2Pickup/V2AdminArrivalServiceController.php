@@ -81,7 +81,7 @@ class V2AdminArrivalServiceController extends Controller
 
 
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 }else if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                     $details = array();
@@ -91,7 +91,7 @@ class V2AdminArrivalServiceController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['pieces_count'] = $shipment->pieces;
                     $details['pieces_tracking_numbers'] = $shipment_pieces;
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                 }
                 else{
@@ -111,7 +111,7 @@ class V2AdminArrivalServiceController extends Controller
                     $details['amount'] = $shipment->amount;
                     //$details['weight'] = floatval($shipment->actual_weight);
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
             } else {
@@ -133,7 +133,7 @@ class V2AdminArrivalServiceController extends Controller
                     $details['shipment_items_count'] = $shipment_items_count;
                     $details['scanned_shipment_item'] = $shipment_item->id;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];
@@ -152,7 +152,7 @@ class V2AdminArrivalServiceController extends Controller
                         $details['pieces'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                         $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment has already been modified'];

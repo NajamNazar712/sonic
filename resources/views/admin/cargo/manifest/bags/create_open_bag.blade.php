@@ -213,7 +213,7 @@
                                 'bag_type': bag_type,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 30000,
+                            // timeout: 30000,
                             error: function (data) {
                                 $('#add_shipment_form button.add').prop('disabled', false);
                                 UnblockPagePermanently();
@@ -472,7 +472,7 @@
                                 'screen_location_id': 3,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 30000,
+                            // timeout: 30000,
                             error: function (data) {
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },

@@ -679,7 +679,7 @@ class RetailShipmentBookController extends Controller
                   body {
                     background: none !important;
                     color: #09262e !important;
-                    font-size: 0.7rem !important;
+                    font-size: 0.8rem !important;
                   }
 
                   hr {
@@ -766,6 +766,9 @@ class RetailShipmentBookController extends Controller
                       font-weight: 900;
                       position: relative;" 
                     }
+                    .black-logo {
+                      filter: grayscale(100%);
+                    }
                 </style>
               </head>
               <body>
@@ -822,7 +825,6 @@ class RetailShipmentBookController extends Controller
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
 //            }
-
             if($shipment->shipment_type == 1){
 
                $shipping_mode = $shipment->shipping_mode->mode;
@@ -831,6 +833,7 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                 if($retail_shipment){
                     $shipping_mode = $retail_shipment->shipping_modes->name;
+                    $retail_user_name = $retail_shipment->retail_user->store->name;
                 }
             }
 
@@ -1043,7 +1046,7 @@ class RetailShipmentBookController extends Controller
                         }
 
                         $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>
                     ';
                         $table_start .= '
                             <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
@@ -1098,7 +1101,7 @@ class RetailShipmentBookController extends Controller
                             <tbody>
                 ';
                     $table_start .= '
-                            <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>
                 ';
                     $table_start .= '
                             <td rowspan="4" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
@@ -1265,13 +1268,13 @@ class RetailShipmentBookController extends Controller
                     $shiping_mode = "";
                     $service_type = "";
                     if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                        $service_type .= '<td colspan="4"  class="prominent" ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                        $service_type .= '<span ><strong>' . $shipment->booking_type->booking_type . '</span></td>';
                     } 
                     else if ($shipment->booking_type_id == 2) {
-                        $service_type .= '<td colspan="4" class="prominent replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
+                        $service_type .= '<span class=" replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></span>';
                     }
                     else {
-                        $service_type .= '<td colspan="4" class="prominent ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                        $service_type .= '<span><strong>' . $shipment->booking_type->booking_type . '</strong></span>';
                     }
 
                     if($shipment->business_category->id==1){
@@ -1282,8 +1285,8 @@ class RetailShipmentBookController extends Controller
                     <tr>
                       <td colspan="1" style="font-size:13px;" class=""><strong>Shipping Mode</strong></td>
                      '.$shiping_mode.'
-                      <td colspan="1" style="font-size:13px;" class=""><strong>Service</strong></td>
-                      '.$service_type.'
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Service - '. $service_type .'</strong></td>
+                      <td colspan="4"  class="prominent"><strong>Centre Name - ' .$retail_user_name. '</strong></td>
                     </tr> ';
 
                     $table_end .= '
@@ -1305,13 +1308,13 @@ class RetailShipmentBookController extends Controller
                     $table_end .= '
                     <div class="col m-1 row">
                               <h1 style="
-                             overflow: hidden;
-                             margin-top: -220px;
-                             margin-left: 300px;
-                             opacity: 0.3;
-                             transform: rotate(350deg);
-                             font-size: 700%; 
-                             color: #636e72;"     
+                              overflow: hidden;
+                              margin-top: -304px;
+                              margin-left: 348px;
+                              opacity: 0.3;
+                              transform: rotate(340deg);
+                              font-size: 1200%;
+                              color: #636e72;"
                               >RETAIL</h1>
                             </div>
                     <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Trax Copy</p></div><div class="col"><hr></div>
@@ -1411,7 +1414,7 @@ class RetailShipmentBookController extends Controller
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
-                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>

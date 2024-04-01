@@ -273,7 +273,7 @@
                                                 <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
                                             <div id="pieces_quantity" class="form-group input-group d-none">
-                                                <input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
+                                                <input  type="text" name="pieces_quantity" id="pieces" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
                                             </div>
                                             <div class="form-group text-center p-1 border border-light rounded" id="insurance_div">
                                                 <label class="d-block">Insurance</label>
@@ -730,6 +730,8 @@
                     $('#from_date_root').css('top','40px');
                 }
             });
+
+            //500 pieces start
             $(this).find('.pieces').TouchSpin({
                 min: 1,
                 max: 10,
@@ -738,10 +740,29 @@
                 buttondown_txt: '<i class="ft-minus"></i>',
                 buttonup_txt: '<i class="ft-plus"></i>'
             }).bind('input change', function() {
-                if ($(this).hasClass('danger')) {
+                $(this).tooltip('show');
+
+                if ($(this).hasClass('danger'))
                     $(this).valid();
-                }
+
+                if ($(this).hasClass('exceed_pieces'))
+                    $("#pieces").trigger("touchspin.updatesettings", {max: 500});
+                else
+                    $("#pieces").trigger("touchspin.updatesettings", {max: 10});
             });
+
+            $(".pieces").change(function () {
+                if($('#shipping_mode').val() == 2)
+                    $(".pieces").addClass("exceed_pieces");
+                else
+                    $(".pieces").removeClass("exceed_pieces");
+            });
+
+
+            $("#shipping_mode").change(function () {
+                $('#pieces').val(null).trigger('change');
+            });
+            //500 pieces end
 
             @if (session('print'))
             $.ajax({

@@ -2,6 +2,7 @@
 /public/hot
 /public/storage
 /public/reports
+/public/qsr_pending_deliveries_reports
 /storage/*.key
 /vendor
 /.phpintel
@@ -24,3 +25,8 @@ composer.lock
 /public/.DT_Store
 /public/file/.DT_Store
 .DT_Store
+
+.config/*
+.product/*
+tmp/*
+docker-compose*

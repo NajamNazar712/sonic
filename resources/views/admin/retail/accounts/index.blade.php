@@ -42,7 +42,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Shipper Details </h4>
+                    <h4 class="modal-title white">Shipper Details</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -56,7 +56,8 @@
                                 <div class="col">
                                     <label for="iban" class="font-weight-bold mr-2">IBAN</label>
                                     <div class="form-group">
-                                        <input type="text" name="iban" id="iban" class="form-control" placeholder="IBAN*" data-rule-required="true" data-msg-required="IBAN is required">
+                                        <input type="text" name="iban" id="iban" class="form-control" placeholder="IBAN*" data-rule-required="true" data-msg-required="IBAN is required" maxlength="24">
+                                        <span id="iban_error" class="danger" style="display: none;">IBAN length must be 24 characters</span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -155,6 +156,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function () {
@@ -351,13 +353,19 @@
 
             });
             $('#edit_shipper_details_form').validate({
-                // ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
+                    var iban = $('#iban').val().replace(/\s+/g, '').toUpperCase();
+
+                        // Check if IBAN length is not 24
+                        if (iban.length !== 24) {
+                            $('#iban_error').show(); // Display error message for invalid IBAN length
+                            return false; // Prevent form submission
+                        }
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to update Shipper Details!',
@@ -388,6 +396,42 @@
                     });
                 }
             });
+
+            $('#iban').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
+            });
+
+            $('#iban').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+                
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length < 24) {
+                    $('#iban_error').show();
+                    event.preventDefault();
+                } else {
+                    $('#iban_error').hide();
+                }
+
+            });
+            
         });
-    </script>
+        </script>
 @endsection

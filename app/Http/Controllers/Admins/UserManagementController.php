@@ -237,7 +237,7 @@ class UserManagementController extends Controller
 
         if ($admin) {
             $admin->status = $request->status;
-
+            $admin->updated_by = Auth::id();
             $admin->save();
 
             $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
@@ -384,7 +384,7 @@ class UserManagementController extends Controller
     {
         $user_ids = explode(',', $request->id);
         foreach ($user_ids as $user_id) {
-
+            $update_user = false; 
             foreach ($request->input('hubs') as $hub_id) {
                 $admin_hub_exist = AdminHub::where('admin_id', $user_id)->where('hub_id', $hub_id)->first();
 
@@ -395,7 +395,14 @@ class UserManagementController extends Controller
                     $admin_hub->admin_id = $user_id;
 
                     $admin_hub->save();
+                    $update_user = true;
                 }
+            }
+            if($update_user){
+                $admin = Admin::find($user_id);
+                $admin->updated_by = Auth::id();
+                $admin->updated_at = Carbon::now();
+                $admin->save();
             }
         }
         return redirect()->back()->with(['status' => 1, 'success' => "Hubs has been Assigned successfully!"]);
@@ -490,6 +497,7 @@ class UserManagementController extends Controller
         }
         $admin->default_hub_id = $request->input('default_hub');
         $admin->updated_by = Auth::id();
+        $admin->updated_at = Carbon::now();
         $admin->shift_id = $request->input('shift_id');
 
         if ($request->filled('pin')) {
@@ -602,9 +610,11 @@ class UserManagementController extends Controller
 
             if ($admin_role->is_active == 1) {
                 $admin_role->is_active = 0;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             } else {
                 $admin_role->is_active = 1;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             }
 
@@ -990,6 +1000,7 @@ class UserManagementController extends Controller
             $admin = Admin::find($admin_id);
             if ($admin) {
                 $admin->phone_number = $phone;
+                $admin->updated_by = Auth::id();
                 $admin->save();
 
                 $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);

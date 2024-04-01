@@ -34,7 +34,7 @@
                                 </div>
 
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                                    <button type="submit" name="add" id="by_pass_add" class="btn btn-primary add" value="Add">Add</button>
                                 </div>
                             </form>
 
@@ -135,7 +135,8 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_shipment_weight_form" class="form-inline mb-1 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
+                    <span class="alert alert-warning d-none" id="by_passed_msg"></span>
+                    <form id="add_shipment_weight_form" class="form-inline mt-2 justify-content-center" method="post" action="{{ route('admin.v2_pickups.arrival.bulk.store') }}" novalidate="novalidate">
                         {{ csrf_field() }}
 
                         <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -171,7 +172,7 @@
                             </div>
                             <div class="col">
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
+                                    <button type="submit" name="add"  class="btn btn-primary add" id="add" value="Add">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -283,6 +284,8 @@
 
     <script>
         $(document).ready(function() {
+
+          
             @if (session('print_shipment_ids'))
             var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
 
@@ -360,6 +363,9 @@
             var all_shipment_item_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
+            var weight_bypass = []
+            var pickup_request_bypass = []
+
             $('#add_shipment_form input.tracking_number').focus();
 
             var table = $('#datatable').DataTable({
@@ -377,6 +383,8 @@
                     {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
+
+        
                     // var info = table.page.info();
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -395,7 +403,7 @@
                     this.api().table().columns.adjust();
                 }
             });
-
+       
             $('#add_try_and_buy_shipment_form input.scan_item').focus();
 
             var try_and_buy_table = $('#try_and_buy_datatable').DataTable({
@@ -496,7 +504,7 @@
                    return true;
                }
             });
-
+            
             var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
             $('#add_shipment_form').validate({
@@ -826,13 +834,57 @@
                 try_and_buy_table.clear().draw();
             });
 
-            $('#arrival_of_shipments_form').bind('submit', function(e) {
+            $('#arrival_of_shipments_form').on('submit', function(e) {
                 e.preventDefault();
+                var url = '{!! route('admin.v2_pickups.arrival.bulk.weight_bypass') !!}';
+                var csrfToken = $('meta[name="csrf-token"]').attr('content');
+                var dataTable = $('#datatable').DataTable();
+                var allData = dataTable.rows().data().toArray();
 
-                $('#add_shipment_weight_form input.shipment_ids').val(shipment_ids);
+                $.each(allData, function(index, row) {
+                    var weightValue = row[1];
+                    weight_bypass.push(weightValue);
+                });
+  
 
-                $('#ShipmentWeightModal').modal('show');
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        tracking_numbers: weight_bypass,
+                    }
+                })
+                .done(function(response) {  
+                    var shipments_to_be_not_bypassed = response.shipments_to_be_not_bypassed;
+                    var shipments_to_be_not_bypassed_str = shipments_to_be_not_bypassed.join(',');
+                    var shipments_to_be_bypassed = response.shipments_to_be_bypassed;
+                    var shipments_to_be_bypassed_str = shipments_to_be_bypassed.join(',');
+   
+                    $('#add_shipment_weight_form input.shipment_ids').val(shipments_to_be_not_bypassed_str);
+                    if (shipments_to_be_not_bypassed.length > 0 && shipments_to_be_bypassed.length == 0) {
+                        $('#ShipmentWeightModal').modal('show');
+                    }
+                    // Check if this block is now running
+                    if (shipments_to_be_not_bypassed.length > 0 && shipments_to_be_bypassed.length > 0) {
+                        $('#ShipmentWeightModal').modal('show');
+                        $('#by_passed_msg').removeClass('d-none');
+                        $('#by_passed_msg').text('These shipments have been marked as arrived at origin: ' + shipments_to_be_bypassed_str);
+                    }
+                    if (shipments_to_be_bypassed.length > 0 && shipments_to_be_not_bypassed.length == 0) {
+                        toastr.success('Has Been Marked Arrived', 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    weight_bypass = [];
+                    pickup_request_bypass = [];
+                    table.clear().draw();
+                })
+                .fail(function(error) {
+                    console.error('Ajax request failed:', error);
+                });
             });
+
+
+
 
             $('#rider_selection_form').validate({
                 errorClass: 'danger',
@@ -1133,6 +1185,7 @@
                                     else{
                                         all_shipment_piece_ids.concat(shipment_piece_ids);
                                     }
+                                    //error removed.
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
@@ -1169,7 +1222,6 @@
             $('#add_shipment_form input.tracking_number').focus();
 
         }
-
 
 
 

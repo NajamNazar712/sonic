@@ -295,6 +295,7 @@
                                             <span class="danger">*</span>
                                         </label>
                                         <input type="text" class="form-control iban text-uppercase required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                        <span id="iban_no_error" class="danger" style="display: none;">IBAN Number must be of 24 Characters</span>
                                     </div>
                                     <div class="form-group col">
                                         <label for="account_name">Account Number:
@@ -751,6 +752,29 @@
                     },
                 },
             });
+
+            $('#iban_no').on('input', function (e) {
+                var iban = $(this).val().replace(/\s+/g, '').toUpperCase(); // Remove white spaces and convert to uppercase
+                var defaultPrefix = 'PK';
+
+                if (!iban.startsWith(defaultPrefix)) {
+                    iban = defaultPrefix + iban.substring(defaultPrefix.length);
+                }
+
+                if (iban.length > 2 && !iban.startsWith(defaultPrefix)) {
+                    $(this).val(defaultPrefix + iban.substring(defaultPrefix.length));
+                } else {
+                    $(this).val(iban);
+                }
+
+                if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
+                    $('#iban_no_error').show();
+                } else {
+                    $('#iban_no_error').hide();
+                }
+            });
+
+
 
             $('#weight').inputmask({
                 'alias': 'decimal',

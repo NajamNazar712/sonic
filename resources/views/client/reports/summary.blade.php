@@ -208,6 +208,7 @@
                         <th class="border-primary border-darken-1">Phone No.</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Return Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -471,6 +472,7 @@
                             head.push('Phone No.');
                             head.push('Rider Picked Status Date');
                             head.push('Status');
+                            head.push('Status Date');
                             head.push('Return Reason');
                             head.push('Payment Status');
                             head.push('Service Type');
@@ -496,6 +498,7 @@
                                 row.push(values.consignee_phone);
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.current_status);
+                                row.push(values.current_status_date);
                                 row.push(values.return_reason);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
@@ -559,6 +562,7 @@
                     { data:'consignee_phone' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
                     { data:'rider_picked_status_date' ,name: 'sjrp.created_at', class: 'align-middle rider_picked_status_date'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'current_status_date' ,name: 'ss.updated', class: 'align-middle current_status_date'},
                     { data: 'return_reason' ,name: 'ssr.name', class: 'align-middle return_reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
