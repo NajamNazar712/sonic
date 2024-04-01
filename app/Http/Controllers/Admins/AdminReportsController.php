@@ -3468,8 +3468,8 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_payment_journey where shipments_payment_journey.shipment_id = shipments.id and shipments_payment_journey.status_id  = 3)')
                     );
             })
-            ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
-            ->leftJoin('sales_commission_users as scu', 'sc.id', '=', 'scu.sales_commission_id')
+            // ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
+            // ->leftJoin('sales_commission_users as scu', 'sc.id', '=', 'scu.sales_commission_id')
          
                 
             // ->leftJoin('sales_tiers as st', 'st.id', '=', 'scu.tier_id')
