@@ -44,7 +44,7 @@ class AdminLogisticBookingController extends Controller
             ->join('sub_category_segments as sb','sb.id','=','trax_logistic_bookings.service_id')
             ->join('cities as oc','oc.id','trax_logistic_bookings.origin_id')
             ->join('cities as dc','dc.id','trax_logistic_bookings.destination_id')
-            ->select('trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address');
+            ->select('trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address');
 
         $datatables = Datatables::of($logistic_bookings);
 
@@ -133,7 +133,7 @@ class AdminLogisticBookingController extends Controller
             foreach ($request->no_piece as  $key => $value) {
                 if(!is_null($value)){
                     TraxItemRefernce::create([
-                        'cn_number' => $request->cn_number,
+                        'booking_id' => $request->id,
                         'width' => $request->width[$key],
                         'height' => $request->height[$key],
                         'length' => $request->length[$key],

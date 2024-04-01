@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Rider\Logistic\Api;
 
+use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
+use App\Http\Models\Admin\Logistic\TraxItemRefernce;
 use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
@@ -11,6 +13,7 @@ use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class RiderLogisticApiController extends Controller
 {
@@ -53,21 +56,73 @@ class RiderLogisticApiController extends Controller
         return response()->json(['status'=>1,'logistic_data'=> $logistic_data]);
     }
 
-    public function  logistic_booking(Request $request)
-    {
-        $logistic_booking = new TraxLogisticBooking();
-        $logistic_booking->shipper_id = $request->shipper_id;
-        $logistic_booking->cn_number = $request->cn_number;
-        $logistic_booking->product_id = $request->product_id;
-        $logistic_booking->service_id = $request->service_id;
-        $logistic_booking->destination_id = $request->destination_id;
-        $logistic_booking->shipper_reference = $request->shipper_reference;
-        $logistic_booking->consignee_name = $request->consignee_name;
-        $logistic_booking->total_pieces = $request->total_pieces;
-        $logistic_booking->consignee_phone_1 = $request->consignee_phone_1;
-        $logistic_booking->total_dense_weight = $request->total_dense_weight;
-        $logistic_booking->total_volumetric_weight = $request->total_volumetric_weight;
-        $logistic_booking->save();
 
+
+    public function logistic_booking_store(Request $request)
+    {
+
+        $bookig_data=$request->booking_data;
+        $rider_id = $request->rider_id;
+
+        try {
+            DB::beginTransaction();
+
+            if (isset($bookig_data))
+            {
+                foreach ($bookig_data as $booking)
+                {
+
+                    $logistic_booking=TraxLogisticBooking::create([
+                        'shipper_id' => $booking['shipper_id'],
+                        'cn_number' => $booking['cn_number'],
+                        'product_id' => $booking['product_id'],
+                        'service_id' => $booking['service_id'],
+                        'destination_id' => $booking['destination_id'],
+                        'shipper_reference' => $booking['shipper_reference'],
+                        'consignee_name' => $booking['consignee_name'],
+                        'total_pieces' => $booking['total_pieces'],
+                        'consignee_phone_1' => $booking['consignee_phone_1'],
+                        'total_dense_weight' => $booking['total_dense_weight'],
+                        'total_volumetric_weight' => $booking['total_volumetric_weight']
+                    ]);
+                    if (isset($booking['booking_pieces_data']))
+                    {
+                        foreach ($booking['booking_pieces_data'] as $pieces_data) {
+                            TraxBookingPiece::create([
+                                'booking_id'=>$logistic_booking->id,
+                                'from_pieces'=>$pieces_data['from_pieces'],
+                                'to_pieces'=>$pieces_data['to_pieces'],
+                                'quantity'=>$pieces_data['quantity']
+                            ]);
+                        }
+                    }
+                    if (isset($booking['item_refernces_data']))
+                    {
+                        foreach ($booking['item_refernces_data'] as  $item_data) {
+                            TraxItemRefernce::create([
+                                'booking_id' => $logistic_booking->id,
+                                'item_code' => $item_data['item_code'],
+                                'width' => $item_data['width'],
+                                'height' => $item_data['height'],
+                                'length' => $item_data['length'],
+                                'weight' => $item_data['weight'],
+                                'no_piece' => $item_data['no_piece'],
+                                'created_by'=>$rider_id,
+                                'updated_by'=>$rider_id,
+                                'user_type'=>2
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json(['success'=>'Booking Completed Successfully']);
+
+        }catch (\Exception $ex) {
+            DB::rollback();
+            dd($ex->getMessage());
+            return response()->json(['error'=>'Something went wrong!']);
+        }
     }
 }

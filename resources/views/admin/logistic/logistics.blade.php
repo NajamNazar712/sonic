@@ -308,7 +308,7 @@
                     {data: 'pickup_address', name: 'pickup_address', class: 'align-middle pickup_address'},
                     {data: 'product_name', name: 's.name', class: 'align-middle product_name'},
                     {data: 'service_name', name: 'sb.name', class: 'align-middle service_name'},
-                    {data: 'booking_weight', name: 'booking_weight', class: 'align-middle booking_weight'},
+                    {data: 'total_booking_weight', name: 'total_booking_weight', class: 'align-middle total_booking_weight'},
                     {data: 'total_pieces', name: 'total_pieces', class: 'align-middle total_pieces'},
                     {data: 'origin_name', name: 'oc.name', class: 'align-middle origin_name'},
                     {data: 'destination_name', name: 'dc.name', class: 'align-middle destination_name'},

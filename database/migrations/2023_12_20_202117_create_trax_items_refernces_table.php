@@ -15,7 +15,8 @@ class CreateTraxItemsReferncesTable extends Migration
     {
         Schema::create('trax_item_refernces', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('cn_number');
+            $table->integer('booking_id')->nullable();
+            $table->string('item_code')->nullable();
             $table->decimal('width')->nullable();
             $table->decimal('height')->nullable();
             $table->decimal('length')->nullable();
