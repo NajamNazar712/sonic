@@ -340,17 +340,19 @@ class ReturnController extends Controller
        ->pluck('employees.id')->toArray();
 
 
-       //Online Available Agents
-       $online_agents = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-        //    ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
-           ->whereIn('id', function ($query) {
-               $query->select(DB::raw('MAX(id)'))
-                   ->from('employee_attendances')
-                   ->groupBy('employee_attendances.employee_id');
-           })
-           ->whereNull('clock_out') //if clockout is null means user has not logged out yet
-           ->count();
-
+        //Online Available Agents
+        $online_agents = EmployeeAttendance::join('admins','admins.employee_id','employee_attendances.employee_id')
+        ->join('rv_shipment_assign_agents as rvsa','rvsa.agent_id','admins.id')
+        ->where('rvsa.updated_at','>',now()->subMinutes(30))
+        ->whereIn('employee_attendances.employee_id', $number_of_available_agents)
+        ->whereIn('employee_attendances.id', function ($query) {
+            $query->select(DB::raw('MAX(id)'))
+                ->from('employee_attendances')
+                ->groupBy('employee_attendances.employee_id');
+        })
+        ->groupBy('employee_attendances.employee_id')
+        ->whereNull('employee_attendances.clock_out') //if clockout is null means user has not logged out yet
+        ->get(['employee_attendances.employee_id'])->count();
 
         //Average Ticket Per Agent
         $average_ticket_per_online_agent = ($online_agents > 0) ? ($total_tickets_today / $online_agents) : 0;
