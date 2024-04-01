@@ -1178,7 +1178,7 @@ trait RvTrait
 
     protected function getShipmentJourneyStatusReasonId($shipment)
     {
-        $statusReasonId = ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',12)->first()->status_reason_id;
+        $statusReasonId = ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',12)->latest()->first()->status_reason_id;
         return $statusReasonId;
     }
     //updated and optimized
