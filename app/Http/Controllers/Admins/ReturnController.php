@@ -317,7 +317,7 @@ class ReturnController extends Controller
         ->where('shipments.shipper_status_id', 12);
 
         $number_of_pending_tickets = $shipmentsQuery
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL THEN 1 END) AS pending_first_call_count')
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL AND rvsa.rv_assign_agent_status_id IS NOT NULL THEN 1 END) AS pending_first_call_count')
             ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL AND rvsa.rv_assign_agent_status_id = 6 THEN 1 END) AS pending_second_call_count')
             ->first();
 
@@ -342,7 +342,7 @@ class ReturnController extends Controller
 
         //Online Available Agents
         $online_agents = EmployeeAttendance::join('admins','admins.employee_id','employee_attendances.employee_id')
-        ->join('rv_shipment_assign_agents as rvsa','rvsa.agent_id','admins.id')
+        ->join('rv_shipment_assign_agents as rvsa','rvsa.agent_id','admins.id') //Agent will be considered as logged out if it's latest record in rv_shipment_assign_agent is older 30 minutes
         ->where('rvsa.updated_at','>',now()->subMinutes(30))
         ->whereIn('employee_attendances.employee_id', $number_of_available_agents)
         ->whereIn('employee_attendances.id', function ($query) {
