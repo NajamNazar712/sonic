@@ -2220,29 +2220,93 @@ class RetailShipmentBookController extends Controller
     {
         $phone_number = str_replace('-', '', $phone_number);
         $shipper_cnic = str_replace('-', '', $shipper_cnic);
+
+        $existing_record = RetailShipperNameVerification::where('phone_number', $phone_number)->get();
+
+        if ($existing_record->isNotEmpty()) {
+            $existing_record = $existing_record->first(); // Get the first matching record
+
+            $changed = false; // Flag to check if any field has changed
+
+            if ($existing_record->phone_number != $phone_number) {
+                $existing_record->phone_number = $phone_number;
+                $changed = true;
+            }
+
+            if ($existing_record->shipper_name != $shipper_name) {
+                $existing_record->shipper_name = $shipper_name;
+                $changed = true;
+            }
+
+            if ($existing_record->shipper_cnic != $shipper_cnic) {
+                $existing_record->shipper_cnic = $shipper_cnic;
+                $changed = true;
+            }
+
+            if ($existing_record->shipper_address != $shipper_address) {
+                $existing_record->shipper_address = $shipper_address;
+                $changed = true;
+            }
+
+            if ($changed) {
+                // Record added
+                $new_shipper = new RetailShipperNameVerification();
+                $new_shipper->phone_number = $phone_number;
+                $new_shipper->shipper_name = $shipper_name;
+                $new_shipper->shipper_cnic = $shipper_cnic;
+                $new_shipper->shipper_address = $shipper_address;
+                $new_shipper->save();
+            } else {
+                // record updated
+                $existing_record->save();
+            }
+        } else {
+            // No existing record found, create a new one
+            $new_shipper = new RetailShipperNameVerification();
+            $new_shipper->phone_number = $phone_number;
+            $new_shipper->shipper_name = $shipper_name;
+            $new_shipper->shipper_cnic = $shipper_cnic;
+            $new_shipper->shipper_address = $shipper_address;
+            $new_shipper->save();
+        }
+
+
+
+        // else {
+        //     // If no record with the phone number exists, create a new entry
+        //     $update_shipper = new RetailShipperNameVerification();
+        //     $update_shipper->phone_number = $phone_number;
+        //     $update_shipper->shipper_name = $shipper_name;
+        //     $update_shipper->shipper_cnic = $shipper_cnic;
+        //     $update_shipper->shipper_address = $shipper_address;
+        //     $update_shipper->save();
+        // }
+
+
+
 //        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
 //        {
 //            return 0;
 //        }
 //        else
 //        {
-            $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
-            if($record_exist->exists())
-            {
-                $record_exist = $record_exist->first();
-                $record_exist->shipper_cnic = $shipper_cnic;
-                $record_exist->shipper_address = $shipper_address;
-                $record_exist->save();
-            }
-            else
-            {
-                $update_shipper = new RetailShipperNameVerification();
-                $update_shipper->phone_number = $phone_number;
-                $update_shipper->shipper_name = $shipper_name;
-                $update_shipper->shipper_cnic = $shipper_cnic;
-                $update_shipper->shipper_address = $shipper_address;
-                $update_shipper->save();
-            }
+            // $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
+            // if($record_exist->exists())
+            // {
+            //     $record_exist = $record_exist->first();
+            //     $record_exist->shipper_cnic = $shipper_cnic;
+            //     $record_exist->shipper_address = $shipper_address;
+            //     $record_exist->save();
+            // }
+            // else
+            // {
+            //     $update_shipper = new RetailShipperNameVerification();
+            //     $update_shipper->phone_number = $phone_number;
+            //     $update_shipper->shipper_name = $shipper_name;
+            //     $update_shipper->shipper_cnic = $shipper_cnic;
+            //     $update_shipper->shipper_address = $shipper_address;
+            //     $update_shipper->save();
+            // }
 //        }
     }
 
