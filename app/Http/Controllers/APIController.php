@@ -289,7 +289,6 @@ class APIController extends Controller
                 'shipments.consignee_address as address',
                 'trax_pay_transactions.fintech_amount as fintech_amount',
                 'trax_pay_transactions.cod_amount as codAmount',
-                'cities.name as city_name',
                 'cities.name as city_name'
             )->first();
 
