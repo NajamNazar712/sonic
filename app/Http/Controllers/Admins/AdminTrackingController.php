@@ -665,8 +665,20 @@ class AdminTrackingController extends Controller
                 }
                 if ((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
 
-                    $details = array();
+                    $arrive_at_origin_statuses = ShipmentsJourney::where('shipment_id', $shipment->id)
+                        ->where('shipper_status_id', 2)
+                        ->pluck('created_at');
+                        $aging = '-';
+                        if ($arrive_at_origin_statuses->isNotEmpty()) {
+                            $origin = Carbon::parse($arrive_at_origin_statuses->first());
+                            $aging = Carbon::now()->diffInDays($origin);
+                            if ($aging >= 90) {
+                                $aging = '90+';
+                            }
+                        }
 
+                    $details = array();
+                    $details['aging'] = $aging;
                     $details['complaint'] = '-';
                     $details['tracking_number'] = $tracking_no;
                     $details['amount'] = $shipment->amount;
@@ -1100,8 +1112,9 @@ class AdminTrackingController extends Controller
                                 }
 
                                 $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
-
-                                $details['shipper']['name'] = $shipper->shipper_name;
+                                $shipment_name_verification = \DB::table('retail_shipments')->where('shipment_id', $retail_shipment->shipment_id)->first();
+                                // $details['shipper']['name'] = $shipper->shipper_name;
+                                $details['shipper']['name'] = $shipment_name_verification->shipper_name;
                                 $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                                 $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
                                 $details['shipper']['sales_person'] = $sales_person_name;
@@ -2203,16 +2216,17 @@ class AdminTrackingController extends Controller
                             ShipmentPosition::where('tracked_by', Auth::id())->delete();
                             $shipments = $shipments->get();
                             foreach ($shipments as $shipment){
-                                $shipment_detail = array();
+                                                                $shipment_detail = array();
 
                                 $last_shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'desc')->first();
-                                if($last_shipment_journey->user_id != null){
+                                
+                                if($last_shipment_journey->user_id != null && $last_shipment_journey->name != null){
                                     $shipment_journey_status_by = $last_shipment_journey->user->name . ' (Shipper)';
                                 }
-                                else if($last_shipment_journey->admin_id != null){
+                                else if($last_shipment_journey->admin_id != null && $last_shipment_journey->admin != null){
                                     $shipment_journey_status_by = $last_shipment_journey->admin->name . ' (Admin)';
                                 }
-                                else if($last_shipment_journey->rider_id != null){
+                                else if($last_shipment_journey->rider_id != null && $last_shipment_journey->rider != null){
                                     $shipment_journey_status_by = $last_shipment_journey->rider->name . ' (Rider)';
                                 }
                                 else{
@@ -2321,8 +2335,12 @@ class AdminTrackingController extends Controller
                                         $handover_note = str_pad($handover->id, 6, '0', STR_PAD_LEFT);
                                         $handover_created_by = Admin::find($handover->created_by)->name;
                                         $handover_created_at = $handover->created_at;
-                                        $handover_from = HandoverResponsibilities::find($handover->from)->admin->name . ' (' . (isset($handover->from_admin->Edesignation) && isset($handover->from_admin->Edesignation->department) ? $handover->from_admin->Edesignation->department->name : '-') . ')' ;
-                                        $handover_to = HandoverResponsibilities::find($handover->to)->admin->name . ' (' . (isset($handover->to_admin->Edesignation) && isset($handover->to_admin->Edesignation->department) ? $handover->to_admin->Edesignation->department->name : '-') . ')';
+                                        
+                                        $handoverfrom = HandoverResponsibilities::find($handover->from);
+                                        $handover_from = (($handoverfrom->admin)  ? $handoverfrom->admin->name . ' (' . (($handover->from_admin->Edesignation) && ($handover->from_admin->Edesignation->department) ? $handover->from_admin->Edesignation->department->name : '-') . ')' : '-');
+                                        $handoverto    = HandoverResponsibilities::find($handover->to);
+                                        $handover_to = (($handoverto->admin) ? $handoverto->admin->name . ' (' . (($handover->to_admin->Edesignation) && ($handover->to_admin->Edesignation->department) ? $handover->to_admin->Edesignation->department->name : '-') . ')' : '-');
+                                       
                                         if($handover->received_by != null){
                                             $handover_received_by = Admin::find($handover->received_by)->name;
                                             $handover_received_at = $handover->received_at;
@@ -2475,7 +2493,8 @@ class AdminTrackingController extends Controller
                         if ($last_scanned_location->user_type == 1) {
                             $account_type = 'Admin';
                             $admin = Admin::find($last_scanned_location->admin_id);
-                            if($admin->trax_id){
+                            
+                            if($admin){
                                $trax_id = $admin->trax_id;
                             }
                             else {

@@ -28,9 +28,10 @@ class ShipmentStatusWebhookController extends Controller
         $subscriber = ShipmentStatusSubscription::where('user_id', $user_id)->where('status', 1);
         if($subscriber->exists()){
             $subscriber = $subscriber->first();
-            $data = array();
+                       $data = array();
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
+            $data['order_id'] = $shipment->order_id;
             $status = ShipmentStatusesForShipperWebhook::where('user_id',$user_id)->where('status_id',$shipper_status_id);
             if($status->exists())
             {
@@ -68,7 +69,7 @@ class ShipmentStatusWebhookController extends Controller
         }
     }
 
-    static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL){
+    static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL,$orderId = NULL){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
 
@@ -78,6 +79,7 @@ class ShipmentStatusWebhookController extends Controller
 
                 $payload = [];
                 $payload['tracking_number'] = $tracking_number;
+                $payload['order_id'] = $orderId ?? '-';
                 $payload['status'] = $status;
                 $payload['date_time'] = $date;
                 if($reason){
@@ -89,8 +91,9 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => $payload
                 ]);
+                
                 $status_code = $response->getStatusCode();
-
+                
                 if (in_array($status_code, [200, 201, 202, 204])) {
                     break;
                 }
