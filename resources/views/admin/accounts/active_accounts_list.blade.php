@@ -2478,7 +2478,7 @@ function checkboxStatus() {
                 if ($(this).prop('checked')) {
                     exclude_shipper.prop('disabled', true);
                     if (same_consignee.prop('checked')) {
-                        var error = "Cannot select For Different Consignee when Same Consignee is selected.";
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         $(this).prop('checked', false);
                     }
@@ -2492,7 +2492,7 @@ function checkboxStatus() {
                 if ($(this).prop('checked')) {
                     exclude_shipper.prop('disabled', true);
                 if (different_consignee.prop('checked')) {
-                        var error = "Cannot select Same Consignee when Different Consignee is selected.";
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         $(this).prop('checked', false);
                     }
