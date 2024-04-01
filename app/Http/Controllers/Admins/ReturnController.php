@@ -323,11 +323,11 @@ class ReturnController extends Controller
 
         //Pending First Call
         $number_of_pending_first_call = $number_of_pending_tickets->pending_first_call_count;
-        $number_of_pending_first_call_percentage = ($number_of_pending_first_call / $reason_validation_required) * 100;
+        $number_of_pending_first_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_first_call / $reason_validation_required) * 100) : 0;
 
         //Pending Second Call
         $number_of_pending_second_call = $number_of_pending_tickets->pending_second_call_count;
-        $number_of_pending_second_call_percentage = ($number_of_pending_second_call / $reason_validation_required) * 100;
+        $number_of_pending_second_call_percentage = ($reason_validation_required > 0) ? (($number_of_pending_second_call / $reason_validation_required) * 100) : 0;
 
         //Total Agents Online Today
        $number_of_available_agents = Employee::join('employee_attendances','employees.id','employee_attendances.employee_id')
