@@ -116,8 +116,9 @@ class LeadAPIController extends Controller
             $new_lead->updated_by = Auth::id();
             $new_lead->save();
             NotificationsController::send(113, $new_lead);
-            if($new_lead->sale_person_id)
+            if(isset($new_lead->sale_person_id))
             {
+
                 $new_lead = $new_lead->get();
                 NotificationsController::send(204, $new_lead,$sales_person_id);
             }
