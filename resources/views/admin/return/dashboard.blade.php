@@ -257,7 +257,7 @@
 
             </div>
         </div>
-
+        <div class="loader"></div>
     @endsection
 
     @section('css')
@@ -343,7 +343,13 @@
                 function fetchData() {
                 $.ajax({
                         url: '{!! route('admin.return.data') !!}',
-                        method: 'GET'
+                        method: 'GET',
+                        beforeSend:function(){
+                                $(".loader").append(data_table_loader);
+                            },
+                        complete:function(){
+                            $(".loader").empty();
+                        }
                     }).done(function (data) 
                     {
                        if(data.status){
