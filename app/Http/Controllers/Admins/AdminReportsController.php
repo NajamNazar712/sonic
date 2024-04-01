@@ -6472,7 +6472,7 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
             ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
-            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
+            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
 
 
