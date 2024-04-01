@@ -408,16 +408,17 @@ class RetailShipmentBookController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
 
-            if ($request->iban_no == null || $request->iban_no == ''){
+            if (!$shipper_info->iban_no && (!$request->iban_no || $request->iban_no == '')) {
                 return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-            } else if ($request->account_no == null || $request->account_no == '') {
+            }
+            if (!$shipper_info->account_no && (!$request->account_no || $request->account_no == '')) {
                 return redirect()->back()->with(['error' => 'Please provide the account number']);
-            } else if ($request->bank == null || $request->bank == ''){
+            }
+            if (!$shipper_info->bank && (!$request->bank || $request->bank == '')) {
                 return redirect()->back()->with(['error' => 'Please choose a bank']);
-            } else if (!$shipper_info->cheque_image){
-                if (!$request->hasFile('cheque_image')){
-                    return redirect()->back()->with(['error' => 'Please provide the cheque image']);
-                }
+            }
+            if (!$shipper_info->cheque_image && !$request->hasFile('cheque_image')) {
+                return redirect()->back()->with(['error' => 'Please provide the cheque image']);
             }
 
             if ($request->iban_no != null && $request->account_no != null && $request->bank != null) {
@@ -447,11 +448,14 @@ class RetailShipmentBookController extends Controller
 
             if ($request->iban_no == null || $request->iban_no == ''){
                 return redirect()->back()->with(['error' => 'Please provide the IBAN number']);
-            } else if ($request->account_no == null || $request->account_no == '') {
+            } 
+            if ($request->account_no == null || $request->account_no == '') {
                 return redirect()->back()->with(['error' => 'Please provide the account number']);
-            } else if ($request->bank == null || $request->bank == ''){
+            } 
+            if ($request->bank == null || $request->bank == ''){
                 return redirect()->back()->with(['error' => 'Please choose a bank']);
-            } else if (!$request->hasFile('cheque_image')){
+            } 
+            if (!$request->hasFile('cheque_image')){
                 return redirect()->back()->with(['error' => 'Please provide the cheque image']);
             } 
 
@@ -567,7 +571,7 @@ class RetailShipmentBookController extends Controller
         $retail_reference->ref = $ref;
         $retail_reference->save();
 
-        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address);
+        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address, $shipper_info->id);
 
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
@@ -2227,7 +2231,7 @@ class RetailShipmentBookController extends Controller
 
   }
 
-    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address)
+    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address, $id)
     {
         $phone_number = str_replace('-', '', $phone_number);
         $shipper_cnic = str_replace('-', '', $shipper_cnic);
@@ -2256,6 +2260,7 @@ class RetailShipmentBookController extends Controller
                 $new_shipper->shipper_name = $shipper_name;
                 $new_shipper->shipper_cnic = $shipper_cnic;
                 $new_shipper->shipper_address = $shipper_address;
+                $new_shipper->retail_shipper_info_id = $id;
                 $new_shipper->save();
             }
         } else {
@@ -2265,6 +2270,7 @@ class RetailShipmentBookController extends Controller
             $new_shipper->shipper_name = $shipper_name;
             $new_shipper->shipper_cnic = $shipper_cnic;
             $new_shipper->shipper_address = $shipper_address;
+            $new_shipper->retail_shipper_info_id = $id;
             $new_shipper->save();
         }
 
