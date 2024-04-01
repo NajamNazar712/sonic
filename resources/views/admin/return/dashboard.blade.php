@@ -12,14 +12,14 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
+            @if (session('role_id') == 1 || in_array(943, session('permissions')))
 
                 <div class="row justify-content-center" >
 
                     {{-- Cards --}}
-                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-in_transit pull-up " id="search_total_div">
+                            <div class="card bg-gradient-directional-in_transit pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -38,7 +38,7 @@
                             </div>
                         </div>
 
-                        <div class="col-3" id="search_rvr_div">
+                        <div class="col-3" >
                             <div class="card bg-gradient-directional-booked_shipments pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="search_sar_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -79,7 +79,7 @@
                         </div> 
 
                         <div class="col-3">
-                            <div class="card bg-gradient-directional-destination pull-up " id="search_unresponsive_div">
+                            <div class="card bg-gradient-directional-destination pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -105,7 +105,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="number_of_pending_first_call"></span> / <span id="number_of_pending_first_call_percentage"></span>%
+                                                    <span id="number_of_pending_first_call">-</span> / <span id="number_of_pending_first_call_percentage">-</span>%
                                                 </h3>
                                                 <span>Pending First Call</span>
                                             </div>
@@ -116,7 +116,7 @@
                         </div>
 
                         <div class="col-3" >
-                            <div class="card bg-gradient-directional-return_delivered pull-up " id="number_of_inprocess_tickets_div">
+                            <div class="card bg-gradient-directional-return_delivered pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -125,7 +125,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="number_of_pending_second_call"></span> / <span id="number_of_pending_second_call_percentage"></span>%
+                                                    <span id="number_of_pending_second_call">-</span> / <span id="number_of_pending_second_call_percentage">-</span>%
                                                 </h3>
                                                 <span>Pending Second Call</span>
                                             </div>
@@ -136,7 +136,7 @@
                         </div>
 
                         <div class="col-3" >
-                            <div class="card bg-gradient-directional-complaints_launched pull-up " id="number_of_available_agents_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
@@ -145,9 +145,9 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="online_agents"></span> / <span id="number_of_available_agents"></span>
+                                                    <span id="number_of_available_agents">-</span>
                                                 </h3>
-                                                <span>Online/ Available Agents </span>
+                                                <span>Total Agents Today</span>
                                             </div>
                                         </div>
                                     </div>
@@ -165,9 +165,30 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="average_aging"></span>
+                                                    <span id="online_agents">-</span>
                                                 </h3>
-                                                <span>Average Aging.</span>
+                                                <span>Online / Available Agents.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center" >
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-in_transit pull-up ">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="total_tickets_today">0</span>
+                                                </h3>
+                                                <span>Total Tickets Today</span>
                                             </div>
                                         </div>
                                     </div>
@@ -175,50 +196,64 @@
                             </div>
                         </div>
 
-                        {{-- <div class="col-3" >
-                            <div class="card bg-gradient-directional-delivered pull-up ">
+                        <div class="col-3" >
+                            <div class="card bg-gradient-directional-booked_shipments pull-up ">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="average_response_time"></span>
+                                                    <span id="average_ticket_per_online_agent">-</span> / <span> Agent</span>
                                                 </h3>
-                                                <span>Average Response Time.</span>
+                                                <span>Average Ticket Per Agent</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div> --}}
+                        </div>
 
-                        {{-- <div class="col-3" >
-                            <div class="card bg-gradient-directional-oldest_shipment pull-up " id="number_of_oldest_shipments_div">
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up " >
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                <i class="icon-flag text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="oldest_shipments">
-                                                    0
+                                                <h3 class="text-white">
+                                                    <span id="average_first_call_time">-</span>
                                                 </h3>
-                                                <span>Oldest Shipment Count.</span>
+                                                <span>Average First Call Time</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div> --}}
-                    
-                @endif
-                    
+                        </div> 
 
-                </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-destination pull-up " >
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white">
+                                                    <span id="average_aging">-</span>
+                                                </h3>
+                                                <span>Average Aging</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>            
+            @endif
 
             </div>
         </div>
@@ -323,8 +358,11 @@
                             $('#number_of_pending_first_call_percentage').text(data.stats.number_of_pending_first_call_percentage);
                             $('#number_of_pending_second_call').text(data.stats.number_of_pending_second_call);
                             $('#number_of_pending_second_call_percentage').text(data.stats.number_of_pending_second_call_percentage);
-                            $('#online_agents').text(data.stats.online_agents);
                             $('#number_of_available_agents').text(data.stats.number_of_available_agents);
+                            $('#total_tickets_today').text(data.stats.total_tickets_today);
+                            $('#average_ticket_per_online_agent').text(data.stats.average_ticket_per_online_agent);
+                            $('#online_agents').text(data.stats.online_agents);
+                            $('#average_first_call_time').text(data.stats.average_first_call_time);
 
                             var averageAging = parseFloat(data.stats.average_aging);
                             var content = averageAging > 24 ? (Math.round(averageAging / 60 * 100) / 100) + ' days' : Math.round(averageAging * 100) / 100 + ' hrs';
