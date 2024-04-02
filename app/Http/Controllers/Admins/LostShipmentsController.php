@@ -543,7 +543,7 @@ class LostShipmentsController extends Controller
                         $verification = $journey->verification;
                         if($verification == 0)
                         {
-                            return response()->json(['status' => 0, 'error' => 'Shipment is unverified!']);
+                            return response()->json(['status' => 0, 'error' => 'Shipment is already marked lost!']);
                         }
 
                     }
