@@ -1175,7 +1175,21 @@ class UserManagementController extends Controller
 
     }
 
+    public function add_management_users(Request $request)
+    {
+        $admins = $request->userIDS;
 
+        foreach($admins as $admin){
+            $admin = Admin::where('id', $admin);
+            if($admin->exists()){
+                $admin = $admin->first();
+                $admin->management_user = 1;
+                $admin->save();    
+            }
+        }
 
+        return response()->json(['status' => 1, 'success' => 'Added Successfully!']);
+
+    }
 
 }

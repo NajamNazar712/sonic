@@ -269,6 +269,58 @@ $('#deSelectAllBtn').on('click', function() {
 
 						}
 					},
+
+					{
+                        text: '<i class="la la-disable"></i> Management Users',
+                        className: 'btn btn-primary management_users',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if (selected_rows.length > 0) { 
+                                swal({
+                                    title: 'Management Users',
+                                    text: 'Are you sure you want to add management users?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: 'Cancel',
+                                        confirm: 'Yes, Add it'
+                                    },
+                                }).then((willDisable) => {
+                                    if (willDisable) {
+                                        $.ajax({
+                                            type: 'POST',
+											url: '{{ route('admin.user_management.users.add_management_users') }}',
+
+                                            data: {
+                                                userIDS: selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            },
+                                            success: function(res) {
+                                                if (res.status == '1') {
+                                                    swal('Added Successfully!', {
+                                                        icon: 'success',
+                                                    });
+
+                                                    table.draw();
+                                                }else{
+                                                    swal(res.status, {
+                                                        icon: 'warning',
+                                                    });
+
+                                                    table.draw();
+                                                }
+                                            }, 
+                                            error: function(xhr, status, error) {
+                                                swal(status.status, {
+                                                    icon: 'warning',
+                                                })                                                
+                                            }
+                                        });
+                                      
+                                    } 
+                                });
+                            }
+                        }
+                    },
 					{
 						extend: 'selectAll',
 						text: 'Select All',
@@ -291,6 +343,8 @@ $('#deSelectAllBtn').on('click', function() {
 									}
 
 									table.button('.assign').enable();
+									table.button('.management_users').enable();
+
 								}
 							});
 						}
@@ -316,6 +370,7 @@ $('#deSelectAllBtn').on('click', function() {
 									}
 
 									if (selected_rows.length == 0) {
+										table.button('.management_users').disable();
 										table.button('.assign').disable();
 									}
 								}
@@ -633,9 +688,14 @@ $('#deSelectAllBtn').on('click', function() {
 
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
+					table.button('.management_users').enable();
+
+					
                 }
                 else {
                     table.button('.assign').disable();
+					table.button('.management_users').disable();
+
                 }
 			});
 			
