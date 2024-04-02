@@ -272,7 +272,7 @@ class APIController extends Controller
     {
 
         $validator = Validator::make($req->all(), [
-            'link'       => 'required',
+            'link'       => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -280,7 +280,13 @@ class APIController extends Controller
         }
 
         $Shipment = new Shipment();
-        $shipmentDetails = $Shipment->where('trax_pay_transactions.link', $req->link)
+        $shipmentDetails = $Shipment->where(function($query) use($req){
+            if(isset($req->trans_id) && !empty($req->trans_id)) {
+                $query->where('trax_pay_transactions.id', $req->trans_id);
+            }else{
+                $query->where('trax_pay_transactions.link', $req->link);
+            }
+        })
             ->join('cities', 'shipments.consignee_city_id', 'cities.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
             ->select(
@@ -289,7 +295,6 @@ class APIController extends Controller
                 'shipments.consignee_address as address',
                 'trax_pay_transactions.fintech_amount as fintech_amount',
                 'trax_pay_transactions.cod_amount as codAmount',
-                'cities.name as city_name',
                 'cities.name as city_name'
             )->first();
 
@@ -7578,7 +7583,13 @@ class APIController extends Controller
         $shipments = Shipment::join('delivery_note_shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
             ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
-            ->where('trax_pay_transactions.link', $req->link)
+            ->where(function($query) use($req){
+                if(isset($req->trans_id) && !empty($req->trans_id)) {
+                    $query->where('trax_pay_transactions.id', $req->trans_id);
+                }else{
+                    $query->where('trax_pay_transactions.link', $req->link);
+                }
+            })
             ->select(
                 'delivery_notes.rider_id as rider',
                 'shipments.user_id as shipper_id',
