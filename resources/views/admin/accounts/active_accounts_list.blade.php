@@ -749,7 +749,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="interceptModalCloseBtn_1">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -769,17 +769,17 @@
 
                             <div class="col-4 mt-4">
                                 <input type="checkbox" name="different_consignee" id="different_consignee">
-                                <label for="different_consignee">For Different Consignee</label>
+                                <label for="different_consignee">Disable Different Consignee</label>
                             </div>
 
                             <div class="col-4 mt-4">
                                 <input type="checkbox" name="same_consignee" id="same_consignee">
-                                <label for="same_consignee">For Same Consignee</label>
+                                <label for="same_consignee">Disable Same Consignee</label>
                             </div>
                         </div>
                         <div class="text-center mt-4">
                             <input type="submit" value="Submit" class="btn btn-success">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="interceptModalCloseBtn_2" data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </form>
@@ -975,9 +975,7 @@ function checkboxStatus() {
 							if (data.status == 0) {
 								var sub_segment = data.sub_segments;
 
-                                $.each(data.sub_segments, function (index, sub_segment) {
-									// console.log(index);	
-									// console.log(sub_segment);	
+                                $.each(data.sub_segments, function (index, sub_segment) {	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1166,7 +1164,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1318,7 +1315,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1447,7 +1443,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -2457,6 +2452,16 @@ function checkboxStatus() {
             var different_consignee = $('#different_consignee');
             var same_consignee = $('#same_consignee');
 
+            $('#interceptModalCloseBtn_1, #interceptModalCloseBtn_2').click(function() {
+                exclude_shipper.prop('checked', false);
+                different_consignee.prop('checked', false);
+                same_consignee.prop('checked', false);
+                exclude_shipper.prop('disabled', false);
+                different_consignee.prop('disabled', false);
+                same_consignee.prop('disabled', false)
+                $('#add_shipper_exclude_intercept_type')[0].reset();
+            });
+
             // if exclude shipper is checked
             exclude_shipper.on('change', function() {
                 if ($(this).prop('checked')) {
@@ -2473,7 +2478,7 @@ function checkboxStatus() {
                 if ($(this).prop('checked')) {
                     exclude_shipper.prop('disabled', true);
                     if (same_consignee.prop('checked')) {
-                        var error = "Cannot select For Different Consignee when Same Consignee is selected.";
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         $(this).prop('checked', false);
                     }
@@ -2487,7 +2492,7 @@ function checkboxStatus() {
                 if ($(this).prop('checked')) {
                     exclude_shipper.prop('disabled', true);
                 if (different_consignee.prop('checked')) {
-                        var error = "Cannot select For Same Consignee when Different Consignee is selected.";
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         $(this).prop('checked', false);
                     }
@@ -2507,47 +2512,46 @@ function checkboxStatus() {
             });
 
             $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
-                    errorClass: "danger",
-                    successClass: 'success',
-                    errorPlacement: function (error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
-                    },
-                    submitHandler: function (form) {
-                        if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
-                                var error = "Please select at least one option.";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        } else {
-                            swal({
-                                title: 'Are you sure?',
-                                text: 'Select Yes to update Intercept Request Exclude Shippers!',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                            var error = "Please select at least one option.";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else {
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
                                 },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                                })
-                            .then(function(confirm) {
-                                if (confirm) {
-                                    form.submit();
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
                                 }
-                            });
-                        }
-
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                            })
+                        .then(function(confirm) {
+                            if (confirm) {
+                                form.submit();
+                            }
+                        });
                     }
-                });
+                }
+            });
         });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
@@ -2555,6 +2559,34 @@ function checkboxStatus() {
             var user_id = table.row( $(this).parents('tr') ).data().id;
             var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
 
+            if ($(this).hasClass('add_shipper_exclude_intercept_type')){
+                $.ajax({
+                    url: '{!! route('admin.accounts.excluded_shippers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                    }).done(function(response){
+                        if (response.intercept_shipper !== null) {
+                            var interceptShipperData = response.intercept_shipper;
+                            var different_consignee = interceptShipperData.different_consignee;
+                            var exclude_shipper = interceptShipperData.exclude_shipper;
+                            var same_consignee = interceptShipperData.same_consignee;
+                            if (different_consignee == 1) {
+                                $('#different_consignee').prop('checked', true);
+                            }
+                            if (exclude_shipper == 1) {
+                                $('#exclude_shipper').prop('checked', true);
+                            }
+                            if (same_consignee == 1) {
+                                $('#same_consignee').prop('checked', true);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+            }
 
             if ($(this).hasClass('change_rate_type')) {
 
@@ -3090,7 +3122,6 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){

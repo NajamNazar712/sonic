@@ -484,10 +484,12 @@
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
                             head.push('Status');
+                            head.push('Location Status');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Total Attempt');
                             head.push('History Status');
+                            head.push('History Location Status');
                             head.push('Cargo Status');
                             head.push('Bag Seal Number');
                             head.push('Bag Status');
@@ -526,10 +528,12 @@
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.status);
+                                row.push(values.location_status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
+                                row.push(values.location_status_hss);
                                 row.push(values.cargo_status);
                                 row.push(values.seal_number);
                                 row.push(values.bag_status);
@@ -616,7 +620,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[19, 'desc']],
+                order: [[21, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
