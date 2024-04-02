@@ -206,7 +206,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white">
-                                                    <span id="average_ticket_per_online_agent">-</span> / <span> Agent</span>
+                                                    <span id="average_ticket_per_agent">-</span> / <span> Agent</span>
                                                 </h3>
                                                 <span>Average Ticket Per Agent</span>
                                             </div>
@@ -366,7 +366,7 @@
                             $('#number_of_pending_second_call_percentage').text(data.stats.number_of_pending_second_call_percentage);
                             $('#number_of_available_agents').text(data.stats.number_of_available_agents);
                             $('#total_tickets_today').text(data.stats.total_tickets_today);
-                            $('#average_ticket_per_online_agent').text(data.stats.average_ticket_per_online_agent);
+                            $('#average_ticket_per_agent').text(data.stats.average_ticket_per_agent);
                             $('#online_agents').text(data.stats.online_agents);
                             $('#average_first_call_time').text(data.stats.average_first_call_time);
 
