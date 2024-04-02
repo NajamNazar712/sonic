@@ -272,8 +272,7 @@ class APIController extends Controller
     {
 
         $validator = Validator::make($req->all(), [
-            'link'       => 'required',
-            'trans_id'       => 'required',
+            'link'       => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -282,10 +281,10 @@ class APIController extends Controller
 
         $Shipment = new Shipment();
         $shipmentDetails = $Shipment->where(function($query) use($req){
-            if(empty($req->trans_id)) {
-                $query->where('trax_pay_transactions.link', $req->link);
-            }else{
+            if(isset($req->trans_id) && !empty($req->trans_id)) {
                 $query->where('trax_pay_transactions.id', $req->trans_id);
+            }else{
+                $query->where('trax_pay_transactions.link', $req->link);
             }
         })
         ->join('cities', 'shipments.consignee_city_id', 'cities.id')
@@ -7585,10 +7584,10 @@ class APIController extends Controller
             ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
             ->where(function($query) use($req){
-                if(empty($req->trans_id)) {
-                    $query->where('trax_pay_transactions.link', $req->link);
-                }else{
+                if(isset($req->trans_id) && !empty($req->trans_id)) {
                     $query->where('trax_pay_transactions.id', $req->trans_id);
+                }else{
+                    $query->where('trax_pay_transactions.link', $req->link);
                 }
             })
             ->select(
