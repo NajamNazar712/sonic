@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Rider\Logistic\Api;
 
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
+use App\Http\Models\Admin\Logistic\TraxItemInsurance;
 use App\Http\Models\Admin\Logistic\TraxItemRefernce;
 use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxService;
+use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
@@ -42,6 +44,9 @@ class RiderLogisticApiController extends Controller
         $destination_list = TraxStation::select('id as destination_id','name as destination_name','station_code as destination_code')
             ->where('status',1)->get();
 
+        $special_handling_list = TraxSpecialHandlingList::select('id as handling_id','description','rate','pay_mode')
+            ->where('status',1)->get();
+
 
 
         $logistic_data = [
@@ -50,10 +55,11 @@ class RiderLogisticApiController extends Controller
             'products'          =>   $products,
             'services'          =>   $services,
             'rider_cn'          =>   $rider_cn,
-            'destination_list'  =>   $destination_list
+            'destination_list'  =>   $destination_list,
+            'special_handling_list' => $special_handling_list
         ];
 
-        return response()->json(['status'=>1,'logistic_data'=> $logistic_data]);
+        return response()->json(['status'=>0,'logistic_data'=> $logistic_data]);
     }
 
 
@@ -83,7 +89,9 @@ class RiderLogisticApiController extends Controller
                         'total_pieces' => $booking['total_pieces'],
                         'consignee_phone_1' => $booking['consignee_phone_1'],
                         'total_dense_weight' => $booking['total_dense_weight'],
-                        'total_volumetric_weight' => $booking['total_volumetric_weight']
+                        'total_volumetric_weight' => $booking['total_volumetric_weight'],
+                        'user_type'=>2,
+                        'created_by'=>$rider_id,
                     ]);
                     if (isset($booking['booking_pieces_data']))
                     {
@@ -92,24 +100,43 @@ class RiderLogisticApiController extends Controller
                                 'booking_id'=>$logistic_booking->id,
                                 'from_pieces'=>$pieces_data['from_pieces'],
                                 'to_pieces'=>$pieces_data['to_pieces'],
-                                'quantity'=>$pieces_data['quantity']
+                                'quantity'=>$pieces_data['quantity'],
+                                'user_type'=>2,
+                                'created_by'=>$rider_id,
                             ]);
                         }
                     }
                     if (isset($booking['item_refernces_data']))
                     {
                         foreach ($booking['item_refernces_data'] as  $item_data) {
-                            TraxItemRefernce::create([
+
+                            foreach ($item_data['item_detail'] as $detail){
+                                TraxItemRefernce::create([
+                                    'booking_id' => $logistic_booking->id,
+                                    'item_code' => $item_data['item_code'],
+                                    'width' => $detail['width'],
+                                    'height' => $detail['height'],
+                                    'length' => $detail['length'],
+                                    'weight' => $detail['weight'],
+                                    'no_piece' => $detail['no_piece'],
+                                    'user_type'=>2,
+                                    'created_by'=>$rider_id,
+
+                                ]);
+                            }
+                        }
+                    }
+                    if(isset($booking['item_insurance_data']))
+                    {
+                        foreach ($booking['item_insurance_data'] as $item_insurance)
+                        {
+                            TraxItemInsurance::create([
                                 'booking_id' => $logistic_booking->id,
-                                'item_code' => $item_data['item_code'],
-                                'width' => $item_data['width'],
-                                'height' => $item_data['height'],
-                                'length' => $item_data['length'],
-                                'weight' => $item_data['weight'],
-                                'no_piece' => $item_data['no_piece'],
+                                'special_handling_id' => $item_insurance['special_handling_id'],
+                                'insurance' => $item_insurance['insurance'],
+                                'item_code' => $item_insurance['item_code'],
+                                'user_type'=>2,
                                 'created_by'=>$rider_id,
-                                'updated_by'=>$rider_id,
-                                'user_type'=>2
                             ]);
                         }
                     }
@@ -117,12 +144,11 @@ class RiderLogisticApiController extends Controller
             }
 
             DB::commit();
-            return response()->json(['success'=>'Booking Completed Successfully']);
+            return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
 
         }catch (\Exception $ex) {
             DB::rollback();
-            dd($ex->getMessage());
-            return response()->json(['error'=>'Something went wrong!']);
+            return response()->json(['status'=>1,'error'=>'Something went wrong!']);
         }
     }
 }
