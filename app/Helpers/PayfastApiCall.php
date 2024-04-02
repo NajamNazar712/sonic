@@ -37,7 +37,7 @@ class PayfastApiCall
             $url          = "https://trax-payment-portal.test/api/online-transaction-details";
             $payment_link = "https://trax-payment-portal.test/pay/$rand";
         }
-        $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
+        $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ,'id'=> $tray_pay_tansaction->id];
 
         return  $payment_details;
     }
