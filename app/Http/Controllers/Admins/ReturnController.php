@@ -355,7 +355,7 @@ class ReturnController extends Controller
         ->get(['employee_attendances.employee_id'])->count();
 
         //Average Ticket Per Agent
-        $average_ticket_per_agent = ($number_of_available_agents > 0) ? ($total_tickets_today / $number_of_available_agents) : 0;
+        $average_ticket_per_agent = (count($number_of_available_agents) > 0) ? ($total_tickets_today / count($number_of_available_agents)) : 0;
 
 
         //Average First Call Time
