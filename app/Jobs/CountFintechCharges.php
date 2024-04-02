@@ -25,6 +25,7 @@ class CountFintechCharges implements ShouldQueue
     protected $payment_link;
     protected $unique_key;
     protected $url;
+    protected $trans_id;
 
     /**
      * Create a new job instance.
@@ -32,13 +33,13 @@ class CountFintechCharges implements ShouldQueue
      * @return void
      */
     public function __construct($valid_shipment, $payment_link, $unique_key, $url,$trans_id = null)
-
     {
         $this->queue = 'fintech_charges_count';
         $this->valid_shipment = $valid_shipment;
         $this->payment_link = $payment_link;
         $this->unique_key = $unique_key;
         $this->url = $url;
+        $this->trans_id = $trans_id;
     }
 
     /**
@@ -106,6 +107,7 @@ class CountFintechCharges implements ShouldQueue
                     'fintech_company' => $fintech_company_id,
                     'cod_amount' => $total_cod_amount,
                     'fintech_amount' => $fintech_charges,
+                    'trans_id' => $this->trans_id,
                 );
                 $options = [
                     'form_params' => $request_body,
