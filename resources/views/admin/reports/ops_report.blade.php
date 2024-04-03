@@ -233,7 +233,7 @@
                                             html += '<td> ' + z.rcp + ' </td>';
                                             html += '<td> ' + z.rcp_percentage + ' </td>';
                                         html += '</tr>';
-                                        console.log(region_index,z);
+                                        
                                     });
                                    
 
@@ -242,19 +242,18 @@
                                    
                                 });
                             }
-                            else{
-                                console.log("error");
-                            }
+                            // else{
+                            //     console.log("error");
+                            // }
 
                             
                         },
-                        error: function(error) {
-                            console.log('AJAX error: ' + error);
-                        }
+                        // error: function(error) {
+                        //     console.log('AJAX error: ' + error);
+                        // }
                     });
                 }
             });
-
         });
     </script>
 @endsection
