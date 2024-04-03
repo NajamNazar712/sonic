@@ -71,7 +71,37 @@
 									<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
 								</div>
 							</div>
+							<div class="row">
+                                <div class="col-md-8"></div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline mb-0">
+                                                    <li class="primary border-primary round"><a
+                                                                data-action="collapse">Legend
+                                                            <i class="ft-minus"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="card-content collapse">
+                                            <div class="card-body p-1">
+                                                <h4 class=" info">Legend</h4>
+                                                <input type="hidden" id="legend_filter">
 
+                                                <table class="table mb-0">
+                                                    <tbody>
+                                                    <tr style="background-color: yellow; color:#010a10;" class="legends">
+                                                        <td class="align-middle" id="filter_management_users_btn">Management Users</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -147,6 +177,14 @@
         #deSelectAllBtn {
 
             margin-bottom: 10px
+        }
+
+		.legends{
+            cursor:pointer;
+        }
+        
+        .is_management_user{
+            background-color: yellow;
         }
     </style>
 
@@ -409,6 +447,7 @@ $('#deSelectAllBtn').on('click', function() {
 					url: '{{ route('admin.user_management.users.list') }}',
 					data: function (d) {
 						d.search_roles = $('#search_roles').val();
+						d.filter_management_users = $('#filter_management_users_btn').val();
 				}
 				},
 				rowId: 'id',
@@ -701,32 +740,35 @@ $('#deSelectAllBtn').on('click', function() {
 			
             $("#assign_hub_form").validate({
 
-errorClass: "danger",
-errorPlacement: function(error, element) {
-    error.addClass('w-100').appendTo(element.parent('.form-group'));
-},
-submitHandler: function(form) {
-    if (selectedValue.length > 0) {
+				errorClass: "danger",
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					if (selectedValue.length > 0) {
 
-        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-        swal({
-            title: 'Please Wait!',
-            text: 'Multiple Hub has been assigned!',
-            icon: 'info',
-            buttons: false,
-            closeOnClickOutside: false,
-            closeOnEsc: false
-        });
+						swal({
+							title: 'Please Wait!',
+							text: 'Multiple Hub has been assigned!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
 
-        form.submit();
+						form.submit();
 
-    } else {
-        $('#assign_hubs_msg_error').removeClass('d-none');
-    }
-}
-});
-
+					} else {
+						$('#assign_hubs_msg_error').removeClass('d-none');
+					}
+				}
+			});
+			$("#filter_management_users_btn").on('click',function (){
+                $("#filter_management_users_btn").val(1);
+                table.draw();
+            });
 			
 
 		});
