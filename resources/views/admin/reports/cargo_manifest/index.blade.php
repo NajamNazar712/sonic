@@ -350,30 +350,17 @@
                                 row = [];
                         
                                 row.push(index + 1);
-                                row.push(values.trax_id);
-                                row.push(values.rider_name);
-                                row.push(values.hub);
-                                row.push(values.zone);
-                                row.push(values.delivery_date);
-                                row.push(values.total_shipments_excel);
-                                row.push(values.before_11_count);
-                                row.push(values.at_11_count);
-                                row.push(values.at_12_count);
-                                row.push(values.at_13_count);
-                                row.push(values.at_14_count);
-                                row.push(values.at_15_count);
-                                row.push(values.at_16_count);
-                                row.push(values.at_17_count);
-                                row.push(values.at_18_count);
-                                row.push(values.at_19_count);
-                                row.push(values.at_20_count);
-                                row.push(values.at_21_count);
-                                row.push(values.at_22_count);
-                                row.push(values.at_23_count);
-                                row.push(values.after_23_count);
-                                row.push(values.total_updated_shipments);
-                                row.push(values.updated_via_rider1);
-                                row.push(values.updated_via_admin1);
+                                row.push(values.booking_date);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.segment);
+                                row.push(values.arrival);
+                                row.push(values.manifest);
+                                row.push(values.manifest_percentage);
+                                row.push(values.withoutmanifest);
+                                row.push(values.withoutmanifest_percentage);
+                                row.push(values.misroute);
+                                row.push(values.misroute_percentage);
                         
                                 body.push(row);
                             });
@@ -422,9 +409,9 @@
                 columns: [
                     {data: 'id',orderable: false, searchable: false, class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle text-center arrived'},
-                    {data: 'origin', name: 'booking_date', class: 'align-middle text-center arrived'},
-                    {data: 'destination', name: 'booking_date', class: 'align-middle text-center arrived'},
-                    {data: 'segment', name: 'booking_date', class: 'align-middle text-center arrived'},
+                    {data: 'origin', name: 'origin', class: 'align-middle text-center'},
+                    {data: 'destination', name: 'destination', class: 'align-middle text-center'},
+                    {data: 'segment', name: 'segment', class: 'align-middle text-center'},
                     {data: 'arrival', name: 'arrived', class: 'align-middle text-center arrived' ,orderable: false,},
                     {data: 'manifest', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'manifest_percentage',  name:'manifest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
