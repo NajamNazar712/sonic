@@ -147,6 +147,7 @@ class RiderLogisticApiController extends Controller
             return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
 
         }catch (\Exception $ex) {
+            dd($ex);
             DB::rollback();
             return response()->json(['status'=>1,'error'=>'Something went wrong!']);
         }
