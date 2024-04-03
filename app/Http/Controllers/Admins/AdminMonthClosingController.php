@@ -137,7 +137,10 @@ class AdminMonthClosingController extends Controller
         $closing_types = MonthClosingType::all();
         $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->with(['role.department'])->get();
         $riders = Rider::where('status',1)->get();
-        return view('admin.month_closing.pending')->with(['admins' => $admins, 'riders' => $riders, 'closing_types' => $closing_types]);
+
+        $date_start = date('Y-m-20',strtotime(date('Y-m-d').'-6 month'));
+        $date_end = date('Y-m-20');
+        return view('admin.month_closing.pending')->with(['admins' => $admins, 'riders' => $riders, 'closing_types' => $closing_types,'date_start'=>$date_start,'date_end'=>$date_end]);
     }
 
     public function pending_list(Request $request){
@@ -147,7 +150,13 @@ class AdminMonthClosingController extends Controller
         }
 //        $status_not_allowed = [1, 5, 6, 14, 17, 25, 31, 38, 51, 53];
         $date = Carbon::now()->startOfMonth()->subMonth()->addDays(20)->toDateString();
-
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+        }else{
+            $from = date('Y-m-20',strtotime(date('Y-m-d').'-6 month'));
+            $to = date('Y-m-20');
+        }
         $month_closing_status = [3, 5, 13, 18, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 60];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -159,10 +168,10 @@ class AdminMonthClosingController extends Controller
                     ->where('shipments_journey.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftjoin('shipments_journey as sj', function ($join) {
+            ->leftjoin('shipments_journey as sj', function ($join) use ($from, $to) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.created_at BETWEEN "'.$from.'" AND "'.$to.'")'));
             })
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('month_closings as mc', function ($join){
@@ -193,15 +202,13 @@ class AdminMonthClosingController extends Controller
             ->groupBy('shipments.id');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
             $shipments = $shipments->where(function ($query) use ($from, $to) {
-                $query->where(function ($sub_query) use ($from,$to) {
-                    $sub_query->whereBetween('sj.created_at', [$from,$to]);
-                })
-                    ->orWhere(function ($sub_query) use ($from,$to) {
-                        $sub_query->whereBetween('shipments.created_at', [$from,$to]);
-                    });
+//                $query->where(function ($sub_query) use ($from,$to) {
+//                    $sub_query->whereBetween('sj.created_at', [$from,$to]);
+//                })
+                $query->Where(function ($sub_query) use ($from,$to) {
+                    $sub_query->whereBetween('shipments.created_at', [$from,$to]);
+                });
             });
         }
         else{
