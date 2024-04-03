@@ -360,9 +360,7 @@ class ReturnController extends Controller
 
         //Average First Call Time
         $average_first_call_time = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
-        ->whereDate('shipments_journey.created_at', date('Y-m-d'))
         ->where('shipments_journey.shipper_status_id', 12)
-        ->whereDate('rv_shipment_assign_agents.created_at', date('Y-m-d'))
         ->avg(DB::raw('TIMESTAMPDIFF(MINUTE, shipments_journey.created_at, rv_shipment_assign_agents.created_at)'));
 
         $hours = floor($average_first_call_time / 60);
@@ -370,7 +368,7 @@ class ReturnController extends Controller
         $average_first_call_time = $hours . " h : ".$minutes. " m";
 
         //Average Hours
-        $aging = RvShipmentAssignAgent::where('rv_state_id',1)->get(['created_at']);
+        $aging = Shipment::whereIn('shipments.shipper_status_id', [12,65,66])->get(['created_at']);
         $totalSeconds = 0;
         $count = count($aging);
         foreach ($aging as $record) {
