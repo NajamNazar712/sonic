@@ -138,8 +138,9 @@ class AdminMonthClosingController extends Controller
         $admins = Admin::where('status', 1)->where('role_id', '!=', 1)->with(['role.department'])->get();
         $riders = Rider::where('status',1)->get();
 
-        $date_start = date('Y-m-20',strtotime(date('Y-m-d').'-6 month'));
-        $date_end = date('Y-m-20');
+        $last_month = date('Y-m-19',strtotime(date('Y-m-d').'-1 month'));
+        $date_start = date('Y-m-20',strtotime($last_month.'-6 month'));
+        $date_end = $last_month;
         return view('admin.month_closing.pending')->with(['admins' => $admins, 'riders' => $riders, 'closing_types' => $closing_types,'date_start'=>$date_start,'date_end'=>$date_end]);
     }
 
@@ -154,8 +155,9 @@ class AdminMonthClosingController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
         }else{
-            $from = date('Y-m-20',strtotime(date('Y-m-d').'-6 month'));
-            $to = date('Y-m-20');
+            $last_month = date('Y-m-19',strtotime(date('Y-m-d').'-1 month'));
+            $from = date('Y-m-20',strtotime($last_month.'-6 month'));
+            $to = $last_month;
         }
         $month_closing_status = [3, 5, 13, 18, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 60];
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
