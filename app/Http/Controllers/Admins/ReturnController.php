@@ -313,12 +313,12 @@ class ReturnController extends Controller
         }
 
         //Pending First And Second Call Tickets Count
-        $shipmentsQuery = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'shipments.id', 'rvsa.shipment_id')
+        $shipmentsQuery = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'rvsa.shipment_id','shipments.id')
         ->where('shipments.shipper_status_id', 12);
 
         $number_of_pending_tickets = $shipmentsQuery
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL OR rvsa.rv_assign_agent_status_id IS NULL THEN 1 END) AS pending_first_call_count')
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL OR rvsa.rv_assign_agent_status_id = 6 THEN 1 END) AS pending_second_call_count')
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL OR rvsa.rv_assign_agent_status_id IS NULL and rvsa.unresponsive_attempt_time is NULL THEN 1 END) AS pending_first_call_count')
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL  OR rvsa.unresponsive_attempt_time is NOT NULL THEN 1 END) AS pending_second_call_count')
             ->first();
 
         //Pending First Call
