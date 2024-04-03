@@ -14064,13 +14064,19 @@ class AdminReportsController extends Controller
         $date_to = Carbon::parse($date_to);
         $date_to = $date_to->format('Y-m-d');
 
-        $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
-
+        // $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
+        $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
+        
         $bindings = [
-            'origin_value' => $origin,
+            // 'origin_value' => $origin,
             'date_from' => $date_from,
             'date_to' => $date_to,
         ];
+
+        if (!empty($origin)) {
+            $Query .= " AND origin_zonecode = :origin_value";
+            $bindings['origin_value'] = $origin;
+        }
 
         if (!empty($destination)) {
             $Query .= " AND destination_zonecode = :destination_value";
@@ -14086,12 +14092,14 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
 
         $transformedData = collect($results)->map(function ($item) { // mapping for datatable
+            $segment = $item->parent_prod_name . ' (' . $item->sub_prod_name . ')';
             return [
                 'origin' => $item->origin_zonecode,
                 'destination' => $item->destination_zonecode,
                 'booking_date' => $item->booking_date,
-                'segment' => $item->parent_prod_name,
+                // 'segment' => $item->parent_prod_name,
                 'sub_segment' => $item->sub_prod_name,
+                'segment' => $segment,
                 'arrival' => $item->arrival,
                 'manifest' => $item->manifest,
                 'misroute' => $item->misroute,
