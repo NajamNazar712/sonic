@@ -16,7 +16,7 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
-                                    <select name="select_origin" id="select_origin" class="form-control select2" data-rule-required="true" data-msg-required="Origin is required">
+                                    <select name="select_origin" id="select_origin" class="form-control select2">
                                             @foreach($origins as $origin)
                                             <option value="{{$origin->origin_name}}">{{$origin->origin_name}}</option>
                                         @endforeach
@@ -87,12 +87,15 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1 align-middle" rowspan="2">S.No.</th>
                         <th class="border-primary border-darken-1 align-middle" rowspan="2">Booking Date.</th>
+                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Origin</th>
+                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Destination</th>
+                        <th class="border-primary border-darken-1 align-middle" rowspan="2">Segments</th>
                         <th class="border-primary border-darken-1 align-middle" rowspan="2">Arrived (Up City)</th>
                         <th class="border-primary border-darken-1 align-middle" colspan="2">
                             <div class="text-center">Manifested</div>
                         </th>
-                        <th class="border-primary border-darken-1 align-middle" colspan="2">Without Manifest</th>
-                        <th class="border-primary border-darken-1 align-middle" colspan="2">Misroute</th>
+                        <th class="border-primary border-darken-1 align-middle text-center" colspan="2">Without Manifest</th>
+                        <th class="border-primary border-darken-1 align-middle text-center" colspan="2">Misroute</th>
                     </tr>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"># of Shipments</th>
@@ -240,6 +243,83 @@
                 }
             });
 
+            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            //     if ( this.context.length ) {
+            //         // blockPagePermanently();
+            //         body = [];
+            //         var params = table.ajax.params();
+            //         params.start = 0;
+            //         params.length = -1;
+            //         params.excel = true;
+            //         var jsonResult = $.ajax({
+            //         {{--    url: '{{ route('admin.reports.last_mile_app.list') }}',--}}
+            //         {{--    data: params,--}}
+            //         {{--    success: function (result) {--}}
+            //         {{--        head = [];--}}
+
+            //         {{--        head.push('S. No');--}}
+            //         {{--        head.push('Trax IDs');--}}
+            //         {{--        head.push('Rider Name');--}}
+            //         {{--        head.push('Hub');--}}
+            //         {{--        head.push('Zone');--}}
+            //         {{--        head.push('Delivery Date');--}}
+            //         {{--        head.push('Total Shipments');--}}
+            //         {{--        head.push('Before 11');--}}
+            //         {{--        head.push('At 11');--}}
+            //         {{--        head.push('At 12');--}}
+            //         {{--        head.push('At 13');--}}
+            //         {{--        head.push('At 14');--}}
+            //         {{--        head.push('At 15');--}}
+            //         {{--        head.push('At 16');--}}
+            //         {{--        head.push('At 17');--}}
+            //         {{--        head.push('At 18');--}}
+            //         {{--        head.push('At 19');--}}
+            //         {{--        head.push('At 20');--}}
+            //         {{--        head.push('At 21');--}}
+            //         {{--        head.push('At 22');--}}
+            //         {{--        head.push('At 23');--}}
+            //         {{--        head.push('After 23');--}}
+            //         {{--        head.push('Total Updated Shipments');--}}
+            //         {{--        head.push('Update Via App');--}}
+            //         {{--        head.push('Update Via Admin');--}}
+            //         {{--        $.each(result.data, function(index, values) {--}}
+            //         {{--            row = [];--}}
+
+            //         {{--            row.push(index + 1);--}}
+            //         {{--            row.push(values.trax_id);--}}
+            //         {{--            row.push(values.rider_name);--}}
+            //         {{--            row.push(values.hub);--}}
+            //         {{--            row.push(values.zone);--}}
+            //         {{--            row.push(values.delivery_date);--}}
+            //         {{--            row.push(values.total_shipments_excel);--}}
+            //         {{--            row.push(values.before_11_count);--}}
+            //         {{--            row.push(values.at_11_count);--}}
+            //         {{--            row.push(values.at_12_count);--}}
+            //         {{--            row.push(values.at_13_count);--}}
+            //         {{--            row.push(values.at_14_count);--}}
+            //         {{--            row.push(values.at_15_count);--}}
+            //         {{--            row.push(values.at_16_count);--}}
+            //         {{--            row.push(values.at_17_count);--}}
+            //         {{--            row.push(values.at_18_count);--}}
+            //         {{--            row.push(values.at_19_count);--}}
+            //         {{--            row.push(values.at_20_count);--}}
+            //         {{--            row.push(values.at_21_count);--}}
+            //         {{--            row.push(values.at_22_count);--}}
+            //         {{--            row.push(values.at_23_count);--}}
+            //         {{--            row.push(values.after_23_count);--}}
+            //         {{--            row.push(values.total_updated_shipments);--}}
+            //         {{--            row.push(values.updated_via_rider1);--}}
+            //         {{--            row.push(values.updated_via_admin1);--}}
+
+            //         {{--            body.push(row);--}}
+            //         {{--        });--}}
+            //         {{--    },--}}
+            //         {{--    async: false--}}
+            //         });
+            //         return {body: body, header: head,};
+            //     }
+            // });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     // blockPagePermanently();
@@ -249,71 +329,58 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                    {{--    url: '{{ route('admin.reports.last_mile_app.list') }}',--}}
-                    {{--    data: params,--}}
-                    {{--    success: function (result) {--}}
-                    {{--        head = [];--}}
-
-                    {{--        head.push('S. No');--}}
-                    {{--        head.push('Trax IDs');--}}
-                    {{--        head.push('Rider Name');--}}
-                    {{--        head.push('Hub');--}}
-                    {{--        head.push('Zone');--}}
-                    {{--        head.push('Delivery Date');--}}
-                    {{--        head.push('Total Shipments');--}}
-                    {{--        head.push('Before 11');--}}
-                    {{--        head.push('At 11');--}}
-                    {{--        head.push('At 12');--}}
-                    {{--        head.push('At 13');--}}
-                    {{--        head.push('At 14');--}}
-                    {{--        head.push('At 15');--}}
-                    {{--        head.push('At 16');--}}
-                    {{--        head.push('At 17');--}}
-                    {{--        head.push('At 18');--}}
-                    {{--        head.push('At 19');--}}
-                    {{--        head.push('At 20');--}}
-                    {{--        head.push('At 21');--}}
-                    {{--        head.push('At 22');--}}
-                    {{--        head.push('At 23');--}}
-                    {{--        head.push('After 23');--}}
-                    {{--        head.push('Total Updated Shipments');--}}
-                    {{--        head.push('Update Via App');--}}
-                    {{--        head.push('Update Via Admin');--}}
-                    {{--        $.each(result.data, function(index, values) {--}}
-                    {{--            row = [];--}}
-
-                    {{--            row.push(index + 1);--}}
-                    {{--            row.push(values.trax_id);--}}
-                    {{--            row.push(values.rider_name);--}}
-                    {{--            row.push(values.hub);--}}
-                    {{--            row.push(values.zone);--}}
-                    {{--            row.push(values.delivery_date);--}}
-                    {{--            row.push(values.total_shipments_excel);--}}
-                    {{--            row.push(values.before_11_count);--}}
-                    {{--            row.push(values.at_11_count);--}}
-                    {{--            row.push(values.at_12_count);--}}
-                    {{--            row.push(values.at_13_count);--}}
-                    {{--            row.push(values.at_14_count);--}}
-                    {{--            row.push(values.at_15_count);--}}
-                    {{--            row.push(values.at_16_count);--}}
-                    {{--            row.push(values.at_17_count);--}}
-                    {{--            row.push(values.at_18_count);--}}
-                    {{--            row.push(values.at_19_count);--}}
-                    {{--            row.push(values.at_20_count);--}}
-                    {{--            row.push(values.at_21_count);--}}
-                    {{--            row.push(values.at_22_count);--}}
-                    {{--            row.push(values.at_23_count);--}}
-                    {{--            row.push(values.after_23_count);--}}
-                    {{--            row.push(values.total_updated_shipments);--}}
-                    {{--            row.push(values.updated_via_rider1);--}}
-                    {{--            row.push(values.updated_via_admin1);--}}
-
-                    {{--            body.push(row);--}}
-                    {{--        });--}}
-                    {{--    },--}}
-                    {{--    async: false--}}
+                        url: '{{ route('admin.reports.cargo_manifest.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                        
+                            head.push('S. No');
+                            head.push('Booking Date');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Segment');
+                            head.push('Arrival');
+                            head.push('Manifest');
+                            head.push('Manifest Percentage');
+                            head.push('Without Manifest');
+                            head.push('Without Manifest Percentage');
+                            head.push('Misroute');
+                            head.push('Misroute Percentage');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                        
+                                row.push(index + 1);
+                                row.push(values.trax_id);
+                                row.push(values.rider_name);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.delivery_date);
+                                row.push(values.total_shipments_excel);
+                                row.push(values.before_11_count);
+                                row.push(values.at_11_count);
+                                row.push(values.at_12_count);
+                                row.push(values.at_13_count);
+                                row.push(values.at_14_count);
+                                row.push(values.at_15_count);
+                                row.push(values.at_16_count);
+                                row.push(values.at_17_count);
+                                row.push(values.at_18_count);
+                                row.push(values.at_19_count);
+                                row.push(values.at_20_count);
+                                row.push(values.at_21_count);
+                                row.push(values.at_22_count);
+                                row.push(values.at_23_count);
+                                row.push(values.after_23_count);
+                                row.push(values.total_updated_shipments);
+                                row.push(values.updated_via_rider1);
+                                row.push(values.updated_via_admin1);
+                        
+                                body.push(row);
+                            });
+                        },
+                        async: false
                     });
-                    return {body: body, header: head,};
+                    return {body: body, header: head};
                 }
             });
 
@@ -355,6 +422,9 @@
                 columns: [
                     {data: 'id',orderable: false, searchable: false, class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle text-center arrived'},
+                    {data: 'origin', name: 'booking_date', class: 'align-middle text-center arrived'},
+                    {data: 'destination', name: 'booking_date', class: 'align-middle text-center arrived'},
+                    {data: 'segment', name: 'booking_date', class: 'align-middle text-center arrived'},
                     {data: 'arrival', name: 'arrived', class: 'align-middle text-center arrived' ,orderable: false,},
                     {data: 'manifest', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'manifest_percentage',  name:'manifest_percentage', class: 'align-middle text-center', orderable: false, searchable: false},
@@ -395,6 +465,7 @@
                 }
             });
 
+            $('#datatable_wrapper > .pull-right > .dt-buttons > a.buttons-excel').removeClass('d-none');
         });
     </script>
 @endsection
