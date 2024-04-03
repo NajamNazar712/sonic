@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admins\Logistic;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\http\models\admin\Logistic\LogisticBookingTrack;
 use App\Http\Models\Admin\Logistic\TraxItemRefernce;
-use App\http\models\admin\Logistic\TraxLogisticBooking;
+use App\Http\Models\Admin\Logistic\TraxLogisticBooking;
 use App\Http\Models\City;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Rider;
