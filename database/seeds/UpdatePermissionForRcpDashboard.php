@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use DB;
 
-class UpdatePermissionForProductTypeSeeder extends Seeder
+class UpdatePermissionForRcpDashboard extends Seeder
 {
     /**
      * Run the database seeds.
