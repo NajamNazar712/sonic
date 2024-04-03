@@ -125,6 +125,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 
 use App\Http\Traits\RvTrait;
+use App\Jobs\ProcessRvShipmentTicket;
+
 class DeliveryController extends Controller
 {
 
@@ -2617,6 +2619,19 @@ class DeliveryController extends Controller
                                 //dispatch(new RCPSmsToConsignee($shipment));
                                 ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                             }
+
+                            if($selected_status == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                            {
+                                $rvData = [
+                                    'shipment_id' => $shipment,
+                                    'shipper_status_id' => $selected_status,
+                                    'status_reason_id' => $selected_reason,
+                                    'shipment_user_id' => $$shipment_details->user_id,
+                                    'call_count' => 0
+                                ];
+                                dispatch(new ProcessRvShipmentTicket($rvData));
+                            }
+
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {

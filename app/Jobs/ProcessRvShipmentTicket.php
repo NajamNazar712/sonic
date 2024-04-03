@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\RvShipmentTicket;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -31,6 +32,12 @@ class ProcessRvShipmentTicket implements ShouldQueue
      */
     public function handle()
     {
-        //
+        RvShipmentTicket::create([
+                'shipment_id' => $this->shipment['shipment_id'],
+                'shipment_shipper_status_id' => $this->shipment['shipper_status_id'],
+                'shipment_status_reason_id' => $this->shipment['status_reason_id'],
+                'shipment_user_id' => $this->shipment['shipment_user_id'],
+                'call_count' => $this->shipment['call_count'],
+            ]);
     }
 }
