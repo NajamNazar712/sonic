@@ -318,7 +318,7 @@ class ReturnController extends Controller
 
         $number_of_pending_tickets = $shipmentsQuery
             ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL OR rvsa.rv_assign_agent_status_id IS NULL THEN 1 END) AS pending_first_call_count')
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL AND rvsa.rv_assign_agent_status_id = 6 THEN 1 END) AS pending_second_call_count')
+            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL OR rvsa.rv_assign_agent_status_id = 6 THEN 1 END) AS pending_second_call_count')
             ->first();
 
         //Pending First Call
