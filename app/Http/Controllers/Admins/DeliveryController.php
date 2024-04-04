@@ -2626,7 +2626,7 @@ class DeliveryController extends Controller
                                     'shipment_id' => $shipment,
                                     'shipper_status_id' => $selected_status,
                                     'status_reason_id' => $selected_reason,
-                                    'shipment_user_id' => $$shipment_details->user_id,
+                                    'shipment_user_id' => $shipment_details->user_id,
                                     'call_count' => 0
                                 ];
                                 dispatch(new ProcessRvShipmentTicket($rvData));

@@ -17,7 +17,7 @@ class CreateRvShipmentTicketsTable extends Migration
             $table->increments('id');
             $table->integer('shipment_id')->index();
             $table->integer('shipment_shipper_status_id')->index();
-            $table->integer('shipment_status_reason_id')->index();
+            $table->integer('shipment_status_reason_id')->index()->nullable();
             // $table->integer('rv_state_id')->index()->nullable();
             $table->integer('shipment_user_id')->index();
             $table->integer('call_count')->default(0);
