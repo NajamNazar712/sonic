@@ -2480,7 +2480,7 @@ class AdminTrackingController extends Controller
                                     from shipment_status_screen_locations 
                                     where shipment_status_id = journey.shipper_status_id
                                 )
-                                and admin.role_id != 1
+                                    and (admin.role_id != 1 or admin.id is null)
                             )');
         })
         ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
