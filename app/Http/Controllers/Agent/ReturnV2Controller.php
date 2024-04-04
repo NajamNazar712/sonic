@@ -180,7 +180,7 @@ class ReturnV2Controller extends Controller
 
                             // If no shipment is already assigned, assign a new one
                             if (!$already_assigned_shipment) {
-                                $shipment = $this->included_shippers($agent_id);
+                                $shipment = $this->findShipmentforAgent($agent_id);
                             } else {
                                 $shipment = $already_assigned_shipment->shipment_id;
                             }
@@ -229,12 +229,12 @@ class ReturnV2Controller extends Controller
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                                 } else {
                                     // $rider_details['reason'] = '-';
-                                    $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
-                                    $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
+                                    // $rider_details['reason'] =ShipmentStatusReason::where('id', $latest_shipments_journey->status_reason_id)->first();
+                                    $rider_details['reason'] = '-';
                                     $rider_details['attempted_time'] = '-';
                                     // $rider_details['remarks'] = '-';
-                                    $rider_details['remarks'] = $latest_shipments_journey;
-                                    $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
+                                    // $rider_details['remarks'] = $latest_shipments_journey;
+                                    $rider_details['remarks'] = '-';
                                 }
 
                                 $call_history = $this->get_call_status_history($request , $shipment->id);
