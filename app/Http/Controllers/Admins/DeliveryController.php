@@ -2620,18 +2620,6 @@ class DeliveryController extends Controller
                                 ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
                             }
 
-                            if($selected_status == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
-                            {
-                                $rvData = [
-                                    'shipment_id' => $shipment,
-                                    'shipper_status_id' => $selected_status,
-                                    'status_reason_id' => $selected_reason,
-                                    'shipment_user_id' => $shipment_details->user_id,
-                                    'call_count' => 0
-                                ];
-                                dispatch(new ProcessRvShipmentTicket($rvData));
-                            }
-
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {
@@ -2673,6 +2661,18 @@ class DeliveryController extends Controller
 //                        $data['shipment_id'] = $shipment;
 //                        dispatch(new ProcessAgentCallMonitoring($data));
 //                    }
+
+                    if($selected_status == 12) //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                    {
+                    $rvData = [
+                    'shipment_id' => $shipment,
+                    'shipper_status_id' => $selected_status,
+                    'status_reason_id' => $selected_reason,
+                    'shipment_user_id' => $shipment_details->user_id,
+                    'call_count' => 0
+                    ];
+                    dispatch(new ProcessRvShipmentTicket($rvData));
+                    }
                 }
             }
 
@@ -2737,7 +2737,6 @@ class DeliveryController extends Controller
         $consignee_relation = $request->relation;
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
-
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
         $rcp_sms_setting = GlobalSettings::where('type', 'return_confirmation_pending_sms')->first();
@@ -2884,6 +2883,15 @@ class DeliveryController extends Controller
                                 //         }
 
                                 //     }
+                                //if Shipper Status Id = 12 (Shipment - Reason Validation Required) Then fetch Those Shipments in Get Ticket
+                                $rvData = [
+                                    'shipment_id' => $shipment,
+                                    'shipper_status_id' => $request->status_drop[$shipment],
+                                    'status_reason_id' => $request->reason_drop[$shipment],
+                                    'shipment_user_id' => $shipment_status->user_id,
+                                    'call_count' => 0
+                                ];
+                                dispatch(new ProcessRvShipmentTicket($rvData));
                             }
                             /* if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
