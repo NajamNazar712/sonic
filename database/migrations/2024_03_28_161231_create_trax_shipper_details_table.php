@@ -20,6 +20,7 @@ class CreateTraxShipperDetailsTable extends Migration
             $table->integer('trax_service_id')->nullable();
             $table->integer('rider_id')->nullable();
             $table->integer('route_id')->nullable();
+            $table->integer('piece_setting_id')->nullable();
             $table->integer('status')->default(1);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();

@@ -31,7 +31,7 @@ class RiderLogisticApiController extends Controller
         $logistic_data = array();
 
         $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
-            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id')
+            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id','sd.piece_setting_id')
             ->where('users.status',3)->where('sd.status',1)
             ->where('sd.rider_id',$rider_id)
             ->get();
