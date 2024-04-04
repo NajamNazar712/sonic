@@ -35,8 +35,6 @@ class logistic_data_seeder extends Seeder
         ));
 
 
-        DB::table('trax_cn_issue_to_riders')->insert(array(
-            array('id' => 1,'company_code'=> 'Logistic' ,'issue_date' =>$time_stamp ,'rider_id'=>1,'product_id'=>1,'cn_from'=>100,'cn_to'=>200,'quantity'=>100,'created_at'=>$time_stamp,'updated_at'=>$time_stamp),
-        ));
+
     }
 }

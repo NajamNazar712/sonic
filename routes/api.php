@@ -361,6 +361,7 @@ Route::name('api.')->group(function () {
                 Route::prefix('logistic')->name('logistic.')->group(function (){
                     Route::get('data','Rider\Logistic\Api\RiderLogisticApiController@logistic_data')->name('data');
                     Route::post('store','Rider\Logistic\Api\RiderLogisticApiController@logistic_booking_store')->name('store');
+                    Route::post('shipper','Rider\Logistic\Api\RiderLogisticApiController@get_shipper_detail')->name('shipper');
 
                 });
 
