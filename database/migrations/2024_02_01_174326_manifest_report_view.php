@@ -13,7 +13,7 @@ class ManifestReportView extends Migration
      * @return void
      */
     public function up()
-    {
+    { 
         $manifest_report = "create or replace view manifest_report as SELECT `sh`.`created_at` AS `created_at`,`sh`.`id` AS `id`,`sj`.`city_id` AS `origin`,`oc`.`name` AS `origin_name`,`oz`.`name` AS `origin_zonecode`,`sh`.`consignee_city_id` AS `shipment_destination`,`c`.`name` AS `destination_name`,`z`.`name` AS `destination_zonecode`,`p`.`name` AS `parent_prod_name`,`sp`.`name` AS `sub_prod_name`,(CASE WHEN (`sj`.`shipper_status_id` = 2) THEN 1 ELSE 0 END) AS `arrival_count`,'Arrival' AS `Arrival`, NULL AS `manifest_code`,'manifest' AS `manifest`, NULL AS `mr_code`,'Misroute' AS `Misroute`, NULL AS `wmcode`,'Without_manifest' AS `Without_manifest`
         FROM ((((((((`shipments` `sh`
         JOIN `users` `u`)
