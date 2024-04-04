@@ -6103,8 +6103,14 @@ class DeliveryController extends Controller
                     return '-';
                 }
             })
+
+
+
+
+
             ->addColumn('cash_amount', function ($sdn) {
                 $id = $sdn->sdn;
+                $sdn_adjustment_amount = $sdn->adjustment_amount;
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
@@ -6156,7 +6162,8 @@ class DeliveryController extends Controller
                         $c = 0;
                     }
 
-                    $sum = $a + $b + $c;
+                    // $sum = $a + $b + $c;
+                    $sum = $a + $b + $c + $sdn_adjustment_amount;
 
                     if ($sum > 0) {
                         $total = $sdn->sdn_amount - $sum;
@@ -6168,6 +6175,11 @@ class DeliveryController extends Controller
                     return '-';
                 }
             });
+
+
+
+
+            
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
         //         $query->where('station_deposit_notes.status', '=', $keyword);
