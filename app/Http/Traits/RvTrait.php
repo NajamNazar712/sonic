@@ -751,7 +751,7 @@ trait RvTrait
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
-
+        
         if($rv_shipment_assign_agent)
         {
             try {
@@ -784,9 +784,10 @@ trait RvTrait
                 else if ($rv_shipment_assign_agent->unresponsive_count == 2) {
                     //updating the shipment status to Shipper Advise Requested(65) in shipments table
                     Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+                    //get the shipment journey table in reason validation id
                     
                     // //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
+                    ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
                     return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
                 }
 
@@ -838,7 +839,7 @@ trait RvTrait
                 Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
                 //updating the shipment status to Shipper Advise Requested(65) in shipments journey table
-                ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 65, 65, self::getShipmentJourneyStatusReasonId($request->shipment_id), NULL, $user_id, Auth::id());
 
                 return ['status' => 1, 'success'=> 'Shipment Updated Successfully'];
             }
@@ -1175,6 +1176,11 @@ trait RvTrait
         return $shipment;
     }
 
+    protected function getShipmentJourneyStatusReasonId($shipment)
+    {
+        $statusReasonId = ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',12)->latest()->first()->status_reason_id;
+        return $statusReasonId;
+    }
     //updated and optimized
     // protected function included_shippers($agent_id, $agent_shipment_id = null)
     // {
