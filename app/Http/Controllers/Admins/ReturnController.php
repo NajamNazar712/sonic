@@ -368,7 +368,7 @@ class ReturnController extends Controller
         $average_first_call_time = $hours . " h : ".$minutes. " m";
 
         //Average Hours
-        $aging = Shipment::whereIn('shipments.shipper_status_id', [12,65,66])->get(['created_at']);
+        $aging = Shipment::where('shipments.shipper_status_id', 2)->get(['created_at']);
         $totalSeconds = 0;
         $count = count($aging);
         foreach ($aging as $record) {
