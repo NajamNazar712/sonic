@@ -100,6 +100,32 @@ class AutoDeliveryNoteVerify extends Command
 
                             }
 
+                            // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
+                            // 27 = Shipment Damaged
+                            // 35 = Delivery Stopped
+                            if ($shipment->shipper_status_id == 12 && in_array($shipments_journey->status_reason_id, [27, 35])) {
+                                $globalAdminId = 346;
+
+                                Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+
+                                $shipment_details = Shipment::find($shipment->id);
+                                if ($shipment_details->shipment_type == 1) {
+                                    if ($shipment_details->booking_type_id != 4) {
+                                        ShipmentChargesController::return($shipment->id);
+                                        if ($shipment_details->packaging_material_request != 1) {
+                                            AdminFinanceController::add_payment($shipment->id, 1);
+                                        }
+                                    } else {
+                                        ShipmentChargesController::walk_in_return($shipment->id);
+                                        $shipment_details->walk_in_status = 2;
+                                        $shipment_details->save();
+                                        AdminFinanceController::done_payment($shipment->id, 1);
+                                    }
+                                }
+                                
+                                ShipmentsJourneyController::add($shipment->id, 20, 20, $shipments_journey->status_reason_id, $shipments_journey->remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
+                            }
+
                         }
                         $current_time = Carbon::now();
                         DeliveryNote::where('id', $delivery_note->id)->update(['verified_by' => 346, 'status' => 1, 'last_updated_at' => $current_time, 'status_verified_at' => $current_time]);
