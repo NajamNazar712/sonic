@@ -253,7 +253,6 @@ class NotificationsController extends Controller
                 }
             }
 
-        
             $mail = Mail::to($to);
             
             if ($cc) {
@@ -274,9 +273,9 @@ class NotificationsController extends Controller
         $notification = Notification::find($id);
 
         if ($notification) {
-
-            if ($notification->status) {
-
+            // if ($notification->status)
+            if ($notification->status || ($id == 81 && $notification->status == 0))
+            {
                 if ($notification->type_id == 1) {
                     $subject = $notification->subject;
                 }
@@ -3239,7 +3238,7 @@ class NotificationsController extends Controller
                     $today->hour = $rdts_time;
 
                     //                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
-//                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
+                    //                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
 
                     $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name', ''];
 
@@ -3372,19 +3371,19 @@ class NotificationsController extends Controller
                                 //                                dd($data1);
 
                                 //                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
-//                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
-//                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
-////                                    ->where('return_delivered_to_shipper_sms.status', 0)
-//                                    ->whereBetween('return_delivered_to_shipper_sms.created_at',[$yesterday,$today])
-//                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
-//                                        'u.phone as phone_number',
-//                                        DB::raw("(select count(return_note_id)
-//                                        from return_delivered_to_shipper_sms
-//                                        Where  created_at >= '$yesterday'
-//                                        and  created_at <= '$today'
-//                                        and return_note_id = rn.id) as shipment_count"))
-//                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
-//                                    ->get();
+                        //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
+                        //                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+                        ////                                    ->where('return_delivered_to_shipper_sms.status', 0)
+                        //                                    ->whereBetween('return_delivered_to_shipper_sms.created_at',[$yesterday,$today])
+                        //                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
+                        //                                        'u.phone as phone_number',
+                        //                                        DB::raw("(select count(return_note_id)
+                        //                                        from return_delivered_to_shipper_sms
+                        //                                        Where  created_at >= '$yesterday'
+                        //                                        and  created_at <= '$today'
+                        //                                        and return_note_id = rn.id) as shipment_count"))
+                        //                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
+                        //                                    ->get();
 
                                 $da = [];
                                 $i = 0;
@@ -5742,7 +5741,6 @@ class NotificationsController extends Controller
                     $to = array();
                     $cc = array('waqas@trax.pk', 'khan.usama@trax.pk', 'shahrukh.raheem@trax.pk');
                     foreach ($sales_person as $index => $person) {
-                        // dd($person);
                         $shipper = User::find($index);
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper->name . '</td>';
@@ -5787,7 +5785,6 @@ class NotificationsController extends Controller
                     if ($to == null) {
                         $cc = null;
                     }
-
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 82) {
                     $done_payment_report = DonePaymentsReport::get();
