@@ -245,7 +245,7 @@ class AdminReportsController extends Controller
                                         from shipment_status_screen_locations 
                                         where shipment_status_id = journey.shipper_status_id
                                     )
-                                    and admin.role_id != 1
+                                    and (admin.role_id != 1 or admin.id is null)
                                 )');
             })
             ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
@@ -259,11 +259,12 @@ class AdminReportsController extends Controller
                                         from shipment_status_screen_locations 
                                         where shipment_status_id = hss.id
                                     )
-                                    and admin.role_id != 1
+                                    and (admin.role_id != 1 or admin.id is null)
                                 )');
             })
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -311,6 +312,7 @@ class AdminReportsController extends Controller
                 'sjrp.created_at as rider_picked_status_date',
                 'ssjal.location_status as location_status',
                 'ssjal_hss.location_status as location_status_hss',
+                'ca_scanning.name as scanning_city_area_name'
                 
             ])
             ->groupBy('shipments.id');
@@ -8326,17 +8328,17 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('rider_city_area', function ($entry) {
+                if ($entry->rider_id) {
+                    $rider = Rider::find($entry->rider_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }
             });
-            // ->addColumn('rider_city_area', function ($entry) {
-            //     if ($entry->rider_id) {
-            //         $rider = Rider::find($entry->rider_id);
-            //         if(isset($rider->area)){
-            //             return $rider->area->name;
-            //         }else{
-            //             return '-';
-            //         }
-            //     }
-            // });
 
 
         if ($rider = $request->get('search_rider')) {
