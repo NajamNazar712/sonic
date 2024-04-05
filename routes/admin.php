@@ -4184,7 +4184,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store','Admins\Logistic\AdminCnController@cn_receive_admin_store_store')->name('store');
             });
 
+            Route::prefix('child_receive_admin_store')->name('child_receive_admin_store.')->group(function (){
+                Route::get('','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_child_receive_admin_store_store')->name('store');
+            });
+
+            Route::prefix('child_issue_to_rider')->name('child_issue_to_rider.')->group(function (){
+                Route::get('','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_index')->name('index');
+                Route::get('list','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_list')->name('list');
+                Route::post('store','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_store')->name('store');
+            });
+
+
         });
+
 
     });
 });

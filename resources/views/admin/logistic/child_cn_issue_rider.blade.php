@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'CN Receive Admin Store')
+@section('title', 'Child CN Issue To Riders')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    CN Receive Admin Store
+                    Child CN Issue To Riders
                 </h1>
 
                 <div class="card">
@@ -21,12 +21,12 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Company Code</th>
-                                    <th class="border-primary border-darken-1">Area</th>
-                                    <th class="border-primary border-darken-1">Product</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">CN From</th>
                                     <th class="border-primary border-darken-1">To From</th>
                                     <th class="border-primary border-darken-1">Quantity</th>
-                                    <th class="border-primary border-darken-1">Receive Date</th>
+                                    <th class="border-primary border-darken-1">Issue Date</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -39,12 +39,12 @@
 
 
 
-    <div class="modal fade" id="AddCNReceiveAdminStoreModal" data-backdrop="static" role="dialog" aria-labelledby="AddCNReceiveAdminStoreModal"
+    <div class="modal fade" id="AddChildCNIssueRiderModal" data-backdrop="static" role="dialog" aria-labelledby="AddChildCNIssueRiderModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add CN Receive Admin Store</h4>
+                    <h4 class="modal-title">Add Child CN Issue To Riders</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -55,69 +55,46 @@
 
                     </div>
 
-                    <form method="post" id="add_cn_receive_admin_store_form"
-                          action="{{ route('admin.logistic.cn.receive_admin_store.store') }}"
+                    <form method="post" id="add_child_cn_issue_rider_form"
+                          action="{{ route('admin.logistic.cn.child_issue_to_rider.store') }}"
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Company Code</label>
-                                    <input type="text" name="company_code" class="form-control" data-rule-required="true" data-msg-required="Company Code is required">
+                                    <input type="text" name="company_code" class="form-control" >
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Receive Date</label>
-                                    <input type="text" name="receive_date" class="form-control receive_date whitebackground" id="receive_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Area Code</label>
-                                    <select class="select select2 mb-1" name="area_code" id="area_code_select" data-rule-required="true" data-msg-required="Area is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                    <label>Rider</label>
+                                    <select class="select select2 mb-1" name="rider_id" id="rider_id_select" data-rule-required="true" data-msg-required="Rider is required">
+                                        @foreach($riders as $rider)
+                                            <option value="{{ $rider->id }}">{{$rider->trax_id}}-{{ $rider->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Product</label>
-                                    <select class="select select2 mb-1" name="product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
-                                            @foreach($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                            @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
                                     <label>CN From</label>
-                                    <input type="text" name="cn_from" class="form-control" data-rule-required="true" data-msg-required="CN from is required" >
+                                    <input type="text" name="cn_from" class="form-control" >
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>CN To</label>
-                                    <input type="text" name="cn_to" class="form-control" data-rule-required="true" data-msg-required="CN to is required">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Quantity</label>
-                                    <input type="text" name="quantity" class="form-control" >
+                                    <input type="text" name="cn_to" class="form-control" >
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group ml-1">
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
 
                             <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -299,7 +276,7 @@
             color: #fff;
             background-color: #649bc8;
         }
-        #add_cn_receive_admin_store_form label {
+        #add_cn_issue_rider_form label {
             float: left;
         }
         .whitebackground{
@@ -327,7 +304,7 @@
         $(document).ready(function () {
 
 
-          $('#receive_date_datepicker').pickadate({
+            $('#issue_date_datepicker').pickadate({
                 firstDay: 1,
                 clear: '',
                 min: '{{ Carbon\Carbon::today() }}',
@@ -339,16 +316,12 @@
                 hiddenSuffix: '_formatted',
             });
 
-            $('#product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
-                placeholder: 'Select Product',
-                width: '100%',
-                dropdownParent:$('#AddCNReceiveAdminStoreModal')
-            });
 
-            $('#area_code_select').prepend('<option value="" selected="selected">Select Area</option>').select2({
-                placeholder: 'Select Area',
+
+            $('#rider_id_select').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider',
                 width: '100%',
-                dropdownParent:$('#AddCNReceiveAdminStoreModal')
+                dropdownParent:$('#AddChildCNIssueRiderModal')
             });
 
 
@@ -366,7 +339,7 @@
                             // $("#add_sack_bag_form")[0].reset();
                             // $("#sackbag_detail tr:not(:first-child)").empty();
                             // $("#add_sack_bag_form select").val(null).trigger('change.select2');
-                            $('#AddCNReceiveAdminStoreModal').modal('show');
+                            $('#AddChildCNIssueRiderModal').modal('show');
 
                         }
                     },
@@ -394,7 +367,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.logistic.cn.receive_admin_store.list') }}',
+                    url: '{{ route('admin.logistic.cn.child_issue_to_rider.list') }}',
 
                 },
                 rowId: 'id',
@@ -413,12 +386,12 @@
                         }
                     },
                     {data: 'company_code', name: 'company_code', class: 'align-middle company_code'},
-                    {data: 'area_name', name: 'c.name', class: 'align-middle area_name'},
-                    {data: 'segment_name', name: 's.name', class: 'align-middle segment_name', orderable: false},
+                    {data: 'rider_trax_id', name: 'rider_trax_id', class: 'align-middle rider_trax_id'},
+                    {data: 'rider_name', name: 'rider_name', class: 'align-middle rider_name'},
                     {data: 'cn_from', name: 'cn_from', class: 'align-middle cn_from'},
                     {data: 'cn_to', name: 'cn_to', class: 'align-middle cn_to'},
                     {data: 'quantity', name: 'quantity', class: 'align-middle quantity'},
-                    {data: 'receive_date', name: 'receive_date', class: 'align-middle receive_date'},
+                    {data: 'issue_date', name: 'issue_date', class: 'align-middle issue_date'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -457,7 +430,7 @@
             });
 
 
-            $("#add_cn_receive_admin_store_form").validate({
+            $("#add_child_cn_issue_rider_form").validate({
                 errorClass: "danger",
                 successClass: 'success',
                 errorPlacement: function (error, element) {

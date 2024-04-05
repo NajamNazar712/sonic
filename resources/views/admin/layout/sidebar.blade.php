@@ -254,6 +254,18 @@
                                 </li>
                             @endif
 
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.cn.child_receive_admin_store.index') }}">Child CN Receive Admin Store</a>
+                                </li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.cn.child_issue_to_rider.index') }}">Child CN Issue to Rider</a>
+                                </li>
+                            @endif
+
                     </ul>
 
                 </li>
