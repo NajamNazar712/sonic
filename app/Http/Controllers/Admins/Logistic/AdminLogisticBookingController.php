@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Models\Admin\Logistic\TraxProduct;
+use App\Http\Models\Admin\Logistic\TraxService;
+use App\Http\Models\Admin\Logistic\TraxShipperDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Logistic\TraxItemRefernce;
@@ -13,12 +17,22 @@ use App\Http\Models\Segment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\SubCategorySegment;
 use App\User;
-use CreateItemsRefernceTrackTable;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 
 class AdminLogisticBookingController extends Controller
 {
+    protected $validation_messages = [
+        'user_id.required' => 'The user ID field is required.',
+        'user_id.integer' => 'The user ID must be an integer.',
+        'rider_id.required' => 'The rider ID field is required.',
+        'rider_id.integer' => 'The rider ID must be an integer.',
+        'product_id.required' => 'The product ID field is required.',
+        'product_id.integer' => 'The product ID must be an integer.',
+        'service_id.required' => 'The service ID field is required.',
+        'service_id.integer' => 'The service ID must be an integer.',
+    ];
+
     public function __construct()
     {
         $this->middleware('auth:admin');
@@ -234,13 +248,5 @@ class AdminLogisticBookingController extends Controller
      
     }
 
-    public function shipper_tagging_index()
-    {
-        return view('admin.logistic.shipper_tagging');
-    }
-    public function shipper_tagging_list()
-    {
-
-    }
    
 }

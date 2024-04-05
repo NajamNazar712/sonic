@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Logistic Shipper Tagging')
+@section('title', 'Master Product')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Logistic Shipper Tagging
+                   Master Product
                 </h1>
 
                 <div class="card">
@@ -20,13 +20,9 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Shipper ID</th>
-                                    <th class="border-primary border-darken-1">Shipper Name</th>
-                                    <th class="border-primary border-darken-1">Product</th>
-                                    <th class="border-primary border-darken-1">Service</th>
-                                    <th class="border-primary border-darken-1">Rider Employee ID</th>
-                                    <th class="border-primary border-darken-1">Rider Name</th>
-                                    <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Master Product Code</th>
+                                    <th class="border-primary border-darken-1">Master Product Name</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -39,12 +35,12 @@
 
 
 
-    <div class="modal fade" id="AddShipperTaggingModal" data-backdrop="static" role="dialog" aria-labelledby="AddShipperTaggingModal"
+    <div class="modal fade" id="AddMasterProductModal" data-backdrop="static" role="dialog" aria-labelledby="AddMasterProductModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add Logistic Shipper Tagging</h4>
+                    <h4 class="modal-title">Add Master Product</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -55,56 +51,25 @@
 
                     </div>
 
-                    <form method="post" id="add_Shipper_tagging_form"
-                          action="{{ route('admin.logistic.shipper_tagging.store') }}"
+                    <form method="post" id="add_master_product_form"
+                          action="{{ route('admin.logistic.master_product.store') }}"
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Shipper</label>
-                                    <select class="select select2 mb-1" name="user_id" id="user_id_select" data-rule-required="true" data-msg-required="Shipper is required">
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label>Code</label>
+                                    <input type="text" name="parent_code" class="form-control parent_code" id="parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">
+
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Rider</label>
-                                    <select class="select select2 mb-1" name="rider_id" id="rider_id_select" data-rule-required="true" data-msg-required="Rider is required">
-                                        @foreach($riders as $rider)
-                                            <option value="{{ $rider->id }}">{{$rider->trax_id}}-{{ $rider->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label>Name</label>
+                                    <input type="text" name="parent_name" class="form-control parent_name" id="parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Product</label>
-                                    <select class="select select2 mb-1" name="trax_product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Service</label>
-                                    <select class="select select2 mb-1" name="trax_service_id" id="service_id_select" data-rule-required="true" data-msg-required="Service is required">
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="form-group ml-1">
                             {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
 
@@ -315,44 +280,6 @@
 
         $(document).ready(function () {
 
-            {{--$('#issue_date_datepicker').pickadate({--}}
-            {{--    firstDay: 1,--}}
-            {{--    clear: '',--}}
-            {{--    min: '{{ Carbon\Carbon::today() }}',--}}
-            {{--    // format: 'dd mmmm, yyyy',--}}
-            {{--    format: 'yyyy-mm-dd',--}}
-            {{--    selectYears: true,--}}
-            {{--    selectMonths: true,--}}
-            {{--    formatSubmit: 'yyyy-mm-dd',--}}
-            {{--    hiddenSuffix: '_formatted',--}}
-            {{--});--}}
-
-            $('#user_id_select').prepend('<option value="" selected="selected">Select Shipper</option>').select2({
-                placeholder: 'Select Shipper',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
-
-            $('#rider_id_select').prepend('<option value="" selected="selected">Select Rider</option>').select2({
-                placeholder: 'Select Rider',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
-
-            $('#product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
-                placeholder: 'Select Product',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
-
-            $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-                placeholder: 'Select Service',
-                width: '100%',
-                dropdownParent:$('#AddShipperTaggingModal')
-            });
-
-
-
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -366,7 +293,7 @@
                             // $("#add_sack_bag_form")[0].reset();
                             // $("#sackbag_detail tr:not(:first-child)").empty();
                             // $("#add_sack_bag_form select").val(null).trigger('change.select2');
-                            $('#AddShipperTaggingModal').modal('show');
+                            $('#AddMasterProductModal').modal('show');
 
                         }
                     },
@@ -394,7 +321,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.logistic.shipper_tagging.list') }}',
+                    url: '{{ route('admin.logistic.master_product.list') }}',
 
                 },
                 rowId: 'id',
@@ -412,13 +339,9 @@
                             return '';
                         }
                     },
-                    {data: 'shipper_id', name: 'u.id', class: 'align-middle shipper_id'},
-                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
-                    {data: 'product_name', name: 'tp.name', class: 'align-middle cn_from'},
-                    {data: 'service_name', name: 'ts.name', class: 'align-middle service_name'},
-                    {data: 'rider_trax_id', name: 'rd.trax_id', class: 'align-middle rider_trax_id'},
-                    {data: 'rider_name', name: 'rd.name', class: 'align-middle rider_name'},
-                    {data: 'route_code', name: 'r.code', class: 'align-middle route_code'},
+                    {data: 'parent_code', name: 'trax_parent_products.parent_code', class: 'align-middle parent_code'},
+                    {data: 'parent_name', name: 'trax_parent_products.parent_name', class: 'align-middle parent_name'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -458,7 +381,7 @@
             });
 
 
-            $("#add_Shipper_tagging_form").validate({
+            $("#add_master_product_form").validate({
                 errorClass: "danger",
                 successClass: 'success',
                 errorPlacement: function (error, element) {

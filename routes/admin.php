@@ -4168,9 +4168,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('shipper_tagging')->name('shipper_tagging.')->group(function (){
-            Route::get('', 'Admins\Logistic\AdminLogisticBookingController@shipper_tagging_index')->name('index');
-//            Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_store')->name('store');
+
         });
+        Route::prefix('master_product')->name('master_product.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@master_product_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@master_product_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@master_product_store')->name('store');
+
+        });
+
+        Route::prefix('product')->name('product.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@product_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@product_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@product_store')->name('store');
+
+        });
+
+        Route::prefix('service')->name('service.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticSetupController@service_index')->name('index');
+            Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@service_list')->name('list');
+            Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@service_store')->name('store');
+
+        });
+
 
         Route::prefix('cn')->name('cn.')->group(function(){
             Route::prefix('issue_area_store')->name('issue_area_store.')->group(function(){

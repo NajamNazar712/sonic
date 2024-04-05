@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins\Logistic;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxChildCnReceiveAdminStore;
 use App\Http\Models\Admin\Logistic\TraxRiderChildCnDetail;
+use App\Http\Models\Admin\Logistic\TraxRiderCnDetail;
 use App\Http\Models\City;
 use App\Http\Models\Admin\Logistic\TraxCnIssueAreaStore;
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
@@ -195,8 +196,8 @@ class AdminCnController extends Controller
             'product_id' => ['required','integer'],
             'cn_from' => ['required','integer'],
             'cn_to' => ['required','integer'],
-            'quantity' => ['required','integer'],
-            'issue_date' => ['required','date'],
+//            'quantity' => ['required','integer'],
+            'issue_date' => ['required','date']
         ]);
 
         if($validate->fails())
@@ -205,18 +206,38 @@ class AdminCnController extends Controller
         }
 
         try {
+            $quantity = ($request->cn_to - $request->cn_from);
+            $time_stamp = now();
+
+            DB::beginTransaction();
+
             $trax_cn_issue_rider = new TraxCnIssueToRider();
             $trax_cn_issue_rider->company_code = $request->company_code;
             $trax_cn_issue_rider->rider_id = $request->rider_id;
             $trax_cn_issue_rider->product_id = $request->product_id;
             $trax_cn_issue_rider->cn_from = $request->cn_from;
             $trax_cn_issue_rider->cn_to = $request->cn_to;
-            $trax_cn_issue_rider->quantity = $request->quantity;
+            $trax_cn_issue_rider->quantity = $quantity;
             $trax_cn_issue_rider->issue_date = $request->issue_date;
             $trax_cn_issue_rider->save();
+
+            for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
+                $child_cn[] = [
+                    'cn_issue_id' => $trax_cn_issue_rider->id,
+                    'cn_number' => $i,
+                    'created_at' => $time_stamp,
+                    'updated_at' => $time_stamp
+                ];
+            }
+
+            TraxRiderCnDetail::insert($child_cn);
+
+            DB::commit();
+
             return redirect()->back()->with('success','CN issue to rider successfully');
 
         } catch (\Exception $exception){
+            DB::rollBack();
             return redirect()->back()->with('error','Failed CN issue to rider');
         }
     }
