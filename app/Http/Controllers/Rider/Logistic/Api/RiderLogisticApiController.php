@@ -95,7 +95,7 @@ class RiderLogisticApiController extends Controller
 
         public function logistic_booking_store(Request $request) {
 
-        dd($request->all());
+//        dd($request->all());
 
             $bookig_data=$request->booking_data;
             $rider_id = $request->rider_id;
@@ -186,7 +186,7 @@ class RiderLogisticApiController extends Controller
             }catch (\Exception $ex) {
 
                 DB::rollback();
-                dd($ex->getMessage());
+//                dd($ex->getMessage());
                 return response()->json(['status'=>1,'error'=>'Something went wrong!']);
             }
         }
