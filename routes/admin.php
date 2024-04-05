@@ -4167,17 +4167,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('create','Admins\Logistic\TransitManifest\AdminTransitManifestController@create')->name('create');
         });
 
+        Route::prefix('shipper_tagging')->name('shipper_tagging.')->group(function (){
+            Route::get('', 'Admins\Logistic\AdminLogisticBookingController@shipper_tagging_index')->name('index');
+//            Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
+        });
+
         Route::prefix('cn')->name('cn.')->group(function(){
             Route::prefix('issue_area_store')->name('issue_area_store.')->group(function(){
                 Route::get('','Admins\Logistic\AdminCnController@cn_area_store_index')->name('index');
                 Route::get('list','Admins\Logistic\AdminCnController@cn_area_store_list')->name('list');
                 Route::post('store','Admins\Logistic\AdminCnController@add_cn_area_store')->name('store');
             });
+
             Route::prefix('issue_to_rider')->name('issue_to_rider.')->group(function(){
                 Route::get('','Admins\Logistic\AdminCnController@cn_issue_to_rider_index')->name('index');
                 Route::get('list','Admins\Logistic\AdminCnController@cn_issue_to_rider_list')->name('list');
                 Route::post('store','Admins\Logistic\AdminCnController@cn_issue_to_rider_store')->name('store');
             });
+
             Route::prefix('receive_admin_store')->name('receive_admin_store.')->group(function(){
                 Route::get('','Admins\Logistic\AdminCnController@cn_receive_admin_store_index')->name('index');
                 Route::get('list','Admins\Logistic\AdminCnController@cn_receive_admin_store_list')->name('list');

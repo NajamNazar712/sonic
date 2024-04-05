@@ -266,6 +266,12 @@
                                 </li>
                             @endif
 
+                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                <li  class="menu-item">
+                                    <a href="{{ route('admin.logistic.shipper_tagging.index') }}">Logistic Shipper Tagging</a>
+                                </li>
+                            @endif
+
                     </ul>
 
                 </li>

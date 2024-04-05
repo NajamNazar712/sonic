@@ -233,5 +233,14 @@ class AdminLogisticBookingController extends Controller
         return response()->json(['status'=>1,'error'=>'Consignment number not correct!']);
      
     }
+
+    public function shipper_tagging_index()
+    {
+        return view('admin.logistic.shipper_tagging');
+    }
+    public function shipper_tagging_list()
+    {
+
+    }
    
 }
