@@ -52,11 +52,11 @@ class AdminLogisticBookingController extends Controller
     public function list()
     {
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
-            ->join('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
-            ->join('segments as s','s.id','=','trax_logistic_bookings.product_id')
-            ->join('sub_category_segments as sb','sb.id','=','trax_logistic_bookings.service_id')
-            ->join('cities as oc','oc.id','trax_logistic_bookings.origin_id')
-            ->join('cities as dc','dc.id','trax_logistic_bookings.destination_id')
+            ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
+            ->leftjoin('segments as s','s.id','=','trax_logistic_bookings.product_id')
+            ->leftjoin('sub_category_segments as sb','sb.id','=','trax_logistic_bookings.service_id')
+            ->leftjoin('cities as oc','oc.id','trax_logistic_bookings.origin_id')
+            ->leftjoin('cities as dc','dc.id','trax_logistic_bookings.destination_id')
             ->select('trax_logistic_bookings.booking_date','trax_logistic_bookings.shipper_id','u.name as shipper_name','usi.pickup_address','trax_logistic_bookings.cn_number','trax_logistic_bookings.product_id','s.name as product_name','trax_logistic_bookings.service_id','sb.name as service_name','trax_logistic_bookings.total_pieces','trax_logistic_bookings.total_booking_weight','trax_logistic_bookings.origin_id','oc.name as origin_name','trax_logistic_bookings.destination_id','dc.name as destination_name','trax_logistic_bookings.consignee_name','trax_logistic_bookings.consignee_address');
 
         $datatables = Datatables::of($logistic_bookings);
