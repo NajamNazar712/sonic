@@ -95,8 +95,6 @@ class RiderLogisticApiController extends Controller
 
         public function logistic_booking_store(Request $request) {
 
-//        dd($request->all());
-
             $bookig_data=$request->booking_data;
             $rider_id = $request->rider_id;
 
@@ -181,14 +179,12 @@ class RiderLogisticApiController extends Controller
                     DB::commit();
                     return response()->json(['status'=>0,'success'=>'Booking Completed Successfully']);
                 } else {
-                    DB::rollback();
                     return response()->json(['status'=>1,'error'=>'Logistic Booking empty not add']);
                 }
 
             } catch (\Exception $ex) {
-
                 DB::rollback();
-                return response()->json(['status'=>1,'error'=>'Something went wrong!']);
+                return response()->json(['status'=>1,'error'=> $ex->getMeesage()]);
             }
         }
 

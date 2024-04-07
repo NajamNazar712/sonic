@@ -116,6 +116,8 @@ class LogisticToShipmentSyncController extends Controller
             $shipment_journey->consignee_status_id = 1;
             $shipment_journey->ip_address = '127.0.0.1';
             $shipment_journey->save();
+
+
             return true;
         } catch (\Exception $ex) {
 //            DB::rollback();

@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+    @extends('admin.layout.master')
 
 @section('title', 'CN Issue To Riders')
 
@@ -67,15 +67,13 @@
                                     <input type="text" name="company_code" class="form-control" >
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Issue Date</label>
-                                    <input type="text" name="issue_date" class="form-control issue_date whitebackground" id="issue_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">
+{{--                            <div class="col-md-6">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Issue Date</label>--}}
+{{--                                    <input type="text" name="issue_date" class="form-control issue_date whitebackground" id="issue_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">--}}
 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
+{{--                                </div>--}}
+{{--                            </div>--}}
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Rider</label>
@@ -86,7 +84,9 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
@@ -96,8 +96,6 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>CN From</label>
@@ -110,12 +108,16 @@
                                     <input type="text" name="cn_to" class="form-control" >
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Quantity</label>
-                                    <input type="text" name="quantity" class="form-control" >
-                                </div>
-                            </div>
+
+                        </div>
+                        <div class="row">
+
+{{--                            <div class="col-md-4">--}}
+{{--                                <div class="form-group">--}}
+{{--                                    <label>Quantity</label>--}}
+{{--                                    <input type="text" name="quantity" class="form-control" >--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
                         </div>
 
                         <div class="form-group ml-1">

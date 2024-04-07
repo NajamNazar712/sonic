@@ -143,9 +143,9 @@ class AdminCnController extends Controller
             'area_code' => ['required','max:255'],
             'product_id' => ['required','integer'],
             'cn_from' => ['required','integer'],
-            'cn_to' => ['required','integer'],
-            'quantity' => ['required','integer'],
-            'receive_date' => ['required','date'],
+            'cn_to' => ['required','integer']
+//            'quantity' => ['required','integer'],
+//            'receive_date' => ['required','date'],
         ],$this->validation_messages);
 
         if($validate->fails())
@@ -154,15 +154,19 @@ class AdminCnController extends Controller
         }
 
         try {
+            $date= Carbon::now()->toDateString();
+            $quantity = ($request->cn_to-$request->cn_from);
+
             $cn_receive_admin_store = new TraxCnReceiveAdminStore();
             $cn_receive_admin_store->company_code = $request->company_code;
             $cn_receive_admin_store->area_code = $request->area_code;
             $cn_receive_admin_store->product_id = $request->product_id;
             $cn_receive_admin_store->cn_from = $request->cn_from;
             $cn_receive_admin_store->cn_to = $request->cn_to;
-            $cn_receive_admin_store->quantity = $request->quantity;
-            $cn_receive_admin_store->receive_date = $request->receive_date;
+            $cn_receive_admin_store->quantity = $quantity;
+            $cn_receive_admin_store->receive_date = $date;
             $cn_receive_admin_store->save();
+
             return redirect()->back()->with('success','CN Receive Admin store successfully');
 
         } catch (\Exception $exception){
@@ -197,7 +201,7 @@ class AdminCnController extends Controller
             'cn_from' => ['required','integer'],
             'cn_to' => ['required','integer'],
 //            'quantity' => ['required','integer'],
-            'issue_date' => ['required','date']
+//            'issue_date' => ['required','date']
         ]);
 
         if($validate->fails())
@@ -206,8 +210,9 @@ class AdminCnController extends Controller
         }
 
         try {
-            $quantity = ($request->cn_to - $request->cn_from);
             $time_stamp = now();
+            $quantity = ($request->cn_to - $request->cn_from);
+            $child_cn = [];
 
             DB::beginTransaction();
 
@@ -218,7 +223,7 @@ class AdminCnController extends Controller
             $trax_cn_issue_rider->cn_from = $request->cn_from;
             $trax_cn_issue_rider->cn_to = $request->cn_to;
             $trax_cn_issue_rider->quantity = $quantity;
-            $trax_cn_issue_rider->issue_date = $request->issue_date;
+            $trax_cn_issue_rider->issue_date = $time_stamp->toDateString();
             $trax_cn_issue_rider->save();
 
             for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
