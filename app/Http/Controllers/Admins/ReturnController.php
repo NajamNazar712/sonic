@@ -274,7 +274,7 @@ class ReturnController extends Controller
 
     public function return_view_data()
     {
-        $total_tickets_today = RvShipmentAssignAgent::whereDate('created_at',date('Y-m-d'))->count();
+        $total_tickets_today = RvShipmentAssignAgent::whereDate('created_at',date('Y-m-d'))->whereNotNull('rv_assign_agent_status_id')->count();
        
        //Total Shipments
     //    $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
@@ -368,7 +368,8 @@ class ReturnController extends Controller
         $average_first_call_time = $hours . " h : ".$minutes. " m";
 
         //Average Hours
-        $aging = Shipment::where('shipments.shipper_status_id', 2)->get(['created_at']);
+        $aging = ShipmentsJourney::join('rv_shipment_assign_agents', 'shipments_journey.shipment_id', '=', 'rv_shipment_assign_agents.shipment_id')
+        ->where('shipments_journey.shipper_status_id', 2)->get(['shipments_journey.created_at']);
         $totalSeconds = 0;
         $count = count($aging);
         foreach ($aging as $record) {
