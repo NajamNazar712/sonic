@@ -6104,10 +6104,6 @@ class DeliveryController extends Controller
                 }
             })
 
-
-
-
-
             ->addColumn('cash_amount', function ($sdn) {
                 $id = $sdn->sdn;
                 $sdn_adjustment_amount = $sdn->adjustment_amount;
@@ -6175,10 +6171,6 @@ class DeliveryController extends Controller
                     return '-';
                 }
             });
-
-
-
-
             
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
