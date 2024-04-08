@@ -274,7 +274,7 @@ class ReturnController extends Controller
 
     public function return_view_data()
     {
-        $total_tickets_today = RvShipmentAssignAgentDetails::whereDate('created_at',date('Y-m-d'))->where('updated_type_id',2)->count();
+        $total_tickets_today = RvShipmentAssignAgentDetails::whereDate('created_at',date('Y-m-d'))->where('updated_type_id',2)->whereNotNull('rv_assign_agent_status_id')->count();
        
        //Total Shipments
     //    $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
@@ -314,10 +314,10 @@ class ReturnController extends Controller
 
 
         //Pending First And Second Call Tickets Count
-        $number_of_pending_tickets = Shipment::leftJoin('rv_agent_call_histories as rvach', 'rvach.shipment_id', 'shipments.id')
-        ->where('shipments.shipper_status_id', 12)
+        $number_of_pending_tickets = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'rvsa.shipment_id', 'shipments.id')
+        ->leftJoin('rv_agent_call_histories as rvach', 'rvach.shipment_id', 'shipments.id')
         ->selectRaw('COUNT(CASE WHEN rvach.id IS NULL THEN 1 END) AS pending_first_call_count')
-        ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL OR rvsa.unresponsive_attempt_time IS NOT NULL THEN 1 END) AS pending_second_call_count')
+        ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL AND rvsa.unresponsive_attempt_time IS NOT NULL THEN 1 END) AS pending_second_call_count')
         ->first();
 
         //Pending First Call
