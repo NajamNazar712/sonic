@@ -155,7 +155,7 @@ class AdminCnController extends Controller
 
         try {
             $date= Carbon::now()->toDateString();
-            $quantity = ($request->cn_to-$request->cn_from);
+            $quantity = ($request->cn_to-$request->cn_from+1);
 
             $cn_receive_admin_store = new TraxCnReceiveAdminStore();
             $cn_receive_admin_store->company_code = $request->company_code;
@@ -211,7 +211,7 @@ class AdminCnController extends Controller
 
         try {
             $time_stamp = now();
-            $quantity = ($request->cn_to - $request->cn_from);
+            $quantity = ($request->cn_to - $request->cn_from + 1);
             $child_cn = [];
 
             DB::beginTransaction();
@@ -281,7 +281,7 @@ class AdminCnController extends Controller
 
         try {
             $date= Carbon::now()->toDateString();
-            $quantity = ($request->cn_to-$request->cn_from);
+            $quantity = ($request->cn_to-$request->cn_from +1);
 
             $child_cn_admin = new TraxChildCnReceiveAdminStore();
             $child_cn_admin->company_code = $request->company_code;
@@ -331,7 +331,7 @@ class AdminCnController extends Controller
 
         try {
             $time_stamp = now();
-            $quantity = ($request->cn_to - $request->cn_from);
+            $quantity = ($request->cn_to - $request->cn_from +1);
             $child_cn = [];
 
             DB::beginTransaction();

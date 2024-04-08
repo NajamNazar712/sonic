@@ -15,6 +15,7 @@ use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
@@ -125,8 +126,12 @@ class RiderLogisticApiController extends Controller
                             'created_by'=>$rider_id,
                         ]);
 
-                        //send data to shipments table
-                        LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Test Address',$booking['consignee_phone_1'],$booking['booking_date'],45,5323,0,1,1500,1,1,1,4,1,1,0.0,null,2);
+                        $shipment=Shipment::where('tracking_number');
+                        if(!$shipment->exists())
+                        {
+                            //send data to shipments table
+                            LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Address',$booking['consignee_phone_1'],$booking['booking_date'],45,5323,0,1,1500,1,1,1,4,1,1,0.0,null,2);
+                        }
 
                         if (isset($booking['booking_pieces_data']))
                         {
