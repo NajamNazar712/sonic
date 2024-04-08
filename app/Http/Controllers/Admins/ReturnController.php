@@ -312,14 +312,14 @@ class ReturnController extends Controller
             $percentage_reattempt_call_requested = ($reattempt_call_requested / $total_of_shipments) * 100;
         }
 
-        //Pending First And Second Call Tickets Count
-        $shipmentsQuery = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'rvsa.shipment_id','shipments.id')
-        ->where('shipments.shipper_status_id', 12);
 
-        $number_of_pending_tickets = $shipmentsQuery
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NULL OR rvsa.rv_assign_agent_status_id IS NULL and rvsa.unresponsive_attempt_time is NULL THEN 1 END) AS pending_first_call_count')
-            ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL  OR rvsa.unresponsive_attempt_time is NOT NULL THEN 1 END) AS pending_second_call_count')
-            ->first();
+        //Pending First And Second Call Tickets Count
+        $number_of_pending_tickets = Shipment::leftJoin('rv_shipment_assign_agents as rvsa', 'rvsa.shipment_id', 'shipments.id')
+        ->leftJoin('rv_agent_call_histories as rvach', 'rvach.shipment_id', 'shipments.id')
+        ->where('shipments.shipper_status_id', 12)
+        ->selectRaw('COUNT(CASE WHEN rvach.id IS NULL THEN 1 END) AS pending_first_call_count')
+        ->selectRaw('COUNT(CASE WHEN rvsa.id IS NOT NULL OR rvsa.unresponsive_attempt_time IS NOT NULL THEN 1 END) AS pending_second_call_count')
+        ->first();
 
         //Pending First Call
         $number_of_pending_first_call = $number_of_pending_tickets->pending_first_call_count;
@@ -368,7 +368,7 @@ class ReturnController extends Controller
         $average_first_call_time = $hours . " h : ".$minutes. " m";
 
         //Average Hours
-        $aging = Shipment::whereIn('shipments.shipper_status_id', [12,65,66])->get(['created_at']);
+        $aging = Shipment::where('shipments.shipper_status_id', 2)->get(['created_at']);
         $totalSeconds = 0;
         $count = count($aging);
         foreach ($aging as $record) {
