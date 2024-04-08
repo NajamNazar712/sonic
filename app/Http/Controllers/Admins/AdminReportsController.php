@@ -14066,7 +14066,7 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
 
         $transformedData = collect($results)->map(function ($item) { // mapping for datatable
-            $segment = $item->parent_prod_name . ' (' . $item->sub_prod_name . ')';
+            $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
             return [
                 'origin' => $item->origin_zonecode,
                 'destination' => $item->destination_zonecode,
