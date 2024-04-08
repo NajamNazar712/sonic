@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class DonePaymentReport extends Command
 {
@@ -42,5 +43,6 @@ class DonePaymentReport extends Command
     {
         $date = Carbon::today()->format('Y-m-d');
         AdminReportsEmailController::done_payment($date . ' 00:00:00');
+        Log::channel('cronJobLog')->info('s ' .'report:donepayment Running');
     }
 }
