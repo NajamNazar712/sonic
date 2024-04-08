@@ -274,7 +274,7 @@ class ReturnController extends Controller
 
     public function return_view_data()
     {
-        $total_tickets_today = RvShipmentAssignAgentDetails::whereDate('created_at',date('Y-m-d'))->where('updated_type_id',2)->count();
+        $total_tickets_today = RvShipmentAssignAgentDetails::whereDate('created_at',date('Y-m-d'))->where('updated_type_id',2)->whereNotNull('rv_assign_agent_status_id')->count();
        
        //Total Shipments
     //    $this->total_of_shipments_exclude = $this->shipments(2)->get()->pluck('rv_shipment_id')->toArray();
