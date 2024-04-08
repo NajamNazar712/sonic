@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Models\Admin\Logistic\TraxPieceSetting;
 use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxService;
@@ -34,7 +35,9 @@ class AdminLogisticSetupController extends Controller
         $services = TraxService::select('id','service_code','service_name','product_id')
             ->where('status',1)->get();
 
-        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'products'=>$products,'services'=>$services]);
+        $piece_settings = TraxPieceSetting::where('status',1)->get();
+
+        return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'products'=>$products,'services'=>$services,'piece_settings'=>$piece_settings]);
     }
     public function shipper_tagging_list()
     {
@@ -42,8 +45,9 @@ class AdminLogisticSetupController extends Controller
             ->join('riders as rd','rd.id','=','trax_shipper_details.rider_id')
             ->join('trax_products as tp','tp.id','=','trax_shipper_details.trax_product_id')
             ->join('trax_services as ts','ts.id','=','trax_shipper_details.trax_service_id')
+            ->join('trax_piece_settings as ps','ps.id','=','trax_shipper_details.piece_setting_id')
             ->leftjoin('routes as r','r.id','=','rd.route_id')
-            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id')
+            ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id','ps.description as piece_setting')
             ->where('trax_shipper_details.status',1);
 
 

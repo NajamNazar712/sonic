@@ -281,7 +281,7 @@ class AdminCnController extends Controller
 
         try {
             $date= Carbon::now()->toDateString();
-            $quantity = ($request->cn_to-$request->cn_from +1);
+                $quantity = ($request->cn_to-$request->cn_from +1);
 
             $child_cn_admin = new TraxChildCnReceiveAdminStore();
             $child_cn_admin->company_code = $request->company_code;

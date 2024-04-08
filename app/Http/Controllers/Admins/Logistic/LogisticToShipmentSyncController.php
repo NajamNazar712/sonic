@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -117,11 +118,29 @@ class LogisticToShipmentSyncController extends Controller
             $shipment_journey->ip_address = '127.0.0.1';
             $shipment_journey->save();
 
+            return $shipment->id;
 
-            return true;
         } catch (\Exception $ex) {
-//            DB::rollback();
             return false;
+        }
+    }
+
+    public static function  shipment_pieces($shipment_id,$form_piece,$to_piece)
+    {
+        $i=1;
+        for ($cn_no=$form_piece;$cn_no<=$to_piece;$cn_no++)
+        {
+            $shipment_piece = ShipmentPiece::where('tracking_number',$cn_no)->where('shipment_id',$shipment_id);
+            if(!$shipment_piece->exists())
+            {
+                $shipment_piece = new ShipmentPiece();
+                $shipment_piece->shipment_id = $shipment_id;
+                $shipment_piece->tracking_number= $cn_no;
+                $shipment_piece->numbering = $i;
+                $shipment_piece->save();
+                $i++;
+            }
+
         }
     }
 
