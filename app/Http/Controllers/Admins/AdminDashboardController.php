@@ -9074,12 +9074,12 @@ class AdminDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
 
-        $usersWithSameNtn = User::whereNotNull('ntn_no')
-            ->select('ntn_no', DB::raw('COUNT(*) as count'))
-            ->groupBy('ntn_no')
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('ntn_no')
-            ->toArray();
+        // $usersWithSameNtn = User::whereNotNull('ntn_no')
+        //     ->select('ntn_no', DB::raw('COUNT(*) as count'))
+        //     ->groupBy('ntn_no')
+        //     ->havingRaw('COUNT(*) > 1')
+        //     ->pluck('ntn_no')
+        //     ->toArray();
         
         $duplicateEmailCount = User::whereNotNull('email')
             ->select('email', DB::raw('COUNT(*) as count'))
@@ -9424,11 +9424,18 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }   
             })
-            ->addColumn('duplication', function ($users)  use ($request, $usersWithSameNtn, $duplicateEmailCount){
+            ->addColumn('duplication', function ($users)  use ($request, $duplicateEmailCount){
                 
                 $count = 0;
 
-                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $usersWithSameNtn)) {
+                $UniqueNtnCount = User::whereNotNull('ntn_no')
+                    ->select('ntn_no', DB::raw('COUNT(*) as count'), 'users.id')
+                    ->groupBy('ntn_no')
+                    ->havingRaw('COUNT(*) > 1')
+                    ->pluck('users.id')
+                    ->toArray();
+
+                if (!is_null($users->ntn_no) && !in_array($users->id, $UniqueNtnCount)) {
                     $count++;
                 }
                 
@@ -9735,13 +9742,13 @@ class AdminDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
 
-        $duplicateNtnCount = User::whereNotNull('ntn_no')
-            ->select('ntn_no', DB::raw('COUNT(*) as count'))
-            ->groupBy('ntn_no')
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('ntn_no')
-            ->toArray();
-        
+        // $duplicateNtnCount = User::whereNotNull('ntn_no')
+        //     ->select('ntn_no', DB::raw('COUNT(*) as count'))
+        //     ->groupBy('ntn_no')
+        //     ->havingRaw('COUNT(*) > 1')
+        //     ->pluck('ntn_no')
+        //     ->toArray();
+
         $duplicateEmailCount = User::whereNotNull('email')
             ->select('email', DB::raw('COUNT(*) as count'))
             ->groupBy('email')
@@ -10053,13 +10060,21 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users)  use ($request, $duplicateNtnCount, $duplicateEmailCount){
+            ->addColumn('duplication', function ($users)  use ($request, $duplicateEmailCount){
                 $count = 0;
 
-                if (!is_null($users->ntn_no) && in_array($users->ntn_no, $duplicateNtnCount)) {
+                // Unique ntn numbers and user ids
+                $UniqueNtnCount = User::whereNotNull('ntn_no')
+                    ->select('ntn_no', DB::raw('COUNT(*) as count'), 'users.id')
+                    ->groupBy('ntn_no')
+                    ->havingRaw('COUNT(*) > 1')
+                    ->pluck('users.id')
+                    ->toArray();
+
+                if (!is_null($users->ntn_no) && !in_array($users->id, $UniqueNtnCount)) {
                     $count++;
                 }
-                
+
                 if (in_array($users->email, $duplicateEmailCount)) {
                     $count++;
                 }
