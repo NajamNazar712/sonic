@@ -2315,7 +2315,7 @@ function checkboxStatus() {
                                 var html = '<table class="table table-bordered">';
                                 html += '<thead>';
                                 html += '<tr>' +
-                                    '<th><strong>User Requirement</strong></th>' +
+                                    '<th><strong>User Information</strong></th>' +
                                     '<th><strong>User Values</strong></th>' +
                                     '<th><strong>Duplicate Ids</strong></th>' +
                                     '</tr>';

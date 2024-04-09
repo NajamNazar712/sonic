@@ -9062,6 +9062,7 @@ class AdminDashboardController extends Controller
         if ($user->ntn_no) {
             $similarUsersNtn = User::where('ntn_no', $user->ntn_no)
                 ->where('id', '!=', $shipper_id)
+                ->where('created_at', '<', $user->created_at)
                 ->pluck('id')
                 ->toArray();
         }

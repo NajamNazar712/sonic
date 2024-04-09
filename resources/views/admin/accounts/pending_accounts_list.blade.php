@@ -2116,7 +2116,7 @@
                             var html = '<table class="table table-bordered">';
                             html += '<thead>';
                             html += '<tr>' +
-                                '<th><strong>User Requirement</strong></th>' +
+                                '<th><strong>User Information</strong></th>' +
                                 '<th><strong>User Values</strong></th>' +
                                 '<th><strong>Duplicate Ids</strong></th>' +
                                 '</tr>';
@@ -2143,6 +2143,13 @@
                                 '<td>' + (data.info.shared_iban ?
                                     generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
                                 '</tr>';
+
+                            // html += '<tr>' +
+                            //     '<td><strong>Name</strong></td>' +
+                            //     '<td>' + data.info.name + '</td>' +
+                            //     '<td>' + (data.info.shared_name ?
+                            //         generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                            //     '</tr>';
 
                             html += '<tr>' +
                                 '<td><strong>Name</strong></td>' +
