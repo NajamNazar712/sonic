@@ -221,7 +221,7 @@ class Kernel extends ConsoleKernel
         // }
 
         // $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
-//        $schedule->command('agent:changeStatus')->twiceDaily('21:55','23:00')->runInBackground(); // Dailt at 9:55
+        $schedule->command('agent:changeStatus')->dailyAt('23:00')->runInBackground(); // Dailt at 9:55
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
