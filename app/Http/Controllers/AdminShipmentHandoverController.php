@@ -295,13 +295,21 @@ class AdminShipmentHandoverController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),384);
         }
-        $handover_list = Handover::leftjoin('cities as c','c.id','=','handovers.hub')
-        ->leftjoin('admins as a', 'a.id', '=', 'handovers.created_by')
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from =  date('Y-m-d 00:00:01',strtotime($request->get('search_date_from')));
+            $to = date('Y-m-d 23:59:59',strtotime($request->get('search_date_to')));
+        }else{
+           $date = date('Y-m-d');
+           $from = date('Y-m-d 00:00:01',strtotime($date.'-6 month'));
+           $to = date('Y-m-d 23:59:59',strtotime($date));
+        }
+        $handover_list = Handover::join('cities as c','c.id','=','handovers.hub')
+        ->join('admins as a', 'a.id', '=', 'handovers.created_by')
         ->leftjoin('admins as ad', 'ad.id', '=', 'handovers.received_by')
-        ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
-        ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
-        ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
-        ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
+        ->join('handover_statuses as hs','hs.id','=','handovers.status_id')
+        ->join('handover_responsibilities as hr','hr.id','=','handovers.from')
+        ->join('handover_responsibilities as hor','hor.id','=','handovers.to')
+        ->join('handover_shipments as hss','hss.handover_id','=','handovers.id')
         ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
         ->leftjoin('city_areas as c_from', function ($join) {
             $join->on('c_from.id', '=', 'hr.city_area_id');
@@ -319,6 +327,7 @@ class AdminShipmentHandoverController extends Controller
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
         DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
       ])
+      ->whereBetween('handovers.created_at', [$from,$to])
       ->orderBy('handovers.id', 'DESC')
       ->groupBy('hss.handover_id');
 
