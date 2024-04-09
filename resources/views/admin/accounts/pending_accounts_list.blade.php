@@ -2144,13 +2144,6 @@
                                     generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
                                 '</tr>';
 
-                            // html += '<tr>' +
-                            //     '<td><strong>Name</strong></td>' +
-                            //     '<td>' + data.info.name + '</td>' +
-                            //     '<td>' + (data.info.shared_name ?
-                            //         generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
-                            //     '</tr>';
-
                             html += '<tr>' +
                                 '<td><strong>Name</strong></td>' +
                                 '<td>' + data.info.name + '</td>' +
