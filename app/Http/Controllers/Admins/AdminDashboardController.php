@@ -9013,12 +9013,32 @@ class AdminDashboardController extends Controller
             ->where('id', '!=', $shipper_id)
             ->pluck('id')
             ->toArray();
-    
+
         // Get user IDs with same name
-        $similarUsersName = DuplicateUser::where('name', $duplicate->name)
+
+        $name_parts = explode(' ', $user->name);
+        $similarUsersNameFromUsers = [];
+        
+        foreach ($name_parts as $part) {
+            $similarUsers = User::where('id', '!=', $shipper_id)
+                ->where('created_at', '<', $user->created_at)
+                ->where('name', 'like', '%' . $part . '%')
+                ->pluck('id')
+                ->toArray();
+        
+            $similarUsersNameFromUsers = array_merge($similarUsersNameFromUsers, $similarUsers);
+        }
+        
+        $similarUsersNameFromUsers = array_diff(array_unique($similarUsersNameFromUsers), [$shipper_id]);
+        
+        $similarUsersNameFromDuplicates = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
             ->where('user_id', '!=', $shipper_id)
+            ->where('created_at', '<', $user->created_at)
             ->pluck('user_id')
             ->toArray();
+
+        $similarUsersName = array_unique(array_merge($similarUsersNameFromUsers, $similarUsersNameFromDuplicates));
+        $similarUsersName = array_diff($similarUsersName, [$shipper_id]);
 
         // Get all IBANs associated with the user
         $ibanCollection = DuplicateUser::where('user_id', $user->id)
