@@ -9438,7 +9438,8 @@ class AdminDashboardController extends Controller
                 $UniqueNtnCount = User::whereNotNull('ntn_no')
                     ->select('ntn_no', DB::raw('COUNT(*) as count'), 'users.id')
                     ->groupBy('ntn_no')
-                    ->havingRaw('COUNT(*) > 1')
+                    // ->havingRaw('COUNT(*) > 1')
+                    ->distinct()
                     ->pluck('users.id')
                     ->toArray();
 
@@ -10074,10 +10075,10 @@ class AdminDashboardController extends Controller
                 $UniqueNtnCount = User::whereNotNull('ntn_no')
                     ->select('ntn_no', DB::raw('COUNT(*) as count'), 'users.id')
                     ->groupBy('ntn_no')
-                    ->havingRaw('COUNT(*) > 1')
-                    ->pluck('users.id')
+                    // ->havingRaw('COUNT(*) > 1')
+                    ->distinct()
+                    ->pluck('users.id', 'users.ntn_no')
                     ->toArray();
-
                 if (!is_null($users->ntn_no) && !in_array($users->id, $UniqueNtnCount)) {
                     $count++;
                 }
