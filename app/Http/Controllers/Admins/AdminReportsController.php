@@ -10150,7 +10150,10 @@ class AdminReportsController extends Controller
         //            }
         //        }
 
-        $shipments = DB::connection($connection)->table('shipments')->leftJoin('shipments_weight_types as sw', 'shipments.id', '=', 'sw.shipment_id')
+            $shipments = DB::connection($connection)->table('shipments')->leftJoin('shipments_weight_types as sw', function ($join) {
+                $join->on('shipments.id', '=', 'sw.shipment_id')
+                        ->whereRaw('sw.id = (SELECT MIN(id) FROM shipments_weight_types WHERE shipment_id = shipments.id)');
+            })
             ->leftJoin('weight_types as wt', 'sw.weight_type', '=', 'wt.id')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
