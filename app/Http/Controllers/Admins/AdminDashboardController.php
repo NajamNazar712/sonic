@@ -9005,12 +9005,14 @@ class AdminDashboardController extends Controller
         // Get user IDs with same phone number
         $similarUsersPhone = User::where('phone', $duplicate->phone)
             ->where('id', '!=', $shipper_id)
+            ->where('created_at', '<', $user->created_at)
             ->pluck('id')
             ->toArray();
     
         // Get user IDs with same CNIC
         $similarUsersCnic = User::where('cnic', $duplicate->cnic)
             ->where('id', '!=', $shipper_id)
+            ->where('created_at', '<', $user->created_at)
             ->pluck('id')
             ->toArray();
 
@@ -9018,6 +9020,7 @@ class AdminDashboardController extends Controller
         // $similarUsersName = DuplicateUser::where('name', $duplicate->name)
         $similarUsersName = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
             ->where('user_id', '!=', $shipper_id)
+            ->where('created_at', '<', $user->created_at)
             ->pluck('user_id')
             ->toArray();
 
