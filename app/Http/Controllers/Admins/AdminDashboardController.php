@@ -9018,11 +9018,15 @@ class AdminDashboardController extends Controller
 
         // Get user IDs with same name
         // $similarUsersName = DuplicateUser::where('name', $duplicate->name)
-        $similarUsersName = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
+        $similarUsersName = [];
+        if ($duplicate->name) 
+        {
+            $similarUsersName = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
             ->where('user_id', '!=', $shipper_id)
             ->where('created_at', '<', $user->created_at)
             ->pluck('user_id')
             ->toArray();
+        }
 
         // Get all IBANs associated with the user
         $ibanCollection = DuplicateUser::where('user_id', $user->id)
