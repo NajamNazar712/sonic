@@ -1041,7 +1041,7 @@ class ReturnController extends Controller
         if ($request->action == 'reattempt') {
             foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
-                if (!in_array($parcel->shipper_status_id, [13, 20])) {
+                if (!in_array($parcel->shipper_status_id, [13, 20, 5])) { // only allow marking reattempt for shipments whose shipper_status_id is not equal to [ 13 (Shipment - Re-Attempt), 20 (Return - Confirm) Or 5 (Shipment - Out for Delivery) ]
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null) ? $request->remark[$parcel->id] : null;
 
