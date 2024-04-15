@@ -635,7 +635,6 @@
               function check_pickup_requests(tracking_number,rider_name){
                    var flag = true;
                    if(rider_name !== ''){
-                    console.log(11);
                     for (not_picked_tracking_number in not_picked_tracking_numbers){
                         if (not_picked_tracking_number['tracking_number'] === tracking_number){
                             flag = false;
@@ -644,7 +643,6 @@
                     }
                 }
                 else{
-                     console.log(12);
                          flag = false;
                 }
                 if (flag) {
@@ -678,9 +676,12 @@
                     shipment_weight_types = [];
                     shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 3 : 2;
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-                        if(parseInt(weight) >= 50){
+                        // if(parseInt(weight) >= 50)
+                        if(weight > 20)
+                        {
                             swal({
-                                text: 'Are you certain about proceeding when your weight surpasses 49KG??',
+                                // text: 'Are you certain about proceeding when your weight surpasses 20KG??',
+                                text: 'Do you agree to add this weight?',
                                 title: 'Are You Sure',
                                 icon: 'warning',
                                 buttons: {
@@ -1285,7 +1286,6 @@
                 //     $('#RiderModal').modal('show');
                 // }
                 // else{
-                    console.log(not_picked_tracking_numbers.length);
                      if(not_picked_tracking_numbers.length > 0){
 
                         const table = document.createElement('table');
@@ -1310,7 +1310,6 @@
                         var count = 1;
                         not_picked_tracking_numbers.forEach(item => {
                         const tr = tbody.insertRow();
-                        console.log(item.rider);
                         tr.style.textAlign = 'center'; // center the row content
                         tr.insertCell(0).innerText = count;
                         tr.insertCell(1).innerText = (item.rider !== '' && item.rider !== null) ? item.rider : 'Not Assigned';
