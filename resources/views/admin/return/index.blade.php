@@ -1768,7 +1768,7 @@
                                 },
                                 
                             @endif {
-                                extend: 'excel',
+                                extend: 'csv',
                                 title: 'Return Marked',
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
