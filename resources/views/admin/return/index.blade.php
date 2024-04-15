@@ -1768,10 +1768,33 @@
                                 },
                                 
                             @endif {
-                                extend: 'csv',
                                 title: 'Return Marked',
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
+                                action: function(e){
+                                    $.post("{{ route('admin.return.list') }}", {
+                                        excel: true,
+                                        _token: $('meta[name="csrf-token"]').attr('content')
+                                    }).done(function(response) {
+                                        
+                                        var blob = new Blob([response], { type: 'text/csv' });
+
+                                        var url = window.URL.createObjectURL(blob);
+
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'Return Marked.csv';
+
+                                        document.body.appendChild(a);
+                                        a.click();
+
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+
+                                    }).fail(function(xhr, status, error) {
+                                        console.error('Failed to fetch CSV data:', status, error);
+                                    });
+                                }
                             }, {
                                 extend: 'selectAll',
                                 text: 'Select All',
