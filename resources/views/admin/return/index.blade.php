@@ -1775,10 +1775,12 @@
                                 action: function(e){
                                     //data table parameters
                                     var dtParams = table.ajax.params();
+                                    dtParams.start = 0;
+                                    dtParams.length = -1;
+                                    dtParams.excel = true;
 
                                     //additional parameters
                                     var additionalParams = {
-                                        excel: true,
                                         _token: $('meta[name="csrf-token"]').attr('content'),
                                         tracking_numbers : $('#track_form .tracking_numbers').val(),
                                         search_shipping_mode : $('#search_shipping_mode').val(),
