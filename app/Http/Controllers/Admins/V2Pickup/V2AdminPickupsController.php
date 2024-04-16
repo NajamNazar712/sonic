@@ -2143,7 +2143,7 @@ class V2AdminPickupsController extends Controller
                         }
                         $weight_type = WeightType::find($request->weight_type);
                         $shipments_weight_type->shipment_id = $shipment->id;
-                        $shipments_weight_type->weight_type = $weight_type->id;
+                        // $shipments_weight_type->weight_type = $weight_type->id;
                         $shipments_weight_type->save();
                     }
 
