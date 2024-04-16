@@ -399,10 +399,7 @@ class ReturnController extends Controller
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),86);
-        }
+        
 
         $shipments = $this->shipments();
 
@@ -894,8 +891,111 @@ class ReturnController extends Controller
                 ['rider_deliveries.otp_entered',1]
             ]);
         });
+        if($request->get('excel') && $request->get('excel') == true)
+        {
 
-        return $datatable->make(true);
+            $exportData = $datatable->make(true);
+            $exportData = $exportData->getData()->data;
+
+            $heads = [
+                'S.No',
+                'Tracking No.',
+                'Order ID',
+                'Shipper Name',
+                'Shipper Phone',
+                'Vendor',
+                'Origin',
+                'Destination',
+                'Hub',
+                'Zone',
+                'Consignee Name',
+                'Consignee Phone',
+                'Address',
+                'Sub Station',
+                'Collection Amount',
+                'Shipping Mode',
+                'Service Type',
+                'Status',
+                'Reason',
+                'Call Findings',
+                'Remarks',
+                'Shipper Remarks',
+                'OSA Estimated Charges',
+                'Arrival Date',
+                'Status Date',
+                'Status Updated',
+                'Confirmation Required',
+                'Confirmation On',
+                'Delivery Attempt Count',
+                'Re-Attempt Count',
+                'Assigned Agent',
+                'Assigned At',
+                'Assigned By',
+                'Consolidation',
+                'Consolidation IDs',
+                'Unresponsive Count',
+                'Unresponsive Call Time',
+                'Last Agent Name'
+            ];            
+            
+            header('Content-Type: text/csv; charset=utf-8');  
+            header('Content-Disposition: attachment; filename=data.csv');  
+            $output = fopen("php://output", "w");  
+            fputcsv($output, $heads);
+
+            $i=1;
+            foreach($exportData as $row)
+            {  
+                $data = [];
+                $row = (array) $row;
+                $data[] = $i;
+                $data[] = $row['tracking'];
+                $data[] = $row['order_id'];
+                $data[] = $row['shipper'];
+                $data[] = $row['shipper_phone1'] . " | ". $row['shipper_phone2'];
+                $data[] = $row['vendor_name'];
+                $data[] = $row['origin'];
+                $data[] = $row['destination'];
+                $data[] = $row['hub'];
+                $data[] = $row['zone'];
+                $data[] = $row['consignee_name'];
+                $data[] = $row['consignee_phone_number_1'] . " | " .$row['consignee_phone_number_2'] ;
+                $data[] = $row['consignee_address'];
+                $data[] = $row['sub_station'];
+                $data[] = $row['amount'];
+                $data[] = $row['mode'];
+                $data[] = $row['service_type'];
+                $data[] = $row['status'];
+                $data[] = $row['reason'];
+                $data[] = $row['remarks_excel'];
+                $data[] = $row['shipment_remarks_excel'];
+                $data[] = $row['shipper_remarks'];
+                $data[] = $row['nsa_osa_estimated_charges'];
+                $data[] = $row['arrival'];
+                $data[] = $row['last_status_date'];
+                $data[] = $row['reattempt_status_remarks'];
+                $data[] = $row['confirmation_req'];
+                $data[] = $row['confirmation_on'];
+                $data[] = $row['delivery_attempt'];
+                $data[] = $row['reattempts'];
+                $data[] = $row['assigned_agent'];
+                $data[] = $row['assigned_at'];
+                $data[] = $row['assigned_by'];
+                $data[] = $row['consolidation'];
+                $data[] = $row['consolidated_id'];
+                $data[] = $row['rvsaa_unresponsive_count'];
+                $data[] = $row['unresponsive_attempt_time'];
+                $data[] = $row['last_agent_name'];
+                fputcsv($output, $data);  
+                $i++;
+            }  
+            fclose($output);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),86);
+        }
+        else
+        {
+            return $datatable->make(true);
+        }
     }
 
     public static function check_tat($last_status_date, $tat_value)
@@ -1041,7 +1141,7 @@ class ReturnController extends Controller
         if ($request->action == 'reattempt') {
             foreach ($shipment_ids as $shipment) {
                 $parcel = Shipment::find($shipment);
-                if (!in_array($parcel->shipper_status_id, [13, 20])) {
+                if (!in_array($parcel->shipper_status_id, [13, 20, 5])) { // only allow marking reattempt for shipments whose shipper_status_id is not equal to [ 13 (Shipment - Re-Attempt), 20 (Return - Confirm) Or 5 (Shipment - Out for Delivery) ]
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null) ? $request->remark[$parcel->id] : null;
 

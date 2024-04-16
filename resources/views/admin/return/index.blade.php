@@ -1772,6 +1772,47 @@
                                 title: 'Return Marked',
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
+                                action: function(e){
+                                    $.post("{{ route('admin.return.list') }}", {
+                                        excel: true,
+                                        _token: $('meta[name="csrf-token"]').attr('content'),
+                                        tracking_numbers : $('#track_form .tracking_numbers').val(),
+                                        search_shipping_mode : $('#search_shipping_mode').val(),
+                                        star_shipper_filter : $('#star_shippers_filter').val(),
+                                        complaint_filter : $('#complaint_filter').val(),
+                                        out_of_service_area_filter : $('#out_of_service_area_filter').val(),
+                                        shipment_re_attempt_request_filter : $('#shipment_re_attempt_request_filter').val(),
+                                        try_buy_filter : $('#try_buy_filter').val(),
+                                        return_confirmation_pending_filter : $('#return_confirmation_pending_filter').val(),
+                                        search_rvr_value_div : $('#search_rvr_value_div').val(),
+                                        search_sar_value_div : $('#search_sar_value_div').val(),
+                                        search_total_value_div : $('#search_total_value_div').val(),
+                                        search_unresponsive_value_div : $('#search_unresponsive_value_div').val(),
+                                        number_of_pending_tickets_value_div : $('#number_of_pending_tickets_value_div').val(),
+                                        number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
+                                        number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
+                                        number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
+
+                                    }).done(function(response) {
+                                        
+                                        var blob = new Blob([response], { type: 'text/csv' });
+
+                                        var url = window.URL.createObjectURL(blob);
+
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'Return_Marked.csv';
+
+                                        document.body.appendChild(a);
+                                        a.click();
+
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+
+                                    }).fail(function(xhr, status, error) {
+                                        console.error('Failed to fetch CSV data:', status, error);
+                                    });
+                                }
                             }, {
                                 extend: 'selectAll',
                                 text: 'Select All',
@@ -3143,33 +3184,63 @@
 
                 $('#star_shippers_filter').on('click', function() {
                     $('#star_shippers_filter').val(1);
+                    $('#complaint_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#star_shippers_filter').val(0);
+                    // $('#star_shippers_filter').val(0);
                 });
                 $('#complaint_filter').on('click', function() {
                     $('#complaint_filter').val(1);
+                    $('#star_shippers_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#complaint_filter').val(0);
+                    // $('#complaint_filter').val(0);
                 });
                 $('#out_of_service_area_filter').on('click', function() {
                     $('#out_of_service_area_filter').val(1);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#out_of_service_area_filter').val(0);
+                    // $('#out_of_service_area_filter').val(0);
                 });
                 $('#shipment_re_attempt_request_filter').on('click', function() {
                     $('#shipment_re_attempt_request_filter').val(1);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#try_buy_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#shipment_re_attempt_request_filter').val(0);
+                    // $('#shipment_re_attempt_request_filter').val(0);
                 });
                 $('#try_buy_filter').on('click', function() {
                     $('#try_buy_filter').val(1);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
+                    $('#return_confirmation_pending_filter').val(0);
                     table.draw(true);
-                    $('#try_buy_filter').val(0);
+                    // $('#try_buy_filter').val(0);
                 });
                 $('#return_confirmation_pending_filter').on('click', function() {
                     $('#return_confirmation_pending_filter').val(1);
+                    $('#try_buy_filter').val(0);
+                    $('#shipment_re_attempt_request_filter').val(0);
+                    $('#out_of_service_area_filter').val(0);
+                    $('#complaint_filter').val(0);
+                    $('#star_shippers_filter').val(0);
                     table.draw(true);
-                    $('#return_confirmation_pending_filter').val(0);
+                    // $('#return_confirmation_pending_filter').val(0);
                 });
                 
             });
