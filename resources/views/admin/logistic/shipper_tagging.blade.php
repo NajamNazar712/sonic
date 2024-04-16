@@ -28,7 +28,7 @@
                                     <th class="border-primary border-darken-1">Rider Name</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
                                     <th class="border-primary border-darken-1">Piece Setting</th>
-                                    piece_setting
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -132,6 +132,100 @@
             </div>
         </div>
     </div>
+
+    {{--Edit Modal--}}
+    <div class="modal fade" id="EditShipperTaggingModal" data-backdrop="static" role="dialog" aria-labelledby="EditShipperTaggingModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Logistic Shipper Tagging</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+
+                    <form method="post" id="edit_Shipper_tagging_form"
+                          action="{{ route('admin.logistic.shipper_tagging.update') }}"
+                          class="form-horizontal mb-1" novalidate="novalidate">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Shipper</label>
+                                    <select class="select select2 mb-1" name="user_id" id="edit_user_id_select" data-rule-required="true" data-msg-required="Shipper is required">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Rider</label>
+                                    <select class="select select2 mb-1" name="rider_id" id="edit_rider_id_select" data-rule-required="true" data-msg-required="Rider is required">
+                                        @foreach($riders as $rider)
+                                            <option value="{{ $rider->id }}">{{$rider->trax_id}}-{{ $rider->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="select select2 mb-1" name="trax_product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
+                                        @foreach($products as $product)
+                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Service</label>
+                                    <select class="select select2 mb-1" name="trax_service_id" id="edit_service_id_select" data-rule-required="true" data-msg-required="Service is required">
+                                        @foreach($services as $service)
+                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Piece Setting</label>
+                                    <select class="select select2 mb-1" name="piece_setting_id" id="edit_piece_setting_id_select" data-rule-required="true" data-msg-required="Piece Setting is required">
+                                        @foreach($piece_settings as $piece_setting)
+                                            <option value="{{ $piece_setting->id }}">{{ $piece_setting->description }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group ml-1">
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -369,6 +463,37 @@
                 dropdownParent:$('#AddShipperTaggingModal')
             });
 
+            // Edit fields
+            $('#edit_user_id_select').prepend('<option value="" selected="selected">Select Shipper</option>').select2({
+                placeholder: 'Select Shipper',
+                width: '100%',
+                dropdownParent:$('#EditShipperTaggingModal')
+            });
+
+            $('#edit_rider_id_select').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider',
+                width: '100%',
+                dropdownParent:$('#EditShipperTaggingModal')
+            });
+
+            $('#edit_product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
+                placeholder: 'Select Product',
+                width: '100%',
+                dropdownParent:$('#EditShipperTaggingModal')
+            });
+
+            $('#edit_service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
+                placeholder: 'Select Service',
+                width: '100%',
+                dropdownParent:$('#EditShipperTaggingModal')
+            });
+
+            $('#edit_piece_setting_id_select').prepend('<option value="" selected="selected">Select Setting</option>').select2({
+                placeholder: 'Select Setting',
+                width: '100%',
+                dropdownParent:$('#EditShipperTaggingModal')
+            });
+
 
 
             var selected_rows = [];
@@ -438,7 +563,7 @@
                     {data: 'rider_name', name: 'rd.name', class: 'align-middle rider_name'},
                     {data: 'route_code', name: 'r.code', class: 'align-middle route_code'},
                     {data: 'piece_setting', name: 'ps.description', class: 'align-middle piece_setting'},
-
+                    {data: 'action', name: 'action', class: 'align-middle action'},
 
                 ],
                 rowCallback: function (row, data, index) {

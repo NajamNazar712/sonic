@@ -65,7 +65,7 @@ class RiderLogisticApiController extends Controller
         $services = TraxService::select('id','service_code','service_name','product_id')
             ->where('status',1)->get();
 
-        $rider_cn = TraxCnIssueToRider::select('product_id','cn_from','cn_to','quantity')
+            $rider_cn = TraxCnIssueToRider::select('product_id','cn_from','cn_to','quantity')
             ->where('rider_id',$rider_id)->where('status',1)->get();
 
         $rider_child_cn = TraxChildCnIssueToRider::select('cn_from','cn_to','quantity')

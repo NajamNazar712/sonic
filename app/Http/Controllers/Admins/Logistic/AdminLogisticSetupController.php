@@ -50,8 +50,27 @@ class AdminLogisticSetupController extends Controller
             ->SELECT('trax_shipper_details.id','u.id as shipper_id','u.name as shipper_name','rd.trax_id as rider_trax_id','rd.name as rider_name','tp.product_name','ts.service_name','r.code as route_code','r.id as route_id','ps.description as piece_setting')
             ->where('trax_shipper_details.status',1);
 
+        $datatables = Datatables::of($trax_shipper_detail)
+            ->addColumn('action',function ($trax_shipper_detail){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                        $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-        $datatables = Datatables::of($trax_shipper_detail);
+                        $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                        $dropdown .= $edit_button;
+                        $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+            });
 
         return $datatables->make(true);
     }
