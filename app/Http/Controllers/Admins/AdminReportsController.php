@@ -172,6 +172,8 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
                     );
             })
+            ->leftjoin('admins as admin', 'admin.id', '=', 'journey.admin_id')
+
             ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'journey.status_reason_id')
             ->leftjoin('shipment_items as si', function ($join) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
@@ -232,15 +234,37 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
-
-            ->leftJoin('shipments_journey as sjl', function ($join) {
-                $join->on('sjl.shipment_id', '=', 'shipments.id')
-                    ->where(
-                        'sjl.id',
-                        '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (2,3,4,5,11,23,53))')
-                    );
+            ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
+                $join->on('ssj.shipment_id', '=', 'journey.shipment_id')
+                     ->whereRaw('ssj.id = (
+                                    select max(id) 
+                                    from shipment_scanning_journeys 
+                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                    and shipment_scanning_journeys.screen_location_id IN (
+                                        select screen_location_id 
+                                        from shipment_status_screen_locations 
+                                        where shipment_status_id = journey.shipper_status_id
+                                    )
+                                    and (admin.role_id != 1 or admin.id is null)
+                                )');
             })
+            ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
+                $join->on('ssj_hss.shipment_id', '=', 'journey.shipment_id')
+                     ->whereRaw('ssj_hss.id = (
+                                    select max(id) 
+                                    from shipment_scanning_journeys 
+                                    where shipment_scanning_journeys.shipment_id = journey.shipment_id
+                                    and shipment_scanning_journeys.screen_location_id IN (
+                                        select screen_location_id 
+                                        from shipment_status_screen_locations 
+                                        where shipment_status_id = hss.id
+                                    )
+                                    and (admin.role_id != 1 or admin.id is null)
+                                )');
+            })
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
+            ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -286,11 +310,13 @@ class AdminReportsController extends Controller
                 'bs.name as bag_status',
                 'sjfa.created_at as first_attempt_date',
                 'sjrp.created_at as rider_picked_status_date',
-                'sjl.shipment_id as journey_latest_id',
-                'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
+                'ssjal.location_status as location_status',
+                'ssjal_hss.location_status as location_status_hss',
+                'ca_scanning.name as scanning_city_area_name'
+                
             ])
             ->groupBy('shipments.id');
+
 
         $type = $request->get('search_types');
 
@@ -339,6 +365,20 @@ class AdminReportsController extends Controller
                     return $shipment->shipper . ' (' . $shipment->poc . ')';
                 } else {
                     return $shipment->shipper;
+                }
+            })
+            ->editColumn('location_status', function ($shipment) {
+                if(isset($shipment->location_status)){
+                    return $shipment->location_status == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
+                }
+            })
+            ->editColumn('location_status_hss', function ($shipment) {
+                if(isset($shipment->location_status_hss)){
+                    return $shipment->location_status_hss == 1 ? 'On-site' : 'Off-site';
+                }else{
+                    return '-';
                 }
             })
             ->editColumn('current_hub', function ($shipment) {
@@ -6472,7 +6512,7 @@ class AdminReportsController extends Controller
             ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
             ->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
-            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
+            ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('user_shipping_infos AS usi', 'usi.id', '=', 's.pickup_address_id')
 
 
@@ -8196,9 +8236,11 @@ class AdminReportsController extends Controller
                 DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'),
                 'rt.name as rider_type',
                 'delivery_notes.id as delivery_note',
-                'r.trax_id as rider_trax_id'
+                'r.trax_id as rider_trax_id',
+                'r.id as rider_id'
             )
             ->groupBy('r.id');
+
 
 
         $datatables = Datatables::of($route_distribution_summary)
@@ -8286,7 +8328,18 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('rider_city_area', function ($entry) {
+                if ($entry->rider_id) {
+                    $rider = Rider::find($entry->rider_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }
             });
+
 
         if ($rider = $request->get('search_rider')) {
             $datatables = $datatables->where('r.id', '=', $rider);
@@ -13985,13 +14038,19 @@ class AdminReportsController extends Controller
         $date_to = Carbon::parse($date_to);
         $date_to = $date_to->format('Y-m-d');
 
-        $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
+        // $Query = "SELECT * FROM manifest_report2 WHERE origin_zonecode = :origin_value AND booking_date >= :date_from AND booking_date <= :date_to";
+        $Query = "SELECT * FROM manifest_report2 WHERE booking_date >= :date_from AND booking_date <= :date_to";
 
         $bindings = [
-            'origin_value' => $origin,
+            // 'origin_value' => $origin,
             'date_from' => $date_from,
             'date_to' => $date_to,
         ];
+
+        if (!empty($origin)) {
+            $Query .= " AND origin_zonecode = :origin_value";
+            $bindings['origin_value'] = $origin;
+        }
 
         if (!empty($destination)) {
             $Query .= " AND destination_zonecode = :destination_value";
@@ -14007,12 +14066,14 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
 
         $transformedData = collect($results)->map(function ($item) { // mapping for datatable
+            $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
             return [
                 'origin' => $item->origin_zonecode,
                 'destination' => $item->destination_zonecode,
                 'booking_date' => $item->booking_date,
-                'segment' => $item->parent_prod_name,
+                // 'segment' => $item->parent_prod_name,
                 'sub_segment' => $item->sub_prod_name,
+                'segment' => $segment,
                 'arrival' => $item->arrival,
                 'manifest' => $item->manifest,
                 'misroute' => $item->misroute,
