@@ -53,6 +53,8 @@
                                     <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
+                                    <th class="border-primary border-darken-1">Last Scanned Area</th>
+                                    <th class="border-primary border-darken-1">Last Scanned Area Location</th>
                                     <th class="border-primary border-darken-1">Trax Id</th>
                                     <th class="border-primary border-darken-1">Last Scanned By</th>
                                     <th class="border-primary border-darken-1">Last Scanned At</th>
@@ -194,6 +196,8 @@
                             head.push('COD Amount');
                             head.push('Last Scanned Location');
                             head.push('Last Scanned City');
+                            head.push('Location Status Area');
+                            head.push('Last Scanned Area Location');
                             head.push('Trax Id');
                             head.push('Last Scanned By');
                             head.push('Last Scanned At');
@@ -205,9 +209,7 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
-                            head.push('Location Status');
-                            head.push('Latitude');
-                            head.push('Longitude');	
+                         	
 							
                     
 
@@ -226,6 +228,8 @@
                                 row.push(values.cod_value);
                                 row.push(values.screen_location);
                                 row.push(values.city);
+                                row.push(values.scanning_city_area_name);
+                                row.push(values.location_status);
                                 row.push(values.trax_id);
                                 row.push(values.scanned_by);
                                 row.push(values.scanned_at);
@@ -286,6 +290,8 @@
                     {data: 'cod_value', name: 's.amount', class: 'align-middle shipper_name'},
                     {data: 'screen_location', name: 'shipment_positions.screen_location', class: 'align-middle screen_location'},
                     {data: 'city', name: 'shipment_positions.city', class: 'align-middle city'},
+                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'scanned_by', name: 'shipment_positions.scanned_by', class: 'align-middle scanned_by'},
                     {data: 'scanned_at', name: 'shipment_positions.scanned_at', class: 'align-middle scanned_at'},

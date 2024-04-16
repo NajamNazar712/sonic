@@ -34,10 +34,10 @@ class Permission
             'accounts.active.ajax' => 11,
             'accounts.block' => 15,
             'accounts.block.ajax' => 15,
-            'accounts.view.profile' =>110,
-            'accounts.get.pickups' =>110,
-            'accounts.update.profile' =>111,
-            'accounts.update.bank' =>112,
+            'accounts.view.profile' => 110,
+            'accounts.get.pickups' => 110,
+            'accounts.update.profile' => 111,
+            'accounts.update.bank' => 112,
             'accounts.sister_account.add.account' => 241,
             'accounts.sister_account.add.submit' => 241,
             'accounts.merged_account.index' => 241,
@@ -236,6 +236,8 @@ class Permission
             'cargo_manifest.draft.setting' => 682,
             'cargo_manifest.draft.update' => 682,
 
+            'cargo_manifest.bags.sack_bag.index' => 934,
+
 
 
 
@@ -279,7 +281,7 @@ class Permission
             'delivery.completed.dncc.list' => 41,
             'delivery.sdn.index' => 42,
             'delivery.sdn.list' => 42,
-            
+
             'delivery.sdn.back_to_deposit' => 604,
 
             'delivery.sdn.dncc.add' => 605,
@@ -474,7 +476,7 @@ class Permission
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
 
-			'petty_cash.advance.index' => 881,
+            'petty_cash.advance.index' => 881,
             'petty_cash.advance.statements.index' => 882,
 
 
@@ -492,10 +494,10 @@ class Permission
             'reports.cargo_received.list' => 65,
             'reports.cargo_received.shipments' => 65,
             'reports.cargo_received.print' => 65,
-            'reports.completed_delivery_notes.index' =>66,
-            'reports.completed_delivery_notes.list' =>66,
-            'reports.completed_delivery_notes.shipments' =>66,
-            'reports.completed_delivery_notes.shipments.delivered' =>66,
+            'reports.completed_delivery_notes.index' => 66,
+            'reports.completed_delivery_notes.list' => 66,
+            'reports.completed_delivery_notes.shipments' => 66,
+            'reports.completed_delivery_notes.shipments.delivered' => 66,
             'reports.return_note.index' => 67,
             'reports.return_note.list' => 67,
             'reports.return_note.print' => 67,
@@ -541,9 +543,9 @@ class Permission
             'reports.return_reattempt_ratio.list' => 174,
             'reports.multiple_payment_report.index' => 176,
             'reports.multiple_payment_report.list' => 176,
-			'reports.revenue.index' => 177,
+            'reports.revenue.index' => 177,
             'reports.revenue.list' => 177,
-			'reports.crm.index' => 200,
+            'reports.crm.index' => 200,
             'reports.crm.list' => 200,
             'reports.gst.index' => 199,
             'reports.gst.list' => 199,
@@ -595,21 +597,21 @@ class Permission
             'reports.weight_qc.list' => 444,
             'reports.master_cargo.bag.in_transit.index' => 472,
             'reports.master_cargo.bag.in_transit.list' => 472,
-            'reports.master_cargo.short_received_shipments.index' =>476,
+            'reports.master_cargo.short_received_shipments.index' => 476,
             'reports.master_cargo.short_received_shipments.list' => 476,
 
-            'reports.manifest.short_received_shipments.index' =>555,
+            'reports.manifest.short_received_shipments.index' => 555,
             'reports.manifest.short_received_shipments.list' => 555,
 
-            'reports.retail_sales.index' =>493,
+            'reports.retail_sales.index' => 493,
             'reports.retail_sales.list' => 493,
 
             'reports.shipper_insurance.index' => 502,
             'reports.shipper_insurance.list' => 502,
-            
+
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
-            
+
             'reports.crm_count.index' => 673,
             'reports.crm_count.list' => 673,
 
@@ -642,6 +644,11 @@ class Permission
             'reports.ordinary_discrepancy_report.list' => 901,
             'reports.ibft_report.index' => 915,
             'reports.ibft_report.list' => 915,
+
+            'reports.sack_bag_utilization.index' => 935,
+            'reports.sack_bag_status.index' => 936,
+            'reports.issuance_sack_bag.index' => 937,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -804,12 +811,14 @@ class Permission
             'settings.walk_in.store' => 154,
             'settings.international_walk_in.index' => 154,
             'settings.international_walk_in.store' => 154,
-		    'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
             'settings.petty_cash.heads.active' => 161,
             'settings.petty_cash.heads.inactive' => 162,
+
+            'settings.shipper_cap.index' => 942,
 
             'settings.petty_cash.titles.index' => 158,
             'settings.petty_cash.titles.list' => 158,
@@ -826,9 +835,9 @@ class Permission
             'settings.petty_cash.consignee.city.check' => 462,
             'settings.petty_cash.consignee.city.update' => 462,
 
-			'settings.auto_invoice_generation_and_due_date.index' => 171,
+            'settings.auto_invoice_generation_and_due_date.index' => 171,
             'settings.auto_invoice_generation_and_due_date.store' => 171,
-			'settings.debriefing_report_cut_off_time.index' => 175,
+            'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
             'settings.debriefing_break_time.index' => 674,
             'settings.debriefing_break_time.store' => 674,
@@ -837,7 +846,7 @@ class Permission
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
-			'settings.stock_movement.index' => 228,
+            'settings.stock_movement.index' => 228,
             'settings.stock_movement.update' => 228,
             'settings.delivery_call_verification_ratio.index' => 231,
             'settings.delivery_call_verification_ratio.update' => 231,
@@ -845,7 +854,7 @@ class Permission
             'settings.delivery_call_verification_ratio.list' => 237,
             'settings.crm_cut_off_time_and_holidays.update' => 237,
             'settings.delivery_call_verification_ratio.add' => 237,
-			'settings.consolidation.max.index' => 256,
+            'settings.consolidation.max.index' => 256,
             'settings.consolidation.max.update' => 256,
             'settings.crm_case_nature_types.index' => 260,
             'settings.crm_case_nature_types.list' => 260,
@@ -858,7 +867,7 @@ class Permission
             'settings.crm_cut_off_time_and_holidays.index' => 237,
 
             'settings.csat_cases_setting.index' => 900,
-          
+
             'settings.csat_cases_setting.formula.index' => 902,
 
             'settings.crm_reopen.index' => 274,
@@ -919,7 +928,7 @@ class Permission
             'settings.escalation.tagging.edit.store' => 350,
 
             'settings.default_agent.index' => 351,
-            
+
             'settings.holidays.index' => 358,
             'settings.holidays.list' => 358,
             'settings.holidays.add' => 358,
@@ -951,9 +960,9 @@ class Permission
             'settings.runner.unique' => 385,
             'settings.runner.enable_disable' => 385,
 
-			'settings.sms_shipper_wise.index' => 388,
+            'settings.sms_shipper_wise.index' => 388,
             'settings.sms_shipper_wise.update' => 388,
-            
+
 
             'settings.pickup_address_wise_payment_accounts.index' => 391,
 
@@ -972,7 +981,7 @@ class Permission
             'settings.rcp_sms.index' => 680,
 
             'settings.consignee_sms_expire.index' => 683,
-			'settings.sales.user_restriction.index' => 681,
+            'settings.sales.user_restriction.index' => 681,
 
             'settings.return_shFipments_address.index' => 689,
 
@@ -995,13 +1004,13 @@ class Permission
 
             'settings.rider_assigned_hub.index' => 893,
 
-            'settings.shippers.bypass_weight.index'=> 909,
+            'settings.shippers.bypass_weight.index' => 909,
 
-            'settings.product_type.index'=> 912,
-            'settings.product_type.list'=> 912,
+            'settings.product_type.index' => 912,
+            'settings.product_type.list' => 912,
 
-            'settings.shipper_ibft_charges_settings.index'=> 917,
-            'settings.shipper_ibft_charges_settings.list'=> 917,
+            'settings.shipper_ibft_charges_settings.index' => 917,
+            'settings.shipper_ibft_charges_settings.list' => 917,
 
 
             'dashboard.userwise' => 333,
@@ -1023,7 +1032,7 @@ class Permission
             'shipment.history.walk_in_history' => 209,
             'shipment.history.walk_in_history_list' => 209,
 
-			'shipment.consolidation.history.index' => 254,
+            'shipment.consolidation.history.index' => 254,
             'shipment.consolidation.history.list' => 254,
 
             'intercept.index' => 245,
@@ -1042,7 +1051,7 @@ class Permission
             'dashboard.overall.commission' => 334,
             'dashboard.overall.commission.list' => 334,
             'dashboard.overall.commission.data' => 334,
-             
+
             //handover module
             'handover.create.index' => 339,
             'handover.create.fetch' => 339,
@@ -1191,7 +1200,7 @@ class Permission
 
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
-            
+
             'human_resource.employee_confirmation.index' => 783,
             'human_resource.employee_confirmation.list' => 783,
 
@@ -1200,7 +1209,7 @@ class Permission
 
             'human_resource.employee_areas.index' => 845,
 
-			'attendance.index' => 465,
+            'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
             'attendance.horizontal.table' => 465,
@@ -1228,18 +1237,18 @@ class Permission
             'route_management.index' => 499,
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
-			'reports.operation_service_level.index' => 524,
+            'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
             'reports.rv_report.index'=>905,
             'reports.rv_action_count_report.index'=>930,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
 
-			'finance.ftl_invoice.index' => 509,           
+            'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
 
-			'admin_otp.index' => 527,
+            'admin_otp.index' => 527,
             'admin_otp.list' => 527,
 
             'admin_otp.update' => 722,
@@ -1266,7 +1275,7 @@ class Permission
             'reports.work_code_master.list' => 532,
 
 
-            
+
             'admin.reports.pay_fast_report.index' => 894,
             'admin.reports.pay_fast_report.list' => 894,
             'admin.reports.csat_report.index' => 899,
@@ -1274,7 +1283,7 @@ class Permission
 
             'reports.hbl_konnect.index' => 895,
             'reports.hbl_konnect.list' => 895,
-            
+
             'incidence_monitoring.index' => 535,
             'incidence_monitoring.list' => 535,
             'incidence_monitoring.add' => 536,
@@ -1291,16 +1300,16 @@ class Permission
             'settings.ccd_booking.index' => 558,
             'accounts.auto_cancelation_days' => 660,
             'settings.omni.index' => 644,
-            
+
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
             'return.new_rcp_agent.index' => 600,
             'return.new_rcp_agent.list' => 600,
-            'sales.territory.territoryindex' =>630,
-            'sales.designation.designationindex' =>631,
-            'settings.sales.incentive.index' =>632,
-            'reports.sales_incentive.index' =>633,
-            'reports.sales_incentive.consolidated' =>634,
+            'sales.territory.territoryindex' => 630,
+            'sales.designation.designationindex' => 631,
+            'settings.sales.incentive.index' => 632,
+            'reports.sales_incentive.index' => 633,
+            'reports.sales_incentive.consolidated' => 634,
 
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
@@ -1329,12 +1338,12 @@ class Permission
             'settings.lead_zones.list' => 664,
             'settings.lead_notification.index' => 671,
             'settings.lead_notification.list' => 671,
-            
+
             'reports.crm_special_approval.index' => 688,
             'reports.crm_special_approval.list' => 688,
-            'settings.cn_print_right.cn_print_right' =>699,
+            'settings.cn_print_right.cn_print_right' => 699,
 
-            
+
             'settings.auto_tag_territories.index' => 697,
             'settings.auto_tag_territories.list' => 697,
 
@@ -1345,18 +1354,18 @@ class Permission
             'settings.lost_shipment_admins.index' => 710,
 
             'settings.invoice_against_return_delivered_shipper.index' => 716,
-			'settings.undelivered_sms_hub_wise.index' => 714,
-			'settings.delivery_area_keyword.index' => 747,
+            'settings.undelivered_sms_hub_wise.index' => 714,
+            'settings.delivery_area_keyword.index' => 747,
             'nps.index' => 751,
             'nps.add' => 752,
             'nps.response.report' => 755,
             'nps.consolidate.report' => 756,
 
-			'accounts.disable.account.intimation.survey.index' => 762,
-			'accounts.disable.account.intimation.survey.report' => 768,
-			'settings.pickup.weight_bypass' => 761,			'delivery.note.rider_category_bypass_request' => 757,
-            'delivery.note.rider_category_bypass_weight' =>758,
-            
+            'accounts.disable.account.intimation.survey.index' => 762,
+            'accounts.disable.account.intimation.survey.report' => 768,
+            'settings.pickup.weight_bypass' => 761,            'delivery.note.rider_category_bypass_request' => 757,
+            'delivery.note.rider_category_bypass_weight' => 758,
+
             'vigilance.verification.index' => 770,
             'vigilance.verification.history.index' => 771,
 
@@ -1365,11 +1374,11 @@ class Permission
 
             'settings.booking_destination_keyword.index' => 772,
             'settings.booking_destination_keyword.add' => 773,
-            'qa.cx_training.index' =>777,
-            'qa.cx_training.list' =>777,
+            'qa.cx_training.index' => 777,
+            'qa.cx_training.list' => 777,
 
-            'return.confirmation_pending_manual_sms' =>781,
-            
+            'return.confirmation_pending_manual_sms' => 781,
+
             'reports.employee_confirmation.index' => 786,
             'reports.employee_confirmation.list' => 786,
 
@@ -1396,27 +1405,27 @@ class Permission
 
             'settings.onelink_payment_charges.index' => 825,
 
-			'reports.rider_pickup.index' => 823,
+            'reports.rider_pickup.index' => 823,
             'reports.rider_pickup.list' => 823,
 
-			'settings.consignee_refused_otp_bypass.index' => 826,
+            'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
             'settings.star_shippers.index' => 846,
-    		'settings.auto_delivery_note_verification.index' => 836,
-			'reports.revenue_report_by_invoice.index' => 839,
-			'return.return_confirm_otp.index' => 849,
-            'return.return_shipments.index'=> 860,
-            'delivery.delivery_shipments.index'=> 859,
-        
-            'management.riders.rider_remarks.index'=>862,
- 			'settings.sms_notifications_limit.index' => 861,
+            'settings.auto_delivery_note_verification.index' => 836,
+            'reports.revenue_report_by_invoice.index' => 839,
+            'return.return_confirm_otp.index' => 849,
+            'return.return_shipments.index' => 860,
+            'delivery.delivery_shipments.index' => 859,
+
+            'management.riders.rider_remarks.index' => 862,
+            'settings.sms_notifications_limit.index' => 861,
             'return.rcp_agent_cn.index' => 876,
             'return.new_rcp_agent_shipments.index' => 876,
- 			'accounts.substitute_account_management.index' => 873,
- 			'accounts.substitute_account_management.add.index' => 874,
- 			'accounts.substitute_account_management.update.index' => 875,
+            'accounts.substitute_account_management.index' => 873,
+            'accounts.substitute_account_management.add.index' => 874,
+            'accounts.substitute_account_management.update.index' => 875,
             'settings.airway_bill_address_visibility.index' => 887,
- 			'management.shipment_received.index' => 878,
+            'management.shipment_received.index' => 878,
             'return.shipper_return_receiving.history.index' => 885,
             'reports.overland.index' => 886,
 
@@ -1424,6 +1433,9 @@ class Permission
             'reports.operations_performance.export_to_excel' => 892,
             'settings.parcel_value_bypass.index' => 910,
             'settings.logistic_report.index' =>932,
+
+            'settings.mms_excel_booking_setting.index' => 938,
+			'reports.cargo_manifest.index' => 933,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1496,7 +1508,7 @@ class Permission
             'dispute.rebook.list' => 7,
             'dispute.rebook.shipment.info' => 7,
             'dispute.rebook.shipment.update' => 7,
-            
+
 
 
             'reports.qsr.index' => 8,
@@ -1508,7 +1520,7 @@ class Permission
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
-            
+
             'reports.daraz_mis.index' => 15,
             'reports.daraz_mis.list' => 15,
 
@@ -1518,7 +1530,7 @@ class Permission
             'crm.bulk_claim.index' => 19,
 
 
-            
+
         ]
     ];
 
@@ -1529,11 +1541,12 @@ class Permission
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next) {
+    public function handle($request, Closure $next)
+    {
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
-            if(session('department_id') == 7){
-                if(!Session::has('sale_users_bypass')){
+            if (session('department_id') == 7) {
+                if (!Session::has('sale_users_bypass')) {
                     $sale_users_bypass = array();
                     $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
 
@@ -1541,37 +1554,29 @@ class Permission
                         $settings = $settings->first();
                         $sale_users_bypass = array_map('intval', explode(',', $settings->text));
                         session(['sale_users_bypass' => $sale_users_bypass]);
-
-                    }
-                    else{
+                    } else {
                         session(['sale_users_bypass' => []]);
                     }
                 }
-
-            }
-            else{
+            } else {
                 session(['sale_users_bypass' => []]);
             }
 
 
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);
-            }
-            else {
+            } else {
                 return redirect()->route('admin.access_denied');
             }
-        }
-        else if (Auth::guard('substitute_users')->check()) {
+        } else if (Auth::guard('substitute_users')->check()) {
             $action = str_replace('cod.', '', $request->route()->getName());
 
             if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
                 return $next($request);
-            }
-            else {
+            } else {
                 return redirect()->route('cod.access_denied');
             }
-        }
-        else {
+        } else {
             return $next($request);
         }
     }

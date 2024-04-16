@@ -59,6 +59,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Lead ID</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
@@ -106,6 +107,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Expected Average Shipments</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -741,6 +743,52 @@
 </div>
 {{-- End --}}
 
+{{-- Add intercept shipper modal --}}
+<div class="modal fade text-left" id="AddShipperExcludeInterceptType" data-backdrop="static" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="interceptModalCloseBtn_1">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add_shipper_exclude_intercept_type" method="POST" action="{{ route('admin.accounts.store_shipper_exclude') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="text-center">
+                        <h4 id="shipper_name"></h4>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="exclude_shipper" id="exclude_shipper">
+                                <label for="exclude_shipper">Exclude Shipper</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="different_consignee" id="different_consignee">
+                                <label for="different_consignee">Disable Different Consignee</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="same_consignee" id="same_consignee">
+                                <label for="same_consignee">Disable Same Consignee</label>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <input type="submit" value="Submit" class="btn btn-success">
+                            <button type="button" class="btn btn-primary" id="interceptModalCloseBtn_2" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End intercept shipper modal --}}
 <div class="modal fade text-left" id="BlockDisableReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BlockDisableReasonModal"
 aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
@@ -794,6 +842,12 @@ aria-hidden="true">
         /* Style the label when the checkbox is checked */
         #checkboxContainer input[type="checkbox"]:checked+label {
             background-color: #56e73c; }
+
+        /* Style the actions dropdown due to increase in action buttons */
+        #datatable > tbody > tr > td:last-child > div.btn-group > div.dropdown-menu.dropdown-menu-sm.accounts {
+            overflow-y: scroll;
+            height: 300px;
+        }
 </style>
 @endsection
 
@@ -947,9 +1001,7 @@ function checkboxStatus() {
 							if (data.status == 0) {
 								var sub_segment = data.sub_segments;
 
-                                $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
+                                $.each(data.sub_segments, function (index, sub_segment) {	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1014,6 +1066,7 @@ function checkboxStatus() {
                         head = [];
 
                         head.push('S.No');
+                        head.push('Lead ID');
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
@@ -1061,11 +1114,13 @@ function checkboxStatus() {
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Expected Average Shipments');
                         $.each(result.data, function(index, values) {
                             row = [];
 
 
                             row.push(index + 1);
+                            row.push(values.lead_id);
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
@@ -1113,6 +1168,7 @@ function checkboxStatus() {
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.expected_average_shipments);
                             body.push(row);
                         });
                     },
@@ -1144,7 +1200,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1296,7 +1351,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1425,7 +1479,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1688,6 +1741,7 @@ function checkboxStatus() {
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'lead_id_link', name: 'users.lead_id', class:'align-middle lead_id_link'},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
@@ -1735,6 +1789,7 @@ function checkboxStatus() {
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -2379,12 +2434,155 @@ function checkboxStatus() {
             }
         }
     });
-    
+
+        // Shipper exclude feature
+        $(document).ready(function() {
+            $('#shipper').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
+
+            // Setup event handlers for checkboxes
+            var exclude_shipper = $('#exclude_shipper');
+            var different_consignee = $('#different_consignee');
+            var same_consignee = $('#same_consignee');
+
+            $('#interceptModalCloseBtn_1, #interceptModalCloseBtn_2').click(function() {
+                exclude_shipper.prop('checked', false);
+                different_consignee.prop('checked', false);
+                same_consignee.prop('checked', false);
+                exclude_shipper.prop('disabled', false);
+                different_consignee.prop('disabled', false);
+                same_consignee.prop('disabled', false)
+                $('#add_shipper_exclude_intercept_type')[0].reset();
+            });
+
+            // if exclude shipper is checked
+            exclude_shipper.on('change', function() {
+                if ($(this).prop('checked')) {
+                    different_consignee.prop('disabled', true);
+                    same_consignee.prop('disabled', true);
+                } else {
+                    different_consignee.prop('disabled', false);
+                    same_consignee.prop('disabled', false);
+                }
+            });
+
+            // if different consignee is checked
+            different_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                    if (same_consignee.prop('checked')) {
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            // if same consignee is checked
+            same_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                if (different_consignee.prop('checked')) {
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                var name = $(this).parents('tr').find('td:eq(4)').text();
+                if ($(this).hasClass('add_shipper_exclude_intercept_type')) {
+                    $('#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type #user_id').val(id);
+                    $('#shipper_name').text(name);
+                    $('#AddShipperExcludeInterceptType').modal('show');
+                }
+            });
+
+            $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                            var error = "Please select at least one option.";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else {
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                            })
+                        .then(function(confirm) {
+                            if (confirm) {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
             var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
 
+            if ($(this).hasClass('add_shipper_exclude_intercept_type')){
+                $.ajax({
+                    url: '{!! route('admin.accounts.excluded_shippers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                    }).done(function(response){
+                        if (response.intercept_shipper !== null) {
+                            var interceptShipperData = response.intercept_shipper;
+                            var different_consignee = interceptShipperData.different_consignee;
+                            var exclude_shipper = interceptShipperData.exclude_shipper;
+                            var same_consignee = interceptShipperData.same_consignee;
+                            if (different_consignee == 1) {
+                                $('#different_consignee').prop('checked', true);
+                            }
+                            if (exclude_shipper == 1) {
+                                $('#exclude_shipper').prop('checked', true);
+                            }
+                            if (same_consignee == 1) {
+                                $('#same_consignee').prop('checked', true);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+            }
 
             if ($(this).hasClass('change_rate_type')) {
 
@@ -2920,7 +3118,6 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3095,6 +3292,7 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#total_commission').val(0).trigger('change');
             $('#total_commission_value').text('0');
             $('#datatable_rate').DataTable().clear().draw();
+            kam_count = 0;
         });
         
     var selected_users = [];
@@ -3232,8 +3430,10 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     function roundToTwo(num) {
         return +(Math.round(num + "e+2") + "e-2");
     }
-
+    
+    var kam_count = 0;
     $('#commission_add_button').on('click', function () {
+        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -3254,50 +3454,66 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }
-
+        }       
+      
         if (flag) {
-       
-
-            if (commission <= commission_max) {
-                selected_commission = roundToTwo(selected_commission + commission);
-                commission_max = commission_max - commission;
-                this_btn.attr('disabled', true);
-                var user_id = '';
-                var user_name = '';
-                var tier_id = '';
-                var tier_name = '';
-                var tier_type = '';
-                tier_id = $('#sales_tier_select').val();
-                tier_name = $('#sales_tier_select').find(":selected").text();
-                tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                if (tier_type == 1) {
-                    user_id = $('#user_select').val();
-                    user_name = $('#user_select').find(":selected").text();
-                } else {
-                    user_name = $('#external_person_name').val();
-                }
-
-                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                $('#sales_tier_select').val(null).trigger('change');
-                $('#user_select').val(null).trigger('change');
-                $('#user_select').attr('disabled', true);
-                $('#external_person_name').val('');
-                $('#external_person_name').attr('disabled', true);
-                $('#user_commission').val('');
-
-            } else {
-                var error = 'Selected Commission value exceeds!';
-                toastr.error(error, 'Error!', {
+            if(is_kam == 'KAM' && kam_count > 0 ){
+                var kam_error = 'You Can Select One KAM Only!';
+                toastr.error(kam_error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
+            }else{
+                if (commission <= commission_max) {
+                    selected_commission = roundToTwo(selected_commission + commission);
+                    commission_max = commission_max - commission;
+                    this_btn.attr('disabled', true);
+                    var user_id = '';
+                    var user_name = '';
+                    var tier_id = '';
+                    var tier_name = '';
+                    var tier_type = '';
+                    tier_id = $('#sales_tier_select').val();
+                    tier_name = $('#sales_tier_select').find(":selected").text();
+                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                    if (tier_type == 1) {
+                        user_id = $('#user_select').val();
+                        user_name = $('#user_select').find(":selected").text();
+                    } else {
+                        user_name = $('#external_person_name').val();
+                    }
+                    if(is_kam == 'KAM'){
+                        kam_count+=1;
+                    }
+                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                    $('#sales_tier_select').val(null).trigger('change');
+                    $('#user_select').val(null).trigger('change');
+                    $('#user_select').attr('disabled', true);
+                    $('#external_person_name').val('');
+                    $('#external_person_name').attr('disabled', true);
+                    $('#user_commission').val('');
+
+                } else {
+                    var error = 'Selected Commission value exceeds!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
             }
+       
         }
     });
         $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
             var id = $(this).parents('tr').attr('id');
+            //check if sale tier is KAM
+            var rowData = table_2.row($(this).parents('tr')).data();
+            var regex = /KAM/;
 
+            if (regex.test(rowData[2])) {
+                kam_count-=1;
+            } 
+            //
             var user_id = $('input[name="user_id[' + id + ']"]').val();
             if (user_id) {
                 var index = $.inArray(user_id, selected_users);
@@ -3363,9 +3579,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-
-
-
 </script>
 
 @endsection

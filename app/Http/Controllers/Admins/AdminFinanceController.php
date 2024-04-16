@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ZoneCitiesGst;
 use Auth;
 use DateTime;
 use SnappyPDF;
@@ -116,9 +117,21 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
+use App\Http\Models\Admin\Settings\GeneralSetting;
+
 
 class AdminFinanceController extends Controller
 {
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
     static private function amount_to_words($amount)
     {
 
@@ -151,14 +164,35 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id)
+    static private function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
-
-        if ($zone) {
-            return $zone->gst;
-        } else {
-            return 0.13;
+        if (!is_null($city_id) && $city_id !== '') {
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
+                ->where('city_id',$city_id)
+                ->where('status',1)
+                ->select('gst');
+            if ($zone_city_gst->exists())
+            {
+                $zone_city_gst = $zone_city_gst->first();
+                return $zone_city_gst->gst;
+            }
+            else
+            {
+                if ($zone) {
+                    return $zone->gst;
+                } else {
+                    return 0.13;
+                }
+            }
+        }
+        else
+        {
+            if ($zone) {
+                return $zone->gst;
+            } else {
+                return 0.13;
+            }
         }
     }
 
@@ -1521,6 +1555,10 @@ class AdminFinanceController extends Controller
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
+
+        //StationDepositeNoteActionLog
+        self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }
 
@@ -3739,14 +3777,13 @@ class AdminFinanceController extends Controller
                 $crs = true;
             }
         }
-
         $amount = $shipment->amount;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -3761,7 +3798,7 @@ class AdminFinanceController extends Controller
                     $amount = 0;
                     $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -4581,7 +4618,15 @@ class AdminFinanceController extends Controller
         $total_amount = PendingPaymentShipment::sum('amount');
         $total_charges = PendingPaymentShipment::sum('charges');
         $total_payable = PendingPaymentShipment::sum('payable');
-        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles]);
+        $shipper_cap   =   GeneralSetting::where('type','shipper_cap');
+        if($shipper_cap->exists())
+        {
+             $shipper_cap = $shipper_cap->first();
+
+        }else{
+             $shipper_cap=0;
+        }
+        return view('admin.finance.make_payments')->with(['banks' => $banks, 'shipper_status' => $shipper_status, 'total_amount' => $total_amount, 'company_banks' => $company_banks, 'total_charges' => $total_charges, 'total_payable' => $total_payable, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles,'shipper_cap'=>$shipper_cap]);
     }
 
   
@@ -5476,17 +5521,17 @@ class AdminFinanceController extends Controller
         $company_bank = $request->get('company_bank_id');
 
         $done_payment_ids = array();
-//        $present_consolidation_shipments = array();
-//        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
-//            foreach ($pending_payment_shipment_ids as $shipment_id){
-//                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
-//                if($present->exists()){
-//                    $present = $present->first();
-//                    $consolidation_id = $present->consolidation_id;
-//
-//                }
-//            }
-//        }
+        //        $present_consolidation_shipments = array();
+        //        if(ConsolidationShipments::whereIn('shipment_id', $pending_payment_shipment_ids)->exists()){
+        //            foreach ($pending_payment_shipment_ids as $shipment_id){
+        //                $present = ConsolidationShipments::where('shipment_id', $shipment_id);
+        //                if($present->exists()){
+        //                    $present = $present->first();
+        //                    $consolidation_id = $present->consolidation_id;
+        //
+        //                }
+        //            }
+        //        }
 
 
         foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
@@ -5741,6 +5786,42 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function make_done_payment($done_payment_id,$user_id,$total_shipments,$delivered_shipments,$returned_shipments,$adjusted_shipments,$user_bank_id,$company_bank)
+    {
+        if(is_null($done_payment_id))
+        {
+           $done_payment = new DonePayment();
+
+           $done_payment->user_id = $user_id;
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+           $done_payment->user_bank_info_id = $user_bank_id;
+           $done_payment->company_bank_id = $company_bank;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        } else {
+
+           $done_payment = DonePayment::find($done_payment_id);
+
+           $done_payment->total_shipments = $total_shipments;
+           $done_payment->delivered_shipments = $delivered_shipments;
+           $done_payment->returned_shipments = $returned_shipments;
+           $done_payment->adjusted_shipments = $adjusted_shipments;
+
+           $done_payment->save();
+
+           return $done_payment->id;
+
+        }
+        
+
+    }
+    
     public function make_payments_stats_calculate(Request $request)
     {
         $total_amount = 0;
@@ -5977,6 +6058,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
+            ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
             ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 
             'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 
@@ -5987,7 +6069,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status');
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -6027,6 +6109,31 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('done_payments.id', function ($query, $keyword) {
                 return $query->where('done_payments.id', '=', $keyword);
+            })
+            ->filterColumn('u.payment_cycle_days', function ($query, $keyword) {
+                $keywordLower = strtolower($keyword);
+                $payment_cycle_days = AdminDashboardController::$paymentCycleDays;
+                
+                if (str_replace(['e', 'v', 'r', 'y','w','k','d','a'], '', $keywordLower) === '') {
+                    $query->whereIn('pc.id', [2, 4, 5]);
+                } else {
+                    $keywordFound = [];
+                
+                    foreach ($payment_cycle_days as $key => $dayMap) {
+                        if (stripos($dayMap, $keywordLower) !== false) {
+                            $keywordFound[] = $key;
+                        }
+                    }
+                
+                    if (count($keywordFound) > 0) {
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keywordFound])->whereNotIn('pc.id', [1, 3, 6]);
+                    } else if (is_numeric($keyword) || is_numeric($keyword . 'rd') || is_numeric($keyword . 'nd') || is_numeric($keyword . 'th')) {
+                        $keyword = preg_replace("/[^0-9]/", "", $keyword);
+                        $query->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$keyword])->whereNotIn('pc.id', [2, 4, 5]);
+                    } else {
+                        $query->whereRaw('false');
+                    }
+                }
             })
             ->editColumn('payment_id', function ($done_payment) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
@@ -6097,6 +6204,35 @@ class AdminFinanceController extends Controller
             })
             ->removeColumn('phone')
             ->removeColumn('phone2')
+            ->editColumn('payment_cycle_days', function ($pending_payment) {
+                $payment_cycle = $pending_payment->payment_cycle_id;
+                $payment_cycle_days = $pending_payment->payment_cycle_days;
+                $dayMap = AdminDashboardController::$paymentCycleDays;
+            
+                if ($payment_cycle == 2 || $payment_cycle == 4 || $payment_cycle == 5) {//Weekiy, Twice A Week And Thrice A Week.
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    $cycleText = $this->getCycleText($payment_cycle_days, $dayMap);
+                    return $cycleText;
+                }
+            
+                if (($payment_cycle == 3 || $payment_cycle == 6) && $payment_cycle_days != '0') {//Monthly And Fortnightly
+                    $payment_cycle_days = explode(',', $payment_cycle_days);
+                    if (count($payment_cycle_days) == 1) {
+                        $day = (int)$payment_cycle_days[0];
+                        return $this->getDayOfMonthText($day);
+                    } elseif (count($payment_cycle_days) == 2) {
+                        $day1 = (int)$payment_cycle_days[0];
+                        $day2 = (int)$payment_cycle_days[1];
+                        return $this->getDayOfMonthText($day1) . " And " . $this->getDayOfMonthText($day2);
+                    }
+                }else{
+                    return '-';
+                }
+            
+                if ($payment_cycle == 1) {// Daily
+                    return '-';
+                }
+            })
             ->editColumn('status', function ($done_payment) {
                 if ($done_payment->status == 0) {
                     return 'Processed';
@@ -6251,6 +6387,37 @@ class AdminFinanceController extends Controller
             })
             ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
+            if ($payment_filter = $request->get('payment_filter')) {
+                $datatables = $datatables->where(function ($query) use ($payment_filter) {
+                    if ($payment_filter == 1) {
+                        $dayOfWeek = Carbon::today()->dayOfWeek;
+                        $dayOfMonth = Carbon::today()->format('d');            
+                        $query->where(function ($sub_query) {
+                            $sub_query->where('u.payment_cycle_id', 1);
+                        })->orWhere(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                            $sub_query->whereIn('u.payment_cycle_id', [2, 3, 4, 5, 6])
+                                ->where(function ($sub_query) use ($dayOfWeek, $dayOfMonth) {
+                                    $sub_query->where(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->where('u.payment_cycle_id', 2)
+                                            ->where('u.payment_cycle_days', $dayOfWeek);
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 3)
+                                            ->where('u.payment_cycle_days', $dayOfMonth);
+                                    })->orWhere(function ($sub_query) use ($dayOfWeek) {
+                                        $sub_query->whereIn('u.payment_cycle_id', [4,5])
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfWeek]);
+                                    })->orWhere(function ($sub_query) use ($dayOfMonth) {
+                                        $sub_query->where('u.payment_cycle_id', 6)
+                                            ->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$dayOfMonth]);
+                                    });
+                                });
+                        });
+                    } else {
+                        $query->whereIn('u.payment_cycle_id', [1, 2, 3, 4, 5, 6]);
+                    }
+                });
+            }
+
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
                 ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
@@ -6263,6 +6430,10 @@ class AdminFinanceController extends Controller
 
         if ($shipper = $request->get('search_shipper')) {
             $datatables->where('u.id', '=', $shipper);
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
         }
 
         if ($shipper_status = $request->get('search_shipper_status')) {
@@ -6283,6 +6454,30 @@ class AdminFinanceController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('done_payments.status_updated_at', [$from, $to]);
+        }
+
+        if ($request->get('payment_cycles') !== null) {
+            $payment_cycles = $request->get('payment_cycles');
+            if ($payment_cycles == 1) {
+                $datatables->where('u.payment_cycle_id', '=', 1);
+            } else if ($payment_cycles == 2) {
+                $datatables->where('u.payment_cycle_id', '=', 2);
+            } else if ($payment_cycles == 3) {
+                $datatables->where('u.payment_cycle_id', '=', 3);
+            } else if ($payment_cycles == 4) {
+                $datatables->where('u.payment_cycle_id', '=', 4);
+            }  else if ($payment_cycles == 5) {
+                $datatables->where('u.payment_cycle_id', '=', 5);
+            }  else if ($payment_cycles == 6) {
+                $datatables->where('u.payment_cycle_id', '=', 6);
+            }
+            else {
+                $datatables->whereRaw('false');
+            }
+        }
+
+        if ($payment_cycle_days = $request->get('payment_cycle_days')) {
+            $datatables->whereRaw("FIND_IN_SET(?, u.payment_cycle_days) > 0", [$payment_cycle_days]);
         }
 
         if($request->get('star_shipper_filter') == 1)
@@ -15258,7 +15453,7 @@ class AdminFinanceController extends Controller
 
         $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
+                                    <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Invoice No.</strong></td>

@@ -79,8 +79,7 @@ class TeamLeadDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
 
-        $empid = Admin::find(Auth::id())->employee_id;
-
+        
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -102,17 +101,22 @@ class TeamLeadDashboardController extends Controller
                 $join->on('rvab.agent_id', '=', 'staff.id')
                     ->groupBy('rvab.zone_id')
                     ->havingRaw('COUNT(DISTINCT rvab.agent_id) > 1');
-            })
+                })
 
             ->select(['employees.rider_type_id as rider_type_id', 'rvab.zone_id as rv_zone_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id as employee_trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
             ->where('employees.staff_category_id', 3)
-            ->where('employees.line_manager_id', $empid)
+            // ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
             ->groupBy('staff.CNIC');
-
-        if ($request->get('number_of_available_agents_input') == '2') {
-            $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
+            
+            if ($request->get('number_of_available_agents_input') == '2') {
+                $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
+            }
+            
+        if (session('role_id') != 1) {
+           $empid = Admin::find(Auth::id())->employee_id;
+           $employees->where('employees.line_manager_id', $empid);
         }
 
         $datatable = Datatables::of($employees)
@@ -416,7 +420,7 @@ class TeamLeadDashboardController extends Controller
         
             //since we are getting employee id and we have to save admin id in table 
             // If employee_id is present, add it to the array
-            if ($request->has('employee_id')) {
+            if ($request->has('employee_id') && $request->employee_id !== null) {
                 $employeeIds[] = $request->employee_id;
             }
             $employee_id_bulks = explode(',', $request->employee_id_bulk);
@@ -429,7 +433,6 @@ class TeamLeadDashboardController extends Controller
                     }
                 }
             }
-            // dd($employeeIds);
             foreach ($employeeIds as $employeeId) {
                 $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $employeeId)->get();
                 if ($rvAgentAssignHub->isNotEmpty()) {
