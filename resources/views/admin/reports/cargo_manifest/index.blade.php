@@ -453,7 +453,6 @@
             });
 
             $('#datatable_wrapper > .pull-right > .dt-buttons > a.buttons-excel').removeClass('d-none');
-
         });
     </script>
 @endsection
