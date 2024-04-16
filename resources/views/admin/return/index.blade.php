@@ -1775,7 +1775,24 @@
                                 action: function(e){
                                     $.post("{{ route('admin.return.list') }}", {
                                         excel: true,
-                                        _token: $('meta[name="csrf-token"]').attr('content')
+                                        _token: $('meta[name="csrf-token"]').attr('content'),
+                                        tracking_numbers : $('#track_form .tracking_numbers').val(),
+                                        search_shipping_mode : $('#search_shipping_mode').val(),
+                                        star_shipper_filter : $('#star_shippers_filter').val(),
+                                        complaint_filter : $('#complaint_filter').val(),
+                                        out_of_service_area_filter : $('#out_of_service_area_filter').val(),
+                                        shipment_re_attempt_request_filter : $('#shipment_re_attempt_request_filter').val(),
+                                        try_buy_filter : $('#try_buy_filter').val(),
+                                        return_confirmation_pending_filter : $('#return_confirmation_pending_filter').val(),
+                                        search_rvr_value_div : $('#search_rvr_value_div').val(),
+                                        search_sar_value_div : $('#search_sar_value_div').val(),
+                                        search_total_value_div : $('#search_total_value_div').val(),
+                                        search_unresponsive_value_div : $('#search_unresponsive_value_div').val(),
+                                        number_of_pending_tickets_value_div : $('#number_of_pending_tickets_value_div').val(),
+                                        number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
+                                        number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
+                                        number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
+                                        
                                     }).done(function(response) {
                                         
                                         var blob = new Blob([response], { type: 'text/csv' });

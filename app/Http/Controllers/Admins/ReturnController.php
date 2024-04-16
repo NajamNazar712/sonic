@@ -943,7 +943,7 @@ class ReturnController extends Controller
             $output = fopen("php://output", "w");  
             fputcsv($output, $heads);
 
-            $i=0;
+            $i=1;
             foreach($exportData as $row)
             {  
                 $data = [];
