@@ -122,6 +122,7 @@ use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerification
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\WeightType;
 
 class NotificationsController extends Controller
 {
@@ -445,9 +446,9 @@ class NotificationsController extends Controller
                 } 
                 
                 else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference'];
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference', 'arrival_at', 'weighted_as'];
 
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)'];
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
 
                     $present_fields = array();
 
@@ -481,7 +482,7 @@ class NotificationsController extends Controller
 
                     foreach ($reference_1_id as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
-
+                        $weight_types = WeightType::where($shipment_id)->first();
                         $origin_hub_id = $shipment->pickup_address->city->hub_id;
 
                         if (!in_array($origin_hub_id, $origin_hub_ids)) {
@@ -498,9 +499,14 @@ class NotificationsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
                         $details['return_notes_id'] = $shipment->return_notes_id;
+                        $details['arrival_at'] = Carbon::parse($today)->format('d/M/Y');
                         $details['estimated_weight'] = $shipment->estimated_weight;
                         $details['actual_weight'] = $shipment->actual_weight;
                         $details['difference'] = abs($shipment->actual_weight - $shipment->estimated_weight);
+                        if ($details['difference'] == 0) {
+                            $details['difference'] = 0;
+                        }
+                        $details['weighted_as'] = $weight_types;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -538,7 +544,8 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($body, '[arrival_at]') !== FALSE) {
-                            $body = str_replace('[arrival_at]', $today, $body);
+                            // $body = str_replace('[arrival_at]', $today, $body);
+                            $body = str_replace('[arrival_at]', Carbon::parse($today)->format('d/M/Y'), $body);
                         }
 
                         //              $to = $shipper->email;
