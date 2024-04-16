@@ -442,10 +442,12 @@ class NotificationsController extends Controller
 
 
                     self::sms($body, $to);
-                } else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
+                } 
+                
+                else if ($id == 4) {
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference'];
 
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)'];
 
                     $present_fields = array();
 
@@ -496,6 +498,9 @@ class NotificationsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
                         $details['return_notes_id'] = $shipment->return_notes_id;
+                        $details['estimated_weight'] = $shipment->estimated_weight;
+                        $details['actual_weight'] = $shipment->actual_weight;
+                        $details['difference'] = abs($shipment->actual_weight - $shipment->estimated_weight);
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -608,7 +613,9 @@ class NotificationsController extends Controller
                         $subject = $original_subject;
                         $body = $original_body;
                     }
-                } else if ($id == 5) {
+                } 
+                
+                else if ($id == 5) {
                     $cargo_fields = ['cargo_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
