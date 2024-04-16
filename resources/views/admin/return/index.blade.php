@@ -1773,11 +1773,7 @@
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
                                 action: function(e){
-                                    //data table parameters
-                                    var dtParams = table.ajax.params();
-
-                                    //additional parameters
-                                    var additionalParams = {
+                                    $.post("{{ route('admin.return.list') }}", {
                                         excel: true,
                                         _token: $('meta[name="csrf-token"]').attr('content'),
                                         tracking_numbers : $('#track_form .tracking_numbers').val(),
@@ -1796,12 +1792,8 @@
                                         number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
                                         number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
                                         number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
-                                    };
 
-                                    //mergin all parameters
-                                    var allParams = Object.assign({}, dtParams, additionalParams);
-
-                                    $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
+                                    }).done(function(response) {
                                         
                                         var blob = new Blob([response], { type: 'text/csv' });
 
