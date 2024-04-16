@@ -164,6 +164,7 @@ class LeadAPIController extends Controller
                     'area_id' => $lead->area_territoy->id,
                     'lead_reference_id' => $lead->lead_reference->id,
                     'lead_reference_name' => $lead->lead_reference->name,
+                    'requested_date'=> $lead->requested_date,
                     'status_id' => $lead->status->id,
                     'status_name' => $lead->status->name
 
