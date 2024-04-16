@@ -156,6 +156,17 @@
                         </div>
                     </div>
 
+                    
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="rider_types_referral" id="rider_types_referral" class="select2">
+                                @foreach($rider_types_referral as $rider_type_referral)
+                                    <option value="{{$rider_type_referral->id}}">{{$rider_type_referral->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="col-3">
 
                         <div class="form-group input-group">
@@ -418,6 +429,20 @@
                 allowClear:true,
             });
         
+
+            $('#rider_types_referral').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Rider Type Referral*'
+            }).on('change', function() {
+                var rider_type = $(this).val();
+                if (rider_type == 3) {
+                    $('#ref_name_select').prop('disabled', true); 
+                } else {
+                    $('#ref_name_select').prop('disabled', false); 
+                }
+            });
+
+            
             
             $('.arrival_time_from').pickatime({
                 clear: '',
@@ -706,6 +731,8 @@
                         d.search_origin_zone = $('#search_origin_zone').val();
 
                         d.service_type_select = $('#service_type_select').val()
+                        d.rider_type_referral = $('#rider_types_referral').val();
+
                     }
                 },
                 order: [[14, 'desc']],

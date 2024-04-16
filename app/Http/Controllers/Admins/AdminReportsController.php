@@ -3341,6 +3341,8 @@ class AdminReportsController extends Controller
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
         $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $rider_types_referral = DB::connection('reports')->table('rider_type_referrals')->get();
+
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
 
@@ -3514,6 +3516,11 @@ class AdminReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_payment_journey where shipments_payment_journey.shipment_id = shipments.id and shipments_payment_journey.status_id  = 3)')
                     );
             })
+            // ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
+            // ->leftJoin('sales_commission_users as scu', 'sc.id', '=', 'scu.sales_commission_id')
+         
+                
+            // ->leftJoin('sales_tiers as st', 'st.id', '=', 'scu.tier_id')
             ->leftJoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
             ->leftJoin('sales_commission_users as scu','scu.sales_commission_id', '=', 'sc.id')
             ->leftJoin('admins as scun', 'scun.id', '=', 'scu.user_id')
@@ -3523,7 +3530,7 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to])
-            ->groupBy('shipments.tracking_number');
+            ->groupBy('shipments.id');
 
 
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
@@ -3827,6 +3834,25 @@ class AdminReportsController extends Controller
             $datatable->where('bt.id', '=', $service_type_select);
         }
 
+
+        $sales_tiers = DB::table('sales_tiers')->where('tier_name' , 'Referral')->orWhere('tier_name', 'REF')->orWhere('tier_name', 'ref')->first()->id ?? null;
+        
+        if ($request->get('rider_type_referral') == 1) {
+            $datatable->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 2]);
+        }
+
+        if ($request->get('rider_type_referral') == 2) {
+            $datatable->where(['scu.tier_id' => $sales_tiers, 'scu.user_type' => 1]);
+        }
+
+        if ($request->get('rider_type_referral') == 3) {
+            $datatable->WhereNotExists(function ($subquery) {
+                $subquery->from('sales_commission_users')
+                    ->whereColumn('sales_commission_id', 'scu.sales_commission_id')
+                    ->where('tier_id', 4);
+            });
+        }
+        
         return $datatable->make(true);
     }
 
