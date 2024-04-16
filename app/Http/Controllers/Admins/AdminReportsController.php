@@ -246,7 +246,7 @@ class AdminReportsController extends Controller
                                         from shipment_status_screen_locations 
                                         where shipment_status_id = journey.shipper_status_id
                                     )
-                                    and admin.role_id != 1
+                                    and (admin.role_id != 1 or admin.id is null)
                                 )');
             })
             ->leftJoin('shipment_scanning_journeys as ssj_hss', function ($join) {
@@ -260,11 +260,12 @@ class AdminReportsController extends Controller
                                         from shipment_status_screen_locations 
                                         where shipment_status_id = hss.id
                                     )
-                                    and admin.role_id != 1
+                                    and (admin.role_id != 1 or admin.id is null)
                                 )');
             })
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
+            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
             ->select([
                 'z.name  as zone',
                 'p.product_name as product_type',
@@ -312,6 +313,7 @@ class AdminReportsController extends Controller
                 'sjrp.created_at as rider_picked_status_date',
                 'ssjal.location_status as location_status',
                 'ssjal_hss.location_status as location_status_hss',
+                'ca_scanning.name as scanning_city_area_name'
                 
             ])
             ->groupBy('shipments.id');
@@ -8358,17 +8360,17 @@ class AdminReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('rider_city_area', function ($entry) {
+                if ($entry->rider_id) {
+                    $rider = Rider::find($entry->rider_id);
+                    if(isset($rider->area)){
+                        return $rider->area->name;
+                    }else{
+                        return '-';
+                    }
+                }
             });
-            // ->addColumn('rider_city_area', function ($entry) {
-            //     if ($entry->rider_id) {
-            //         $rider = Rider::find($entry->rider_id);
-            //         if(isset($rider->area)){
-            //             return $rider->area->name;
-            //         }else{
-            //             return '-';
-            //         }
-            //     }
-            // });
 
 
         if ($rider = $request->get('search_rider')) {
@@ -12610,7 +12612,8 @@ class AdminReportsController extends Controller
                     })
                     ->addColumn('action_updated_by', function($rv_report) {
                         //admin or customer_experience
-                        if (($rv_report['updated_type_id'] == 1) && ($rv_report['rv_state_id'] != 1)) {
+                        
+                        if (($rv_report['updated_type_id'] == 1) && ($rv_report['rv_state_id'] != 1) && ($rv_report['updated_by_id'] != NULL)) {
                             $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
                                 $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
                             })
@@ -12619,7 +12622,7 @@ class AdminReportsController extends Controller
                             return $query->name;
                         }
                         //shipper or retail user
-                        else if(($rv_report['updated_type_id'] == 3) || ($rv_report['updated_type_id'] == 5)){
+                        else if(($rv_report['updated_type_id'] == 3) || ($rv_report['updated_type_id'] == 5) && ($rv_report['updated_by_id'] != NULL)){
                             $query = $rv_report->leftJoin('users as u', function ($join) use ($rv_report) {
                                 $join->on('u.id', '=', \DB::raw($rv_report['updated_by_id']));
                             })
@@ -12675,6 +12678,9 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $rv_report->where('add.id', '=', $agent_id);
+            // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
+            $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
+            
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
@@ -14092,7 +14098,7 @@ class AdminReportsController extends Controller
         $results = DB::select($Query,$bindings);
 
         $transformedData = collect($results)->map(function ($item) { // mapping for datatable
-            $segment = $item->parent_prod_name . ' (' . $item->sub_prod_name . ')';
+            $segment = $item->sub_prod_name . ' (' . $item->parent_prod_name . ')';
             return [
                 'origin' => $item->origin_zonecode,
                 'destination' => $item->destination_zonecode,

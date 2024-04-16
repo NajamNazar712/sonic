@@ -184,6 +184,7 @@
                         <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Location Status Area</th>
                         <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -484,6 +485,7 @@
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
                             head.push('Status');
+                            head.push('Location Status Area');
                             head.push('Location Status');
                             head.push('Reason');
                             head.push('Remarks');
@@ -528,6 +530,7 @@
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.status);
+                                row.push(values.scanning_city_area_name);
                                 row.push(values.location_status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
@@ -620,7 +623,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[21, 'desc']],
+                order: [[22, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -632,6 +635,7 @@
                     {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
                     {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
