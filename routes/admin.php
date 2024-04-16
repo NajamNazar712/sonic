@@ -4171,6 +4171,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_index')->name('index');
             Route::get('list', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_list')->name('list');
             Route::post('store', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_store')->name('store');
+            Route::get('edit/{id}', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_edit')->name('edit');
+            Route::put('update', 'Admins\Logistic\AdminLogisticSetupController@shipper_tagging_update')->name('update');
+
 
         });
         Route::prefix('master_product')->name('master_product.')->group(function (){

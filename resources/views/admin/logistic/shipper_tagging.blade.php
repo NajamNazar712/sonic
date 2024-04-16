@@ -154,7 +154,9 @@
                           action="{{ route('admin.logistic.shipper_tagging.update') }}"
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
+                        @method('put')
                         <div class="row">
+                            <input type="hidden" name="shipper_tagging_id" id="shipper_tagging_id">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Shipper</label>
@@ -614,8 +616,37 @@
                 }
             });
 
+            $("body").on('click','.datatable .edit',function (){
+                var id = parseInt($(this).closest('tr').attr('id'));
+                $.ajax({
+                    url:'{{route('admin.logistic.shipper_tagging.edit',['id'=>':id']) }}'.replace(':id',id),
+                    method:'GET'
+                }).done(function (data){
+                    if(data.status==0)
+                    {
+                        var shipper_tagging = data.shipper_tagging;
+                        $("#shipper_tagging_id").val(shipper_tagging.time_range_id);
+                        $("#edit_user_id_select").val(shipper_tagging.user_id).trigger('change');
+                        $("#edit_rider_id_select").val(shipper_tagging.rider_id).trigger('change');
+                        $("#edit_product_id_select").val(shipper_tagging.trax_product_id).trigger('change');
+                        $("#edit_service_id_select").val(shipper_tagging.trax_service_id).trigger('change');
+                        $("#edit_piece_setting_id_select").val(shipper_tagging.piece_setting_id).trigger('change');
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+                $("#EditShipperTaggingModal").modal("show");
+
+            });
+
 
         });
+
 
 
 

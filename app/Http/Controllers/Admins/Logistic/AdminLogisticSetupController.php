@@ -108,6 +108,21 @@ class AdminLogisticSetupController extends Controller
         }
     }
 
+    public  function shipper_tagging_edit($id)
+    {
+        $shipper_tagging= TraxShipperDetail::where('id',$id)->where('status',1);
+        if($shipper_tagging->exists())
+        {
+            $shipper_tagging = $shipper_tagging->first();
+            return response()->json(['status'=>0,'shipper_tagging'=>$shipper_tagging]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No Shipper Tagging found!']);
+    }
+    public function shipper_tagging_update()
+    {
+
+    }
      public function master_product_index()
      {
         return view('admin.logistic.master_product');
