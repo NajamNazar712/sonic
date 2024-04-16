@@ -1306,7 +1306,6 @@
                     'clearIncomplete': true
                 });
                 $("input[name='ntn_no']").inputmask({
-                        // 'mask': "9999999-9",
                     'mask': "*******-*",
                 'clearIncomplete': true
             });
