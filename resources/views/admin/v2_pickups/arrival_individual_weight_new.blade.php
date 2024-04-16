@@ -680,8 +680,8 @@
                         if(weight > 20)
                         {
                             swal({
-                                // text: 'Are you certain about proceeding when your weight surpasses 20KG??',
-                                text: 'Do you agree to add this weight?',
+                                text: 'Are you certain about proceeding when your weight surpasses 20KG??',
+                                // text: 'Do you agree to add this weight?',
                                 title: 'Are You Sure',
                                 icon: 'warning',
                                 buttons: {
