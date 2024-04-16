@@ -1191,9 +1191,10 @@ class DeliveryController extends Controller
                                 $rand = $payment_details['unique_key'];
                                 $payment_link = $payment_details['payment_link'];
                                 $url = $payment_details['url'];
+                                $trans_id = $payment_details['id'];
                                 Log::channel('trax_pay_test')->info('sh '. json_encode($shipment_id, true));
-                                
-                                CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url);
+
+                                CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url , $trans_id);
                                 NotificationsController::send(12, $note->id, $shipment_id, $payment_link);
                             }
                         }
@@ -3798,6 +3799,7 @@ class DeliveryController extends Controller
                                         //                                    continue;
                                     }
                                 }
+
                             }
                         }
                         $verify_fake = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
@@ -4194,6 +4196,31 @@ class DeliveryController extends Controller
                                     }
                                 }
                             }
+                        }
+
+                        // Mark Return Confirm if $shipper_status_id == 12 And $status_reason_id == (27 or 35)
+                        // 27 = Shipment Damaged
+                        // 35 = Delivery Stopped
+                        if ($shipper_status_id == 12 && in_array($status_reason_id, [27, 35]) && $verification) {
+                            $globalAdminId = 346;
+
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+
+                            if ($shipment_details->shipment_type == 1) {
+                                if ($shipment_details->booking_type_id != 4) {
+                                    ShipmentChargesController::return($shipment);
+                                    if ($shipment_details->packaging_material_request != 1) {
+                                        AdminFinanceController::add_payment($shipment, 1);
+                                    }
+                                } else {
+                                    ShipmentChargesController::walk_in_return($shipment);
+                                    $shipment_details->walk_in_status = 2;
+                                    $shipment_details->save();
+                                    AdminFinanceController::done_payment($shipment, 1);
+                                }
+                            }
+                            
+                            ShipmentsJourneyController::add($shipment, 20, 20, $status_reason_id, $shipment_journey_remarks, NULL, $globalAdminId, null, null, 1, null, null, null, null, null);
                         }
                     }
 
@@ -5787,18 +5814,17 @@ class DeliveryController extends Controller
                 return number_format($shipment->sdn_net_amount);
             })
             ->editColumn('sdn_deposit_amount', function ($shipment) {
-              
                 if ($shipment->sdn_deposit_amount) {
                     return number_format($shipment->sdn_deposit_amount);
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('sdn_adjustment_amount', function ($shipment) {
                 if ($shipment->adjustment_amount) {
                     return number_format($shipment->adjustment_amount);
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('sdn_id_padded', function ($sdn) {
@@ -5831,12 +5857,10 @@ class DeliveryController extends Controller
                 return $date;
             })
             ->addColumn('difference_amount', function ($sdn) {
-                // $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
-                // $difference_amount = 0;
+                $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
+                $difference_amount = 0;
 
-                // $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
-                // return number_format($difference_amount);
-                $difference_amount =  ($sdn->sdn_deposit_amount - $sdn->adjustment_amount);
+                $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
                 return number_format($difference_amount);
             })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
@@ -6013,10 +6037,10 @@ class DeliveryController extends Controller
                         $hbl_amount = $hbl_amount->get();
                         return $hbl_amount->sum('transactions_amount');
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
 
             })
@@ -6042,13 +6066,13 @@ class DeliveryController extends Controller
                         }
                         else
                         {
-                            return 0;
+                            return '-';
                         }
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
             ->addColumn('trax_pay_amount', function ($sdn) {
@@ -6070,81 +6094,84 @@ class DeliveryController extends Controller
                         }
                         else
                         {
-                            return 0;
+                            return '-';
                         }
                     } else {
-                        return 0;
+                        return '-';
                     }
                 } else {
-                    return 0;
+                    return '-';
                 }
             })
+
             ->addColumn('cash_amount', function ($sdn) {
-                return  0;
-                // $id = $sdn->sdn;
-                // $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
+                $id = $sdn->sdn;
+                $sdn_adjustment_amount = $sdn->adjustment_amount;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
-                // if ($delivery_note->exists()) {
-                //     $delivery_note = $delivery_note->get();
-                //     $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                if ($delivery_note->exists()) {
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                //     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
-                //     if ($one_link_amount->exists()) {
-                //         $one_link_amount = $one_link_amount->get();
-                //         $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
+                    if ($one_link_amount->exists()) {
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
 
-                //         $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
 
-                //         if($cod->exists())
-                //         {
-                //             $cod = $cod->get();
-                //             $a = $cod = $cod->sum('amount');
-                //         }
-                //         else
-                //         {
-                //             $a = 0;
-                //         }
-                //     }
-                //     else {
-                //         $a = 0;
-                //     }
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            $a = $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            $a = 0;
+                        }
+                    }
+                    else {
+                        $a = 0;
+                    }
 
-                //     $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
-                //     if ($hbl_amount->exists()) {
-                //         $hbl_amount = $hbl_amount->get();
-                //         $b = $hbl_amount->sum('transactions_amount');
-                //     } else {
-                //         $b = 0;
-                //     }
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    if ($hbl_amount->exists()) {
+                        $hbl_amount = $hbl_amount->get();
+                        $b = $hbl_amount->sum('transactions_amount');
+                    } else {
+                        $b = 0;
+                    }
 
-                //     $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
-                //     if ($trax_pay_amount->exists()) {
-                //         $trax_pay_amount = $trax_pay_amount->get();
-                //         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
-                //         $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
-                //         if($fintech_payment_detail->exists())
-                //         {
-                //             $c = $fintech_payment_detail->sum('cod_amount');
-                //         }
-                //         else {
-                //             $c = 0;
-                //         }
-                //     } else {
-                //         $c = 0;
-                //     }
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
+                    if ($trax_pay_amount->exists()) {
+                        $trax_pay_amount = $trax_pay_amount->get();
+                        $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
+                        $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
+                        if($fintech_payment_detail->exists())
+                        {
+                            $c = $fintech_payment_detail->sum('cod_amount');
+                        }
+                        else {
+                            $c = 0;
+                        }
+                    } else {
+                        $c = 0;
+                    }
 
-                //     $sum = $a + $b + $c;
+                    // $sum = $a + $b + $c;
+                    $sum = $a + $b + $c + $sdn_adjustment_amount;
 
-                //     if ($sum > 0) {
-                //         $total = $sdn->sdn_amount - $sum;
-                //         return $total;
-                //     } else {
-                //         return '-';
-                //     }
-                // } else {
-                //     return '-';
-                // }
+                    if ($sum > 0) {
+                        $total = $sdn->sdn_amount - $sum;
+                        return $total;
+                    } else {
+                        return '-';
+                    }
+                } else {
+                    return '-';
+                }
             });
+            
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
         //         $query->where('station_deposit_notes.status', '=', $keyword);
@@ -9878,8 +9905,9 @@ class DeliveryController extends Controller
                         $rand = $payment_details['unique_key'];
                         $payment_link = $payment_details['payment_link'];
                         $url = $payment_details['url'];
+                        $trans_id = $payment_details['id'];
                         $shipments_id = array_wrap($shipment);
-                        CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
+                        CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url , $trans_id);
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
                         if (in_array($shipment, $notifications)) {

@@ -1010,7 +1010,35 @@
 			if (service_type == 2) {
 				$('#replacement').removeClass('d-none');
 				$('#try_and_buy_charges_div').addClass('d-none');
-
+				
+				$('.weight').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'digits': 2,
+						'min': 0.1,
+						'max': 10,
+						'oncomplete': function() {
+							var val = parseFloat($(this).val());
+							if (val > 10) {
+									var error = 'Number should be less than or equal to 10 Kg';
+									toastr.error(error, 'Error!', {
+										positionClass: 'toast-top-center',
+										containerId: 'toast-top-center'
+									});
+								$(this).val('');
+							}
+							}
+						});
+			}else{
+					$('.weight').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 100000
+				});
 			}
 			if (service_type == 3) {
 				$('#regular').addClass('d-none');
@@ -1149,6 +1177,37 @@
 
 					shipping_modes();
 					set_return_city();
+
+					if (service_type == 2) {
+						$('.weight').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'digits': 2,
+						'min': 0.1,
+						'max': 10,
+						'oncomplete': function() {
+							var val = parseFloat($(this).val());
+							if (val > 10) {
+									var error = 'Number should be less than or equal to 10';
+									toastr.error(error, 'Error!', {
+										positionClass: 'toast-top-center',
+										containerId: 'toast-top-center'
+									});
+								$(this).val('');
+							}
+							}
+						});
+					}else{
+							$('.weight').inputmask({
+							'alias': 'decimal',
+							'allowMinus': false,
+							'allowPlus': false,
+							'digits': 2,
+							'min': 0.1,
+							'max': 100000
+						});
+					}
 				}
 				else {
 					$('#select_service_type form #service_type-error').removeClass('d-none');
@@ -1932,15 +1991,7 @@
 				}
 			});
 
-			$('.weight').inputmask({
-				'alias': 'decimal',
-				'allowMinus': false,
-				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 100000
-			});
-
+			
 			$('.amount').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
