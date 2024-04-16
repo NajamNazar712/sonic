@@ -46,6 +46,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
+                                        <th class="border-primary border-darken-1">Remarks</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
@@ -209,6 +210,7 @@
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
+                        head.push('Remarks');
                         head.push('Reason');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -223,6 +225,7 @@
                             row.push(values.poc);
                             row.push(values.kam);
                             row.push(values.ref);
+                            row.push(values.remarks);
                             row.push(values.reason);
 
                             body.push(row);
@@ -438,7 +441,8 @@
                 {data: 'poc_tagged', name: 'a.name', class: 'align-middle poc_tagged'},
                 {data: 'kam', name: 'd.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'h.name', class: 'align-middle ref'},
-                {data: 'reason', name: 'users.blacklist_reason', class: 'reason'},
+                {data: 'remarks', name: 'users.blacklist_reason', class: 'remarks'},
+                {data: 'reason', name: 'bdru.name', class: 'reason'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {

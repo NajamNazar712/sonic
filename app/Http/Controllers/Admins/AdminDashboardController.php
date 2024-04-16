@@ -127,6 +127,7 @@ use App\Http\Models\Rates\HistoryRateOriginHub;
 use App\Http\Models\Rates\PendingFuelSurcharge;
 use App\Http\Models\Rates\PendingRateOriginHub;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Jobs\UserDisableBlockEmailNotification;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\HistoryDiscountWeightCharge;
@@ -185,8 +186,8 @@ use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Operataions\OperationForecastShipments;
-use App\Http\Models\Shipper\SubstituteUserModulePermission;
 
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -1255,6 +1256,7 @@ class AdminDashboardController extends Controller
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
+        $block_disable_reasons = DB::table('block_disable_reason_users')->select('id', 'name')->get();
         $commission_percentage = '';
         $settings = GlobalSettings::where('type', 'commission_percentage');
         if ($settings->exists()) {
@@ -1284,7 +1286,7 @@ class AdminDashboardController extends Controller
         $all_users['results'][2]['children'] = [];
         $all_users['pagination']['more'] = true;
         $active_shippers = User::where('status', 3)->get();
-        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'active_shippers' => $active_shippers]);
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories,'sales_tiers'=>$sales_tiers, 'commission_percentage'=>$commission_percentage,'riders_permanent'=>$riders_permanent,'all_users'=>$all_users, 'active_shippers' => $active_shippers,'block_disable_reasons'=> $block_disable_reasons]);
     }
 
     public function shipperExclude(Request $request)
@@ -1495,11 +1497,15 @@ class AdminDashboardController extends Controller
     public function UserStatusBlock(Request $request)
     {
         $user_id = $request->id;
+        $remarks = $request->remarks;
         $reason = $request->reason;
         $status = $request->status;
+
         $user = User::where('id', $user_id);
         if ($user->exists()) {
             $user = $user->first();
+            
+
             if ($status == 'block') {
                 $negative_balance_status = false;
                 $merged_account = MergedSisterAccount::where('user_id', $user_id);
@@ -1527,10 +1533,16 @@ class AdminDashboardController extends Controller
                     }
                 }
                 if ($negative_balance_status == false) {
-                    if ($user->blacklist == 0) {
+                    if ($user->blacklist == 0) {                        
                         $user->blacklist = 1;
-                        $user->blacklist_reason = $reason;
+                        $user->blacklist_reason = $remarks;
+                        $user->blacklist_reason_1 = $reason;
+                        $user->blocked_at = Carbon::now()->format('Y-m-d H:i:s');
                         $user->save();
+
+                        UserDisableBlockEmailNotification::dispatch($user);
+
+
                         return response()->json(['status' => 1, 'success' => "User added to the blacklist!"]);
                     } else {
                         return response()->json(['status' => 0, 'error' => "User is already in blacklist!"]);
@@ -1557,6 +1569,9 @@ class AdminDashboardController extends Controller
     {
         $user_id = $request->id;
         $status = $request->status;
+        $remarks = $request->remarks;
+        $reason = $request->reason;
+
         $user = User::where('id', $user_id);
         if ($user->exists()) {
             $user = $user->first();
@@ -1574,10 +1589,12 @@ class AdminDashboardController extends Controller
                 }
             } else if ($status == 'disable') {
                 if ($user->status == 3) {
-                    $user->disable_at = Carbon::now();
-
+                    $user->disable_at =  Carbon::now()->format('Y-m-d H:i:s');
+                    $user->disable_reason = $remarks;
+                    $user->disable_reason_1 = $reason;
                     $user->status = 4;
                     $user->save();
+                    UserDisableBlockEmailNotification::dispatch($user);
 
                     //                    add row in user_check_status table
                     $userstatus = UserCheckStatus::where('user_id', $user_id)->count();
@@ -9006,7 +9023,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments'])
+            ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.disable_reason_1')
+            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9083,9 +9101,9 @@ class AdminDashboardController extends Controller
                 } else {
                     return "Rejected";
                 }
-            })->editColumn('disable_remarks', function ($users) {
-                if ($users->disable_remarks != null) {
-                    return $users->disable_remarks;
+            })->editColumn('disable_reason', function ($users) {
+                if ($users->disable_reason != null) {
+                    return $users->disable_reason;
                 } else {
                     return "-";
                 }
@@ -9485,12 +9503,12 @@ class AdminDashboardController extends Controller
                     }
 
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item blacklist" data-id="' . $result->id . '" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x"></i></div><div class="col-9 offset-1">Block</div></div></button>';
                     }
 
                     if (session('role_id') == 1 || in_array(13, session('permissions'))) {
                         if ($result->status == 3) {
-                            $dropdown .= '<button type="button" class="dropdown-item userdisable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-minus"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item userdisable" data-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-minus"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
                         } else {
                             $dropdown .= '<button type="button" class="dropdown-item userenable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Enable</div></button>';
@@ -10162,7 +10180,9 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'st.poc')
             ->leftjoin('admins as d', 'd.id', '=', 'st.kam')
             ->leftjoin('admins as h', 'h.id', '=', 'st.ref')
-            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as reason', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref'])->where('blacklist', 1);
+            ->leftjoin('block_disable_reason_users as bdru', 'bdru.id', '=', 'users.blacklist_reason_1')
+
+            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as remarks', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref', 'bdru.name as reason'])->where('blacklist', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
