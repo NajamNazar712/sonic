@@ -122,6 +122,7 @@ use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Admin\ShipperInterceptExclude;
 
 class APIController extends Controller
 {
@@ -272,7 +273,7 @@ class APIController extends Controller
     {
 
         $validator = Validator::make($req->all(), [
-            'link'       => 'required',
+            'link'       => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -280,7 +281,13 @@ class APIController extends Controller
         }
 
         $Shipment = new Shipment();
-        $shipmentDetails = $Shipment->where('trax_pay_transactions.link', $req->link)
+        $shipmentDetails = $Shipment->where(function($query) use($req){
+            if(isset($req->trans_id) && !empty($req->trans_id)) {
+                $query->where('trax_pay_transactions.id', $req->trans_id);
+            }else{
+                $query->where('trax_pay_transactions.link', $req->link);
+            }
+        })
             ->join('cities', 'shipments.consignee_city_id', 'cities.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
             ->select(
@@ -289,7 +296,6 @@ class APIController extends Controller
                 'shipments.consignee_address as address',
                 'trax_pay_transactions.fintech_amount as fintech_amount',
                 'trax_pay_transactions.cod_amount as codAmount',
-                'cities.name as city_name',
                 'cities.name as city_name'
             )->first();
 
@@ -4832,7 +4838,6 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
 
-
         $rules = [
             'type' => ['required', 'integer', 'digits_between:1,3'],
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
@@ -4868,7 +4873,7 @@ class APIController extends Controller
                     } else {
                         $remark = null;
                     }
-                    if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
+                    if ($shipment->shipper_status_id == 65) {
 
                         Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                         $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
@@ -4920,7 +4925,7 @@ class APIController extends Controller
                         $remark = null;
                     }
                     if ($shipment->shipper_status_id != 52 || $shipment->shipper_status_id != 66) {
-                        if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
+                        if ($shipment->shipper_status_id == 65) {
                             $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
                             // Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 66, 'consignee_status_id' => 66]); // 66 is reattempt call request
@@ -4976,12 +4981,19 @@ class APIController extends Controller
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
                 } elseif ($request->type == 3) {
+
                     $rules = [
                         'consignee_type' => ['required', 'integer', 'between:1,2'],
                     ];
                     $validate = Validator::make($request->all(), $rules, $this->messages);
 
                     $validate->setAttributeNames($this->names);
+
+                    $exclude_shipper = ShipperInterceptExclude::where('user_id', $user_id)->where('exclude_shipper', 1)->first();
+
+                    if($exclude_shipper){
+                        return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept, contact sales person']);
+                    }
 
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
@@ -4998,6 +5010,12 @@ class APIController extends Controller
 
                             $validate->setAttributeNames($this->names);
 
+                            $disable_same_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('same_consignee', 1)->first();
+                            if($disable_same_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - same consignee, contact sales person']);
+                            }
+
+
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                             } else {
@@ -5010,7 +5028,7 @@ class APIController extends Controller
                                     $phone_number2 = $shipment->consignee_phone_number_2;
                                 }
 
-                                if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
+                                if ($shipment->shipper_status_id == 65) {
                                     if ($shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
@@ -5090,7 +5108,9 @@ class APIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
                                 }
                             }
-                        } else {
+                        } 
+                        
+                        else {
                             //different consignee
                             $rules = [
 
@@ -5107,6 +5127,14 @@ class APIController extends Controller
 
                             $validate->setAttributeNames($this->names);
 
+
+                            $disable_different_consignee = ShipperInterceptExclude::where('user_id', $user_id)->where('different_consignee', 1)->first();
+                            if($disable_different_consignee){
+                                return response()->json(['status' => 1, 'message' => 'You are not allowed to mark intercept - different consignee, contact sales person']);
+                            }
+
+
+
                             if ($validate->fails()) {
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                             } else {
@@ -5119,7 +5147,7 @@ class APIController extends Controller
                                     $phone_number2 = $shipment->consignee_phone_number_2;
                                 }
 
-                                if ($shipment->shipper_status_id == 12 || $shipment->shipper_status_id == 65) {
+                                if ($shipment->shipper_status_id == 65) {
                                     if ($shipment->consignee_city_id != $request->consignee_city_id || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $request->amount) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
@@ -7578,7 +7606,13 @@ class APIController extends Controller
         $shipments = Shipment::join('delivery_note_shipments', 'shipments.id', 'delivery_note_shipments.shipment_id')
             ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', 'delivery_notes.id')
             ->join('trax_pay_transactions', 'shipments.id', 'trax_pay_transactions.shipment_id')
-            ->where('trax_pay_transactions.link', $req->link)
+            ->where(function($query) use($req){
+                if(isset($req->trans_id) && !empty($req->trans_id)) {
+                    $query->where('trax_pay_transactions.id', $req->trans_id);
+                }else{
+                    $query->where('trax_pay_transactions.link', $req->link);
+                }
+            })
             ->select(
                 'delivery_notes.rider_id as rider',
                 'shipments.user_id as shipper_id',

@@ -89,6 +89,7 @@
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Account Disable Reason</th>
                                         <th class="border-primary border-darken-1">Account Disable Count</th>
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
@@ -742,6 +743,77 @@
 </div>
 {{-- End --}}
 
+{{-- Add intercept shipper modal --}}
+<div class="modal fade text-left" id="AddShipperExcludeInterceptType" data-backdrop="static" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="interceptModalCloseBtn_1">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add_shipper_exclude_intercept_type" method="POST" action="{{ route('admin.accounts.store_shipper_exclude') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="text-center">
+                        <h4 id="shipper_name"></h4>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="exclude_shipper" id="exclude_shipper">
+                                <label for="exclude_shipper">Exclude Shipper</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="different_consignee" id="different_consignee">
+                                <label for="different_consignee">Disable Different Consignee</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="same_consignee" id="same_consignee">
+                                <label for="same_consignee">Disable Same Consignee</label>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <input type="submit" value="Submit" class="btn btn-success">
+                            <button type="button" class="btn btn-primary" id="interceptModalCloseBtn_2" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End intercept shipper modal --}}
+<div class="modal fade text-left" id="BlockDisableReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BlockDisableReasonModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="BlockDisableReasonModalHeading"></h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-1" placeholder="Enter Remarks" name="block_disable_remarks" id="block_disable_remarks">
+                <div class="text-danger d-none blocked_remarks" style="margin-top: -12px; margin-bottom: 15px;" id="blocked_remarks">Remarks Are Required</div>
+                <select name="block_disable_reason" id="block_disable_reason" class="form-control select2">
+                    @foreach($block_disable_reasons as $block_disable_reason)
+                        <option value="{{ $block_disable_reason->id }}" > {{ $block_disable_reason->name }} </option>
+                    @endforeach
+                </select>
+                <span class="text-danger d-none blocked_reasons">Reasons Are Required</span>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BlockDisableReasonSubmit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -770,6 +842,12 @@
         /* Style the label when the checkbox is checked */
         #checkboxContainer input[type="checkbox"]:checked+label {
             background-color: #56e73c; }
+
+        /* Style the actions dropdown due to increase in action buttons */
+        #datatable > tbody > tr > td:last-child > div.btn-group > div.dropdown-menu.dropdown-menu-sm.accounts {
+            overflow-y: scroll;
+            height: 300px;
+        }
 </style>
 @endsection
 
@@ -923,9 +1001,7 @@ function checkboxStatus() {
 							if (data.status == 0) {
 								var sub_segment = data.sub_segments;
 
-                                $.each(data.sub_segments, function (index, sub_segment) {
-									// console.log(index);	
-									// console.log(sub_segment);	
+                                $.each(data.sub_segments, function (index, sub_segment) {	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -956,6 +1032,15 @@ function checkboxStatus() {
             placeholder:"Select Shipper",
             allowClear:true,
          });
+
+         $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
+            width: '100%',
+            placeholder: "Select Reasons",
+            allowClear: true,
+            dropdownParent: $('#BlockDisableReasonModal')
+        }).on('change', function() {
+            $('.blocked_reasons').addClass('d-none');
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -1011,7 +1096,7 @@ function checkboxStatus() {
                         head.push('Account Activation Date');
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
-                        // head.push('Account Disable Remarks');
+                        head.push('Account Disable Reason');
                         head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
@@ -1064,7 +1149,8 @@ function checkboxStatus() {
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_at);
-                            row.push(values.disable_remarks);
+                            row.push(values.disable_reason);
+                            row.push(values.reason);
                             row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
@@ -1114,7 +1200,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1266,7 +1351,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1395,7 +1479,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1687,7 +1770,8 @@ function checkboxStatus() {
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
-                {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
+                {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
                 {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
@@ -1874,80 +1958,86 @@ function checkboxStatus() {
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());
         });
-        $('body').on('click','button.blacklist',function () {
-            var id = $(this).parents('tr').attr('id');
-            var status = $(this).attr('rel');
-            swal({
-                // title: 'Are You Sure?',
-                text: 'Write a reason to blacklist this account!',
-                content: {
-                    element: "input",
-                    attributes: {
-                        placeholder: "Write a reason",
-                        class: "form-control blacklist_reason",
-                    },
-                },
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: false,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: false
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then((value) => {
-                    if (value) {
-                        if (value === '') {
-                            swal("You have not selected any reason!", {
-                                icon: "warning",
-                            });
-                        } else {
-                        if (id) {
-                            $.ajax({
-                                url: '{!! route('admin.accounts.status.block') !!}',
-                                method: 'POST',
-                                data: {
-                                    'id': id,
-                                    'reason': value,
-                                    'status': status,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                swal.close();
-                                if (data.status === 1) {
-                                    table.draw('false');
-                                    swal.close();
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
 
-                            });
-                        }
-                    }
-                    }else{
-                        swal.close();
-                    }
+        var block_user_id;
+        var block_user_status;
 
-            });
+        var disable_user_id;
+        var disable_user_status;
 
-
+        
+        $('body').on('click', 'button.blacklist', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Block Reason Remarks');
+            block_user_id = $(this).data('id');
+            block_user_status = $(this).attr('rel');
+            disable_user_id = null; 
         });
+
+        $('body').on('click', 'button.userdisable', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Disable Reason Remarks');
+            disable_user_id = $(this).data('id');
+            disable_user_status = 'disable';
+            block_user_id = null; 
+        });
+
+        
+        $('#BlockDisableReasonSubmit').click(function () {
+            var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
+            var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
+            if(remarks == ''){
+                $('.blocked_remarks').removeClass('d-none');
+            }else if (reasons == ''){
+                $('.blocked_reasons').removeClass('d-none');
+            }else{
+                $.ajax({
+                url:  block_user_id ? '{!! route('admin.accounts.status.block') !!}' : '{!! route('admin.accounts.status.change') !!}',
+                method: 'POST',
+                data: {
+                    'id': block_user_id ? block_user_id : disable_user_id,
+                    'reason': reasons,
+                    'remarks': remarks,
+                    'status' : block_user_id ? block_user_status : 'disable',
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if (data.status === 1) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    // $('#blocked_remarks').addClass('d-none');
+                    // $('#blocked_reasons').addClass('d-none');
+                    $('#BlockDisableReasonModal').modal('hide');
+                    $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+                    $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
+                    table.draw()
+                } else {
+                    toastr.error(data.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                });
+            }
+        });  
+              
+            
+
+        $('input[name="block_disable_remarks"]').keyup(function() {
+            $('#blocked_remarks').addClass('d-none');
+        });
+
+        $('#BlockDisableReasonModal').on('hide.bs.modal',function (e) {
+            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change'); 
+            $('#blocked_remarks').addClass('d-none');
+            $('#blocked_reasons').addClass('d-none');
+            disable_user_id = null; 
+            block_user_id = null; 
+        });
+		
         $("#saletag").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1989,6 +2079,7 @@ function checkboxStatus() {
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
 
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
@@ -2069,55 +2160,7 @@ function checkboxStatus() {
             });
 
         });
-        $('body').on('click','button.userdisable',function () {
-            var status  = "disable";
-            var id = $(this).parents('tr').attr('id');
-            swal({
-                title: 'Are You Sure?',
-                text: 'Select Yes to Disable this account!',
-                icon: 'warning',
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: null,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: true
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then(function (confirm) {
-               if(confirm){
-                   if(id){
-                       $.ajax({
-                           url: '{!! route('admin.accounts.status.change') !!}',
-                           method: 'POST',
-                           data: {
-                               'id':id,
-                               'status':status,
-                               '_token': '{{ csrf_token() }}'
-                           }
-                       }).done(function (data) {
-                           if(data.status == 1){
-                               table.draw('false');
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                           }
 
-                       });
-                   }
-               }
-            });
-
-        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
@@ -2391,12 +2434,155 @@ function checkboxStatus() {
             }
         }
     });
-    
+
+        // Shipper exclude feature
+        $(document).ready(function() {
+            $('#shipper').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
+
+            // Setup event handlers for checkboxes
+            var exclude_shipper = $('#exclude_shipper');
+            var different_consignee = $('#different_consignee');
+            var same_consignee = $('#same_consignee');
+
+            $('#interceptModalCloseBtn_1, #interceptModalCloseBtn_2').click(function() {
+                exclude_shipper.prop('checked', false);
+                different_consignee.prop('checked', false);
+                same_consignee.prop('checked', false);
+                exclude_shipper.prop('disabled', false);
+                different_consignee.prop('disabled', false);
+                same_consignee.prop('disabled', false)
+                $('#add_shipper_exclude_intercept_type')[0].reset();
+            });
+
+            // if exclude shipper is checked
+            exclude_shipper.on('change', function() {
+                if ($(this).prop('checked')) {
+                    different_consignee.prop('disabled', true);
+                    same_consignee.prop('disabled', true);
+                } else {
+                    different_consignee.prop('disabled', false);
+                    same_consignee.prop('disabled', false);
+                }
+            });
+
+            // if different consignee is checked
+            different_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                    if (same_consignee.prop('checked')) {
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            // if same consignee is checked
+            same_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                if (different_consignee.prop('checked')) {
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                var name = $(this).parents('tr').find('td:eq(4)').text();
+                if ($(this).hasClass('add_shipper_exclude_intercept_type')) {
+                    $('#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type #user_id').val(id);
+                    $('#shipper_name').text(name);
+                    $('#AddShipperExcludeInterceptType').modal('show');
+                }
+            });
+
+            $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                            var error = "Please select at least one option.";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else {
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                            })
+                        .then(function(confirm) {
+                            if (confirm) {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
             var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
 
+            if ($(this).hasClass('add_shipper_exclude_intercept_type')){
+                $.ajax({
+                    url: '{!! route('admin.accounts.excluded_shippers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                    }).done(function(response){
+                        if (response.intercept_shipper !== null) {
+                            var interceptShipperData = response.intercept_shipper;
+                            var different_consignee = interceptShipperData.different_consignee;
+                            var exclude_shipper = interceptShipperData.exclude_shipper;
+                            var same_consignee = interceptShipperData.same_consignee;
+                            if (different_consignee == 1) {
+                                $('#different_consignee').prop('checked', true);
+                            }
+                            if (exclude_shipper == 1) {
+                                $('#exclude_shipper').prop('checked', true);
+                            }
+                            if (same_consignee == 1) {
+                                $('#same_consignee').prop('checked', true);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+            }
 
             if ($(this).hasClass('change_rate_type')) {
 
@@ -2932,7 +3118,6 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3107,6 +3292,7 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#total_commission').val(0).trigger('change');
             $('#total_commission_value').text('0');
             $('#datatable_rate').DataTable().clear().draw();
+            kam_count = 0;
         });
         
     var selected_users = [];
@@ -3244,8 +3430,10 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     function roundToTwo(num) {
         return +(Math.round(num + "e+2") + "e-2");
     }
-
+    
+    var kam_count = 0;
     $('#commission_add_button').on('click', function () {
+        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -3266,50 +3454,66 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }
-
+        }       
+      
         if (flag) {
-       
-
-            if (commission <= commission_max) {
-                selected_commission = roundToTwo(selected_commission + commission);
-                commission_max = commission_max - commission;
-                this_btn.attr('disabled', true);
-                var user_id = '';
-                var user_name = '';
-                var tier_id = '';
-                var tier_name = '';
-                var tier_type = '';
-                tier_id = $('#sales_tier_select').val();
-                tier_name = $('#sales_tier_select').find(":selected").text();
-                tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                if (tier_type == 1) {
-                    user_id = $('#user_select').val();
-                    user_name = $('#user_select').find(":selected").text();
-                } else {
-                    user_name = $('#external_person_name').val();
-                }
-
-                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                $('#sales_tier_select').val(null).trigger('change');
-                $('#user_select').val(null).trigger('change');
-                $('#user_select').attr('disabled', true);
-                $('#external_person_name').val('');
-                $('#external_person_name').attr('disabled', true);
-                $('#user_commission').val('');
-
-            } else {
-                var error = 'Selected Commission value exceeds!';
-                toastr.error(error, 'Error!', {
+            if(is_kam == 'KAM' && kam_count > 0 ){
+                var kam_error = 'You Can Select One KAM Only!';
+                toastr.error(kam_error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
+            }else{
+                if (commission <= commission_max) {
+                    selected_commission = roundToTwo(selected_commission + commission);
+                    commission_max = commission_max - commission;
+                    this_btn.attr('disabled', true);
+                    var user_id = '';
+                    var user_name = '';
+                    var tier_id = '';
+                    var tier_name = '';
+                    var tier_type = '';
+                    tier_id = $('#sales_tier_select').val();
+                    tier_name = $('#sales_tier_select').find(":selected").text();
+                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                    if (tier_type == 1) {
+                        user_id = $('#user_select').val();
+                        user_name = $('#user_select').find(":selected").text();
+                    } else {
+                        user_name = $('#external_person_name').val();
+                    }
+                    if(is_kam == 'KAM'){
+                        kam_count+=1;
+                    }
+                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                    $('#sales_tier_select').val(null).trigger('change');
+                    $('#user_select').val(null).trigger('change');
+                    $('#user_select').attr('disabled', true);
+                    $('#external_person_name').val('');
+                    $('#external_person_name').attr('disabled', true);
+                    $('#user_commission').val('');
+
+                } else {
+                    var error = 'Selected Commission value exceeds!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
             }
+       
         }
     });
         $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
             var id = $(this).parents('tr').attr('id');
+            //check if sale tier is KAM
+            var rowData = table_2.row($(this).parents('tr')).data();
+            var regex = /KAM/;
 
+            if (regex.test(rowData[2])) {
+                kam_count-=1;
+            } 
+            //
             var user_id = $('input[name="user_id[' + id + ']"]').val();
             if (user_id) {
                 var index = $.inArray(user_id, selected_users);
@@ -3375,9 +3579,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-
-
-
 </script>
 
 @endsection

@@ -138,6 +138,15 @@
                     </div>
 
                     <div class="col-3">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="col-3">
                         <div class="form-group">
                             <select name="ref_name_select" id="ref_name_select" class="select2">
                                 @foreach($referral_names as $referral_name)
@@ -434,6 +443,7 @@
             });
 
             
+            
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -470,6 +480,12 @@
                         }
                     }
                 }
+            });
+
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
             });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
@@ -601,7 +617,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_number_excel);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
@@ -714,6 +730,7 @@
                         d.search_origin_hub = $('#search_origin_hub').val();
                         d.search_origin_zone = $('#search_origin_zone').val();
 
+                        d.service_type_select = $('#service_type_select').val()
                         d.rider_type_referral = $('#rider_types_referral').val();
 
                     }

@@ -113,6 +113,14 @@
                         </select>
                     </div>
 
+                    <div class="col-4">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -176,10 +184,13 @@
                         <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Location Status Area</th>
+                        <th class="border-primary border-darken-1">Location Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
+                        <th class="border-primary border-darken-1">History Status Location</th>
                         <th class="border-primary border-darken-1">Cargo Status</th>
                         <th class="border-primary border-darken-1">Bag Seal Number</th>
                         <th class="border-primary border-darken-1">Bag Status</th>
@@ -332,6 +343,10 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Service Type'
+            });
 
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
@@ -470,10 +485,13 @@
                             head.push('First Attempt Date');
                             head.push('Rider Picked Status Date');
                             head.push('Status');
+                            head.push('Location Status Area');
+                            head.push('Location Status');
                             head.push('Reason');
                             head.push('Remarks');
                             head.push('Total Attempt');
                             head.push('History Status');
+                            head.push('History Location Status');
                             head.push('Cargo Status');
                             head.push('Bag Seal Number');
                             head.push('Bag Status');
@@ -512,10 +530,13 @@
                                 row.push(values.first_attempt_date);
                                 row.push(values.rider_picked_status_date);
                                 row.push(values.status);
+                                row.push(values.scanning_city_area_name);
+                                row.push(values.location_status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
+                                row.push(values.location_status_hss);
                                 row.push(values.cargo_status);
                                 row.push(values.seal_number);
                                 row.push(values.bag_status);
@@ -597,10 +618,12 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.service_type_select = $('#service_type_select').val();
+
                     }
                 },
                 rowId: 'shId',
-                order: [[19, 'desc']],
+                order: [[22, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -612,10 +635,13 @@
                     {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
+                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss'},
                     {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
                     {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},
