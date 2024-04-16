@@ -184,7 +184,7 @@
                 </div>
             </div>
         </div>
-        <div class='row' id="allow_delivered_row"> 
+        <div class='row d-none' id="allow_delivered_row"> 
             <div class="col text-center">
                 <label class="font-medium-2 font-weight-bold block">This rider will mark delivered status?</label>
                 <div class="form-group">
@@ -216,8 +216,8 @@
         var allow_elem = document.querySelector('.allow_delivered_status');
         var allow_switchery = new Switchery(allow_elem);
 
-        @if($rider->operation_rider_id != 2)
-            $('#allow_delivered_row').addClass('d-none');
+        @if($rider->operation_rider_id == 2)
+            $('#allow_delivered_row').removeClass('d-none');
         @endif
 
         @if($rider->incentive_amount == null)
