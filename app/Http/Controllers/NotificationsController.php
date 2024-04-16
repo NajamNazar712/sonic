@@ -11013,11 +11013,11 @@ class NotificationsController extends Controller
 
                         $sale_person_name_array = array_merge($admin_name, $lead_name);
                         $sale_person_name = implode(' ,', $sale_person_name_array);
-
-                        $status = $user->blacklist == 1 ? 'Blocked' : ' Disabled';
-                        $status = $status == 'Blocked' ? 'Block' : 'Disable';
+                        
                     }
-
+                    $status = $user->blacklist == 1 ? 'Blocked' : ' Disabled';
+                    $status = $status == 'Blocked' ? 'Block' : 'Disable';
+                    
                     // Table for User Disable/Block Accounts
                     $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
