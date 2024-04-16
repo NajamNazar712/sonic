@@ -9017,15 +9017,26 @@ class AdminDashboardController extends Controller
             ->toArray();
 
         // Get user IDs with same name
+
         // $similarUsersName = DuplicateUser::where('name', $duplicate->name)
+        // $similarUsersName = [];
+        // if ($duplicate->name) 
+        // {
+        //     $similarUsersName = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
+        //     // ->where('user_id', '=', $shipper_id)
+        //     ->where('created_at', '<', $user->created_at)
+        //     ->pluck('user_id')
+        //     ->toArray();
+        // }
         $similarUsersName = [];
-        if ($duplicate->name) 
-        {
+        if ($duplicate->name) {
             $similarUsersName = DuplicateUser::where('name', 'like', '%' . $duplicate->name . '%')
-            ->where('user_id', '!=', $shipper_id)
-            ->where('created_at', '<', $user->created_at)
-            ->pluck('user_id')
-            ->toArray();
+                ->where(function ($query) use ($user) {
+                    $query->where('created_at', '<', $user->created_at)
+                        ->orWhere('user_id', $user->id); // Include the current user
+                })
+                ->pluck('user_id')
+                ->toArray();
         }
 
         // Get all IBANs associated with the user
