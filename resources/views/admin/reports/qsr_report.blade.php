@@ -443,125 +443,6 @@
             //         // console.log(selectedOption);
             //     }
             // });
-
-
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    blockPagePermanently();
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.qsr.list') }}',
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: params,
-                        success: function (result) {
-                            head = [];
-
-                            head.push('S.No');
-                            head.push('Tracking No.');
-                            head.push('Order ID');
-                            head.push('Account No.');
-                            head.push('Shipper');
-                            head.push('Sub Segment');
-                            head.push('Consignee Name');
-                            head.push('First Attempt Date');
-                            head.push('Rider Picked Status Date');
-                            head.push('Status');
-                            head.push('Location Status Area');
-                            head.push('Location Status');
-                            head.push('Reason');
-                            head.push('Remarks');
-                            head.push('Total Attempt');
-                            head.push('History Status');
-                            head.push('History Location Status');
-                            head.push('Cargo Status');
-                            head.push('Bag Seal Number');
-                            head.push('Bag Status');
-                            head.push('Service Type');
-                            head.push('Arrival');
-                            head.push('Last Status Date');
-                            head.push('Booked Status Date');
-                            head.push('Shipping Mode');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Hub');
-                            head.push('Area');
-                            head.push('Concerned Hub');
-                            head.push('Return City');
-                            head.push('Zone');
-                            head.push('Product Type');
-                            head.push('Product Description');
-                            head.push('Amount');
-                            head.push('Aging (Arrival)');
-                            head.push('Aging (Last Status)');
-                            head.push('Request #');
-                            head.push('Request Status');
-                            head.push('Case Nature');
-                            head.push('Case Nature Type');
-                            head.push('Adjusted amount');
-                            $.each(result.data, function(index, values) {
-                                row = [];
-                                
-                                row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.order_id);
-                                row.push(values.account_no);
-                                row.push(values.shipper);
-                                row.push(values.sub_segment);
-                                row.push(values.name);
-                                row.push(values.first_attempt_date);
-                                row.push(values.rider_picked_status_date);
-                                row.push(values.status);
-                                row.push(values.scanning_city_area_name);
-                                row.push(values.location_status);
-                                row.push(values.reason);
-                                row.push(values.remarks);
-                                row.push(values.total_attempt);
-                                row.push(values.history_status);
-                                row.push(values.location_status_hss);
-                                row.push(values.cargo_status);
-                                row.push(values.seal_number);
-                                row.push(values.bag_status);
-                                row.push(values.service_type);
-                                row.push(values.arrival);
-                                row.push(values.last_status_date);
-                                row.push(values.created_at);
-                                row.push(values.shipping_mode);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.area);
-                                row.push(values.current_hub);
-                                row.push(values.return_city);
-                                row.push(values.zone);
-                                row.push(values.product_type);
-                                row.push(values.description);
-                                row.push(values.amount);
-                                row.push(values.aging);
-                                row.push(values.aging_last_status);
-                                row.push(values.crm_id_padded);
-                                row.push(values.crm_request_status);
-                                row.push(values.crm_request_case_nature);
-                                row.push(values.crm_request_case_nature_type);
-                                row.push(values.adjusted_amount);
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-                    UnblockPagePermanently();
-
-                    return {body: body, header: head};
-                }
-            } );
-
             var index_column = [];
             var flag = false;
             var table = $('#datatable').DataTable({
@@ -573,6 +454,46 @@
                         title: 'QSR Report',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        action: function(e){
+                                    $.post("{{ route('admin.reports.qsr.list') }}", {
+                                        excel: true,
+                                        _token: $('meta[name="csrf-token"]').attr('content'),
+                                        search_shipment_status : $('#search_shipment_status').val(),
+                                        search_shipper : $('#search_shipper').val(),
+                                        sub_segment : $('#sub_segment_select').val(),
+                                        search_shippers : $('#search_shippers').val(),
+                                        search_origin : $('#search_origin').val(),
+                                        search_destination : $('#search_destination').val(),
+                                        search_qsr : $('#search_qsr').val(),
+                                        search_zone : $('#search_zone').val(),
+                                        search_hub : $('#search_hub').val(),
+                                        search_shipping_mode : $('#search_shippimg_modes').val(),
+                                        search_from : $('input[name="from_date_formatted"]').val(),
+                                        search_to : $('input[name="to_date_formatted"]').val(),
+                                        arrival_search_from : $('input[name="from_date1_formatted"]').val(),
+                                        arrival_search_to : $('input[name="to_date1_formatted"]').val(),
+                                        search_types : $('#search_types').val(),
+
+                                    }).done(function(response) {
+                                        
+                                        var blob = new Blob([response], { type: 'text/csv' });
+
+                                        var url = window.URL.createObjectURL(blob);
+
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'QSR Report.csv';
+
+                                        document.body.appendChild(a);
+                                        a.click();
+
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+
+                                    }).fail(function(xhr, status, error) {
+                                        console.error('Failed to fetch CSV data:', status, error);
+                                    });
+                                }
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
