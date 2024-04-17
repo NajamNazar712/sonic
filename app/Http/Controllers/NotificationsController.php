@@ -448,23 +448,42 @@ class NotificationsController extends Controller
                 else if ($id == 4) {
                     // $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference', 'arrival_at', 'weighted_as'];
 
-                    $possible_fields = [  
-                        'consignee_name',
+                    // $possible_fields = [  
+                    //     'consignee_name',
+                    //     'consignee_city',
+                    //     'order_id',
+                    //     'weight',
+                    //     'item_product_type',
+                    //     'item_description',
+                    //     'item_quantity',
+                    //     'amount',
+                    //     'weighted_as',
+                    //     'difference',
+                    //     'actual_weight',
+                    //     'estimated_weight', 
+                    //     'tracking_number',
+                    //     'pickup_city',
+                    //     'arrival_at',
+                    // ];
+
+                    $possible_fields = [
+                        'tracking_number',     // Tracking Number
+                        'consignee_name',      // Shipper Name
+                        'pickup_city',         // Origin
+                        'arrival_at',          // Arrival Date
+                        'estimated_weight',    // Weight Input by Shipper (A)
+                        'actual_weight',       // Arrival Weight (B)
+                        'difference',          // Difference (B-A)
+                        'weighted_as',         // Weighted As
                         'consignee_city',
                         'order_id',
                         'weight',
                         'item_product_type',
                         'item_description',
                         'item_quantity',
-                        'amount',
-                        'weighted_as',
-                        'difference',
-                        'actual_weight',
-                        'estimated_weight', 
-                        'pickup_city',
-                        'tracking_number',
-                        'arrival_at',
+                        'amount'
                     ];
+                    
 
                     $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
 
