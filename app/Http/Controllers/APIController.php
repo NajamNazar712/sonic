@@ -7758,7 +7758,7 @@ class APIController extends Controller
                 }
                 return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
             } else {
-
+                
                 $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
                 $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
                 if ($retail_note->exists()) {
@@ -7871,7 +7871,7 @@ class APIController extends Controller
                 $amount = $request->amount;
                 $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
                 if ($existing_hbl_konnect_transaction->exists()) {
-                    return ['status' => 1, 'message' => 'Transaction Already Exists !'];
+                    return ['status' => 2, 'message' => 'Transaction Already Exists !'];
                 } else {
                     $retail_note = RetailCashDeposit::where('id', $retail_note_id);
                     if ($retail_note->exists()) {
