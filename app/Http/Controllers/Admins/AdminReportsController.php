@@ -3370,7 +3370,7 @@ class AdminReportsController extends Controller
 
         $service_types = DB::connection('reports')->table('booking_types')->get();
         
-        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments, 'referral_names' => $referral_names, 'zones' => $zones, 'service_types'=> $service_types ]);
+        return view('admin.reports.overall_sales')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments, 'referral_names' => $referral_names, 'zones' => $zones, 'service_types'=> $service_types ,'rider_types_referral'=>$rider_types_referral]);
     }
     public function overall_sales_list(Request $request)
     {
