@@ -676,8 +676,8 @@
                     shipment_weight_types = [];
                     shipment_weight_types[tracking_number] =!$('#add_shipment_form input.manual_weight').is(':checked') && !$('#add_shipment_form input.volumetric_weight').is(':checked') ? 3 : 2;
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-                        // if(parseInt(weight) >= 50)
-                        if(weight > 20)
+                        if(parseInt(weight) > 20)
+                        // if(weight > 20)
                         {
                             swal({
                                 text: 'Are you certain about proceeding when your weight surpasses 20KG??',
