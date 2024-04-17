@@ -83,8 +83,10 @@ class AdminLogisticSetupController extends Controller
             'user_id' => ['required','integer'],
             'rider_id' => ['required','integer'],
             'trax_product_id' => ['required','integer'],
-            'trax_service_id' => ['required','integer']
-        ],$this->validation_messages);
+            'trax_service_id' => ['required','integer'],
+            'piece_setting_id'=>['required','integer']
+
+        ]);
 
         if($validate->fails())
         {
@@ -98,6 +100,7 @@ class AdminLogisticSetupController extends Controller
             $shipper_detail->trax_product_id = $request->trax_product_id;
             $shipper_detail->trax_service_id = $request->trax_service_id;
             $shipper_detail->rider_id = $request->rider_id;
+            $shipper_detail->piece_setting_id=$request->piece_setting_id;
             $shipper_detail->created_by = $user_id;
             $shipper_detail->save();
 
@@ -119,9 +122,39 @@ class AdminLogisticSetupController extends Controller
 
         return  response()->json(['status'=>1,'error'=>'No Shipper Tagging found!']);
     }
-    public function shipper_tagging_update()
+    public function shipper_tagging_update(Request $request)
     {
 
+        $user_id = session('id');
+        $validate = Validator::make($request->all(),[
+            'shipper_tagging_id'=>['required','integer'],
+            'user_id' => ['required','integer'],
+            'rider_id' => ['required','integer'],
+            'trax_product_id' => ['required','integer'],
+            'trax_service_id' => ['required','integer'],
+            'piece_setting_id'=>['required','integer']
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $shipper_detail = TraxShipperDetail::find($request->shipper_tagging_id);
+            $shipper_detail->user_id = $request->user_id;
+            $shipper_detail->trax_product_id = $request->trax_product_id;
+            $shipper_detail->trax_service_id = $request->trax_service_id;
+            $shipper_detail->rider_id = $request->rider_id;
+            $shipper_detail->piece_setting_id=$request->piece_setting_id;
+            $shipper_detail->updated_by = $user_id;
+            $shipper_detail->save();
+
+            return redirect()->back()->with('success','Logistic Shipper Tagging Successfully Update');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed to Update Logistic Shipper Tagging');
+        }
     }
      public function master_product_index()
      {
@@ -138,7 +171,27 @@ class AdminLogisticSetupController extends Controller
                 return 'Active';
              }
              return  'Inactive';
-         });
+         }) ->addColumn('action',function ($trax_shipper_detail){
+         if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+             $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+             $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+             $dropdown .= $edit_button;
+             $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+             return $dropdown;
+         } else{
+             return '';
+         }
+     });
+
          return $datatables->make(true);
      }
 
@@ -166,6 +219,45 @@ class AdminLogisticSetupController extends Controller
 
      }
 
+     public function master_product_edit($id)
+     {
+         $master_product= TraxParentProduct::where('id',$id)->where('status',1);
+         if($master_product->exists())
+         {
+             $master_product = $master_product->first();
+             return response()->json(['status'=>0,'master_product'=>$master_product]);
+         }
+
+         return  response()->json(['status'=>1,'error'=>'No Master Product found!']);
+     }
+
+     public function master_product_update(Request $request) {
+
+        $validate = Validator::make($request->all(),[
+            'parent_product_id'=>['required','integer'],
+            'parent_code' => ['required','string'],
+            'parent_name' => ['required','string']
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $parent_product = TraxParentProduct::find($request->parent_product_id);
+            $parent_product->parent_code = $request->parent_code;
+            $parent_product->parent_name = $request->parent_name;
+            $parent_product->save();
+
+            return redirect()->back()->with('success','Master Product Successfully Update');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed to Update Master Product');
+        }
+    }
+
+
      public  function  product_index()
      {
          $parent_products = TraxParentProduct::select('id','parent_name')->where('status',1)->get();
@@ -185,6 +277,25 @@ class AdminLogisticSetupController extends Controller
                     return 'Active';
                 }
                 return  'Inactive';
+            }) ->addColumn('action',function ($trax_shipper_detail){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
             });
         return $datatables->make(true);
     }
@@ -214,6 +325,46 @@ class AdminLogisticSetupController extends Controller
         }
     }
 
+    public function product_edit($id)
+    {
+        $product= TraxProduct::where('id',$id)->where('status',1);
+        if($product->exists())
+        {
+            $product = $product->first();
+            return response()->json(['status'=>0,'product'=>$product]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No Product found!']);
+    }
+
+    public function product_update(Request $request) {
+
+        $validate = Validator::make($request->all(),[
+            'product_id'=>['required','integer'],
+            'parent_id'=>['required','integer'],
+            'product_code' => ['required','string'],
+            'product_name' => ['required','string']
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $product = TraxProduct::find($request->product_id);
+            $product->product_code = $request->product_code;
+            $product->product_name = $request->product_name;
+            $product->parent_id = $request->parent_id;
+            $product->save();
+
+            return redirect()->back()->with('success','Product Successfully Update');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed to Update Product');
+        }
+    }
+
 
     public  function service_index()
     {
@@ -233,6 +384,25 @@ class AdminLogisticSetupController extends Controller
                     return 'Active';
                 }
                 return  'Inactive';
+            })->addColumn('action',function ($trax_shipper_detail){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
             });
         return $datatables->make(true);
     }
@@ -261,4 +431,46 @@ class AdminLogisticSetupController extends Controller
             return redirect()->back()->with('error','Service not add');
         }
     }
+
+    public function service_edit($id)
+    {
+        $service= TraxService::where('id',$id)->where('status',1);
+        if($service->exists())
+        {
+            $service = $service->first();
+            return response()->json(['status'=>0,'service'=>$service]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No Service found!']);
+    }
+
+    public function service_update(Request $request) {
+
+        $validate = Validator::make($request->all(),[
+            'service_id'=>['required','integer'],
+            'product_id'=>['required','integer'],
+            'service_code' => ['required','string'],
+            'service_name' => ['required','string']
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $service = TraxService::find($request->service_id);
+            $service->service_code = $request->service_code;
+            $service->service_name = $request->service_name;
+            $service->product_id = $request->product_id;
+
+            $service->save();
+
+            return redirect()->back()->with('success','Service Successfully Update');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed to Update Service');
+        }
+    }
+
 }

@@ -616,6 +616,17 @@
                 }
             });
 
+            $("#edit_Shipper_tagging_form").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
             $("body").on('click','.datatable .edit',function (){
                 var id = parseInt($(this).closest('tr').attr('id'));
                 $.ajax({
@@ -625,12 +636,13 @@
                     if(data.status==0)
                     {
                         var shipper_tagging = data.shipper_tagging;
-                        $("#shipper_tagging_id").val(shipper_tagging.time_range_id);
+                        $("#shipper_tagging_id").val(shipper_tagging.id);
                         $("#edit_user_id_select").val(shipper_tagging.user_id).trigger('change');
                         $("#edit_rider_id_select").val(shipper_tagging.rider_id).trigger('change');
                         $("#edit_product_id_select").val(shipper_tagging.trax_product_id).trigger('change');
                         $("#edit_service_id_select").val(shipper_tagging.trax_service_id).trigger('change');
                         $("#edit_piece_setting_id_select").val(shipper_tagging.piece_setting_id).trigger('change');
+                        $("#EditShipperTaggingModal").modal("show");
 
                     } else {
                         toastr.error(data.error, 'Error!', {
@@ -640,7 +652,7 @@
                     }
 
                 });
-                $("#EditShipperTaggingModal").modal("show");
+
 
             });
 

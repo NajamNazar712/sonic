@@ -23,6 +23,8 @@
                                     <th class="border-primary border-darken-1">Master Product Code</th>
                                     <th class="border-primary border-darken-1">Master Product Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -85,6 +87,60 @@
             </div>
         </div>
     </div>
+
+    {{--Edit Form--}}
+    <div class="modal fade" id="EditMasterProductModal" data-backdrop="static" role="dialog" aria-labelledby="EditMasterProductModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Master Product</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+
+                    <form method="post" id="edit_master_product_form"
+                          action="{{ route('admin.logistic.master_product.update') }}"
+                          class="form-horizontal mb-1" novalidate="novalidate">
+                        @csrf
+                        @method('put')
+                        <div class="row">
+                            <input type="hidden" name="parent_product_id" id="parent_product_id">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Code</label>
+                                    <input type="text" name="parent_code" class="form-control parent_code" id="edit_parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" name="parent_name" class="form-control parent_name" id="edit_parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -342,6 +398,8 @@
                     {data: 'parent_code', name: 'trax_parent_products.parent_code', class: 'align-middle parent_code'},
                     {data: 'parent_name', name: 'trax_parent_products.parent_name', class: 'align-middle parent_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
+
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -380,7 +438,6 @@
 
             });
 
-
             $("#add_master_product_form").validate({
                 errorClass: "danger",
                 successClass: 'success',
@@ -391,6 +448,45 @@
                     form.submit();
                 }
             });
+
+            $("#edit_master_product_form").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
+            $("body").on('click','.datatable .edit',function (){
+                var id = parseInt($(this).closest('tr').attr('id'));
+                $.ajax({
+                    url:'{{route('admin.logistic.master_product.edit',['id'=>':id']) }}'.replace(':id',id),
+                    method:'GET'
+                }).done(function (data){
+                    if(data.status==0)
+                    {
+                        var master_product = data.master_product;
+                        $("#master_product_id").val(master_product.id);
+                        $("#edit_parent_code").val(master_product.parent_code);
+                        $("#edit_parent_name").val(master_product.parent_name);
+
+                        $("#EditMasterProductModal").modal("show");
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+
+
+            });
+
 
 
         });

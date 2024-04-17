@@ -123,15 +123,36 @@ class AdminCnController extends Controller
         return view('admin.logistic.cn_receive_admin_store')->with(['products'=> $products,'cities'=>$cities]);
     }
 
-    public  function cn_receive_admin_store_list(Request  $request)
+    public  function cn_receive_admin_store_list(Request $request)
     {
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('segments as s','trax_cn_receive_admin_stores.product_id','=','s.id')
             ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
-            ->SELECT('trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
+            ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
             ->where('trax_cn_receive_admin_stores.status',1);
 
 
-        $datatables = Datatables::of($trax_cn_receive_admin_stores);
+        $datatables = Datatables::of($trax_cn_receive_admin_stores)
+            ->addColumn('action',function ($trax_cn_receive_admin_stores){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+            });
+
 
         return $datatables->make(true);
     }
@@ -174,6 +195,58 @@ class AdminCnController extends Controller
         }
     }
 
+    public function cn_receive_admin_store_edit($id)
+    {
+        $cn_receive_admin_store= TraxCnReceiveAdminStore::where('id',$id)->where('status',1);
+        if($cn_receive_admin_store->exists())
+        {
+            $cn_receive_admin_store = $cn_receive_admin_store->first();
+            return response()->json(['status'=>0,'cn_receive_admin_store'=>$cn_receive_admin_store]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No CN found in admin store!']);
+    }
+
+    public  function cn_receive_admin_store_update(Request  $request)
+    {
+
+        $user_id=session('id');
+        $validate = Validator::make($request->all(),[
+            'id' => ['required','integer'],
+            'company_code' => ['required','max:255'],
+            'area_code' => ['required','max:255'],
+            'product_id' => ['required','integer'],
+            'cn_from' => ['required','integer'],
+            'cn_to' => ['required','integer']
+        ],$this->validation_messages);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $date= Carbon::now()->toDateString();
+            $quantity = ($request->cn_to-$request->cn_from+1);
+
+            $cn_receive_admin_store = TraxCnReceiveAdminStore::find($request->id);
+            $cn_receive_admin_store->company_code = $request->company_code;
+            $cn_receive_admin_store->area_code = $request->area_code;
+            $cn_receive_admin_store->product_id = $request->product_id;
+            $cn_receive_admin_store->cn_from = $request->cn_from;
+            $cn_receive_admin_store->cn_to = $request->cn_to;
+            $cn_receive_admin_store->quantity = $quantity;
+            $cn_receive_admin_store->receive_date = $date;
+            $cn_receive_admin_store->updated_by=$user_id;
+            $cn_receive_admin_store->save();
+
+            return redirect()->back()->with('success','CN update admin store successfully');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed CN update admin store');
+        }
+    }
+
     public  function cn_issue_to_rider_index()
     {
         $products =  Segment::all();
@@ -185,10 +258,31 @@ class AdminCnController extends Controller
     {
         $trax_cn_issue_rider = TraxCnIssueToRider::Join('segments as s','trax_cn_issue_to_riders.product_id','=','s.id')
             ->join('riders as rd','rd.id','=','trax_cn_issue_to_riders.rider_id')
-            ->SELECT('trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
+            ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
             ->where('trax_cn_issue_to_riders.status',1);
 
-        $datatables = Datatables::of($trax_cn_issue_rider);
+        $datatables = Datatables::of($trax_cn_issue_rider)
+            ->addColumn('action',function ($trax_cn_issue_rider){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+            });
+
 
         return $datatables->make(true);
     }
@@ -247,6 +341,82 @@ class AdminCnController extends Controller
         }
     }
 
+    public function cn_issue_to_rider_edit($id)
+    {
+        $trax_cn_issue_rider= TraxCnIssueToRider::where('id',$id)->where('status',1);
+        if($trax_cn_issue_rider->exists())
+        {
+            $trax_cn_issue_rider = $trax_cn_issue_rider->first();
+            return response()->json(['status'=>0,'trax_cn_issue_rider'=>$trax_cn_issue_rider]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No CN issue to rider found!']);
+    }
+
+    public  function cn_issue_to_rider_update(Request  $request)
+    {
+
+        $user_id=session('id');
+        $validate = Validator::make($request->all(),[
+            'id' => ['required','integer'],
+            'company_code' => ['required','max:255'],
+            'rider_id' => ['required','integer'],
+            'product_id' => ['required','integer'],
+            'cn_from' => ['required','integer'],
+            'cn_to' => ['required','integer'],
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $time_stamp = now();
+//            $quantity = ($request->cn_to-$request->cn_from+1);
+//            $child_cn = [];
+
+//            DB::beginTransaction();
+
+            $trax_cn_issue_rider = TraxCnIssueToRider::find($request->id);
+            $trax_cn_issue_rider->company_code = $request->company_code;
+            $trax_cn_issue_rider->rider_id = $request->rider_id;
+            $trax_cn_issue_rider->product_id = $request->product_id;
+//            $trax_cn_issue_rider->cn_from = $request->cn_from;
+//            $trax_cn_issue_rider->cn_to = $request->cn_to;
+//            $trax_cn_issue_rider->quantity = $quantity;
+            $trax_cn_issue_rider->issue_date = $time_stamp->toDateString();
+            $trax_cn_issue_rider->updated_by=$user_id;
+            $trax_cn_issue_rider->save();
+
+            // delete exiting issue rider cns
+            // $trax_rider_cn = TraxRiderCnDetail::where('cn_issue_id',$trax_cn_issue_rider->id);
+            //  if($trax_rider_cn->exists())
+            //    $trax_rider_cn->delete();
+
+
+        //            for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
+        //                $child_cn[] = [
+        //                    'cn_issue_id' => $trax_cn_issue_rider->id,
+        //                    'cn_number' => $i,
+        //                    'created_at' => $time_stamp,
+        //                    'updated_at' => $time_stamp
+        //                ];
+        //            }
+        //
+        //            TraxRiderCnDetail::insert($child_cn);
+
+
+
+//            DB::commit();
+            return redirect()->back()->with('success','CN update issue to rider successfully');
+
+        } catch (\Exception $exception){
+//            DB::rollBack();
+            return redirect()->back()->with('error','Failed CN update issue to rider');
+        }
+    }
+
     public function cn_child_receive_admin_store_index()
     {
         $cities = City::where('status',1)->get();
@@ -256,10 +426,32 @@ class AdminCnController extends Controller
     public function cn_child_receive_admin_store_list()
     {
         $trax_child_cn_receive_admin_stores = TraxChildCnReceiveAdminStore::Join('cities as c','c.id','=','trax_child_cn_receive_admin_stores.area_code')
-            ->SELECT('trax_child_cn_receive_admin_stores.receive_date','trax_child_cn_receive_admin_stores.company_code','trax_child_cn_receive_admin_stores.area_code','c.name as area_name','trax_child_cn_receive_admin_stores.cn_from','trax_child_cn_receive_admin_stores.cn_to','trax_child_cn_receive_admin_stores.quantity')
+            ->SELECT('trax_child_cn_receive_admin_stores.id','trax_child_cn_receive_admin_stores.receive_date','trax_child_cn_receive_admin_stores.company_code','trax_child_cn_receive_admin_stores.area_code','c.name as area_name','trax_child_cn_receive_admin_stores.cn_from','trax_child_cn_receive_admin_stores.cn_to','trax_child_cn_receive_admin_stores.quantity')
             ->where('trax_child_cn_receive_admin_stores.status',1);
 
-        $datatables = Datatables::of($trax_child_cn_receive_admin_stores);
+        $datatables = Datatables::of($trax_child_cn_receive_admin_stores)
+            ->addColumn('action',function ($trax_child_cn_receive_admin_stores){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+            });
+
+
 
         return $datatables->make(true);
     }
@@ -299,6 +491,58 @@ class AdminCnController extends Controller
         }
     }
 
+    public function cn_child_receive_admin_store_edit($id)
+    {
+        $child_cn_admin= TraxChildCnReceiveAdminStore::where('id',$id)->where('status',1);
+        if($child_cn_admin->exists())
+        {
+            $child_cn_admin = $child_cn_admin->first();
+            return response()->json(['status'=>0,'child_cn_admin'=>$child_cn_admin]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No Child CN found in admin store!']);
+    }
+
+    public  function cn_child_receive_admin_store_update(Request  $request)
+    {
+
+        $user_id=session('id');
+        $validate = Validator::make($request->all(),[
+            'id' => ['required','integer'],
+            'company_code' => ['required','max:255'],
+            'area_code' => ['required','max:255'],
+            'cn_from' => ['required','integer'],
+            'cn_to' => ['required','integer']
+        ],$this->validation_messages);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $date= Carbon::now()->toDateString();
+//            $quantity = ($request->cn_to-$request->cn_from+1);
+
+            $child_cn_admin = TraxChildCnReceiveAdminStore::find($request->id);
+            $child_cn_admin->company_code = $request->company_code;
+            $child_cn_admin->area_code = $request->area_code;
+//            $cn_receive_admin_store->product_id = $request->product_id;
+//            $cn_receive_admin_store->cn_from = $request->cn_from;
+//            $cn_receive_admin_store->cn_to = $request->cn_to;
+//            $cn_receive_admin_store->quantity = $quantity;
+            $child_cn_admin->receive_date = $date;
+            $child_cn_admin->updated_by=$user_id;
+            $child_cn_admin->save();
+
+            return redirect()->back()->with('success','Child CN update admin store successfully');
+
+        } catch (\Exception $exception){
+            return redirect()->back()->with('error','Failed Child CN update admin store');
+        }
+    }
+
+
     public function cn_child_issue_to_rider_index()
     {
         $riders =  Rider::where('status',1)->get();
@@ -308,10 +552,32 @@ class AdminCnController extends Controller
     public function cn_child_issue_to_rider_list()
     {
         $trax_child_cn_issue_rider = TraxChildCnIssueToRider::join('riders as rd','rd.id','=','trax_child_cn_issue_to_riders.rider_id')
-            ->SELECT('trax_child_cn_issue_to_riders.issue_date','trax_child_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_child_cn_issue_to_riders.cn_from','trax_child_cn_issue_to_riders.cn_to','trax_child_cn_issue_to_riders.quantity')
+            ->SELECT('trax_child_cn_issue_to_riders.id','trax_child_cn_issue_to_riders.issue_date','trax_child_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_child_cn_issue_to_riders.cn_from','trax_child_cn_issue_to_riders.cn_to','trax_child_cn_issue_to_riders.quantity')
             ->where('trax_child_cn_issue_to_riders.status',1);
 
-        $datatables = Datatables::of($trax_child_cn_issue_rider);
+        $datatables = Datatables::of($trax_child_cn_issue_rider)
+            ->addColumn('action',function ($trax_child_cn_issue_rider){
+                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    $dropdown = '
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                              <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                    $dropdown .= $edit_button;
+                    $dropdown .= '
+                              </div>
+                            </div>
+                       
+                         ';
+                    return $dropdown;
+                } else{
+                    return '';
+                }
+            });
+
+
 
         return $datatables->make(true);
     }
@@ -365,5 +631,81 @@ class AdminCnController extends Controller
             return redirect()->back()->with('error', 'Failed Child CN issue to rider');
         }
     }
+
+    public function cn_child_issue_to_rider_edit($id)
+    {
+        $trax_child_cn_issue_rider = TraxChildCnIssueToRider::where('id',$id)->where('status',1);
+        if($trax_child_cn_issue_rider->exists())
+        {
+            $trax_child_cn_issue_rider = $trax_child_cn_issue_rider->first();
+            return response()->json(['status'=>0,'trax_child_cn_issue_rider'=>$trax_child_cn_issue_rider]);
+        }
+
+        return  response()->json(['status'=>1,'error'=>'No Child CN issue to rider found!']);
+    }
+
+    public  function cn_child_issue_to_rider_update(Request $request)
+    {
+
+        $user_id=session('id');
+        $validate = Validator::make($request->all(),[
+            'id' => ['required','integer'],
+            'company_code' => ['required','max:255'],
+            'rider_id' => ['required','integer'],
+            'cn_from' => ['required','integer'],
+            'cn_to' => ['required','integer'],
+        ]);
+
+        if($validate->fails())
+        {
+            return redirect()->back()->withErrors($validate)->withInput();
+        }
+
+        try {
+            $time_stamp = now();
+//            $quantity = ($request->cn_to-$request->cn_from+1);
+//            $child_cn = [];
+
+//            DB::beginTransaction();
+
+            $trax_child_cn_issue_rider = TraxChildCnIssueToRider::find($request->id);
+            $trax_child_cn_issue_rider->company_code = $request->company_code;
+            $trax_child_cn_issue_rider->rider_id = $request->rider_id;
+//            $trax_child_cn_issue_rider->cn_from = $request->cn_from;
+//            $trax_child_cn_issue_rider->cn_to = $request->cn_to;
+//            $trax_child_cn_issue_rider->quantity = $quantity;
+            $trax_child_cn_issue_rider->issue_date = $time_stamp->toDateString();
+            $trax_child_cn_issue_rider->updated_by=$user_id;
+            $trax_child_cn_issue_rider->save();
+
+            // delete exiting issue rider cns
+            // $trax_rider_cn = TraxRiderCnDetail::where('cn_issue_id',$trax_cn_issue_rider->id);
+            //  if($trax_rider_cn->exists())
+            //    $trax_rider_cn->delete();
+
+
+            //            for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
+            //                $child_cn[] = [
+            //                    'cn_issue_id' => $trax_cn_issue_rider->id,
+            //                    'cn_number' => $i,
+            //                    'created_at' => $time_stamp,
+            //                    'updated_at' => $time_stamp
+            //                ];
+            //            }
+            //
+            //            TraxRiderCnDetail::insert($child_cn);
+
+
+
+//            DB::commit();
+            return redirect()->back()->with('success','Child CN update issue to rider successfully');
+
+        } catch (\Exception $exception){
+//            DB::rollBack();
+            return redirect()->back()->with('error','Failed Child CN update issue to rider');
+        }
+    }
+
+
 
 }

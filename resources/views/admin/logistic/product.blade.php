@@ -24,6 +24,8 @@
                                     <th class="border-primary border-darken-1">Product Name</th>
                                     <th class="border-primary border-darken-1">Master Product Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -96,6 +98,72 @@
             </div>
         </div>
     </div>
+
+{{--Edit Modal--}}
+    <div class="modal fade" id="EditProductModal" data-backdrop="static" role="dialog" aria-labelledby="AddProductModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Product</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+
+                    <form method="post" id="edit_product_form"
+                          action="{{ route('admin.logistic.product.update') }}"
+                          class="form-horizontal mb-1" novalidate="novalidate">
+                        @csrf
+                        @method('put')
+                        <div class="row">
+                            <input type="hidden" name="product_id" id="product_id">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Product Code</label>
+                                    <input type="text" name="product_code" class="form-control product_code" id="edit_product_code" data-rule-required="true" data-msg-required="Product Code is Required">
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Product Name</label>
+                                    <input type="text" name="product_name" class="form-control product_name" id="edit_product_name"  data-rule-required="true" data-msg-required="Product Name is Required">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Master Product</label>
+                                    <select class="select select2 mb-1" name="parent_id" id="edit_parent_id_select" data-rule-required="true" data-msg-required="Master Product is required">
+                                        @foreach($parent_products as $parent_product)
+                                            <option value="{{ $parent_product->id }}">{{ $parent_product->parent_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -297,6 +365,11 @@
                 dropdownParent:$('#AddProductModal')
             });
 
+            $('#edit_parent_id_select').prepend('<option value="" selected="selected">Select Master Product</option>').select2({
+                placeholder: 'Select Master Product',
+                width: '100%',
+                dropdownParent:$('#EditProductModal')
+            });
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -360,6 +433,8 @@
                     {data: 'product_name', name: 'trax_products.product_name', class: 'align-middle product_name'},
                     {data: 'master_product_name', name: 'pp.parent_name', class: 'align-middle master_product_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
+
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -409,6 +484,46 @@
                     form.submit();
                 }
             });
+
+            $("#edit_product_form").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
+            $("body").on('click','.datatable .edit',function (){
+                var id = parseInt($(this).closest('tr').attr('id'));
+                $.ajax({
+                    url:'{{route('admin.logistic.product.edit',['id'=>':id']) }}'.replace(':id',id),
+                    method:'GET'
+                }).done(function (data){
+                    if(data.status==0)
+                    {
+                        var product = data.product;
+                        $("#product_id").val(product.id);
+                        $("#edit_product_code").val(product.product_code);
+                        $("#edit_product_name").val(product.product_name);
+                        $("#edit_parent_id_select").val(product.parent_id).trigger('change');
+
+                        $("#EditProductModal").modal("show");
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+
+
+            });
+
 
 
         });

@@ -24,6 +24,8 @@
                                     <th class="border-primary border-darken-1">Service Name</th>
                                     <th class="border-primary border-darken-1">Product Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Action</th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -96,6 +98,72 @@
             </div>
         </div>
     </div>
+
+    {{--Edit Modal--}}
+    <div class="modal fade" id="EditServiceModal" data-backdrop="static" role="dialog" aria-labelledby="EditServiceModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Service</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+
+                    <form method="post" id="edit_service_form"
+                          action="{{ route('admin.logistic.service.update') }}"
+                          class="form-horizontal mb-1" novalidate="novalidate">
+                        @csrf
+                        @method('put')
+                        <div class="row">
+                            <input type="hidden" name="service_id" id="service_id">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Service Code</label>
+                                    <input type="text" name="service_code" class="form-control service_code" id="edit_service_code" data-rule-required="true" data-msg-required="Service Code is Required">
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Service Name</label>
+                                    <input type="text" name="service_name" class="form-control service_name" id="edit_service_name"  data-rule-required="true" data-msg-required="Service Name is Required">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="select select2 mb-1" name="product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
+                                        @foreach($products as $product)
+                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group ml-1">
+                            {{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -297,6 +365,12 @@
                 dropdownParent:$('#AddServiceModal')
             });
 
+            $('#edit_product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
+                placeholder: 'Select Product',
+                width: '100%',
+                dropdownParent:$('#EditServiceModal')
+            });
+
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -360,6 +434,9 @@
                     {data: 'service_name', name: 'trax_services.service_name', class: 'align-middle service_name'},
                     {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
+
+
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -409,6 +486,46 @@
                     form.submit();
                 }
             });
+
+            $("#edit_service_form").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
+            $("body").on('click','.datatable .edit',function (){
+                var id = parseInt($(this).closest('tr').attr('id'));
+                $.ajax({
+                    url:'{{route('admin.logistic.service.edit',['id'=>':id']) }}'.replace(':id',id),
+                    method:'GET'
+                }).done(function (data){
+                    if(data.status==0)
+                    {
+                        var service = data.service;
+                        $("#service_id").val(service.id);
+                        $("#edit_service_code").val(service.service_code);
+                        $("#edit_service_name").val(service.service_name);
+                        $("#edit_product_id_select").val(service.product_id).trigger('change');
+
+                        $("#EditServiceModal").modal("show");
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+
+
+            });
+
 
 
         });

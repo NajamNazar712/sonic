@@ -26,6 +26,7 @@
                                     <th class="border-primary border-darken-1">To From</th>
                                     <th class="border-primary border-darken-1">Quantity</th>
                                     <th class="border-primary border-darken-1">Receive Date</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -119,6 +120,93 @@
             </div>
         </div>
     </div>
+
+    {{--Edit Modal--}}
+    <div class="modal fade" id="EditChildCNReceiveAdminStoreModal" data-backdrop="static" role="dialog" aria-labelledby="EditChildCNReceiveAdminStoreModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Child CN Receive Admin Store</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="errormessage">
+
+                    </div>
+
+                    <form method="post" id="edit_child_cn_receive_admin_store_form"
+                          action="{{ route('admin.logistic.cn.child_receive_admin_store.update') }}"
+                          class="form-horizontal mb-1" novalidate="novalidate">
+                        @csrf
+                        @method('put')
+                        <div class="row">
+                            <input type="hidden" name="id" id="id">
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Company Code</label>
+                                    <input type="text" name="company_code" id="edit_company_code" class="form-control"  data-rule-required="true" data-msg-required="Company Code is required">
+                                </div>
+                            </div>
+                            {{--                            <div class="col-md-6">--}}
+                            {{--                                <div class="form-group">--}}
+                            {{--                                    <label>Receive Date</label>--}}
+                            {{--                                    <input type="text" name="receive_date" class="form-control receive_date whitebackground" id="receive_date_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}" data-rule-required="true" data-msg-required="Pickup Date is Required">--}}
+
+                            {{--                                </div>--}}
+                            {{--                            </div>--}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Area</label>
+                                    <select class="select select2 mb-1" name="area_code" id="edit_area_code_select" data-rule-required="true" data-msg-required="Area is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>CN From</label>
+                                    <input type="text" name="cn_from" id="edit_cn_from" class="form-control" data-rule-required="true" data-msg-required="CN from is required" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>CN To</label>
+                                    <input type="text" name="cn_to" id="edit_cn_to" class="form-control"  data-rule-required="true" data-msg-required="CN to is required" readonly>
+                                </div>
+                            </div>
+                            {{--                            <div class="col-md-4">--}}
+                            {{--                                <div class="form-group">--}}
+                            {{--                                    <label>Quantity</label>--}}
+                            {{--                                    <input type="text" name="quantity" class="form-control" >--}}
+                            {{--                                </div>--}}
+                            {{--                            </div>--}}
+                        </div>
+
+                        <div class="form-group ml-1">
+
+                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -315,17 +403,17 @@
         $(document).ready(function () {
 
 
-          $('#receive_date_datepicker').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::today() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
+          {{--$('#receive_date_datepicker').pickadate({--}}
+          {{--      firstDay: 1,--}}
+          {{--      clear: '',--}}
+          {{--      min: '{{ Carbon\Carbon::today() }}',--}}
+          {{--      // format: 'dd mmmm, yyyy',--}}
+          {{--      format: 'yyyy-mm-dd',--}}
+          {{--      selectYears: true,--}}
+          {{--      selectMonths: true,--}}
+          {{--      formatSubmit: 'yyyy-mm-dd',--}}
+          {{--      hiddenSuffix: '_formatted',--}}
+          {{--  });--}}
 
 
 
@@ -333,6 +421,12 @@
                 placeholder: 'Select Area',
                 width: '100%',
                 dropdownParent:$('#AddChildCNReceiveAdminStoreModal')
+            });
+
+            $('#edit_area_code_select').prepend('<option value="" selected="selected">Select Area</option>').select2({
+                placeholder: 'Select Area',
+                width: '100%',
+                dropdownParent:$('#EditChildCNReceiveAdminStoreModal')
             });
 
 
@@ -402,6 +496,7 @@
                     {data: 'cn_to', name: 'cn_to', class: 'align-middle cn_to'},
                     {data: 'quantity', name: 'quantity', class: 'align-middle quantity'},
                     {data: 'receive_date', name: 'receive_date', class: 'align-middle receive_date'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -450,7 +545,45 @@
                     form.submit();
                 }
             });
+            $("#edit_child_cn_receive_admin_store_form").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
 
+            $("body").on('click','.datatable .edit',function (){
+                var id = parseInt($(this).closest('tr').attr('id'));
+                $.ajax({
+                    url:'{{route('admin.logistic.cn.child_receive_admin_store.edit',['id'=>':id']) }}'.replace(':id',id),
+                    method:'GET'
+                }).done(function (data){
+                    if(data.status==0)
+                    {
+                        var child_cn_admin = data.child_cn_admin;
+                        $("#id").val(child_cn_admin.id);
+                        $("#edit_company_code").val(child_cn_admin.company_code);
+                        $("#edit_cn_from").val(child_cn_admin.cn_from);
+                        $("#edit_cn_to").val(child_cn_admin.cn_to);
+                        $("#edit_area_code_select").val(child_cn_admin.area_code).trigger('change');
+
+                        $("#EditChildCNReceiveAdminStoreModal").modal("show");
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+
+
+            });
 
         });
 

@@ -255,26 +255,26 @@
                                 <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
-                            <li  class="menu-item">
-                                <a href="{{ route('admin.logistic.shipment_manifest.create') }}">Shipment Manifest</a>
-                            </li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
-                            <li  class="menu-item">
-                                <a href="{{ route('admin.logistic.rbag_manifest.create') }}">Rbag Manifest</a>
-                            </li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
-                            <li  class="menu-item">
-                                <a href="{{ route('admin.logistic.transit_manifest.create') }}">Only Transit Manifest</a>
-                            </li>
-                        @endif
-                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
-                                <li  class="menu-item">
-                                    <a href="{{ route('admin.logistic.cn.issue_area_store.index') }}">CN Issue Area Store</a>
-                                </li>
-                            @endif
+{{--                        @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
+{{--                            <li  class="menu-item">--}}
+{{--                                <a href="{{ route('admin.logistic.shipment_manifest.create') }}">Shipment Manifest</a>--}}
+{{--                            </li>--}}
+{{--                        @endif--}}
+{{--                        @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
+{{--                            <li  class="menu-item">--}}
+{{--                                <a href="{{ route('admin.logistic.rbag_manifest.create') }}">Rbag Manifest</a>--}}
+{{--                            </li>--}}
+{{--                        @endif--}}
+{{--                        @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
+{{--                            <li  class="menu-item">--}}
+{{--                                <a href="{{ route('admin.logistic.transit_manifest.create') }}">Only Transit Manifest</a>--}}
+{{--                            </li>--}}
+{{--                        @endif--}}
+{{--                            @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
+{{--                                <li  class="menu-item">--}}
+{{--                                    <a href="{{ route('admin.logistic.cn.issue_area_store.index') }}">CN Issue Area Store</a>--}}
+{{--                                </li>--}}
+{{--                            @endif--}}
                             @if (session('role_id') == 1 || in_array(446, session('permissions')))
                                 <li  class="menu-item">
                                     <a href="{{ route('admin.logistic.cn.receive_admin_store.index') }}">CN Receive Admin Store</a>
