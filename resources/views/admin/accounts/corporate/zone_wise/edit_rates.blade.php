@@ -4237,7 +4237,28 @@
                                     @endif
 
                                     @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
-                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        {{-- <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button> --}}
+                                        <button id="duplicate_modal_btn" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
+                                    
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                    
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-success">Yes</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
                                     @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
@@ -4976,10 +4997,82 @@
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
         });
-        $('#accountApproveActiveSubmit').on('click',function(){
-            $('#approve').val(1);
-            // console.log('ddd');
+        // $('#accountApproveActiveSubmit').on('click',function(){
+        //     $('#approve').val(1);
+        // });
+
+        $('#duplicate_modal_btn').on('click', function(e){
+            e.preventDefault();
+            var url = window.location.href;
+            var urlParts = url.split('/');
+            var id = urlParts[5];
+            if (id) {
+                $.ajax({
+                    url: '{!! route('admin.accounts.duplicate.info') !!}',
+                    data: {
+                        'shipper_id': id,
+                    }
+                }).done(function(data) {
+                    if(data.status == 1){
+                        $('#duplicate_modal').modal('show');
+                        var baseURL = "{{ url('admin/accounts') }}";
+                        var html = '<table class="table table-bordered">';
+                        html += '<tr>' +
+                            '<td><strong>Phone</strong></td>' +
+                            '<td>' + data.info.phone + '</td>' +
+                            '<td>' + (data.info.shared_phone ?
+                                generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                            '</tr>';
+                        html += '<tr>' +
+                            '<td><strong>CNIC</strong></td>' +
+                            '<td>' + data.info.cnic + '</td>' +
+                            '<td>' + (data.info.shared_cnic ?
+                                generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                            '</tr>';
+                        html += '<tr>' +
+                            '<td><strong>IBAN</strong></td>' +
+                            '<td>' + data.info.iban + '</td>' +
+                            '<td>' + (data.info.shared_iban ?
+                                generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                            '</tr>';
+                        html += '<tr>' +
+                            '<td><strong>Name</strong></td>' +
+                            '<td>' + data.info.name + '</td>' +
+                            '<td>' + (data.info.shared_name ?
+                                generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                            '</tr>';
+                        html += '<tr>' +
+                            '<td><strong>NTN</strong></td>' +
+                            '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                            '<td>' + (data.info.shared_ntn_no ?
+                                generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                            '</tr>';  
+                        html += '<tr>' +
+                            '<td><strong>Email</strong></td>' +
+                            '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
+                                data.info.email : '') + '</td>' +
+                            '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                            '</tr>';
+                        html += '</table>';
+
+                        function generateLinks(ids, baseURL, type) {
+                            var links = [];
+                            for (var i = 0; i < ids.length; i++) {
+                                var url = baseURL + '/' + ids[i].trim() + '/view';
+                                links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                            }
+                            return links.join(', ');
+                        }
+
+                        $('#duplicate_modal .modal-body').html(html);
+                        $('#approve').val(1);
+                    }
+
+                });
+            }
         });
+
         $('#accountApproveChangeSubmit').on('click',function(){
             $('#approve_change_rate_type').val(1);
         });
