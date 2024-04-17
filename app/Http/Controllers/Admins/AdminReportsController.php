@@ -501,112 +501,11 @@ class AdminReportsController extends Controller
             $datatable->where('ss.id', '=', $status_id);
         }
 
+        //csv part
         if ($request->get('excel') && $request->get('excel') == true) {
-
-            $exportData = $datatable->make(true);
-            $exportData = $exportData->getData()->data;
-
-            $headers = [
-                'S. No.',
-                'Tracking No.',
-                'Order ID',
-                'Account No.',
-                'Shipper',
-                'Sub Segment',
-                'Consignee Name',
-                'First Attempt Date',
-                'Rider Picked Status Date',
-                'Status',
-                'Location Status Area',
-                'Location Status',
-                'Reason',
-                'Remarks',
-                'Total Attempt',
-                'History Status',
-                'History Location Status',
-                'Cargo Status',
-                'Bag Seal Number',
-                'Bag Status',
-                'Service Type',
-                'Arrival',
-                'Last Status Date',
-                'Booked Status Date',
-                'Shipping Mode',
-                'Origin',
-                'Destination',
-                'Hub',
-                'Area',
-                'Concerned Hub',
-                'Return City',
-                'Zone',
-                'Product Type',
-                'Product Description',
-                'Amount',
-                'Aging (Arrival)',
-                'Aging (Last Status)',
-                'Request #',
-                'Request Status',
-                'Case Nature',
-                'Case Nature Type',
-                'Adjusted amount',
-            ];
-
-            header('Content-Type: text/csv; charset=utf-8');  
-            header('Content-Disposition: attachment; filename=data.csv');  
-            $output = fopen("php://output", "w");  
-            fputcsv($output, $headers);
-
-            $i=1;
-            foreach($exportData as $row)
-            {  
-                $data = [];
-                $row = (array) $row;
-                $data[] = $i;
-                $data[] = $row['tracking_number'];
-                $data[] = $row['order_id'];
-                $data[] = $row['account_no'];
-                $data[] = $row['shipper'];
-                $data[] = $row['sub_segment'];
-                $data[] = $row['name'];
-                $data[] = $row['first_attempt_date'];
-                $data[] = $row['rider_picked_status_date'];
-                $data[] = $row['status'];
-                $data[] = $row['scanning_city_area_name'];
-                $data[] = $row['location_status'];
-                $data[] = $row['reason'];
-                $data[] = $row['remarks'];
-                $data[] = $row['total_attempt'];
-                $data[] = $row['history_status'];
-                $data[] = $row['location_status_hss'];
-                $data[] = $row['cargo_status'];
-                $data[] = $row['seal_number'];
-                $data[] = $row['bag_status'];
-                $data[] = $row['service_type'];
-                $data[] = $row['arrival'];
-                $data[] = $row['last_status_date'];
-                $data[] = $row['created_at'];
-                $data[] = $row['shipping_mode'];
-                $data[] = $row['origin'];
-                $data[] = $row['destination'];
-                $data[] = $row['hub'];
-                $data[] = $row['area'];
-                $data[] = $row['current_hub'];
-                $data[] = $row['return_city'];
-                $data[] = $row['zone'];
-                $data[] = $row['product_type'];
-                $data[] = $row['description'];
-                $data[] = $row['amount'];
-                $data[] = $row['aging'];
-                $data[] = $row['aging_last_status'];
-                $data[] = $row['crm_id_padded'];
-                $data[] = $row['crm_request_status'];
-                $data[] = $row['crm_request_case_nature'];
-                $data[] = $row['crm_request_case_nature_type'];
-                $data[] = "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";
-                fputcsv($output, $data);  
-                $i++;
-            }  
-            fclose($output);
+            $fieldsToRetrieve = $request->input('selectedValue', []);
+            $headers = $request->input('selectedTexts',[]);
+            $this->fetchCsv($headers,$fieldsToRetrieve,$datatable);
             ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
         }else{
             return $datatable->make(true);
@@ -14234,5 +14133,37 @@ class AdminReportsController extends Controller
                 }
             });
         return $datatable->make(true);
+    }
+    
+    public function fetchCsv($headers ,$fieldsToRetrieve, $datatable)
+    {
+            $headers = array_filter($headers, function($value) {
+                return $value !== 'Select All';
+            });            
+
+            $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
+                return $value !== 'selectAll';
+            }); 
+            $exportData = $datatable->make(true);
+            $exportData = $exportData->getData()->data;          
+            $specificValues = collect($exportData)->map(function ($item) use ($fieldsToRetrieve) {
+                $filteredItem = [];
+                foreach ($fieldsToRetrieve as $field) {
+                    $filteredItem[$field] = $item->$field ?? null;
+                }
+                return $filteredItem;
+            })->toArray();
+ 
+            header('Content-Type: text/csv; charset=utf-8');  
+            header('Content-Disposition: attachment; filename=data.csv');  
+            $output = fopen("php://output", "w");  
+            fputcsv($output, $headers);
+
+            foreach($specificValues as $row)
+            {  
+                fputcsv($output, $row);  
+            }
+ 
+            fclose($output);    
     }
 }

@@ -156,6 +156,13 @@
                             <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To">
                         </div>
                     </div>
+                    <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="export[]" id="export" class="form-control select2" multiple="multiple">
+                                    <option value="selectAll">Select All</option>
+                                </select>
+                            </fieldset>
+                        </div>
                     {{--todo new end--}}
 
                     <div class="col-2">
@@ -335,7 +342,25 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+            $('#export').select2({
+                width:'100%',
+                placeholder:"Export Options",
+                allowClear:true,
+            });
 
+            $('#export').on('select2:select', function(e) {
+                var selectAll = $(this).find('option[value="selectAll"]');
+                if (e.params.data.id === 'selectAll') {
+                    $(this).find('option').not(selectAll).prop('selected', true).trigger('change');
+                }
+            });
+
+            $('#export').on('select2:unselect', function(e) {
+                var selectAll = $(this).find('option[value="selectAll"]');
+                if (e.params.data.id === 'selectAll') {
+                    $(this).find('option').not(selectAll).prop('selected', false).trigger('change');
+                }
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -455,43 +480,64 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         action: function(e){
-                                    $.post("{{ route('admin.reports.qsr.list') }}", {
-                                        excel: true,
-                                        _token: $('meta[name="csrf-token"]').attr('content'),
-                                        search_shipment_status : $('#search_shipment_status').val(),
-                                        search_shipper : $('#search_shipper').val(),
-                                        sub_segment : $('#sub_segment_select').val(),
-                                        search_shippers : $('#search_shippers').val(),
-                                        search_origin : $('#search_origin').val(),
-                                        search_destination : $('#search_destination').val(),
-                                        search_qsr : $('#search_qsr').val(),
-                                        search_zone : $('#search_zone').val(),
-                                        search_hub : $('#search_hub').val(),
-                                        search_shipping_mode : $('#search_shippimg_modes').val(),
-                                        search_from : $('input[name="from_date_formatted"]').val(),
-                                        search_to : $('input[name="to_date_formatted"]').val(),
-                                        arrival_search_from : $('input[name="from_date1_formatted"]').val(),
-                                        arrival_search_to : $('input[name="to_date1_formatted"]').val(),
-                                        search_types : $('#search_types').val(),
+                                    $.ajax({
+                                        url: "{{ route('admin.reports.qsr.list') }}",
+                                        method: "POST",
+                                        data: {
+                                            excel: true,
+                                            _token: $('meta[name="csrf-token"]').attr('content'),
+                                            search_shipment_status: $('#search_shipment_status').val(),
+                                            search_shipper: $('#search_shipper').val(),
+                                            sub_segment: $('#sub_segment_select').val(),
+                                            search_shippers: $('#search_shippers').val(),
+                                            search_origin: $('#search_origin').val(),
+                                            search_destination: $('#search_destination').val(),
+                                            search_qsr: $('#search_qsr').val(),
+                                            search_zone: $('#search_zone').val(),
+                                            search_hub: $('#search_hub').val(),
+                                            search_shipping_mode: $('#search_shippimg_modes').val(),
+                                            search_from: $('input[name="from_date_formatted"]').val(),
+                                            search_to: $('input[name="to_date_formatted"]').val(),
+                                            arrival_search_from: $('input[name="from_date1_formatted"]').val(),
+                                            arrival_search_to: $('input[name="to_date1_formatted"]').val(),
+                                            search_types: $('#search_types').val(),
+                                            selectedValue: $('#export').val(),
+                                            selectedTexts: $('#export option:selected').map(function() {
+                                                return $(this).text()
+                                            }).get()
+                                        },
+                                        beforeSend: function() {
+                                            swal({
+                                                title: 'Please Wait!',
+                                                text: 'Downloading is in progress',
+                                                icon: 'info',
+                                                buttons: false,
+                                                //closeOnClickOutside: false,
+                                                //closeOnEsc: false
+                                            });
+                                        },
+                                        complete: function() {
+                                            // Hide loader
+                                            swal.close();
+                                        },
+                                        success: function(response) {
+                                            var blob = new Blob([response], {
+                                                type: 'text/csv'
+                                            });
+                                            var url = window.URL.createObjectURL(blob);
+                                            var a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = 'QSR Report.csv';
 
-                                    }).done(function(response) {
-                                        
-                                        var blob = new Blob([response], { type: 'text/csv' });
+                                            document.body.appendChild(a);
+                                            a.click();
 
-                                        var url = window.URL.createObjectURL(blob);
-
-                                        var a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = 'QSR Report.csv';
-
-                                        document.body.appendChild(a);
-                                        a.click();
-
-                                        window.URL.revokeObjectURL(url);
-                                        document.body.removeChild(a);
-
-                                    }).fail(function(xhr, status, error) {
-                                        console.error('Failed to fetch CSV data:', status, error);
+                                            window.URL.revokeObjectURL(url);
+                                            document.body.removeChild(a);
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('Failed to fetch CSV data:', status, error);
+                                        }
                                     });
                                 }
                     },
@@ -527,53 +573,57 @@
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
+                        d.selectedValue = $('#export').val();
+                        d.selectedTexts = $('#export option:selected').map(function () {
+                            return $(this).text()
+                        }).get();
                     }
                 },
                 rowId: 'shId',
                 order: [[22, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment'},
-                    {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
-                    {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
-                    {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
-                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name'},
-                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
-                    {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
-                    {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
-                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss'},
-                    {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
-                    {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
-                    {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},
-                    {data: 'created_at', name: 'shipments.created_at', class: 'align-middle created_at'},
-                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
-                    {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub'},
-                    {data: 'return_city', name: 'return_city', class: 'align-middle return_city'},
-                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
-                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
-                    {data: 'description', name: 'si.description', class: 'align-middle description'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
-                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false},
-                    {data: 'crm_id_padded_link', name: 'cr.id', class: 'align-middle crm_id_padded'},
-                    {data: 'crm_request_status', name: 'aging_last_status', class: 'align-middle crm_request_status'},
-                    {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature'},
-                    {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type'},
-                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
+                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link', text:'Tracking Number', value:'tracking_number'},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id' ,text:'Order ID', value:'order_id'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no', text:'Account No.', value:'account_no'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper', text:'Shipper',value:'shipper'},
+                    {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment',text:'Sub Segment', value:'sub_segment'},
+                    {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name',text:'Consignee Name', value:'name'},
+                    {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date',text:'First Attempt Date',value:'first_attempt_date'},
+                    {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date',text:'Rider Picked Status Date',value:'rider_picked_status_date'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle status', text:'Status', value:'status'},
+                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name'},
+                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status'},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason',text:'Reason',value:'reason'},
+                    {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks'},
+                    {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt'},
+                    {data: 'history_status', name: 'ss.name', class: 'align-middle history_status',text:'History Status',value:'history_status'},
+                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss'},
+                    {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status'},
+                    {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status',text:'Bag Seal Number',value:'seal_number'},
+                    {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status',text:'Bag Status',value:'bag_status'},
+                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type',text:'Service Type',value:'service_type'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival',text:'Arrival',value:'arrival'},
+                    {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date',text:'Last Status Date',value:'last_status_date'},
+                    {data: 'created_at', name: 'shipments.created_at', class: 'align-middle created_at',text:'Booked Status Date',value:'created_at'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode',text:'Shipping Mode',value:'shipping_mode'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin',text:'Origin',value:'origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination',text:'Destination',value:'destination'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub',text:'Hub',value:'hub'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area',text:'Area',value:'area'},
+                    {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub'},
+                    {data: 'return_city', name: 'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone',text:'Zone',value:'zone'},
+                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type'},
+                    {data: 'description', name: 'si.description', class: 'align-middle description',text:'Product Description',value:'description'},
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount',text:'Amount',value:'amount'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Arrival)',value:'aging'},
+                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Last Status)',value:'aging_last_status'},
+                    {data: 'crm_id_padded_link', name: 'cr.id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded'},
+                    {data: 'crm_request_status', name: 'aging_last_status', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status'},
+                    {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature'},
+                    {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type',text:'Case Nature Type',value:'crm_request_case_nature_type'},
+                    {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount',text:'Adjusted amount',value:'adjusted_amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -587,6 +637,22 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+            });
+
+            let option = '';
+            var columnNames2 = table.settings().init().columns.map(function (column) {
+                let col_name = column.value;
+                let col_text = column.text;
+                if (col_name && col_text) {
+                    option += `<option value="${col_name}">${col_text}</option>`;
+                }
+            });
+
+            $('#export').append(option).select2({
+                columns: 1,
+                placeholder: 'Export Options',
+                search: true,
+                selectAll: true
             });
 
         });
