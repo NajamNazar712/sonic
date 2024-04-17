@@ -6165,7 +6165,8 @@ class DeliveryController extends Controller
                         $total = $sdn->sdn_amount - $sum;
                         return $total;
                     } else {
-                        return '-';
+                        // return '-';
+                        return $sdn->sdn_amount;
                     }
                 } else {
                     return '-';
