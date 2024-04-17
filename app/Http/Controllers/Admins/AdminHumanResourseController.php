@@ -5855,19 +5855,20 @@ class AdminHumanResourseController extends Controller
     }
 
     public function get_employee_info_name_type(Request $request){
-      
         $employee = Employee::where('trax_id',$request->trax_id);
         if($employee->exists()){
             $employee = $employee->first();
-            $details = array();
-            $details['trax_id'] = $employee->trax_id;
-            $details['name'] = $employee->name;
-            $details['type'] = $employee->employee_type->name;
-            $details['status'] = $employee->employee_status->name;
-
-            return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
-        }
-        else{
+            if($employee->admin != null || $employee->rider != null){
+                $details = array();
+                $details['trax_id'] = $employee->trax_id;
+                $details['name'] = $employee->name;
+                $details['type'] = $employee->employee_type->name;
+                $details['status'] = $employee->employee_status->name;
+                return response()->json(['status' => 1, 'success' => 'Employee found!','details' => $details]);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+            }
+        }else{
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
         }
     }
