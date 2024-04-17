@@ -1773,8 +1773,14 @@
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
                                 action: function(e){
-                                    $.post("{{ route('admin.return.list') }}", {
-                                        excel: true,
+                                    //data table parameters
+                                    var dtParams = table.ajax.params();
+                                    dtParams.start = 0;
+                                    dtParams.length = -1;
+                                    dtParams.excel = true;
+
+                                    //additional parameters
+                                    var additionalParams = {
                                         _token: $('meta[name="csrf-token"]').attr('content'),
                                         tracking_numbers : $('#track_form .tracking_numbers').val(),
                                         search_shipping_mode : $('#search_shipping_mode').val(),
@@ -1792,7 +1798,11 @@
                                         number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
                                         number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
                                         number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
-
+                                    },
+                                    
+                                    //mergin all parameters
+                                    var allParams = Object.assign({}, dtParams, additionalParams);
+                                    $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
                                     }).done(function(response) {
                                         
                                         var blob = new Blob([response], { type: 'text/csv' });
