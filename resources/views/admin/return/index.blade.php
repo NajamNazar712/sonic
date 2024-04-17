@@ -1798,10 +1798,11 @@
                                         number_of_inprocess_tickets_value_div : $('#number_of_inprocess_tickets_value_div').val(),
                                         number_of_available_agents_value_div : $('#number_of_available_agents_value_div').val(),
                                         number_of_oldest_shipments_value_div : $('#number_of_oldest_shipments_value_div').val()
-                                    },
+                                    };
                                     
                                     //mergin all parameters
                                     var allParams = Object.assign({}, dtParams, additionalParams);
+
                                     $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
                                     }).done(function(response) {
                                         
