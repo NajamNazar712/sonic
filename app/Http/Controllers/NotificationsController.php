@@ -122,7 +122,7 @@ use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerification
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipperVerificationPinCode;
-use App\Http\Models\WeightType;
+use App\Http\Models\ShipmentsWeightType;
 
 class NotificationsController extends Controller
 {
@@ -446,7 +446,25 @@ class NotificationsController extends Controller
                 } 
                 
                 else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference', 'arrival_at', 'weighted_as'];
+                    // $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference', 'arrival_at', 'weighted_as'];
+
+                    $possible_fields = [  
+                        'consignee_name',
+                        'consignee_city',
+                        'order_id',
+                        'weight',
+                        'item_product_type',
+                        'item_description',
+                        'item_quantity',
+                        'amount',
+                        'weighted_as',
+                        'difference',
+                        'actual_weight',
+                        'estimated_weight', 
+                        'pickup_city',
+                        'tracking_number',
+                        'arrival_at',
+                    ];
 
                     $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
 
@@ -482,7 +500,7 @@ class NotificationsController extends Controller
 
                     foreach ($reference_1_id as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
-                        $weight_types = WeightType::where($shipment_id)->first();
+                        $weight_types = ShipmentsWeightType::where('shipment_id', $shipment_id)->first();
                         $origin_hub_id = $shipment->pickup_address->city->hub_id;
 
                         if (!in_array($origin_hub_id, $origin_hub_ids)) {
@@ -506,7 +524,15 @@ class NotificationsController extends Controller
                         if ($details['difference'] == 0) {
                             $details['difference'] = 0;
                         }
-                        $details['weighted_as'] = $weight_types;
+                        if ($weight_types->weight_type == 1) {
+                            $details['weighted_as'] = "Partially Manual";
+                        } else if ($weight_types->weight_type == 2){
+                            $details['weighted_as'] = "Manual";
+                        } else if ($weight_types->weight_type == 3){
+                            $details['weighted_as'] = "Automatic";
+                        } else if ($weight_types->weight_type == 4){
+                            $details['weighted_as'] = "Bulk Arrival";
+                        }
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
