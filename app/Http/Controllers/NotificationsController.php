@@ -444,48 +444,26 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 } 
-                
                 else if ($id == 4) {
-                    // $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount', 'estimated_weight', 'actual_weight', 'difference', 'arrival_at', 'weighted_as'];
-
-                    // $possible_fields = [  
-                    //     'consignee_name',
-                    //     'consignee_city',
-                    //     'order_id',
-                    //     'weight',
-                    //     'item_product_type',
-                    //     'item_description',
-                    //     'item_quantity',
-                    //     'amount',
-                    //     'weighted_as',
-                    //     'difference',
-                    //     'actual_weight',
-                    //     'estimated_weight', 
-                    //     'tracking_number',
-                    //     'pickup_city',
-                    //     'arrival_at',
-                    // ];
-
+                    // $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description','item_quantity', 'amount'];
                     $possible_fields = [
-                        'tracking_number',     // Tracking Number
-                        'consignee_name',      // Shipper Name
-                        'pickup_city',         // Origin
-                        'arrival_at',          // Arrival Date
-                        'estimated_weight',    // Weight Input by Shipper (A)
-                        'actual_weight',       // Arrival Weight (B)
-                        'difference',          // Difference (B-A)
-                        'weighted_as',         // Weighted As
-                        'consignee_city',
-                        'order_id',
-                        'weight',
-                        'item_product_type',
-                        'item_description',
+                        'amount',
                         'item_quantity',
-                        'amount'
+                        'item_description',
+                        'item_product_type',
+                        'weight',
+                        'order_id',
+                        'consignee_city',
+                        'consignee_name',
+                        'weight_input_by_shipper',
+                        'actual_weight',
+                        'difference',
+                        'arrival_at',
+                        'weighted_as',
+                        'pickup_city',
+                        'tracking_number',
                     ];
-                    
-
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'estimated_weight' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
+                    $field_names = ['pickup_city' => 'Origin', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'weight_input_by_shipper' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
 
                     $present_fields = array();
 
@@ -537,7 +515,7 @@ class NotificationsController extends Controller
                         $details['amount'] = $shipment->amount;
                         $details['return_notes_id'] = $shipment->return_notes_id;
                         $details['arrival_at'] = Carbon::parse($today)->format('d/M/Y');
-                        $details['estimated_weight'] = $shipment->estimated_weight;
+                        $details['weight_input_by_shipper'] = $shipment->estimated_weight;
                         $details['actual_weight'] = $shipment->actual_weight;
                         $details['difference'] = abs($shipment->actual_weight - $shipment->estimated_weight);
                         if ($details['difference'] == 0) {
