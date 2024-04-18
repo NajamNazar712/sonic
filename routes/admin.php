@@ -2390,6 +2390,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
             });
 
+        Route::prefix('rvr_call_history')->name('rvr_call_history.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rvr_call_history_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rvr_call_history_list')->name('list');
+            });
+
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
