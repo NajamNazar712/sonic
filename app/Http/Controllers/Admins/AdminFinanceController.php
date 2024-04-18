@@ -3614,7 +3614,7 @@ class AdminFinanceController extends Controller
                         $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
                         if ($shipment->actual_weight == null) {
-                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment is not arrived yet so weight can not be changed!');
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment has not arrived yet so weight charges cannot be viewed!');
                         }
 
                         $old_shipment_weight = $shipment->actual_weight;

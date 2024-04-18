@@ -46,7 +46,7 @@
 
 								<div class="row align-items-center justify-content-center">
 									<div class="col-2">
-										<h3 class="heading"><strong>For Bulk Shipment (update)</strong></h3>
+										<h3 class="heading" data-toggle="tooltip" data-placement="top" title data-original-title="For update weight only."><strong>For Bulk Shipment (update)</strong></h3>
 									</div>
 									<div class="col-4">
 										<div class="form-group">
@@ -73,7 +73,7 @@
 
 								<div class="row align-items-center justify-content-center">
 									<div class="col-2">
-										<h3 class="heading"><strong>For Bulk Shipment (view)</strong></h3>
+										<h3 class="heading" data-toggle="tooltip" data-placement="bottom" title data-original-title="For view weight charges only."><strong>For Bulk Shipment (view)</strong></h3>
 									</div>
 									<div class="col-4">
 										<div class="form-group">
