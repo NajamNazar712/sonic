@@ -1455,41 +1455,33 @@ class AdminTrackingController extends Controller
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
                             
                             // $details['tracking_history'][] = $journey_details;
-
-
-                            $shipment_id = $journey->shipment_id;
-                            $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
-                                $query->selectRaw('MAX(id)')
-                                      ->from('lost_shipment_responsibles')
-                                      ->where('shipment_id', $shipment_id)
-                                      ->where('updated_at', '<=', $journey->updated_at)
-                                      ->groupBy('user_id');
-                            })->get();
                             
-                            foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
-                                if($lost_responsible_shipment->user_type == 1){
-                                    $admin = Admin::find($lost_responsible_shipment->user_id);
-                                    $journey_details[$key]['trax_id'] = $admin->trax_id;
-                                    $journey_details[$key]['name'] = $admin->name;
-                                    $journey_details[$key]['type'] = $admin->employee->employee_type->name;
-                                    $journey_details[$key]['status'] = $admin->employee->employee_status->name;
-                                    $journey_details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
-                    
-                    
-                                }else{
-                                    $rider = Rider::find($lost_responsible_shipment->user_id);
-                                    $journey_details[$key]['trax_id'] = $rider->trax_id;
-                                    $journey_details[$key]['name'] = $rider->name;
-                                    $journey_details[$key]['type'] = $rider->employee->employee_type->name;
-                                    $journey_details[$key]['status'] = $rider->employee->employee_status->name;
-                                    $journey_details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+                            if($journey->shipper_status_id == 18){
+                                $shipment_id = $journey->shipment_id;
+                                $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
+                                    $query->selectRaw('MAX(id)')
+                                          ->from('lost_shipment_responsibles')
+                                          ->where('shipment_id', $shipment_id)
+                                          ->where('updated_at', '<=', $journey->updated_at)
+                                          ->groupBy('user_id');
+                                })->get();
+    
+                                
+                                foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
+                                    if($lost_responsible_shipment->user_type == 1){
+                                        $admin = Admin::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+
+                                    }else{
+                                        $rider = Rider::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+                                    }
                                 }
                             }
 
                             $details['tracking_history'][] = $journey_details;
 
                         }
-dd(                            $details['tracking_history']);
                         
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
 
