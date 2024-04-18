@@ -101,6 +101,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
 		'App\Console\Commands\RetailDonePaymentReport',
+        'App\Console\Commands\DonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
@@ -370,7 +371,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
-        $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
+        $schedule->command('report:donepayment')->dailyAt('19:05')->runInBackground();
         $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
