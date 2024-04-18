@@ -8,6 +8,7 @@ use App\Http\Traits\RvTrait;
 use App\RvCronLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AgentSarNotification extends Command
 {
@@ -52,6 +53,7 @@ class AgentSarNotification extends Command
     public function handle()
     {
         try {
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Initiated');
             $currentDateTime1 = Carbon::now()->toDateTimeString();
             $currentDateTime = Carbon::parse($currentDateTime1);
 
@@ -178,7 +180,10 @@ class AgentSarNotification extends Command
                 }
             }
 
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Completed');
+
         } catch (\Throwable $th) {
+            Log::channel('cronJobLog')->info('s ' .'agent:sarnotification Failed');
             $this->createRvCronLog($th->getMessage());
         }
     }
