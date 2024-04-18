@@ -265,56 +265,56 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
-            ->select([
-                'z.name  as zone',
-                'p.product_name as product_type',
-                'si.description as description',
-                'ssr.name as reason',
-                'sjr.remarks as remarks',
-                'ss.name as status',
-                'shipments.id as shId',
-                'shipments.tracking_number',
-                'shipments.tracking_number as tracking_number_link',
-                'u.name as shipper',
-                // 'ss.name as history_status',
-                'hss.name as history_status',
-                'bt.booking_type as service_type',
-                'sj.created_at as arrival',
-                'oc.name as origin',
-                'dc.name as destination',
-                'h.name as hub',
-                'ca.name as area',
-                'shipments.amount',
-                'journey.created_at as last_status_date',
-                'shipments.consignee_name as name',
-                'shipments.booking_type_id',
-                'shipments.created_at',
-                'usi.poc',
-                'u.id as account_no',
-                'sm.mode as shipping_mode',
-                'shipments.order_id as order_id',
-                'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),
-                'cmbh.name as current_hub_name',
-                'cmbh.id as current_hub_id',
-                'shipments.shipper_status_id as shipper_status_id',
-                'cr.missing_product_price as missing_product_price',
-                'cr.id as crm_request_id',
-                'cr.damage_product_price as damage_product_price',
-                'crs.name as crm_request_status',
-                'crcn.name as crm_request_case_nature',
-                'crcnt.type as crm_request_case_nature_type',
-                'adjustment.adjustment_amount as adjusted_amount',
-                'scs.name as sub_segment',
-                'cargo_status.name as cargo_status',
-                'cmb.seal_number as seal_number',
-                'bs.name as bag_status',
-                'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date',
-                'ssjal.location_status as location_status',
-                'ssjal_hss.location_status as location_status_hss',
-                'ca_scanning.name as scanning_city_area_name'
+            // ->select([
+            //     'z.name  as zone',
+            //     'p.product_name as product_type',
+            //     'si.description as description',
+            //     'ssr.name as reason',
+            //     'sjr.remarks as remarks',
+            //     'ss.name as status',
+            //     'shipments.id as shId',
+            //     'shipments.tracking_number',
+            //     'shipments.tracking_number as tracking_number_link',
+            //     'u.name as shipper',
+            //     // 'ss.name as history_status',
+            //     'hss.name as history_status',
+            //     'bt.booking_type as service_type',
+            //     'sj.created_at as arrival',
+            //     'oc.name as origin',
+            //     'dc.name as destination',
+            //     'h.name as hub',
+            //     'ca.name as area',
+            //     'shipments.amount',
+            //     'journey.created_at as last_status_date',
+            //     'shipments.consignee_name as name',
+            //     'shipments.booking_type_id',
+            //     'shipments.created_at',
+            //     'usi.poc',
+            //     'u.id as account_no',
+            //     'sm.mode as shipping_mode',
+            //     'shipments.order_id as order_id',
+            //     'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),
+            //     'cmbh.name as current_hub_name',
+            //     'cmbh.id as current_hub_id',
+            //     'shipments.shipper_status_id as shipper_status_id',
+            //     'cr.missing_product_price as missing_product_price',
+            //     'cr.id as crm_request_id',
+            //     'cr.damage_product_price as damage_product_price',
+            //     'crs.name as crm_request_status',
+            //     'crcn.name as crm_request_case_nature',
+            //     'crcnt.type as crm_request_case_nature_type',
+            //     'adjustment.adjustment_amount as adjusted_amount',
+            //     'scs.name as sub_segment',
+            //     'cargo_status.name as cargo_status',
+            //     'cmb.seal_number as seal_number',
+            //     'bs.name as bag_status',
+            //     'sjfa.created_at as first_attempt_date',
+            //     'sjrp.created_at as rider_picked_status_date',
+            //     'ssjal.location_status as location_status',
+            //     'ssjal_hss.location_status as location_status_hss',
+            //     'ca_scanning.name as scanning_city_area_name'
                 
-            ])
+            // ])
             ->groupBy('shipments.id');
 
 
@@ -14530,6 +14530,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             $fieldsToRetrieve = $request->input('selectedValue', []);
             $headers = $request->input('selectedTexts',[]);
+        
             $this->fetchCsv($headers,$fieldsToRetrieve,$shipments);
             ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
         }else{
@@ -14545,22 +14546,17 @@ class AdminReportsController extends Controller
             $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
                 return $value !== 'selectAll';
             }); 
-            $exportData = $shipments->get();          
-            $specificValues = collect($exportData)->map(function ($item) use ($fieldsToRetrieve) {
-                $filteredItem = [];
-                foreach ($fieldsToRetrieve as $field) {
-                    $filteredItem[$field] = $item->$field ?? null;
-                }
-                return $filteredItem;
-            })->toArray();
- 
+           
+            $specificValues = $shipments->select($fieldsToRetrieve)->get()->toArray();
+                
+        
+    
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
             $output = fopen("php://output", "w");  
             fputcsv($output, $headers);
-            foreach($specificValues as $row)
-            {  
-                fputcsv($output, $row);  
+            foreach($specificValues as $row) {  
+                fputcsv($output, (array) $row); 
             }
  
             fclose($output);    
