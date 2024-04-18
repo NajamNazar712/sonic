@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxChildCnReceiveAdminStore;
+use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxRiderChildCnDetail;
 use App\Http\Models\Admin\Logistic\TraxRiderCnDetail;
+use App\Http\Models\Admin\Logistic\TraxStation;
 use App\Http\Models\City;
 use App\Http\Models\Admin\Logistic\TraxCnIssueAreaStore;
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
@@ -58,8 +60,8 @@ class AdminCnController extends Controller
     public  function  cn_area_store_index()
     {
         // ActivityTrailController::createActivityTrailLog(Auth::id(), 739);
-        $products =  Segment::all();
-        $cities = City::where('status',1)->get();
+        $products =  TraxProduct::where('status',1)->get();
+        $cities = TraxStation::where('status',1)->get();
         return view('admin.logistic.cn_issue_area_store')->with(['products'=> $products,'cities'=>$cities]);
     }
 
@@ -118,8 +120,8 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_index()
     {
-        $products =  Segment::all();
-        $cities = City::where('status',1)->get();
+        $products =  TraxProduct::where('status',1)->get();
+        $cities = TraxStation::where('status',1)->get();
         return view('admin.logistic.cn_receive_admin_store')->with(['products'=> $products,'cities'=>$cities]);
     }
 
@@ -249,7 +251,7 @@ class AdminCnController extends Controller
 
     public  function cn_issue_to_rider_index()
     {
-        $products =  Segment::all();
+        $products =  TraxProduct::where('status',1)->get();
         $riders =  Rider::where('status',1)->get();
         return view('admin.logistic.cn_issue_rider')->with(['products'=> $products,'riders'=>$riders]);
     }
@@ -419,7 +421,7 @@ class AdminCnController extends Controller
 
     public function cn_child_receive_admin_store_index()
     {
-        $cities = City::where('status',1)->get();
+        $cities = TraxStation::where('status',1)->get();
         return view('admin.logistic.cn_child_receive_admin_store')->with(['cities'=>$cities]);
     }
 

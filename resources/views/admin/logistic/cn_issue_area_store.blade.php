@@ -90,7 +90,7 @@
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
                                             @foreach($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                <option value="{{ $product->id }}">{{ $product->product_name }}</option>
                                             @endforeach
                                     </select>
                                 </div>
