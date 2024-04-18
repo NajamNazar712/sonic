@@ -684,6 +684,7 @@
                 </div>
             </div>
         </div>
+        <div class="loader"></div>
 
     @endsection
 
@@ -1773,6 +1774,10 @@
                                 className: 'btn btn-primary',
                                 text: '<i class="la la-file-excel-o"></i> Excel',
                                 action: function(e){
+
+                                    //start Loader
+                                    $(".loader").append(data_table_loader);
+
                                     //data table parameters
                                     var dtParams = table.ajax.params();
                                     dtParams.start = 0;
@@ -1804,7 +1809,6 @@
                                     var allParams = Object.assign({}, dtParams, additionalParams);
 
                                     $.post("{{ route('admin.return.list') }}", allParams).done(function(response) {
-                                    }).done(function(response) {
                                         
                                         var blob = new Blob([response], { type: 'text/csv' });
 
@@ -1820,9 +1824,13 @@
                                         window.URL.revokeObjectURL(url);
                                         document.body.removeChild(a);
 
+                                        $(".loader").empty();
+
                                     }).fail(function(xhr, status, error) {
-                                        console.error('Failed to fetch CSV data:', status, error);
+                                        $(".loader").empty();
+                                        console.error('Failed to fetch Return Marked Excel data:', status, error);
                                     });
+
                                 }
                             }, {
                                 extend: 'selectAll',
