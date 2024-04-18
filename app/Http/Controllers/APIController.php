@@ -7878,7 +7878,7 @@ class APIController extends Controller
                         $retail_note = $retail_note->first();
 
                         if ($retail_note->status != 0) {
-                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                            return ['status' => 2, 'message' => 'Retail note already updated !'];
                         }
                     }
 
