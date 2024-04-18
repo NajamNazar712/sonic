@@ -350,15 +350,20 @@
                 allowClear:true,
             });
             $('#export').on('select2:select', function(e) {
-                var selectAll = $(this).find('option[value="selectAll"]');
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
                 if (e.params.data.id === 'selectAll') {
-                    $(this).find('option').not(selectAll).prop('selected', true).trigger('change');
+                    firstOption.data().data.text = 'Un Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', true).trigger('change');
+                    
                 }
             });
             $('#export').on('select2:unselect', function(e) {
-                var selectAll = $(this).find('option[value="selectAll"]');
+                var selectAll = $('#export').find('option[value="selectAll"]');
+                var firstOption = $('#export option').first();
                 if (e.params.data.id === 'selectAll') {
-                    $(this).find('option').not(selectAll).prop('selected', false).trigger('change');
+                    firstOption.data().data.text = 'Select All';
+                    $('#export').find('option').not(selectAll).prop('selected', false).trigger('change');
                 }
             });
 
