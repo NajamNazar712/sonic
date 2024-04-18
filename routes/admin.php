@@ -2483,6 +2483,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
+
+        Route::prefix('delivery_revert_access')->name('delivery_revert_access.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@delivery_revert_access_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@delivery_revert_access_store')->name('store');
+        });
+
         Route::prefix('pickup')->name('pickup.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');

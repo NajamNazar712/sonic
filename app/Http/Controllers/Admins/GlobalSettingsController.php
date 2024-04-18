@@ -9452,4 +9452,22 @@ class GlobalSettingsController extends Controller
             
             return redirect()->back()->with('success', 'Settings Updated!');
         }
+
+
+    public function delivery_revert_access_index()
+    {
+        $finance_admins = Admin::whereIn('role_id', [2, 7, 14, 17])->where('status', 1)->get();
+        return view('admin.settings.delivery_revert_access.index')->with(['finance_admins' => $finance_admins]);
+    }
+
+    public function delivery_revert_access_store(Request $request)
+    {
+        $finance_admins_id = implode(',', $request->finance_admins);
+        $settings = new GlobalSettings();
+        $settings->type = 'delivery_revert_access';
+        $settings->setting_value = 0;
+        $settings->text = $finance_admins_id;
+        $settings->save();
+        return redirect()->back()->with('success', 'Admins have been assigned!');
+    }
 }
