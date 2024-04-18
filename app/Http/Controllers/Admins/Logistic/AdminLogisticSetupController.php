@@ -234,7 +234,7 @@ class AdminLogisticSetupController extends Controller
      public function master_product_update(Request $request) {
 
         $validate = Validator::make($request->all(),[
-            'parent_product_id'=>['required','integer'],
+            'id'=>['required','integer'],
             'parent_code' => ['required','string'],
             'parent_name' => ['required','string']
         ]);
@@ -245,7 +245,7 @@ class AdminLogisticSetupController extends Controller
         }
 
         try {
-            $parent_product = TraxParentProduct::find($request->parent_product_id);
+            $parent_product = TraxParentProduct::find($request->id);
             $parent_product->parent_code = $request->parent_code;
             $parent_product->parent_name = $request->parent_name;
             $parent_product->save();
@@ -315,8 +315,8 @@ class AdminLogisticSetupController extends Controller
         }
         try {
             $product = new TraxProduct();
-            $product->parent_code = $request->parent_code;
-            $product->parent_name = $request->parent_name;
+            $product->product_code = $request->product_code;
+            $product->product_name = $request->product_name;
             $product->parent_id = $request->parent_id;
             $product->save();
             return redirect()->back()->with('success','Product added successfully');

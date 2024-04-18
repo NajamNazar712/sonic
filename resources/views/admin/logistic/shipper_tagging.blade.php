@@ -99,9 +99,9 @@
                                 <div class="form-group">
                                     <label>Service</label>
                                     <select class="select select2 mb-1" name="trax_service_id" id="service_id_select" data-rule-required="true" data-msg-required="Service is required">
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>
-                                        @endforeach
+{{--                                        @foreach($services as $service)--}}
+{{--                                            <option value="{{ $service->id }}">{{ $service->service_name }}</option>--}}
+{{--                                        @endforeach--}}
                                     </select>
                                 </div>
                             </div>
@@ -447,10 +447,27 @@
                 dropdownParent:$('#AddShipperTaggingModal')
             });
 
+            var services = @json($services);
             $('#product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
                 width: '100%',
                 dropdownParent:$('#AddShipperTaggingModal')
+            }).bind('select2:select',function (){
+                var product_id = parseInt($(this).val());
+                $('#service_id_select').empty();
+                $.each(services,function (key,value){
+                    if(value.product_id == product_id)
+                    {
+                        var service_option = new Option(value.service_name, value.id, false, false);
+                        $('#service_id_select').append(service_option).trigger('change');
+                    }
+                });
+                $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
+                    placeholder: 'Select Service',
+                    width: '100%',
+                    dropdownParent:$('#AddShipperTaggingModal')
+                });
+
             });
 
             $('#service_id_select').prepend('<option value="" selected="selected">Select Service</option>').select2({

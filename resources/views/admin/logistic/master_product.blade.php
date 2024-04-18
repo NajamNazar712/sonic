@@ -111,7 +111,7 @@
                         @csrf
                         @method('put')
                         <div class="row">
-                            <input type="hidden" name="parent_product_id" id="parent_product_id">
+                            <input type="hidden" name="id" id="id">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Code</label>
@@ -469,7 +469,7 @@
                     if(data.status==0)
                     {
                         var master_product = data.master_product;
-                        $("#master_product_id").val(master_product.id);
+                        $("#id").val(master_product.id);
                         $("#edit_parent_code").val(master_product.parent_code);
                         $("#edit_parent_name").val(master_product.parent_name);
 
