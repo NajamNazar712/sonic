@@ -14362,6 +14362,57 @@ class AdminReportsController extends Controller
         if ($search_concerned_hub = $request->get('search_concerned_hub')) {
             $shipments = $shipments->where('cmb.current_hub_id', $search_concerned_hub);
         }
+
+        if ($search_shipper = $request->get('search_shipper')) {
+            $shipments->where('shipments.user_id', $search_shipper);
+        }
+        if ($search_shippers = $request->get('search_shippers')) {
+            $shipments->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($sub_segment = $request->get('sub_segment')) {
+            $shipments->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $shipments->where('dc.id', '=', $destination);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $shipments->where('z.id', '=', $zone);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $shipments->where('h.id', '=', $hub);
+        }
+        if ($shipping_mode = $request->get('search_shipping_mode')) {
+            $shipments->where('sm.id', '=', $shipping_mode);
+        }
+        if ($search_qsr = $request->get('search_qsr')) {
+            if ($search_qsr != 3) {
+                if ($search_qsr == 1) {
+                    $shipments->whereIn('shipments.shipper_status_id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 51, 52, 54, 55]);
+                }
+                if ($search_qsr == 2) {
+                    $shipments->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 26, 27, 28, 29, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 50]);
+                }
+            }
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('journey.created_at', [$from, $to]);
+        }
+        if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
+            $from1 = $request->get('arrival_search_from');
+            $to1 = $request->get('arrival_search_to');
+            $shipments->whereBetween('sj.created_at', [$from1, $to1]);
+        }
+
+        if ($status_id = $request->get('search_shipment_status')) {
+            $shipments->where('ss.id', '=', $status_id);
+        }
+
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -14472,69 +14523,22 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
-        if ($search_shipper = $request->get('search_shipper')) {
-            $datatable->where('shipments.user_id', $search_shipper);
-        }
-        if ($search_shippers = $request->get('search_shippers')) {
-            $datatable->whereIn('shipments.user_id', $search_shippers);
-        }
-        if ($sub_segment = $request->get('sub_segment')) {
-            $datatable->where('u.sub_segment_id', '=', $sub_segment);
-        }
-        if ($origin = $request->get('search_origin')) {
-            $datatable->where('oc.id', '=', $origin);
-        }
-        if ($destination = $request->get('search_destination')) {
-            $datatable->where('dc.id', '=', $destination);
-        }
-        if ($zone = $request->get('search_zone')) {
-            $datatable->where('z.id', '=', $zone);
-        }
-        if ($hub = $request->get('search_hub')) {
-            $datatable->where('h.id', '=', $hub);
-        }
-        if ($shipping_mode = $request->get('search_shipping_mode')) {
-            $datatable->where('sm.id', '=', $shipping_mode);
-        }
-        if ($search_qsr = $request->get('search_qsr')) {
-            if ($search_qsr != 3) {
-                if ($search_qsr == 1) {
-                    $datatable->whereIn('shipments.shipper_status_id', [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 49, 51, 52, 54, 55]);
-                }
-                if ($search_qsr == 2) {
-                    $datatable->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 26, 27, 28, 29, 32, 33, 34, 35, 37, 44, 45, 46, 47, 48, 50]);
-                }
-            }
-        }
-
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatable->whereBetween('journey.created_at', [$from, $to]);
-        }
-        if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
-            $from1 = $request->get('arrival_search_from');
-            $to1 = $request->get('arrival_search_to');
-            $datatable->whereBetween('sj.created_at', [$from1, $to1]);
-        }
-
-        if ($status_id = $request->get('search_shipment_status')) {
-            $datatable->where('ss.id', '=', $status_id);
-        }
+      
 
         //return $datatable->make(true);
         //csv part
         if ($request->get('excel') && $request->get('excel') == true) {
             $fieldsToRetrieve = $request->input('selectedValue', []);
             $headers = $request->input('selectedTexts',[]);
-            $this->fetchCsv($headers,$fieldsToRetrieve,$datatable);
+        
+            $this->fetchCsv($headers,$fieldsToRetrieve,$shipments);
             ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
         }else{
             return $datatable->make(true);
         }
     }
 
-    public function fetchCsv($headers ,$fieldsToRetrieve, $datatable)
+    public function fetchCsv($headers ,$fieldsToRetrieve, $shipments)
     {
             $headers = array_filter($headers, function($value) {
                 return $value !== 'Select All';
@@ -14542,23 +14546,17 @@ class AdminReportsController extends Controller
             $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
                 return $value !== 'selectAll';
             }); 
-            $exportData = $datatable->make(true);
-            $exportData = $exportData->getData()->data;          
-            $specificValues = collect($exportData)->map(function ($item) use ($fieldsToRetrieve) {
-                $filteredItem = [];
-                foreach ($fieldsToRetrieve as $field) {
-                    $filteredItem[$field] = $item->$field ?? null;
-                }
-                return $filteredItem;
-            })->toArray();
- 
+           
+            $specificValues = $shipments->select($fieldsToRetrieve)->get()->toArray();
+                
+        
+    
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
             $output = fopen("php://output", "w");  
             fputcsv($output, $headers);
-            foreach($specificValues as $row)
-            {  
-                fputcsv($output, $row);  
+            foreach($specificValues as $row) {  
+                fputcsv($output, (array) $row); 
             }
  
             fclose($output);    
