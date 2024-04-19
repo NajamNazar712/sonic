@@ -970,10 +970,11 @@ class LostShipmentsController extends Controller
         $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $request) {
             $query->selectRaw('MAX(id)')
                   ->from('lost_shipment_responsibles')
-                  ->where('shipment_id', $shipment_id);
+                  ->where('shipment_id', $shipment_id) ;
         
             if(isset($request->updated_at)){
-                $query->where('updated_at', '<=', $request->updated_at);
+                $query->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($request->updated_at) - 10)) 
+                ->where('updated_at', '<=', $request->updated_at); 
             }
         
             $query->groupBy('user_id');
