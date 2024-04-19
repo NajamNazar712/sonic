@@ -1454,8 +1454,6 @@ class AdminTrackingController extends Controller
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
                             
-                            // $details['tracking_history'][] = $journey_details;
-                            
                             if($journey->shipper_status_id == 18){
                                 $shipment_id = $journey->shipment_id;
                                 $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
@@ -1465,7 +1463,7 @@ class AdminTrackingController extends Controller
                                     ->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($journey->updated_at) - 10)) // Adjust time range
                                     ->where('updated_at', '<=', $journey->updated_at) // Assuming $journey->updated_at is the latest time
                                     ->groupBy('user_id');
-                            })->get();
+                                })->get();
 
                                 
                                 foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
@@ -1478,10 +1476,12 @@ class AdminTrackingController extends Controller
                                         $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
                                     }
                                 }
+                            }else{
+                                $journey_details['responsible'] = [];
                             }
-
+                            
                             $details['tracking_history'][] = $journey_details;
-
+                            
                         }
                         
                         $shipment_payment_journey = $shipment->shipment_payment_journey;

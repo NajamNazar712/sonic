@@ -1585,7 +1585,6 @@
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
                                 shipment += '<th><strong>Details</strong></th>';
-                                shipment += '<th><strong>Responsible</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
@@ -1598,12 +1597,13 @@
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
+                                    console.log(history.responsible);
                                     shipment += '<tr>';
                                     shipment += '<td>' + formattedDateTime + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
                                     shipment += '<td>' + 
                                     (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
-                                    (history.responsible !== undefined ? 
+                                    (history.responsible && history.responsible.length > 0 ? 
                                         '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ')' + '</button>' :
                                         '-'
                                     ) +
