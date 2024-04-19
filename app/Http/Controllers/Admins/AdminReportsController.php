@@ -14529,6 +14529,8 @@ class AdminReportsController extends Controller
         //csv part
         if ($request->get('excel') && $request->get('excel') == true) {
             $fieldsToRetrieve = $request->input('selectedValue', []);
+            $fieldsToRetrieve = array_merge($fieldsToRetrieve, ['shipments.booking_type_id as booking_type_id', 'usi.poc as poc', 'cmbh.id as current_hub_id',
+            'shipments.shipper_status_id as shipper_status_id',]);
             $headers = $request->input('selectedTexts',[]);
         
             $this->fetchCsv($headers,$fieldsToRetrieve,$shipments);
@@ -14546,19 +14548,40 @@ class AdminReportsController extends Controller
             $fieldsToRetrieve = array_filter($fieldsToRetrieve, function($value) {
                 return $value !== 'selectAll';
             }); 
-           
+            
+            
             $specificValues = $shipments->select($fieldsToRetrieve)->get()->toArray();
-                
-        
-    
+           // dd($specificValues);
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
             $output = fopen("php://output", "w");  
             fputcsv($output, $headers);
             foreach($specificValues as $row) {  
+                if(property_exists($row ,'location_status')) {
+                    
+                    $row->location_status  = ($row->location_status) ? (($row->location_status == 1) ? 'On-site' : 'Off-site') : '-';
+                }
+                if(property_exists($row , 'location_status_hss')) {
+                    
+                    $row->location_status_hss  = ($row->location_status_hss) ? (($row->location_status_hss == 1) ? 'On-site' : 'Off-site') : '-';
+                }
+                if(property_exists($row ,'shipper')) {
+                    $row->shipper = ($row->booking_type_id == 4) ? ($row->shipper . ' (' . $row->poc . ')') : $row->shipper;
+                }
+                if(property_exists($row ,'current_hub_name')) {
+                    if ($row->current_hub_id != null) {
+                        $row->current_hub_name =  $row->current_hub_name;
+                    } else {
+                        if (in_array($row->shipper_status_id, [1, 2, 61])) {
+                            $row->current_hub_name = $row->origin;
+                        } else {
+                            $row->current_hub_name = $row->hub;
+                        }
+                    }
+                }
+                unset($row->booking_type_id, $row->poc, $row->current_hub_id, $row->shipper_status_id);
                 fputcsv($output, (array) $row); 
             }
- 
-            fclose($output);    
+            fclose($output);   
     }
 }

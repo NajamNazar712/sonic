@@ -591,42 +591,42 @@
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link', text:'Tracking Number', value:'tracking_number',download:true},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id' ,text:'Order ID', value:'order_id',download:true},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no', text:'Account No.', value:'account_no',download:true},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper', text:'Shipper',value:'shipper',download:true},
-                    {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment',text:'Sub Segment', value:'sub_segment',download:true},
+                    {data: 'shipper', name: 'u.name', as:'shipper', class: 'align-middle shipper', text:'Shipper',value:'shipper',download:true},
+                    {data: 'sub_segment', name: 'scs.name', as:'sub_segment', class: 'align-middle sub_segment',text:'Sub Segment', value:'sub_segment',download:true},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name',text:'Consignee Name', value:'name',download:true},
-                    {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date',text:'First Attempt Date',value:'first_attempt_date',download:false},
-                    {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date',text:'Rider Picked Status Date',value:'rider_picked_status_date',download:false},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status', text:'Status', value:'status',download:true},
-                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name',download:true},
-                    {data: 'location_status', name: 'ssjal.location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
+                    {data: 'first_attempt_date', name: 'sjfa.created_at', as:'first_attempt_date', class: 'align-middle first_attempt_date',text:'First Attempt Date',value:'first_attempt_date',download:true},
+                    {data: 'rider_picked_status_date', name: 'sjrp.created_at', as:'rider_picked_status_date', class: 'align-middle rider_picked_status_date',text:'Rider Picked Status Date',value:'rider_picked_status_date',download:true},
+                    {data: 'status', name: 'ss.name', as:'status', class: 'align-middle status', text:'Status', value:'status',download:true},
+                    {data: 'scanning_city_area_name', name: 'ca_scanning.name', as:'scanning_city_area_name', class: 'align-middle scanning_city_area_name',text:'Location Status Area',value:'scanning_city_area_name',download:true},
+                    {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
+                    {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt',download:false},
-                    {data: 'history_status', name: 'ss.name', class: 'align-middle history_status',text:'History Status',value:'history_status',download:true},
-                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
-                    {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status',download:true},
+                    {data: 'history_status', name: 'hss.name', as:'history_status', class: 'align-middle history_status',text:'History Status',value:'history_status',download:true},
+                    {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
+                    {data: 'cargo_status', name: 'cargo_status.name', as:'cargo_status', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status',download:true},
                     {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status',text:'Bag Seal Number',value:'seal_number',download:true},
-                    {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status',text:'Bag Status',value:'bag_status',download:true},
+                    {data: 'bag_status', name: 'bs.name', as:'bag_status', class: 'align-middle history_status',text:'Bag Status',value:'bag_status',download:true},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type',text:'Service Type',value:'service_type',download:true},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival',text:'Arrival',value:'arrival',download:true},
-                    {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date',text:'Last Status Date',value:'last_status_date',download:true},
-                    {data: 'created_at', name: 'shipments.created_at', class: 'align-middle created_at',text:'Booked Status Date',value:'created_at',download:true},
+                    {data: 'arrival', name: 'sj.created_at', as:'arrival', class: 'align-middle arrival',text:'Arrival',value:'arrival',download:true},
+                    {data: 'last_status_date', name: 'journey.created_at', as:'last_status_date', class: 'align-middle last_status_date',text:'Last Status Date',value:'last_status_date',download:true},
+                    {data: 'created_at', name: 'shipments.created_at', as:'created_at', class: 'align-middle created_at',text:'Booked Status Date',value:'created_at',download:true},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode',text:'Shipping Mode',value:'shipping_mode',download:true},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin',text:'Origin',value:'origin',download:true},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination',text:'Destination',value:'destination',download:true},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub',text:'Hub',value:'hub',download:true},
-                    {data: 'area', name: 'ca.name', class: 'align-middle area',text:'Area',value:'area',download:true},
-                    {data: 'current_hub', name: 'cmbh.name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub',download:true},
-                    {data: 'return_city', name: 'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city',download:false},
-                    {data: 'zone', name: 'z.name', class: 'align-middle zone',text:'Zone',value:'zone',download:true},
+                    {data: 'origin', name: 'oc.name', as:'origin', class: 'align-middle origin',text:'Origin',value:'origin',download:true},
+                    {data: 'destination', name: 'dc.name', as:'destination', class: 'align-middle destination',text:'Destination',value:'destination',download:true},
+                    {data: 'hub', name: 'h.name', as:'hub', class: 'align-middle hub',text:'Hub',value:'hub',download:true},
+                    {data: 'area', name: 'ca.name', as:'area', class: 'align-middle area',text:'Area',value:'area',download:true},
+                    {data: 'current_hub', name: 'cmbh.name', as:'current_hub_name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub',download:true},
+                    {data: 'return_city', name: 'rc.name',as:'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city',download:true},
+                    {data: 'zone', name: 'z.name',as:'zone',class: 'align-middle zone',text:'Zone',value:'zone',download:true},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type',download:true},
                     {data: 'description', name: 'si.description', class: 'align-middle description',text:'Product Description',value:'description',download:true},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount',text:'Amount',value:'amount',download:true},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Arrival)',value:'aging',download:false},
                     {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Last Status)',value:'aging_last_status',download:false},
-                    {data: 'crm_id_padded_link', name: 'cr.id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded',download:false},
-                    {data: 'crm_request_status', name: 'crs.name', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status',download:false},
-                    {data: 'crm_request_case_nature', name: 'crcn.name', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature',download:true},
+                    {data: 'crm_id_padded_link', name: 'cr.id', as:'crm_request_id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded',download:true},
+                    {data: 'crm_request_status', name: 'crs.name', as:'crm_request_status', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status',download:true},
+                    {data: 'crm_request_case_nature', name: 'crcn.name',as:'crm_request_case_nature', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature',download:true},
                     {data: 'crm_request_case_nature_type', name: 'crcnt.type', class: 'align-middle crm_request_case_nature_type',text:'Case Nature Type',value:'crm_request_case_nature_type',download:true},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount',text:'Adjusted amount',value:'adjusted_amount',download:true},
                 ],
@@ -649,10 +649,14 @@
                 if(column.download){
                     let col_name = column.name;
                     let col_text = column.text;
+                
+                    if(column.as){
+                        col_name+= ' as ' +column.as;
+                    }
                     if (col_name && col_text) {
                         option += `<option value="${col_name}">${col_text}</option>`;
                     }
-            }
+                }
             });
             $('#export').append(option).select2({
                 columns: 1,
