@@ -24,19 +24,21 @@
                                         method="POST" action="{{ route('admin.settings.delivery_revert_access.store') }}"
                                         novalidate="novalidate">
                                         {{ csrf_field() }}
+
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
                                                 <select name="finance_admins[]" id="finance_admins_select"
-                                                    class="form-control select2" multiple
-                                                    data-msg-required="Please assign an admin" data-rule-required="true"
-                                                    required="required">
+                                                    class="form-control select2" multiple>
                                                     @foreach ($finance_admins as $finance_admin)
-                                                        <option value="{{ $finance_admin->id }}">{{ $finance_admin->name }}
+                                                        <option value="{{ $finance_admin->id }}"
+                                                            @if ($admins && $admins->text && in_array($finance_admin->id, explode(',', $admins->text))) selected @endif>
+                                                            {{ $finance_admin->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
+
                                         <button type="submit" class="btn btn-primary">Assign</button>
                                     </form>
                                 </div>
@@ -74,20 +76,19 @@
                 }
             });
 
-            $('#finance_admins_select').on('select2:unselect', function() {
-                if ($(this).val().length == 0) {
-                    $('#delivery_revert_access_form').find('button[type=submit]').prop('disabled', true);
-                }
-            });
+            // $('#finance_admins_select').on('select2:unselect', function() {
+            //     if ($(this).val().length == 0) {
+            //         $('#delivery_revert_access_form').find('button[type=submit]').prop('disabled', true);
+            //     }
+            // });
 
             $('#delivery_revert_access_form').validate({
-                // ignore: ":not(:visible),:disabled",
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
-                submitHandler: function (form) {
+                submitHandler: function(form) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to allow these admins',
@@ -109,8 +110,8 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
+                    }).then(function(confirm) {
+                        if (confirm) {
                             $(form).find('button[type=submit]').attr('disabled', 'disabled');
                             blockPagePermanently();
                             form.submit();
