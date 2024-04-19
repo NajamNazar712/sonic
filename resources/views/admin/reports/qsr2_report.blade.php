@@ -601,7 +601,7 @@
                     {data: 'location_status', name: 'ssjal.location_status', as:'location_status', class: 'align-middle location_status',text:'Location Status',value:'location_status',download:true},
                     {data: 'reason', name: 'ssr.name', as:'reason', class: 'align-middle reason',text:'Reason',value:'reason',download:true},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks',text:'Remarks',value:'remarks',download:true},
-                    {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt',download:false},
+                    {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt',text:'Total Attempt',value:'total_attempt',download:true},
                     {data: 'history_status', name: 'hss.name', as:'history_status', class: 'align-middle history_status',text:'History Status',value:'history_status',download:true},
                     {data: 'location_status_hss', name: 'ssjal_hss.location_status', as:'location_status_hss', class: 'align-middle location_status_hss',text:'History Location Status',value:'location_status_hss',download:true},
                     {data: 'cargo_status', name: 'cargo_status.name', as:'cargo_status', class: 'align-middle history_status',text:'Cargo Status',value:'cargo_status',download:true},
@@ -622,8 +622,8 @@
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type',download:true},
                     {data: 'description', name: 'si.description', class: 'align-middle description',text:'Product Description',value:'description',download:true},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount',text:'Amount',value:'amount',download:true},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Arrival)',value:'aging',download:false},
-                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Last Status)',value:'aging_last_status',download:false},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Arrival)',value:'aging',download:true},
+                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false,text:'Aging (Last Status)',value:'aging_last_status',download:true},
                     {data: 'crm_id_padded_link', name: 'cr.id', as:'crm_request_id', class: 'align-middle crm_id_padded',text:'Request #',value:'crm_id_padded',download:true},
                     {data: 'crm_request_status', name: 'crs.name', as:'crm_request_status', class: 'align-middle crm_request_status',text:'Request Status',value:'crm_request_status',download:true},
                     {data: 'crm_request_case_nature', name: 'crcn.name',as:'crm_request_case_nature', class: 'align-middle crm_request_case_nature',text:'Case Nature',value:'crm_request_case_nature',download:true},
@@ -647,12 +647,12 @@
             let option = '';
             var columnNames2 = table.settings().init().columns.map(function (column) {
                 if(column.download){
-                    let col_name = column.name;
+                    let col_name = column.value;
                     let col_text = column.text;
                 
-                    if(column.as){
-                        col_name+= ' as ' +column.as;
-                    }
+                    // if(column.as){
+                    //     col_name+= ' as ' +column.as;
+                    // }
                     if (col_name && col_text) {
                         option += `<option value="${col_name}">${col_text}</option>`;
                     }

@@ -14153,6 +14153,57 @@ class AdminReportsController extends Controller
     public function qsr2_list(Request $request)
     {
         $connection = 'reports';
+        $select =    [
+            'z.name  as zone',
+            'p.product_name as product_type',
+            'si.description as description',
+            'ssr.name as reason',
+            'sjr.remarks as remarks',
+            'ss.name as status',
+            'shipments.id as shId',
+            'shipments.tracking_number',
+            'shipments.tracking_number as tracking_number_link',
+            'u.name as shipper',
+            // 'ss.name as history_status',
+            'hss.name as history_status',
+            'bt.booking_type as service_type',
+            'sj.created_at as arrival',
+            'oc.name as origin',
+            'dc.name as destination',
+            'h.name as hub',
+            'ca.name as area',
+            'shipments.amount',
+            'journey.created_at as last_status_date',
+            'shipments.consignee_name as name',
+            'shipments.booking_type_id',
+            'shipments.created_at',
+            'usi.poc',
+            'u.id as account_no',
+            'sm.mode as shipping_mode',
+            'shipments.order_id as order_id',
+            'rc.name as return_city', 
+             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),
+            'cmbh.name as current_hub_name',
+            'cmbh.id as current_hub_id',
+            'shipments.shipper_status_id as shipper_status_id',
+            'cr.missing_product_price as missing_product_price',
+            'cr.id as crm_request_id',
+            'cr.damage_product_price as damage_product_price',
+            'crs.name as crm_request_status',
+            'crcn.name as crm_request_case_nature',
+            'crcnt.type as crm_request_case_nature_type',
+            'adjustment.adjustment_amount as adjusted_amount',
+            'scs.name as sub_segment',
+            'cargo_status.name as cargo_status',
+            'cmb.seal_number as seal_number',
+            'bs.name as bag_status',
+            'sjfa.created_at as first_attempt_date',
+            'sjrp.created_at as rider_picked_status_date',
+            'ssjal.location_status as location_status',
+            'ssjal_hss.location_status as location_status_hss',
+            'ca_scanning.name as scanning_city_area_name'
+            
+        ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -14282,58 +14333,9 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
             ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
-            ->select([
-                'z.name  as zone',
-                'p.product_name as product_type',
-                'si.description as description',
-                'ssr.name as reason',
-                'sjr.remarks as remarks',
-                'ss.name as status',
-                'shipments.id as shId',
-                'shipments.tracking_number',
-                'shipments.tracking_number as tracking_number_link',
-                'u.name as shipper',
-                // 'ss.name as history_status',
-                'hss.name as history_status',
-                'bt.booking_type as service_type',
-                'sj.created_at as arrival',
-                'oc.name as origin',
-                'dc.name as destination',
-                'h.name as hub',
-                'ca.name as area',
-                'shipments.amount',
-                'journey.created_at as last_status_date',
-                'shipments.consignee_name as name',
-                'shipments.booking_type_id',
-                'shipments.created_at',
-                'usi.poc',
-                'u.id as account_no',
-                'sm.mode as shipping_mode',
-                'shipments.order_id as order_id',
-                'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),
-                'cmbh.name as current_hub_name',
-                'cmbh.id as current_hub_id',
-                'shipments.shipper_status_id as shipper_status_id',
-                'cr.missing_product_price as missing_product_price',
-                'cr.id as crm_request_id',
-                'cr.damage_product_price as damage_product_price',
-                'crs.name as crm_request_status',
-                'crcn.name as crm_request_case_nature',
-                'crcnt.type as crm_request_case_nature_type',
-                'adjustment.adjustment_amount as adjusted_amount',
-                'scs.name as sub_segment',
-                'cargo_status.name as cargo_status',
-                'cmb.seal_number as seal_number',
-                'bs.name as bag_status',
-                'sjfa.created_at as first_attempt_date',
-                'sjrp.created_at as rider_picked_status_date',
-                'ssjal.location_status as location_status',
-                'ssjal_hss.location_status as location_status_hss',
-                'ca_scanning.name as scanning_city_area_name'
-                
-            ])
+            ->select($select)
             ->groupBy('shipments.id');
-
+            
 
         $type = $request->get('search_types');
 
@@ -14528,19 +14530,17 @@ class AdminReportsController extends Controller
         //return $datatable->make(true);
         //csv part
         if ($request->get('excel') && $request->get('excel') == true) {
-            $fieldsToRetrieve = $request->input('selectedValue', []);
-            $fieldsToRetrieve = array_merge($fieldsToRetrieve, ['shipments.booking_type_id as booking_type_id', 'usi.poc as poc', 'cmbh.id as current_hub_id',
-            'shipments.shipper_status_id as shipper_status_id',]);
+            $fieldsToRetrieve = $request->input('selectedValue', []); 
             $headers = $request->input('selectedTexts',[]);
         
-            $this->fetchCsv($headers,$fieldsToRetrieve,$shipments);
+            $this->fetchCsv($headers,$fieldsToRetrieve,$shipments,$select);
             ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
         }else{
             return $datatable->make(true);
         }
     }
 
-    public function fetchCsv($headers ,$fieldsToRetrieve, $shipments)
+    public function fetchCsv($headers ,$fieldsToRetrieve, $shipments,$select)
     {
             $headers = array_filter($headers, function($value) {
                 return $value !== 'Select All';
@@ -14549,39 +14549,79 @@ class AdminReportsController extends Controller
                 return $value !== 'selectAll';
             }); 
             
+            $final_Array = array();
+            $specificValues = $shipments->select($select)->get()->toarray();
+        
             
-            $specificValues = $shipments->select($fieldsToRetrieve)->get()->toArray();
-           // dd($specificValues);
             header('Content-Type: text/csv; charset=utf-8');  
             header('Content-Disposition: attachment; filename=data.csv');  
             $output = fopen("php://output", "w");  
             fputcsv($output, $headers);
-            foreach($specificValues as $row) {  
-                if(property_exists($row ,'location_status')) {
-                    
-                    $row->location_status  = ($row->location_status) ? (($row->location_status == 1) ? 'On-site' : 'Off-site') : '-';
+           
+            foreach ($specificValues as $key => $row) {
+                // Convert the row to an associative array
+                $rowArray = (array) $row;
+            
+                // Apply modifications to the row
+                if (isset($rowArray['location_status'])) {
+                    $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
                 }
-                if(property_exists($row , 'location_status_hss')) {
-                    
-                    $row->location_status_hss  = ($row->location_status_hss) ? (($row->location_status_hss == 1) ? 'On-site' : 'Off-site') : '-';
+                if (isset($rowArray['location_status_hss'])) {
+                    $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
                 }
-                if(property_exists($row ,'shipper')) {
-                    $row->shipper = ($row->booking_type_id == 4) ? ($row->shipper . ' (' . $row->poc . ')') : $row->shipper;
+                if (isset($rowArray['shipper'])) {
+                    $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
                 }
-                if(property_exists($row ,'current_hub_name')) {
-                    if ($row->current_hub_id != null) {
-                        $row->current_hub_name =  $row->current_hub_name;
+                if (isset($rowArray['current_hub_name'])) {
+                    if ($rowArray['current_hub_id'] != null) {
+                        $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
                     } else {
-                        if (in_array($row->shipper_status_id, [1, 2, 61])) {
-                            $row->current_hub_name = $row->origin;
+                        if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
+                            $rowArray['current_hub_name'] = $rowArray['origin'];
                         } else {
-                            $row->current_hub_name = $row->hub;
+                            $rowArray['current_hub_name'] = $rowArray['hub'];
                         }
                     }
                 }
-                unset($row->booking_type_id, $row->poc, $row->current_hub_id, $row->shipper_status_id);
-                fputcsv($output, (array) $row); 
+            
+                $days = Carbon::now()->diffInDays($rowArray['arrival']);
+                $rowArray['aging'] = ($days == 0) ? "-" : $days;
+                $days = Carbon::now()->diffInDays($rowArray['last_status_date']);
+                $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
+        
+                if (isset($rowArray['crm_request_id'])) {
+                    $rowArray['crm_id_padded'] = ($days == 0) ? "-" : $days; str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
+                } else {
+                    $rowArray['crm_id_padded'] = ($days == 0) ? "-" : $days; '-';
+                }
+
+                if (isset($rowArray['crm_request_id'])) {
+                    $rowArray['crm_id_padded_link'] ='<u><a href=' . route('admin.crm.request.details', ['id' =>$rowArray['crm_request_id']]) . '  target="_blank">' . str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT) . '</a></u>';
+                } else {
+                    $rowArray['crm_id_padded_link'] ='-';
+                }
+
+
+                $filteredArray = [];
+
+                // Iterate over $fieldsToRetrieve to maintain sequence
+                foreach ($fieldsToRetrieve as $field) {
+                    // Check if the field exists in the row array
+                    if (array_key_exists($field, $rowArray)) {
+                        // Add the field to the filtered array
+                        $filteredArray[$field] = $rowArray[$field];
+                    }
+                }
+
+
+            
+
+                // $final_Array[] = $rowArray;
+               fputcsv($output, $filteredArray);
             }
+          
+        
+            
             fclose($output);   
     }
 }
