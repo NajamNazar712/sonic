@@ -14561,7 +14561,7 @@ class AdminReportsController extends Controller
             foreach ($specificValues as $key => $row) {
                 // Convert the row to an associative array
                 $rowArray = (array) $row;
-            
+                //dd($rowArray);
                 // Apply modifications to the row
                 if (isset($rowArray['location_status'])) {
                     $rowArray['location_status'] = ($rowArray['location_status']) ? (($rowArray['location_status'] == 1) ? 'On-site' : 'Off-site') : '-';
@@ -14569,18 +14569,16 @@ class AdminReportsController extends Controller
                 if (isset($rowArray['location_status_hss'])) {
                     $rowArray['location_status_hss'] = ($rowArray['location_status_hss']) ? (($rowArray['location_status_hss'] == 1) ? 'On-site' : 'Off-site') : '-';
                 }
-                if (isset($rowArray['shipper'])) {
-                    $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
-                }
-                if (isset($rowArray['current_hub_name'])) {
-                    if ($rowArray['current_hub_id'] != null) {
-                        $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
+                
+                $rowArray['shipper'] = ($rowArray['booking_type_id'] == 4) ? ($rowArray['shipper'] . ' (' . $rowArray['poc'] . ')') : $rowArray['shipper'];
+                
+                if (!empty($rowArray['current_hub_id'])) {
+                    $rowArray['current_hub_name'] = $rowArray['current_hub_name'];
+                } else {
+                    if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
+                        $rowArray['current_hub_name'] = $rowArray['origin'];
                     } else {
-                        if (in_array($rowArray['shipper_status_id'], [1, 2, 61])) {
-                            $rowArray['current_hub_name'] = $rowArray['origin'];
-                        } else {
-                            $rowArray['current_hub_name'] = $rowArray['hub'];
-                        }
+                        $rowArray['current_hub_name'] = $rowArray['hub'];
                     }
                 }
             
@@ -14590,9 +14588,9 @@ class AdminReportsController extends Controller
                 $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
         
                 if (isset($rowArray['crm_request_id'])) {
-                    $rowArray['crm_id_padded'] = ($days == 0) ? "-" : $days; str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
+                    $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);
                 } else {
-                    $rowArray['crm_id_padded'] = ($days == 0) ? "-" : $days; '-';
+                    $rowArray['crm_id_padded'] = '-';
                 }
 
                 if (isset($rowArray['crm_request_id'])) {
@@ -14612,16 +14610,9 @@ class AdminReportsController extends Controller
                         $filteredArray[$field] = $rowArray[$field];
                     }
                 }
-
-
-            
-
-                // $final_Array[] = $rowArray;
-               fputcsv($output, $filteredArray);
+                $final_Array[] = $rowArray;
+                fputcsv($output, $filteredArray);
             }
-          
-        
-            
             fclose($output);   
     }
 }

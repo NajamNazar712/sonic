@@ -616,7 +616,7 @@
                     {data: 'destination', name: 'dc.name', as:'destination', class: 'align-middle destination',text:'Destination',value:'destination',download:true},
                     {data: 'hub', name: 'h.name', as:'hub', class: 'align-middle hub',text:'Hub',value:'hub',download:true},
                     {data: 'area', name: 'ca.name', as:'area', class: 'align-middle area',text:'Area',value:'area',download:true},
-                    {data: 'current_hub', name: 'cmbh.name', as:'current_hub_name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub',download:true},
+                    {data: 'current_hub', name: 'cmbh.name', as:'current_hub_name', class: 'align-middle current_hub',text:'Concerned Hub',value:'current_hub_name',download:true},
                     {data: 'return_city', name: 'rc.name',as:'return_city', class: 'align-middle return_city',text:'Return City',value:'return_city',download:true},
                     {data: 'zone', name: 'z.name',as:'zone',class: 'align-middle zone',text:'Zone',value:'zone',download:true},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type',text:'Product Type',value:'product_type',download:true},
