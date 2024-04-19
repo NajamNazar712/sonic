@@ -12698,12 +12698,8 @@ class AdminReportsController extends Controller
         ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
         ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
         ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
-        ->leftjoin('shipping_modes', 'shipments.shipping_mode_id', 'shipping_modes.id')
-        ->leftjoin('booking_types', 'shipments.booking_type_id', 'booking_types.id')
         ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agent_details.rv_assign_agent_status_id', 'rv_aas.id')
-        ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agent_details.rv_assign_agent_sub_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
-        ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agent_details.rv_fake_status_id','rv_fakes.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
 
         ->leftjoin('shipments_journey as sj', function($join) {
@@ -12721,44 +12717,36 @@ class AdminReportsController extends Controller
             $join->on('sjj.shipment_id', '=', 'shipments.id')
             ->where('sjj.shipper_status_id', '=', 2);
         })
-        
-        ->leftJoin('shipments_journey as sj_for_reason',function($join) {
-            $join->on('sj_for_reason.id', '=', 'rv_shipment_assign_agent_details.shipments_journey_id');
-        })
-        ->leftjoin('shipment_status_reason as rv_reason', 'sj_for_reason.status_reason_id', 'rv_reason.id')
 
-        ->leftJoin('rv_agent_call_histories','rv_shipment_assign_agent_details.shipment_id','rv_agent_call_histories.shipment_id')
-        ->leftJoin('rv_assign_agent_sub_statuses as rvaass','rv_agent_call_histories.call_finding_id','rvaass.id')
+        ->leftJoin('rv_agent_call_histories','shipments.id','rv_agent_call_histories.shipment_id')
+        ->join('rv_assign_agent_sub_statuses as rvaass','rv_agent_call_histories.call_finding_id','rvaass.id')
 
-        ->select('shipments.id as shipment_id','sjj.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 
-        'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub',
-        'shipments.amount as cod_amount', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as action', 'rv_aass.name as reason', 
-        'rv_shipment_assign_agent_details.remarks as remarks', 'rv_shipment_assign_agent_details.created_at as action_date',
-        'rv_shipment_assign_agent_details.updated_type_id as updated_type_id','rv_shipment_assign_agent_details.updated_by_id as updated_by_id',
-        'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 
-        'rv_shipment_assign_agents.unresponsive_count as call_count','rv_status.name as rv_status_name','sj.updated_at as rv_status_date','rv_shipment_assign_agent_details.rv_state_id as rv_state_id', 'add.id as agent_id', 'rv_reason.name as rv_reason','rv_agent_call_histories.updated_at as calling_datetime','rv_agent_call_histories.remarks as call_remarks','rvaass.name as call_finding_reason')
+        ->select(
+            'shipments.id as shipment_id',
+            'sjj.created_at as arrival_date', 
+            'shipments.tracking_number as tracking_number',
+            'users.name as shipper_name', 
+            'origin_city.name as origin', 
+            'destination_city.name as destination', 
+            'hub.name as hub',
+            'shipments.amount as cod_amount', 
+            'rv_aas.name as action', 
+            'rv_shipment_assign_agent_details.created_at as action_date',
+            's_status.name as current_status', 
+            'shipments.updated_at as current_status_date', 
+            'rv_status.name as rv_status_name',
+            'sj.updated_at as rv_status_date',
+            'rv_agent_call_histories.updated_at as calling_datetime',
+            'rv_agent_call_histories.remarks as call_remarks',
+            'rvaass.name as call_finding_reason'
+            )
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->groupBy('rv_shipment_assign_agent_details.created_at');
-
-        // dd($rv_report->get()->toArray());
+        ->groupBy('rv_agent_call_histories.updated_at');
             
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
                         $route = route('admin.tracking.index');
                         return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
-                    })
-                    ->addColumn('rcp_agent_updated_by', function($rv_report) {
-                        if ($rv_report['rv_state_id'] != 1 && $rv_report['updated_type_id'] == 2) { 
-                            $agent = Admin::where('id', $rv_report->agent_id)->select('name')->first();
-                            if ($agent) {
-                                return $agent->name;
-                            } else {
-                                return '-';
-                            }
-                        }
-                        else {
-                            return '-';
-                        }
                     })
                     ->editColumn('action', function($rv_report) {
                         if ($rv_report['action'] == "") { 
@@ -12777,79 +12765,6 @@ class AdminReportsController extends Controller
                         }
                     })
 
-                    ->editColumn('reason', function($rv_report) {
-                        if ($rv_report['reason']=="") {
-                            return '-';
-                        }
-                        else {
-                            return $rv_report['reason'];
-                        }
-                    })
-
-                    ->editColumn('fake_status', function($rv_report) {
-                        if ($rv_report['fake_status']) {
-                            return $rv_report['fake_status'];
-                        }
-                        else {
-                            return '-';
-                        }
-                    })
-                    ->addColumn('action_updated_by', function($rv_report) {
-                        //admin or customer_experience
-                        
-                        if (($rv_report['updated_type_id'] == 1) && ($rv_report['rv_state_id'] != 1) && ($rv_report['updated_by_id'] != NULL)) {
-                            $query = $rv_report->leftJoin('admins as ad', function ($join) use ($rv_report) {
-                                $join->on('ad.id', '=', \DB::raw($rv_report['updated_by_id']));
-                            })
-                            ->select('ad.name')
-                            ->first();
-                            return $query->name;
-                        }
-                        //shipper or retail user
-                        else if(($rv_report['updated_type_id'] == 3) || ($rv_report['updated_type_id'] == 5) && ($rv_report['updated_by_id'] != NULL)){
-                            $query = $rv_report->leftJoin('users as u', function ($join) use ($rv_report) {
-                                $join->on('u.id', '=', \DB::raw($rv_report['updated_by_id']));
-                            })
-                            ->select('u.name')
-                            ->first();
-                        
-                            return $query->name;
-                        }
-                        //substitute user
-                        else if($rv_report['updated_type_id'] == 4){
-                            $query = $rv_report->leftJoin('substitute_users as su', function ($join) use ($rv_report) {
-                                $join->on('su.id', '=', \DB::raw($rv_report['updated_by_id']));
-                            })
-                            ->select('su.name')
-                            ->first();
-                        
-                            return $query->name;
-                        }
-                        else{
-                            return '-';
-                        }
-                    })
-                    ->addColumn('delivery_attempt_count', function($rv_report) {
-                        $delivered_status = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 5)->get();
-                        return count($delivered_status);
-                    })
-                    ->addColumn('re_attempt_count', function($rv_report) { 
-                        $reattempt = ShipmentsJourney::where('shipment_id', $rv_report->shipment_id)->where('shipper_status_id', 13)->get();
-                        return count($reattempt);               
-                    })
-                    ->addColumn('unresponsive_count', function($rv_report){
-                        $rv_shipment_count_check =  DB::table('rv_shipment_assign_agents')->where('shipment_id', $rv_report->shipment_id);
-                        if($rv_shipment_count_check->exists()){
-                            $rv_shipment_count_check = $rv_shipment_count_check->first();
-                            if($rv_shipment_count_check->unresponsive_count > 0){
-                                $unresponsive_count = DB::table('rv_shipment_assign_agents')->where('shipment_id', $rv_report->shipment_id)->pluck('unresponsive_count')->toArray();
-                                $unresponsive_count = array_sum($unresponsive_count);
-                                return '<button type="button" class="btn btn-sm btn-outline-info align-middle unresponsive_count_label" data-shipments = '.$rv_report->shipment_id.'><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' .$unresponsive_count .'</span></button>';
-                            }else{
-                                return '-';
-                            }
-                        }
-                    })
                     ->editColumn('calling_datetime', function($rv_report){
                         return substr($rv_report->calling_datetime,0,10);
                     })
@@ -12878,7 +12793,8 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+            // $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
+            $rv_report->whereBetween('rv_agent_call_histories.updated_at', [$from, $to]);
         }   
 
         return $datatable->make(true);
