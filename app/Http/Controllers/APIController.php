@@ -7780,7 +7780,7 @@ class APIController extends Controller
                             $admin_trax_id = $admin->trax_id;
                             $admin_cnic = $admin->cnic;
                         }
-                        return response()->json(['status' => 1, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
+                        return response()->json(['status' => 0, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id, 'admin_cnic' => $admin_cnic]);
                     } else {
                         return response()->json(['status' => 0, 'message' => 'Retail Note restricted!']);
                     }
@@ -7914,7 +7914,7 @@ class APIController extends Controller
                     $hbl_konnect_transaction->amount = $amount;
                     $hbl_konnect_transaction->save();
 
-                    return ['status' => 1, 'message' => 'Request completed successfully!'];
+                    return ['status' => 1, 'message' => 'Payment completed successfully!'];
                 }
             }
         } else {
