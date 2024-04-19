@@ -1695,6 +1695,17 @@ class AdminFinanceController extends Controller
 
     public function outstanding_shipments_bulk_adjust_in_payment(Request $request)
     {
+
+        $finance_admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
+        $admin = $request->user();
+        // if ($finance_admins->text != null || $finance_admins->text != '') {
+        //     $finance_admins_ids = explode(',', $finance_admins->text);
+        //     if (!in_array($admin->id, $finance_admins_ids)) {
+                
+        //     }
+
+        // }
+
         $now = Carbon::now()->startOfDay();
         foreach ($request->shipment_ids as $index => $shipment_id) {
             $delivery_note_id = $request->dncc[$index];
