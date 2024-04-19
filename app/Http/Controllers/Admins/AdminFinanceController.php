@@ -1707,8 +1707,7 @@ class AdminFinanceController extends Controller
 
                 $finance_admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
                 $admin = $request->user();
-
-                if ($admin->role_id != 1 || $admin->role_id != 4){
+                if ($admin->role_id != 1 && $admin->role_id != 4){
                     return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
                 }
 
