@@ -519,8 +519,8 @@
                                                 text: 'Downloading is in progress',
                                                 icon: 'info',
                                                 buttons: false,
-                                                //closeOnClickOutside: false,
-                                                //closeOnEsc: false
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
                                             });
                                         },
                                         complete: function() {
