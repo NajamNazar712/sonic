@@ -160,6 +160,7 @@ class DeliveryController extends Controller
         
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries (old)
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sub_category_segments as scs', 'scs.id' , 'u.sub_segment_id')
 //        $shipments = DB::connection('reports')->table('shipments')
 //            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -289,7 +290,8 @@ class DeliveryController extends Controller
                 'shipments.shipper_status_id as shipper_status_id',
                 'sjl.shipment_id as journey_latest_id',
                 'sjl.updated_at as journey_latest_updated_at',
-                'sjl.shipper_status_id as latest_shipper_status_id'
+                'sjl.shipper_status_id as latest_shipper_status_id',
+                'scs.name as sub_segment_name'
 
             )
 
