@@ -182,7 +182,7 @@ class LostShipmentsController extends Controller
 //                    $sub_query->where('shipments.payment_status_id', '>', 1);
 //                });
 
-            if (session('role_id') != 1) {
+            if (session('role_id') != 1 && !in_array($admin->role_id, [3, 8, 134])) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
             }
 
