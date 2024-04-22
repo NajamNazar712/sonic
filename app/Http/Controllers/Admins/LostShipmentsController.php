@@ -144,7 +144,7 @@ class LostShipmentsController extends Controller
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
                 ->join('shipments_journey', function ($join) use ($admin) {
                     if (isset($admin->responsible_city->zone) && isset($admin->role_id) && in_array($admin->role_id, [3, 8, 134])) {
-                        $join->join('cities as ci', 'ci.id', '=', 'sj_city.city_id');
+                        $join->join('cities as ci', 'ci.id', '=', DB::raw('sj_city.city_id'));
                         $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                                 ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND ci.zone_id = {$admin->responsible_city->zone->id})"));
                     } else {
