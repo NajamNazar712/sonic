@@ -15,9 +15,11 @@ use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
+use App\Http\Models\CityDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -62,22 +64,24 @@ class RiderLogisticApiController extends Controller
         $products =  TraxProduct::select('id','product_code','product_name','parent_id')
             ->where('status',1)->get();
 
-        $services = TraxService::select('id','service_code','service_name','product_id')
+        $services = TraxService::select('id','service_code','service_name','product_id','shipping_mode_id')
             ->where('status',1)->get();
 
             $rider_cn = TraxCnIssueToRider::select('product_id','cn_from','cn_to','quantity')
             ->where('rider_id',$rider_id)->where('status',1)->get();
 
+        $shipping_modes = ShippingMode::select('id','mode as shipping_mode')->get();
+
+        $city_deliveries =  CityDelivery::select('city_id','booking_type_id','shipping_mode_id')->where('booking_type_id',1)->get();
+
+
         $rider_child_cn = TraxChildCnIssueToRider::select('cn_from','cn_to','quantity')
             ->where('rider_id',$rider_id)->where('status',1)->get();
-
         $destination_list = TraxStation::select('id as destination_id','name as destination_name','station_code as destination_code')
             ->where('status',1)->get();
 
         $special_handling_list = TraxSpecialHandlingList::select('id as handling_id','description','rate','pay_mode')
             ->where('status',1)->get();
-
-
 
         $logistic_data = [
             'shipper_list'        =>   $shipper_list,
@@ -88,7 +92,9 @@ class RiderLogisticApiController extends Controller
             'rider_cn'          =>   $rider_cn,
             'rider_child_cn'     =>   $rider_child_cn,
             'destination_list'  =>   $destination_list,
-            'special_handling_list' => $special_handling_list
+            'special_handling_list' => $special_handling_list,
+            'shipping_modes' => $shipping_modes,
+            'city_deliveries' => $city_deliveries
         ];
 
         return response()->json(['status'=>0,'logistic_data'=> $logistic_data]);

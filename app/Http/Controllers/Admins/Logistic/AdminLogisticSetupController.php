@@ -8,6 +8,9 @@ use App\Http\Models\Admin\Logistic\TraxProduct;
 use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Rider;
+use App\Http\Models\Segment;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\SubCategorySegment;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -158,12 +161,15 @@ class AdminLogisticSetupController extends Controller
     }
      public function master_product_index()
      {
-        return view('admin.logistic.master_product');
+         $segments=Segment::all();
+         return view('admin.logistic.master_product')->with('segments',$segments);
      }
 
      public  function master_product_list()
      {
-         $master_product = TraxParentProduct::all();
+         $master_product = TraxParentProduct::leftjoin('segments as s','s.id','trax_parent_products.segment_id')
+         ->select('trax_parent_products.id','trax_parent_products.parent_code','trax_parent_products.parent_name','s.name as segment_name','trax_parent_products.status')
+             ->where('status',1);
          $datatables = Datatables::of($master_product)
          ->editColumn('status',function ($master_product){
              if($master_product->status == 1)
@@ -200,6 +206,7 @@ class AdminLogisticSetupController extends Controller
          $validate = Validator::make($request->all(),[
              'parent_code' => ['required','max:255'],
              'parent_name' => ['required','max:255'],
+             'segment_id'=>['required','integer']
          ]);
 
 
@@ -211,6 +218,7 @@ class AdminLogisticSetupController extends Controller
              $parent_product = new TraxParentProduct();
              $parent_product->parent_code = $request->parent_code;
              $parent_product->parent_name = $request->parent_name;
+             $parent_product->segment_id = $request->segment_id;
              $parent_product->save();
              return redirect()->back()->with('success','Master product added successfully');
          } catch (\Exception $ex) {
@@ -236,7 +244,9 @@ class AdminLogisticSetupController extends Controller
         $validate = Validator::make($request->all(),[
             'id'=>['required','integer'],
             'parent_code' => ['required','string'],
-            'parent_name' => ['required','string']
+            'parent_name' => ['required','string'],
+            'segment_id'   =>['required','integer']
+
         ]);
 
         if($validate->fails())
@@ -248,6 +258,8 @@ class AdminLogisticSetupController extends Controller
             $parent_product = TraxParentProduct::find($request->id);
             $parent_product->parent_code = $request->parent_code;
             $parent_product->parent_name = $request->parent_name;
+            $parent_product->segment_id = $request->segment_id;
+
             $parent_product->save();
 
             return redirect()->back()->with('success','Master Product Successfully Update');
@@ -261,14 +273,17 @@ class AdminLogisticSetupController extends Controller
      public  function  product_index()
      {
          $parent_products = TraxParentProduct::select('id','parent_name')->where('status',1)->get();
-         return view('admin.logistic.product')->with(['parent_products'=>$parent_products]);
+         $sub_segments = SubCategorySegment::select('id','name')->get();
+
+         return view('admin.logistic.product')->with(['parent_products'=>$parent_products,'sub_segments'=>$sub_segments]);
 
      }
 
     public  function  product_list()
     {
         $product = TraxProduct::join('trax_parent_products as pp','pp.id','trax_products.parent_id')
-        ->select('trax_products.id','trax_products.product_code','trax_products.product_name','pp.parent_name as master_product_name','trax_products.status');
+            ->leftjoin('sub_category_segments as sb','sb.id','trax_products.sub_segment_id')
+        ->select('trax_products.id','trax_products.product_code','trax_products.product_name','pp.parent_name as master_product_name','sb.name as sub_segment_name','trax_products.status');
 
         $datatables = Datatables::of($product)
             ->editColumn('status',function ($product){
@@ -305,7 +320,9 @@ class AdminLogisticSetupController extends Controller
         $validate = Validator::make($request->all(),[
             'product_code' => ['required','max:255'],
             'product_name' => ['required','max:255'],
-            'parent_id' => ['required','integer']
+            'parent_id' => ['required','integer'],
+            'sub_segment_id' => ['required','integer']
+
         ]);
 
 
@@ -318,6 +335,7 @@ class AdminLogisticSetupController extends Controller
             $product->product_code = $request->product_code;
             $product->product_name = $request->product_name;
             $product->parent_id = $request->parent_id;
+            $product->sub_segment_id = $request->sub_segment_id;
             $product->save();
             return redirect()->back()->with('success','Product added successfully');
         } catch (\Exception $ex) {
@@ -343,7 +361,9 @@ class AdminLogisticSetupController extends Controller
             'product_id'=>['required','integer'],
             'parent_id'=>['required','integer'],
             'product_code' => ['required','string'],
-            'product_name' => ['required','string']
+            'product_name' => ['required','string'],
+            'sub_segment_id' => ['required','integer']
+
         ]);
 
         if($validate->fails())
@@ -356,6 +376,8 @@ class AdminLogisticSetupController extends Controller
             $product->product_code = $request->product_code;
             $product->product_name = $request->product_name;
             $product->parent_id = $request->parent_id;
+            $product->sub_segment_id = $request->sub_segment_id;
+
             $product->save();
 
             return redirect()->back()->with('success','Product Successfully Update');
@@ -369,13 +391,16 @@ class AdminLogisticSetupController extends Controller
     public  function service_index()
     {
         $products = TraxProduct::select('id','product_name')->where('status',1)->get();
-        return view('admin.logistic.service')->with(['products'=>$products]);
+        $shipping_modes = ShippingMode::select('id','mode')->get();
+
+        return view('admin.logistic.service')->with(['products'=>$products,'shipping_modes'=>$shipping_modes]);
     }
 
     public  function  service_list()
     {
         $product = TraxService::join('trax_products as p','p.id','trax_services.product_id')
-            ->select('trax_services.id','trax_services.service_code','trax_services.service_name','p.product_name as product_name','trax_services.status');
+            ->leftjoin('shipping_modes as sm','sm.id','trax_services.shipping_mode_id')
+            ->select('trax_services.id','trax_services.service_code','trax_services.service_name','p.product_name as product_name','sm.mode as shipping_mode_name','trax_services.status');
 
         $datatables = Datatables::of($product)
             ->editColumn('status',function ($product){
@@ -412,7 +437,9 @@ class AdminLogisticSetupController extends Controller
         $validate = Validator::make($request->all(),[
             'service_code' => ['required','max:255'],
             'service_name' => ['required','max:255'],
-            'product_id' => ['required','integer']
+            'product_id' => ['required','integer'],
+            'shipping_mode_id' => ['required','integer']
+
         ]);
 
 
@@ -425,6 +452,7 @@ class AdminLogisticSetupController extends Controller
             $service->service_code = $request->service_code;
             $service->service_name = $request->service_name;
             $service->product_id = $request->product_id;
+            $service->shipping_mode_id = $request->shipping_mode_id;
             $service->save();
             return redirect()->back()->with('success','Service added successfully');
         } catch (\Exception $ex) {
@@ -450,7 +478,9 @@ class AdminLogisticSetupController extends Controller
             'service_id'=>['required','integer'],
             'product_id'=>['required','integer'],
             'service_code' => ['required','string'],
-            'service_name' => ['required','string']
+            'service_name' => ['required','string'],
+            'shipping_mode_id' => ['required','integer']
+
         ]);
 
         if($validate->fails())
@@ -463,7 +493,7 @@ class AdminLogisticSetupController extends Controller
             $service->service_code = $request->service_code;
             $service->service_name = $request->service_name;
             $service->product_id = $request->product_id;
-
+            $service->shipping_mode_id = $request->shipping_mode_id;
             $service->save();
 
             return redirect()->back()->with('success','Service Successfully Update');

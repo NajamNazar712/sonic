@@ -18,6 +18,7 @@ class CreateTraxProductsTable extends Migration
             $table->string('product_code')->nullable();
             $table->string('product_name');
             $table->integer('parent_id');
+            $table->integer('sub_segment_id')->nullable();
             $table->integer('status')->default(1);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();

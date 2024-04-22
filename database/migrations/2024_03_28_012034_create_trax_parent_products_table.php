@@ -17,6 +17,7 @@ class CreateTraxParentProductsTable extends Migration
             $table->increments('id');
             $table->string('parent_code')->nullable();
             $table->string('parent_name');
+            $table->integer('segment_id')->nullable();
             $table->integer('status')->default(1);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();

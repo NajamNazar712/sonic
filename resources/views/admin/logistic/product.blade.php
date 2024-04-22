@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">Product Code</th>
                                     <th class="border-primary border-darken-1">Product Name</th>
                                     <th class="border-primary border-darken-1">Master Product Name</th>
+                                    <th class="border-primary border-darken-1">Sub Segment</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
@@ -59,25 +60,38 @@
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product Code</label>
                                     <input type="text" name="product_code" class="form-control product_code" id="product_code" data-rule-required="true" data-msg-required="Product Code is Required">
 
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product Name</label>
                                     <input type="text" name="product_name" class="form-control product_name" id="product_name"  data-rule-required="true" data-msg-required="Product Name is Required">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Master Product</label>
                                     <select class="select select2 mb-1" name="parent_id" id="parent_id_select" data-rule-required="true" data-msg-required="Master Product is required">
                                         @foreach($parent_products as $parent_product)
                                             <option value="{{ $parent_product->id }}">{{ $parent_product->parent_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Sub Segment</label>
+                                    <select class="select select2 mb-1" name="sub_segment_id" id="sub_segment_id_select" data-rule-required="true" data-msg-required="Sub Segment is required">
+                                        @foreach($sub_segments as $sub_segment)
+                                            <option value="{{ $sub_segment->id }}">{{ $sub_segment->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -137,12 +151,24 @@
                                     <input type="text" name="product_name" class="form-control product_name" id="edit_product_name"  data-rule-required="true" data-msg-required="Product Name is Required">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Master Product</label>
                                     <select class="select select2 mb-1" name="parent_id" id="edit_parent_id_select" data-rule-required="true" data-msg-required="Master Product is required">
                                         @foreach($parent_products as $parent_product)
                                             <option value="{{ $parent_product->id }}">{{ $parent_product->parent_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Sub Segment</label>
+                                    <select class="select select2 mb-1" name="sub_segment_id" id="edit_sub_segment_id_select" data-rule-required="true" data-msg-required="Sub Segment is required">
+                                        @foreach($sub_segments as $sub_segment)
+                                            <option value="{{ $sub_segment->id }}">{{ $sub_segment->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -365,8 +391,19 @@
                 dropdownParent:$('#AddProductModal')
             });
 
+            $('#sub_segment_id_select').prepend('<option value="" selected="selected">Select Sub Segment</option>').select2({
+                placeholder: 'Select Sub Segment',
+                width: '100%',
+                dropdownParent:$('#AddProductModal')
+            });
+
             $('#edit_parent_id_select').prepend('<option value="" selected="selected">Select Master Product</option>').select2({
                 placeholder: 'Select Master Product',
+                width: '100%',
+                dropdownParent:$('#EditProductModal')
+            });
+            $('#edit_sub_segment_id_select').prepend('<option value="" selected="selected">Select Sub Segment</option>').select2({
+                placeholder: 'Select Sub Segment',
                 width: '100%',
                 dropdownParent:$('#EditProductModal')
             });
@@ -432,6 +469,7 @@
                     {data: 'product_code', name: 'trax_products.product_code', class: 'align-middle product_code'},
                     {data: 'product_name', name: 'trax_products.product_name', class: 'align-middle product_name'},
                     {data: 'master_product_name', name: 'pp.parent_name', class: 'align-middle master_product_name'},
+                    {data: 'sub_segment_name', name: 'sb.name', class: 'align-middle sub_segment_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
 
@@ -509,6 +547,7 @@
                         $("#edit_product_code").val(product.product_code);
                         $("#edit_product_name").val(product.product_name);
                         $("#edit_parent_id_select").val(product.parent_id).trigger('change');
+                        $("#edit_sub_segment_id_select").val(product.sub_segment_id).trigger('change');
 
                         $("#EditProductModal").modal("show");
 

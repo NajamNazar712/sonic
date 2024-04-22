@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">Service Code</th>
                                     <th class="border-primary border-darken-1">Service Name</th>
                                     <th class="border-primary border-darken-1">Product Name</th>
+                                    <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
@@ -59,25 +60,38 @@
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service Code</label>
                                     <input type="text" name="service_code" class="form-control service_code" id="service_code" data-rule-required="true" data-msg-required="Service Code is Required">
 
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service Name</label>
                                     <input type="text" name="service_name" class="form-control service_name" id="service_name"  data-rule-required="true" data-msg-required="Service Name is Required">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="product_id" id="product_id_select" data-rule-required="true" data-msg-required="Product is required">
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Shipping Mode</label>
+                                    <select class="select select2 mb-1" name="shipping_mode_id" id="shipping_mode_id_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                                        @foreach($shipping_modes as $shipping_mode)
+                                            <option value="{{ $shipping_mode->id }}">{{ $shipping_mode->mode }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -124,25 +138,38 @@
                         <div class="row">
                             <input type="hidden" name="service_id" id="service_id">
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service Code</label>
                                     <input type="text" name="service_code" class="form-control service_code" id="edit_service_code" data-rule-required="true" data-msg-required="Service Code is Required">
 
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Service Name</label>
                                     <input type="text" name="service_name" class="form-control service_name" id="edit_service_name"  data-rule-required="true" data-msg-required="Service Name is Required">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Product</label>
                                     <select class="select select2 mb-1" name="product_id" id="edit_product_id_select" data-rule-required="true" data-msg-required="Product is required">
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Shipping Mode</label>
+                                    <select class="select select2 mb-1" name="shipping_mode_id" id="edit_shipping_mode_id_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                                        @foreach($shipping_modes as $shipping_mode)
+                                            <option value="{{ $shipping_mode->id }}">{{ $shipping_mode->mode }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -364,9 +391,20 @@
                 width: '100%',
                 dropdownParent:$('#AddServiceModal')
             });
+            $('#shipping_mode_id_select').prepend('<option value="" selected="selected">Select Shipping Mode</option>').select2({
+                placeholder: 'Select Shipping Mode',
+                width: '100%',
+                dropdownParent:$('#AddServiceModal')
+            });
 
             $('#edit_product_id_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
+                width: '100%',
+                dropdownParent:$('#EditServiceModal')
+            });
+
+            $('#edit_shipping_mode_id_select').prepend('<option value="" selected="selected">Select Shipping Mode</option>').select2({
+                placeholder: 'Select Shipping Mode',
                 width: '100%',
                 dropdownParent:$('#EditServiceModal')
             });
@@ -433,6 +471,7 @@
                     {data: 'service_code', name: 'trax_services.service_code', class: 'align-middle service_code'},
                     {data: 'service_name', name: 'trax_services.service_name', class: 'align-middle service_name'},
                     {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                    {data: 'shipping_mode_name', name: 'sm.mode', class: 'align-middle shipping_mode_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
 

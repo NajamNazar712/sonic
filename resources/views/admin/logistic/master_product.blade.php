@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Master Product Code</th>
                                     <th class="border-primary border-darken-1">Master Product Name</th>
+                                    <th class="border-primary border-darken-1">Segment</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Action</th>
 
@@ -58,17 +59,27 @@
                           class="form-horizontal mb-1" novalidate="novalidate">
                         @csrf
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Code</label>
                                     <input type="text" name="parent_code" class="form-control parent_code" id="parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">
 
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Name</label>
                                     <input type="text" name="parent_name" class="form-control parent_name" id="parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Segments</label>
+                                    <select class="select select2 mb-1" name="segment_id" id="segment_id_select" data-rule-required="true" data-msg-required="Segment is required">
+                                        @foreach($segments as $segment)
+                                            <option value="{{ $segment->id }}">{{ $segment->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -112,16 +123,26 @@
                         @method('put')
                         <div class="row">
                             <input type="hidden" name="id" id="id">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Code</label>
                                     <input type="text" name="parent_code" class="form-control parent_code" id="edit_parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Name</label>
                                     <input type="text" name="parent_name" class="form-control parent_name" id="edit_parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Segments</label>
+                                    <select class="select select2 mb-1" name="segment_id" id="edit_segment_id_select" data-rule-required="true" data-msg-required="Segment is required">
+                                        @foreach($segments as $segment)
+                                            <option value="{{ $segment->id }}">{{ $segment->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -336,6 +357,19 @@
 
         $(document).ready(function () {
 
+
+            $('#segment_id_select').prepend('<option value="" selected="selected">Select Segment</option>').select2({
+                placeholder: 'Select Segment',
+                width: '100%',
+                dropdownParent:$('#AddMasterProductModal')
+            });
+
+            $('#edit_segment_id_select').prepend('<option value="" selected="selected">Select Segment</option>').select2({
+                placeholder: 'Select Segment',
+                width: '100%',
+                dropdownParent:$('#EditMasterProductModal')
+            });
+
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -397,6 +431,7 @@
                     },
                     {data: 'parent_code', name: 'trax_parent_products.parent_code', class: 'align-middle parent_code'},
                     {data: 'parent_name', name: 'trax_parent_products.parent_name', class: 'align-middle parent_name'},
+                    {data: 'segment_name', name: 's.name', class: 'align-middle segment_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
 
@@ -472,7 +507,7 @@
                         $("#id").val(master_product.id);
                         $("#edit_parent_code").val(master_product.parent_code);
                         $("#edit_parent_name").val(master_product.parent_name);
-
+                        $("#edit_segment_id_select").val(master_product.segment_id).trigger('change');
                         $("#EditMasterProductModal").modal("show");
 
                     } else {
