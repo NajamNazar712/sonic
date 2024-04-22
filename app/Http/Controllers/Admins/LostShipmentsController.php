@@ -622,7 +622,7 @@ class LostShipmentsController extends Controller
     }
     public function add_lost_shipments(Request $request){
     
-        $passing_status_array = array(1,14,17,18,25,31,38,11,49);
+        $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
