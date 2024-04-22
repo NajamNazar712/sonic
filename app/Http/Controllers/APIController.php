@@ -7789,7 +7789,7 @@ class APIController extends Controller
                 }
             }
         } else {
-            return ['status' => 2, 'message' => 'Access Denied!'];
+            return ['status' => 0, 'message' => 'Access Denied!'];
         }
     }
 
@@ -7878,7 +7878,7 @@ class APIController extends Controller
                         $retail_note = $retail_note->first();
 
                         if ($retail_note->status != 0) {
-                            return ['status' => 2, 'message' => 'Retail note already updated !'];
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
                         }
                     }
 
@@ -7918,7 +7918,7 @@ class APIController extends Controller
                 }
             }
         } else {
-            return ['status' => 2, 'message' => 'Access Denied!'];
+            return ['status' => 0, 'message' => 'Access Denied!'];
         }
     }
 
