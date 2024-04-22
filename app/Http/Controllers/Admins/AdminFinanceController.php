@@ -3514,7 +3514,8 @@ class AdminFinanceController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query) {
-                $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
+                // $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 36, 37, 38, 46]);
+                $query->whereNotIn('shipper_status_id', [32, 33, 34, 35, 46]);
             })],
             'actual_weight' => ['required', 'numeric', 'between:0.01,100000'],
         ];
@@ -3592,9 +3593,9 @@ class AdminFinanceController extends Controller
                         if (!Shipment::where('tracking_number', $row['tracking_number'])->exists()) {
                             $errors['Row #' . $row_id][] = 'Shipment is already updated from Booked Status #' . $row['tracking_number'];
                         }
-                        if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
-                            $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
-                        }
+                        // if (Shipment::where('tracking_number', $row['tracking_number'])->where('booking_type_id', 2)->exists()) {
+                        //     $errors['Row #' . $row_id][] = 'Replacement shipment can not updated from excel #' . $row['tracking_number'];
+                        // }
                     }
                 }
                 if (empty($errors)) {
@@ -3614,7 +3615,7 @@ class AdminFinanceController extends Controller
                         $previous_weight_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;
 
                         if ($shipment->actual_weight == null) {
-                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', 'Shipment has not arrived yet so weight charges cannot be viewed!');
+                            return redirect()->route('admin.finance.change_shipment_weight.index')->with('error', $row['tracking_number'] .' Shipment has not arrived yet so weight charges cannot be viewed!');
                         }
 
                         $old_shipment_weight = $shipment->actual_weight;
