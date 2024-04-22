@@ -12,7 +12,7 @@ class DeliveryRevertAccessPermissionSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 949, 'name' => 'Delivery Revert Access - View', 'module_id' => 8),
+            array('id' => 949, 'name' => 'Delivery Revert Access - Update', 'module_id' => 8),
         ));
     }
 }

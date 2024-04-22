@@ -3619,7 +3619,7 @@ class AdminFinanceController extends Controller
                 $finance_admins_ids = explode(',', $finance_admins->text);
                 if(!in_array($admin->id, $finance_admins_ids)){
                     if ($now->format('Y-m-d') != $shipment_journey->updated_at->format('Y-m-d')){
-                        return ['status' => 1, 'error' => 'You can no longer perform this action'];
+                        return ['status' => 1, 'error' => 'This shipment is not delivered in current date, please contact treasury leads/supervisors'];
                     }
                     else {
                         $lost_shipment_shipper = LostShipmentShipper::where('user_id', $shipment->user_id);
