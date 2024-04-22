@@ -100,7 +100,11 @@
                 <div class="modal-body">
                     <select name="Sale_person" id="assign_agent" class="form-control select2">
                         @foreach($agents as $agent)
-                            <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                            <option value="{{ $agent->id }}" >
+                            {{ $agent->trax_id ? $agent->trax_id . ' - ' : '' }}
+                            {{ $agent->name ? $agent->name . ' - ' : '' }}
+                            {{ $agent->dept }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
