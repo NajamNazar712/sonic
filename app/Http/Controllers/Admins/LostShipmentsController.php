@@ -137,11 +137,16 @@ class LostShipmentsController extends Controller
                 ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
                 ->join('shipments_journey', function ($join) use ($admin) {
-                    $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                         ->join('cities as ci', 'ci.id', '=', 'shipments_journey.city_id')
-                         ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id" . 
-                               (isset($admin->responsible_city->zone) ? " AND ci.zone_id = {$admin->responsible_city->zone->id}" : "") . ")"));
+                    $join->join('cities as ci', 'ci.id', '=', 'shipments_journey.city_id');
+                    if (isset($admin->responsible_city->zone) && isset($admin->role_id) && in_array($admin->role_id, [3, 8, 134])) {
+                        $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                                ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND ci.zone_id = {$admin->responsible_city->zone->id})"));
+                    } else {
+                        $join->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+                    }
                 })
+                
+                
                 ->leftJoin('admins as ad', 'ad.id', '=', 'shipments_journey.admin_id')
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -171,9 +176,9 @@ class LostShipmentsController extends Controller
 //                    $sub_query->where('shipments.payment_status_id', '>', 1);
 //                });
 
-            // if (session('role_id') != 1) {
-            //     $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
-            // }
+            if (session('role_id') != 1) {
+                $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            }
 
             if(session('role_id') != 1){
                 $check_lost_shipments_admins = LostShipmentAdmin::where('admin_id', Auth::id());
