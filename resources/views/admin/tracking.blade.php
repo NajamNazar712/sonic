@@ -635,6 +635,10 @@
         </div>
     </div>
     </div>
+
+    <div class="modal fade text-left addLostResponsibleModal" data-backdrop="static" tabindex="-1" role="dialog">        
+
+    </div>
 @endsection
 
 @section('css')
@@ -1607,10 +1611,19 @@
                                         googleMapsUrl = 'https://www.google.com/maps?q=' + history.area_log.latitude + ',' + history.area_log.longitude;
                                     }
                                     var formattedDateTime = moment(history.date_time).format('YYYY-MM-DD HH:mm:ss');
+                                    console.log(history.responsible);
                                     shipment += '<tr>';
                                     shipment += '<td>' + formattedDateTime + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
-                                    shipment += '<td>' + (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '</td>'; 
+                                    shipment += '<td>' + 
+                                    (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
+                                    (history.responsible && history.responsible.length > 0 ? 
+                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ') </button>' :
+                                        '-'
+                                    ) +
+                                    '</td>';
+
+                              
                                     shipment += '<td>' + (history.status_reason || '') + '</td>';
                                     shipment += '<td>' + history.remarks + '</td>';
                                     shipment += '<td>' + history.user + '</td>';
@@ -3433,7 +3446,74 @@
 
         });
 
-            
+        $(document).on('click', '.responsible_person_shipment', function() {
+            var shipment_id = $(this).attr('data-shipment-id');
+            var updated_at = $(this).attr('data-journey_updated_at');
+
+            console.log(updated_at);
+
+            // Make an AJAX request
+            $.ajax({
+                url:  '{{ route('admin.delivery.lost.lost_responsible_list') }}',
+                type: 'GET', 
+                data: { 
+                    'shipment_id': shipment_id, 
+                    'updated_at' : updated_at 
+                }, 
+                success: function(response) {
+                    var modalContent =  
+                        '<div class="modal-dialog modal-xl" role="document">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header bg-primary white">' +
+                        '<h4 class="modal-title white">Add Lost Responsible for Shipment ID: ' + shipment_id + '</h4>' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="modal-body text-center">' +
+                        '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                        '<table class="table table-bordered datatable" id="addLostResponsibleTable">' +
+                        '<thead>' +
+                        '<tr role="row" class="bg-primary white">' +
+                        '<th class="border-primary border-darken-1">S. No.</th>' +
+                        '<th class="border-primary border-darken-1">Employee ID</th>' +
+                        '<th class="border-primary border-darken-1">Employee Name</th>' +
+                        '<th class="border-primary border-darken-1">Employee Type</th>' +
+                        '<th class="border-primary border-darken-1">Employee Status</th>' +
+                        '<th class="border-primary border-darken-1">Marked At</th>' +
+
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>'; 
+
+                        $.each(response.details, function(index, item) {
+                            var employee = item;
+                                modalContent += '<tr>';
+                                modalContent += '<td>' + (index + 1) + '</td>'; 
+                                modalContent += '<td>' + (employee.trax_id ? employee.trax_id : '') + '</td>'; 
+                                modalContent += '<td>' + employee.name + '</td>'; 
+                                modalContent += '<td>' + employee.type + '</td>'; 
+                                modalContent += '<td>' + employee.status + '</td>';
+                                modalContent += '<td>' + employee.marked_at + '</td>'; 
+                                modalContent += '</tr>';                            
+                        });
+
+
+                    modalContent += '</tbody>' + // End of tbody
+                        '</table>' +
+                       
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                    $('.addLostResponsibleModal').html('');
+                    $('.addLostResponsibleModal').append(modalContent);
+                    $('.addLostResponsibleModal').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors if any
+                }
+            });
+        });
 
 	</script>
 @endsection
