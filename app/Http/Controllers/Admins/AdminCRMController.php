@@ -1296,7 +1296,7 @@ class AdminCRMController extends Controller
                             ->whereIn('a.role_id', [115, 43, 75]);
             });
         })
-        ->select(['a.id as id', 'a.name as name','a.trax_id as trax_id','admin_departments.name as dept' ])->get();
+        ->select(['a.id as id', 'a.name as name','a.trax_id as trax_id','admin_departments.name as department' ])->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $zones = Zone::where('status', 1)->get();

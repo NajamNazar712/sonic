@@ -103,7 +103,7 @@
                             <option value="{{ $agent->id }}" >
                             {{ $agent->trax_id ? $agent->trax_id . ' - ' : '' }}
                             {{ $agent->name ? $agent->name . ' - ' : '' }}
-                            {{ $agent->dept }}
+                            {{ $agent->department }}
                             </option>
                         @endforeach
                     </select>
