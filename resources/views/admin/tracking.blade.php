@@ -1604,7 +1604,7 @@
                                     shipment += '<td>' + 
                                     (history.image_audio_location !== undefined ? history.image_audio_location : '-') + '|' + 
                                     (history.responsible && history.responsible.length > 0 ? 
-                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ')' + '</button>' :
+                                        '<button class="btn btn-sm btn-outline-info align-middle responsible_person_shipment" data-shipment-id="' + id + '" data-journey_updated_at="' + history.responsible[0].journey_updated_at + '">' + 'Responsibles (' + history.responsible.length + ') </button>' :
                                         '-'
                                     ) +
                                     '</td>';
