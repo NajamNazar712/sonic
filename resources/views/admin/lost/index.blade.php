@@ -17,7 +17,14 @@
                     <input type="hidden" name="search_total_lost_approved_shipments" id="search_total_lost_approved_shipments">
                     <input type="hidden" name="search_total_lost_pending_shipments" id="search_total_lost_pending_shipments">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-4">
+                        <div class="col-3">
+
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                        </div>
+
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -27,7 +34,7 @@
                                 <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -37,6 +44,9 @@
                                 <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
                             </div>
                         </div>
+
+                 
+
                         <div class="col-2">
                             <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
@@ -735,11 +745,13 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 data: function(d) {    
-                    d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
+                    // d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
                     d.search_total_lost_approved_shipments = $('#search_total_lost_approved_shipments').val();
                     d.search_total_lost_pending_shipments = $('#search_total_lost_pending_shipments').val();
                     d.search_from = $('input[name="from_date_formatted"]').val();
                     d.search_to = $('input[name="to_date_formatted"]').val();
+                    d.tracking_numbers = $('#search_form .tracking_numbers').val();
+
                 }
             },
             rowId: 'shId',
@@ -1050,7 +1062,7 @@
             $('#search_total_lost_shipments').val(1);
             $('#search_total_lost_approved_shipments').val('');
             $('#search_total_lost_pending_shipments').val('');
-            table.draw();
+            // table.draw();
         });
 
 
@@ -1270,10 +1282,13 @@
                         '_token': '{{ csrf_token() }}',
                     },
                     success: function(response) {
+                        var total = parseInt(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments) +
+                            parseInt(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments) +
+                            parseInt(response.details.total_rejections == null ? 0 : response.details.total_rejections);                       
                         $('#total_of_pending_shipments').text(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments);
                         $('#total_of_approved_shipments').text(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments);
-                        $('#total_of_shipments').text(response.details.total == null ? 0 : response.details.total);
                         $('#rejection_shipments').text(response.details.total_rejections == null ? 0 : response.details.total_rejections);
+                        $('#total_of_shipments').text(total.toString());
                     },
                     error: function(xhr, status, error) {
                         console.error('AJAX request failed');
@@ -1285,6 +1300,44 @@
        
         });
 
+        //Selectize
+        var select = $('#search_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+        });
+   
+        $('#search_form').bind('submit', function (e) {
+                e.preventDefault();
+                var tracking_numbers = $('#search_form .tracking_numbers').val();
+                if (tracking_numbers != '') {
+                    table.draw();
+                }
+            });    
+    
     });
 
     </script>
