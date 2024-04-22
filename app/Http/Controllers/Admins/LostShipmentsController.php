@@ -135,11 +135,12 @@ class LostShipmentsController extends Controller
                 ->join('cities as h', 'dc.hub_id', '=', 'h.id')
                 ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
                 ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+     
                 ->join('shipments_journey as sj_city', function ($join) {
                     $join->on('sj_city.shipment_id', '=', 'shipments.id')
-                        ->where('sj_city.id', '=',
-                            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        ->where('sj_city.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
                 })
+                
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
                 ->join('shipments_journey', function ($join) use ($admin) {
                     if (isset($admin->responsible_city->zone) && isset($admin->role_id) && in_array($admin->role_id, [3, 8, 134])) {
