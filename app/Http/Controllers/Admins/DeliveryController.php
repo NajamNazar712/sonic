@@ -1839,6 +1839,7 @@ class DeliveryController extends Controller
 
                 $shipment_details_row_start .= '
                     <td class="' . $class . '">' . $shipment->items->sum('quantity') . '</td>';
+                    
                 if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
                             <td class="' . $class . '">Rs ' . number_format($shipment->amount) . '</td>
