@@ -70,6 +70,15 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <select name="product_id" id="product_id" class="form-control select2" {{-- data-rule-required="true" data-msg-required="Product Type is required" --}}>
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <input type="text" name="lat" id="lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required">
                         </div>
@@ -89,6 +98,13 @@
                         </div>
                         <div class="input-group mb-2">
                             <input type="text" name="discount" id="discount" class="form-control discount" placeholder="Discount"  value="" max="100">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">%</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-2">
+                            <input type="text" name="product_percentage" id="product_percentage" class="form-control product_percentage" placeholder="Product"  value="" max="100">
                             <div class="input-group-append">
                                 <span class="input-group-text" id="basic-addon2">%</span>
                             </div>
@@ -136,6 +152,15 @@
                         <div class="form-group">
                             <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
                         </div>
+
+                        <div class="form-group">
+                            <select name="product_id" id="product_id" class="form-control select2">
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="input-group mb-2">
                             <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
                                    data-rule-required="true" data-msg-required="Insurance is required" min="1">
@@ -149,6 +174,14 @@
                                 <span class="input-group-text" id="basic-addon2">%</span>
                             </div>
                         </div>
+
+                        <div class="input-group mb-2">
+                            <input type="text" name="product_percentage" id="product_percentage_edit" class="form-control product_percentage" placeholder="Product"  value="" max="100">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="basic-addon2">%</span>
+                            </div>
+                        </div>
+
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary edit" value="Add">Update</button>
                         </div>
@@ -213,6 +246,18 @@
                 allowClear:true
             });
 
+            $('#add_franchise_form #product_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Product',
+                allowClear:true
+            });
+
+            $('#edit_franchise_form #product_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Product',
+                allowClear:true
+            });
+        
 
 
             $('.lat').inputmask({
@@ -443,6 +488,28 @@
                 var discount = table.row($(this).parents('tr')).data().discount;
                 var insurance = table.row($(this).parents('tr')).data().insurance;
 
+                var product_percent = <?php echo json_encode($product_percentage); ?>;
+
+                // Find the product_id associated with the current franchise_id
+                var desired_product_id = null;
+                for (var i = 0; i < product_percent.length; i++) {
+                    if (product_percent[i].franchise_id === id) {
+                        desired_product_id = product_percent[i].product_id;
+                        break;
+                    }
+                }
+
+                // Find the product_percentage for the specific franchise_id and product_id
+                var product_percentage_value = '';
+                if (desired_product_id !== null) {
+                    for (var i = 0; i < product_percent.length; i++) {
+                        if (product_percent[i].franchise_id === id && product_percent[i].product_id === desired_product_id) {
+                            product_percentage_value = product_percent[i].product_percentage;
+                            break;
+                        }
+                    }
+                }
+
                 $('#franchise_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_phone_number').val(phone_no);
@@ -452,6 +519,8 @@
                 $('#edit_long').val(long);
                 $('#edit_discount').val(discount);
                 $('#edit_insurance').val(insurance);
+
+                $('#product_percentage_edit').val(product_percentage_value);
 
                 $('#edit_remarks_title').text('Edit Franchise ' + name);
                 $('#edit_franchise').modal('show');

@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Product;
+use App\Http\Models\RetailFranchiseProductPerecntage;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -72,7 +74,10 @@ class RetailAdminUserManagementController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 377);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
-        return view('admin.retail.franchise.index')->with(['hubs' => $hubs]);
+        $products = Product::orderBy('product_name')->get();
+        $product_percentage = RetailFranchiseProductPerecntage::get();
+
+        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage]);
     }
 
     public function franchise_list(Request $request)
@@ -158,6 +163,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_add(Request $request)
     {
+        $admin = $request->user();
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
 
         $franchise = new RetailFranchise();
@@ -182,6 +188,13 @@ class RetailAdminUserManagementController extends Controller
         $franchise->code = $code;
         $franchise->save();
 
+        RetailFranchiseProductPerecntage::create([
+            'franchise_id' => $franchise->id,
+            'product_id' => $request->product_id,
+            'product_percentage' => $request->product_percentage,
+            'created_by' => $admin->id,
+        ]);
+
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
 
@@ -195,11 +208,14 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_edit(Request $request)
     {
+        dd(
+            $request->all()
+        );
+        $admin = $request->user();
         $id = $request->franchise_id;
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
         if (!$existing_franchise->exists()) {
             $franchise = RetailFranchise::find($request->franchise_id);
-
             $franchise->name = $request->name;
             $franchise->phone_no = $request->phone_number;
             $franchise->email = $request->email;
@@ -210,6 +226,13 @@ class RetailAdminUserManagementController extends Controller
             $franchise->insurance = $request->edit_insurance;
             $franchise->updated_by = Auth::id();
             $franchise->save();
+
+            $productPercentage = RetailFranchiseProductPerecntage::where('franchise_id', $franchise->id)->first();
+            $productPercentage->update([
+                'product_id' => $request->product_id,
+                'product_percentage' => $request->product_percentage,
+                'updated_by' => $admin->id
+            ]);
 
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
