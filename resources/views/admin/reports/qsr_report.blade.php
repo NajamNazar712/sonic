@@ -156,18 +156,22 @@
                             <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To">
                         </div>
                     </div>
-                    <div class="col-4">
+                    {{--todo new end--}}
+
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
+                <div class="row justify-content-end">
+                <div class="col-4">
+                <h4 for="export" class="font">Excel Column(s):</h4>
+
                             <fieldset class="form-group">
                                 <select name="export[]" id="export" class="form-control select2" multiple="multiple">
                                     <option value="selectAll">Select All</option>
                                 </select>
                             </fieldset>
                         </div>
-                    {{--todo new end--}}
-
-                    <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
                 </div>
                 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -346,7 +350,7 @@
 
             $('#export').select2({
                 width:'100%',
-                placeholder:"Export Options",
+                placeholder:"Excel Column(s)",
                 allowClear:true,
             });
             $('#export').on('select2:select', function(e) {
@@ -489,8 +493,8 @@
                         action: function(e){
                                     if ($('#export').val().length === 0) {
                                         swal({
-                                            text: 'Atleast 1 column should be selected from export options.!',
-                                            title: 'No Column Selected',
+                                            text: 'Atleast 1 column should be selected for export.!',
+                                            title: 'Please select excel column(s)',
                                             icon: 'warning',
                                             buttons: {
                                                 cancel: {
@@ -677,7 +681,7 @@
             });
             $('#export').append(option).select2({
                 columns: 1,
-                placeholder: 'Export Options',
+                placeholder: 'Excel Column(s)',
                 search: true,
                 selectAll: true
             });
