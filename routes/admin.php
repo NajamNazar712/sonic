@@ -4249,6 +4249,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('batch')->name('batch.')->group(function(){
+            Route::get('','Admins\Logistic\AdminBatchController@booking_batch_index')->name('index');
+            Route::get('list','Admins\Logistic\AdminBatchController@booking_batch_list')->name('list');
+            Route::post('assign_batch','Admins\Logistic\AdminBatchController@booking_batch_assign')->name('assign_batch');
+
+//            Route::post('store', 'Admins\Logistic\AdminBatchController@batch_booking_store')->name('store');
+//            Route::get('edit/{id}', 'Admins\Logistic\AdminBatchController@batch_booking_edit')->name('edit');
+//            Route::put('update', 'Admins\Logistic\AdminBatchController@batch_booking_update')->name('update');
+        });
+
 
     });
 });

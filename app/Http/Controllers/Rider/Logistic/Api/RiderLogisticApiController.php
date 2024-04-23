@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Rider\Logistic\Api;
 
+use App\Http\Controllers\Admins\Logistic\AdminBatchController;
 use App\Http\Controllers\Admins\Logistic\LogisticToShipmentSyncController;
+use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
@@ -15,6 +17,7 @@ use App\Http\Models\Admin\Logistic\TraxService;
 use App\Http\Models\Admin\Logistic\TraxShipperDetail;
 use App\Http\Models\Admin\Logistic\TraxSpecialHandlingList;
 use App\Http\Models\Admin\Logistic\TraxStation;
+use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
@@ -104,12 +107,25 @@ class RiderLogisticApiController extends Controller
 
             $bookig_data=$request->booking_data;
             $rider_id = $request->rider_id;
+            $hub_id = $request->rider_hub;
+            $current_date = Carbon::now()->toDateString();
             $already_exists_bookings = [];
             try {
 
                 if (isset($bookig_data))
                 {
+
+
                     DB::beginTransaction();
+
+                    //check booking batch length for creating a batch
+                    $batch_length=10;
+                    $booking_batch_length =  GeneralSetting::where('type','booking_batch_length')->first();
+                    if($booking_batch_length->exists())
+                    {
+                        $batch_length = $booking_batch_length->setting_value;
+                    }
+
 
                     foreach ($bookig_data as $booking)
                     {
@@ -119,31 +135,15 @@ class RiderLogisticApiController extends Controller
                         {
                             $booking_weight=0;
 
-
                             if($booking['total_volumetric_weight'] >= $booking['total_dense_weight'])
                             {
                                 $booking_weight= $booking['total_volumetric_weight'];
                             }else{
                                 $booking_weight= $booking['total_dense_weight'];
                             }
-//                            $logistic_booking=TraxLogisticBooking::create([
-//                                'shipper_id' => $booking['shipper_id'],
-//                                'cn_number' => $booking['cn_number'],
-//                                'pickup_address_id'=>$booking['pickup_address_id'],
-//                                'booking_date' => $booking['booking_date'],
-//                                'product_id' => $booking['product_id'],
-//                                'service_id' => $booking['service_id'],
-//                                'destination_id' => $booking['destination_id'],
-//                                'shipper_reference' => $booking['shipper_reference'],
-//                                'consignee_name' => $booking['consignee_name'],
-//                                'consignee_phone_1' => $booking['consignee_phone_1'],
-//                                'total_pieces' => $booking['total_pieces'],
-//                                'total_booking_weight'=>$booking_weight,
-//                                'total_dense_weight' => $booking['total_dense_weight'],
-//                                'total_volumetric_weight' => $booking['total_volumetric_weight'],
-//                                'user_type'=>2,
-//                                'created_by'=>$rider_id,
-//                            ]);
+
+
+
                             $logistic_booking = new TraxLogisticBooking();
 
                             $logistic_booking->shipper_id = $booking['shipper_id'];
@@ -161,7 +161,7 @@ class RiderLogisticApiController extends Controller
                             $logistic_booking->total_booking_weight = $booking_weight;
                             $logistic_booking->total_dense_weight = $booking['total_dense_weight'];
                             $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
-                            $logistic_booking->user_type = 2;
+                            $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
                             $logistic_booking->created_by = $rider_id;
 
                             $logistic_booking->save();
@@ -172,20 +172,12 @@ class RiderLogisticApiController extends Controller
                             {
                                 //send data to shipments table
                                 $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,5323,0,1,0,1,1,1,4,$booking['total_pieces'],1,0.0,null,2);
-
                             }
+
 
                             if (isset($booking['booking_pieces_data']))
                             {
                                 foreach ($booking['booking_pieces_data'] as $pieces_data) {
-//                                    TraxBookingPiece::create([
-//                                        'booking_id'=>$logistic_booking->id,
-//                                        'from_pieces'=>$pieces_data['from_pieces'],
-//                                        'to_pieces'=>$pieces_data['to_pieces'],
-//                                        'quantity'=>$pieces_data['quantity'],
-//                                        'user_type'=>2,
-//                                        'created_by'=>$rider_id,
-//                                    ]);
 
                                     $booking_piece = new TraxBookingPiece();
 
@@ -210,18 +202,7 @@ class RiderLogisticApiController extends Controller
                                 foreach ($booking['item_refernces_data'] as  $item_data) {
 
                                     foreach ($item_data['item_detail'] as $detail){
-//                                        TraxItemRefernce::create([
-//                                            'booking_id' => $logistic_booking->id,
-//                                            'item_code' => $item_data['item_code'],
-//                                            'width' => $detail['width'],
-//                                            'height' => $detail['height'],
-//                                            'length' => $detail['length'],
-//                                            'weight' => $detail['weight'],
-//                                            'no_piece' => $detail['no_piece'],
-//                                            'user_type'=>2,
-//                                            'created_by'=>$rider_id,
-//
-//                                        ]);
+
                                         $item_reference = new TraxItemRefernce();
 
                                         $item_reference->booking_id = $logistic_booking->id;
@@ -242,14 +223,6 @@ class RiderLogisticApiController extends Controller
                             {
                                 foreach ($booking['item_insurance_data'] as $item_insure)
                                 {
-//                                    TraxItemInsurance::create([
-//                                        'booking_id' => $logistic_booking->id,
-//                                        'special_handling_id' => $item_insurance['special_handling_id'],
-//                                        'insurance' => $item_insurance['insurance'],
-//                                        'item_code' => $item_insurance['item_code'],
-//                                        'user_type'=>2,
-//                                        'created_by'=>$rider_id,
-//                                    ]);
                                     $item_insurance = new TraxItemInsurance();
 
                                     $item_insurance->booking_id = $logistic_booking->id;
@@ -262,11 +235,35 @@ class RiderLogisticApiController extends Controller
                                     $item_insurance->save();
                                 }
                             }
+
+                            //logistic batch process
+                            $batch = TraxBookingBatch::leftJoin('trax_booking_batch_details as bbd', 'trax_booking_batches.id', '=', 'bbd.batch_id')
+                                ->where('trax_booking_batches.city_id', $hub_id)
+                                ->where('trax_booking_batches.batch_date', $current_date)
+                                ->selectRaw('COUNT(bbd.batch_id) AS batch_count, trax_booking_batches.id AS batch_id')
+                                ->groupBy('trax_booking_batches.id')
+                                ->havingRaw('batch_count < ?',[$batch_length]);
+
+                            //check batch exist than check batch length
+//                            $batch =$batch->first();
+
+                            if($batch->exists())
+                            {
+                                $batch_id = $batch->first()->batch_id;
+                            } else {
+                                //create new batch
+                                $batch_id = AdminBatchController::booking_batch_store($hub_id,$batch_length);
+
+                            }
+
+                            //create booking batch detail for add bookings in batch
+                            AdminBatchController::booking_batch_detail_store($batch_id,$logistic_booking->id);
+
                         } else {
-                            $booking = $booking->get();
+                            $old_booking = $old_booking->first();
                             $already_exists_bookings [] = [
-                                'booking_id'=>$booking->id,
-                                'cn_number'=>$booking->cn_number
+                                'booking_id'=>$old_booking->id,
+                                'cn_number'=>$old_booking->cn_number
                             ];
                         }
 
