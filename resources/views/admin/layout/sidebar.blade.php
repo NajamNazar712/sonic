@@ -2841,15 +2841,26 @@
                                 </ul>
                             </li>
                         @endif
+
+                        {{-- Agent  Types --}}
+                        @if (session('role_id') == 1 || in_array(697, session('permissions')))
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Agents</span></a>
+                            <ul class="menu-content">
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">Agents List</a>
+                                </li>
+
+                                <li>
+                                    <a class="menu-item" href="{{ route('admin.settings.agent_types.index') }}">Agent Types</a>
+                                </li>
+                            </ul>
+                        </li>
+                        @endif
+
                         @if (session('role_id') == 1 || in_array(697, session('permissions')))
                             <li><a class="menu-item"
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
-                        @endif
-                        {{-- Agent  Types --}}
-                        @if (session('role_id') == 1 || in_array(697, session('permissions')))
-                            <li><a class="menu-item"
-                                    href="{{ route('admin.settings.agent_types.index') }}">Agent Types</a></li>
                         @endif
                         <!--                         add side bar-->
 
