@@ -550,10 +550,10 @@ trait RvTrait
         // 15 = Shipment - On Hold for Self Collection
         // 52 = Shipment - Re-Attempt Requested
         // 66 = Shipment - Re-Attempt Call Requested (from shipper)
-
         // if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52])) { old for rv
-        if (in_array($parcel->shipper_status_id, [12, 52, 66])) {
 
+        if (in_array($parcel->shipper_status_id, [12, 52, 66]) || $globalAdminId) {
+                
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
