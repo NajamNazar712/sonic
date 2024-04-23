@@ -1234,10 +1234,12 @@
                                         '>Re-Attempt</button>';
                                 @endif
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
-                                    shipment +=
-                                        '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' +
-                                        id + ' data-tracking=' + details.tracking_history[0].status_id +
-                                        '>Intercept</button>';
+                                    if (details.tracking_history && details.tracking_history.length > 0) {
+                                        shipment +=
+                                            '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' +
+                                            id + ' data-tracking=' + details.tracking_history[0].status_id +
+                                            '>Intercept</button>';
+                                    }
                                 @endif
                                 if (details.dws_image != null) {
                                     shipment +=
