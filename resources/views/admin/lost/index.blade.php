@@ -25,6 +25,15 @@
                         </div>
 
                         <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_lost_status" id="search_lost_status" class="form-control select2" >
+                                        <option value="0">Pending</option>
+                                        <option value="1">Approved</option>
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -47,7 +56,7 @@
 
                  
 
-                        <div class="col-2">
+                        <div class="col-2 mt-2">
                             <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
                     </form>
@@ -149,6 +158,8 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Last Hub Name</th>
+                        <th class="border-primary border-darken-1">Last Zone Name</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
@@ -316,6 +327,11 @@
             width: '100%',
             placeholder: 'Select Reason'
         });
+        $('#search_lost_status').prepend('<option value="" selected></option>').select2({
+            width:'100%',
+            placeholder:"Select Lost Status",
+            allowClear:true,
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -343,6 +359,8 @@
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
+                        head.push('Last Hub Name');
+                        head.push('Last Zone Name');
                         head.push('Consignee Name');
                         head.push('Phone');
                         head.push('Address');
@@ -371,6 +389,8 @@
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            row.push(values.last_hub_name);
+                            row.push(values.last_zone_name);
                             row.push(values.consignee_name);
                             row.push(values.phone);
                             row.push(values.consignee_address);
@@ -751,6 +771,8 @@
                     d.search_from = $('input[name="from_date_formatted"]').val();
                     d.search_to = $('input[name="to_date_formatted"]').val();
                     d.tracking_numbers = $('#search_form .tracking_numbers').val();
+                    d.search_lost_status = $('#search_lost_status').val();
+
 
                 }
             },
@@ -765,6 +787,8 @@
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                {data: 'last_hub_name', name: 'ci.name', class: 'align-middle last_hub_name'},
+                {data: 'last_zone_name', name: 'zo.name', class: 'align-middle last_zone_name'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
