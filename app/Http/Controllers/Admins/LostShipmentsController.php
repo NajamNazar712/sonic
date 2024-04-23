@@ -58,10 +58,22 @@ class LostShipmentsController extends Controller
         $service_type = BookingType::all();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', [2, 5, 8, 9, 10, 12, 19, 20, 34, 38, 39, 40, 41, 42])->select('id', 'name')->get();
 
-        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
-            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id', '=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        $admin_id = session('id');
+        $admin = Admin::find($admin_id);
+
+        $shipments = Shipment::leftJoin('shipments_journey as sj_city', function ($join) {
+            $join->on('sj_city.shipment_id', '=', 'shipments.id')
+                ->where('sj_city.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        })
+        ->join('cities as ci', 'ci.id', '=', 'sj_city.city_id')
+        ->join('shipments_journey', function ($join) use ($admin) {
+            if (isset($admin->responsible_city->zone) && isset($admin->role_id) && in_array($admin->role_id, [3, 8, 134])) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND ci.zone_id = {$admin->responsible_city->zone->id})"));
+            } else {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+            }
         })
         ->where('shipments.shipper_status_id', 18);
         
@@ -1022,12 +1034,26 @@ class LostShipmentsController extends Controller
             'total_of_pending_shipments' => 0,
         ];
 
-        $shipments = Shipment::leftJoin('shipments_journey', function ($join) {
-            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-        })
-            ->where('shipments.shipper_status_id', 18)->whereBetween('shipments_journey.updated_at',[$request->from_date, $request->to_date]);
+        $admin_id = session('id');
+        $admin = Admin::find($admin_id);
 
+        $shipments = Shipment::leftJoin('shipments_journey as sj_city', function ($join) {
+            $join->on('sj_city.shipment_id', '=', 'shipments.id')
+                ->where('sj_city.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        })
+        ->join('cities as ci', 'ci.id', '=', 'sj_city.city_id')
+        ->join('shipments_journey', function ($join) use ($admin) {
+            if (isset($admin->responsible_city->zone) && isset($admin->role_id) && in_array($admin->role_id, [3, 8, 134])) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id AND ci.zone_id = {$admin->responsible_city->zone->id})"));
+            } else {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=', DB::raw("(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)"));
+            }
+        })
+        ->where('shipments.shipper_status_id', 18)
+        ->whereBetween('shipments_journey.updated_at', [$request->from_date, $request->to_date]);
+    
             // COUNT(*) as total,
         $shipmentsCounts = $shipments
             ->selectRaw('
