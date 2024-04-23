@@ -240,7 +240,7 @@
                         },
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},
-                    {data: 'agent_type.name', name: 'agent_type.name', class: 'align-middle agent_type'},
+                    {data: 'agent_type.name', name: 'agent_type.name', class: 'align-middle agent_type', orderable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -255,13 +255,12 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var departments_select = '<select name="departments_select" id="departments_select" class="select2 form-control"></select>';
                    
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') ||  $(header).is('.agent_type')) {
                             $(td).appendTo($(search));
                         }else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
