@@ -1963,9 +1963,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
         });
-        Route::prefix('qsr_new')->name('qsr_new.')->group(function () {
-            Route::get('', 'Admins\AdminReportsController@qsr2_index')->name('index');
-            Route::post('list', 'Admins\AdminReportsController@qsr2_list')->name('list');
+        Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
         });
         Route::prefix('return_note')->name('return_note.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
