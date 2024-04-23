@@ -487,6 +487,23 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         action: function(e){
+                                    if ($('#export').val().length === 0) {
+                                        swal({
+                                            text: 'Atleast 1 column should be selected from export options.!',
+                                            title: 'No Column Selected',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'OK',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                }
+                                            },
+                                            dangerMode: true
+                                        })
+                                        return;
+                                    }
                                     $.ajax({
                                         url: "{{ route('admin.reports.qsr.list') }}",
                                         method: "POST",
