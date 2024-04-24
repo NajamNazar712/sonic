@@ -4969,7 +4969,8 @@ class APIController extends Controller
                                 'shipment_id' => $shipment->id,
                                 'rv_assign_agent_status_id' => 2, //Reattempt
                                 'updated_by_id' =>  $user_id,
-                            ];
+                                'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
+                            ];                           
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
 
