@@ -24,7 +24,7 @@ class AgentSettingsController extends Controller
     //Agents List
     public function agents_list_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 495);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 763);
         $agent_types = AgentType::get();
 
         return view('admin.settings.agents_list.index')->with(['agent_types' => $agent_types]);
@@ -34,7 +34,7 @@ class AgentSettingsController extends Controller
     public function agents_list_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 496);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 764);
         }
         $agents = Admin::with('agent_type:id,name')
         ->where('trax_id', 'LIKE','Trax-C%')
