@@ -2850,9 +2850,9 @@
                                     <a class="menu-item" href="{{ route('admin.settings.agents_list.index') }}">Agents List</a>
                                 </li>
 
-                                <li>
+                                {{-- <li>
                                     <a class="menu-item" href="{{ route('admin.settings.agent_types.index') }}">Agent Types</a>
-                                </li>
+                                </li> --}}
                             </ul>
                         </li>
                         @endif
