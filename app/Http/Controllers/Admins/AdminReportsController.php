@@ -12668,7 +12668,7 @@ class AdminReportsController extends Controller
     //RVR Call History
     public function rvr_call_history_index()
     {
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 761);
 
         $shippers = User::where('status', 3)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
@@ -12687,7 +12687,7 @@ class AdminReportsController extends Controller
     public function rvr_call_history_list(Request $request)
     {   
         if ($request->get('excel') && $request->get('excel') == true) {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 762);
         }
 
         $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')

@@ -19,12 +19,16 @@ class OverallRVRCallHistoryReportSeeder extends Seeder
 
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 733, 'screen_name' => 'RVR Call History Report', 'action' => 'View'),
+            array('id' => 761, 'screen_name' => 'RVR Call History Report', 'action' => 'View'),
+        ));
+
+        DB::table('activity_trail_actions')->insert(array(
+            array('id' => 762, 'screen_name' => 'RVR Call History Report', 'action' => 'Excel Download'),
         ));
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > RVR Call History Report', 'url'=>'admin.reports.rv_action_count_report.index', 'permission_id' => 950),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > RVR Call History Report', 'url'=>'admin.reports.rvr_call_history.index', 'permission_id' => 950),
         ));
     }
 }
