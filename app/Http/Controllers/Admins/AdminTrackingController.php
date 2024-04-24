@@ -808,6 +808,10 @@ class AdminTrackingController extends Controller
 
     public function cx_quick_tracking_list(Request $request)
     {
+        $date = date('Y-m-d H:i:s');
+        $start_date = date('Y-m-d 00:00:01', strtotime('-12 months', strtotime($date)));
+        $end_date = date('Y-m-d 23:59:59',strtotime($date));
+
         $quick_tracking = Shipment::join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -815,6 +819,37 @@ class AdminTrackingController extends Controller
             ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->leftjoin('crm_requests as crm', 'shipments.id', '=', 'crm.shipment_id')
             ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'ss.name as status', 'u.name as shipper_name', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id');
+//            ->whereBetween('shipments.created_at',[$start_date,$end_date]);
+        if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
+            if ($tracking = $request->get('search_tracking')) {
+                $quick_tracking->where('shipments.tracking_number', 'LIKE', '%' . $tracking . '%');
+            }
+            if ($shipper = $request->get('search_shipper')) {
+                $quick_tracking->where('u.id', 'LIKE', '%' . $shipper . '%');
+            }
+            if($phone_no = $request->get('search_phone_no')){
+                $quick_tracking->where('shipments.consignee_phone_number_1', '=', $phone_no);
+            }
+            if ($order_id = $request->get('search_order_id')) {
+                $quick_tracking->where('shipments.order_id', 'LIKE', '%' . $order_id . '%');
+            }
+            if ($crm_request_id = $request->get('crm_request_id')) {
+                $quick_tracking->where('crm.id', $crm_request_id);
+            }
+            if ($search_shipment_status = $request->get('search_shipment_status')) {
+                $quick_tracking->where('shipments.shipper_status_id', $search_shipment_status);
+            }
+        } else {
+            $quick_tracking->where('shipments.tracking_number', null);
+            $quick_tracking->where('u.id', null);
+            $quick_tracking->where('shipments.consignee_phone_number_1', null);
+            $quick_tracking->where('shipments.order_id', null);
+            $quick_tracking->where('shipments.consignee_name', null);
+            $quick_tracking->where('shipments.consignee_address', null);
+            $quick_tracking->where('crm.id', null);
+            $quick_tracking->where('shipments.shipper_status_id', null);
+        }
+
         $datatable = Datatables::of($quick_tracking)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -844,35 +879,6 @@ class AdminTrackingController extends Controller
 
                 return $dropdown;
             });
-        if ($request->has('search_tracking') || $request->has('search_shipper') || $request->has('search_phone_no') || $request->has('search_order_id' || $request->has('crm_request_id') || $request->has('search_shipment_status'))) {
-            if ($tracking = $request->get('search_tracking')) {
-                $datatable->where('shipments.tracking_number', 'LIKE', '%' . $tracking . '%');
-            }
-            if ($shipper = $request->get('search_shipper')) {
-                $datatable->where('u.id', 'LIKE', '%' . $shipper . '%');
-            }
-            if($phone_no = $request->get('search_phone_no')){
-                $datatable->where('shipments.consignee_phone_number_1', '=', $phone_no);
-            }
-            if ($order_id = $request->get('search_order_id')) {
-                $datatable->where('shipments.order_id', 'LIKE', '%' . $order_id . '%');
-            }
-            if ($crm_request_id = $request->get('crm_request_id')) {
-                $datatable->where('crm.id', $crm_request_id);
-            }
-            if ($search_shipment_status = $request->get('search_shipment_status')) {
-                $datatable->where('shipments.shipper_status_id', $search_shipment_status);
-            }
-        } else {
-            $datatable->where('shipments.tracking_number', null);
-            $datatable->where('u.id', null);
-            $datatable->where('shipments.consignee_phone_number_1', null);
-            $datatable->where('shipments.order_id', null);
-            $datatable->where('shipments.consignee_name', null);
-            $datatable->where('shipments.consignee_address', null);
-            $datatable->where('crm.id', null);
-            $datatable->where('shipments.shipper_status_id', null);
-        }
         return $datatable->make(true);
     }
 

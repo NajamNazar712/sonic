@@ -61,6 +61,7 @@
 													</span>
 												</div>
 												<input type="text" name="search_from"
+													   data-value="{{$from}}"
 													   class="form-control pickadate bg-primary border-primary white rounded-right"
 													   id="search_date_from" placeholder="Date (From)">
 											</div>
@@ -73,6 +74,7 @@
 													</span>
 												</div>
 												<input type="text" name="search_to"
+													   data-value="{{$to}}"
 													   class="form-control pickadate bg-primary border-primary white rounded-right"
 													   id="search_date_to" placeholder="Date (To)">
 											</div>
@@ -787,6 +789,7 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
+				deferLoading: 0,
 				ajax: {
 					url: '{{ route('admin.finance.done_payments.list') }}',
 					data: function (d) {
