@@ -173,25 +173,19 @@
                             table.rows().nodes().each(function(index) {
                                 var row = table.row(index);
 
-                                if ($(row.node().firstChild).hasClass(
-                                        'select-checkbox') && !$(row.node()).hasClass(
-                                        'selected')) {
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                     id = parseInt(row.id());
 
-                                    var assigned_agent_id = row.data()
-                                        .assigned_agent_id;
-                                    var tat = row.data().confirmation_on;
+                                    hub_id = $(row.node()).data('id');
 
-                                    // admin_id = $(row.node()).data('id');
-                                    admin_id = id;
-                                   
                                     var allow = false;
 
-                                    if (admin_ids.length == 0) {
-                                        admin_ids.push(admin_id);
+                                    if(admin_ids.length == 0) {
+                                        admin_ids.push(hub_id);
 
                                         allow = true;
-                                    } else if (admin_ids[0] == admin_id) {
+                                    }
+                                    else if(admin_ids[0] == hub_id) {
                                         allow = true;
                                     }
 
@@ -204,17 +198,46 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.assign').enable();
-                                        table.button('.un-assign').enable();
+                                        table.button('.update_agent_type').enable();
+
                                     }
                                 }
                             });
                         }
                     },
                     {
-                        text: '<i class="la la-plus"></i> Assign Agent Type',
-                        className: 'btn btn-primary tag_agents',
-                        enabled: true,
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.update_agent_type').disable();
+                                        admin_ids.splice(index, 1);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text: '<i class="la la-plus"></i> Update Agent Type',
+                        className: 'btn btn-primary update_agent_type',
+                        enabled: false,
                         action: function (e, dt, node, config) {
                             $('#AddAgentTypeModal').modal('show');
                             
@@ -223,6 +246,12 @@
                     @endif
                     'reset'
                     ],
+                    select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -233,11 +262,8 @@
                 },
                 ajax: '{{ route('admin.settings.agents_list.list') }}',
                 rowId: 'id',
-                columns: [{data: 'id',orderable: false,searchable: false,class: 'text-center align-middle select p-1',targets: 0,
-                            render: function(data, type, row) {
-                                return '';
-                            }
-                        },
+                columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},
                     {data: 'agent_type.name', name: 'agent_type.name', class: 'align-middle agent_type', orderable: false},
@@ -291,63 +317,41 @@
                 }
             });
 
+            var selected_rows_2 = [];
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+              
+                var index = $.inArray(id, selected_rows);
+                var index_2 = $.inArray(id, selected_rows_2);
 
-            var id = parseInt($(this).parent('tr').attr('id'));
-            var hub_id = $(this).parents('tr').data('hub');
-            var verify_shipment = table.row($(this).parents('tr')).data().verify_shipment
-            var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-            var agent_assigned = table.row($(this).parents('tr')).data().RvShipmentAssignedAgent
-            var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
-            var tat = table.row($(this).parents('tr')).data().confirmation_on;
-            var id = parseInt($(this).parent('tr').attr('id'));
+                var dataTable = $('#datatable').DataTable();
+                var tr = $(this).closest('tr');
+                var row = dataTable.row(tr);
+                var rowData = row.data();
+                var cond = (rowData.status_id != 2);
+               
+               if (index_2 === -1 && cond) {
+                    selected_rows_2.push(id);
+                }else {
+                    if(selected_rows_2.includes(id)){
+                        selected_rows_2.splice(index_2, 1);
+                    }
+                }
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
 
+                if (selected_rows.length > 0) {
+                    table.button('.update_agent_type').enable();
 
-
-            // if (con_id) {
-            //     table.rows().nodes().each(function(index) {
-            //         var row = table.row(index);
-            //         if ($(row.node()).attr('consolidation_id') == con_id) {
-            //             var rid = parseInt($(row.node()).attr('id'));
-            //             var rindex = $.inArray(rid, selected_rows);
-
-            //             if (rindex === -1) {
-            //                 selected_rows.push(rid);
-            //                 if (id != rid) {
-
-            //                     table.row(row).select();
-            //                 }
-            //             } else {
-            //                 if (id != rid) {
-
-            //                     row.deselect();
-            //                 }
-            //                 selected_rows.splice(rindex, 1);
-            //             }
-            //             if (selected_rows.length > 0 || call_history.length > 0) {
-            //                 table.button('.confirm').enable();
-            //                 table.button('.assign').enable();
-            //                 table.button('.re-attempt').enable();
-            //                 table.button('.un-assign').enable();
-
-            //             } else {
-            //                 table.button('.confirm').disable();
-            //                 table.button('.assign').disable();
-            //                 table.button('.re-attempt').disable();
-            //                 table.button('.un-assign').disable();
-
-            //             }
-            //         }
-            //     });
-            // } 
-            // if (verify_shipment === 1) {
-            //     table.button('.confirm').enable();
-            // }
-            // else{
-            //     table.button('.confirm').disable();
-            // }
-
-            });
+                }
+                else {
+                    table.button('.update_agent_type').disable();
+                }
+        });
             
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
