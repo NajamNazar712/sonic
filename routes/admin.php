@@ -3350,6 +3350,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\Settings\AgentSettingsController@agent_type_store')->name('store');
             Route::post('data', 'Admins\Settings\AgentSettingsController@agent_data')->name('data');
             Route::post('update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update')->name('update');
+            Route::post('bulk-update', 'Admins\Settings\AgentSettingsController@admin_agent_type_update_bulk')->name('update.bulk');
 
         });
 

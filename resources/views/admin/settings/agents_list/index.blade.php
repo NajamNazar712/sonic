@@ -33,26 +33,28 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade text-left" id="AddAgentTypeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddAgentTypeModal"
+        <div class="modal fade text-left" id="UpdateAgentTypeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateAgentTypeModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Assign Agent Type</h4>
+                    <h4 class="modal-title" id="">Update Agent Type</h4>
                 </div>
-                <form method="post" id="add_agent_type" action="{{route('admin.settings.agent_types.store')}}">
-                    @csrf
-
+                
                 <div class="modal-body">
                     <div class="form-group">
-                        <input type="text" name="name" class="form-control" placeholder="Name*" maxlength="50" data-rule-required="true" data-msg-required="Agent Type Name is required">
+                        {{-- <input type="text" name="name" class="form-control" placeholder="Name*" maxlength="50" data-rule-required="true" data-msg-required="Agent Type Name is required"> --}}
+                        <select name="agent_type" id="update_agent_type_id" class="form-control" data-rule-required="true"  data-msg-required="Agent Type is required">
+                            @foreach($agent_types as $agent_type)
+                                <option value="{{ $agent_type->id }}"> {{ $agent_type->name }} </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Add</button>
+                    <button type="button" class="btn btn-success" id="update_agent_type_bulk_submit">Update</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
-            </form>
 
             </div>
         </div>
@@ -141,7 +143,7 @@
         @endphp
         $(document).ready(function() {
 
-            $('#AddAgentTypeModal').on('hidden.bs.modal', function () {
+            $('#UpdateAgentTypeModal').on('hidden.bs.modal', function () {
                 
                 $("agent_id").select2('val', '')
                 $('#zone_id').val('').trigger('change.select2');
@@ -239,7 +241,82 @@
                         className: 'btn btn-primary update_agent_type',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            $('#AddAgentTypeModal').modal('show');
+                            
+                            if(selected_rows != ''){
+                              
+                              $('#UpdateAgentTypeModal').modal('show');
+
+                              $('#update_agent_type_bulk_submit').on('click',function () {
+                                  var assign = parseInt($('#update_agent_type_id').val());
+                                  swal({
+                                      text: 'Are you sure, you want to Update?',
+                                      icon: 'info',
+                                      buttons: {
+                                          cancel: {
+                                              text: 'No',
+                                              value: null,
+                                              visible: true,
+                                              closeModal: true,
+                                          },
+                                          confirm: {
+                                              text: 'Yes',
+                                              value: true,
+                                              visible: true,
+                                              closeModal: true
+                                          }
+                                      },
+                                      closeOnClickOutside: false,
+                                      closeOnEsc: false,
+                                      dangerMode: true
+                                  }).then(function(confirm) {
+                                      if (confirm) {
+                                          if (assign) {
+                                              $.ajax({
+                                                  url: '{!! route('admin.settings.agents_list.update.bulk') !!}',
+                                                  method: 'POST',
+                                                  data: {
+                                                      'agent_type_id': assign,
+                                                      'admin_ids[]': selected_rows,
+                                                      '_token': '{{ csrf_token() }}'
+                                                  }
+                                              })
+                                                  .done(function (data) {
+                                                      if (data.status == 1) {
+                                                          $('#UpdateAgentTypeModal').modal('hide');
+                                                          toastr.success(data.success, 'Success!', {
+                                                              positionClass: 'toast-bottom-center',
+                                                              containerId: 'toast-bottom-center'
+                                                          });
+                                                      } else {
+                                                          toastr.error(data.error, 'Error!', {
+                                                              positionClass: 'toast-top-center',
+                                                              containerId: 'toast-top-center'
+                                                          });
+                                                      }
+                                                      selected_rows = [];
+
+                                                      table.rows().deselect();
+                                                      $('#update_agent_type_id').val('').trigger('change');
+                                                      $('#UpdateAgentTypeModal').modal('hide');
+                                                      table.draw(true);
+                                                      table.button('.territory_retag').disable();
+
+                                                  });
+                                          } else {
+                                              var error = "Agents Not Selected!";
+                                              toastr.error(error, 'Error!', {
+                                                  positionClass: 'toast-top-center',
+                                                  containerId: 'toast-top-center'
+                                              });
+                                          }
+                                      }
+                                  });
+                              });
+
+                          }else{
+                              var error = "Account Not selected!";
+                              toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                          }
                             
                         }
                     },

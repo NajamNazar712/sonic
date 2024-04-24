@@ -1,6 +1,6 @@
 <?php
 
-use App\AgentType;
+use App\Http\Models\Agent\AgentType;
 use Illuminate\Database\Seeder;
 
 class AgentTypeSeeder extends Seeder

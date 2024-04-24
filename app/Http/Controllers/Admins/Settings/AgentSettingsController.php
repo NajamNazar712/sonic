@@ -91,6 +91,23 @@ class AgentSettingsController extends Controller
      }
 
 
+     //Update Admin Agent Type With Id
+     public function admin_agent_type_update_bulk(Request $request)
+     {
+
+        $agent_type_id = $request->agent_type_id;
+
+        foreach ($request->admin_ids as $admin_id) {
+            if ($agent_type = Admin::find($admin_id)) {
+                $agent_type->agent_type_id = $agent_type_id;
+                $agent_type->save();
+            }
+        }
+
+        return ['status' => 1, 'success' => "Agent Types Updated of Selected Agents!"];
+     }
+
+
     // ----------x------------x---------------
     //Agent Types
     // ----------x------------x---------------
