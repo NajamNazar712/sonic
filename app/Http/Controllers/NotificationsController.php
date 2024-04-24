@@ -6842,6 +6842,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     $cc = ['shahbaz.abbasi@trax.pk'];
+                    $to = array();
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 111) {
@@ -6851,6 +6852,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
+                    $to = array();
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
