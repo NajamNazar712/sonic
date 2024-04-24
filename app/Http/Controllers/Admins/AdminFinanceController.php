@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ZoneCitiesGst;
 use Auth;
 use DateTime;
 use SnappyPDF;
@@ -116,12 +117,22 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
+use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use App\Http\Models\ShipmentSmsLogs;
 use App\Http\Models\CorporateFixedSmsChargeFlag;
 
 class AdminFinanceController extends Controller
 {
+    static public function sdn_action_logs($sdn_id, $status_id, $admin_id)
+    {
+        $sdn_log = new StationDepositeNoteActionLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
     static private function amount_to_words($amount)
     {
 
@@ -154,14 +165,35 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function gst($zone_id)
+    static private function gst($zone_id,$city_id = Null)
     {
         $zone = Zone::find($zone_id);
-
-        if ($zone) {
-            return $zone->gst;
-        } else {
-            return 0.13;
+        if (!is_null($city_id) && $city_id !== '') {
+            $zone_city_gst = ZoneCitiesGst::where('zone_id',$zone_id)
+                ->where('city_id',$city_id)
+                ->where('status',1)
+                ->select('gst');
+            if ($zone_city_gst->exists())
+            {
+                $zone_city_gst = $zone_city_gst->first();
+                return $zone_city_gst->gst;
+            }
+            else
+            {
+                if ($zone) {
+                    return $zone->gst;
+                } else {
+                    return 0.13;
+                }
+            }
+        }
+        else
+        {
+            if ($zone) {
+                return $zone->gst;
+            } else {
+                return 0.13;
+            }
         }
     }
 
@@ -1524,6 +1556,10 @@ class AdminFinanceController extends Controller
         $sdn_detail = StationDepositNote::find($sdn_id);
         $sdn_detail->sdn_deposit_amount = $total_amount;
         $sdn_detail->save();
+
+        //StationDepositeNoteActionLog
+        self::sdn_action_logs($sdn_id, 4, Auth::id());
+
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip edited successfully!']);
     }
 
@@ -3742,14 +3778,13 @@ class AdminFinanceController extends Controller
                 $crs = true;
             }
         }
-
         $amount = $shipment->amount;
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -3764,7 +3799,7 @@ class AdminFinanceController extends Controller
                     $amount = 0;
                     $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->intercept_charges + $shipment->nsa_osa_charges;
                     if ($shipment->business_category_id == 1) {
-                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 2, PHP_ROUND_HALF_DOWN);
+                        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
                         $gst = ROUND(($charges * self::international_gst()), 2, PHP_ROUND_HALF_DOWN);
                     }
@@ -6092,7 +6127,13 @@ class AdminFinanceController extends Controller
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status]);
+
+        $date = date('Y-m-d');
+        $from = date('Y-m-d',strtotime($date.'-6 month'));
+        $to = $date;
+
+
+        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status,'from'=>$from,'to'=>$to]);
     }
 
     public function done_payments_list(Request $request)
@@ -15747,7 +15788,7 @@ class AdminFinanceController extends Controller
 
         $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
+                                    <td>' . Carbon::parse($invoice->from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->to_date)->format('Y-m-d') . '</td>
                                 </tr>
                                 <tr>
                                     <td class="color primary"><strong>Invoice No.</strong></td>

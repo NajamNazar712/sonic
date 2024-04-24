@@ -7479,7 +7479,7 @@ class RiderAPIController extends Controller
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
         $shipping_modes = RetailShippingMode::all();
-        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $domestic_cities = City::where('business_category_id', 1)->where('booking_enable_status', 1)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
@@ -13980,7 +13980,7 @@ class RiderAPIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
                         }
                     } else if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
-                        $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+                        $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60,22);
                         if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
                             if ($shipment->return_address_id != NULL) {
                                 $destination_city_id = $shipment->return_address->city_id;

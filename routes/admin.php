@@ -300,6 +300,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('city/city_area_status', 'Admins\AdminDashboardController@city_area_status')->name('city_area_status');
         Route::post('city/city_area_default', 'Admins\AdminDashboardController@city_area_default')->name('city_area_default');
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
+        Route::post('city/disable_booking_status', 'Admins\AdminDashboardController@disable_booking_status')->name('disable_booking_status');
+        Route::post('city/enable_booking_status', 'Admins\AdminDashboardController@enable_booking_status')->name('enable_booking_status');
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
@@ -411,6 +413,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
             Route::post('duplicate_zone', 'Admins\AdminZonalManagementController@duplicate_zone')->name('duplicate_zone');
             Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
+
+            Route::post('update_zone_cities_gst', 'Admins\AdminZonalManagementController@update_zone_cities_gst')->name('update_zone_cities_gst');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -828,6 +832,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('status_logs', 'Admins\DeliveryController@sdn_status_logs')->name('status_logs');
 
+            Route::post('sdn_actions', 'Admins\DeliveryController@sdn_actions')->name('sdn_actions');
+
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('{id}/details', 'Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
                 Route::get('{id}/ajax', 'Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
@@ -958,6 +964,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('return')->name('return.')->group(function () {
         Route::get('', 'Admins\ReturnController@return_view')->name('index');
         Route::post('list', 'Admins\ReturnController@return_marked_list')->name('list');
+        Route::get('dashboard', 'Admins\ReturnController@dashboard')->name('dashboard');
         Route::get('data', 'Admins\ReturnController@return_view_data')->name('data');
         Route::post('confirm/status', 'Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status', 'Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
@@ -1956,6 +1963,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
         });
+        Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
+        });
         Route::prefix('return_note')->name('return_note.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
@@ -2490,6 +2501,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}/edit', 'Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
                 Route::put('update', 'Admins\GlobalSettingsController@status_webhook_update')->name('update');
             });
+
+            // Route::prefix('mobile_check')->name('mobile_check.')->group(function() {
+            //     Route::get('', 'Admins\Settings\GeneralSettingController@mobile_check_index')->name('index');
+            //     Route::post('store', 'Admins\Settings\GeneralSettingController@mobile_check_store')->name('store');
+            // });
 
             Route::prefix('bypass_weight')->name('bypass_weight.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@bypass_weight_index')->name('index');
@@ -3323,6 +3339,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
         });
 
+        Route::prefix('mms_excel_booking_setting')->name('mms_excel_booking_setting.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_store')->name('store');
+        });
         Route::prefix('shipper_cap')->name('shipper_cap.')->group(function () {
             Route::get('', 'Admins\Settings\GeneralSettingController@shipper_cap_index')->name('index');
             Route::get('list', 'Admins\Settings\GeneralSettingController@shipper_cap_list')->name('list');

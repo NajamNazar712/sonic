@@ -853,7 +853,9 @@
         return +(Math.round(num + "e+2") + "e-2");
     }
 
+    var kam_count = 0;
     $('#commission_add_button').on('click', function () {
+        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -874,64 +876,80 @@
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }
-
+        }       
+      
         if (flag) {
-       
-
-            if (commission <= commission_max) {
-                selected_commission = roundToTwo(selected_commission + commission);
-                commission_max = commission_max - commission;
-                this_btn.attr('disabled', true);
-                var user_id = '';
-                var user_name = '';
-                var tier_id = '';
-                var tier_name = '';
-                var tier_type = '';
-                tier_id = $('#sales_tier_select').val();
-                tier_name = $('#sales_tier_select').find(":selected").text();
-                tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                if (tier_type == 1) {
-                    user_id = $('#user_select').val();
-                    user_name = $('#user_select').find(":selected").text();
-                } else {
-                    user_name = $('#external_person_name').val();
-                }
-
-                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                $('#sales_tier_select').val(null).trigger('change');
-                $('#user_select').val(null).trigger('change');
-                $('#user_select').attr('disabled', true);
-                $('#external_person_name').val('');
-                $('#external_person_name').attr('disabled', true);
-                $('#user_commission').val('');
-
-            } else {
-                var error = 'Selected Commission value exceeds!';
-                toastr.error(error, 'Error!', {
+            if(is_kam == 'KAM' && kam_count > 0 ){
+                var kam_error = 'You Can Select One KAM Only!';
+                toastr.error(kam_error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
-            }
-        }
-    });
-        $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
-            var id = $(this).parents('tr').attr('id');
+            }else{
+                if (commission <= commission_max) {
+                    selected_commission = roundToTwo(selected_commission + commission);
+                    commission_max = commission_max - commission;
+                    this_btn.attr('disabled', true);
+                    var user_id = '';
+                    var user_name = '';
+                    var tier_id = '';
+                    var tier_name = '';
+                    var tier_type = '';
+                    tier_id = $('#sales_tier_select').val();
+                    tier_name = $('#sales_tier_select').find(":selected").text();
+                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                    if (tier_type == 1) {
+                        user_id = $('#user_select').val();
+                        user_name = $('#user_select').find(":selected").text();
+                    } else {
+                        user_name = $('#external_person_name').val();
+                    }
+                    if(is_kam == 'KAM'){
+                        kam_count+=1;
+                    }
+                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                    $('#sales_tier_select').val(null).trigger('change');
+                    $('#user_select').val(null).trigger('change');
+                    $('#user_select').attr('disabled', true);
+                    $('#external_person_name').val('');
+                    $('#external_person_name').attr('disabled', true);
+                    $('#user_commission').val('');
 
-            var user_id = $('input[name="user_id[' + id + ']"]').val();
-            if (user_id) {
-                var index = $.inArray(user_id, selected_users);
-                if (index !== -1) {
-                    selected_users.splice(index, 1);
+                } else {
+                    var error = 'Selected Commission value exceeds!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
                 }
             }
-            var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
-            commission_max = roundToTwo(commission_max + commission);
-            selected_commission = roundToTwo(selected_commission - commission);
-            $('#total_commission_value').html(selected_commission);
-            $('#total_commission').val(selected_commission);
-            table_2.row($(this).parents('tr')).remove().draw();
-        });
+       
+        }
+    });
+    $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
+        var id = $(this).parents('tr').attr('id');
+        //check if sale tier is KAM
+        var rowData = table_2.row($(this).parents('tr')).data();
+        var regex = /KAM/;
+
+        if (regex.test(rowData[2])) {
+            kam_count-=1;
+        } 
+        //
+        var user_id = $('input[name="user_id[' + id + ']"]').val();
+        if (user_id) {
+            var index = $.inArray(user_id, selected_users);
+            if (index !== -1) {
+                selected_users.splice(index, 1);
+            }
+        }
+        var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
+        commission_max = roundToTwo(commission_max + commission);
+        selected_commission = roundToTwo(selected_commission - commission);
+        $('#total_commission_value').html(selected_commission);
+        $('#total_commission').val(selected_commission);
+        table_2.row($(this).parents('tr')).remove().draw();
+    });
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,

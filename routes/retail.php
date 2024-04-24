@@ -25,6 +25,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
             Route::post('/consignee_info', 'Retail\RetailShipmentBookController@consignee_info')->name('consignee_info');
             Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
+            Route::post('previous_names_verify', 'Retail\RetailShipmentBookController@previous_names_verify')->name('previous_names_verify');
             // address_verify
 
 

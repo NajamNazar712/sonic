@@ -9055,7 +9055,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
-            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.sms_charges_type_id'])
+            ->select(['users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'users.sms_charges_type_id'])
             ->whereIn('users.status', [3, 4])
             ->where('users.blacklist', 0)
             ->groupBy('users.id');
@@ -9462,6 +9462,12 @@ class AdminDashboardController extends Controller
                 if ($payment_cycle == 1) {// Daily
                     return '-';
                 }
+            })
+            ->addColumn('expected_average_shipments', function ($users){
+                return $users->average_shipments;
+            })
+            ->filterColumn('users.average_shipments', function ($query, $keyword) {
+                return $query->where('users.average_shipments', '=', $keyword);
             })
             ->addColumn("action", function ($result) {
                 if ($result->id != 8761 && $result->id != 9358) {
@@ -10522,7 +10528,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code'])
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude', 'cities.iata_code as iata_code','cities.booking_enable_status as booking_enable_status'])
             ->where('cities.permanent_disabled',0);
 
         return Datatables::of($cities)
@@ -10531,6 +10537,9 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('gc_area', function ($cities) {
                 return ($cities->gc_area == 1) ? 'Yes' : 'No';
+            })
+            ->editColumn('booking_enable_status', function ($cities) {
+                return ($cities->booking_enable_status == 1) ? 'Yes' : 'No';
             })
             ->filterColumn('modes', function ($query, $keyword) {
 
@@ -13968,10 +13977,50 @@ class AdminDashboardController extends Controller
         }
     }
 
+    public function disable_booking_status(Request $request){
+        $userIDS = $request->input('userIDS', []);
+   
+        if(!is_array($userIDS) || empty($userIDS)){
+            return response()->json(['status' => 'Invalid IDS'], 400);
+        }
+        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 0)->get();
+
+        if(count($error) > 0 && count($userIDS) === count($error)){
+            return response()->json(['status' => 'Already Disabled !!']);
+        }else if (count($error) > 0 && count($userIDS) != count($error)){
+            return response()->json(['status' => 'Some Of The Selected Cities Are Already Disabled']);
+        }
+
+        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '0']);
+        return response()->json(['status' => 200]);
+    }
+   
+    public function enable_booking_status(Request $request){
+        $userIDS = $request->input('userIDS', []);
+   
+        if(!is_array($userIDS) || empty($userIDS)){
+            return response()->json(['status' => 'Invalid IDS'], 400);
+        }
+
+        $error = City::whereIn('id', $userIDS)->where('booking_enable_status', 1)->get();
+
+        if(count($error) > 0 && count($userIDS) === count($error)){
+            return response()->json(['status' => 'Already Enabled !!']);
+        }else if (count($error) > 0 && count($userIDS) != count($error)){
+            return response()->json(['status' => 'Some Of The Selected Cities Are Already Enabled']);
+        }
+   
+        City::whereIn('id', $userIDS)->update(['booking_enable_status' => '1']);
+        return response()->json(['status' => 200]);
+      
+    }
+   
+
    
 
     public function add_rate_commission_corporate_reimb(Request $request, $shipper_ids)
     {
+
         $shipper_ids = explode(',', $shipper_ids);
         foreach($shipper_ids as $shipper_id)
         {
@@ -14118,6 +14167,22 @@ class AdminDashboardController extends Controller
             }
 
             self::balance_count_commission($shipper_id);
+
+            $sale_tier_tag = SaleTierTag::where('user_id', $shipper_id);
+            $sales_tiers_kam = DB::table('sales_tiers')->where('tier_name', 'LIKE', '%KAM%')->orWhere('tier_name', 'LIKE', '%kam%')->first()->id ?? null;
+
+            if(isset($request->tier_id[$row_id]) && (isset($request->user_id[$row_id])) && $request->tier_id[$row_id] == $sales_tiers_kam){
+                if (!$sale_tier_tag->exists()) {
+                    $sale_tier_object = new SaleTierTag();
+                    $sale_tier_object->user_id = $shipper_id;
+                    $sale_tier_object->kam = $request->user_id[$row_id];
+                    $sale_tier_object->save();
+                } else {
+                    $sale_tier_object = $sale_tier_tag->first(); 
+                    $sale_tier_object->kam = $request->user_id[$row_id]; 
+                    $sale_tier_object->save();
+                }
+            }
         }
 
         return back()->with('success', 'Commission Has Been Added !!');

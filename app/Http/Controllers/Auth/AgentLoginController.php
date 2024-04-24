@@ -144,7 +144,15 @@ class AgentLoginController extends Controller
     {
         if (Auth::guard('agent')) {
             $admin = Admin::find(Auth::guard('agent')->id());
-            EmployeeAttendance::where('employee_id',$admin->employee_id)->update(['clock_out'=>date('H:i:s')]);
+            if($admin)
+            {
+                $employee = EmployeeAttendance::whereDate('attendance_date', '=', now()->format('Y-m-d'))
+                ->where('employee_id',$admin->employee_id)->first();
+                if($employee)
+                {   
+                    $employee->update(['clock_out' => date('H:i:s')]);
+                }
+            }
             Auth::guard('agent')->logout();
 
             $request->session()->invalidate();

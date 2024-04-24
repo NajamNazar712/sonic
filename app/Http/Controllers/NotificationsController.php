@@ -118,9 +118,11 @@ use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipmentSmsLogs;
+use App\Http\Models\ShipperVerificationPinCode;
 
 class NotificationsController extends Controller
 {
@@ -150,6 +152,15 @@ class NotificationsController extends Controller
         } else {
             dispatch(new ProcessSMS($sms));
         }
+    }
+
+    static private function verifyShipperOtpCode($user_id, $otp, $notification_id)
+    {
+        $shipper_code = new AdminShipperVerificationPinCode();
+        $shipper_code->user_id = $user_id; 
+        $shipper_code->otp = $otp; 
+        $shipper_code->notification_id = $notification_id;
+        $shipper_code->save();
     }
 
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
@@ -6326,6 +6337,7 @@ class NotificationsController extends Controller
 
                         $to = $user->phone;
                         self::sms($body, $to, NULL, NULL, $id);
+                        self::verifyShipperOtpCode($user->id, $pin, 91);
                     }
                 } else if ($id == 92) {
                     $subject = $notification->subject;
