@@ -2769,12 +2769,11 @@ function checkboxStatus() {
             submitHandler: function (form) {
                 var formData = $(form).serializeArray();
                 var fortnite = formData[3]['value'].split(',');
-                var monthly = formData[5]['value'];
-                var twice_and_thrice = (formData[7] && formData[7]['value']) ? formData[7]['value'].split(',') : [];
+                var monthly = formData[6]['value'];
                 var selected_days = [];
 
-                if (formData[6] && formData[6]['value']) {
-                    var splitValues = formData[6]['value'].split(',');
+                if (formData[7] && formData[7]['value']) {
+                    var splitValues = formData[7]['value'].split(',');
                     if (splitValues.length > 0) {
                         selected_days = splitValues;
                     }
@@ -2791,10 +2790,10 @@ function checkboxStatus() {
                 fortnite = fortnite.length;
                 selected_days = selected_days.length;
 
-
-                if ((formData[2]['value'] == '4' && twice_and_thrice.length === 2) ||
-                    (formData[2]['value'] == '5' && twice_and_thrice.length === 3) ||
-                    (formData[2]['value'] == '2' && twice_and_thrice.length === 1) || 
+                console.log(formData);
+                if ((formData[2]['value'] == '4' && selected_days === 2) ||
+                    (formData[2]['value'] == '5' && selected_days === 3) ||
+                    (formData[2]['value'] == '2' && selected_days === 1) || 
                     (formData[2]['value'] == '6' && fortnite > 1) || 
                     (formData[2]['value'] == '1') ||
                     (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
@@ -3040,6 +3039,12 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             selectedValues = [];
             $('#payment_cycle_msg').text('')
             var id = $(this).val();
+
+
+            var option = $('<option></option>').attr('value', 1).text(1 + " Days");
+            $("#fornite_2").empty().append(option);
+
+
             if (id == 4 || id == 5 || id == 2) {
                 $("#checkboxContainer").removeClass("d-none");
                 $('#fornite').addClass('d-none')
