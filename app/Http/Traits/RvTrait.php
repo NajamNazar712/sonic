@@ -1186,6 +1186,8 @@ trait RvTrait
     {
         $shipment = null;
 
+        $agent_type = Admin::find($agent_id);
+
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
@@ -1222,6 +1224,16 @@ trait RvTrait
         if (!empty($included_shippers)) {
 
             $shipments = RvShipmentTicket::whereIn('shipment_user_id',$included_shippers)
+            ->when($agent_type, function ($query, $agent_type) {
+                if($agent_type->agent_type_id == 1) //These Agents will get shipments pending with first call
+                {
+                    return $query->where('call_count' , 0);
+                }
+                else if($agent_type->agent_type_id == 2)//These Agents will get shipments pending with second call
+                {
+                    return $query->where('call_count' , 1);
+                }
+            })
             ->where('in_progress',0)
             ->where('is_completed',0)
             ->orderBy('updated_at','ASC')
@@ -1245,6 +1257,16 @@ trait RvTrait
             if (!empty($result)){
 
                 $shipments = RvShipmentTicket::whereIn('shipment_user_id',$result)
+                ->when($agent_type, function ($query, $agent_type) {
+                    if($agent_type->agent_type_id == 1) //These Agents will get shipments pending with first call
+                    {
+                        return $query->where('call_count' , 0);
+                    }
+                    else if($agent_type->agent_type_id == 2)//These Agents will get shipments pending with second call
+                    {
+                        return $query->where('call_count' , 1);
+                    }
+                })
                 ->where('in_progress',0)
                 ->where('is_completed',0)
                 ->orderBy('updated_at','ASC')
