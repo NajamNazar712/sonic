@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Logistic Booking')
+@section('title', 'Update Logistic Booking')
 
 @section('content')
     <div class="app-content content">
@@ -8,16 +8,18 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                <h1 class="mb-1">Logistic Booking</h1>
+                <h1 class="mb-1">Update Logistic Booking</h1>
               
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="logistic_booking_form" class="form-horizontal" method="POST" action="{{ route('admin.logistic.store') }}" novalidate="novalidate">
+                            <form id="logistic_booking_form" class="form-horizontal" method="POST" action="{{ route('admin.logistic.update') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
+                                 @method('put')
 
+                                    <input type="hidden" name="booking_id" value="{{$logistic_booking->id}}">
                                     <div class="row">
                                         <div class="col-md-12"><hr style="background-color: black;"></div>
                                     </div>
@@ -27,7 +29,7 @@
                                                     <div class="col-md-2">
                                                         <div class="form-group">
                                                             <label>Consignment #:</label>
-                                                            <input type="text" name="cn_number" class="form-control" >
+                                                            <input type="text" name="cn_number" class="form-control" value="{{$logistic_booking->cn_number}}" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
@@ -35,8 +37,11 @@
                                                             <label>Staff #</label>
                                                             <select class="select select2 mb-1" name="rider_id" id="rider_select">
                                                                 @foreach ($riders as  $rider)
-                                                                     <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
-
+                                                                    @if($rider->id == $logistic_booking->rider_id)
+                                                                        <option value="{{$rider->id}}" selected>{{$rider->name}} - {{$rider->trax_id}}</option>
+                                                                    @else
+                                                                        <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                                 
                                                             </select>
@@ -45,15 +50,15 @@
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Booking Date</label>
-                                                            <input type="text" name="booking_date" class="form-control rounded-right booking_date" id="pickup_datepicker" value="{{ Carbon\Carbon::today()->format('Y-m-d') }}">
+                                                            <input type="text" name="booking_date" class="form-control rounded-right booking_date" id="pickup_datepicker" value="{{ $logistic_booking->booking_date }}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label>Customer</label>
                                                             <select class="select select2 mb-1" name="shipper_id" id="shipper_select">
-                                                                @foreach ($shippers as $id => $shipper)
-                                                                    <option value="{{ $shipper->id }}">{{  $shipper->name }}</option>
+                                                                @foreach ($shippers as $shipper)
+                                                                    <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -64,6 +69,9 @@
                                                         <div class="form-group">
                                                             <label>Product</label>
                                                             <select class="select select2 mb-1" id="product_select" name="product_id">
+                                                                @foreach($product as $single_prodcut)
+                                                                    <option value="{{ $single_prodcut->id }}">{{ $single_prodcut->product_name }}</option>
+                                                                @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
@@ -102,26 +110,26 @@
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Total Pieces</label>
-                                                            <input type="text" name="total_pieces" class="form-control"   >
+                                                            <input type="text" name="total_pieces" class="form-control" value="{{$logistic_booking->total_pieces}}" readonly>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Weight Bkg (KG)</label>
-                                                            <input type="text" name="booking_weight" class="form-control"   >
+                                                            <input type="text" name="booking_weight" class="form-control" value="{{$logistic_booking->total_booking_weight}}" >
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             <label>Dense Weight</label>
-                                                            <input type="text" name="dense_weight" class="form-control"   >
+                                                            <input type="text" name="dense_weight" class="form-control" value="{{$logistic_booking->total_dense_weight}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-group">
                                                             {{-- umetric --}}
                                                             <label>Vol. Weight (KG)</label>
-                                                            <input type="text" name="volumetric_weight" class="form-control "   >
+                                                            <input type="text" name="volumetric_weight" class="form-control " value="{{$logistic_booking->total_volumetric_weight}}">
                                                         </div>
                                                     </div>
                                             </div>
@@ -149,7 +157,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label>Handling Instructions</label>
-                                                        <input type="text" name="handling_inst" class="form-control "   >
+                                                        <input type="text" name="handling_inst" class="form-control "  value="{{$logistic_booking->handling_inst}}" >
                                                     </div>
                                                 </div>
                                             </div>
@@ -162,7 +170,9 @@
                                                                 <div class="form-group">
                                                                     <label>Shipper Address</label>
                                                                     <select class="select select2 mb-1" name="shipper_address_id"  id="shipper_address_select">
-                                                                       
+                                                                        @foreach ($pickup_addresses as $pickup_address)
+                                                                            <option value="{{ $pickup_address->id }}" data-poc="{{$pickup_address->poc}}" data-phone="{{$pickup_address->phone}}" data-email="{{$pickup_address->email}}">{{ $pickup_address->pickup_address }} </option>
+                                                                        @endforeach
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -171,13 +181,13 @@
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label>Shipper Phone</label>
-                                                                    <input type="text" name="shipper_phone" class="form-control "   >
+                                                                    <input type="text" name="shipper_phone" class="form-control "  readonly >
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label>Shipper Name</label>
-                                                                    <input type="text" name="shipper_name" class="form-control "   >
+                                                                    <input type="text" name="shipper_name" class="form-control "  readonly >
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -186,7 +196,7 @@
                                                             <div class="col-md-12">
                                                                 <div class="form-group">
                                                                     <label>Shipper Email</label>
-                                                                    <input type="text" name="shipper_email" class="form-control "   >
+                                                                    <input type="text" name="shipper_email" class="form-control "   readonly>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -205,13 +215,13 @@
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label>Consignee Name</label>
-                                                                    <input type="text" name="consignee_name" class="form-control "   >
+                                                                    <input type="text" name="consignee_name" class="form-control " value="{{$logistic_booking->consignee_name}}">
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label>Consignee Phone</label>
-                                                                    <input type="text" name="consignee_phone_1" class="form-control "   >
+                                                                    <input type="text" name="consignee_phone_1" class="form-control "  value="{{$logistic_booking->consignee_phone_1}}" >
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -219,7 +229,7 @@
                                                             <div class="col-md-12">
                                                                 <div class="form-group">
                                                                     <label>Consignee Address</label>
-                                                                    <input type="text" name="consignee_address" class="form-control "   >
+                                                                    <input type="text" name="consignee_address" class="form-control "  value="{{$logistic_booking->consignee_address}}" >
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -227,7 +237,7 @@
                                                             <div class="col-md-12">
                                                                 <div class="form-group">
                                                                     <label>Consignee Email</label>
-                                                                    <input type="text" name="consignee_email" class="form-control "   >
+                                                                    <input type="text" name="consignee_email" class="form-control " value="{{$logistic_booking->consignee_email}}"  >
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -243,13 +253,44 @@
                                             </div>
                                             <hr style="background-color: black;">
                                             <div class="row">
+                                                <div class="col-md-2" style="margin-right: -10px;"><span class="btn btn-primary mb-3" data-toggle="collapse" data-target="#book_pieces">Booking Pieces</span></div>
                                                 <div class="col-md-2"><span class="btn btn-primary mb-3" data-toggle="collapse" data-target="#sp_ins">Special Handling</span></div>
                                                 <div class="col-md-3"><span class="btn btn-primary float-left" data-toggle="collapse" data-target="#item_sp">Volumatric Item Specification</span></div>
                                                 <div class="col-md-2"><span class="btn btn-primary float-left mr-1" data-toggle="collapse" data-target="#other_charges">Other's</span></div>
                                             </div>
+                                            <div id="book_pieces" class="collapse">
+                                                <div class="row">
+                                                        <div class="col-md-12">
+                                                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
+                                                                <thead>
+                                                                <tr role="row" class="bg-primary white">
+                                                                    <th class="border-primary border-darken-1">S. No</th>
+                                                                    <th class="border-primary border-darken-1">From Piece</th>
+                                                                    <th class="border-primary border-darken-1">To Pieces</th>
+                                                                    <th class="border-primary border-darken-1">Quantity</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+
+                                                                    @foreach($booking_pieces as $key=>$booking_piece)
+                                                                       <tr>
+                                                                           <td class=" align-middle serial_no"> {{$key+1}}</td>
+                                                                           <td class=" align-middle from_pieces"> {{$booking_piece->from_pieces}}</td>
+                                                                           <td class=" align-middle to_pieces"> {{$booking_piece->to_pieces}}</td>
+                                                                           <td class=" align-middle quantity"> {{$booking_piece->quantity}}</td>
+                                                                       </tr>
+                                                                    @endforeach
+
+
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                </div>
+                                            </div>
                                             <div id="sp_ins" class="collapse">
 
                                                 <div class="row">
+                                                    <input type="hidden" name="item_insurance_id" value="{{isset($item_insurance->id)?$item_insurance->id:''}}">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label>Special Handling</label>
@@ -263,13 +304,13 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <label>Insurance</label>
-                                                            <input type="text" name="insurance" class="form-control">
+                                                            <input type="text" name="item_insurance" class="form-control" value="{{isset($item_insurance->insurance)?$item_insurance->insurance:''}}">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-4">
                                                           <div class="form-group">
                                                              <label>Item Specification</label>
-                                                             <input type="text" name="insuranceitem_code" class="form-control">
+                                                             <input type="text" name="insurance_item_code" class="form-control"  value="{{isset($item_insurance->item_code)?$item_insurance->item_code:''}}">
                                                            </div>
                                                     </div>
                                                 </div>
@@ -283,57 +324,136 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label>Item Specification</label>
-                                                            <input type="text" name="reference_item_code" class="form-control "   >
+                                                            <input type="text" name="reference_item_code" class="form-control "   value="{{isset($item_references[0]->item_code)?$item_references[0]->item_code:''}}" >
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="item_box" style="border: 1px solid lightgrey; padding:10px;">
                                                             <div class="item_detail">
-                                                                <div class="row">
-                                                                    {{-- <div class="col-md-2">
-                                                                        <div class="form-group">
-                                                                            <label>Item Id</label>
-                                                                            <input type="text" name="cn_number[]" class="form-control "   >
-                                                                        </div>
-                                                                    </div> --}}
-
+                                                                @if(@count($item_references)>0)
+                                                                <div class="row" style="margin-bottom: -17px;">
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Pieces</label>
-                                                                            <input type="text" name="no_piece[]" class="form-control "   >
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Height (in)</label>
-                                                                            <input type="text" name="height[]" class="form-control "   >
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Width (in)</label>
-                                                                            <input type="text" name="width[]" class="form-control "   >
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Length (in)</label>
-                                                                            <input type="text" name="length[]" class="form-control "   >
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Weight</label>
-                                                                            <input type="text" name="weight[]" class="form-control "   >
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-1">
+                                                                    <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label>Action</label>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                              
+                                                                @endif
+                                                                @if(@count($item_references)>0)
+                                                                    @foreach($item_references as $item_reference)
+                                                                        <div class="row">
+                                                                            <input type="hidden" name="item_reference_id[]" value="{{$item_reference->id}}">
+                                                                            {{-- <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <label>Item Id</label>
+                                                                                    <input type="text" name="cn_number[]" class="form-control "   >
+                                                                                </div>
+                                                                            </div> --}}
+
+                                                                            <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <input type="text" name="no_piece[]" class="form-control "  value="{{$item_reference->no_piece}}" >
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <input type="text" name="height[]" class="form-control "  value="{{$item_reference->height}}"  >
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <input type="text" name="width[]" class="form-control "  value="{{$item_reference->width}}"  >
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <input type="text" name="length[]" class="form-control "   value="{{$item_reference->length}}" >
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <div class="form-group">
+                                                                                    <input type="text" name="weight[]" class="form-control "    value="{{$item_reference->weight}}">
+                                                                                </div>
+                                                                            </div>
+{{--                                                                            <div class="col-md-1">--}}
+{{--                                                                                <div class="form-group">--}}
+{{--                                                                                    <label>Action</label>--}}
+{{--                                                                                </div>--}}
+{{--                                                                            </div>--}}
+                                                                        </div>
+                                                                    @endforeach
+                                                                @else
+                                                                    <div class="row">
+                                                                        {{-- <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Item Id</label>
+                                                                                <input type="text" name="cn_number[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div> --}}
+
+                                                                        <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Pieces</label>
+                                                                                <input type="text" name="no_piece[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Height (in)</label>
+                                                                                <input type="text" name="height[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Width (in)</label>
+                                                                                <input type="text" name="width[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Length (in)</label>
+                                                                                <input type="text" name="length[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-2">
+                                                                            <div class="form-group">
+                                                                                <label>Weight</label>
+                                                                                <input type="text" name="weight[]" class="form-control "   >
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-1">
+                                                                            <div class="form-group">
+                                                                                <label>Action</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endif
+
                                                             </div>
                                                             <div class="row">
                                                                 <div class="col-md-12">
@@ -530,66 +650,87 @@
 
     $(document).ready(function(){
         
-        
+
+        {{--var shippers =@json($shippers);--}}
+            var bookings = @json($logistic_booking);
+
+
+
+    {{--$('#shipper_select').prepend('<option value="" selected="selected">Select Customer</option>').select2({--}}
+        {{--   width: '100%',--}}
+        {{--   placeholder: 'Select Customer'--}}
+        {{--}).bind('select2:select',function(){--}}
+
+        {{--    var shipper_id = parseInt($(this).val());--}}
+        {{--    $("#shipper_address_select").empty();--}}
+        {{--    --}}
+        {{--            $.ajax({--}}
+        {{--                url: '{{ route('admin.logistic.shipper_info') }}',--}}
+        {{--                method: 'POST',--}}
+        {{--                data: {--}}
+        {{--                    'shipper_id': shipper_id,--}}
+        {{--                    '_token': '{{ csrf_token() }}'--}}
+        {{--                }--}}
+        {{--            }).done(function (data) {--}}
+        {{--                $('#product_select').empty();--}}
+        {{--                if (data.status == 0) {--}}
+        {{--                    $.each(data.pickup_addresses,function(key,value) {--}}
+        {{--                        var name = value.city.name + ' - ' + value.pickup_address;--}}
+        {{--                        var pickup = new Option(name, value.id,false, false);--}}
+        {{--                        $(pickup).attr('data-poc', value.poc).attr('data-phone',value.phone).attr('data-email',value.email);--}}
+        {{--                        $('#shipper_address_select').append(pickup).trigger('change');--}}
+        {{--                    });--}}
+
+        {{--                    $('#shipper_address_select').select2({--}}
+        {{--                        placeholder: 'Select Shipper Address',--}}
+        {{--                        width: '100%',--}}
+        {{--                    }).val(null).trigger('change');--}}
+
+        {{--                    var product = new Option(data.product.product_name, data.product.id, false, false);--}}
+        {{--                    $('#product_select').append(product).trigger('change');--}}
+
+        {{--                } else {--}}
+        {{--                    toastr.error('No pickup address found!', 'Error!', {--}}
+        {{--                        positionClass: 'toast-top-center',--}}
+        {{--                        containerId: 'toast-top-center'--}}
+        {{--                    });--}}
+        {{--                }--}}
+        {{--            });--}}
+        {{--});--}}
+
         $('#shipper_select').prepend('<option value="" selected="selected">Select Customer</option>').select2({
-           width: '100%',
-           placeholder: 'Select Customer'
-        }).bind('select2:select',function(){
-            var shipper_id = parseInt($(this).val());
-            $("#shipper_address_select").empty();
-            
-                    $.ajax({
-                        url: '{{ route('admin.logistic.shipper_info') }}',
-                        method: 'POST',
-                        data: {
-                            'shipper_id': shipper_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        $('#product_select').empty();
-                        if (data.status == 0) {
-                            $.each(data.pickup_addresses,function(key,value) {
-                                var name = value.city.name + ' - ' + value.pickup_address;
-                                var pickup = new Option(name, value.id,false, false);
-                                $(pickup).attr('data-poc', value.poc).attr('data-phone',value.phone).attr('data-email',value.email);
-                                $('#shipper_address_select').append(pickup).trigger('change');
-                            });
+            width: '100%',
+            placeholder: 'Select Customer'
+        }).val(bookings.shipper_id).trigger('change');
 
-                            $('#shipper_address_select').select2({
-                                placeholder: 'Select Shipper Address',
-                                width: '100%',
-                            }).val(null).trigger('change');
-
-                            var product = new Option(data.product.product_name, data.product.id, false, false);
-                            $('#product_select').append(product).trigger('change');
-
-                        } else {
-                            toastr.error('No pickup address found!', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-        });
+        var item_insurance = @json($item_insurance);
 
         $('#special_handling_select').prepend('<option value="" selected="selected">Select Special Handling</option>').select2({
             width: '100%',
             placeholder: 'Select Special Handling'
         });
+        if(item_insurance!=null)
+        {
+            $("#special_handling_select").val(item_insurance.special_handling_id).trigger('change');
+        }
+
         $('#origin_select').prepend('<option value="" selected="selected">Select Origin</option>').select2({
            width: '100%',
            placeholder: 'Select Origin'
-        });
+        }).val(bookings.origin_id).trigger('change');
+
 
 
         $('#destination_select').prepend('<option value="" selected="selected">Select Destination</option>').select2({
            width: '100%',
            placeholder: 'Select Destination'
-        });
+        }).val(bookings.destination_id).trigger('change');
+
         $('#payment_mode_select').prepend('<option value="" selected="selected">Select Payment Mode</option>').select2({
            width: '100%',
            placeholder: 'Select Payment Mode'
-        });
+        }).val(bookings.payment_mode_id).trigger('change');
+
         $('#shipper_address_select').prepend('<option value="" selected="selected">Select Shipper Address</option>').select2({
            width: '100%',
            placeholder: 'Select Shipper Address'
@@ -597,7 +738,9 @@
             $("input[name=shipper_name]").val($('#shipper_address_select').find(':selected').attr('data-poc'));
             $("input[name=shipper_phone]").val($('#shipper_address_select').find(':selected').attr('data-phone'));
             $("input[name=shipper_email]").val($('#shipper_address_select').find(':selected').attr('data-email'));
-        });
+        }).val(bookings.shipper_address_id).trigger('change');
+
+
         $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
            width: '100%',
            placeholder: 'Select Product'
@@ -620,7 +763,7 @@
                     $('#service_select').select2({
                                 placeholder: 'Select Service',
                                 width: '100%',
-                    }).val(null).trigger('change');
+                    }).val(bookings.service_id).trigger('change');
                 }else{
                     toastr.error('No Serivce found!', 'Error!', {
                          positionClass: 'toast-top-center',
@@ -629,11 +772,13 @@
                 }
             });
 
-        });
+        }).val(bookings.product_id).trigger('change');
+
         $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
            width: '100%',
            placeholder: 'Select Service'
         });
+
 
         $('#pickup_datepicker').pickadate({
                 firstDay: 1,
@@ -651,8 +796,10 @@
         $('#rider_select').prepend('<option value="" selected="selected">Select Rider</option>').select2({
            width: '100%',
            placeholder: 'Select Rider'
-        });
-        
+        }).val(bookings.rider_id).trigger('change');
+
+
+
         //validate form request
         $('#logistic_booking_form').validate({
                 errorClass: 'danger',

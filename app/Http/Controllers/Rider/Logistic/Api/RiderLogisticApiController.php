@@ -151,7 +151,9 @@ class RiderLogisticApiController extends Controller
                             $logistic_booking->shipper_address_id = $booking['pickup_address_id'];
                             $logistic_booking->booking_date = $booking['booking_date'];
                             $logistic_booking->product_id = $booking['product_id'];
+                            $logistic_booking->rider_id = $rider_id;
                             $logistic_booking->service_id = $booking['service_id'];
+                            $logistic_booking->origin_id = $hub_id;
                             $logistic_booking->destination_id = $booking['destination_id'];
                             $logistic_booking->shipper_reference = $booking['shipper_reference'];
                             $logistic_booking->consignee_name = $booking['consignee_name'];
@@ -171,7 +173,7 @@ class RiderLogisticApiController extends Controller
                             if(!$shipment->exists())
                             {
                                 //send data to shipments table
-                                $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,5323,0,1,0,1,1,1,4,$booking['total_pieces'],1,0.0,null,2);
+                                $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,1,0,1,1,1,4,$booking['total_pieces'],1,0.0,null,2);
                             }
 
 

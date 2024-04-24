@@ -32,6 +32,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>
                                     <th class="border-primary border-darken-1">Consignee Address</th>
+                                    <th class="border-primary border-darken-1">Action</th>
 
                                 </tr>
                                 </thead>
@@ -314,6 +315,8 @@
                     {data: 'destination_name', name: 'dc.name', class: 'align-middle destination_name'},
                     {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_address', name: 'consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'action', name: 'action', class: 'align-middle action'}
+
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
@@ -348,6 +351,35 @@
                 }
 
             });
+
+            //get booking for edit
+            {{--$("body").on('click','.datatable .edit',function (){--}}
+            {{--    var id = parseInt($(this).closest('tr').attr('id'));--}}
+            {{--    --}}
+            {{--    --}}{{--$.ajax({--}}
+            {{--    --}}{{--    url:'{{route('admin.logistic.master_product.edit',['id'=>':id']) }}'.replace(':id',id),--}}
+            {{--    --}}{{--    method:'GET'--}}
+            {{--    --}}{{--}).done(function (data){--}}
+            {{--    --}}{{--    if(data.status==0)--}}
+            {{--    --}}{{--    {--}}
+            {{--    --}}{{--        var master_product = data.master_product;--}}
+            {{--    --}}{{--        $("#id").val(master_product.id);--}}
+            {{--    --}}{{--        $("#edit_parent_code").val(master_product.parent_code);--}}
+            {{--    --}}{{--        $("#edit_parent_name").val(master_product.parent_name);--}}
+            {{--    --}}{{--        $("#edit_segment_id_select").val(master_product.segment_id).trigger('change');--}}
+            {{--    --}}{{--        $("#EditMasterProductModal").modal("show");--}}
+            {{--    --}}
+            {{--    --}}{{--    } else {--}}
+            {{--    --}}{{--        toastr.error(data.error, 'Error!', {--}}
+            {{--    --}}{{--            positionClass: 'toast-top-center',--}}
+            {{--    --}}{{--            containerId: 'toast-top-center'--}}
+            {{--    --}}{{--        });--}}
+            {{--    --}}{{--    }--}}
+            {{--    --}}
+            {{--    --}}{{--});--}}
+
+
+            {{--});--}}
 
 
 

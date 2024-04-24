@@ -4149,7 +4149,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
         Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
         Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
-        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');
+        Route::get('edit/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
+        Route::put('update','Admins\Logistic\AdminLogisticBookingController@update')->name('update');
+
+//        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');
 
         Route::post('shipper_info','Admins\Logistic\AdminLogisticBookingController@get_shipper_info')->name('shipper_info');
         Route::post('product_services','Admins\Logistic\AdminLogisticBookingController@get_product_services')->name('product_services');
@@ -4253,6 +4256,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\Logistic\AdminBatchController@booking_batch_index')->name('index');
             Route::get('list','Admins\Logistic\AdminBatchController@booking_batch_list')->name('list');
             Route::post('assign_batch','Admins\Logistic\AdminBatchController@booking_batch_assign')->name('assign_batch');
+            Route::get('batch_bookings/{batch_id}', 'Admins\Logistic\AdminLogisticBookingController@batch_bookings')->name('batch_bookings');
+            Route::post('batch_booking_list','Admins\Logistic\AdminLogisticBookingController@batch_booking_list')->name('batch_booking_list');
+
 
 //            Route::post('store', 'Admins\Logistic\AdminBatchController@batch_booking_store')->name('store');
 //            Route::get('edit/{id}', 'Admins\Logistic\AdminBatchController@batch_booking_edit')->name('edit');

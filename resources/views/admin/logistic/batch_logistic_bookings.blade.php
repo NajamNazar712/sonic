@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Logistic Booking Batches')
+@section('title', 'Batch Logistic Booking')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Logistic Booking Batches
+                    Batch Logistic Booking
                 </h1>
 
                 <div class="card">
@@ -20,10 +20,20 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
-                                    <th class="border-primary border-darken-1">Batch #</th>
-                                    <th class="border-primary border-darken-1">No of Consignments</th>
+                                    <th class="border-primary border-darken-1">Booking Date</th>
+                                    <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Pickup Address</th>
+                                    <th class="border-primary border-darken-1">Product</th>
+                                    <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Booking Weight</th>
+                                    <th class="border-primary border-darken-1">Total Pieces</th>
+                                    <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Consignee Name</th>
+                                    <th class="border-primary border-darken-1">Consignee Address</th>
                                     <th class="border-primary border-darken-1">Action</th>
-                                    <th class="border-primary border-darken-1">Batch Status</th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -34,131 +44,6 @@
         </div>
     </div>
 
-
-
-{{--    <div class="modal fade" id="AddBookingBatchModal" data-backdrop="static" role="dialog" aria-labelledby="AddBookingBatchModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header">--}}
-{{--                    <h4 class="modal-title">Add Master Product</h4>--}}
-
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">×</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body text-center">--}}
-{{--                    <div class="errormessage">--}}
-
-{{--                    </div>--}}
-
-{{--                    <form method="post" id="add_booking_batch_form"--}}
-{{--                          action="{{ route('admin.logistic.master_product.store') }}"--}}
-{{--                          class="form-horizontal mb-1" novalidate="novalidate">--}}
-{{--                        @csrf--}}
-{{--                        <div class="row">--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Code</label>--}}
-{{--                                    <input type="text" name="parent_code" class="form-control parent_code" id="parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">--}}
-
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Name</label>--}}
-{{--                                    <input type="text" name="parent_name" class="form-control parent_name" id="parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Segments</label>--}}
-{{--                                    <select class="select select2 mb-1" name="segment_id" id="segment_id_select" data-rule-required="true" data-msg-required="Segment is required">--}}
-{{--                                        @foreach($segments as $segment)--}}
-{{--                                            <option value="{{ $segment->id }}">{{ $segment->name }}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                        <div class="form-group ml-1">--}}
-{{--                            --}}{{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
-
-{{--                            <button type="submit" name="add" class="btn btn-primary ml-2">Submit</button>--}}
-{{--                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>--}}
-
-
-{{--                        </div>--}}
-{{--                    </form>--}}
-
-{{--                </div>--}}
-
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-
-    {{--Edit Form--}}
-{{--    <div class="modal fade" id="EditMasterProductModal" data-backdrop="static" role="dialog" aria-labelledby="EditMasterProductModal"--}}
-{{--         aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-lg" role="document">--}}
-{{--            <div class="modal-content">--}}
-{{--                <div class="modal-header">--}}
-{{--                    <h4 class="modal-title">Update Master Product</h4>--}}
-
-{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-{{--                        <span aria-hidden="true">×</span>--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <div class="modal-body text-center">--}}
-{{--                    <div class="errormessage">--}}
-
-{{--                    </div>--}}
-
-{{--                    <form method="post" id="edit_master_product_form"--}}
-{{--                          action="{{ route('admin.logistic.master_product.update') }}"--}}
-{{--                          class="form-horizontal mb-1" novalidate="novalidate">--}}
-{{--                        @csrf--}}
-{{--                        @method('put')--}}
-{{--                        <div class="row">--}}
-{{--                            <input type="hidden" name="id" id="id">--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Code</label>--}}
-{{--                                    <input type="text" name="parent_code" class="form-control parent_code" id="edit_parent_code" data-rule-required="true" data-msg-required="Master Product Code is Required">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Name</label>--}}
-{{--                                    <input type="text" name="parent_name" class="form-control parent_name" id="edit_parent_name"  data-rule-required="true" data-msg-required="Master Product Name is Required">--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-4">--}}
-{{--                                <div class="form-group">--}}
-{{--                                    <label>Segments</label>--}}
-{{--                                    <select class="select select2 mb-1" name="segment_id" id="edit_segment_id_select" data-rule-required="true" data-msg-required="Segment is required">--}}
-{{--                                        @foreach($segments as $segment)--}}
-{{--                                            <option value="{{ $segment->id }}">{{ $segment->name }}</option>--}}
-{{--                                        @endforeach--}}
-{{--                                    </select>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                        <div class="form-group ml-1">--}}
-{{--                            --}}{{-- <button type="button" id="addrow" class="btn btn-success ">Add Row</button> --}}
-
-{{--                            <button type="submit" name="add" class="btn btn-primary ml-2">Update</button>--}}
-{{--                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>--}}
-
-
-{{--                        </div>--}}
-{{--                    </form>--}}
-
-{{--                </div>--}}
-
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
 
 @endsection
 
@@ -350,6 +235,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
+
     <script>
 
 
@@ -363,18 +249,6 @@
                 @if (session('role_id') == 1 || count(array_intersect([934], session('permissions'))) !== 0)
 
                 buttons: [
-                    // {
-                    //     text: '<i class="la la-plus"></i> Add New',
-                    //     className: 'btn btn-primary request_add',
-                    //     action: function (e, dt, node, config) {
-                    //         // $("#add_sack_bag_form")[0].reset();
-                    //         // $("#sackbag_detail tr:not(:first-child)").empty();
-                    //         // $("#add_sack_bag_form select").val(null).trigger('change.select2');
-                    //         $('#AddMasterProductModal').modal('show');
-                    //
-                    //     }
-                    // },
-
                     'reset'
                 ],
                 @else
@@ -398,7 +272,14 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.logistic.batch.list') }}',
+                    url: '{{ route('admin.logistic.batch.batch_booking_list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN':'{{ csrf_token() }}'
+                    },
+                    data: {
+                        batch_id: '{{ request('batch_id') }}'
+                    },
 
                 },
                 rowId: 'id',
@@ -416,11 +297,22 @@
                             return '';
                         }
                     },
-                    {data: 'id', name: 'trax_booking_batches.id', class: 'align-middle id'},
-                    {data: 'total_bookings', name: 'trax_booking_batches.total_bookings', class: 'align-middle total_bookings'},
-                    {data: 'status_name', name: 'bs.name', class: 'align-middle status_name'},
-                    {data: 'action', name: 'action', class: 'align-middle action'},
-
+                    {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
+                    {data: 'cn_number', name: 'cn_number', class: 'align-middle cn_number'},
+                    // {data: 'shipper_name', name: 'u.name', class: 'align-middle shipshipper_trax_idper_name',render: function (data, type, row){
+                    //     return row.shipper_trax_id +'-'+ row.shipper_name;
+                    // }},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
+                    {data: 'pickup_address', name: 'pickup_address', class: 'align-middle pickup_address'},
+                    {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                    {data: 'service_name', name: 's.service_name', class: 'align-middle service_name'},
+                    {data: 'total_booking_weight', name: 'total_booking_weight', class: 'align-middle total_booking_weight'},
+                    {data: 'total_pieces', name: 'total_pieces', class: 'align-middle total_pieces'},
+                    {data: 'origin_name', name: 'oc.name', class: 'align-middle origin_name'},
+                    {data: 'destination_name', name: 'dc.name', class: 'align-middle destination_name'},
+                    {data: 'consignee_name', name: 'consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_address', name: 'consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'action', name: 'action', class: 'align-middle action'}
 
                 ],
                 rowCallback: function (row, data, index) {
@@ -455,43 +347,36 @@
                     this.api().table().columns.adjust();
                 }
 
-
-
             });
 
+            //get booking for edit
+            {{--$("body").on('click','.datatable .edit',function (){--}}
+            {{--    var id = parseInt($(this).closest('tr').attr('id'));--}}
+            {{--    --}}
+            {{--    --}}{{--$.ajax({--}}
+            {{--    --}}{{--    url:'{{route('admin.logistic.master_product.edit',['id'=>':id']) }}'.replace(':id',id),--}}
+            {{--    --}}{{--    method:'GET'--}}
+            {{--    --}}{{--}).done(function (data){--}}
+            {{--    --}}{{--    if(data.status==0)--}}
+            {{--    --}}{{--    {--}}
+            {{--    --}}{{--        var master_product = data.master_product;--}}
+            {{--    --}}{{--        $("#id").val(master_product.id);--}}
+            {{--    --}}{{--        $("#edit_parent_code").val(master_product.parent_code);--}}
+            {{--    --}}{{--        $("#edit_parent_name").val(master_product.parent_name);--}}
+            {{--    --}}{{--        $("#edit_segment_id_select").val(master_product.segment_id).trigger('change');--}}
+            {{--    --}}{{--        $("#EditMasterProductModal").modal("show");--}}
+            {{--    --}}
+            {{--    --}}{{--    } else {--}}
+            {{--    --}}{{--        toastr.error(data.error, 'Error!', {--}}
+            {{--    --}}{{--            positionClass: 'toast-top-center',--}}
+            {{--    --}}{{--            containerId: 'toast-top-center'--}}
+            {{--    --}}{{--        });--}}
+            {{--    --}}{{--    }--}}
+            {{--    --}}
+            {{--    --}}{{--});--}}
 
 
-            $("body").on('click','.datatable .assign_batch',function (){
-                var id = parseInt($(this).closest('tr').attr('id'));
-                $.ajax({
-                    url:'{{route('admin.logistic.batch.assign_batch')}}',
-                    headers: {
-                        'X-CSRF-TOKEN':'{{ csrf_token() }}'
-                    },
-                    data:{
-                        'batch_id':id
-                    },
-                    method:'POST'
-                }).done(function (data){
-                    if(data.status==0)
-                    {
-                        toastr.success(data.success, 'Success!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                        table.draw();
-
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-
-                });
-
-
-            });
+            {{--});--}}
 
 
 
