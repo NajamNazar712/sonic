@@ -12740,8 +12740,8 @@ class AdminReportsController extends Controller
             'rv_agent_call_histories.remarks as call_remarks',
             'rvaass.name as call_finding_reason'
             )
-        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1);
-        // ->groupBy('rv_agent_call_histories.id');
+        ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
+        ->groupBy('rv_agent_call_histories.created_at');
             
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
@@ -12794,7 +12794,7 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             // $rv_report->whereBetween('rv_shipment_assign_agent_details.created_at', [$from, $to]);
-            $rv_report->whereBetween('rv_agent_call_histories.updated_at', [$from, $to]);
+            $rv_report->whereBetween('rv_agent_call_histories.created_at', [$from, $to]);
         }   
 
         return $datatable->make(true);
