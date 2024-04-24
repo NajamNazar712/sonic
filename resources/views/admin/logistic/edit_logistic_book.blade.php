@@ -260,6 +260,9 @@
                                             </div>
                                             <div id="book_pieces" class="collapse">
                                                 <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group"> <h4 style="color: black"><b>Booking Pieces</b></h4></div>
+                                                    </div>
                                                         <div class="col-md-12">
                                                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
                                                                 <thead>
@@ -287,9 +290,13 @@
                                                         </div>
                                                 </div>
                                             </div>
+                                            <hr style="background-color: black;">
                                             <div id="sp_ins" class="collapse">
 
                                                 <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group"> <h4 style="color: black"><b>Special Handling</b></h4></div>
+                                                    </div>
                                                     <input type="hidden" name="item_insurance_id" value="{{isset($item_insurance->id)?$item_insurance->id:''}}">
                                                     <div class="col-md-4">
                                                         <div class="form-group">
