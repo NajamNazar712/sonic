@@ -318,7 +318,7 @@ class RiderLogisticApiController extends Controller
 
             $rules = [ 
                 'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
-                'booking_id' => ['required']
+                'cn_number' => ['required']
             ];
 
             $messages = [
@@ -330,7 +330,8 @@ class RiderLogisticApiController extends Controller
             if ($validate->fails()) {
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }else {
-                $booking_id = $request->booking_id;
+
+                $booking_id = Shipment::where('tracking_number', $request->cn_number)->pluck('id')->first();
                 $image = new TraxLogisticBookingImages();
                 $time = Carbon::now()->timestamp;
                 $image_name =$booking_id . '_' . $time . '.png';
