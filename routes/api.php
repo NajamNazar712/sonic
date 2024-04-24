@@ -362,7 +362,7 @@ Route::name('api.')->group(function () {
                     Route::get('data','Rider\Logistic\Api\RiderLogisticApiController@logistic_data')->name('data');
                     Route::post('store','Rider\Logistic\Api\RiderLogisticApiController@logistic_booking_store')->name('store');
                     Route::post('shipper','Rider\Logistic\Api\RiderLogisticApiController@get_shipper_detail')->name('shipper');
-
+                    Route::post('store_image', 'Rider\Logistic\Api\RiderLogisticApiController@store_image')->name('store_image');
                 });
 
             });

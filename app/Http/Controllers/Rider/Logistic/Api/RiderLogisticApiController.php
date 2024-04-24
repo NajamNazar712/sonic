@@ -27,6 +27,10 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\Logistic\TraxLogisticBookingImages;
+use Validator;
+use Illuminate\Support\Facades\Storage;
+
 
 class RiderLogisticApiController extends Controller
 {
@@ -247,7 +251,7 @@ class RiderLogisticApiController extends Controller
                                 ->havingRaw('batch_count < ?',[$batch_length]);
 
                             //check batch exist than check batch length
-//                            $batch =$batch->first();
+                           //$batch =$batch->first();
 
                             if($batch->exists())
                             {
@@ -310,11 +314,42 @@ class RiderLogisticApiController extends Controller
 
                 }
                 return response()->json(['status'=>1,'error'=>'Shipper ID not found!']);
+        }
+
+        public function store_image(Request $request) {
+
+            $rules = [ 
+                'booking_image' => ['required', 'mimes:png,jpeg,jpg'],
+                'cn_number' => ['required']
+            ];
+
+            $messages = [
+                'required' => ':attribute is Required.',
+            ];
+
+            $validate = Validator::make($request->all(), $rules, $messages);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            }else {
+
+                $booking_id = Shipment::where('tracking_number', $request->cn_number)->pluck('id')->first();
+                $image = new TraxLogisticBookingImages();
+                $time = Carbon::now()->timestamp;
+                $image_name =$booking_id . '_' . $time . '.png';
+                $image_path = 'logistic_bookings/' . $image_name;
+                Storage::disk('public')->put($image_path, file_get_contents($request->booking_image));
+                $image->booking_id = $booking_id;
+                $image->image_name = $image_name;
+                $image->image_path = $image_path;
+                $image->save();
+
+                return response()->json(['status' => 0, 'message' => 'Image has been stored!']);
+            }
 
         }
 
-
-//    public function logistic_booking_store(Request $request)
+        //    public function logistic_booking_store(Request $request)
 //    {
 //
 //        $bookig_data=$request->booking_data;
