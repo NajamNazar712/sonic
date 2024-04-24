@@ -16,8 +16,12 @@ class RVShipmentAssignAgentUpdateSeeder extends Seeder
     public function run()
     {
         //
-        $rvshipment = RvShipmentAssignAgent::join('users as u','u.id','rv_shipment_assign_agents.updated_by_id')->where('updated_type_id',1)->pluck('rv_shipment_assign_agents.id')->limit('10000');
-        $rvShipmentAssignAgentUpdate = RvShipmentAssignAgent::whereIN('id',$rvshipment)->update(['updated_type_id'=>3]);
-        $rvShipmentdetailUpdate = RvShipmentAssignAgentDetails::whereIN('rv_shipment_assign_agent_id',$rvshipment)->update(['updated_type_id'=>3]);
+        $rvshipment = RvShipmentAssignAgent::join('users as u','u.id','rv_shipment_assign_agents.updated_by_id')->where('updated_type_id',1)->get(['rv_shipment_assign_agents.id']);
+        
+        foreach($rvshipment as $updatedbyid)
+        {
+            $rvShipmentAssignAgentUpdate = RvShipmentAssignAgent::where('id',$updatedbyid['id'])->update(['updated_type_id'=>3]);
+            $rvShipmentdetailUpdate = RvShipmentAssignAgentDetails::where('rv_shipment_assign_agent_id',$updatedbyid['id'])->update(['updated_type_id'=>3]);
+        }
     }
 }
