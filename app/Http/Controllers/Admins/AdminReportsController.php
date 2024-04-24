@@ -4669,10 +4669,8 @@ class AdminReportsController extends Controller
                         $rows = $rows->where('s.shipping_mode_id', '=', $mode);
                     }
 
-                    if ($rows->exists()) {
-                        $rows = $rows->groupBy('s.id');
-
-                        $rows = $rows->get();
+                    $rows = $rows->groupBy('s.id')->get();
+                    if ($rows->count() > 0) {
 
                         $counts[$hub->name][$type] = $rows->count();
 
