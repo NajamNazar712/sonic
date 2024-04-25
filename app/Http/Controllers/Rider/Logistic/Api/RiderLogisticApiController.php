@@ -122,6 +122,7 @@ class RiderLogisticApiController extends Controller
 
                     DB::beginTransaction();
 
+
                     //check booking batch length for creating a batch
                     $batch_length=10;
                     $booking_batch_length =  GeneralSetting::where('type','booking_batch_length')->first();
@@ -333,7 +334,7 @@ class RiderLogisticApiController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
             }else {
 
-                $booking_id = Shipment::where('tracking_number', $request->cn_number)->pluck('id')->first();
+                $booking_id = TraxLogisticBooking::where('cn_number', $request->cn_number)->pluck('id')->first();
                 $image = new TraxLogisticBookingImages();
                 $time = Carbon::now()->timestamp;
                 $image_name =$booking_id . '_' . $time . '.png';
