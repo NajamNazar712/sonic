@@ -40,8 +40,8 @@ class RiderLogisticApiController extends Controller
         $rider_id = $request->rider_id;
         $logistic_data = array();
 
-        $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
-            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id','sd.piece_setting_id')
+            $shipper_list = User::join('trax_shipper_details as sd','sd.user_id','=','users.id')
+            ->select('users.id as shipper_id','users.name as shipper_name','users.phone as shipper_phone','users.address','users.city_id','sd.trax_product_id','sd.trax_service_id','sd.piece_setting_id','users.account_type_id')
             ->where('users.status',3)->where('sd.status',1)
             ->where('sd.rider_id',$rider_id)
             ->get();
@@ -170,6 +170,7 @@ class RiderLogisticApiController extends Controller
                             $logistic_booking->total_volumetric_weight = $booking['total_volumetric_weight'];
                             $logistic_booking->user_type = 2; // 1 - Admin, 2 - Rider, 0 -> shipper
                             $logistic_booking->created_by = $rider_id;
+                            $logistic_booking->payment_mode_id=1;
 
                             $logistic_booking->save();
 
@@ -177,8 +178,18 @@ class RiderLogisticApiController extends Controller
                             $shipment=Shipment::where('tracking_number',$logistic_booking['cn_number']);
                             if(!$shipment->exists())
                             {
+                                $charges_mode_id=0;
+
+                                if($booking['account_type_id']==1)
+                                {
+                                    $charges_mode_id=4;
+
+                                } else  if($booking['account_type_id']==2)
+                                {
+                                    $charges_mode_id=3;
+                                }
                                 //send data to shipments table
-                                $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,1,0,1,1,1,4,$booking['total_pieces'],1,0.0,null,2);
+                                $shipment_id = LogisticToShipmentSyncController::shipments_book($booking['shipper_id'],$booking['cn_number'],$booking['pickup_address_id'],1,1,$booking['destination_id'],$booking['consignee_name'],'Consignee Address',$booking['consignee_phone_1'],$booking['booking_date'],$booking_weight,0,0,$booking['shipping_mode_id'],0,1,1,1,$charges_mode_id,$booking['total_pieces'],1,0.0,null,2);
                             }
 
 
