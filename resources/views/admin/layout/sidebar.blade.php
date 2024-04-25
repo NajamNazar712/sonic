@@ -222,11 +222,7 @@
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Setup</span></a>
                             <ul class="menu-content">
 
-                                    @if (session('role_id') == 1 || in_array(446, session('permissions')))
-                                        <li  class="menu-item">
-                                            <a href="{{ route('admin.logistic.shipper_tagging.index') }}">Logistic Shipper Tagging</a>
-                                        </li>
-                                    @endif
+
 
                                     @if (session('role_id') == 1 || in_array(446, session('permissions')))
                                             <li  class="menu-item">
@@ -245,7 +241,11 @@
                                            <a href="{{ route('admin.logistic.service.index') }}">Service</a>
                                         </li>
                                     @endif
-
+                                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                            <li  class="menu-item">
+                                                <a href="{{ route('admin.logistic.shipper_tagging.index') }}">Logistic Shipper Tagging</a>
+                                            </li>
+                                        @endif
 
                             </ul>
                         </li>
@@ -254,11 +254,11 @@
                                 <a href="{{ route('admin.logistic.batch.index') }}">Batches</a>
                             </li>
                         @endif
-{{--                        @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
-{{--                            <li  class="menu-item">--}}
-{{--                                <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>--}}
-{{--                            </li>--}}
-{{--                        @endif--}}
+                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            <li  class="menu-item">
+                                <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>
+                            </li>
+                        @endif
 {{--                        @if (session('role_id') == 1 || in_array(446, session('permissions')))--}}
 {{--                            <li  class="menu-item">--}}
 {{--                                <a href="{{ route('admin.logistic.shipment_manifest.create') }}">Shipment Manifest</a>--}}
