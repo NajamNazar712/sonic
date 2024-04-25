@@ -2893,9 +2893,9 @@ class ShipperShipmentBookController extends Controller
             $data = $validator->getData();
             $service_type_id = $data['service_type_id'];
         
-            if ($service_type_id == 2 && ($value < 0.1 || $value > 10)) {
+            if ($service_type_id == 2 && ($value < 0.01 || $value > 10)) {
                 return false;
-            } elseif ($service_type_id != 2 && ($value < 1 || $value > 10000)) {
+            } elseif ($service_type_id != 2 && ($value < 0.01 || $value > 100000)) {
                 return false;
             }else{
                 return true;
@@ -3073,7 +3073,7 @@ class ShipperShipmentBookController extends Controller
             'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,10000'],
 
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['numeric', 'estimated_weight_check'],
+            'estimated_weight' => ['numeric', 'estimated_weight_check', 'between:0.1,100000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
