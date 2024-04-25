@@ -570,7 +570,6 @@
                                                 <div class="col-md-12" >
                                                     <div class="label_img">
                                                         @if(isset($booking_img_url))
-{{--                                                            {{dd(asset($booking_img_url))}}--}}
                                                             <img id="myimage" src="{{asset($booking_img_url)}}" >
                                                         @else
                                                             <img id="myimage" src="" alt="Booking label not available" >
