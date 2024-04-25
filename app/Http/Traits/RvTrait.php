@@ -775,6 +775,8 @@ trait RvTrait
                 $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
                 $rv_shipment_assign_agent->save();
 
+                $rv_shipment_ticket = RvShipmentTicket::where('shipment_id',$request->shipment_id)->increment('call_count');
+
                 $reattempt_count = BoltUndeliveredReasonMapCount::where('shipment_id',$request->shipment_id)->where('count',3)->first();
                 //if reattempt count is 3 then shipment status will be auto return confirm
                 if ($rv_shipment_assign_agent->unresponsive_count > 0 && $reattempt_count) {
@@ -1186,7 +1188,7 @@ trait RvTrait
     {
         $shipment = null;
 
-        $agent_type = Admin::find($agent_id);
+        $agent = Admin::find($agent_id);
 
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
@@ -1224,12 +1226,12 @@ trait RvTrait
         if (!empty($included_shippers)) {
 
             $shipments = RvShipmentTicket::whereIn('shipment_user_id',$included_shippers)
-            ->when($agent_type, function ($query, $agent_type) {
-                if($agent_type->agent_type_id == 1) //These Agents will get shipments pending with first call
+            ->when($agent, function ($query, $agent) {
+                if($agent->agent_type_id == 1) //These Agents will get shipments pending with first call only
                 {
                     return $query->where('call_count' , 0);
                 }
-                else if($agent_type->agent_type_id == 2)//These Agents will get shipments pending with second call
+                else if($agent->agent_type_id == 2)//These Agents will get shipments pending with second call only
                 {
                     return $query->where('call_count' , 1);
                 }
@@ -1257,12 +1259,12 @@ trait RvTrait
             if (!empty($result)){
 
                 $shipments = RvShipmentTicket::whereIn('shipment_user_id',$result)
-                ->when($agent_type, function ($query, $agent_type) {
-                    if($agent_type->agent_type_id == 1) //These Agents will get shipments pending with first call
+                ->when($agent, function ($query, $agent) {
+                    if($agent->agent_type_id == 1) //These Agents will get shipments pending with first call only
                     {
                         return $query->where('call_count' , 0);
                     }
-                    else if($agent_type->agent_type_id == 2)//These Agents will get shipments pending with second call
+                    else if($agent->agent_type_id == 2)//These Agents will get shipments pending with second call only
                     {
                         return $query->where('call_count' , 1);
                     }

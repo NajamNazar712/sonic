@@ -26,7 +26,7 @@ class AddAgentTypeColumnInAdminsTable extends Migration
     public function down()
     {
         Schema::table('admins', function (Blueprint $table) {
-            //
+            $table->dropColumn('agent_type_id');
         });
     }
 }
