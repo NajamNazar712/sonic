@@ -2893,9 +2893,9 @@ class ShipperShipmentBookController extends Controller
             $data = $validator->getData();
             $service_type_id = $data['service_type_id'];
         
-            if ($service_type_id == 2 && ($value < 0.1 || $value > 10)) {
+            if ($service_type_id == 2 && ($value < 0.001 || $value > 10)) {
                 return false;
-            } elseif ($service_type_id != 2 && ($value < 1 || $value > 10000)) {
+            } elseif ($service_type_id != 2 && ($value < 0.001 || $value > 100000)) {
                 return false;
             }else{
                 return true;
