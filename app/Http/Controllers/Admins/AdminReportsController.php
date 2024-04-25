@@ -95,6 +95,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\IssueSackBagOrigin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Traits\RvTrait;
+use App\RvAgentCallHistory;
 use DateTime;
 
 
@@ -12690,15 +12691,15 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 762);
         }
 
-        $rv_report = RvShipmentAssignAgentDetails::join('shipments', 'rv_shipment_assign_agent_details.shipment_id','shipments.id')
-        ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_shipment_assign_agent_details.rv_shipment_assign_agent_id')
+        $rv_report = RvAgentCallHistory::join('shipments', 'rv_agent_call_histories.shipment_id','shipments.id')
+        ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_agent_call_histories.rv_shipment_assign_agent_id')
+        ->leftJoin('rv_shipment_assign_agent_details','rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', 'rv_shipment_assign_agents.id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
-        ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
         ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
         ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
         ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
-        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agent_details.rv_assign_agent_status_id', 'rv_aas.id')
+        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aas.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
 
@@ -12718,7 +12719,7 @@ class AdminReportsController extends Controller
             ->where('sjj.shipper_status_id', '=', 2);
         })
 
-        ->leftJoin('rv_agent_call_histories','shipments.id','rv_agent_call_histories.shipment_id')
+        // ->leftJoin('rv_agent_call_histories','shipments.id','rv_agent_call_histories.shipment_id')
         ->join('rv_assign_agent_sub_statuses as rvaass','rv_agent_call_histories.call_finding_id','rvaass.id')
 
         ->select(
@@ -12731,7 +12732,7 @@ class AdminReportsController extends Controller
             'hub.name as hub',
             'shipments.amount as cod_amount', 
             'rv_aas.name as action', 
-            'rv_shipment_assign_agent_details.created_at as action_date',
+            'rv_agent_call_histories.created_at as action_date',
             's_status.name as current_status', 
             'shipments.updated_at as current_status_date', 
             'rv_status.name as rv_status_name',
@@ -12739,10 +12740,10 @@ class AdminReportsController extends Controller
             'rv_agent_call_histories.updated_at as calling_datetime',
             'rv_agent_call_histories.remarks as call_remarks',
             'rvaass.name as call_finding_reason'
-            )
+        )
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->groupBy('rv_agent_call_histories.created_at');
-            
+        ->groupBy('rv_agent_call_histories.id');
+
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
                         $route = route('admin.tracking.index');
@@ -12756,14 +12757,6 @@ class AdminReportsController extends Controller
                             return $rv_report['action'];
                         }
                     })
-                    ->editColumn('remarks', function($rv_report) {
-                        if ($rv_report['remarks']=="") {
-                            return '-';
-                        }
-                        else {
-                            return $rv_report['remarks'];
-                        }
-                    })
 
                     ->editColumn('calling_datetime', function($rv_report){
                         return substr($rv_report->calling_datetime,0,10);
@@ -12771,7 +12764,7 @@ class AdminReportsController extends Controller
                     ->addColumn('calling_time', function($rv_report){
                         return substr($rv_report->calling_datetime,10);
                     })
-                    ->addColumn('call_findings', function($rv_report){
+                    ->addColumn('call_findings', function(){
                         return 'Unresponsive';
                     });
 
@@ -12783,8 +12776,8 @@ class AdminReportsController extends Controller
             $rv_report->where('users.name', '=', $shipper_name);
         }
         if ($agent_id = $request->get('search_agent_name')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
+            // $from = $request->get('search_date_from');
+            // $to = $request->get('search_date_to');
             $rv_report->where('add.id', '=', $agent_id);
             // $rv_report->where('rv_shipment_assign_agent_details.agent_id', '=', $agent_id);
             $rv_report->where('rv_shipment_assign_agent_details.updated_type_id',2);
