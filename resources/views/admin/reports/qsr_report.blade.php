@@ -544,7 +544,8 @@
                                             selectedValue: $('#export').val(),
                                             selectedTexts: $('#export option:selected').map(function() {
                                                 return $(this).text()
-                                            }).get()
+                                            }).get(),
+                                            service_type_select: $('#service_type_select').val()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -615,6 +616,7 @@
                         d.selectedTexts = $('#export option:selected').map(function () {
                             return $(this).text()
                         }).get();
+                        d.service_type_select = $('#service_type_select').val();
                     }
                 },
                 rowId: 'shId',
