@@ -1,5 +1,6 @@
 <?php
 
+use App\CronDonePayment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Models\Shipment;
@@ -14,8 +15,8 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $shipment_ids = [34663870];
-        
+        $tracking_number = CronDonePayment::where('status',1)->pluck('tracking_number')->toArray();
+        $shipment_ids = Shipment::whereIn('tracking_number',$tracking_number)->select('id')->pluck('id')->toArray();
         foreach ($shipment_ids as $shipment_id){
             $shipment = Shipment::find($shipment_id);
             if($shipment){
@@ -35,6 +36,9 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
 
                 }
             }
+        }
+        if(count($tracking_number) > 0){
+            CronDonePayment::whereIn('tracking_number',$tracking_number)->update(['status'=>0]);
         }
     }
 }

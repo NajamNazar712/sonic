@@ -88,6 +88,15 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    <div class="col-5">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-5">
 
                         <div class="form-group input-group ml-1">
@@ -304,7 +313,11 @@
                 width:'100%',
                 allowClear:true
             });
-
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
+            });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -529,7 +542,9 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
-                        d.search_business_category = $('#search_business_category').val();
+                        d.search_business_category = $('#search_business_category').val();                 
+                        d.service_type_select = $('#service_type_select').val();
+
                     }
                 },
                 order: [[12, 'desc']],

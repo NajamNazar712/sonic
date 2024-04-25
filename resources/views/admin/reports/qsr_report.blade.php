@@ -113,6 +113,14 @@
                         </select>
                     </div>
 
+                    <div class="col-4">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -347,6 +355,10 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Service Type'
+            });
 
             $('#export').select2({
                 width:'100%',
@@ -532,7 +544,8 @@
                                             selectedValue: $('#export').val(),
                                             selectedTexts: $('#export option:selected').map(function() {
                                                 return $(this).text()
-                                            }).get()
+                                            }).get(),
+                                            service_type_select: $('#service_type_select').val()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -603,6 +616,7 @@
                         d.selectedTexts = $('#export option:selected').map(function () {
                             return $(this).text()
                         }).get();
+                        d.service_type_select = $('#service_type_select').val();
                     }
                 },
                 rowId: 'shId',
