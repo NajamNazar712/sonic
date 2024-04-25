@@ -285,7 +285,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash_draft->hub_id = $request->select_statement_hub;
                 $petty_cash_draft->reference_no = $request->reference_no;
                 $petty_cash_draft->date = $request->select_statement_date_formatted;
-                $petty_cash_draft->sdn_id = $request->select_statement_sdn;
+                $petty_cash_draft->sdn_id = $request->select_statement_sdn ?? 0;
                 $petty_cash_draft->origin_hub_id = Auth::user()->default_hub_id ?? 0;
                 $petty_cash_draft->destination_hub_id = Admin::find($request->select_statement_station_manager)->default_hub_id ?? 0;
                 $petty_cash_draft->station_manager_id = $request->select_statement_station_manager;
