@@ -17,7 +17,23 @@
                     <input type="hidden" name="search_total_lost_approved_shipments" id="search_total_lost_approved_shipments">
                     <input type="hidden" name="search_total_lost_pending_shipments" id="search_total_lost_pending_shipments">
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="col-4">
+                        <div class="col-3">
+
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_lost_status" id="search_lost_status" class="form-control select2" >
+                                        <option value="0">Pending</option>
+                                        <option value="1">Approved</option>
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -27,7 +43,7 @@
                                 <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" >
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -37,7 +53,10 @@
                                 <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
                             </div>
                         </div>
-                        <div class="col-2">
+
+                 
+
+                        <div class="col-2 mt-2">
                             <button type="button" id="search_filter_btn" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
                     </form>
@@ -139,6 +158,8 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Last Hub Name</th>
+                        <th class="border-primary border-darken-1">Last Zone Name</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
@@ -306,6 +327,11 @@
             width: '100%',
             placeholder: 'Select Reason'
         });
+        $('#search_lost_status').prepend('<option value="" selected></option>').select2({
+            width:'100%',
+            placeholder:"Select Lost Status",
+            allowClear:true,
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -333,6 +359,8 @@
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
+                        head.push('Last Hub Name');
+                        head.push('Last Zone Name');
                         head.push('Consignee Name');
                         head.push('Phone');
                         head.push('Address');
@@ -361,6 +389,8 @@
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            row.push(values.last_hub_name);
+                            row.push(values.last_zone_name);
                             row.push(values.consignee_name);
                             row.push(values.phone);
                             row.push(values.consignee_address);
@@ -735,11 +765,15 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 data: function(d) {    
-                    d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
+                    // d.search_total_lost_shipments = $('#search_total_lost_shipments').val();
                     d.search_total_lost_approved_shipments = $('#search_total_lost_approved_shipments').val();
                     d.search_total_lost_pending_shipments = $('#search_total_lost_pending_shipments').val();
                     d.search_from = $('input[name="from_date_formatted"]').val();
                     d.search_to = $('input[name="to_date_formatted"]').val();
+                    d.tracking_numbers = $('#search_form .tracking_numbers').val();
+                    d.search_lost_status = $('#search_lost_status').val();
+
+
                 }
             },
             rowId: 'shId',
@@ -753,6 +787,8 @@
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                {data: 'last_hub_name', name: 'ci.name', class: 'align-middle last_hub_name'},
+                {data: 'last_zone_name', name: 'zo.name', class: 'align-middle last_zone_name'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
@@ -1050,7 +1086,7 @@
             $('#search_total_lost_shipments').val(1);
             $('#search_total_lost_approved_shipments').val('');
             $('#search_total_lost_pending_shipments').val('');
-            table.draw();
+            // table.draw();
         });
 
 
@@ -1270,10 +1306,13 @@
                         '_token': '{{ csrf_token() }}',
                     },
                     success: function(response) {
+                        var total = parseInt(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments) +
+                            parseInt(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments) +
+                            parseInt(response.details.total_rejections == null ? 0 : response.details.total_rejections);                       
                         $('#total_of_pending_shipments').text(response.details.total_of_pending_shipments == null ? 0 : response.details.total_of_pending_shipments);
                         $('#total_of_approved_shipments').text(response.details.total_of_approved_shipments == null ? 0 : response.details.total_of_approved_shipments);
-                        $('#total_of_shipments').text(response.details.total == null ? 0 : response.details.total);
                         $('#rejection_shipments').text(response.details.total_rejections == null ? 0 : response.details.total_rejections);
+                        $('#total_of_shipments').text(total.toString());
                     },
                     error: function(xhr, status, error) {
                         console.error('AJAX request failed');
@@ -1285,6 +1324,44 @@
        
         });
 
+        //Selectize
+        var select = $('#search_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+        });
+   
+        $('#search_form').bind('submit', function (e) {
+                e.preventDefault();
+                var tracking_numbers = $('#search_form .tracking_numbers').val();
+                if (tracking_numbers != '') {
+                    table.draw();
+                }
+            });    
+    
     });
 
     </script>

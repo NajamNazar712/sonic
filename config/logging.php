@@ -51,6 +51,11 @@ return [
             'path' => storage_path('logs/trax_pay.log'),
             'level' => 'debug',
         ],
+        'cronJobLog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/cronJobLog.log'),
+            'level' => 'debug',
+        ],
         'trax_pay_test' => [
             'driver' => 'single',
             'path' => storage_path('logs/trax_pay_test.log'),
