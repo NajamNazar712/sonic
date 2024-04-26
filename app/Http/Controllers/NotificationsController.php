@@ -2608,9 +2608,9 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'rahat.ali@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
+                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'hassan.arman@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk', "asad.ahsan@trax.pk"];
+                    $bcc = ['faisal.hasan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 27) {
 
@@ -3721,7 +3721,6 @@ class NotificationsController extends Controller
                             //     $cc = $general_managers->pluck('admins.email')->toArray();
                             // }
 
-                            $to[] = 'uzair.anees@trax.pk';
                             $admins = Admin::whereIn('role_id', [31])->where('status', 1)->whereNotNull('email');
 
                             if ($admins->exists()) {
@@ -3852,7 +3851,6 @@ class NotificationsController extends Controller
 
                     // self::email($subject, $body, $to, $cc);
 
-                    $to = 'uzair.anees@trax.pk';
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
@@ -3994,7 +3992,7 @@ class NotificationsController extends Controller
                     $to = ['abbas.ali@trax.pk','ali.cheema@trax.pk','tanveer.malik@trax.pk','waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
-                    $bcc = ['muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk', "asad.ahsan@trax.pk"];
+                    $bcc = [ 'faisal.hasan@trax.pk', "asad.ahsan@trax.pk"];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 48) {
 
@@ -4081,11 +4079,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         array_push($to, $ceo->email);
                     }
-                    $extra_admins = ['syed.sharique@trax.pk'];
 
-                    $to = array_merge($to, $extra_admins);
-
-                    $to[] = 'muhammad.waqas@trax.pk';
                     $to[] = 'shoaib.ameen@trax.pk';
 
                     foreach ($to as $email) {
@@ -4185,10 +4179,9 @@ class NotificationsController extends Controller
                     //                    $extra_admins = ['rahat.ali@trax.pk'];
                     //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = [ 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
-                    $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
                     //                 $to = array();
@@ -5755,7 +5748,6 @@ class NotificationsController extends Controller
                         $html .= '</tr>';
 
                         if ($person['zone']->id == 1) {
-                            $cc[] = 'waqas.shaikh@trax.pk';
                             $cc[] = 'nabeel.ahmed@trax.pk';
                         } else if ($person['zone']->id == 2) {
                             $cc[] = 'ali.qureshi@trax.pk';
@@ -5872,10 +5864,7 @@ class NotificationsController extends Controller
                         $to[] = 'aftab.qidwai@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
-                        $to[] = 'mohsin.khan@trax.pk';
-                        $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'noman.arshad@trax.pk';
-
+                      
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
                 } else if ($id == 83) {
@@ -6253,10 +6242,9 @@ class NotificationsController extends Controller
                     //              if ($admin->exists()) {
                     //                  $to = array_merge($to, $admin->pluck('email')->toArray());
                     //              }
-                    $to[] = 'syed.sharique@trax.pk';
 
 
-                    self::email($subject, $body, $to);
+                    // self::email($subject, $body, $to);
                 } else if ($id == 89) {
 
                     $finance = Admin::whereIn('id', [60, 12])->where('status', 1);
@@ -6850,8 +6838,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $to = ['uzair.anees@trax.pk'];
                     $cc = ['shahbaz.abbasi@trax.pk'];
+                    $to = array();
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 111) {
@@ -6861,7 +6849,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
                     }
-                    $to = ['uzair.anees@trax.pk'];
+                    $to = array();
                     $cc = ['shahbaz.abbasi@trax.pk'];
 
                     self::email($subject, $body, $to, $cc);
@@ -7644,7 +7632,7 @@ class NotificationsController extends Controller
 
                     $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "faisal.hasan@trax.pk"];
+                    $cc = ["faisal.hasan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 133) {
@@ -8214,8 +8202,6 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'huzaifa.aamir@trax.pk';
                         $to[] = 'mohsin.khan@trax.pk';
-                        $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'noman.arshad@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8717,7 +8703,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'ali.raza@trax.pk'];
+                    $to = ['nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -8737,7 +8723,7 @@ class NotificationsController extends Controller
 
                     $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "faisal.hasan@trax.pk"];
+                    $cc = [ "faisal.hasan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 157) {
@@ -8889,11 +8875,10 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['waqas@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
-                    $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 162) {
                     $admin = Admin::find($reference_1_id);
@@ -9242,7 +9227,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[preview]', $preview, $body);
                         }
 
-                        $to = ["talha.hussain@trax.pk", 'syed.anam@trax.pk', 'waqas@trax.pk', 'ops.telenor@trax.pk'];
+                        $to = ["talha.hussain@trax.pk", 'syed.anam@trax.pk', 'waqas@trax.pk'];
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 169) {
@@ -9734,7 +9719,7 @@ class NotificationsController extends Controller
                         if (strpos($body, '[role]') !== FALSE) {
                             $body = str_replace('[role]', $role, $body);
                         }
-                        $to = ['faisal.hasan@trax.pk', 'muhammad.waqas@trax.pk'];
+                        $to = ['faisal.hasan@trax.pk'];
                         self::email($subject, $body, $to);
                     }
                 } else if ($id == 190) {
@@ -9811,10 +9796,9 @@ class NotificationsController extends Controller
 
                     $to = array();
                     // $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'khan.usama@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
-                    $to = ['info@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
+                    $to = ['info@trax.pk', 'waqas@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'm.sohail@trax.pk'];
                     $cc = array();
                     $bcc = array();
-                    $bcc = ['muhammad.waqas@trax.pk'];
 
                     self::email($subject, $body, $to, $cc, $bcc);
                 } else if ($id == 191) {
@@ -9942,7 +9926,7 @@ class NotificationsController extends Controller
 
                     $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "faisal.hasan@trax.pk"];
+                    $cc = ["faisal.hasan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 207) {
@@ -9961,7 +9945,7 @@ class NotificationsController extends Controller
 
                     $to = [ 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk', 'm.sohail@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
+                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 210) {
@@ -10296,7 +10280,7 @@ class NotificationsController extends Controller
 
                     $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk',  'huzaifa.aamir@trax.pk', 'hammad.majid@trax.pk', 'ghazanfar.ali@trax.pk'];
 
-                    $cc = ["muhammad.waqas@trax.pk", "faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
+                    $cc = ["faisal.hasan@trax.pk", "asad.ahsan@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 215) {
@@ -10539,7 +10523,7 @@ class NotificationsController extends Controller
                     $subject = $notification->subject;
                     $body = $notification->body;
 
-                    $to = array('muhammad.waqas@trax.pk', 'faisal.hasan@trax.pk', "asad.ahsan@trax.pk");
+                    $to = array('faisal.hasan@trax.pk', "asad.ahsan@trax.pk");
 
                     self::email($subject, $body, $to);
                 }else if ($id == 221) {
