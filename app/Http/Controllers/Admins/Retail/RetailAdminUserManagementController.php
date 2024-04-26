@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Product;
 use App\Http\Models\RetailFranchiseProductPerecntage;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use Illuminate\Support\Facades\Storage;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -76,8 +78,9 @@ class RetailAdminUserManagementController extends Controller
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         $products = Product::orderBy('product_name')->get();
         $product_percentage = RetailFranchiseProductPerecntage::get();
+        $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
 
-        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage]);
+        return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes]);
     }
 
     public function franchise_list(Request $request)
@@ -163,7 +166,9 @@ class RetailAdminUserManagementController extends Controller
 
     public function franchise_add(Request $request)
     {
+        dd($request->all());
         $admin = $request->user();
+        $date = Carbon::now()->format('Y_m_d');
         $hub_count = RetailFranchise::where('default_hub', $request->hub)->count() + 1;
 
         $franchise = new RetailFranchise();
@@ -178,7 +183,7 @@ class RetailAdminUserManagementController extends Controller
         $franchise->updated_by = Auth::id();
         $franchise->insurance = $request->insurance;
         $franchise->status = 1;
-        $franchise->save();
+        // $franchise->save();
 
         $hub_name = City::find($request->hub)->name;
         $hub_code = substr($hub_name, 0, 3);
@@ -186,14 +191,56 @@ class RetailAdminUserManagementController extends Controller
         $code = 'FR-' . $hub_code . '-' . str_pad($hub_count, 3, 0, STR_PAD_LEFT);
 
         $franchise->code = $code;
-        $franchise->save();
+        // $franchise->save();
 
-        RetailFranchiseProductPerecntage::create([
-            'franchise_id' => $franchise->id,
-            'product_id' => $request->product_id,
-            'product_percentage' => $request->product_percentage,
-            'created_by' => $admin->id,
-        ]);
+        $franchise_retail_product = new RetailFranchiseProductPerecntage();
+
+        if ($request->hasFile('attachment_1')) {
+            $file = $request->file('attachment_1');
+            $filename = 'attachment_1_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('product_documents/' . Carbon::now()->format('His') . '', $file, $filename);
+            $franchise_retail_product->attachment_1 = $filename;
+        }
+
+        if ($request->hasFile('attachment_2')) {
+            $file = $request->file('attachment_2');
+            $filename = 'attachment_2_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('attachment_2/' . Carbon::now()->format('His') . '', $file, $filename);
+            $franchise_retail_product->attachment_2 = $filename;
+        }
+
+        if ($request->hasFile('attachment_3')) {
+            $file = $request->file('attachment_3');
+            $filename = 'attachment_3_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('attachment_3/' . Carbon::now()->format('His') . '', $file, $filename);
+            $franchise_retail_product->attachment_3 = $filename;
+        }
+
+        if ($request->hasFile('attachment_4')) {
+            $file = $request->file('attachment_4');
+            $filename = 'attachment_4_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('attachment_4/' . Carbon::now()->format('His') . '', $file, $filename);
+            $franchise_retail_product->attachment_4 = $filename;
+        }
+
+        if ($request->hasFile('attachment_5')) {
+            $file = $request->file('attachment_5');
+            $filename = 'attachment_5_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+            Storage::disk('public')->putFileAs('attachment_5/' . Carbon::now()->format('His') . '', $file, $filename);
+            $franchise_retail_product->attachment_5 = $filename;
+        }
+
+        $franchise_retail_product->franchise_id = $franchise->id;
+        $franchise_retail_product->retail_shipping_mode_id = $request->retail_shipping_mode_id;
+        $franchise_retail_product->product_percentage = $request->product_percentage;
+        $franchise_retail_product->created_by = $admin->id;
+        $franchise_retail_product->commission_percentage = $request->commission_percentage;
+        $franchise_retail_product->withholding_tax_percentage = $request->withholding_tax_percentage;
+        $franchise_retail_product->deduction_percentage = $request->deduction_percentage;
+
+        $retailShippingModes = $request->input('retail_shipping_mode_id');
+
+        $franchise_retail_product->save();
 
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
@@ -201,16 +248,14 @@ class RetailAdminUserManagementController extends Controller
         $pickup_address_id = $this->add_pickup_address($shipper_user_id, $franchise->name . ' - ' . $hub_name, $franchise->name, $franchise->phone_no, $franchise->email, $franchise->default_hub, 0, $franchise->location_latitude, $franchise->location_longitude);
 
         $franchise->pickup_address_id = $pickup_address_id;
-        $franchise->save();
+        // $franchise->save();
 
         return redirect()->back()->with('success', 'Franchise Added Successfully!');
     }
 
     public function franchise_edit(Request $request)
     {
-        dd(
-            $request->all()
-        );
+        $date = Carbon::now()->format('Y_m_d');
         $admin = $request->user();
         $id = $request->franchise_id;
         $existing_franchise = RetailUser::where('name', $request->name)->where('category_id', '!=', $id);
@@ -228,11 +273,60 @@ class RetailAdminUserManagementController extends Controller
             $franchise->save();
 
             $productPercentage = RetailFranchiseProductPerecntage::where('franchise_id', $franchise->id)->first();
-            $productPercentage->update([
+
+            $productPercentage->fill([
                 'product_id' => $request->product_id,
                 'product_percentage' => $request->product_percentage,
-                'updated_by' => $admin->id
+                'updated_by' => $admin->id,
+                'retail_shipping_mode_id' => $request->retail_shipping_mode_id,
+                'commission_percentage' => $request->commission_percentage,
+                'withholding_tax_percentage' => $request->withholding_tax_percentage,
+                'deduction_percentage' => $request->deduction_percentage,
             ]);
+
+            if ($request->hasFile('product_docs')) {
+                if ($productPercentage->product_docs) {
+                    Storage::disk('public')->delete('product_documents/' . $productPercentage->product_docs);
+                }
+
+                $file = $request->file('product_docs');
+                $filename = 'product_docs_' . $date . '_' . Carbon::now()->format('His') . $file->getClientOriginalExtension();
+                $file->storeAs('product_documents', $filename, 'public');
+                $productPercentage->product_docs = $filename;
+            }
+            
+            if ($request->hasFile('product_pdf')) {
+
+                if ($productPercentage->product_pdf) {
+                    Storage::disk('public')->delete('product_pdf/' . $productPercentage->product_pdf);
+                }
+
+                $file = $request->file('product_pdf');
+                $filename = 'product_pdf_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('product_pdf', $filename, 'public');
+                $productPercentage->product_pdf = $filename;
+            }
+            
+            if ($request->hasFile('product_image')) {
+
+                if ($productPercentage->product_image) {
+                    Storage::disk('public')->delete('product_image/' . $productPercentage->product_image);
+                }   
+
+                $file = $request->file('product_image');
+                $filename = 'product_image_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('product_image', $filename, 'public');
+                $productPercentage->product_image = $filename;
+            }
+            $productPercentage->save();
+
+            // $productPercentage->update([
+            //     'product_id' => $request->product_id,
+            //     'product_percentage' => $request->product_percentage,
+            //     'updated_by' => $admin->id,
+            //     'retail_shipping_mode_id' => $request->retail_shipping_mode_id,
+            //     'commission_percentage' => $request->commission_percentage
+            // ]);
 
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
