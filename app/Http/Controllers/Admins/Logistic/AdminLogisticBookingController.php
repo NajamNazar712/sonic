@@ -294,8 +294,14 @@ class AdminLogisticBookingController extends Controller
             $product=TraxProduct::select('id','product_name')->where('id',$logistic_booking->product_id)->where('status',1)->get();
             $trax_stations=TraxStation::select('id','name')->where('status',1)->get();
             $pickup_addresses=UserShippingInfo::select('id','pickup_address','poc','phone','email')->get();
-            $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id)->first();
-            $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+            $booking_img = TraxLogisticBookingImages::where('booking_id',$logistic_booking->id);
+            $booking_img_url=null;
+            if ($booking_img->exists())
+            {
+                $booking_img = $booking_img->first();
+                $booking_img_url =  Storage::url('logistic_bookings/'. $booking_img->image_name);
+            }
+
             return view('admin.logistic.edit_logistic_book')
                 ->with(['booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'paymentmodes'=>$paymentmodes,'riders'=>$riders]);
         }
