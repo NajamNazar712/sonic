@@ -63,9 +63,9 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Region</th>
+                                        {{-- <th class="border-primary border-darken-1">Contact Person</th> --}}
+                                        {{-- <th class="border-primary border-darken-1">Address</th> --}}
+                                        <th class="border-primary border-darken-1">Zone</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
@@ -90,7 +90,7 @@
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Account Disable Reason</th>
-                                        <th class="border-primary border-darken-1">Account Disable Count</th>
+                                        {{-- <th class="border-primary border-darken-1">Account Disable Count</th> --}}
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
                                         <th class="border-primary border-darken-1">Documents Approved By</th>
@@ -104,7 +104,7 @@
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
-                                        <th class="border-primary border-darken-1">Referral Code</th>
+                                        {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Expected Average Shipments</th>
@@ -1070,9 +1070,9 @@ function checkboxStatus() {
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        head.push('Contact Person');
-                        head.push('Address');
-                        head.push('Region');
+                        //head.push('Contact Person');
+                        //head.push('Address');
+                        head.push('Zone');
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
@@ -1097,7 +1097,7 @@ function checkboxStatus() {
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
                         head.push('Account Disable Reason');
-                        head.push('Account Disable Count');
+                        //head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
@@ -1111,7 +1111,7 @@ function checkboxStatus() {
                         head.push('Intl Rates Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
-                        head.push('Referral Code');
+                        //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
                         head.push('Expected Average Shipments');
@@ -1124,8 +1124,8 @@ function checkboxStatus() {
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
-                            row.push(values.poc);
-                            row.push(values.address);
+                            //row.push(values.poc);
+                            //row.push(values.address);
                             row.push(values.zone);
                             row.push(values.city);
                             row.push(values.territory);
@@ -1151,7 +1151,7 @@ function checkboxStatus() {
                             row.push(values.disable_at);
                             row.push(values.disable_reason);
                             row.push(values.reason);
-                            row.push(values.status_count);
+                            //row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
@@ -1165,7 +1165,7 @@ function checkboxStatus() {
                             row.push(values.international_rejected_reason);    
                             row.push(values.segment);
                             row.push(values.sub_segment);
-                            row.push(values.referral_name);
+                            //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
                             row.push(values.expected_average_shipments);
@@ -1745,8 +1745,8 @@ function checkboxStatus() {
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'address', name: 'users.address', class: 'align-middle address'},
+                //{data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -1772,7 +1772,7 @@ function checkboxStatus() {
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
                 {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
                 {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
-                {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
+                //{data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},
@@ -1786,7 +1786,7 @@ function checkboxStatus() {
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
-                {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                //{data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
