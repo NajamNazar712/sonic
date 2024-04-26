@@ -28,7 +28,6 @@ class JourneyMissingEntrySeeder extends Seeder
                 $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
                 $deliveryNoteId = DeliveryNoteShipment::where('shipment_id',$shipment->id)->first();
                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
                 $zone = Zone::find($shipment->pickup_address->city->zone_id);
                 if($zone->gst == '0.16')
                 {
@@ -58,18 +57,15 @@ class JourneyMissingEntrySeeder extends Seeder
     
                     $pending_payment->save();
                 }
-                if(!$pending_payment_shipment->exists())
-                {
-                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->shipment_id = $shipment->id;
-                    $pending_payment_shipment->type = 0;
-                    $pending_payment_shipment->amount = $shipment->amount;
-                    $pending_payment_shipment->charges = $charges;
-                    $pending_payment_shipment->gst = $addgst;
-                    $pending_payment_shipment->payable = $payable;
-                    $pending_payment_shipment->save();
-
-                }
+                $pending_payment_shipment = new PendingPaymentShipment();
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment->id;
+                $pending_payment_shipment->type = 0;
+                $pending_payment_shipment->amount = $shipment->amount;
+                $pending_payment_shipment->charges = $charges;
+                $pending_payment_shipment->gst = $addgst;
+                $pending_payment_shipment->payable = $payable;
+                $pending_payment_shipment->save();
 
                 // $deliveryNoteId->status = 6;
                 // $deliveryNoteId->save();
