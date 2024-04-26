@@ -32,24 +32,24 @@ class JourneyMissingEntrySeeder extends Seeder
                 $zone = Zone::find($shipment->pickup_address->city->zone_id);
                 $gst = ROUND($charges * $zone->gst, 2, PHP_ROUND_HALF_DOWN);
                 $payable = $shipment->amount - $gst;
-                // if ($pending_payment->exists()) {
-                //     $pending_payment = $pending_payment->first();
+                if ($pending_payment->exists()) {
+                    $pending_payment = $pending_payment->first();
     
-                //     $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-                //     $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                    $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                    $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
     
-                //     $pending_payment->save();
-                // } else {
-                //     $pending_payment = new PendingPayment();
+                    $pending_payment->save();
+                } else {
+                    $pending_payment = new PendingPayment();
     
-                //     $pending_payment->user_id = $shipment->user_id;
-                //     $pending_payment->total_shipments = 1;
-                //     $pending_payment->delivered_shipments = 1;
-                //     $pending_payment->returned_shipments = 0;
-                //     $pending_payment->adjusted_shipments = 0;
+                    $pending_payment->user_id = $shipment->user_id;
+                    $pending_payment->total_shipments = 1;
+                    $pending_payment->delivered_shipments = 1;
+                    $pending_payment->returned_shipments = 0;
+                    $pending_payment->adjusted_shipments = 0;
     
-                //     $pending_payment->save();
-                // }
+                    $pending_payment->save();
+                }
                 if(!$pending_payment_shipment->exists())
                 {
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
@@ -62,7 +62,6 @@ class JourneyMissingEntrySeeder extends Seeder
                     $pending_payment_shipment->save();
 
                 }
-                
 
                 // $deliveryNoteId->status = 6;
                 // $deliveryNoteId->save();
