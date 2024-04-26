@@ -529,6 +529,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.done_payments.list') }}',
                         data: params,
+						method: 'POST',
                         success: function (result) {
                             head = [];
 
@@ -802,18 +803,18 @@
 				ajax: {
 					url: '{{ route('admin.finance.done_payments.list') }}',
 					method: 'POST',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'tracking_number' : $('#tracking_number_search_form #tracking_number').val(),
-                    	'search_shipper' : $('#search_shipper').val(),
-                        'search_shipper_status' : $('#search_shipper_status').val(),
-                        'search_from' : $('input[name="search_from_formatted"]').val(),
-                        'search_to' : $('input[name="search_to_formatted"]').val(),
-                        'search_date_from' : $('input[name="search_date_status_from_formatted"]').val(),
-                        'search_date_to' : $('input[name="search_date_status_to_formatted"]').val(),
-						'tracking_numbers' : $('#tracking_number_search_form .tracking_numbers').val(),
-						'search_payment_ids' : $('#done_payment_id_form .done_payment_ids').val(),
-						'star_shipper_filter' : $('#star_shippers_filter').val()
+					data: function (d) {
+						d._token = '{{ csrf_token() }}'; 
+						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+                        d.search_shipper = $('#search_shipper').val();
+                        d.search_shipper_status = $('#search_shipper_status').val();
+                        d.search_from = $('input[name="search_from_formatted"]').val();
+                        d.search_to = $('input[name="search_to_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_status_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_status_to_formatted"]').val();
+						d.tracking_numbers = $('#tracking_number_search_form .tracking_numbers').val();
+						d.search_payment_ids = $('#done_payment_id_form .done_payment_ids').val();
+						d.star_shipper_filter = $('#star_shippers_filter').val();
 					}
 				},
 				rowId: 'id',
