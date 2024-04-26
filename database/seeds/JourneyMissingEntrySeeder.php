@@ -24,10 +24,19 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [34677630];
+        $shipmentId = [];
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
+                if($shipment->shipper_status_id === 5)
+                {
+                    $shipment->created_at = $shipment->created_at;
+                    $shipment->updated_at = $shipment->created_at;
+                    $shipment->shipper_status_id = 14;
+                    $shipment->consignee_status_id = 14;
+                    $shipment->save();
+                }
+                
                 if($shipment->shipper_status_id === 14)
                 {
                     $charges = $shipment->weight_charges + $shipment->fuel_surcharge;
@@ -42,6 +51,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     }else{
                         $addgst = $zone->gst;
                     }
+                    
                     $gst = ROUND($charges * $zone->gst, 2, PHP_ROUND_HALF_DOWN);
                     $payable = $shipment->amount - $gst;
                     if ($pending_payment->exists()) {
@@ -50,7 +60,7 @@ class JourneyMissingEntrySeeder extends Seeder
                         $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
                         $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
         
-                        $pending_payment->save();
+                        // $pending_payment->save();
                     } else {
                         $pending_payment = new PendingPayment();
         
@@ -80,8 +90,8 @@ class JourneyMissingEntrySeeder extends Seeder
 
                     $shipment_journey->shipment_id = $shipment->id;
                     $shipment_journey->verification = $verification;
-                    $shipment_journey->created_at = $shipment->updated_at;
-                    $shipment_journey->updated_at = $shipment->updated_at;
+                    $shipment_journey->created_at = $shipment->created_at;
+                    $shipment_journey->updated_at = $shipment->created_at;
                     $shipment_journey->shipper_status_id = $shipment->shipper_status_id;
                     $shipment_journey->consignee_status_id = $shipment->consignee_status_id;
                     $shipment_journey->status_reason_id = null;
