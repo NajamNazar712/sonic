@@ -1675,7 +1675,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('done_payments')->name('done_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
             Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
             Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
