@@ -12,20 +12,12 @@
             <li class=" nav-item"><a href="{{ route('admin.dashboard.index') }}"><i class="la la-area-chart"></i><span
                         class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a>
             </li>
-            @if (session('role_id') == 1 || in_array(416, session('permissions')) || in_array(903, session('permissions')))
+            @if (session('role_id') == 1 || in_array(416, session('permissions')))
             <li><a class="menu-item" ><i class="la la-user-plus"></i>Leads</a>
                 <ul> <!-- Nested menu for Team Lead -->
 
                     @if (session('role_id') == 1 || in_array(416, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.leads.index') }}">Leads</a></li>
-                    @endif
-
-                    @if (session('role_id') == 1 || in_array(903, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
-                    @endif
-
-                    @if (session('role_id') == 1 || in_array(927, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}">Rv Assigned Agent Shipments</a></li>
                     @endif
 
                 </ul>
@@ -620,15 +612,36 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885,903,927, 943], session('permissions'))) !== 0)
+
                             <li class=" nav-item"><a href="#"><span class="menu-title"
-                                        data-i18n="nav.dash.main">Return</span></a>
+                                        data-i18n="nav.dash.main">Reason Validation</span></a>
                                 <ul class="menu-content">
+
+                                    @if (session('role_id') == 1 || in_array(903, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}">Team Lead</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(927, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.assigned_shipment.index') }}">Rv Assigned Agent Shipments</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(943, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.return.dashboard') }}">Dashboard</a>
+                                        </li>
+                                    @endif
+
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.index') }}">Shipment - Reason Validation Required</a>
                                         </li>
                                     @endif
+                                </ul>
+                            </li>
+                            <li class=" nav-item"><a href="#"><span class="menu-title"
+                                        data-i18n="nav.dash.main">Return</span></a>
+                                <ul class="menu-content">
 
                                     @if (session('role_id') == 1 || in_array(47, session('permissions')))
                                         <li><a class="menu-item"

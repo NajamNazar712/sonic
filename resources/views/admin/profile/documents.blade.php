@@ -184,6 +184,30 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="approveBtn">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
@@ -212,7 +236,6 @@
             $('.edit').on('click', function() {
                 
                 var user_id = {!! $id !!};
-                console.log(user_id);
                 $.ajax({
                     url: '{!! route('admin.accounts.documents.edit') !!}',
                     method: 'POST',
@@ -222,8 +245,6 @@
                     }
                 }).done(function (data) {
                     if(data.status === 1){
-                        // console.log(data);
-                        // console.log(data.user_attachment.blank_cheque_image);
                         $('#old_filled_and_signed_pdf').text(data.user_attachment.filled_and_signed_pdf);
                         $('#old_signed_acknowledgement_pdf').text(data.user_attachment.signed_acknowledgement_pdf);
                         $('#old_cnic_front_image').text(data.user_attachment.cnic_front_image);
@@ -345,35 +366,112 @@
                 }
             });
 
+            // $('.approve').on('click', function() {
+            //     swal({
+            //         title: 'Are You Sure?',
+            //         text: 'Select Yes to approve documents',
+            //         icon: 'warning',
+            //         buttons: {
+            //             cancel: {
+            //                 text: 'No',
+            //                 value: null,
+            //                 visible: true,
+            //                 closeModal: true,
+            //             },
+            //             confirm: {
+            //                 text: 'Yes',
+            //                 value: true,
+            //                 visible: true,
+            //                 closeModal: true
+            //             }
+            //         },
+            //         closeOnClickOutside: false,
+            //         closeOnEsc: false,
+            //         dangerMode: true
+            //     }).then(function (confirm) {
+                    // if(confirm){
+                    //     var route = '{!!route('admin.accounts.documents.approve', ['id' => $id, 'approve' => 1, 'reject' => "null"])!!}';
+                    //     window.location.href = route;
+                    // }
+            //     });
+            // });
+
             $('.approve').on('click', function() {
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to approve documents',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
+                $('#duplicate_modal').modal('show');
+                var url = window.location.href;
+                var urlParts = url.split('/');
+                var id = urlParts[5];
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.accounts.duplicate.info') !!}',
+                        data: {
+                            'shipper_id': id,
                         }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        var route = '{!!route('admin.accounts.documents.approve', ['id' => $id, 'approve' => 1, 'reject' => "null"])!!}';
-                        window.location.href = route;
-                    }
-                });
+                    }).done(function(data) {
+                        if(data.status == 1){
+                            $('#duplicate_modal').modal('show');
+                            var baseURL = "{{ url('admin/accounts') }}";
+                            var html = '<table class="table table-bordered">';
+                            html += '<tr>' +
+                                '<td><strong>Phone</strong></td>' +
+                                '<td>' + data.info.phone + '</td>' +
+                                '<td>' + (data.info.shared_phone ?
+                                    generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>CNIC</strong></td>' +
+                                '<td>' + data.info.cnic + '</td>' +
+                                '<td>' + (data.info.shared_cnic ?
+                                    generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>IBAN</strong></td>' +
+                                '<td>' + data.info.iban + '</td>' +
+                                '<td>' + (data.info.shared_iban ?
+                                    generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>Name</strong></td>' +
+                                '<td>' + data.info.name + '</td>' +
+                                '<td>' + (data.info.shared_name ?
+                                    generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>NTN</strong></td>' +
+                                '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                '<td>' + (data.info.shared_ntn_no ?
+                                    generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>Email</strong></td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
+                                    data.info.email : '') + '</td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                    generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                '</tr>';
+                            html += '</table>';
+
+                            function generateLinks(ids, baseURL, type) {
+                                var links = [];
+                                for (var i = 0; i < ids.length; i++) {
+                                    var url = baseURL + '/' + ids[i].trim() + '/view';
+                                    links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                }
+                                return links.join(', ');
+                            }
+
+                            $('#duplicate_modal .modal-body').html(html);
+                        }
+
+                    });
+                }
             });
+
+            $('#approveBtn').on('click', function() {
+                var route = '{{ route("admin.accounts.documents.approve", ["id" => $id, "approve" => 1, "reject" => "null"]) }}';
+                window.location.href = route;
+            });
+
             $('.reject').on('click', function() {
                 var reject_reason = $('#reason').val();
                 if(reject_reason !== "" && reject_reason !== null){
