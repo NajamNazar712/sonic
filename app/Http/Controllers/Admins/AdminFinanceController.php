@@ -6245,7 +6245,13 @@ class AdminFinanceController extends Controller
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status]);
+
+        $date = date('Y-m-d');
+        $from = date('Y-m-d',strtotime($date.'-6 month'));
+        $to = $date;
+
+
+        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status,'from'=>$from,'to'=>$to]);
     }
 
     public function done_payments_list(Request $request)

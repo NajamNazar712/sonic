@@ -32,6 +32,7 @@ class UpdateAddColumnBlockDisableRemarksReasonTable extends Migration
             $table->dropColumn('blacklist_reason_1');
             $table->dropColumn('disable_reason_1');
             $table->dropColumn('disable_reason');
+            $table->dropColumn('blocked_at');
         });
     }
 }

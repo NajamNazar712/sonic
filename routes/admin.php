@@ -973,6 +973,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('return')->name('return.')->group(function () {
         Route::get('', 'Admins\ReturnController@return_view')->name('index');
         Route::post('list', 'Admins\ReturnController@return_marked_list')->name('list');
+        Route::get('dashboard', 'Admins\ReturnController@dashboard')->name('dashboard');
         Route::get('data', 'Admins\ReturnController@return_view_data')->name('data');
         Route::post('confirm/status', 'Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status', 'Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
@@ -1971,6 +1972,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+        });
+        Route::prefix('qsr_old')->name('qsr_old.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@qsrold_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@qsrold_list')->name('list');
         });
         Route::prefix('return_note')->name('return_note.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');

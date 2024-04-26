@@ -101,6 +101,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
 		'App\Console\Commands\RetailDonePaymentReport',
+        'App\Console\Commands\DonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
@@ -220,7 +221,8 @@ class Kernel extends ConsoleKernel
         //     }
         // }
 
-        $schedule->command('agent:changeStatus')->dailyAt("00:10")->withoutOverlapping()->runInBackground();
+        // $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('agent:changeStatus')->twiceDaily('22','00')->runInBackground(); // Dailt at 9:55
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
