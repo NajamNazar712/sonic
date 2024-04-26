@@ -621,7 +621,7 @@
         .label_img {
             max-width: 445px;
             height: 400px;
-            background-color: red;
+            /*background-color: red;*/
             position: relative;
         }
         .label_img img {
