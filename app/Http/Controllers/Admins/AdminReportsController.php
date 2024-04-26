@@ -14210,7 +14210,9 @@ class AdminReportsController extends Controller
         $types = [1 => 'Sales', 2 => 'CX'];
         $shipment_status = ShipmentStatus::where('id', '>', 0)->select('id', 'name')->get();
         $sub_segments = SubCategorySegment::select('id', 'name')->get();
-        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities,'zones' => $zones , 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas, 'service_types'=>$service_types]);
+        $kam_sales = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        ->where('admin_roles.department_id', 7)->where('status',1)->select('a.id', 'a.name')->get();
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities,'zones' => $zones , 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas, 'service_types'=>$service_types , 'kam_sales'=>$kam_sales]);
     }
     public function qsr_list(Request $request)
     {
@@ -14263,10 +14265,21 @@ class AdminReportsController extends Controller
             'sjrp.created_at as rider_picked_status_date',
             'ssjal.location_status as location_status',
             'ssjal_hss.location_status as location_status_hss',
-            'ca_scanning.name as scanning_city_area_name'
+            'ca_scanning.name as scanning_city_area_name',
+            'spt.admin_id as sales_person_id',
+            'sales_person.name as sales_person_name'
             
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id','u.id')
+                ->where(
+                    'spt.id',
+                    '=',
+                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 1 )')
+                );
+            })
+            ->leftJoin('admins as sales_person', 'sales_person.id','spt.admin_id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -14426,10 +14439,6 @@ class AdminReportsController extends Controller
         if ($search_concerned_hub = $request->get('search_concerned_hub')) {
             $shipments = $shipments->where('cmb.current_hub_id', $search_concerned_hub);
         }
-
-        if ($search_shipper = $request->get('search_shipper')) {
-            $shipments->where('shipments.user_id', $search_shipper);
-        }
         if ($search_shippers = $request->get('search_shippers')) {
             $shipments->whereIn('shipments.user_id', $search_shippers);
         }
@@ -14479,6 +14488,10 @@ class AdminReportsController extends Controller
 
         if ($service_type_select = $request->get('service_type_select')) {
             $shipments->where('bt.id', '=', $service_type_select);
+        }
+
+        if($search_sale_person =  $request->get('search_sale_person')) {
+            $shipments->where('spt.admin_id', $search_sale_person);
         }
 
         $datatable = Datatables::of($shipments)

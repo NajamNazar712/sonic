@@ -12,17 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                <div class="row mb-2 justify-content-start">
 
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
@@ -119,6 +110,25 @@
                                 <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_kam" id="search_kam" class="form-control select2">
+                                @foreach($kam_sales as $d)
+                                    <option value="{{ $d->id }}">{{ $d->name }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_sale_person" id="search_sale_person" class="form-control select2">
+                                @foreach($kam_sales as $d)
+                                    <option value="{{ $d->id }}">{{ $d->name }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
                     </div>
 
                     <div class="col-4 ">
@@ -302,11 +312,6 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_shippers').select2({
                 width:'100%',
                 placeholder:"Select Multiple Shippers",
@@ -358,6 +363,14 @@
             $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Search Service Type'
+            });
+            $('#search_kam').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search KAM'
+            });
+            $('#search_sale_person').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Sales Person'
             });
 
             $('#export').select2({
@@ -527,7 +540,6 @@
                                             excel: true,
                                             _token: $('meta[name="csrf-token"]').attr('content'),
                                             search_shipment_status: $('#search_shipment_status').val(),
-                                            search_shipper: $('#search_shipper').val(),
                                             sub_segment: $('#sub_segment_select').val(),
                                             search_shippers: $('#search_shippers').val(),
                                             search_origin: $('#search_origin').val(),
@@ -545,7 +557,9 @@
                                             selectedTexts: $('#export option:selected').map(function() {
                                                 return $(this).text()
                                             }).get(),
-                                            service_type_select: $('#service_type_select').val()
+                                            service_type_select: $('#service_type_select').val(),
+                                            search_kam: $('#search_kam').val(),
+                                            search_sale_person: $('#search_sale_person').val()
                                         },
                                         beforeSend: function() {
                                             swal({
@@ -598,7 +612,6 @@
                         },
                     data: function (d) {
                         d.search_shipment_status = $('#search_shipment_status').val();
-                        d.search_shipper = $('#search_shipper').val();
                         d.sub_segment = $('#sub_segment_select').val();
                         d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
@@ -617,6 +630,8 @@
                             return $(this).text()
                         }).get();
                         d.service_type_select = $('#service_type_select').val();
+                        d.search_kam = $('#search_kam').val();
+                        d.search_sale_person = $('#search_sale_person').val();
                     }
                 },
                 rowId: 'shId',
