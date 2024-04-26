@@ -38,6 +38,7 @@ use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PaymentMode;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\Product;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
@@ -514,6 +515,11 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+
+        $user_id = session('user_id');
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your have Negative Payable Amount, Please Contact Support for further details"]);
+        }
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
