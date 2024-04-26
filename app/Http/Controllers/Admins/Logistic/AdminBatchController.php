@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Logistic\TraxBookingBatch;
 use App\Http\Models\Admin\Logistic\TraxBookingBatchDetail;
 use App\Http\Models\Admin\Logistic\TraxBookingBatchAssign;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
@@ -25,40 +27,45 @@ class AdminBatchController extends Controller
 
     public function booking_batch_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 781);
+
         return view('admin.logistic.batches');
     }
-    public function booking_batch_list()
+    public function booking_batch_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 782);
+        }
         $user_id = session('id');
         $booking_batch = TraxBookingBatch::join('trax_booking_batch_statuses as bs', 'bs.id', 'trax_booking_batches.status_id')
             ->leftjoin('trax_booking_batch_assigns as bba',function ($join){
                     $join->on('bba.batch_id','trax_booking_batches.id')
                         ->whereRaw('bba.id = (SELECT MAX(id) FROM trax_booking_batch_assigns WHERE batch_id = trax_booking_batches.id)');
             })
-            ->select('trax_booking_batches.id', 'trax_booking_batches.total_bookings', 'trax_booking_batches.complete_bookings', 'trax_booking_batches.status_id', 'bs.name as status_name','bba.user_id');
+            ->select('trax_booking_batches.id', 'trax_booking_batches.total_bookings', 'trax_booking_batches.complete_bookings', 'trax_booking_batches.status_id', 'bs.name as status_name','bba.user_id')
+            ->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
 //                ->where(function($query) use ($user_id) {
 //                $query->where('bba.user_id', $user_id) // Condition for bba.user_id
 //                ->orWhere('trax_booking_batches.status_id', 1); // Condition for trax_booking_batches.status_id
 //            });
-        if(session('role_id') == 1){
-            $booking_batch->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
-        } else {
-            $booking_batch->orWhere('bba.user_id',$user_id);
-        }
+//        if(session('role_id') == 1 || count(array_intersect([977], session('permissions'))) !== 0){
+//            $booking_batch->where('bba.user_id',$user_id)->orWhere('trax_booking_batches.status_id', 1);
+//        } else {
+//            $booking_batch->orWhere('bba.user_id',$user_id);
+//        }
 
         $datatables = Datatables::of($booking_batch)
             ->editColumn('total_bookings', function ($booking_batch) {
                 $consigments = $booking_batch->complete_bookings . ' / ' . $booking_batch->total_bookings .' Completed';
                 return $consigments;
             })->addColumn('action', function ($booking_batch) use ($user_id) {
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([977], session('permissions'))) !== 0) {
 
                     if ($booking_batch->user_id == $user_id)
                     {
                         $button = '<a href="' . route("admin.logistic.batch.batch_bookings", ["batch_id" => $booking_batch->id]) . '" class="btn btn-secondary btn-primary btn-sm "><div class="row no-gutters align-items-center"><div class="col-9">View Batch</div></div></a>';
-
 //                        $button =  '<button type="button" class="btn btn-secondary btn-primary btn-sm view_batch">View Batch</button>';
-                    }else{
+                    } else{
                         $button = '<button type="button" class="btn btn-secondary btn-primary btn-sm assign_batch">Select this batch</button>';
 
                     }

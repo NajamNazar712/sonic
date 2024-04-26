@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Logistic\TraxPieceSetting;
 use App\Http\Models\Admin\Logistic\TraxParentProduct;
 use App\Http\Models\Admin\Logistic\TraxProduct;
@@ -14,6 +15,7 @@ use App\Http\Models\SubCategorySegment;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 
@@ -29,6 +31,7 @@ class AdminLogisticSetupController extends Controller
 
     public function shipper_tagging_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 779);
 
         $shippers = User::select('id','name')->where('status',3)->get();
         $riders = Rider::select('id','name','trax_id')->where('status',1)->whereNotNull('route_id')->get();
@@ -42,8 +45,12 @@ class AdminLogisticSetupController extends Controller
 
         return view('admin.logistic.shipper_tagging')->with(['shippers'=>$shippers,'riders'=>$riders,'products'=>$products,'services'=>$services,'piece_settings'=>$piece_settings]);
     }
-    public function shipper_tagging_list()
+    public function shipper_tagging_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 780);
+        }
+
         $trax_shipper_detail = TraxShipperDetail::join('users as u','u.id','trax_shipper_details.user_id')
             ->join('riders as rd','rd.id','=','trax_shipper_details.rider_id')
             ->join('trax_products as tp','tp.id','=','trax_shipper_details.trax_product_id')
@@ -55,7 +62,7 @@ class AdminLogisticSetupController extends Controller
 
         $datatables = Datatables::of($trax_shipper_detail)
             ->addColumn('action',function ($trax_shipper_detail){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([975], session('permissions'))) !== 0) {
                         $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                         $dropdown = '
@@ -161,12 +168,18 @@ class AdminLogisticSetupController extends Controller
     }
      public function master_product_index()
      {
+         ActivityTrailController::createActivityTrailLog(Auth::id(), 765);
+
          $segments=Segment::all();
          return view('admin.logistic.master_product')->with('segments',$segments);
      }
 
-     public  function master_product_list()
+     public  function master_product_list(Request $request)
      {
+         if ($request->get('excel') && $request->get('excel') == true) {
+             ActivityTrailController::createActivityTrailLog(Auth::id(), 766);
+         }
+
          $master_product = TraxParentProduct::leftjoin('segments as s','s.id','trax_parent_products.segment_id')
          ->select('trax_parent_products.id','trax_parent_products.parent_code','trax_parent_products.parent_name','s.name as segment_name','trax_parent_products.status')
              ->where('status',1);
@@ -178,7 +191,7 @@ class AdminLogisticSetupController extends Controller
              }
              return  'Inactive';
          }) ->addColumn('action',function ($trax_shipper_detail){
-         if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+         if (session('role_id') == 1 || count(array_intersect([954], session('permissions'))) !== 0) {
              $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
              $dropdown = '
@@ -272,6 +285,8 @@ class AdminLogisticSetupController extends Controller
 
      public  function  product_index()
      {
+         ActivityTrailController::createActivityTrailLog(Auth::id(), 767);
+
          $parent_products = TraxParentProduct::select('id','parent_name')->where('status',1)->get();
          $sub_segments = SubCategorySegment::select('id','name')->get();
 
@@ -279,8 +294,12 @@ class AdminLogisticSetupController extends Controller
 
      }
 
-    public  function  product_list()
+    public  function  product_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 768);
+        }
+
         $product = TraxProduct::join('trax_parent_products as pp','pp.id','trax_products.parent_id')
             ->leftjoin('sub_category_segments as sb','sb.id','trax_products.sub_segment_id')
         ->select('trax_products.id','trax_products.product_code','trax_products.product_name','pp.parent_name as master_product_name','sb.name as sub_segment_name','trax_products.status');
@@ -293,7 +312,7 @@ class AdminLogisticSetupController extends Controller
                 }
                 return  'Inactive';
             }) ->addColumn('action',function ($trax_shipper_detail){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([957], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
@@ -390,14 +409,19 @@ class AdminLogisticSetupController extends Controller
 
     public  function service_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 769);
+
         $products = TraxProduct::select('id','product_name')->where('status',1)->get();
         $shipping_modes = ShippingMode::select('id','mode')->get();
 
         return view('admin.logistic.service')->with(['products'=>$products,'shipping_modes'=>$shipping_modes]);
     }
 
-    public  function  service_list()
+    public  function  service_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 770);
+        }
         $product = TraxService::join('trax_products as p','p.id','trax_services.product_id')
             ->leftjoin('shipping_modes as sm','sm.id','trax_services.shipping_mode_id')
             ->select('trax_services.id','trax_services.service_code','trax_services.service_name','p.product_name as product_name','sm.mode as shipping_mode_name','trax_services.status');
@@ -410,7 +434,7 @@ class AdminLogisticSetupController extends Controller
                 }
                 return  'Inactive';
             })->addColumn('action',function ($trax_shipper_detail){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([960], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '

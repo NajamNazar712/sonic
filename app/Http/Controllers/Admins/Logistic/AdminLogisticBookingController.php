@@ -54,12 +54,17 @@ class AdminLogisticBookingController extends Controller
      */
     public function index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 783 );
+
         return view('admin.logistic.logistic_bookings');
     }
 
 
-    public function list()
+    public function list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 784);
+        }
         $logistic_bookings = TraxLogisticBooking::Join('users as u','u.id','=','trax_logistic_bookings.shipper_id')
             ->leftjoin('user_shipping_infos as usi','usi.id','=','trax_logistic_bookings.shipper_address_id')
             ->leftjoin('segments as s','s.id','=','trax_logistic_bookings.product_id')
@@ -70,7 +75,7 @@ class AdminLogisticBookingController extends Controller
 
         $datatables = Datatables::of($logistic_bookings)
             ->addColumn('action',function ($logistic_bookings){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
 //                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                       $edit_button = '<a href="' . route("admin.logistic.edit", ["booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 

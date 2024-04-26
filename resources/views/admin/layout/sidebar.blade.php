@@ -214,34 +214,32 @@
             @endif
 
             {{--Add Logistic routes not create permission yet--}}
-            @if (session('role_id') == 1 || count(array_intersect([17, 20, 23, 123, 368, 369, 370, 446, 670, 830], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960, 972, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                     class="la la-cubes"></i>Logistic</span></a>
                     <ul class="menu-content">
 
-                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Setup</span></a>
+                        @if(session('role_id') == 1 || count(array_intersect([952, 953, 954, 955, 956, 957, 958, 959, 960], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Setup</span></a>
                             <ul class="menu-content">
-
-
-
-                                    @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(952, session('permissions')))
                                             <li  class="menu-item">
                                                 <a href="{{ route('admin.logistic.master_product.index') }}">Master Product</a>
                                             </li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(955, session('permissions')))
                                         <li  class="menu-item">
                                             <a href="{{ route('admin.logistic.product.index') }}">Product</a>
                                         </li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(958, session('permissions')))
                                         <li  class="menu-item">
                                            <a href="{{ route('admin.logistic.service.index') }}">Service</a>
                                         </li>
                                     @endif
-                                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                                        @if (session('role_id') == 1 || in_array(973, session('permissions')))
                                             <li  class="menu-item">
                                                 <a href="{{ route('admin.logistic.shipper_tagging.index') }}">Logistic Shipper Tagging</a>
                                             </li>
@@ -249,12 +247,14 @@
 
                             </ul>
                         </li>
-                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(976, session('permissions')))
                             <li  class="menu-item">
                                 <a href="{{ route('admin.logistic.batch.index') }}">Batches</a>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(979, session('permissions')))
                             <li  class="menu-item">
                                 <a href="{{ route('admin.logistic.index') }}">Logistic Book</a>
                             </li>
@@ -279,32 +279,28 @@
 {{--                                    <a href="{{ route('admin.logistic.cn.issue_area_store.index') }}">CN Issue Area Store</a>--}}
 {{--                                </li>--}}
 {{--                            @endif--}}
-                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(972, session('permissions')))
                                 <li  class="menu-item">
                                     <a href="{{ route('admin.logistic.cn.receive_admin_store.index') }}">CN Receive Admin Store</a>
                                 </li>
                             @endif
-                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(963, session('permissions')))
                                 <li  class="menu-item">
                                     <a href="{{ route('admin.logistic.cn.issue_to_rider.index') }}">CN Issue to Rider</a>
                                 </li>
                             @endif
 
-                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(966, session('permissions')))
                                 <li  class="menu-item">
                                     <a href="{{ route('admin.logistic.cn.child_receive_admin_store.index') }}">Child CN Receive Admin Store</a>
                                 </li>
                             @endif
 
-                            @if (session('role_id') == 1 || in_array(446, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(969, session('permissions')))
                                 <li  class="menu-item">
                                     <a href="{{ route('admin.logistic.cn.child_issue_to_rider.index') }}">Child CN Issue to Rider</a>
                                 </li>
                             @endif
-
-
-
-
                     </ul>
 
                 </li>

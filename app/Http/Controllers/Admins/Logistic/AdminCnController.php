@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxChildCnReceiveAdminStore;
 use App\Http\Models\Admin\Logistic\TraxProduct;
@@ -17,6 +18,7 @@ use App\Http\Models\Segment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
@@ -120,6 +122,8 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 771);
+
         $products =  TraxProduct::where('status',1)->get();
         $cities = TraxStation::where('status',1)->get();
         return view('admin.logistic.cn_receive_admin_store')->with(['products'=> $products,'cities'=>$cities]);
@@ -127,6 +131,9 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 772);
+        }
         $trax_cn_receive_admin_stores = TraxCnReceiveAdminStore::Join('segments as s','trax_cn_receive_admin_stores.product_id','=','s.id')
             ->Join('cities as c','c.id','=','trax_cn_receive_admin_stores.area_code')
             ->SELECT('trax_cn_receive_admin_stores.id','trax_cn_receive_admin_stores.receive_date','trax_cn_receive_admin_stores.company_code','trax_cn_receive_admin_stores.area_code','c.name as area_name','trax_cn_receive_admin_stores.product_id','s.name as segment_name','trax_cn_receive_admin_stores.cn_from','trax_cn_receive_admin_stores.cn_to','trax_cn_receive_admin_stores.quantity')
@@ -135,7 +142,7 @@ class AdminCnController extends Controller
 
         $datatables = Datatables::of($trax_cn_receive_admin_stores)
             ->addColumn('action',function ($trax_cn_receive_admin_stores){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([962], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
@@ -161,6 +168,7 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_store(Request  $request)
     {
+
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'area_code' => ['required','max:255'],
@@ -251,13 +259,18 @@ class AdminCnController extends Controller
 
     public  function cn_issue_to_rider_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 773);
+
         $products =  TraxProduct::where('status',1)->get();
         $riders =  Rider::where('status',1)->get();
         return view('admin.logistic.cn_issue_rider')->with(['products'=> $products,'riders'=>$riders]);
     }
 
-    public function  cn_issue_to_rider_list()
+    public function  cn_issue_to_rider_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 774);
+        }
         $trax_cn_issue_rider = TraxCnIssueToRider::Join('segments as s','trax_cn_issue_to_riders.product_id','=','s.id')
             ->join('riders as rd','rd.id','=','trax_cn_issue_to_riders.rider_id')
             ->SELECT('trax_cn_issue_to_riders.id','trax_cn_issue_to_riders.issue_date','trax_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_cn_issue_to_riders.product_id','s.name as segment_name','trax_cn_issue_to_riders.cn_from','trax_cn_issue_to_riders.cn_to','trax_cn_issue_to_riders.quantity')
@@ -265,7 +278,7 @@ class AdminCnController extends Controller
 
         $datatables = Datatables::of($trax_cn_issue_rider)
             ->addColumn('action',function ($trax_cn_issue_rider){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([965], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
@@ -421,19 +434,24 @@ class AdminCnController extends Controller
 
     public function cn_child_receive_admin_store_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 775);
+
         $cities = TraxStation::where('status',1)->get();
         return view('admin.logistic.cn_child_receive_admin_store')->with(['cities'=>$cities]);
     }
 
     public function cn_child_receive_admin_store_list()
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 776);
+        }
         $trax_child_cn_receive_admin_stores = TraxChildCnReceiveAdminStore::Join('cities as c','c.id','=','trax_child_cn_receive_admin_stores.area_code')
             ->SELECT('trax_child_cn_receive_admin_stores.id','trax_child_cn_receive_admin_stores.receive_date','trax_child_cn_receive_admin_stores.company_code','trax_child_cn_receive_admin_stores.area_code','c.name as area_name','trax_child_cn_receive_admin_stores.cn_from','trax_child_cn_receive_admin_stores.cn_to','trax_child_cn_receive_admin_stores.quantity')
             ->where('trax_child_cn_receive_admin_stores.status',1);
 
         $datatables = Datatables::of($trax_child_cn_receive_admin_stores)
             ->addColumn('action',function ($trax_child_cn_receive_admin_stores){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([968], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
@@ -547,19 +565,24 @@ class AdminCnController extends Controller
 
     public function cn_child_issue_to_rider_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 777);
+
         $riders =  Rider::where('status',1)->get();
         return view('admin.logistic.child_cn_issue_rider')->with(['riders'=>$riders]);
     }
 
-    public function cn_child_issue_to_rider_list()
+    public function cn_child_issue_to_rider_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 778);
+        }
         $trax_child_cn_issue_rider = TraxChildCnIssueToRider::join('riders as rd','rd.id','=','trax_child_cn_issue_to_riders.rider_id')
             ->SELECT('trax_child_cn_issue_to_riders.id','trax_child_cn_issue_to_riders.issue_date','trax_child_cn_issue_to_riders.company_code','rd.name as rider_name','rd.trax_id as rider_trax_id','trax_child_cn_issue_to_riders.cn_from','trax_child_cn_issue_to_riders.cn_to','trax_child_cn_issue_to_riders.quantity')
             ->where('trax_child_cn_issue_to_riders.status',1);
 
         $datatables = Datatables::of($trax_child_cn_issue_rider)
             ->addColumn('action',function ($trax_child_cn_issue_rider){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([971], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     $dropdown = '
