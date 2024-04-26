@@ -107,14 +107,14 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="commission_percentage" id="commission_percentage" class="form-control commission_percentage" placeholder="Commission GST"  value="" max="100">
+                                        <input type="text" name="franchise_gst" id="commission_percentage" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100" data-rule-required="true" data-msg-required="GST Commission is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="withholding_tax_percentage" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100">
+                                        <input type="text" name="withholding_tax_percentage" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>

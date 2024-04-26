@@ -23,6 +23,7 @@ use App\Http\Models\RetailFranchiseProductPercentage;
 use App\Http\Models\Admin\Retail\RetailShippingMode;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\RetailFranchiseProductAttachment;
+use App\Http\Models\RetailFranchiseProductCharges;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -227,6 +228,15 @@ class RetailAdminUserManagementController extends Controller
                 $franchiseRetailProduct->save();
             }
         }
+
+
+        $franchise_product_charges = new RetailFranchiseProductCharges();
+        $franchise_product_charges->franchise_id = $franchise->id;
+        $franchise_product_charges->franchise_gst = $request->franchise_gst;
+        $franchise_product_charges->franchise_withholding = $request->franchise_withholding;
+        $franchise_product_charges->franchise_deduction = $request->franchise_deduction;
+        $franchise_product_charges->save();
+
 
         $franchise_retail_product_attachment = new RetailFranchiseProductAttachment();
         $franchise_retail_product_attachment->franchise_id = $franchise->id;
