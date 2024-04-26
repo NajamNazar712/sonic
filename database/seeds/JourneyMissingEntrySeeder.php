@@ -19,7 +19,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = ['34691375','34690896','34689305','34677630','34571165','34690896','34690896','34691375','34689305'];
+        $shipmentId = [34691375,34690896,34689305,34677630,34571165,34690896,34690896,34691375,34689305];
         
         foreach($shipmentId as $Shipment){
             $shipment = Shipment::find($Shipment);
@@ -53,7 +53,7 @@ class JourneyMissingEntrySeeder extends Seeder
 
                 $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                 $pending_payment_shipment->shipment_id = $Shipment;
-                $pending_payment_shipment->type = 2;
+                $pending_payment_shipment->type = 0;
                 $pending_payment_shipment->amount = $shipment->amount;
                 $pending_payment_shipment->charges = $charges;
                 $pending_payment_shipment->gst = $zone->gst;
@@ -62,7 +62,7 @@ class JourneyMissingEntrySeeder extends Seeder
                 $pending_payment_shipment->save();
                 // $deliveryNoteId->status = 6;
                 // $deliveryNoteId->save();
-                ShipmentsJourneyController::add($shipment->shipment_id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $delivery_note_id->delivery_note_id);
+                ShipmentsJourneyController::add($shipment->shipment_id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
 
             }
         }
