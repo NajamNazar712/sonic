@@ -3509,7 +3509,7 @@ class AdminFinanceController extends Controller
         $messages = [
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
-            'exists' => 'Given :attribute is Invalid / not ready for update.',
+            'exists' => 'Given :attribute is Invalid.',
         ];
 
         $rules = [
