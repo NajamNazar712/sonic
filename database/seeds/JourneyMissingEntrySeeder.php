@@ -30,6 +30,14 @@ class JourneyMissingEntrySeeder extends Seeder
                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
                 $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
                 $zone = Zone::find($shipment->pickup_address->city->zone_id);
+                if($zone->gst == '0.16')
+                {
+                    $addgst = 16.0;
+                }elseif($zone->gst == '0.13'){
+                    $addgst = 13.0;
+                }else{
+                    $addgst = $zone->gst;
+                }
                 $gst = ROUND($charges * $zone->gst, 2, PHP_ROUND_HALF_DOWN);
                 $payable = $shipment->amount - $gst;
                 if ($pending_payment->exists()) {
@@ -57,7 +65,7 @@ class JourneyMissingEntrySeeder extends Seeder
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;
                     $pending_payment_shipment->charges = $charges;
-                    $pending_payment_shipment->gst = $zone->gst;
+                    $pending_payment_shipment->gst = $addgst;
                     $pending_payment_shipment->payable = $payable;
                     $pending_payment_shipment->save();
 
