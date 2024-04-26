@@ -124,6 +124,7 @@ use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerification
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\ShipmentsWeightType;
 
 class NotificationsController extends Controller
 {
@@ -441,10 +442,27 @@ class NotificationsController extends Controller
 
 
                     self::sms($body, $to);
-                } else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
-
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
+                } 
+                else if ($id == 4) {
+                    // $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description','item_quantity', 'amount'];
+                    $possible_fields = [
+                        'amount',
+                        'item_quantity',
+                        'item_description',
+                        'item_product_type',
+                        'weight',
+                        'order_id',
+                        'consignee_city',
+                        'consignee_name',
+                        'weight_input_by_shipper',
+                        'actual_weight',
+                        'difference',
+                        'arrival_at',
+                        'weighted_as',
+                        'pickup_city',
+                        'tracking_number',
+                    ];
+                    $field_names = ['pickup_city' => 'Origin', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount', 'weight_input_by_shipper' => 'Weight Input by Shipper (A)', 'actual_weight' => 'Arrival Weight (B)', 'difference' => 'Difference (B-A)', 'arrival_at' => 'Arrival Date', 'weighted_as' => 'Weighted As'];
 
                     $present_fields = array();
 
@@ -478,7 +496,7 @@ class NotificationsController extends Controller
 
                     foreach ($reference_1_id as $shipment_id) {
                         $shipment = Shipment::find($shipment_id);
-
+                        $weight_types = ShipmentsWeightType::where('shipment_id', $shipment_id)->first();
                         $origin_hub_id = $shipment->pickup_address->city->hub_id;
 
                         if (!in_array($origin_hub_id, $origin_hub_ids)) {
@@ -495,6 +513,22 @@ class NotificationsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
                         $details['return_notes_id'] = $shipment->return_notes_id;
+                        $details['arrival_at'] = Carbon::parse($today)->format('d/M/Y');
+                        $details['weight_input_by_shipper'] = $shipment->estimated_weight;
+                        $details['actual_weight'] = $shipment->actual_weight;
+                        $details['difference'] = abs($shipment->actual_weight - $shipment->estimated_weight);
+                        if ($details['difference'] == 0) {
+                            $details['difference'] = 0;
+                        }
+                        if ($weight_types->weight_type == 1) {
+                            $details['weighted_as'] = "Partially Manual";
+                        } else if ($weight_types->weight_type == 2){
+                            $details['weighted_as'] = "Manual";
+                        } else if ($weight_types->weight_type == 3){
+                            $details['weighted_as'] = "Automatic";
+                        } else if ($weight_types->weight_type == 4){
+                            $details['weighted_as'] = "Bulk Arrival";
+                        }
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -532,7 +566,8 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($body, '[arrival_at]') !== FALSE) {
-                            $body = str_replace('[arrival_at]', $today, $body);
+                            // $body = str_replace('[arrival_at]', $today, $body);
+                            $body = str_replace('[arrival_at]', Carbon::parse($today)->format('d/M/Y'), $body);
                         }
 
                         //              $to = $shipper->email;
@@ -607,7 +642,9 @@ class NotificationsController extends Controller
                         $subject = $original_subject;
                         $body = $original_body;
                     }
-                } else if ($id == 5) {
+                } 
+                
+                else if ($id == 5) {
                     $cargo_fields = ['cargo_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
