@@ -107,7 +107,7 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="commission_percentage" id="commission_percentage" class="form-control commission_percentage" placeholder="Commission"  value="" max="100">
+                                        <input type="text" name="commission_percentage" id="commission_percentage" class="form-control commission_percentage" placeholder="Commission GST"  value="" max="100">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -253,7 +253,7 @@
                         </div>
 
                         <div class="form-group">
-                            <select name="retail_shipping_mode_id" id="retail_shipping_mode_id" class="select2 form-control" data-rule-required="true" data-msg-required="Please choose a shipping mode">
+                            <select name="retail_shipping_mode_id" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id_edit" data-rule-required="true" data-msg-required="Please choose a shipping mode">
                                 @foreach($shipping_modes as $shipping_mode)
                                     <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
                                 @endforeach
@@ -688,17 +688,10 @@
             }
 
             $("#retail_product_add_btn").on('click', function (event) {
-                // var selectedOption = $("#retail_shipping_mode_id option:selected").text();
-                // var productPercentage = $("#product_percentage").val();
+                var selectedOption = $("#retail_shipping_mode_id option:selected").text();
+                var productPercentage = $("#product_percentage").val();
 
-                var row = $(this).closest('.row');
-                var selectedOption = $(".retail_shipping_mode_id option:selected").text();
-                var productPercentage = $(".product_percentage").val();
-
-                // var selectedOption = $(this).closest('.row').find(".retail_shipping_mode_id option:selected").text();
-                // var productPercentage = $(this).closest('.row').find(".product_percentage").val();
-
-                if (productPercentage.trim() === '' || !$.isNumeric(productPercentage)){
+                if (productPercentage.trim() === '' || !$.isNumeric(productPercentage)) {
                     // Show error message
                     $("#error_message").text("Please enter a valid product percentage.").show();
                     $("#product_percentage").attr("required", true);
@@ -728,19 +721,41 @@
                             }
                         });
                         $("#tableRow").show();
+
+                        // Clear input fields after adding a new row
+                        $("#product_percentage").val('');
                     }
                 }
             });
 
+            $("#add_franchise_form").submit(function(event) {
+                event.preventDefault();
 
+                var attachment1 = $("#attachment_1")[0].files[0];
+                if (!attachment1){
+                    // Stop form submission
+                    return;
+                }
 
+                // Collect all shipping modes and product percentages
+                var retailShippingIds = [];
+                var productPercentages = [];
+                $("#tableBody").find("tr").each(function() {
+                    var selectedOption = $(this).find("td:first").text();
+                    var productPercentage = $(this).find("td:nth-child(2)").text();
+                    retailShippingIds.push(selectedOption);
+                    productPercentages.push(productPercentage);
+                });
 
+                // Append shipping data to the form before submission
+                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
+                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
 
-
-
+                this.submit();
+            });
 
             $(".modal_close_btn").click(function() {
-                resetModal(); // Reset the modal
+                resetModal();
             });
 
         });
