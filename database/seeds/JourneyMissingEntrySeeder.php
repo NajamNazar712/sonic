@@ -61,7 +61,7 @@ class JourneyMissingEntrySeeder extends Seeder
                 if(!$pending_payment_shipment->exists())
                 {
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                    $pending_payment_shipment->shipment_id = $Shipment;
+                    $pending_payment_shipment->shipment_id = $shipment->id;
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;
                     $pending_payment_shipment->charges = $charges;
