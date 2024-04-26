@@ -12699,7 +12699,7 @@ class AdminReportsController extends Controller
         ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
         ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
         ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
-        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aas.id')
+        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agent_details.rv_assign_agent_status_id', 'rv_aas.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('admins as add', 'rv_shipment_assign_agent_details.agent_id','add.id')
 
@@ -12719,7 +12719,6 @@ class AdminReportsController extends Controller
             ->where('sjj.shipper_status_id', '=', 2);
         })
 
-        // ->leftJoin('rv_agent_call_histories','shipments.id','rv_agent_call_histories.shipment_id')
         ->join('rv_assign_agent_sub_statuses as rvaass','rv_agent_call_histories.call_finding_id','rvaass.id')
 
         ->select(
