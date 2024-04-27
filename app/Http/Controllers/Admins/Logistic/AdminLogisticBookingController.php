@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Logistic;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Logistic\TraxBookingBatchAssign;
 use App\Http\Models\Admin\Logistic\TraxBookingPiece;
 use App\Http\Models\Admin\Logistic\TraxItemInsurance;
@@ -23,6 +24,7 @@ use App\Http\Models\Segment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\SubCategorySegment;
 use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
