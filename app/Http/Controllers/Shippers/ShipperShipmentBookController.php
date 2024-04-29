@@ -518,7 +518,7 @@ class ShipperShipmentBookController extends Controller
 
         $user_id = session('user_id');
         if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
         }
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -2827,6 +2827,7 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request)
     {
         $user_id = session('user_id');
+        $pending_payable = PendingPayment::check_negative_payable($user_id);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -2844,11 +2845,9 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($user_id) {
-            if ($value) {
-                if ($value== 0 && !PendingPayment::check_negative_payable($user_id)) {
-                    return false;
-                }
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
             }
             return true;
         });
@@ -3027,7 +3026,8 @@ class ShipperShipmentBookController extends Controller
             'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
             'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
-            'estimated_weight_check' => 'The :attribute should be less than or equal to 10 Kg',       
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
+            'estimated_weight_check' => 'The :attribute should be less than or equal to 10 Kg',
          ];
 
         $rules = [
@@ -3351,8 +3351,6 @@ class ShipperShipmentBookController extends Controller
                         ];
                     }
                 }
-
-
                 $validate = Validator::make($row, $rules, $messages);
 
                 $validate->setAttributeNames($names);
@@ -3881,7 +3879,7 @@ class ShipperShipmentBookController extends Controller
 
         $user_id = session('user_id');
         if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
         }
 
         $rules = [
@@ -4915,9 +4913,6 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_mms_store(Request $request)
     {
         $user_id = session('user_id');
-        if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -5653,9 +5648,7 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_store(Request $request)
     {
         $user_id = session('user_id');
-        if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
+        $pending_payable = PendingPayment::check_negative_payable($user_id);
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -5673,6 +5666,13 @@ class ShipperShipmentBookController extends Controller
                     return FALSE;
                 }
             }
+        });
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -5814,6 +5814,7 @@ class ShipperShipmentBookController extends Controller
             'origin_check' => 'Origin city not allowed, please contact your sales person!',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
             'pieces_check' => 'Please enter quantity between 0 to 500 only for saver-plus, else 0 to 10 for other modes !',
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
         ];
 
         $rules = [
@@ -5882,7 +5883,7 @@ class ShipperShipmentBookController extends Controller
             'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -6531,9 +6532,6 @@ class ShipperShipmentBookController extends Controller
     {
 
         $user_id = session('user_id');
-        if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
         $rate_type_id = session('rate_type_id');
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -7602,11 +7600,16 @@ class ShipperShipmentBookController extends Controller
 
     public function international_excel_store(Request $request)
     {
-
         $user_id = session('user_id');
-        if( !PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
-        }
+        $pending_payable = PendingPayment::check_negative_payable($user_id);
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
+        });
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -7694,7 +7697,8 @@ class ShipperShipmentBookController extends Controller
             'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
             'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount.',
         ];
 
         $rules = [
@@ -7757,7 +7761,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->whereNotIn('id', [3]);
