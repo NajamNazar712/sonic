@@ -325,7 +325,7 @@ class AdminNotificationsController extends Controller
              $details['fields'] = ['hub', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'status', 'status_reason', 'status_date', 'tracking_number'];
         }
         else if ($id == 26) {
-            $details['receiver'] = ['mohsin.ali@trax.pk,waqas@trax.pk,noman.aziz@trax.pk,asad.ahsan@trax.pk,fawad.ahmed@trax.pk,nadir.qureshi@trax.pk,hammad.saleem@trax.pk,rahat.ali@trax.pk,hassan.arman@trax.pk,m.sohail@trax.pk,ghazanfar.ali@trax.pk','BCC-(muhammad.waqas@trax.pk,faisal.hasan@trax.pk,asad.ahsan@trax.pk)'];
+            $details['receiver'] = ['mohsin.ali@trax.pk','waqas@trax.pk','noman.aziz@trax.pk','asad.ahsan@trax.pk;','fawad.ahmed@trax.pk','nadir.qureshi@trax.pk','hammad.saleem@trax.pk','rahat.ali@trax.pk','hassan.arman@trax.pk','m.sohail@trax.pk','ghazanfar.ali@trax.pk','BCC-(muhammad.waqas@trax.pk','faisal.hasan@trax.pk','asad.ahsan@trax.pk'];
 
             $details['fields'] = ['date', 'link'];
         }
