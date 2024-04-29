@@ -1243,7 +1243,7 @@ class Permission
             'reports.rv_action_count_report.index'=>930,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
-            'reports.rv_report.index'=>950,
+            'reports.rvr_call_history.index'=>950,
 
             'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,
