@@ -133,6 +133,8 @@ class UserManagementController extends Controller
 
                     $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
 
+                    $lost_hub_user_shipment_button = '<button type="button" class="dropdown-item lost_hub_user_shipment" data-target-id="' . $user->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">User Lost Shipment Hub</div></button>';
+
                     $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -155,6 +157,9 @@ class UserManagementController extends Controller
                         $dropdown .= $phone_edit_button;
                     }
 
+                    if (session('role_id') == 1 || in_array(979, session('permissions'))) {
+                        $dropdown .= $lost_hub_user_shipment_button;
+                    }
 
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
                         if ($user->status == 0 && $user->first_inactive == 1) {
@@ -1175,7 +1180,7 @@ class UserManagementController extends Controller
 
     }
 
+    public function lost_hub_user_shipment(Request $request){
 
-
-
+    }
 }
