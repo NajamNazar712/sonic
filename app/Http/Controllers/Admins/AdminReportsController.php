@@ -12800,7 +12800,7 @@ class AdminReportsController extends Controller
             'rvaass.name as call_finding_reason'
         )
         ->where('rv_shipment_assign_agent_details.rv_state_id', '!=', 1)
-        ->groupBy('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id');
+        ->groupBy('rv_agent_call_histories.id','sjj.created_at');
 
         $datatable = Datatables::of($rv_report)
                     ->editColumn('tracking_number', function($rv_report) {
