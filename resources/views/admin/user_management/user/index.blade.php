@@ -52,7 +52,7 @@
 				</div>
 
 				
-				<form id="lost_hub_user_shipment_form" action="{{ route('admin.user_management.lost_hub_user_shipment') }}" method="POST">
+				<form id="lost_hub_user_shipment_form" action="{{ route('admin.user_management.users.lost_hub_user_shipment') }}" method="POST">
 					@csrf
 					<div class="modal fade text-left" id="lost_hub_user_shipment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="lost_hub_user_shipment" aria-hidden="true">
 						<div class="modal-dialog modal-md" role="document">
@@ -61,7 +61,7 @@
 									<h4 class="modal-title" id="">User Lost Shipemnt Hub</h4>
 								</div>
 								<div class="modal-body">
-									<input type="hidden" id="lost_hub_user_shipment_shipper_id">
+									<input type="hidden" id="admin_id" name="admin_id">
 									<select name="select_lost_hub_user_shipment[]" id="select_lost_hub_user_shipment" class="form-control select2" multiple>
 										@foreach($hubs as $hub)
 											<option value="{{ $hub->id }}" > {{ $hub->name }} </option>
@@ -698,12 +698,39 @@
 					}
 				}
 			});
-
-			$(document).on('click','.lost_hub_user_shipment',function(){
+			
+			$(document).on('click', '.lost_hub_user_shipment', function() {
 				var id = $(this).data('target-id');
+				$('#admin_id').val(id);
+
+				$.ajax({
+					url: '{!! route('admin.user_management.users.get_lost_hub_user_shipment') !!}',
+					method: 'GET',
+					data: {
+						admin_id: id
+					},
+					success: function(response) {
+						$('#select_lost_hub_user_shipment').val(null);
+						$(response.data).each(function(index, item) {
+							$('#select_lost_hub_user_shipment option[value="' + item + '"]').prop('selected', true);
+						});
+
+						$('#select_lost_hub_user_shipment').trigger('change');
+					},
+					error: function(xhr, status, error) {
+						console.error('Error:', error);
+					}
+				});
+
 				$('#lost_hub_user_shipment').modal('show');
 			});
 
+
+
+			$('#lost_hub_user_shipment').on('hidden.bs.modal', function (e) {
+				$('#admin_id ').val('');
+				$('#select_lost_hub_user_shipment').val([]).trigger('change');
+			});
 
 		});
 	</script>
