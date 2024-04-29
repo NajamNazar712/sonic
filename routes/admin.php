@@ -3756,6 +3756,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@franchise_add')->name('add');
             Route::post('edit', 'Admins\Retail\RetailAdminUserManagementController@franchise_edit')->name('edit');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
+
+            Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');

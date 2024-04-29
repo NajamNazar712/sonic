@@ -5,7 +5,7 @@
 @section('content')
 
     <style>
-        .add_franchise_modal {
+        .add_franchise_modal, .edit_franchise_modal {
             max-width: 1300px;
         }
     </style>
@@ -114,14 +114,14 @@
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="withholding_tax_percentage" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
+                                        <input type="text" name="franchise_withholding" id="withholding_tax_percentage" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-rule-required="true" data-msg-required="Withholding Tax is required">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
                                     </div>
             
                                     <div class="input-group mb-2">
-                                        <input type="text" name="deduction_percentage" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
+                                        <input type="text" name="franchise_deduction" id="deduction_percentage" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
                                         <div class="input-group-append">
                                             <span class="input-group-text" id="basic-addon2">%</span>
                                         </div>
@@ -212,7 +212,7 @@
     </div>
 
     <div class="modal fade" id="edit_franchise" role="dialog" aria-labelledby="edit_franchise_title" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog edit_franchise_modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="edit_remarks_title">Edit Franchise</h4>
@@ -224,99 +224,140 @@
                 <div class="modal-body text-center">
                     <form id="edit_franchise_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.franchise.edit') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field()  }}
-                        <input type="hidden" name="franchise_id" id="franchise_id" value="">
-                        <div class="form-group">
-                            <input type="text" name="name" id="edit_name" class="form-control" placeholder="Franchise Name*" data-rule-required="true" data-msg-required="Name is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
-                        </div>
-                        <div class="form-group">
-                            <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
-                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="hidden" name="franchise_id" id="franchise_id" value="">
+                                <div class="form-group">
+                                    <input type="text" name="name" id="edit_name" class="form-control" placeholder="Franchise Name*" data-rule-required="true" data-msg-required="Name is required" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="phone_number" id="edit_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" name="email" id="edit_email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="cnic" id="edit_cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="lat" id="edit_lat" class="form-control lat" placeholder="Latitude*" data-rule-required="true" data-msg-required="Latitude is required" value="">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" name="long" id="edit_long" class="form-control long" placeholder="Longitude*" data-rule-required="true" data-msg-required="Longitude is required" value="">
+                                </div>
 
-                        <div class="form-group">
-                            <select name="product_id" id="product_id" class="form-control select2" data-rule-required="true" data-msg-required="Product Type is required">
-                                @foreach($products as $product)
-                                    <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                <div class="input-group mb-2">
+                                    <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
+                                        data-rule-required="true" data-msg-required="Insurance is required" min="1">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <input type="text" name="discount" id="edit_discount" class="form-control edit_discount" placeholder="Discount"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
 
-                        <div class="form-group">
-                            <select name="retail_shipping_mode_id" id="retail_shipping_mode_id" class="select2 form-control retail_shipping_mode_id_edit" data-rule-required="true" data-msg-required="Please choose a shipping mode">
-                                @foreach($shipping_modes as $shipping_mode)
-                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                                <div class="input-group mb-2">
+                                    <input type="text" name="product_percentage" id="product_percentage_edit" class="form-control product_percentage" placeholder="Product"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
 
-                        <div class="input-group mb-2">
-                            <input type="text" name="edit_insurance" id="edit_insurance" class="form-control edit_insurance" placeholder="Insurance*"  value="" max="100"
-                                   data-rule-required="true" data-msg-required="Insurance is required" min="1">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
+                                <div class="input-group mb-2">
+                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+
+                                <div class="input-group mb-2">
+                                    <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="row">
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <select name="retail_shipping_mode_id" id="retail_shipping_mode_id_edit" class="select2 form-control retail_shipping_mode_id_edit" data-rule-required="true" data-msg-required="Please choose a shipping mode">
+                                                @foreach($shipping_modes as $shipping_mode)
+                                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-5">
+                                        <div class="form-group">
+                                            <div class="input-group mb-2">
+                                                <input type="text" name="product_percentage[]" id="product_percentage_edit" class="form-control product_percentage_edit" placeholder="Product"  value="" max="100">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" id="basic-addon2">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="button" class="btn btn-primary" id="edit_retail_product_add_btn" value="Add">
+                                    </div>
+                                </div>
+                                <span id="error_message" class="text-danger"></span>
+        
+                                <div class="row" id="editTableRow" style="display: none;">
+                                    <div class="col">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Selected Option</th>
+                                                    <th>Product Percentage</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="editTableBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="attachment_1">Attachment 1</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf" data-rule-required="true" data-msg-required="Atleast 1 attachment is required">
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="attachment_2">Attachment 2</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="attachment_3">Attachment 3</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="attachment_4">Attachment 4</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="attachment_5">Attachment 5</label>
+                                    <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
+                                </div>
                             </div>
                         </div>
-                        <div class="input-group mb-3">
-                            <input type="text" name="discount" id="edit_discount" class="form-control edit_discount" placeholder="Discount"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-
-                        <div class="input-group mb-2">
-                            <input type="text" name="product_percentage" id="product_percentage_edit" class="form-control product_percentage" placeholder="Product"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-
-                        <div class="input-group mb-2">
-                            <input type="text" name="commission_percentage" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="Commission"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-
-                        <div class="input-group mb-2">
-                            <input type="text" name="withholding_tax_percentage" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-
-                        <div class="input-group mb-2">
-                            <input type="text" name="deduction_percentage" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="basic-addon2">%</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="product_docs">Product Documents</label>
-                            <input class="form-control form-control-sm" type="file" name="product_docs" id="product_docs" accept=".doc, .docx">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="product_pdf">Product PDF</label>
-                            <input class="form-control form-control-sm" type="file" name="product_pdf" id="product_pdf" accept=".pdf">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="product_photo">Product Image</label>
-                            <input class="form-control form-control-sm" type="file" name="product_photo" id="product_photo" accept="image/*">
-                        </div>
-
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary edit" value="Add">Update</button>
                         </div>
@@ -728,11 +769,43 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function(event) {
+                var selectedOption = $("#retail_shipping_mode_id_edit option:selected").text();
+                var productPercentage = $(".product_percentage_edit").val();
+                var franchiseId = $("#franchise_id").val();
+                // send ajax request to fetch data
+                $.ajax({
+                    type: "GET",
+                    url: '{{ route('admin.retail.franchise.retail_product_percentage') }}',
+                    data: { franchise_id: franchiseId },
+                    success: function (response) {
+                        console.log(response.data.length);
+                        if (response.data.length > 0) {
+                            $('#editTableBody').empty();
+                            $.each(response.data, function(index, item) {
+                                var row = "<tr><td>" + item.selected_option + "</td><td>" + item.product_percentage + "</td><td><button class='btn btn-danger btn-sm remove-btn-edit-form'>Remove</button></td></tr>";
+                                $("#editTableBody").append(row);
+                            });
+                            $("#editTableRow").show();
+                        }
+                        else {
+                            $("#editTableRow").hide();
+                        }
+                    }
+                });
+
+                $('#editTableBody').on('click', '.remove-btn-edit-form', function() {
+                    $(this).closest('tr').remove();
+                });
+            });
+
+
             $("#add_franchise_form").submit(function(event) {
                 event.preventDefault();
-
                 var attachment1 = $("#attachment_1")[0].files[0];
-                if (!attachment1){
+                var gst_commission = $('#commission_percentage').val();
+                var withholding_tax_percentage = $('#withholding_tax_percentage').val();
+                if (!attachment1 || !gst_commission || !withholding_tax_percentage){
                     // Stop form submission
                     return;
                 }
@@ -751,6 +824,36 @@
                 $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
                 $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
 
+                this.submit();
+            });
+
+
+
+            $("#edit_franchise_form").submit(function(event) {
+                event.preventDefault();
+                var attachment1 = $("#attachment_1")[0].files[0];
+                var gst_commission = $('#commission_percentage').val();
+                var withholding_tax_percentage = $('#withholding_tax_percentage').val();
+                if (!attachment1 || !gst_commission || !withholding_tax_percentage){
+                    // Stop form submission
+                    return;
+                }
+
+                // Collect all shipping modes and product percentages
+                var retailShippingIds = [];
+                var productPercentages = [];
+                $("#editTableBody").find("tr").each(function() {
+                    var selectedOption = $(this).find("td:first").text();
+                    var productPercentage = $(this).find("td:nth-child(2)").text();
+                    retailShippingIds.push(selectedOption);
+                    productPercentages.push(productPercentage);
+                });
+
+                // Append shipping data to the form before submission
+                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
+                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
+
+                // Submit the form
                 this.submit();
             });
 
