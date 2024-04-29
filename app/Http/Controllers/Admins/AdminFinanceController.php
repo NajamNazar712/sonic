@@ -3766,9 +3766,11 @@ class AdminFinanceController extends Controller
 
     }
 
-    static public function add_payment($shipment_id, $type)
+    static public function add_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
         $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
         $crs = false;
         if ($setting->exists()) {
@@ -5857,9 +5859,11 @@ class AdminFinanceController extends Controller
         return ['total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable];
     }
 
-    static public function done_payment($shipment_id, $type)
+    static public function done_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
         if ($shipment->shipment_type == 1) {
             if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
