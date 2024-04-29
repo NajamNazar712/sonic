@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class userLostShipmentHubPermissionSeeder extends Seeder
+class UserLostShipmentHubPermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
