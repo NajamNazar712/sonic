@@ -30,7 +30,9 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShippingMode;
 use App\Jobs\ProcessRetailShipmentBookingDB;
+use App\RetailShipperNameVerification;
 use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -205,7 +207,7 @@ class RetailShipmentBookController extends Controller
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
         $retail_international_shipping_modes =  RetailShippingMode::where('business_category_id',2)->get();
-        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $domestic_cities = City::where('business_category_id', 1)->where('booking_enable_status', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
@@ -543,6 +545,8 @@ class RetailShipmentBookController extends Controller
         $retail_reference->ref = $ref;
         $retail_reference->save();
 
+        $this->previous_names_verify_update($request->shipper_phone_no,$request->shipper_name,$request->shipper_cnic,$request->shipper_address);
+
         if($request->book_button == 0){
             return response()->json(['status' => 1, 'success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'shipment_id' => $shipment_id]);
         }
@@ -679,7 +683,7 @@ class RetailShipmentBookController extends Controller
                   body {
                     background: none !important;
                     color: #09262e !important;
-                    font-size: 0.7rem !important;
+                    font-size: 0.8rem !important;
                   }
 
                   hr {
@@ -766,6 +770,9 @@ class RetailShipmentBookController extends Controller
                       font-weight: 900;
                       position: relative;" 
                     }
+                    .black-logo {
+                      filter: grayscale(100%);
+                    }
                 </style>
               </head>
               <body>
@@ -822,7 +829,6 @@ class RetailShipmentBookController extends Controller
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
 //            }
-
             if($shipment->shipment_type == 1){
 
                $shipping_mode = $shipment->shipping_mode->mode;
@@ -831,6 +837,7 @@ class RetailShipmentBookController extends Controller
                 $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                 if($retail_shipment){
                     $shipping_mode = $retail_shipment->shipping_modes->name;
+                    $retail_user_name = $retail_shipment->retail_user->store->name;
                 }
             }
 
@@ -1043,7 +1050,7 @@ class RetailShipmentBookController extends Controller
                         }
 
                         $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>
                     ';
                         $table_start .= '
                             <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
@@ -1098,7 +1105,7 @@ class RetailShipmentBookController extends Controller
                             <tbody>
                 ';
                     $table_start .= '
-                            <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>
                 ';
                     $table_start .= '
                             <td rowspan="4" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
@@ -1265,13 +1272,13 @@ class RetailShipmentBookController extends Controller
                     $shiping_mode = "";
                     $service_type = "";
                     if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                        $service_type .= '<td colspan="4"  class="prominent" ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                        $service_type .= '<span ><strong>' . $shipment->booking_type->booking_type . '</span></td>';
                     } 
                     else if ($shipment->booking_type_id == 2) {
-                        $service_type .= '<td colspan="4" class="prominent replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
+                        $service_type .= '<span class=" replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></span>';
                     }
                     else {
-                        $service_type .= '<td colspan="4" class="prominent ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                        $service_type .= '<span><strong>' . $shipment->booking_type->booking_type . '</strong></span>';
                     }
 
                     if($shipment->business_category->id==1){
@@ -1282,8 +1289,8 @@ class RetailShipmentBookController extends Controller
                     <tr>
                       <td colspan="1" style="font-size:13px;" class=""><strong>Shipping Mode</strong></td>
                      '.$shiping_mode.'
-                      <td colspan="1" style="font-size:13px;" class=""><strong>Service</strong></td>
-                      '.$service_type.'
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Service - '. $service_type .'</strong></td>
+                      <td colspan="4"  class="prominent"><strong>Centre Name - ' .$retail_user_name. '</strong></td>
                     </tr> ';
 
                     $table_end .= '
@@ -1305,13 +1312,13 @@ class RetailShipmentBookController extends Controller
                     $table_end .= '
                     <div class="col m-1 row">
                               <h1 style="
-                             overflow: hidden;
-                             margin-top: -220px;
-                             margin-left: 300px;
-                             opacity: 0.3;
-                             transform: rotate(350deg);
-                             font-size: 700%; 
-                             color: #636e72;"     
+                              overflow: hidden;
+                              margin-top: -304px;
+                              margin-left: 348px;
+                              opacity: 0.3;
+                              transform: rotate(340deg);
+                              font-size: 1200%;
+                              color: #636e72;"
                               >RETAIL</h1>
                             </div>
                     <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Trax Copy</p></div><div class="col"><hr></div>
@@ -1411,7 +1418,7 @@ class RetailShipmentBookController extends Controller
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
-                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
+                            $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto black-logo">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
@@ -1829,7 +1836,7 @@ class RetailShipmentBookController extends Controller
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', 1)->get();
         $shipping_modes = RetailShippingMode::where('id','!=',3)->where('business_category_id',1)->get();
-        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $domestic_cities = City::where('business_category_id', 1)->where('booking_enable_status', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', 1)->get();
@@ -1902,7 +1909,7 @@ class RetailShipmentBookController extends Controller
             'product_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('products', 'id')],
             'business_category_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('business_categories', 'id')->where('id', 1)],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')->whereNotIn('id', [3])],
-            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('booking_enable_status', 1)->where('business_category_id', 1)],
             'volumetric_weight' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'weight' => ['nullable', 'numeric', 'between:0.1,100000'],
             'length' => ['nullable', 'numeric', 'between:0.1,100000'],
@@ -2074,8 +2081,8 @@ class RetailShipmentBookController extends Controller
                 $products = Product::pluck('product_name', 'id');
                 $business_categories = BusinessCategory::where('id', '!=', 2)->pluck('name', 'id');
                 $shipping_modes = RetailShippingMode::where('id', '!=', 3)->pluck('name', 'id');
-                $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
-//                $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
+                $domestic_cities = City::where('business_category_id', 1)->where('booking_enable_status', 1)->where('status', 1)->get();
+                //                $international_cities = City::where('business_category_id', 2)->where('permanent_disabled',0)->where('status', 1)->get();
                 $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.name')->get();
                 $payment_modes = RetailPaymentMode::where('id', 1)->pluck('name', 'id');
                 $charges_modes = ChargesMode::whereIn('id', [1, 2])->pluck('charges_mode', 'id');
@@ -2197,4 +2204,63 @@ class RetailShipmentBookController extends Controller
       return response()->json(['status'=>'true']);
 
   }
+
+    static function previous_names_verify_update($phone_number,$shipper_name,$shipper_cnic,$shipper_address)
+    {
+        $phone_number = str_replace('-', '', $phone_number);
+        $shipper_cnic = str_replace('-', '', $shipper_cnic);
+//        if (RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name)->where('shipper_cnic',$shipper_cnic)->where('shipper_address',$shipper_address))
+//        {
+//            return 0;
+//        }
+//        else
+//        {
+            $record_exist = RetailShipperNameVerification::where('phone_number',$phone_number)->where('shipper_name',$shipper_name);
+            if($record_exist->exists())
+            {
+                $record_exist = $record_exist->first();
+                $record_exist->shipper_cnic = $shipper_cnic;
+                $record_exist->shipper_address = $shipper_address;
+                $record_exist->save();
+            }
+            else
+            {
+                $update_shipper = new RetailShipperNameVerification();
+                $update_shipper->phone_number = $phone_number;
+                $update_shipper->shipper_name = $shipper_name;
+                $update_shipper->shipper_cnic = $shipper_cnic;
+                $update_shipper->shipper_address = $shipper_address;
+                $update_shipper->save();
+            }
+//        }
+    }
+
+    public function previous_names_verify(Request $request)
+    {
+        $retail_shipper = array();
+        $phone_number = $request->phone_number;
+        $phone_number_without_hyphen = str_replace('-', '', $phone_number);
+        $phone_number_without_hyphen = str_replace('_', '', $phone_number_without_hyphen);
+        $length = strlen($phone_number_without_hyphen);
+
+        if ($length == 11)
+        {
+
+            $retail_shipper_verification = RetailShipperNameVerification::where('phone_number',$phone_number_without_hyphen)->get();
+            $retail_shipper_info = RetailShipperInfo::where('shipper_phone_no',$phone_number)->get();
+            $verify_retail_array = $retail_shipper_verification->pluck('phone_number')->toArray();
+
+            //if(in_array($phone_number_without_hyphen,$verify_retail_array) == true){
+            if(isset($retail_shipper_verification[0]->phone_number)){
+                $retail_shipper = $retail_shipper_verification;
+            }else{
+                $retail_shipper = $retail_shipper_info;
+            }
+            return response()->json(['status' => 1, 'success' => 'Shipper info found: ', 'data' => $retail_shipper]);
+        }
+        else
+        {
+            return response()->json(['status' => 0, 'error' => 'Not found: ', 'data' => $retail_shipper]);
+        }
+    }
 }

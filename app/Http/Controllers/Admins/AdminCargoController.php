@@ -64,6 +64,7 @@ class AdminCargoController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $shipping_mode = ShippingMode::all();
+        return view('admin.reports.qsr_report')->with(['shippers' => $shippers, 'cities' => $cities,'zones' => $zones , 'hubs' => $hubs, 'shippimg_modes' => $shipping_modes, 'types' => $types, 'shipment_status' => $shipment_status, 'sub_segments' => $sub_segments, 'areas'=> $areas]);
         return view('admin.cargo.pending')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'shipping_mode'=>$shipping_mode]);
     }
 
@@ -476,7 +477,8 @@ class AdminCargoController extends Controller
 
                                     $details['total'] = $shipments->count;
                                 }
-                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
+                                ShipmentScanningJourneyController::add($shipment->id,2,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
+
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 //                            }
 //                            else {
@@ -1951,8 +1953,7 @@ class AdminCargoController extends Controller
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
-
-                        ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
+                        ShipmentScanningJourneyController::add($shipment->id ,3,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     }
                     else {
@@ -2215,7 +2216,7 @@ class AdminCargoController extends Controller
                     $details['amount'] = number_format($shipment->amount);
                     $details['service_type'] = $shipment->booking_type->booking_type;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 3, 1, Auth::id(), null,null);
+                    ShipmentScanningJourneyController::add($shipment->id,3,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
                 else {

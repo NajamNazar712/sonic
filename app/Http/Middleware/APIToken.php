@@ -8,6 +8,7 @@ use Closure;
 
 class APIToken
 {
+
     /**
      * Handle an incoming request.
      *

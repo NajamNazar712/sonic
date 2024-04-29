@@ -334,8 +334,7 @@ class AdminInternationalShipmentsController extends Controller
                     $data['destination'] = $shipment->consignee_city->name;
                     $data['status'] = $shipment->status_shipper->name;
                     $data['status_id'] = $shipment->shipper_status_id;
-
-                    ShipmentScanningJourneyController::add($shipment->id, 17, 1, Auth::id(), null,null);
+                    ShipmentScanningJourneyController::add($shipment->id ,17,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return response()->json(['status' => 1, 'details' => $data]);
 
                 } else {
@@ -359,7 +358,7 @@ class AdminInternationalShipmentsController extends Controller
                     $data['destination'] = $shipment->pickup_address->city->name;
                     $data['status'] = $shipment->status_shipper->name;
                     $data['status_id'] = $shipment->shipper_status_id;
-                    ShipmentScanningJourneyController::add($shipment->id, 17, 1, Auth::id(), null,null);
+                    ShipmentScanningJourneyController::add($shipment->id ,17,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return response()->json(['status' => 1, 'details' => $data]);
 
                 } else {

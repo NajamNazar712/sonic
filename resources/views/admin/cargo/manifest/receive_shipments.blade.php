@@ -21,9 +21,19 @@
                                     {!! session('received_html') !!}
                                 </div>
                             @endif
+                            @if(session('misrouted_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('misrouted_html') !!}
+                                </div>
+                            @endif
                             @if(session('sr_html'))
                                 <div class="alert alert-danger">
                                     {!! session('sr_html') !!}
+                                </div>
+                            @endif
+                            @if(session('went_wrong'))
+                                <div class="alert alert-danger">
+                                    {!! session('went_wrong') !!}
                                 </div>
                             @endif
                             @if(session('already_received_shipments_html'))
@@ -79,6 +89,7 @@
                             <form id="receive_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.cargo_manifest.receive.bag.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
+                                <input id="bag_type_for_receive" type="hidden" name="bag_type" class="bag_type">
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <input type="hidden" name="open_box_ids" class="open_box_ids" id="open_box_ids">
 
@@ -201,6 +212,12 @@
                     // var info = table.page.info();
                     //
                     // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    var misroute = data[11]; // misroute veriable
+                    console.log('row',row.childNodes[7].innerText);
+                    if(misroute == 1)
+                    {
+                        // $(row).addClass('alert-danger');
+                    }
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
@@ -224,13 +241,27 @@
 
                     var tracking_number = $(form).find('input.tracking_number').val();
                     var shipment_bag_type = $(form).find('input#shipment_bag_type').val();
+                    var shipment_bag_type_route = null;
+
+                    $('#bag_type_for_receive').val(shipment_bag_type);
+                    console.log($('#bag_type_for_receive'));
+
+                    if(shipment_bag_type == 1)
+                    {
+                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details') !!}';
+                    }
+                    else
+                    {
+                        shipment_bag_type_route = '{!! route('admin.cargo_manifest.receive.bag.details.return') !!}';
+                    }
 
                     form.reset();
-
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
+
                         $.ajax({
-                            url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',
+                            {{--url: '{!! route('admin.cargo_manifest.receive.bag.details') !!}',--}}
+                            url: shipment_bag_type_route,
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
@@ -257,7 +288,7 @@
                                         var rowNo = table.rows().count();
 
                                         table.row.add([rowNo + 1, data.details.tracking_number, data.details.bag_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type
-                                            ,open_box
+                                            ,open_box,data.details.misroute
                                         ])
                                             .node().id = data.details.id;
                                         // var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';

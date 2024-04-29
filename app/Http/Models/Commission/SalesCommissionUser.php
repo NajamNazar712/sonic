@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class SalesCommissionUser extends Model
 {
     public function sales_person(){
-        return $this->belongsTo('App\Http\Models\Admin\Admin','user_id');
+        return $this->belongsTo('App\Http\Models\Admin\Admin','user_id','id');
+    }
+
+    public function rider_person(){
+        return $this->belongsTo('App\Http\Models\Rider','user_id','id');
     }
     public function sales_person_external(){
         return $this->belongsTo('App\Http\Models\Commission\SalesCommissionExternalUser','user_id');

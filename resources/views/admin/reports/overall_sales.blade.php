@@ -67,6 +67,28 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_hub" id="search_origin_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-3 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_origin_zone" id="search_origin_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+         
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -110,6 +132,36 @@
                             <select name="sub_segment_select" id="sub_segment_select" class="select2">
                                 @foreach($sub_segments as $sub_segment)
                                     <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="ref_name_select" id="ref_name_select" class="select2">
+                                @foreach($referral_names as $referral_name)
+                                    <option value="{{$referral_name->id}}">{{$referral_name->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="rider_types_referral" id="rider_types_referral" class="select2">
+                                @foreach($rider_types_referral as $rider_type_referral)
+                                    <option value="{{$rider_type_referral->id}}">{{$rider_type_referral->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -174,6 +226,8 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">First Attempt Date</th>
+                        <th class="border-primary border-darken-1">Item Quantity</th>
+                        <th class="border-primary border-darken-1">Pieces</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remark</th>
@@ -187,11 +241,11 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination</th>
-{{--                        <th class="border-primary border-darken-1">Consignee Address</th>--}}
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
-                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Origin Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -220,6 +274,7 @@
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Received/Refused By</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">Referral Name</th>
                         <th class="border-primary border-darken-1">Special Instructions</th>
                     </tr>
                     </thead>
@@ -355,8 +410,40 @@
             });
             $('#sub_segment_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Sub Segment*'
+                placeholder: 'Sub Segment',
+                allowClear:true
             });
+             $('#ref_name_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Referral Name',
+                allowClear:true
+            });
+            $('#search_origin_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Hub',
+                allowClear:true,
+            });
+            $('#search_origin_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Origin Zone',
+                allowClear:true,
+            });
+        
+
+            $('#rider_types_referral').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Rider Type Referral*'
+            }).on('change', function() {
+                var rider_type = $(this).val();
+                if (rider_type == 3) {
+                    $('#ref_name_select').prop('disabled', true); 
+                } else {
+                    $('#ref_name_select').prop('disabled', false); 
+                }
+            });
+
+            
+            
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -393,6 +480,12 @@
                         }
                     }
                 }
+            });
+
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
             });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
@@ -470,6 +563,8 @@
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('First Attempt Date');
+                            head.push('Item Quantity');
+                            head.push('Pieces');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
@@ -483,11 +578,11 @@
                             head.push('Arrival Date');
                             head.push('Rider');
                             head.push('Origin');
+                            head.push('Origin Hub');
                             head.push('Destination');
-                            // head.push('Consignee Address');
-                            head.push('Hub');
+                            head.push('Destination Hub');
                             head.push('Return City');
-                            head.push('Zone');
+                            head.push('Origin Zone');
                             head.push('Class');
                             head.push('Attempts');
                             head.push('Shipping Mode');
@@ -515,19 +610,22 @@
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
                             head.push('Sales Person');
+                            head.push('Referral Name');
                             head.push('Reason');
                             head.push('Special Instructions');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_number_excel);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.first_attempt_date);
+                                row.push(values.item_quantity);
+                                row.push(values.pieces);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
@@ -541,8 +639,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.ridername);
                                 row.push(values.origin);
+                                row.push(values.origin_hub);
                                 row.push(values.destination);
-                                // row.push(values.consignee_address);
                                 row.push(values.hub);
                                 row.push(values.return_city);
                                 row.push(values.zone);
@@ -573,6 +671,7 @@
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
+                                row.push(values.ref);
                                 row.push(values.reason);
                                 row.push(values.special_instructions);
 
@@ -621,12 +720,19 @@
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
                         d.sub_segment = $('#sub_segment_select').val();
+                        d.ref = $('#ref_name_select').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_business_category = $('#search_business_category').val();
                         d.arrival_time_from= $('input[name="arrival_time_from"]').val();
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.search_origin_hub = $('#search_origin_hub').val();
+                        d.search_origin_zone = $('#search_origin_zone').val();
+
+                        d.service_type_select = $('#service_type_select').val()
+                        d.rider_type_referral = $('#rider_types_referral').val();
+
                     }
                 },
                 order: [[14, 'desc']],
@@ -639,6 +745,8 @@
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
+                    { data:'item_quantity' ,name: 'item_quantity', class: 'align-middle item_quantity'},
+                    { data:'pieces' ,name: 'pieces', class: 'align-middle pieces'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason' ,name:'reason', class: 'align-middle reason'},
                     { data: 'remark' ,name:'remark', class: 'align-middle remark'},
@@ -652,6 +760,7 @@
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'origin_hub' ,name: 'och.name', class: 'align-middle origin_hub'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     // { data:'consignee_address' ,name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
@@ -685,6 +794,7 @@
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},
                     { data: 'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle received_or_refused_by'},
                     { data: 'sales_person' ,name: 'adsp.name', class: 'align-middle sales_person'},
+                    { data: 'ref', name: 'r.name', class: 'align-middle ref'},
                     { data: 'special_instructions' ,name: 'shipments.special_instructions', class: 'align-middle special_instructions'}
                 ],
                 rowCallback: function(row, data, index) {
