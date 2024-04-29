@@ -517,8 +517,8 @@ class ShipperShipmentBookController extends Controller
     public function store(Request $request) {
 
         $user_id = session('user_id');
-        if(!PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Your have Negative Payable Amount, Please Contact Support for further details"]);
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -2844,6 +2844,14 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($user_id) {
+            if ($value) {
+                if ($value== 0 && !PendingPayment::check_negative_payable($user_id)) {
+                    return false;
+                }
+            }
+            return true;
+        });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
@@ -3084,7 +3092,7 @@ class ShipperShipmentBookController extends Controller
                 $query->where('user_id', $user_id)->where('status', 1);
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
 //            'parcel_value' => [
 //                'required_if:amount,0',
 //                'nullable',
@@ -3870,6 +3878,11 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+
+        $user_id = session('user_id');
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -4902,6 +4915,9 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_mms_store(Request $request)
     {
         $user_id = session('user_id');
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -5637,6 +5653,9 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_store(Request $request)
     {
         $user_id = session('user_id');
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
         if (!$request->has('omni')) {
             $omni = 0;
         } else {
@@ -6512,6 +6531,9 @@ class ShipperShipmentBookController extends Controller
     {
 
         $user_id = session('user_id');
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
         $rate_type_id = session('rate_type_id');
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
@@ -7582,6 +7604,9 @@ class ShipperShipmentBookController extends Controller
     {
 
         $user_id = session('user_id');
+        if( !PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',

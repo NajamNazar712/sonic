@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\PendingPayment;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -487,7 +488,9 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
@@ -1503,6 +1506,10 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
         $flag = null;
+
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
@@ -8583,6 +8590,10 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
+
+        if(!PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // check if user_id is 2234 or not
         if ($user_id != 2234 && $user_id != 1049) {
