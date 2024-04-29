@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\StarShipper;
+use App\LostShipmentResponsible;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\RiderDelivery;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -75,7 +77,6 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Commission\SalesTier;
 
 class AdminTrackingController extends Controller
 {
@@ -1542,7 +1543,34 @@ class AdminTrackingController extends Controller
                             $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
                             $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
                             
+                            if($journey->shipper_status_id == 18){
+                                $shipment_id = $journey->shipment_id;
+                                $latest_lost_responsible_shipments = LostShipmentResponsible::whereIn('id', function($query) use ($shipment_id, $journey) {
+                                $query->selectRaw('MAX(id)')
+                                    ->from('lost_shipment_responsibles')
+                                    ->where('shipment_id', $shipment_id)
+                                    ->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($journey->updated_at) - 10)) // Adjust time range
+                                    ->where('updated_at', '<=', $journey->updated_at) // Assuming $journey->updated_at is the latest time
+                                    ->groupBy('user_id');
+                                })->get();
+
+                                
+                                foreach($latest_lost_responsible_shipments as $key => $lost_responsible_shipment){
+                                    if($lost_responsible_shipment->user_type == 1){
+                                        $admin = Admin::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+
+                                    }else{
+                                        $rider = Rider::find($lost_responsible_shipment->user_id);
+                                        $journey_details['responsible'][$key]['journey_updated_at'] = Carbon::parse($journey->updated_at)->format('Y-m-d H:i:s');
+                                    }
+                                }
+                            }else{
+                                $journey_details['responsible'] = [];
+                            }
+                            
                             $details['tracking_history'][] = $journey_details;
+                            
                         }
                         
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
@@ -1615,7 +1643,7 @@ class AdminTrackingController extends Controller
                                    
                             }
                         } 
-                        //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
+                        // shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
                         $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
                         if($shipment_pickup_journey_v3->exists())
                         {
@@ -2493,8 +2521,8 @@ class AdminTrackingController extends Controller
         ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')        
         ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id','sjl.shipment_id as journey_latest_id',
         'sjl.updated_at as journey_latest_updated_at',
-        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id','ssjal.location_status as location_status','ca_scanning.name as scanning_city_area_name'
-
+        'sjl.shipper_status_id as latest_shipper_status_id','s.shipper_status_id as shipper_status_id','ssj.id as ssj_id','ssjal.location_status as location_status','ca_scanning.name as scanning_city_area_name',
+        's.consignee_address', 's.actual_weight'
         ])
         ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
 

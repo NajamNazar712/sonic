@@ -62,9 +62,9 @@
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
-                                        <th class="border-primary border-darken-1">Contact Person</th>
-                                        <th class="border-primary border-darken-1">Address</th>
-                                        <th class="border-primary border-darken-1">Region</th>
+                                        {{-- <th class="border-primary border-darken-1">Contact Person</th> --}}
+                                        {{-- <th class="border-primary border-darken-1">Address</th> --}}
+                                        <th class="border-primary border-darken-1">Zone</th>
                                         <th class="border-primary border-darken-1">City</th>
                                         <th class="border-primary border-darken-1">Territory</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
@@ -88,7 +88,8 @@
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
-                                        <th class="border-primary border-darken-1">Account Disable Count</th>
+                                        <th class="border-primary border-darken-1">Account Disable Reason</th>
+                                        {{-- <th class="border-primary border-darken-1">Account Disable Count</th> --}}
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
                                         <th class="border-primary border-darken-1">Documents Approved By</th>
@@ -102,7 +103,7 @@
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Segment</th>
                                         <th class="border-primary border-darken-1">Sub Category Segment</th>
-                                        <th class="border-primary border-darken-1">Referral Code</th>
+                                        {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
                                         <th class="border-primary border-darken-1">Action</th>
@@ -205,7 +206,7 @@
     </div>
 
     <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
@@ -740,6 +741,77 @@
 </div>
 {{-- End --}}
 
+{{-- Add intercept shipper modal --}}
+<div class="modal fade text-left" id="AddShipperExcludeInterceptType" data-backdrop="static" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="interceptModalCloseBtn_1">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add_shipper_exclude_intercept_type" method="POST" action="{{ route('admin.accounts.store_shipper_exclude') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="text-center">
+                        <h4 id="shipper_name"></h4>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="exclude_shipper" id="exclude_shipper">
+                                <label for="exclude_shipper">Exclude Shipper</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="different_consignee" id="different_consignee">
+                                <label for="different_consignee">Disable Different Consignee</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="same_consignee" id="same_consignee">
+                                <label for="same_consignee">Disable Same Consignee</label>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <input type="submit" value="Submit" class="btn btn-success">
+                            <button type="button" class="btn btn-primary" id="interceptModalCloseBtn_2" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End intercept shipper modal --}}
+<div class="modal fade text-left" id="BlockDisableReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BlockDisableReasonModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="BlockDisableReasonModalHeading"></h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-1" placeholder="Enter Remarks" name="block_disable_remarks" id="block_disable_remarks">
+                <div class="text-danger d-none blocked_remarks" style="margin-top: -12px; margin-bottom: 15px;" id="blocked_remarks">Remarks Are Required</div>
+                <select name="block_disable_reason" id="block_disable_reason" class="form-control select2">
+                    @foreach($block_disable_reasons as $block_disable_reason)
+                        <option value="{{ $block_disable_reason->id }}" > {{ $block_disable_reason->name }} </option>
+                    @endforeach
+                </select>
+                <span class="text-danger d-none blocked_reasons">Reasons Are Required</span>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BlockDisableReasonSubmit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -768,6 +840,12 @@
         /* Style the label when the checkbox is checked */
         #checkboxContainer input[type="checkbox"]:checked+label {
             background-color: #56e73c; }
+
+        /* Style the actions dropdown due to increase in action buttons */
+        #datatable > tbody > tr > td:last-child > div.btn-group > div.dropdown-menu.dropdown-menu-sm.accounts {
+            overflow-y: scroll;
+            height: 300px;
+        }
 </style>
 @endsection
 
@@ -922,8 +1000,8 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
+									// console.log(index);	
+									// console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -954,6 +1032,15 @@ function checkboxStatus() {
             placeholder:"Select Shipper",
             allowClear:true,
          });
+
+         $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
+            width: '100%',
+            placeholder: "Select Reasons",
+            allowClear: true,
+            dropdownParent: $('#BlockDisableReasonModal')
+        }).on('change', function() {
+            $('.blocked_reasons').addClass('d-none');
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -982,9 +1069,9 @@ function checkboxStatus() {
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
-                        head.push('Contact Person');
-                        head.push('Address');
-                        head.push('Region');
+                        //head.push('Contact Person');
+                        //head.push('Address');
+                        head.push('Zone');
                         head.push('City');
                         head.push('Territory');
                         head.push('Product Type');
@@ -1008,8 +1095,8 @@ function checkboxStatus() {
                         head.push('Account Activation Date');
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
-                        // head.push('Account Disable Remarks');
-                        head.push('Account Disable Count');
+                        head.push('Account Disable Reason');
+                        //head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
@@ -1023,7 +1110,7 @@ function checkboxStatus() {
                         head.push('Intl Rates Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
-                        head.push('Referral Code');
+                        //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
                         $.each(result.data, function(index, values) {
@@ -1034,8 +1121,8 @@ function checkboxStatus() {
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
-                            row.push(values.poc);
-                            row.push(values.address);
+                            //row.push(values.poc);
+                            //row.push(values.address);
                             row.push(values.zone);
                             row.push(values.city);
                             row.push(values.territory);
@@ -1059,8 +1146,9 @@ function checkboxStatus() {
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_at);
-                            row.push(values.disable_remarks);
-                            row.push(values.status_count);
+                            row.push(values.disable_reason);
+                            row.push(values.reason);
+                            //row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
@@ -1074,7 +1162,7 @@ function checkboxStatus() {
                             row.push(values.international_rejected_reason);    
                             row.push(values.segment);
                             row.push(values.sub_segment);
-                            row.push(values.referral_name);
+                            //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
                             body.push(row);
@@ -1108,7 +1196,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1260,7 +1347,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1389,7 +1475,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1655,8 +1740,8 @@ function checkboxStatus() {
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
-                {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
-                {data: 'address', name: 'users.address', class: 'align-middle address'},
+                //{data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -1680,8 +1765,9 @@ function checkboxStatus() {
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
-                {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
-                {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
+                {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
+                {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
+                //{data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},
@@ -1695,7 +1781,7 @@ function checkboxStatus() {
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
                 {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                 {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
-                {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
+                //{data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
@@ -1866,80 +1952,86 @@ function checkboxStatus() {
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());
         });
-        $('body').on('click','button.blacklist',function () {
-            var id = $(this).parents('tr').attr('id');
-            var status = $(this).attr('rel');
-            swal({
-                // title: 'Are You Sure?',
-                text: 'Write a reason to blacklist this account!',
-                content: {
-                    element: "input",
-                    attributes: {
-                        placeholder: "Write a reason",
-                        class: "form-control blacklist_reason",
-                    },
-                },
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: false,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: false
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then((value) => {
-                    if (value) {
-                        if (value === '') {
-                            swal("You have not selected any reason!", {
-                                icon: "warning",
-                            });
-                        } else {
-                        if (id) {
-                            $.ajax({
-                                url: '{!! route('admin.accounts.status.block') !!}',
-                                method: 'POST',
-                                data: {
-                                    'id': id,
-                                    'reason': value,
-                                    'status': status,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                swal.close();
-                                if (data.status === 1) {
-                                    table.draw('false');
-                                    swal.close();
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
 
-                            });
-                        }
-                    }
-                    }else{
-                        swal.close();
-                    }
+        var block_user_id;
+        var block_user_status;
 
-            });
+        var disable_user_id;
+        var disable_user_status;
 
-
+        
+        $('body').on('click', 'button.blacklist', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Block Reason Remarks');
+            block_user_id = $(this).data('id');
+            block_user_status = $(this).attr('rel');
+            disable_user_id = null; 
         });
+
+        $('body').on('click', 'button.userdisable', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Disable Reason Remarks');
+            disable_user_id = $(this).data('id');
+            disable_user_status = 'disable';
+            block_user_id = null; 
+        });
+
+        
+        $('#BlockDisableReasonSubmit').click(function () {
+            var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
+            var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
+            if(remarks == ''){
+                $('.blocked_remarks').removeClass('d-none');
+            }else if (reasons == ''){
+                $('.blocked_reasons').removeClass('d-none');
+            }else{
+                $.ajax({
+                url:  block_user_id ? '{!! route('admin.accounts.status.block') !!}' : '{!! route('admin.accounts.status.change') !!}',
+                method: 'POST',
+                data: {
+                    'id': block_user_id ? block_user_id : disable_user_id,
+                    'reason': reasons,
+                    'remarks': remarks,
+                    'status' : block_user_id ? block_user_status : 'disable',
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if (data.status === 1) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    // $('#blocked_remarks').addClass('d-none');
+                    // $('#blocked_reasons').addClass('d-none');
+                    $('#BlockDisableReasonModal').modal('hide');
+                    $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+                    $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
+                    table.draw()
+                } else {
+                    toastr.error(data.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                });
+            }
+        });  
+              
+            
+
+        $('input[name="block_disable_remarks"]').keyup(function() {
+            $('#blocked_remarks').addClass('d-none');
+        });
+
+        $('#BlockDisableReasonModal').on('hide.bs.modal',function (e) {
+            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change'); 
+            $('#blocked_remarks').addClass('d-none');
+            $('#blocked_reasons').addClass('d-none');
+            disable_user_id = null; 
+            block_user_id = null; 
+        });
+		
         $("#saletag").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1981,6 +2073,7 @@ function checkboxStatus() {
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
 
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
@@ -2061,55 +2154,7 @@ function checkboxStatus() {
             });
 
         });
-        $('body').on('click','button.userdisable',function () {
-            var status  = "disable";
-            var id = $(this).parents('tr').attr('id');
-            swal({
-                title: 'Are You Sure?',
-                text: 'Select Yes to Disable this account!',
-                icon: 'warning',
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: null,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: true
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then(function (confirm) {
-               if(confirm){
-                   if(id){
-                       $.ajax({
-                           url: '{!! route('admin.accounts.status.change') !!}',
-                           method: 'POST',
-                           data: {
-                               'id':id,
-                               'status':status,
-                               '_token': '{{ csrf_token() }}'
-                           }
-                       }).done(function (data) {
-                           if(data.status == 1){
-                               table.draw('false');
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                           }
 
-                       });
-                   }
-               }
-            });
-
-        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
@@ -2228,9 +2273,92 @@ function checkboxStatus() {
                     }
                 })
                     .done(function(data) {
-                        if(data.status){
+                        if(data.status == 1){
                             $('#duplicate_modal').modal('show');
-                            var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+                            // var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+
+                                // var html = '<table class="table table-bordered">' +
+                                //             '<tr>' +
+                                //                 '<td><strong>Phone</strong></td>' +
+                                //                 '<td>' + data.info.phone + '</td>' +
+                                //                 '<td>' + (data.info.shared_phone ? data.info.shared_phone : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>CNIC</strong></td>' +
+                                //                 '<td>' + data.info.cnic + '</td>' +
+                                //                 '<td>' + (data.info.shared_cnic ? data.info.shared_cnic : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>IBAN</strong></td>' +
+                                //                 '<td>' + data.info.iban + '</td>' +
+                                //                 '<td>' + (data.info.shared_iban ? data.info.shared_iban : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>Name</strong></td>' +
+                                //                 '<td>' + data.info.name + '</td>' +
+                                //                 '<td>' + (data.info.shared_name ? data.info.shared_name : '') + '</td>' +
+                                //             '</tr>' +
+                                //         '</table>';
+
+
+                                var baseURL = "{{ url('admin/accounts') }}";
+                                var html = '<table class="table table-bordered">';
+                                html += '<thead>';
+                                html += '<tr>' +
+                                    '<th><strong>User Information</strong></th>' +
+                                    '<th><strong>User Values</strong></th>' +
+                                    '<th><strong>Duplicate Ids</strong></th>' +
+                                    '</tr>';
+                                html += '</thead>';
+                                html += '<tbody>';
+                                html += '<tr>' +
+                                    '<td><strong>Phone</strong></td>' +
+                                    '<td>' + data.info.phone + '</td>' +
+                                    '<td>' + (data.info.shared_phone ?
+                                        generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>CNIC</strong></td>' +
+                                    '<td>' + data.info.cnic + '</td>' +
+                                    '<td>' + (data.info.shared_cnic ?
+                                        generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>IBAN</strong></td>' +
+                                    '<td>' + data.info.iban + '</td>' +
+                                    '<td>' + (data.info.shared_iban ?
+                                        generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>Name</strong></td>' +
+                                    '<td>' + data.info.name + '</td>' +
+                                    '<td>' + (data.info.shared_name ?
+                                        generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>NTN</strong></td>' +
+                                    '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                    '<td>' + (data.info.shared_ntn_no ?
+                                        generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>Email</strong></td>' +
+                                    '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ? data.info.email : '') + '</td>' +
+                                    '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                        generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                    '</tr>';
+                                html += '</tbody>';
+                                html += '</table>';
+
+                                function generateLinks(ids, baseURL, type) {
+                                    var links = [];
+                                    for (var i = 0; i < ids.length; i++) {
+                                        var url = baseURL + '/' + ids[i].trim() + '/view';
+                                        links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                    }
+                                    return links.join(', ');
+                                }
+
                             $('#duplicate_modal .modal-body').html(html);
                         }
 
@@ -2383,12 +2511,155 @@ function checkboxStatus() {
             }
         }
     });
-    
+
+        // Shipper exclude feature
+        $(document).ready(function() {
+            $('#shipper').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
+
+            // Setup event handlers for checkboxes
+            var exclude_shipper = $('#exclude_shipper');
+            var different_consignee = $('#different_consignee');
+            var same_consignee = $('#same_consignee');
+
+            $('#interceptModalCloseBtn_1, #interceptModalCloseBtn_2').click(function() {
+                exclude_shipper.prop('checked', false);
+                different_consignee.prop('checked', false);
+                same_consignee.prop('checked', false);
+                exclude_shipper.prop('disabled', false);
+                different_consignee.prop('disabled', false);
+                same_consignee.prop('disabled', false)
+                $('#add_shipper_exclude_intercept_type')[0].reset();
+            });
+
+            // if exclude shipper is checked
+            exclude_shipper.on('change', function() {
+                if ($(this).prop('checked')) {
+                    different_consignee.prop('disabled', true);
+                    same_consignee.prop('disabled', true);
+                } else {
+                    different_consignee.prop('disabled', false);
+                    same_consignee.prop('disabled', false);
+                }
+            });
+
+            // if different consignee is checked
+            different_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                    if (same_consignee.prop('checked')) {
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            // if same consignee is checked
+            same_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                if (different_consignee.prop('checked')) {
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                var name = $(this).parents('tr').find('td:eq(4)').text();
+                if ($(this).hasClass('add_shipper_exclude_intercept_type')) {
+                    $('#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type #user_id').val(id);
+                    $('#shipper_name').text(name);
+                    $('#AddShipperExcludeInterceptType').modal('show');
+                }
+            });
+
+            $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                            var error = "Please select at least one option.";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else {
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                            })
+                        .then(function(confirm) {
+                            if (confirm) {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
             var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
 
+            if ($(this).hasClass('add_shipper_exclude_intercept_type')){
+                $.ajax({
+                    url: '{!! route('admin.accounts.excluded_shippers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                    }).done(function(response){
+                        if (response.intercept_shipper !== null) {
+                            var interceptShipperData = response.intercept_shipper;
+                            var different_consignee = interceptShipperData.different_consignee;
+                            var exclude_shipper = interceptShipperData.exclude_shipper;
+                            var same_consignee = interceptShipperData.same_consignee;
+                            if (different_consignee == 1) {
+                                $('#different_consignee').prop('checked', true);
+                            }
+                            if (exclude_shipper == 1) {
+                                $('#exclude_shipper').prop('checked', true);
+                            }
+                            if (same_consignee == 1) {
+                                $('#same_consignee').prop('checked', true);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+            }
 
             if ($(this).hasClass('change_rate_type')) {
 
@@ -2789,8 +3060,6 @@ function checkboxStatus() {
                 };
                 fortnite = fortnite.length;
                 selected_days = selected_days.length;
-
-                console.log(formData);
                 if ((formData[2]['value'] == '4' && selected_days === 2) ||
                     (formData[2]['value'] == '5' && selected_days === 3) ||
                     (formData[2]['value'] == '2' && selected_days === 1) || 
@@ -2927,7 +3196,7 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            console.log(value,value.admin);
+                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3376,9 +3645,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 $('#ratesAdditionForm').submit()
             }
         });
-
-
-
 </script>
 
 @endsection

@@ -66,6 +66,8 @@
                                     <th class="border-primary border-darken-1">Handover Received By</th>
                                     <th class="border-primary border-darken-1">Handover Received At</th>
                                     <th class="border-primary border-darken-1">Last Action Performed</th>
+                                    <th class="border-primary border-darken-1">Consignee Address</th>
+                                    <th class="border-primary border-darken-1">Actual Weight</th>
 
 
                                 </tr>
@@ -209,6 +211,8 @@
                             head.push('Handover Received By');
                             head.push('Handover Received At');
                             head.push('Last Action Performed');
+                            head.push('Consignee Address');
+                            head.push('Actual Weight');
                          	
 							
                     
@@ -241,6 +245,8 @@
                                 row.push(values.handover_received_by);
                                 row.push(values.handover_received_at);
                                 row.push(values.last_action);
+                                row.push(values.consignee_address);
+                                row.push(values.actual_weight);
 
                                 body.push(row);
                             });
@@ -303,6 +309,8 @@
                     {data: 'handover_received_by', name: 'shipment_positions.handover_received_by', class: 'align-middle handover_received_by'},
                     {data: 'handover_received_at', name: 'shipment_positions.handover_received_at', class: 'align-middle handover_received_at'},
                     {data: 'last_action', name: 'shipment_positions.last_action', class: 'align-middle action'},
+                    {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle action'},
+                    {data: 'actual_weight', name: 's.actual_weight', class: 'align-middle action'},
 
                 ],
                 rowCallback: function(row, data, index) {
