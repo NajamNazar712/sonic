@@ -14267,7 +14267,9 @@ class AdminReportsController extends Controller
             'ssjal_hss.location_status as location_status_hss',
             'ca_scanning.name as scanning_city_area_name',
             'spt.admin_id as sales_person_id',
-            'sales_person.name as sales_person_name'
+            'sales_person.name as sales_person_name',
+            'stt.kam as stt_kam_id',
+            'kam.name as stt_kam_name'
             
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -14280,6 +14282,16 @@ class AdminReportsController extends Controller
                 );
             })
             ->leftJoin('admins as sales_person', 'sales_person.id','spt.admin_id')
+            ->leftJoin('sale_tier_tags as stt', function($join){
+                $join->on('stt.user_id','u.id')
+                ->where(
+                    'stt.id',
+                    '=',
+                    DB::raw('(select max(id) from sale_tier_tags where sale_tier_tags.user_id = u.id)')
+                );
+            })
+            
+            ->leftJoin('admins as kam', 'kam.id','stt.kam')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
