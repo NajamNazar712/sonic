@@ -51,6 +51,7 @@ use PHPExcel_Style_Fill;
 use PHPExcel_Cell;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class AdminReportsEmailController extends Controller
 {
@@ -1531,79 +1532,86 @@ class AdminReportsEmailController extends Controller
 
 
     static public function retail_done_payment($date){
-        $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', $date);
-        RetailDonePaymentsReport::truncate();
-        if($retail_done_payments->exists()){
-            $total_amount = 0;
-            $retail_done_payment_array = array();
-            $retail_done_payments_array = array();
-            $retail_done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
-            $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
-            $retail_done_payments = $retail_done_payments->get();
-            $shippers = array();
-            $serial = 0;
-            foreach ($retail_done_payments as $retail_done_payment) {
-                if (!in_array($retail_done_payment->retail_done_payment->shipper->id, $shippers)) {
-                    $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
-                }
-                if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
-                    $iban = $retail_done_payment->retail_done_payment->shipper->iban;
-                } else {
-                    $iban = '-';
-                }
-                $retail_done_payment_report = new RetailDonePaymentsReport();
-                $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
-                $retail_done_payment_report->shipper_id = $retail_done_payment->retail_done_payment->shipper->id;
-                $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->shipper_name;
-                $retail_done_payment_report->amount = $retail_done_payment->payable;
-                $retail_done_payment_report->iban_number = $iban;
-                $retail_done_payment_report->save();
-                $serial++;
-                $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
-                $total_amount = $total_amount + $retail_done_payment->payable;
-            }
-            $retail_done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
-            $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $retail_done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => number_format($total_amount)];
-            $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
-            $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
-            $retail_done_payment_array = array_merge($retail_done_payments_array, $retail_done_payment_array);
+        Log::channel('cronJobLog')->info('s ' .'report:retail Running');
+        try{
 
-            $cell_s = [
-                'font' => ['bold' => true],
-                'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders' => array(
-                    'outline' => array(
-                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
-                        'color' => array('argb' => '000000'),
+            $retail_done_payments = RetailDonePaymentCalculation::whereDate('created_at', $date);
+            RetailDonePaymentsReport::truncate();
+            if($retail_done_payments->exists()){
+                $total_amount = 0;
+                $retail_done_payment_array = array();
+                $retail_done_payments_array = array();
+                $retail_done_payment_array['header'] = ['S No.', 'Payment ID', 'Shipper Name', 'IBAN Number', 'Amount'];
+                $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => '', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => ''];
+                $retail_done_payments = $retail_done_payments->get();
+                $shippers = array();
+                $serial = 0;
+                foreach ($retail_done_payments as $retail_done_payment) {
+                    if (!in_array($retail_done_payment->retail_done_payment->shipper->id, $shippers)) {
+                        $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
+                    }
+                    if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
+                        $iban = $retail_done_payment->retail_done_payment->shipper->iban;
+                    } else {
+                        $iban = '-';
+                    }
+                    $retail_done_payment_report = new RetailDonePaymentsReport();
+                    $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
+                    $retail_done_payment_report->shipper_id = $retail_done_payment->retail_done_payment->shipper->id;
+                    $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->shipper_name;
+                    $retail_done_payment_report->amount = $retail_done_payment->payable;
+                    $retail_done_payment_report->iban_number = $iban;
+                    $retail_done_payment_report->save();
+                    $serial++;
+                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
+                    $total_amount = $total_amount + $retail_done_payment->payable;
+                }
+                $retail_done_payments_array['summary_header'] = ['', 'Total Shippers', 'Total Amount'];
+                $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+                $retail_done_payments_array[] = ['' => '', 'Total Shippers' => count($shippers), 'Total Amount' => number_format($total_amount)];
+                $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+                $retail_done_payments_array[] = ['' => '', 'Total Shippers' => '', 'Total Amount' => ''];
+                $retail_done_payment_array[] = ['S No.' => '', 'Payment ID' => 'Total', 'Shipper Name' => '', 'IBAN Number' => '', 'Amount' => number_format($total_amount)];
+                $retail_done_payment_array = array_merge($retail_done_payments_array, $retail_done_payment_array);
+    
+                $cell_s = [
+                    'font' => ['bold' => true],
+                    'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => array(
+                        'outline' => array(
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                            'color' => array('argb' => '000000'),
+                        ),
                     ),
-                ),
-            ];
-
-            $cell_st = [
-                'font' => ['bold' => true],
-                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
-                'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
-            ];
-
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            $sheet->getDefaultColumnDimension()->setWidth(20);
-            $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
-            $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
-            $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-            $date_file_name = Carbon::now()->format('Y_m_d_s');
-            $sheet->setTitle('Retail Done Payments');
-            $writer = new Xlsx($spreadsheet);
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="retail_done_payment_report.xlsx"');
-            header('Cache-Control: max-age=0');
-            $file_name_without_path = "reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
-            $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
-            $writer->save($file_name);
-
-            NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
+                ];
+    
+                $cell_st = [
+                    'font' => ['bold' => true],
+                    'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+                    'borders' => ['bottom' => ['style' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+                ];
+    
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->getDefaultColumnDimension()->setWidth(20);
+                $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
+                $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
+                $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
+                $date_file_name = Carbon::now()->format('Y_m_d_s');
+                $sheet->setTitle('Retail Done Payments');
+                $writer = new Xlsx($spreadsheet);
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="retail_done_payment_report.xlsx"');
+                header('Cache-Control: max-age=0');
+                $file_name_without_path = "reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
+                $file_name = public_path() . "/reports/retail_done_payment_report_" . $date_file_name . ".xlsx";
+                $writer->save($file_name);
+                
+                NotificationsController::send(141, $date, url('/') . '/' . $file_name_without_path);
+                Log::channel('cronJobLog')->info('s ' .'report:retail End');
+            }
+        }catch(\Throwable $th){
+            Log::channel('cronJobLog')->info('s ' .'report:retail Failed');
         }
     }
 
