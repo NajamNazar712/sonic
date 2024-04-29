@@ -121,6 +121,8 @@ use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -623,65 +625,6 @@ class ShipperDashboardController extends Controller
              $connection = 'mysql';
          }
 
-        $count = DB::connection($connection)->table('shipments')
-        
-        
-        ->where(function ($query) use ($masp, $request) {
-            if(isset($request->search_account_type) && count($request->search_account_type) > 0){
-                $query->whereIn('shipments.user_id', $request->search_account_type);
-            } else {
-                $query->whereIn('shipments.user_id', $masp);
-            }
-        });
-
-        // ->where(function ($query){ 
-        //     $query->where('shipments.user_id', session('user_id'))
-        //         ->orwhereIn('shipments.user_id', session('sister_users'));
-        // });
-
-      
-
-        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
-            $from = $request->get('booking_from_date');
-            $to = $request->get('booking_to_date');
-            $count = $count->whereBetween('shipments.created_at', [$from, $to]);
-        }
-
-        $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
-
-        $to_id = NULL;
-
-        if ($from_id->exists()) {
-            $from_id = $from_id->first()->id;
-
-            $to_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from)->where('created_at', '<=', $to)->where('id', '>=', $from_id);
-
-            if ($to_id->exists()) {
-                $to_id = $to_id->orderBy('id', 'DESC')->first()->id;
-            }
-            else {
-                $to_id = NULL;
-            }
-        }
-        else {
-            $from_id = NULL;
-        }
-
-        if ($from_id && $to_id) {
-            $count = $count->where('shipments.id', '>=', $from_id)
-                ->where('shipments.id', '<=', $to_id);
-        }
-
-        $from_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
-
-        if ($from_sj_id->exists()) {
-            $from_sj_id = $from_sj_id->first()->id;
-        }
-        else {
-            $from_sj_id = NULL;
-        }
-
-        $count = $count->count();
 
         $shipments = DB::connection($connection)->table('shipments')
             ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
@@ -692,10 +635,10 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->join('shipments_journey', function ($join) use($from) {
+            ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.created_at > "'. $from .'")'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -706,6 +649,8 @@ class ShipperDashboardController extends Controller
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
+
+
 
         $shipments = $shipments->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
@@ -725,17 +670,12 @@ class ShipperDashboardController extends Controller
             }
         }
 
-        if ($from_id && $to_id) {
-            $shipments = $shipments->where('shipments.id', '>=', $from_id)
-                ->where('shipments.id', '<=', $to_id);
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
-
-        if ($from_sj_id) {
-            $shipments = $shipments->where('shipments_journey.id', '>=', $from_sj_id);
-        }
-
         $datatable = Datatables::of($shipments)
-            ->setTotalRecords($count)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -867,11 +807,6 @@ class ShipperDashboardController extends Controller
 
             if ($phone_number = $request->get('phone_number')) {
                 $datatable->where('shipments.consignee_phone_number_1', $phone_number);
-            }
-            if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
-                $from = $request->get('booking_from_date');
-                $to = $request->get('booking_to_date');
-                $datatable->whereBetween('shipments.created_at', [$from,$to]);
             }
 
             return $datatable->make(true);
@@ -1165,6 +1100,45 @@ class ShipperDashboardController extends Controller
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
+    public function storeShipperId(Request $request)
+    {
+        $userId = $request->input('userId');
+        $shipperStoreId = $request->input('shipper_store_id');
+        $userShippingInfosId = $request->input('user_shipper_infos_id');
+        $userShippingInfosStatus = $request->input('user_shipper_infos_status');
+        if ($userId != 2234 && $userId != 1049){
+            return response()->json(['error' => 'Invalid user']);
+        } 
+        if (!$shipperStoreId) {
+            return response()->json(['error' => 'Please enter a store ID']);
+        }
+        // if (!is_numeric($shipperStoreId) || $shipperStoreId < 0) {
+        //     return response()->json(['error' => 'Shipper Store ID must be a non-negative number']);
+        // }
+
+        $status = null;
+        if ($userShippingInfosStatus == "Enabled") {
+            $status = 1;
+        } else {
+            $status = 0;
+        }
+
+        if ($userShippingInfosId) {
+            UserShippingInfoStoreAddress::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'user_shipping_infos_id' => $userShippingInfosId,
+                ],
+                [
+                    'shipper_store_id' => $shipperStoreId,
+                    'status' => $status,
+                ]
+            );
+            return response()->json(['success' => 'Store ID updated successfully']);
+        }
+        return response()->json(['error' => 'No User Shipping Info found']);
+    }
+
     public function verifyPincode(Request $request)
     {
         if(isset($request->action) && $request->action == 'verify_pincode')
@@ -1172,8 +1146,15 @@ class ShipperDashboardController extends Controller
             $user_id = session('user_id');
             $pin = rand(1000,9999);
             NotificationsController::send(91,$user_id,$pin);
-            $data['code'] = $pin;
-            return json_encode($data);
+
+            // Get the profile_otp from SMS model
+            $profile_otp = ShipperVerificationPinCode::where('otp', $pin)->first();
+            if ($profile_otp) {
+                $data['code'] = $pin;
+                return json_encode($data);
+            }
+            // $data['code'] = $pin;
+            // return json_encode($data);
         }
     }
 
@@ -1231,9 +1212,12 @@ class ShipperDashboardController extends Controller
     }
 
     public function getPickups(Request $request) {
-        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address'])
-        ->where('user_id', session('user_id'))
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
+        ->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
+        ->leftjoin('user_shipping_info_store_addresses as usisa', 'user_shipping_infos.id', '=', 'usisa.user_shipping_infos_id')
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name', 'user_shipping_infos.default_return_address', 'usisa.shipper_store_id as shipper_store_id',])
+        // ->where('user_id', session('user_id'))
+        ->where('user_shipping_infos.user_id', session('user_id'))
         ->where('hidden', 0);
 
         return Datatables::of($pickups)
@@ -1249,6 +1233,28 @@ class ShipperDashboardController extends Controller
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
             $return_default_button = '<button type="button" class="dropdown-item return_default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Return Address</div></button>';
+            $add_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Store ID</div></button>';
+            $edit_store_id_button = '<button type="button" class="dropdown-item add_store_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Store ID</div></button>';
+            
+            // if((auth()->user()->id == 2234 || auth()->user()->id == 10364) && $store_id_check){
+            //     $dropdown .= $add_store_id_button;
+            // }
+
+            $active_status_count = UserShippingInfo::where('user_id',$pickup->user_id)
+            ->where('status', 1)
+            ->where('hidden', 0)
+            ->count();
+
+            if ($active_status_count == 1) {
+                $disable_button = '<button type="button" class="dropdown-item disable btn btn-danger text-white" disabled><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            }
+
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049) && $pickup->shipper_store_id) {
+                $dropdown .= $edit_store_id_button;
+            } 
+            if ((auth()->user()->id == 2234 || auth()->user()->id == 1049)  && !$pickup->shipper_store_id) {
+                $dropdown .= $add_store_id_button;
+            }
             if ($pickup->default_address == 1) {
                 $dropdown .= '<label class="row no-gutters align-items-center p-1 font-size-small">Default Address</label>';
             }
@@ -1300,6 +1306,9 @@ class ShipperDashboardController extends Controller
         ->editColumn('status', function ($pickup) {
             return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
         })
+        ->filterColumn('shipper_store_id', function ($query, $keyword) {
+            $query->where('usisa.shipper_store_id', 'LIKE', '%' . $keyword . '%');
+        })
         ->make(true);
     }
 
@@ -1308,23 +1317,42 @@ class ShipperDashboardController extends Controller
         $pickup_id = $request->id;
         $status = $request->status;
         $shipping_info = UserShippingInfo::where('id',$pickup_id)->first();
+        $shipper_store_id = UserShippingInfoStoreAddress::where('user_shipping_infos_id', $pickup_id)->first();
         if($shipping_info->exists()){
             if($status == 'enable'){
                 if($shipping_info->status == 0){
                     $shipping_info->status = 1;
                     $shipping_info->save();
+                    if ($shipper_store_id !== null && (auth()->user()->id == 2234 || auth()->user()->id == 1049)) {
+                        $shipper_store_id->status = 1;
+                        $shipper_store_id->save();
+                    }
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now enabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already enabled!"]);
                 }
             }else if($status == 'disable'){
-                if(UserShippingInfo::where('user_id',$shipping_info->user_id)->count()==1)
-                {
+                // if(UserShippingInfo::where('user_id',$shipping_info->user_id)->count()==1)
+                // {
+                //     return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
+                // }
+
+                $active_status_count = UserShippingInfo::where('user_id',$shipping_info->user_id)
+                    ->where('status', 1)
+                    ->where('hidden', 0)
+                    ->count();
+                if($active_status_count == 1){
                     return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
                 }
+
                 if($shipping_info->status == 1){
                     $shipping_info->status = 0;
                     $shipping_info->save();
+                    if ($shipper_store_id !== null && (auth()->user()->id == 2234 || auth()->user()->id == 1049)) {
+                        $shipper_store_id->status = 0;
+                        $shipper_store_id->save();
+                    }
+
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now disabled!"]);
                 }else{
                     return response()->json(['status'=>0,'error'=>"Pickup Address is already disabled!"]);

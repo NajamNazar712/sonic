@@ -1327,7 +1327,7 @@ class AdminPickupsController extends Controller
                     $details['shipment_items_count'] = $shipment_items_count;
                     $details['scanned_shipment_item'] = $shipment_item->id;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 } else {
                     return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
@@ -1366,7 +1366,7 @@ class AdminPickupsController extends Controller
                             $details['shipment_items'] = $shipment_items;
                             $details['shipment_items_count'] = $shipment_items_count;
 
-                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                             return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                         } else {
                             return ['status' => 1, 'error' => 'Given Item ID/Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
@@ -1395,7 +1395,7 @@ class AdminPickupsController extends Controller
                             $details['estimated_weight'] = floatval($shipment->estimated_weight);
                             $details['actual_weight'] = floatval($shipment->actual_weight);
 
-                            ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                            ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                         } else {
                             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
@@ -1443,7 +1443,7 @@ class AdminPickupsController extends Controller
                         $details['estimated_weight'] = floatval($shipment->estimated_weight);
                         $details['actual_weight'] = floatval($shipment->actual_weight);
 
-                        ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+                        ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                     } else {
                         return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
@@ -2814,7 +2814,7 @@ class AdminPickupsController extends Controller
                 $details['estimated_weight'] = floatval($shipment->estimated_weight);
                 $details['actual_weight'] = floatval($shipment->actual_weight);
 
-                ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), NULL, NULL);
+                ShipmentScanningJourneyController::add($shipment->id ,1,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
               }

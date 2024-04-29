@@ -59,6 +59,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Lead ID</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
@@ -73,6 +74,7 @@
                                         <th class="border-primary border-darken-1">POC Tagged</th>
                                         <th class="border-primary border-darken-1">KAM Tagged</th>
                                         <th class="border-primary border-darken-1">REF Tagged</th>
+                                        {{-- <th class="border-primary border-darken-1">ESO Tagged</th> --}}
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Added At</th>
@@ -87,6 +89,7 @@
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Account Disable Reason</th>
                                         <th class="border-primary border-darken-1">Account Disable Count</th>
                                         <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
@@ -104,6 +107,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">Expected Average Shipments</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -114,46 +118,7 @@
             </div>
         </div>
     </section>
-    <div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Sales Tiers</h4>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="shipper_id1">
-                    <div class="mb-2">
-                        <select name="poc" id="poc" class="form-control select2">
-                            @foreach($sale_tier_types as $poc)
-                                <option value="{{ $poc->id }}" > {{ $poc->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <select name="kam" id="kam" class="form-control select2">
-                            @foreach($sale_tier_types as $kam)
-                                <option value="{{ $kam->id }}" > {{ $kam->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <select name="ref" id="ref" class="form-control select2">
-                            @foreach($sale_tier_types as $ref)
-                                <option value="{{ $ref->id }}" > {{ $ref->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="salesTierTypeTagSubmit">Submit</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+ 
 
     <div class="modal fade text-left" id="SalesTagModal1" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal1"
          aria-hidden="true">
@@ -243,7 +208,7 @@
     </div>
 
     <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
@@ -681,7 +646,174 @@
 
 {{-- End Add Fintech Charges Modal --}}
 
+{{-- Commission Moal --}}
+<div class="modal fade text-left" id="SalesTierTypeTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTierTypeTagModal" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 100%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Rates</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate>
+                @csrf
+                <input type="hidden" name="datatable_check" id="datatable_check">
 
+                <div class="modal-body">
+                    <div class="col text-center">
+                        <h1 id="shipper_ids_msg"></h1>
+                        <div class="row justify-content-center mt-2" id="commission_div">
+                            <div class="form-group row d-none">
+                                <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Total Commission"
+                                            id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                    <div class="row justify-content-center">
+                                        <div class="col-2 form-group">
+                                            <select name="sales_tier" class="select2" id="sales_tier_select">
+                                                @foreach($sales_tiers as $tier)
+                                                    <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                        sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <input type="text" id="external_person_name" name="external_person_name"
+                                                class="form-control" placeholder="External Tier Person Name" disabled>
+                                        </div>
+                                        <div class="col-2 form-group">
+                                            <select name="user" class="select2" id="user_select" disabled>
+                                            </select>
+                                        </div>
+                                        <div class="col-3 form-group">
+                                            <div class="input-group form-group">
+                                                <input type="text" id="user_commission" class="form-control commission"
+                                                    placeholder="User Commission" name="user_commission">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-1 form-group">
+                                            <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <table class="table table-bordered datatable_rate" id="datatable_rate" style="z-index: 3;">
+                                    <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">S. No.</th>
+                                            <th class="border-primary border-darken-1">User Name</th>
+                                            <th class="border-primary border-darken-1">Tier</th>
+                                            <th class="border-primary border-darken-1">Commission Percentage</th>
+                                            <th class="border-primary border-darken-1"></th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                        <tr>
+                                            <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
+                                            <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{-- End --}}
+
+{{-- Add intercept shipper modal --}}
+<div class="modal fade text-left" id="AddShipperExcludeInterceptType" data-backdrop="static" role="dialog" aria-labelledby="modalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Intercept Request Exclude Shippers</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="interceptModalCloseBtn_1">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="add_shipper_exclude_intercept_type" method="POST" action="{{ route('admin.accounts.store_shipper_exclude') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" id="user_id">
+                    <div class="text-center">
+                        <h4 id="shipper_name"></h4>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="exclude_shipper" id="exclude_shipper">
+                                <label for="exclude_shipper">Exclude Shipper</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="different_consignee" id="different_consignee">
+                                <label for="different_consignee">Disable Different Consignee</label>
+                            </div>
+
+                            <div class="col-4 mt-4">
+                                <input type="checkbox" name="same_consignee" id="same_consignee">
+                                <label for="same_consignee">Disable Same Consignee</label>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <input type="submit" value="Submit" class="btn btn-success">
+                            <button type="button" class="btn btn-primary" id="interceptModalCloseBtn_2" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- End intercept shipper modal --}}
+<div class="modal fade text-left" id="BlockDisableReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BlockDisableReasonModal"
+aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="BlockDisableReasonModalHeading"></h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-1" placeholder="Enter Remarks" name="block_disable_remarks" id="block_disable_remarks">
+                <div class="text-danger d-none blocked_remarks" style="margin-top: -12px; margin-bottom: 15px;" id="blocked_remarks">Remarks Are Required</div>
+                <select name="block_disable_reason" id="block_disable_reason" class="form-control select2">
+                    @foreach($block_disable_reasons as $block_disable_reason)
+                        <option value="{{ $block_disable_reason->id }}" > {{ $block_disable_reason->name }} </option>
+                    @endforeach
+                </select>
+                <span class="text-danger d-none blocked_reasons">Reasons Are Required</span>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="BlockDisableReasonSubmit">Submit</button>
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -710,6 +842,12 @@
         /* Style the label when the checkbox is checked */
         #checkboxContainer input[type="checkbox"]:checked+label {
             background-color: #56e73c; }
+
+        /* Style the actions dropdown due to increase in action buttons */
+        #datatable > tbody > tr > td:last-child > div.btn-group > div.dropdown-menu.dropdown-menu-sm.accounts {
+            overflow-y: scroll;
+            height: 300px;
+        }
 </style>
 @endsection
 
@@ -811,7 +949,11 @@ function checkboxStatus() {
     });
 
     $(document).ready(function() {
-
+        $("#user_select").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Users",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='search_cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $('body').on('change','#search_iban',function() {
@@ -860,8 +1002,6 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -892,6 +1032,15 @@ function checkboxStatus() {
             placeholder:"Select Shipper",
             allowClear:true,
          });
+
+         $('#block_disable_reason').prepend('<option value="" selected></option>').select2({
+            width: '100%',
+            placeholder: "Select Reasons",
+            allowClear: true,
+            dropdownParent: $('#BlockDisableReasonModal')
+        }).on('change', function() {
+            $('.blocked_reasons').addClass('d-none');
+        });
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -917,6 +1066,7 @@ function checkboxStatus() {
                         head = [];
 
                         head.push('S.No');
+                        head.push('Lead ID');
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
@@ -931,6 +1081,7 @@ function checkboxStatus() {
                         head.push('POC Tagged');
                         head.push('KAM Tagged');
                         head.push('REF Tagged');
+                        // head.push('ESO Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Added At');
@@ -945,7 +1096,7 @@ function checkboxStatus() {
                         head.push('Account Activation Date');
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
-                        // head.push('Account Disable Remarks');
+                        head.push('Account Disable Reason');
                         head.push('Account Disable Count');
                         head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
@@ -963,12 +1114,14 @@ function checkboxStatus() {
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('Expected Average Shipments');
                         $.each(result.data, function(index, values) {
                             row = [];
 
 
                             row.push(index + 1);
-                            row.push(values.id_padded);
+                            row.push(values.lead_id);
+                            row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
                             row.push(values.poc);
@@ -982,6 +1135,7 @@ function checkboxStatus() {
                             row.push(values.tagged_poc);
                             row.push(values.kam);
                             row.push(values.ref);
+                            // row.push(values.eso);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.rates_added_at);
@@ -995,7 +1149,8 @@ function checkboxStatus() {
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
                             row.push(values.disable_at);
-                            row.push(values.disable_remarks);
+                            row.push(values.disable_reason);
+                            row.push(values.reason);
                             row.push(values.status_count);
                             row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
@@ -1013,6 +1168,7 @@ function checkboxStatus() {
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.expected_average_shipments);
                             body.push(row);
                         });
                     },
@@ -1044,7 +1200,6 @@ function checkboxStatus() {
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1196,7 +1351,6 @@ function checkboxStatus() {
                                 $('#SetSegment').modal('show');
                                 $('#setsegmentSubmit').on('click',function () {
                                     var segment = parseInt($('#set_segment').val());
-                                    console.log(segment);
                                     swal({
                                         text: 'Are you sure, you want to set Segment?',
                                         icon: 'info',
@@ -1325,7 +1479,6 @@ function checkboxStatus() {
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1411,84 +1564,19 @@ function checkboxStatus() {
                    className: 'btn btn-primary tag',
                    enabled:false,
                    action: function (e, dt, node, config) {
-                       if(selected_rows != ''){
+                            if(selected_rows_2 != ''){
+                                $('#SalesTierTypeTagModal').modal('show');
+                                var route = '{!! route('admin.accounts.add_rate_commission_corporate_reimb', ':shippers') !!}';
+                                route = route.replace(':shippers', encodeURIComponent(selected_rows_2));
+                                $("#SalesTierTypeTagModal #ratesAdditionForm").attr('action', route);
 
-                           $('#SalesTierTypeTagModal').modal('show');
-                           $('#salesTierTypeTagSubmit').on('click',function () {
-                               var poc = $('#poc').val();
-                               var kam = $('#kam').val();
-                               var ref = $('#ref').val();
-                               swal({
-                                   text: 'Are you sure, you want to Tag?',
-                                   icon: 'info',
-                                   buttons: {
-                                       cancel: {
-                                           text: 'No',
-                                           value: null,
-                                           visible: true,
-                                           closeModal: true,
-                                       },
-                                       confirm: {
-                                           text: 'Yes',
-                                           value: true,
-                                           visible: true,
-                                           closeModal: true
-                                       }
-                                   },
-                                   closeOnClickOutside: false,
-                                   closeOnEsc: false,
-                                   dangerMode: true
-                               }).then(function(confirm) {
-                                   if (confirm) {
+                                $('#shipper_ids_msg').text("Selected Shipper:"+ selected_rows_2)
 
-                                       $.ajax({
-                                           url: '{!! route('admin.accounts.kam_poc_ref_tag.submit') !!}',
-                                           method: 'POST',
-                                           data: {
-                                               'poc': poc,
-                                               'kam': kam,
-                                               'ref': ref,
-                                               'shipper_ids[]': selected_rows,
-                                               '_token': '{{ csrf_token() }}'
-                                           }
-                                       })
-                                           .done(function (data) {
-                                               if (data.status === 0) {
-                                                   toastr.error(data.error, 'Error!', {
-                                                       positionClass: 'toast-top-center',
-                                                       containerId: 'toast-top-center'
-                                                   });
-                                               } else {
-                                                   $('#SalesTierTypeTagModal').modal('hide');
-                                                   toastr.success(data.success, 'Success!', {
-                                                       positionClass: 'toast-bottom-center',
-                                                       containerId: 'toast-bottom-center'
-                                                   });
-                                               }
-                                               selected_rows = [];
-
-                                               table.rows().deselect();
-                                               $('#SalesTierTypeTagModal').modal('hide');
-                                               table.draw(true);
-                                               table.button('.tag').disable();
-                                               table.button('.bulk_tagging').disable();
-                                               table.button('.bulk_segment_tagging').disable();
-                                               table.button('.set_commission').disable();
-                                               table.button('.approve_commission').disable();
-                                               table.button('.territory_tag').disable();
-                                               table.button('.territory_retag').disable();
-
-
-                                           });
-                                   }
-                               });
-                           });
-
-                       }else{
-                           var error = "Atleast Select One Shipper";
-                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                       }
-                   }
+                            }else{
+                                var error = "Rates Are Rejected";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
                },
                     @endif
 
@@ -1653,6 +1741,7 @@ function checkboxStatus() {
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'lead_id_link', name: 'users.lead_id', class:'align-middle lead_id_link'},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
@@ -1667,6 +1756,7 @@ function checkboxStatus() {
                 {data: 'tagged_poc', name: 'poc.name', class: 'align-middle tagged_poc'},
                 {data: 'kam', name: 'k.name', class: 'align-middle kam'},
                 {data: 'ref', name: 'r.name', class: 'align-middle ref'},
+                // {data: 'eso', name: 'e.name', class: 'align-middle eso'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'rates_added_at', name: 'users.rates_added_at', class: 'align-middle rates_added_at'},
@@ -1680,7 +1770,8 @@ function checkboxStatus() {
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
-                {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'disable_reason', name: 'users.disable_reason', class: 'align-middle disable_reason', orderable: false, searchable: false},
+                {data: 'reason', name: 'bdru.name', class: 'align-middle reason'},
                 {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
                 {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
@@ -1698,6 +1789,7 @@ function checkboxStatus() {
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -1866,80 +1958,86 @@ function checkboxStatus() {
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());
         });
-        $('body').on('click','button.blacklist',function () {
-            var id = $(this).parents('tr').attr('id');
-            var status = $(this).attr('rel');
-            swal({
-                // title: 'Are You Sure?',
-                text: 'Write a reason to blacklist this account!',
-                content: {
-                    element: "input",
-                    attributes: {
-                        placeholder: "Write a reason",
-                        class: "form-control blacklist_reason",
-                    },
-                },
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: false,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: false
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then((value) => {
-                    if (value) {
-                        if (value === '') {
-                            swal("You have not selected any reason!", {
-                                icon: "warning",
-                            });
-                        } else {
-                        if (id) {
-                            $.ajax({
-                                url: '{!! route('admin.accounts.status.block') !!}',
-                                method: 'POST',
-                                data: {
-                                    'id': id,
-                                    'reason': value,
-                                    'status': status,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                swal.close();
-                                if (data.status === 1) {
-                                    table.draw('false');
-                                    swal.close();
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
 
-                            });
-                        }
-                    }
-                    }else{
-                        swal.close();
-                    }
+        var block_user_id;
+        var block_user_status;
 
-            });
+        var disable_user_id;
+        var disable_user_status;
 
-
+        
+        $('body').on('click', 'button.blacklist', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Block Reason Remarks');
+            block_user_id = $(this).data('id');
+            block_user_status = $(this).attr('rel');
+            disable_user_id = null; 
         });
+
+        $('body').on('click', 'button.userdisable', function () {
+            $('#BlockDisableReasonModal').modal('show');
+            $('#BlockDisableReasonModal #BlockDisableReasonModalHeading').text('Disable Reason Remarks');
+            disable_user_id = $(this).data('id');
+            disable_user_status = 'disable';
+            block_user_id = null; 
+        });
+
+        
+        $('#BlockDisableReasonSubmit').click(function () {
+            var remarks = $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val();
+            var reasons = $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val();
+            if(remarks == ''){
+                $('.blocked_remarks').removeClass('d-none');
+            }else if (reasons == ''){
+                $('.blocked_reasons').removeClass('d-none');
+            }else{
+                $.ajax({
+                url:  block_user_id ? '{!! route('admin.accounts.status.block') !!}' : '{!! route('admin.accounts.status.change') !!}',
+                method: 'POST',
+                data: {
+                    'id': block_user_id ? block_user_id : disable_user_id,
+                    'reason': reasons,
+                    'remarks': remarks,
+                    'status' : block_user_id ? block_user_status : 'disable',
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if (data.status === 1) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    // $('#blocked_remarks').addClass('d-none');
+                    // $('#blocked_reasons').addClass('d-none');
+                    $('#BlockDisableReasonModal').modal('hide');
+                    $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+                    $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change');   
+                    table.draw()
+                } else {
+                    toastr.error(data.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                });
+            }
+        });  
+              
+            
+
+        $('input[name="block_disable_remarks"]').keyup(function() {
+            $('#blocked_remarks').addClass('d-none');
+        });
+
+        $('#BlockDisableReasonModal').on('hide.bs.modal',function (e) {
+            $('#BlockDisableReasonModal').find('.modal-body input[name="block_disable_remarks"]').val('');            
+            $('#BlockDisableReasonModal').find('.modal-body select[name="block_disable_reason"]').val(null).trigger('change'); 
+            $('#blocked_remarks').addClass('d-none');
+            $('#blocked_reasons').addClass('d-none');
+            disable_user_id = null; 
+            block_user_id = null; 
+        });
+		
         $("#saletag").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
             width:'100%',
@@ -1970,12 +2068,18 @@ function checkboxStatus() {
             width:'100%',
             dropdownParent:$('#SalesTierTypeTagModal')
         });
+        $("#eso").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select ESO",
+            width:'100%',
+            dropdownParent:$('#SalesTierTypeTagModal')
+        });
 
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
 
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
@@ -2056,55 +2160,7 @@ function checkboxStatus() {
             });
 
         });
-        $('body').on('click','button.userdisable',function () {
-            var status  = "disable";
-            var id = $(this).parents('tr').attr('id');
-            swal({
-                title: 'Are You Sure?',
-                text: 'Select Yes to Disable this account!',
-                icon: 'warning',
-                buttons: {
-                    cancel: {
-                        text: 'No',
-                        value: null,
-                        visible: true,
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Yes',
-                        value: true,
-                        visible: true,
-                        closeModal: true
-                    }
-                },
-                closeOnClickOutside: false,
-                closeOnEsc: false,
-                dangerMode: true
-            }).then(function (confirm) {
-               if(confirm){
-                   if(id){
-                       $.ajax({
-                           url: '{!! route('admin.accounts.status.change') !!}',
-                           method: 'POST',
-                           data: {
-                               'id':id,
-                               'status':status,
-                               '_token': '{{ csrf_token() }}'
-                           }
-                       }).done(function (data) {
-                           if(data.status == 1){
-                               table.draw('false');
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                           }
 
-                       });
-                   }
-               }
-            });
-
-        });
 
         $('#datatable').on('click', 'button.warehousing_enable', function(){
             var id = $(this).parents('tr').attr('id');
@@ -2223,9 +2279,92 @@ function checkboxStatus() {
                     }
                 })
                     .done(function(data) {
-                        if(data.status){
+                        if(data.status == 1){
                             $('#duplicate_modal').modal('show');
-                            var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+                            // var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+
+                                // var html = '<table class="table table-bordered">' +
+                                //             '<tr>' +
+                                //                 '<td><strong>Phone</strong></td>' +
+                                //                 '<td>' + data.info.phone + '</td>' +
+                                //                 '<td>' + (data.info.shared_phone ? data.info.shared_phone : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>CNIC</strong></td>' +
+                                //                 '<td>' + data.info.cnic + '</td>' +
+                                //                 '<td>' + (data.info.shared_cnic ? data.info.shared_cnic : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>IBAN</strong></td>' +
+                                //                 '<td>' + data.info.iban + '</td>' +
+                                //                 '<td>' + (data.info.shared_iban ? data.info.shared_iban : '') + '</td>' +
+                                //             '</tr>' +
+                                //             '<tr>' +
+                                //                 '<td><strong>Name</strong></td>' +
+                                //                 '<td>' + data.info.name + '</td>' +
+                                //                 '<td>' + (data.info.shared_name ? data.info.shared_name : '') + '</td>' +
+                                //             '</tr>' +
+                                //         '</table>';
+
+
+                                var baseURL = "{{ url('admin/accounts') }}";
+                                var html = '<table class="table table-bordered">';
+                                html += '<thead>';
+                                html += '<tr>' +
+                                    '<th><strong>User Information</strong></th>' +
+                                    '<th><strong>User Values</strong></th>' +
+                                    '<th><strong>Duplicate Ids</strong></th>' +
+                                    '</tr>';
+                                html += '</thead>';
+                                html += '<tbody>';
+                                html += '<tr>' +
+                                    '<td><strong>Phone</strong></td>' +
+                                    '<td>' + data.info.phone + '</td>' +
+                                    '<td>' + (data.info.shared_phone ?
+                                        generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>CNIC</strong></td>' +
+                                    '<td>' + data.info.cnic + '</td>' +
+                                    '<td>' + (data.info.shared_cnic ?
+                                        generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>IBAN</strong></td>' +
+                                    '<td>' + data.info.iban + '</td>' +
+                                    '<td>' + (data.info.shared_iban ?
+                                        generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>Name</strong></td>' +
+                                    '<td>' + data.info.name + '</td>' +
+                                    '<td>' + (data.info.shared_name ?
+                                        generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>NTN</strong></td>' +
+                                    '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                    '<td>' + (data.info.shared_ntn_no ?
+                                        generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                    '</tr>';
+                                html += '<tr>' +
+                                    '<td><strong>Email</strong></td>' +
+                                    '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ? data.info.email : '') + '</td>' +
+                                    '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                        generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                    '</tr>';
+                                html += '</tbody>';
+                                html += '</table>';
+
+                                function generateLinks(ids, baseURL, type) {
+                                    var links = [];
+                                    for (var i = 0; i < ids.length; i++) {
+                                        var url = baseURL + '/' + ids[i].trim() + '/view';
+                                        links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                    }
+                                    return links.join(', ');
+                                }
+
                             $('#duplicate_modal .modal-body').html(html);
                         }
 
@@ -2378,12 +2517,155 @@ function checkboxStatus() {
             }
         }
     });
-    
+
+        // Shipper exclude feature
+        $(document).ready(function() {
+            $('#shipper').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Shipper",
+                allowClear:true,
+            });
+
+            // Setup event handlers for checkboxes
+            var exclude_shipper = $('#exclude_shipper');
+            var different_consignee = $('#different_consignee');
+            var same_consignee = $('#same_consignee');
+
+            $('#interceptModalCloseBtn_1, #interceptModalCloseBtn_2').click(function() {
+                exclude_shipper.prop('checked', false);
+                different_consignee.prop('checked', false);
+                same_consignee.prop('checked', false);
+                exclude_shipper.prop('disabled', false);
+                different_consignee.prop('disabled', false);
+                same_consignee.prop('disabled', false)
+                $('#add_shipper_exclude_intercept_type')[0].reset();
+            });
+
+            // if exclude shipper is checked
+            exclude_shipper.on('change', function() {
+                if ($(this).prop('checked')) {
+                    different_consignee.prop('disabled', true);
+                    same_consignee.prop('disabled', true);
+                } else {
+                    different_consignee.prop('disabled', false);
+                    same_consignee.prop('disabled', false);
+                }
+            });
+
+            // if different consignee is checked
+            different_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                    if (same_consignee.prop('checked')) {
+                        var error = "Cannot select Different Consignee when Same Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            // if same consignee is checked
+            same_consignee.on('change', function() {
+                if ($(this).prop('checked')) {
+                    exclude_shipper.prop('disabled', true);
+                if (different_consignee.prop('checked')) {
+                        var error = "Cannot select Same Consignee when Different Consignee is selected. Please un-check.";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $(this).prop('checked', false);
+                    }
+                } else {
+                    exclude_shipper.prop('disabled', false);
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = $(this).parents('tr').attr('id');
+                var name = $(this).parents('tr').find('td:eq(4)').text();
+                if ($(this).hasClass('add_shipper_exclude_intercept_type')) {
+                    $('#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type #user_id').val(id);
+                    $('#shipper_name').text(name);
+                    $('#AddShipperExcludeInterceptType').modal('show');
+                }
+            });
+
+            $("#AddShipperExcludeInterceptType #add_shipper_exclude_intercept_type").validate({
+                errorClass: "danger",
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    if (!exclude_shipper.prop('checked') && !different_consignee.prop('checked') && !same_consignee.prop('checked')) {
+                            var error = "Please select at least one option.";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else {
+                        swal({
+                            title: 'Are you sure?',
+                            text: 'Select Yes to update Intercept Request Exclude Shippers!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                            })
+                        .then(function(confirm) {
+                            if (confirm) {
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
             var user_id = table.row( $(this).parents('tr') ).data().id;
             var rate_type_id = table.row( $(this).parents('tr') ).data().corporate_rate_type_id;
 
+            if ($(this).hasClass('add_shipper_exclude_intercept_type')){
+                $.ajax({
+                    url: '{!! route('admin.accounts.excluded_shippers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                    }).done(function(response){
+                        if (response.intercept_shipper !== null) {
+                            var interceptShipperData = response.intercept_shipper;
+                            var different_consignee = interceptShipperData.different_consignee;
+                            var exclude_shipper = interceptShipperData.exclude_shipper;
+                            var same_consignee = interceptShipperData.same_consignee;
+                            if (different_consignee == 1) {
+                                $('#different_consignee').prop('checked', true);
+                            }
+                            if (exclude_shipper == 1) {
+                                $('#exclude_shipper').prop('checked', true);
+                            }
+                            if (same_consignee == 1) {
+                                $('#same_consignee').prop('checked', true);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+            }
 
             if ($(this).hasClass('change_rate_type')) {
 
@@ -2421,12 +2703,26 @@ function checkboxStatus() {
                 });
             }
         });
-
+        var selected_rows_2 = [];
         $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
               
                 var index = $.inArray(id, selected_rows);
+                var index_2 = $.inArray(id, selected_rows_2);
 
+                var dataTable = $('#datatable').DataTable();
+                var tr = $(this).closest('tr');
+                var row = dataTable.row(tr);
+                var rowData = row.data();
+                var cond = (rowData.status_id != 2);
+               
+               if (index_2 === -1 && cond) {
+                    selected_rows_2.push(id);
+                }else {
+                    if(selected_rows_2.includes(id)){
+                        selected_rows_2.splice(index_2, 1);
+                    }
+                }
                 if (index === -1) {
                     selected_rows.push(id);
                 }
@@ -2769,6 +3065,10 @@ function checkboxStatus() {
                 };
                 fortnite = fortnite.length;
                 selected_days = selected_days.length;
+
+                //for prod checking
+                console.log(selected_days);
+
                 if ((formData[2]['value'] == '4' && selected_days === 2) ||
                     (formData[2]['value'] == '5' && selected_days === 3) ||
                     (formData[2]['value'] == '2' && selected_days === 1) || 
@@ -2905,7 +3205,6 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
-                            console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3072,7 +3371,301 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#fortnite_val').val(value);
         });
 
+        $('#SalesTierTypeTagModal').on('hide.bs.modal', function (e) {
+            selected_commission = 0;
+            commission = 0;
+            selected_users.length = 0;   
+            commission_max = $('#commission_max').val()         
+            $('#total_commission').val(0).trigger('change');
+            $('#total_commission_value').text('0');
+            $('#datatable_rate').DataTable().clear().draw();
+            kam_count = 0;
+        });
+        
+    var selected_users = [];
+    var tier_sales;
+    var users = @json($all_users);
 
+    var users_data = $.map(users, function (obj) {
+        obj.id = obj.id || obj.text;
+        return obj;
+    });
+    $('#user_select').prepend('<option value="" selected></option>').select2({
+        placeholder: "Select User",
+        width: '100%',
+        data: users_data,
+    }).bind('change', function () {
+        var th = $(this);
+        var id = $(this).val();
+        var group = $(this).find(':selected').closest('optgroup').attr('label');
+        if (group == 'Admins') {
+            if (tier_sales == 1) {
+                th.val(null).trigger('change');
+                var error = 'Select sales related user!';
+                toastr.error(error, 'Error!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center'
+                });
+            }
+        }
+        if (group != 'Admins' && group != 'Sales'){
+            $('#user_commission').val(1.8)
+            $('#user_commission').attr('disabled', true)
+        } else {
+            $('#user_commission').val('');
+            $('#user_commission').attr('disabled', false)
+        }
+        var index = $.inArray(id, selected_users);
+        if (index !== -1) {
+            var error = 'User previously selected!';
+            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            $('#user_select').val(null).trigger('change');
+        }
+    });
+
+    var riders_permanents_data = {!! json_encode($riders_permanent) !!};
+    var selectHtml = '';
+    for (var i = 0; i < riders_permanents_data.length; i++) {
+        selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
+    }
+    $('#user_select').append(selectHtml);
+
+    $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
+        placeholder: "Select Sales Tier",
+        width: '100%'
+    }).bind('change', function () {
+        $('#user_select').attr('disabled', true);
+        $('#external_person_name').attr('disabled', true);
+        var type = $(this).find(":selected").attr('type');
+        var sales = $(this).find(":selected").attr('sales');
+        tier_sales = sales;
+        if (type == 1) {
+            $('#user_select').attr('disabled', false);
+        } else {
+            $('#external_person_name').attr('disabled', false);
+        }
+
+    });
+
+    var commission_max = $('#commission_max').val();
+    $('.commission').inputmask({
+        'alias': 'decimal',
+        'allowMinus': false,
+        'allowPlus': false,
+        'rightAlign': false,
+        'digits': 2,
+        'min': 0.00,
+        'max': commission_max,
+    });
+
+    var table_2 = $('#datatable_rate').DataTable({
+        dom: 'ltipr',
+        paging: false,
+        ordering: false,
+        sorting: false,
+        bInfo: false,
+        columns: [
+            {
+                orderable: false,
+                searchable: false,
+                name: 'serial_number',
+                class: 'align-middle serial_number',
+                targets: 1,
+                render: function (data, type, row) {
+                    return '';
+                }
+            },
+            {name: 'user_name', class: 'align-middle user_name'},
+            {name: 'tier', class: 'align-middle tier'},
+            {name: 'commission_percentage', class: 'align-middle commission_percentage'},
+            {name: 'action', class: 'align-middle action'}
+
+        ],
+        rowCallback: function (row, data, index) {
+            var info = table_2.page.info();
+
+            $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+        },
+    });
+
+    var row = 1;
+    var selected_commission = 0;
+
+    function add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission) {
+        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove"><i class="la la-close"></i></a>';
+        var tier = '<div><input type="hidden" name="tier_id[' + row + ']"  value="' + tier_id + '">' + tier_name + '</div>';
+        if (tier_type == 1) {
+            var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_id + '">' + user_name + '</div>';
+        } else {
+            var name = '<div><input type="hidden" name="user_id[' + row + ']"  value="' + user_name + '">' + user_name + '</div>';
+        }
+        var commission_percentage = '<div><input type="hidden" name="commission_percentage[' + row + ']"  value="' + commission + '">' + commission + '%</div>';
+        table_2.row.add([row, name, tier, commission_percentage, remove]).node().id = row;
+        table_2.draw(false);
+        if (tier_type == 1) {
+            selected_users.push(user_id);
+        }
+        $('#commission_add_button').attr('disabled', false);
+        $('#total_commission_value').html(selected_commission);
+        $('#total_commission').val(selected_commission);
+        $('#total_commission_value').val(selected_commission);
+
+        row++;
+    }
+
+    function roundToTwo(num) {
+        return +(Math.round(num + "e+2") + "e-2");
+    }
+    
+    var kam_count = 0;
+    $('#commission_add_button').on('click', function () {
+        var is_kam = $('#sales_tier_select').find(":selected").text();
+        var commission = parseFloat($('#user_commission').val());
+        var this_btn = $(this);
+
+        var flag = true;
+        var type = $('#sales_tier_select').find(":selected").attr('type');
+        if (!$('#sales_tier_select').valid()) {
+            flag = false;
+        }
+        if (type == 1) {
+            if (!$('#user_select').valid()) {
+                flag = false;
+            }
+        }
+        if (type == 2) {
+            if (!$('#external_person_name').valid()) {
+                flag = false;
+            }
+        }
+        if (!$('#user_commission').valid()) {
+            flag = false;
+        }       
+      
+        if (flag) {
+            if(is_kam == 'KAM' && kam_count > 0 ){
+                var kam_error = 'You Can Select One KAM Only!';
+                toastr.error(kam_error, 'Error!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center'
+                });
+            }else{
+                if (commission <= commission_max) {
+                    selected_commission = roundToTwo(selected_commission + commission);
+                    commission_max = commission_max - commission;
+                    this_btn.attr('disabled', true);
+                    var user_id = '';
+                    var user_name = '';
+                    var tier_id = '';
+                    var tier_name = '';
+                    var tier_type = '';
+                    tier_id = $('#sales_tier_select').val();
+                    tier_name = $('#sales_tier_select').find(":selected").text();
+                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                    if (tier_type == 1) {
+                        user_id = $('#user_select').val();
+                        user_name = $('#user_select').find(":selected").text();
+                    } else {
+                        user_name = $('#external_person_name').val();
+                    }
+                    if(is_kam == 'KAM'){
+                        kam_count+=1;
+                    }
+                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                    $('#sales_tier_select').val(null).trigger('change');
+                    $('#user_select').val(null).trigger('change');
+                    $('#user_select').attr('disabled', true);
+                    $('#external_person_name').val('');
+                    $('#external_person_name').attr('disabled', true);
+                    $('#user_commission').val('');
+
+                } else {
+                    var error = 'Selected Commission value exceeds!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            }
+       
+        }
+    });
+        $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
+            var id = $(this).parents('tr').attr('id');
+            //check if sale tier is KAM
+            var rowData = table_2.row($(this).parents('tr')).data();
+            var regex = /KAM/;
+
+            if (regex.test(rowData[2])) {
+                kam_count-=1;
+            } 
+            //
+            var user_id = $('input[name="user_id[' + id + ']"]').val();
+            if (user_id) {
+                var index = $.inArray(user_id, selected_users);
+                if (index !== -1) {
+                    selected_users.splice(index, 1);
+                }
+            }
+            var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
+            commission_max = roundToTwo(commission_max + commission);
+            selected_commission = roundToTwo(selected_commission - commission);
+            $('#total_commission_value').html(selected_commission);
+            $('#total_commission').val(selected_commission);
+            table_2.row($(this).parents('tr')).remove().draw();
+        });
+        $('.decimal').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 100000
+        });
+
+        $('.amount').inputmask({
+            'alias': 'decimal',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 2,
+            'min': 0.00,
+            'max': 1000000.00
+        });
+
+        $('.percent').inputmask({
+            'alias': 'numeric',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 500
+        });
+        $('.numeric').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 1000000
+        });
+        $('.dec-percent').inputmask("Regex", {
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
+        });
+
+         $('#ratesAdditionForm').submit(function (cz) {
+            if (table_2.data().count() === 0) {
+                toastr.error('Enter Atleast One Row', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                cz.preventDefault();
+            } else {
+                $('#ratesAdditionForm').submit()
+            }
+        });
 </script>
 
 @endsection

@@ -4404,70 +4404,7 @@
                                 </div>
                             @endif
 
-                            <div class="row justify-content-center mt-2" id="commission_div">
-                                <div class="form-group row">
-                                    <label class="col-md-4 label-control" for="commission">Total Commission</label>
-                                    <div class="col-md-8">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Total Commission" id="commission_max" name="commission_max" value="{{$commission_percentage}}" readonly>
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12">
-                                    <div id="add_user_commission_form" class="form mb-1 justify-content-center">
-                                        <div class="row justify-content-center">
-                                            <div class="col-2 form-group">
-                                                <select name="sales_tier" class="select2" id="sales_tier_select">
-                                                    @foreach($sales_tiers as $tier)
-                                                        <option value="{{ $tier->id }}" type="{{$tier->tier_type}}" sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <input type="text" id="external_person_name" name="external_person_name" class="form-control" placeholder="External Tier Person Name" disabled data-rule-required="true" data-msg-required="Person Name is required">
-                                            </div>
-                                            <div class="col-2 form-group">
-                                                <select name="user" class="select2" id="user_select" disabled>
-                                                </select>
-                                            </div>
-                                            <div class="col-3 form-group">
-                                                <div class="input-group form-group">
-                                                    <input type="text" id="user_commission" class="form-control commission" placeholder="User Commission" name="user_commission">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text">%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-1 form-group">
-                                                <button type="button" class="btn btn-primary" id="commission_add_button">Add</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                        <thead>
-                                        <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">S. No.</th>
-                                            <th class="border-primary border-darken-1">User Name</th>
-                                            <th class="border-primary border-darken-1">Tier</th>
-                                            <th class="border-primary border-darken-1">Commission Percentage</th>
-                                            <th class="border-primary border-darken-1"></th>
-                                        </tr>
-                                        </thead>
-                                        <tfoot>
-                                        <input type="hidden" value="0" name="total_commission" id="total_commission">
-                                        <input type="hidden" value="0" name="edit_commission" id="edit_commission">
-                                        <tr><th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th><th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th></tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
-
+                            
                             <div class="row mt-2 justify-content-center">
                                 <div class="col-5 form-group">
                                     <textarea name="rate_remarks" id="rate_remarks" class="form-control" placeholder="Rate Remarks..." rows="3"></textarea>
@@ -4487,7 +4424,28 @@
                                     @endif
 
                                     @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
-                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        {{-- <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button> --}}
+                                        <button id="duplicate_modal_btn" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                        <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
+                                    
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                    
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-success">Yes</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @endif
                                     @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
@@ -4505,8 +4463,95 @@
 
                         </form>
 
-                    </div>
-                </div>
+                        <form id="ratesAdditionForm" class="card-body card-dashboard"  action="{{route('admin.accounts.add_rate_commission_corporate_reimb',['shippers'=>$shipper->id])}}" method="post" novalidate>
+                            @csrf
+                            <input type="hidden" name="edit" value="edit">
+                            <div class="modal-body">
+                                <div class="col text-center">
+                                    <h1 id="shipper_ids_msg"></h1>
+                                    <div class="row justify-content-center mt-2" id="commission_div">
+                                        <div class="form-group row">
+                                            <label class="col-md-4 label-control" for="commission">Total Commission</label>
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="Total Commission"
+                                                           id="commission_max" name="commission_max"
+                                                           value="{{$commission_percentage}}" readonly>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+             
+                                        <div class="col-12">
+                                            <div id="add_user_commission_form" class="form mb-1 justify-content-center">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-2 form-group">
+                                                        <select name="sales_tier" class="select2" id="sales_tier_select">
+                                                            @foreach($sales_tiers as $tier)
+                                                                <option value="{{ $tier->id }}" type="{{$tier->tier_type}}"
+                                                                        sales="{{$tier->sales_status}}">{{ $tier->tier_name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-3 form-group">
+                                                        <input type="text" id="external_person_name" name="external_person_name"
+                                                               class="form-control" placeholder="External Tier Person Name"
+                                                               disabled >
+                                                    </div>
+                                                    <div class="col-2 form-group">
+                                                        <select name="user" class="select2" id="user_select"
+                                                                
+                                                                disabled>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-3 form-group">
+                                                        <div class="input-group form-group">
+                                                            <input type="text" id="user_commission"
+                                                                   class="form-control commission" placeholder="User Commission"
+                                                                   name="user_commission">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-1 form-group">
+                                                        <button type="button" class="btn btn-primary"
+                                                                id="commission_add_button">Add
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                                <thead>
+                                                <tr role="row" class="bg-primary white">
+                                                    <th class="border-primary border-darken-1">S. No.</th>
+                                                    <th class="border-primary border-darken-1">User Name</th>
+                                                    <th class="border-primary border-darken-1">Tier</th>
+                                                    <th class="border-primary border-darken-1">Commission Percentage</th>
+                                                    <th class="border-primary border-darken-1"></th>
+                                                </tr>
+                                                </thead>
+                                                <tfoot>
+                                                <input type="hidden" value="0" name="total_commission" id="total_commission">
+                                                <tr>
+                                                    <th colspan="3" style="text-align:right" rowspan="1">Total Commission:</th>
+                                                    <th rowspan="1" colspan="2"><span id="total_commission_value">0</span>%</th>
+                                                </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success" style="margin-right:680px;">Submit</button>
+                            </div>
+                        </form>
+                
             </div>
         </div>
 
@@ -4882,10 +4927,32 @@
         });
         $('#user_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select User",
-            width:'100%'
+            width:'100%',
+            data: users_data,
         }).bind('change', function () {
+            var th = $(this);
             var id = $(this).val();
 
+            if (id.indexOf('riders') !== -1) {
+                 id = id.replace(/\D/g, '');
+            }
+
+            var group = $(this).find(':selected').closest('optgroup').attr('label');
+            if(group == 'Admins'){
+                if(tier_sales == 1){
+                    th.val(null).trigger('change');
+                    var error = 'Select sales related user!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            }
+            
+            if (group != 'Admins' && group != 'Sales' && $('#user_select').val() != ""){
+                $('#user_commission').val(1.8)
+                $('#user_commission').attr('disabled', true)
+            } else {
+                $('#user_commission').val('');
+                $('#user_commission').attr('disabled', false)
+            }
             var index = $.inArray(id, selected_users);
             if (index !== -1) {
                 var error = 'User previously selected!';
@@ -4893,7 +4960,13 @@
                 $('#user_select').val(null).trigger('change');
             }
         });
-        $('#user_select').select2({data:users_data,placeholder:'Select User'});
+
+        var riders_permanents_data = {!! json_encode($riders_permanents) !!};
+        var selectHtml = '';
+        for (var i = 0; i < riders_permanents_data.length; i++) {
+            selectHtml += '<option value="' + riders_permanents_data[i].id + 'riders' +'">' + riders_permanents_data[i].name + '-' + riders_permanents_data[i].trax_id + '</option>';
+        }
+        $('#user_select').append(selectHtml);
 
         $('#sales_tier_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Tier",
@@ -5117,10 +5190,83 @@
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
         });
-        $('#accountApproveActiveSubmit').on('click',function(){
-            $('#approve').val(1);
-            // console.log('ddd');
+        // $('#accountApproveActiveSubmit').on('click',function(){
+        //     $('#approve').val(1);
+        // });
+
+        $('#duplicate_modal_btn').on('click', function(e){
+            e.preventDefault();
+            $('#duplicate_modal').modal('show');
+            var url = window.location.href;
+            var urlParts = url.split('/');
+            var id = urlParts[5];
+            if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.accounts.duplicate.info') !!}',
+                        data: {
+                            'shipper_id': id,
+                        }
+                    }).done(function(data) {
+                        if(data.status == 1){
+                            $('#duplicate_modal').modal('show');
+                            var baseURL = "{{ url('admin/accounts') }}";
+                            var html = '<table class="table table-bordered">';
+                            html += '<tr>' +
+                                '<td><strong>Phone</strong></td>' +
+                                '<td>' + data.info.phone + '</td>' +
+                                '<td>' + (data.info.shared_phone ?
+                                    generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>CNIC</strong></td>' +
+                                '<td>' + data.info.cnic + '</td>' +
+                                '<td>' + (data.info.shared_cnic ?
+                                    generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>IBAN</strong></td>' +
+                                '<td>' + data.info.iban + '</td>' +
+                                '<td>' + (data.info.shared_iban ?
+                                    generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>Name</strong></td>' +
+                                '<td>' + data.info.name + '</td>' +
+                                '<td>' + (data.info.shared_name ?
+                                    generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                '</tr>';
+                            html += '<tr>' +
+                                '<td><strong>NTN</strong></td>' +
+                                '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                '<td>' + (data.info.shared_ntn_no ?
+                                    generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                '</tr>';  
+                            html += '<tr>' +
+                                '<td><strong>Email</strong></td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
+                                    data.info.email : '') + '</td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                    generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                '</tr>';
+                            html += '</table>';
+
+                            function generateLinks(ids, baseURL, type) {
+                                var links = [];
+                                for (var i = 0; i < ids.length; i++) {
+                                    var url = baseURL + '/' + ids[i].trim() + '/view';
+                                    links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                }
+                                return links.join(', ');
+                            }
+
+                            $('#duplicate_modal .modal-body').html(html);
+                            $('#approve').val(1);
+                        }
+
+                    });
+                }
         });
+
         $('#accountApproveChangeSubmit').on('click',function(){
             $('#approve_change_rate_type').val(1);
         });
@@ -5313,7 +5459,6 @@
 
             });
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
             on_slab_count++;
         });
         //add more slabs insurance
@@ -5351,7 +5496,6 @@
         //Cash handling
         // cashChargesOvernight
         cashhandlingswitch.onchange = function () {
-            console.log(cashhandlingswitch);
             if(cashhandlingswitch.checked === true){
                 $('.cash-handling-div-overnight').find('input').prop('disabled',false);
                 $('.cash-handling-btn-overnight').find('button').prop('disabled',false);
@@ -5524,7 +5668,6 @@
             ol_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -5553,7 +5696,6 @@
             ol_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -5703,7 +5845,6 @@
             detain_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -5732,7 +5873,6 @@
             detain_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -5886,7 +6026,6 @@
             sameday_slab_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //add more slabs insurance
@@ -5915,7 +6054,6 @@
             sameday_ins_count++;
             masks();
             // $(this).parent().prev().find('div.slabs').append(htmdiv);
-            // console.log();
 
         });
         //Cash handling
@@ -6161,7 +6299,6 @@
                     storage_type_selected.push('{{$storage->storage_type_id}}');
                 @endforeach
                 @if(count($wms_packing_charges) > 0)
-                console.log('here')
                     @foreach($wms_packing_charges as $indx => $packing)
                     $('select[name="packing_type[{{$indx}}]"]').select2({
                         width:'100%',

@@ -48,7 +48,8 @@ class ShipperAccountController extends Controller
             $result = array_diff($users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_reason' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    $concern_user = User::where('id', $status)->first();
 
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
@@ -60,7 +61,14 @@ class ShipperAccountController extends Controller
                     NotificationsController::send(179, $disabled_shippers);
                     //via sms
                     NotificationsController::send(180, $disabled_shippers);
+
+                    //email for block_disable
+                    NotificationsController::send(229, $concern_user);
+                    //end
                 }
+
+
+
             }
         } 
         $active_users = User::where('status', 3)->where('reactivated_at', '<', $date)->pluck('id')->toArray();
@@ -71,9 +79,15 @@ class ShipperAccountController extends Controller
             $result = array_diff($active_users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_reason' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    $concern_user = User::where('id', $status)->first();
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
+
+                    
+                    //email for block_disable
+                    NotificationsController::send(229, $concern_user);
+                    //end
                 }
             }
         }

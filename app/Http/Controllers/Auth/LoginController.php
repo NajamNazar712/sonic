@@ -29,6 +29,7 @@ use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\Admin\Settings\GeneralSetting;
 
 
 class LoginController extends Controller
@@ -65,9 +66,10 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        
-        $background_image = BackgroundImage::where('background_image_screen_id', 2)->latest()->first();
-        if ($background_image) {
+        $background_image = [];
+        $background_images = BackgroundImage::where('background_image_screen_id', 2);
+        if ($background_images->exists()) {
+            $background_image = $background_images->first();
             $background_image['path'] = 'storage/' . $background_image->picture_path;
             $background_image['version'] = $background_image->version;
         } else {
@@ -376,6 +378,13 @@ class LoginController extends Controller
         }
 
         session(['mms_shippers' => $mms_shippers]);
+        $mms_excel_booking_shippers = array();
+        $setting = GeneralSetting::where('type', 'mms_excel_booking_setting')->select('description')->first();
+        if ($setting) {
+            $mms_excel_booking_shippers = array_map('intval',explode(',' , $setting->description));
+          
+        }
+        session(['mms_excel_booking_shippers' => $mms_excel_booking_shippers]);
 
         return redirect()->route('cod.welcome');
     }

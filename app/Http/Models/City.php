@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class City extends Model
 {
     protected $fillable = [
-        'name','city_code','hub','hub_id','zone_id','pickup','status','gc_area','attempt_tat','location_latitude','location_longitude','address','business_category_id','hub_location_latitude','hub_location_longitude','pickup_cut_off_time','permanent_disabled','iata_code'
+        'name','city_code','hub','hub_id','zone_id','pickup','status','gc_area','attempt_tat','location_latitude','location_longitude','address','business_category_id','hub_location_latitude','hub_location_longitude','pickup_cut_off_time','permanent_disabled','iata_code','booking_disable_status'
     ];
     public function hub(){
        return $this->belongsTo(self::class, 'hub_id');
@@ -32,6 +32,10 @@ class City extends Model
     public function admins(){
         return $this->hasMany('App\Http\Models\Admin\Admin');
     }
+
+    public function responsible_admins(){
+        return $this->hasMany('App\Http\Models\Admin\Admin','default_hub_id','id');
+    }
     public function disputes(){
         return $this->hasMany('App\Http\Models\Dispute');
     }
@@ -43,4 +47,8 @@ class City extends Model
     public function zone() {
        return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
     }
+    public function agentAssignHub() {
+        return $this->hasMany('App\Http\Models\RvAgentAssignHub');
+    }
+
 }

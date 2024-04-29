@@ -61,6 +61,7 @@
 													</span>
 												</div>
 												<input type="text" name="search_from"
+													   data-value="{{$from}}"
 													   class="form-control pickadate bg-primary border-primary white rounded-right"
 													   id="search_date_from" placeholder="Date (From)">
 											</div>
@@ -73,6 +74,7 @@
 													</span>
 												</div>
 												<input type="text" name="search_to"
+													   data-value="{{$to}}"
 													   class="form-control pickadate bg-primary border-primary white rounded-right"
 													   id="search_date_to" placeholder="Date (To)">
 											</div>
@@ -168,12 +170,15 @@
 										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductible</th>
+										<th class="border-primary border-darken-1">Ibft Charges</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
+										<th class="border-primary border-darken-1">Payment Cycle</th>
+                                        <th class="border-primary border-darken-1">Payment Cycle Days</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1">Paid / Reverted Datetime</th>
 										{{--										<th class="border-primary border-darken-1">Aging</th>--}}
@@ -541,12 +546,15 @@
                             head.push('Total WHT');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
+                            head.push('Ibft Charges');
 							head.push('Adjustment Charges');
                             head.push('Total Payable');
                             head.push('Bank');
                             head.push('Reference No.');
                             head.push('Done Datetime');
                             head.push('Company Bank');
+							head.push('Payment Cycle');
+                            head.push('Payment Cycle Days');
                             head.push('Status');
 							head.push('Paid / Reverted Datetime');
 							// head.push('Updated By');
@@ -572,12 +580,15 @@
                                 row.push(values.total_wht);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
+                                row.push(values.ibft_charges);
 								row.push(values.adjustment_charges);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
                                 row.push(values.reference_number);
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
+								row.push(values.payment_cycle);
+                                row.push(values.payment_cycle_days);
                                 row.push(values.status);
 								row.push(values.status_updated_at);
 								// row.push(values.updated_by);
@@ -778,6 +789,7 @@
                     processing: data_table_loader
                 },
 				serverSide: true,
+				deferLoading: 0,
 				ajax: {
 					url: '{{ route('admin.finance.done_payments.list') }}',
 					data: function (d) {
@@ -817,12 +829,15 @@
 					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
+					{data:'ibft_charges', name: 'done_payments.ibft_charges', class: 'align-middle text-center ibft_charges', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
+					{data:'payment_cycle_days', name: 'u.payment_cycle_days', class: 'align-middle text-center payment_cycle_days'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data:'paid_reverted_at', name: 'done_payments.status_updated_at', class: 'align-middle text-center paid_reverted_at'},
 					// {data:'aging', name: 'aging', class: 'align-middle text-center aging'},
@@ -854,6 +869,17 @@
                         '<option value="1">Paid</option>' +
                         '<option value="2">Reverted</option>' +
                         '</select>';
+					var payment_cycle_select =
+                        '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="1">Daily</option>' +
+                        '<option value="2">Weekly</option>' +
+                        '<option value="3">Monthly</option>' +
+                        '<option value="4">Twice A Week</option>' +
+                        '<option value="5">Thrice A Week</option>' +
+                        '<option value="6">Fortnite</option>' +
+
+                        '</select>';
+
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -870,6 +896,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }else if ($(header).is('.payment_cycle')) {
+                            $(payment_cycle_select).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -928,6 +959,16 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+					$("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
+
+                    });
+					
 					this.api().table().columns.adjust();
 				}
 			});

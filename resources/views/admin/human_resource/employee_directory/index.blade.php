@@ -122,6 +122,8 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
+                                    <th class="border-primary border-darken-1">CNIC Issue Date</th>
+                                    <th class="border-primary border-darken-1">CNIC Expiry Date</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Email</th>
@@ -131,6 +133,7 @@
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Sub Department</th>
+                                    <th class="border-primary border-darken-1">Employee Education</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">IBAN No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
@@ -1278,6 +1281,8 @@
                             head.push('City');
                             head.push('Area');
                             head.push('CNIC');
+                            head.push('CNIC Issue Date');
+                            head.push('CNIC Expiry Date');
                             head.push('Phone No.');
                             head.push('Official Phone Number');
                             head.push('Official Email');
@@ -1287,6 +1292,7 @@
                             head.push('Designation');
                             head.push('Department Name');
                             head.push('Sub Department Name');
+                            head.push('Employee Education');
                             head.push('Line Manager');
                             head.push('IBAN No.');
                             head.push('Zone Name');
@@ -1299,6 +1305,7 @@
                             head.push('Date of Birth');
                             head.push('Emergency Contact Person');
                             head.push('Emergency Contact Number');
+                            head.push('Mother Name');
                             head.push('Religion');
                             head.push('Marital Status');
                             head.push('Shift Timing');
@@ -1319,6 +1326,8 @@
                                 row.push(values.city);
                                 row.push(values.area);
                                 row.push(values.cnic);
+                                row.push(values.cnic_issue_date);
+                                row.push(values.cnic_expiry_date);
                                 row.push(values.phone_number);
                                 row.push(values.official_phone_number);
                                 row.push(values.official_email);
@@ -1327,7 +1336,8 @@
                                 row.push(values.incentive_amount);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
-                                row.push(values.sub_department_name);
+                                row.push(values.sub_department_name);                            
+                                row.push(values.education_name); 
                                 row.push(values.line_manager);
                                 row.push(values.iban);
                                 row.push(values.zone_name);
@@ -1340,6 +1350,7 @@
                                 row.push(values.date_of_birth);
                                 row.push(values.emergency_contact_person);
                                 row.push(values.emergency_contact);
+                                row.push(values.mother_name);
                                 row.push(values.religion);
                                 row.push(values.martial_status);
                                 row.push(values.shift);
@@ -1616,6 +1627,8 @@
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
+                    {data: 'cnic_issue_date', name: 'employees.cnic_issue_date', class: 'align-middle cnic_issue_date'},
+                    {data: 'cnic_expiry_date', name: 'employees.cnic_expiry_date', class: 'align-middle cnic_expiry_date'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'official_phone_number', name: 'employees.official_phone_number', class: 'align-middle official_phone_number'},
                     {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},
@@ -1625,6 +1638,7 @@
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'sub_department_name', name: 'employees.sub_department', class: 'align-middle sub_department_name'},
+                    {data: 'education_name', name: 'el.name', class: 'align-middle education_name'},
                     {data: 'line_manager', name: 'lm.name', class: 'align-middle line_manager'},
                     {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
                     {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},

@@ -13,7 +13,7 @@
     <div class="content-wrapper">
     	@if (isset($ticker))
 	    	<div class="marquee3k" data-speed="0.25" data-pausable="bool">
-				<span>{{ $ticker }}</span>
+				<span>{!! $ticker !!}</span>
 			</div>
 		@endif
 

@@ -242,6 +242,8 @@ class RiderManagementController extends Controller
             'rider_type_id' => $type,
             'shift_id' => 1,
             'incentive_amount' => $request->incentive_amount,
+            'allow_delivered_status' => ($request->has('allow_delivered_status') && $request->operation_rider_id == 2 ? 1 : 0)
+            
         ]);
         if ($rider) {
             $employee = new Employee();
@@ -336,7 +338,7 @@ class RiderManagementController extends Controller
         $rider->rider_main_category_id = $request->rider_main_category;
 
         $rider->operation_rider_id = $request->operation_rider_id;
-
+        $rider->allow_delivered_status =  ($request->has('allow_delivered_status') && $request->operation_rider_id == 2 ? 1 : 0);
         if ($request->has('special_rider_checkbox')) {
             $rider->special_rider = 1;
         } else {
@@ -1604,6 +1606,7 @@ class RiderManagementController extends Controller
                 $rider_remark = RiderRemark::find($id);
                 $response = new RiderRemarksResponse();
 
+                
 
                 if (isset($request->initial_response)) {
                     $rider_remark->updated_by = Auth::id();

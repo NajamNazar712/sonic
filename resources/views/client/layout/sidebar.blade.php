@@ -24,6 +24,11 @@
                                         @else
                                             <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                                         @endif
+                                        @if(session('mms_excel_booking_shippers') != null)
+                                            @if (in_array(session('user_id'), session('mms_excel_booking_shippers')))
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_mms') }}">MMS Excel Sheet</a></li>
+                                            @endif
+                                        @endif
                                     @endif
                                     @if(session('international_rates') == 1)
                                         <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>
@@ -85,7 +90,7 @@
             @if (session('user_type') == 1 || in_array(9, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-rotate-left"></i>Return</span></a>
                     <ul class="menu-content">
-                        <li><a class="menu-item" href="{{ route('cod.return.pending.index') }}">Confirmation Pending</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.return.pending.index') }}">Shipper Advise Requested</a></li>
                     </ul>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('cod.return.reattempt_history.index') }}">Re-Attempt Request</a></li>

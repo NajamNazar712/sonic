@@ -60,6 +60,10 @@ return [
             'driver' => 'session',
             'provider' => 'retails'
         ],
+        'agent' => [
+            'driver' => 'session',
+            'provider' => 'agents'
+        ],
     ],
 
     /*
@@ -99,6 +103,10 @@ return [
              'driver' => 'eloquent',
              'model' => App\Http\Models\Admin\Retail\RetailUser::class,
          ],
+         'agents' => [
+             'driver' => 'eloquent',
+             'model' => App\Http\Models\Admin\Admin::class,
+         ],
     ],
 
     /*
@@ -137,6 +145,11 @@ return [
 
         'retail' => [
             'provider' => 'retails',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+        'agent' => [
+            'provider' => 'agents',
             'table' => 'password_resets',
             'expire' => 60,
         ],

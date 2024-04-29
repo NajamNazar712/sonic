@@ -977,8 +977,8 @@
             $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
             $("input[name='phone'],input[name='phone2']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $("input[name='billing_person_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-            $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-            
+            $("input[name='ntn_no']").inputmask({'mask': "*******-*", 'clearIncomplete': true});
+
             
             var selected_rows = [];
             var table = $('#datatable').DataTable({

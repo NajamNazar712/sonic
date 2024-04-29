@@ -2,35 +2,37 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\Rider;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\SubstituteUserShipment;
-use App\Http\Models\Shipper\ReturnSheetShipments;
-use Cassandra\Session;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\DeliveryLocationMapping;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Shipment;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\RiderDelivery;
-use App\Http\Models\ShipmentReplacementParcelImage;
 use Auth;
-
-use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Cassandra\Session;
+use App\Http\Models\Rider;
+use App\RvAgentCallHistory;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\Admin\StatusRemark;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Shipper\ReturnSheetShipments;
+
+use App\Http\Models\Admin\DeliveryLocationMapping;
 use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use DB;
 
 class ShipperTrackingController extends Controller
 {
@@ -250,97 +252,114 @@ class ShipperTrackingController extends Controller
                         $details['order_information']['business_category'] = $shipment->business_category->name;
 
                         foreach ($shipment->shipment_journey as $journey) {
-                            if ($journey->verification) {
-                                $journey_details = array();
+                            if($journey->shipper_status_id != '67'){
+                                if ($journey->verification) {
+                                    $journey_details = array();
 
-                                $journey_details['date_time'] = $journey->created_at->toDateTimeString();
-                                $journey_details['status'] = $journey->shipment_status_shipper->name;
-                                if(in_array($journey->shipper_status_id, [1])){
-                                    if($shipment->booked_by == 1){
-                                        $journey_details['status'] .= ' (Main User)';
+                                    $journey_details['date_time'] = $journey->created_at->toDateTimeString();
+                                    if($journey->shipper_status_id == '68'){
+                                        $journey_details['status'] = "Shipment - Misrouted";
+                                    }else{
+                                        $journey_details['status'] = $journey->shipment_status_shipper->name;
                                     }
-                                    else if($shipment->booked_by == 2){
-                                        if($journey->reference_1_id != NULL){
-                                            $sub_user = SubstituteUser::find($journey->reference_1_id);
-                                            $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                    if(in_array($journey->shipper_status_id, [1])){
+                                        if($shipment->booked_by == 1){
+                                            $journey_details['status'] .= ' (Main User)';
                                         }
-                                        else{
-                                            $journey_details['status'] .= ' (Substitute User)';
-                                        }
-                                    }
-                                }
-                                if(in_array($journey->shipper_status_id, [52])){
-                                    if($journey->reference_1_id != NULL){
-                                        $sub_user = SubstituteUser::find($journey->reference_1_id);
-                                        if($sub_user){
-                                            $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
-                                        }else{
-                                            if($journey->user_id != null){
-                                                $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                        else if($shipment->booked_by == 2){
+                                            if($journey->reference_1_id != NULL){
+                                                $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                                $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                            }
+                                            else{
+                                                $journey_details['status'] .= ' (Substitute User)';
                                             }
                                         }
                                     }
-                                    else{
-                                        if($journey->user_id != null){
-                                            $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
-                                        }else{
-                                            $journey_details['status'] .= ' (Substitute User)';
+                                    if(in_array($journey->shipper_status_id, [52])){
+                                        if($journey->reference_1_id != NULL){
+                                            $sub_user = SubstituteUser::find($journey->reference_1_id);
+                                            if($sub_user){
+                                                $journey_details['status'] .= ' (' . $sub_user->name . ' - Substitute User)';
+                                            }else{
+                                                if($journey->user_id != null){
+                                                    $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                                }
+                                            }
+                                        }
+                                        else{
+                                            if($journey->user_id != null){
+                                                $journey_details['status'] .= ' (' . User::find($journey->user_id)->name . ' - Main User)';
+                                            }else{
+                                                $journey_details['status'] .= ' (Substitute User)';
+                                            }
                                         }
                                     }
-                                }
 
-                                if($journey->shipper_status_id == 25 && $journey->reference_1_id){
-                                    $return_note = ReturnNote::find($journey->reference_1_id);
-                                    if($return_note && $return_note->actual_date != null){
-                                        $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
-                                    }
-                                }
-
-                                if(in_array($journey->shipper_status_id, [1])){
-                                    $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
-                                    if($replacement_image->exists()){
-                                        $replacement_image = $replacement_image->first();
-                                        $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
-                                    }
-                                }
-                                if(in_array($journey->shipper_status_id, [30])){
-                                    $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',14);
-                                    if($replacement_image2->exists()){
-                                        $replacement_image2 = $replacement_image2->first();
-                                        if($replacement_image2->replacement_image != null){
-
-                                            $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                        $return_note = ReturnNote::find($journey->reference_1_id);
+                                        if($return_note && $return_note->actual_date != null){
+                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
                                         }
-
                                     }
-                                }
 
-                                $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                                    if(in_array($journey->shipper_status_id, [1])){
+                                        $replacement_image = ShipmentReplacementParcelImage::where('shipment_id',$journey->shipment_id);
+                                        if($replacement_image->exists()){
+                                            $replacement_image = $replacement_image->first();
+                                            $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_booked_image" data-link="' . asset(Storage::url($replacement_image->picture_path)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
+                                    }
+                                    if(in_array($journey->shipper_status_id, [30])){
+                                        $replacement_image2 = RiderDelivery::where('shipment_id',$journey->shipment_id)->where('rider_status_id',14);
+                                        if($replacement_image2->exists()){
+                                            $replacement_image2 = $replacement_image2->first();
+                                            if($replacement_image2->replacement_image != null){
 
-                                if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
-                                    $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
-                                }else{
-                                    $journey_details['status_remarks'] = '';
-                                }
-                                $received_or_refused_by = '';
+                                                $journey_details['status'] .= '  <button class="btn btn-sm btn-outline-info align-middle replacement_collected_image" data-link="' . asset(Storage::url($replacement_image2->replacement_image)).'" data-id="' . $journey->shipment_id . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                            }
 
-                                $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
-                                $shippers = explode(',', $shippers->text);
-                                $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+                                        }
+                                    }
 
-                                if(in_array($shipment->user_id,$special_dashboard_shippers))
-                                {
-                                    $receiver_details = ShipementReceiveDetails::where('tracking_number',$shipment->tracking_number)->first();
-                                    if($receiver_details)
+                                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                                    if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
+                                        $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                                    }else{
+                                        $journey_details['status_remarks'] = '';
+                                    }
+                                    $received_or_refused_by = '';
+
+                                    $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+                                    $shippers = explode(',', $shippers->text);
+                                    $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+
+                                    if(in_array($shipment->user_id,$special_dashboard_shippers))
                                     {
-                                        if($journey->received_or_refused_by){
-                                            $received_or_refused_by = $receiver_details->receiver_name;
+                                        $receiver_details = ShipementReceiveDetails::where('tracking_number',$shipment->tracking_number)->first();
+                                        if($receiver_details)
+                                        {
+                                            if($journey->received_or_refused_by){
+                                                $received_or_refused_by = $receiver_details->receiver_name;
+                                            }
+                                            if($journey->cnic){
+                                                $received_or_refused_by .= "|".$receiver_details->receiver_cnic;
+                                            }
+                                            if($journey->relation){
+                                                $received_or_refused_by .= "|".$receiver_details->receiver_relationship;
+                                            }
                                         }
-                                        if($journey->cnic){
-                                            $received_or_refused_by .= "|".$receiver_details->receiver_cnic;
-                                        }
-                                        if($journey->relation){
-                                            $received_or_refused_by .= "|".$receiver_details->receiver_relationship;
+                                        else{
+                                            if($journey->received_or_refused_by){
+                                                $received_or_refused_by = $journey->received_or_refused_by;
+                                            }
+                                            if($journey->cnic){
+                                                $received_or_refused_by .= "|".$journey->cnic;
+                                            }
+                                            if($journey->relation){
+                                                $received_or_refused_by .= "|".$journey->relation;
+                                            }
                                         }
                                     }
                                     else{
@@ -354,23 +373,11 @@ class ShipperTrackingController extends Controller
                                             $received_or_refused_by .= "|".$journey->relation;
                                         }
                                     }
-                                }
-                                else{
-                                    if($journey->received_or_refused_by){
-                                        $received_or_refused_by = $journey->received_or_refused_by;
-                                    }
-                                    if($journey->cnic){
-                                        $received_or_refused_by .= "|".$journey->cnic;
-                                    }
-                                    if($journey->relation){
-                                        $received_or_refused_by .= "|".$journey->relation;
-                                    }
-                                }
-                                $journey_details['received_or_refused_by'] = $received_or_refused_by;
+                                    $journey_details['received_or_refused_by'] = $received_or_refused_by;
 
-                                $details['tracking_history'][] = $journey_details;
+                                    $details['tracking_history'][] = $journey_details;
+                                }
                             }
-
                         }
 
                         $shipment_payment_journey = $shipment->shipment_payment_journey;
@@ -431,9 +438,67 @@ class ShipperTrackingController extends Controller
                                     $journey_details['user'] = '';
                                 }
 
-                                $details['pickup_history'][] = $journey_details;
+                                $details['pickup_history_v2'][] = $journey_details;
                             }
                         }
+
+                         //shipment_pickup_journey_v3 get direct table for temporary untile use both pms use v2 and v3
+
+                        $shipment_pickup_journey_v3 = DB::table('shipments_v3_pickup_journeys')->where('shipment_id',$shipment->id);
+
+                        if ($shipment_pickup_journey_v3->exists()) {
+
+                            $shipment_pickup_journey_v3 = $shipment_pickup_journey_v3->get();
+
+                            foreach ($shipment_pickup_journey_v3 as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+
+                                $v3_pickup_status = DB::table('v3_pickup_request_statuses')->where('id',$journey->status_id)->first();
+
+                                $journey_details['status'] = $v3_pickup_status->name;
+                                if($journey->reason_id != NULL){
+                                    $v3_pickup_request_reason = DB::table('v3_pickup_request_reasons')->where('id',$journey->reason_id)->first();
+                                    $journey_details['reason'] = $v3_pickup_request_reason->name;
+                                }
+                                else{
+                                    $journey_details['reason'] = '';
+                                }
+
+                                if ($journey->reference_1_id) {
+                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                    if ($journey->reference_2_id) {
+                                        if ($journey->status_id == 6) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= $rider->name;
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+
+                                    $journey_details['status'] .= ')';
+                                }
+
+                                // $admin = $journey->admin;
+                                $admin = DB::table('admins')->where('id',$journey->admin_id)->first();
+
+                                if ($admin) {
+                                    $journey_details['user'] = $admin->name;
+                                }
+                                else {
+                                    $journey_details['user'] = '';
+                                }
+
+                                $details['pickup_history_v3'][] = $journey_details;
+                            }
+                        }
+
 
 
                         $user_id = null;
@@ -446,8 +511,8 @@ class ShipperTrackingController extends Controller
                             $user_type = 3;
                             $substitute_user_id = Auth::id();
                         }
+                        ShipmentScanningJourneyController::add($shipment->id , 9, $user_type , null, $user_id, $substitute_user_id,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
-                        ShipmentScanningJourneyController::add($shipment->id, 9, $user_type, null, $user_id, $substitute_user_id);
 
                         $tracking['shipments'][$shipment->id] = $details;
                     }
@@ -724,8 +789,7 @@ class ShipperTrackingController extends Controller
                                 $user_type = 3;
                                 $substitute_user_id = Auth::id();
                             }
-
-                            ShipmentScanningJourneyController::add($shipment->id, 9, $user_type, null, $user_id, $substitute_user_id);
+                            ShipmentScanningJourneyController::add($shipment->id ,9,$user_type,null,$user_id,$substitute_user_id,NULL,NULL, session('latitude'), session('longitude'), NULL);
 
                             $tracking['shipments'][$shipment->id] = $details;
                         }
@@ -749,18 +813,26 @@ class ShipperTrackingController extends Controller
 
     public function call_status_history(Request $request)
     {
-        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
-        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
-        ->leftJoin('admins','admins.id','status_remarks.updated_by')
-        ->where('status_remarks.shipment_id',$request->shipment_id)
-
-        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
-        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
-        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
-        'shipment_status.name as status', 'admins.name as updated_by')
-        ->orderBy('status_remarks.updated_at','desc')->limit(10)->get();
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding' => function ($query) {
+            $query->select('id', 'name');
+        }, 'shipment.status_shipper' => function ($query) {
+            $query->select('id', 'name');
+        },  'updated_by'])->where('shipment_id', $request->shipment_id)->orderby('updated_at', 'desc')->get();
         
-        return $shipment;
+        if($data){
+            foreach ($data as $item) {
+                $mergedArray[] = [
+                    'data' => $item,
+                    'user_name' => $item->updated_by->name ?? '-',
+                ];
+            }
+            return  $mergedArray;
+        }
+        else{
+            return false;
+        }
+       
     }
 
 

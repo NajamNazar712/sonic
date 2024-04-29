@@ -25,6 +25,7 @@ use App\Http\Models\Admin\Module;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use App\Http\Models\BusinessCategory;
 
 class UserManagementController extends Controller
 {
@@ -242,7 +243,7 @@ class UserManagementController extends Controller
 
         if ($admin) {
             $admin->status = $request->status;
-
+            $admin->updated_by = Auth::id();
             $admin->save();
 
             $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
@@ -268,6 +269,19 @@ class UserManagementController extends Controller
         }
     }
 
+    // public function user_add_index()
+    // {
+    //     if (!in_array(session('role_id'), [1, 58])) {
+    //         $roles = AdminRole::with('department')->where('id', '!=', 1)->where('is_active', 1)->where('department_id', session('department_id'))->get();
+    //     } else {
+    //         $roles = AdminRole::with('department')->where('is_active', 1)->get();
+    //     }
+    //     $hubs = City::where('hub', 1)->get();
+    //     $shifts = EmployeeShift::where('status', 1)->get();
+    //     $designations = EmployeeDesignation::where('status', 1)->with('department')->get();
+    //     return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts, 'designations' => $designations]);
+    // }
+
     public function user_add_index()
     {
         if (!in_array(session('role_id'), [1, 58])) {
@@ -275,10 +289,11 @@ class UserManagementController extends Controller
         } else {
             $roles = AdminRole::with('department')->where('is_active', 1)->get();
         }
+        $categories = BusinessCategory::get();
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
         $designations = EmployeeDesignation::where('status', 1)->with('department')->get();
-        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts, 'designations' => $designations]);
+        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts, 'designations' => $designations, 'categories' => $categories]);
     }
 
     public function user_add_store(Request $request)
@@ -389,7 +404,7 @@ class UserManagementController extends Controller
     {
         $user_ids = explode(',', $request->id);
         foreach ($user_ids as $user_id) {
-
+            $update_user = false; 
             foreach ($request->input('hubs') as $hub_id) {
                 $admin_hub_exist = AdminHub::where('admin_id', $user_id)->where('hub_id', $hub_id)->first();
 
@@ -400,11 +415,36 @@ class UserManagementController extends Controller
                     $admin_hub->admin_id = $user_id;
 
                     $admin_hub->save();
+                    $update_user = true;
                 }
+            }
+            if($update_user){
+                $admin = Admin::find($user_id);
+                $admin->updated_by = Auth::id();
+                $admin->updated_at = Carbon::now();
+                $admin->save();
             }
         }
         return redirect()->back()->with(['status' => 1, 'success' => "Hubs has been Assigned successfully!"]);
     }
+
+    // public function user_update_index($id)
+    // {
+    //     if (!in_array(session('role_id'), [1, 58])) {
+    //         $roles = AdminRole::with('department')->where('is_active', 1)->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+    //     } else {
+    //         $roles = AdminRole::with('department')->where('is_active', 1)->get();
+    //     }
+    //     $hubs = City::where('hub', 1)->get();
+    //     $user = Admin::find($id);
+    //     $user_hubs = $user->hubs->pluck('hub_id')->toArray();
+    //     $shifts = EmployeeShift::where('status', 1)->get();
+    //     $designations = EmployeeDesignation::where('status', 1)->with('department')->get();
+
+    //     ActivityTrailController::createActivityTrailLog(Auth::id(), 231, 1);
+    //     return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts, 'designations' => $designations]);
+
+    // }
 
     public function user_update_index($id)
     {
@@ -413,14 +453,14 @@ class UserManagementController extends Controller
         } else {
             $roles = AdminRole::with('department')->where('is_active', 1)->get();
         }
+        $categories = BusinessCategory::get();
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
         $shifts = EmployeeShift::where('status', 1)->get();
         $designations = EmployeeDesignation::where('status', 1)->with('department')->get();
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 231, 1);
-        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts, 'designations' => $designations]);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts, 'designations' => $designations, 'categories' => $categories]);
 
     }
 
@@ -495,6 +535,7 @@ class UserManagementController extends Controller
         }
         $admin->default_hub_id = $request->input('default_hub');
         $admin->updated_by = Auth::id();
+        $admin->updated_at = Carbon::now();
         $admin->shift_id = $request->input('shift_id');
 
         if ($request->filled('pin')) {
@@ -607,9 +648,11 @@ class UserManagementController extends Controller
 
             if ($admin_role->is_active == 1) {
                 $admin_role->is_active = 0;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             } else {
                 $admin_role->is_active = 1;
+                $admin_role->updated_by = Auth::id();
                 $admin_role->save();
             }
 
@@ -726,8 +769,6 @@ class UserManagementController extends Controller
 
     public function role_permission_list(Request $request)
     {
-
-        // dd($request->all());
         $permissions = array();
         $module_id = $request->module_id;
         if (isset($request->permissions)) {
@@ -766,14 +807,12 @@ class UserManagementController extends Controller
         $data['admin_perm'] = $admin_perm;
         $data['permissions_data'] = $permissions_data;
 
-        // dd($data);
 
         return $data;
     }
 
     public function module_permission_update_store(Request $request)
     {
-        // dd($request->all());
 
         $module_id = $request->update_module_id;
         $curr_module_perm_id = explode(",", $request->update_module_permission);
@@ -785,11 +824,9 @@ class UserManagementController extends Controller
         // admins id who has selected module and permission access
         $all_admin_role_ids = AdminRoleModulePermission::whereIn('permission_id', $curr_module_perm_id)->distinct('role_id')->pluck('role_id')->toArray();
 
-        // dd($module_all_permissions , $curr_module_perm_id, $all_admin_role_ids);
 
         $role_ids = array();
 
-        // dd($admin_ids);
 
         foreach ($permissions as $key => $value) {
 
@@ -995,6 +1032,7 @@ class UserManagementController extends Controller
             $admin = Admin::find($admin_id);
             if ($admin) {
                 $admin->phone_number = $phone;
+                $admin->updated_by = Auth::id();
                 $admin->save();
 
                 $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
@@ -1085,7 +1123,6 @@ class UserManagementController extends Controller
 
         $roles = explode(',', $request->ids);
         $permission_ids = $request->permission_ids;
-        // dd($request->all());
         foreach ($roles as $role) {
             if ($request->has('permission_ids')) {
 
