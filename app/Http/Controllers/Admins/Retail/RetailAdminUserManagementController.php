@@ -297,54 +297,36 @@ class RetailAdminUserManagementController extends Controller
             $franchise->updated_by = Auth::id();
             $franchise->save();
 
-            // $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
-            // if ($retail_franchise_product_percentage){
-            //     foreach ($retail_franchise_product_percentage as $record) {
-            //         $index = array_search($record->id, $request->record_ids);
-            //         if ($index !== false) {
-            //             $record->update([
-            //                 'retail_shipping_mode_id' => $request->retail_shipping_mode_id[$index],
-            //                 'product_percentage' => $request->product_percentage[$index],
-            //                 'updated_by' => $admin->id,
-            //             ]);
-            //         }
-            //     }
-            // }
-
             $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
-            if ($retail_franchise_product_percentage) {
-                $updatedIds = [];
-                foreach ($retail_franchise_product_percentage as $record) {
-                    $index = null;
-                    if ($request->has('record_ids') && is_array($request->record_ids)) {
-                        $index = array_search($record->id, $request->record_ids);
-                    }
-                    if ($index !== false && isset($request->retail_shipping_mode_id[$index]) && isset($request->product_percentage[$index])) {
-                        $record->update([
-                            'retail_shipping_mode_id' => $request->retail_shipping_mode_id[$index],
-                            'product_percentage' => $request->product_percentage[$index],
-                            'updated_by' => $admin->id,
-                        ]);
-                        $updatedIds[] = $record->id;
-                    }
-                }
+            if ($retail_franchise_product_percentage->isNotEmpty()) {
+                RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
+                $new_retail_shipping_mode_ids = $retail_franchise_product_percentage->pluck('retail_shipping_mode_id')->toArray();
+                $new_product_percentages = $retail_franchise_product_percentage->pluck('product_percentage')->toArray();
+            } else {
+                $new_retail_shipping_mode_ids = $request->input('retail_shipping_mode_id');
+                $new_product_percentages = $request->input('product_percentage');
 
-                // Check if there are new records to add
-                if ($request->has('retail_shipping_mode_id') && $request->has('product_percentage')) {
-                    foreach ($request->retail_shipping_mode_id as $index => $shippingModeId) {
-                        if (!in_array($request->record_ids[$index], $updatedIds)) {
-                            $newRecord = new RetailFranchiseProductPercentage();
-                            $newRecord->franchise_id = $franchise->id;
-                            $newRecord->retail_shipping_mode_id = $shippingModeId;
-                            $newRecord->product_percentage = $request->product_percentage[$index];
-                            $newRecord->created_by = $admin->id;
-                            $newRecord->save();
-                        }
-                    }
-                }
+                dump(
+                    $new_retail_shipping_mode_ids,
+                    $new_product_percentages
+                );
+
+            }
+            foreach ($new_retail_shipping_mode_ids as $key => $retail_shipping_mode_id) {
+
+                // dump(
+                //     $new_retail_shipping_mode_ids,
+                //     $new_product_percentages
+                // );
+
+                die;
+                $retail_franchise_product_percentage = new RetailFranchiseProductPercentage();
+                $retail_franchise_product_percentage->franchise_id = $franchise->id;
+                $retail_franchise_product_percentage->retail_shipping_mode_id = $retail_shipping_mode_id;
+                $retail_franchise_product_percentage->product_percentage = $new_product_percentages[$key];
+                $retail_franchise_product_percentage->save();
             }
 
-            
             $franchise_retail_product_attachment_edit = RetailFranchiseProductAttachment::where('franchise_id', $franchise->id)->first();
             if ($request->hasFile('attachment_1')) {
                 if ($franchise_retail_product_attachment_edit) {
