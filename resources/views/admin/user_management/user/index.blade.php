@@ -51,6 +51,32 @@
 					</div>
 				</div>
 
+				
+				<form id="lost_hub_user_shipment_form" action="{{ route('admin.user_management.lost_hub_user_shipment') }}" method="POST">
+					@csrf
+					<div class="modal fade text-left" id="lost_hub_user_shipment" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="lost_hub_user_shipment" aria-hidden="true">
+						<div class="modal-dialog modal-md" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h4 class="modal-title" id="">User Lost Shipemnt Hub</h4>
+								</div>
+								<div class="modal-body">
+									<input type="hidden" id="lost_hub_user_shipment_shipper_id">
+									<select name="select_lost_hub_user_shipment[]" id="select_lost_hub_user_shipment" class="form-control select2" multiple>
+										@foreach($hubs as $hub)
+											<option value="{{ $hub->id }}" > {{ $hub->name }} </option>
+										@endforeach
+									</select>
+								</div>
+								<div class="modal-footer">
+									<button type="submit" class="btn btn-success" id="lost_hub_user_shipment_submit">Submit</button>
+									<button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				
 
 
 				<div class="card">
@@ -164,20 +190,26 @@
 
             var selectedValue = [];
 
-$('#hub_select').select2().on('change', function() {
-    selectedValue = $('#hub_select').val();
-    $('#assign_hubs_msg_error').addClass('d-none')
+			$('#hub_select').select2().on('change', function() {
+				selectedValue = $('#hub_select').val();
+				$('#assign_hubs_msg_error').addClass('d-none')
 
-});
+			});
 
-$('#selectAllBtn').on('click', function() {
-    $('#hub_select').val($('#hub_select option').map(function() {
-        return $(this).val();
-    })).trigger('change');
+			$('#selectAllBtn').on('click', function() {
+				$('#hub_select').val($('#hub_select option').map(function() {
+					return $(this).val();
+				})).trigger('change');
 
-});
+			});
 
-$('#deSelectAllBtn').on('click', function() {
+			$('#select_lost_hub_user_shipment').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true,
+            });
+
+			$('#deSelectAllBtn').on('click', function() {
                 $('#hub_select').val([]).trigger('change');
             });
 
@@ -641,33 +673,37 @@ $('#deSelectAllBtn').on('click', function() {
 			
             $("#assign_hub_form").validate({
 
-errorClass: "danger",
-errorPlacement: function(error, element) {
-    error.addClass('w-100').appendTo(element.parent('.form-group'));
-},
-submitHandler: function(form) {
-    if (selectedValue.length > 0) {
+				errorClass: "danger",
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					if (selectedValue.length > 0) {
 
-        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-        swal({
-            title: 'Please Wait!',
-            text: 'Multiple Hub has been assigned!',
-            icon: 'info',
-            buttons: false,
-            closeOnClickOutside: false,
-            closeOnEsc: false
-        });
+						swal({
+							title: 'Please Wait!',
+							text: 'Multiple Hub has been assigned!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
 
-        form.submit();
+						form.submit();
 
-    } else {
-        $('#assign_hubs_msg_error').removeClass('d-none');
-    }
-}
-});
+					} else {
+						$('#assign_hubs_msg_error').removeClass('d-none');
+					}
+				}
+			});
 
-			
+			$(document).on('click','.lost_hub_user_shipment',function(){
+				var id = $(this).data('target-id');
+				$('#lost_hub_user_shipment').modal('show');
+			});
+
 
 		});
 	</script>
