@@ -3766,9 +3766,11 @@ class AdminFinanceController extends Controller
 
     }
 
-    static public function add_payment($shipment_id, $type)
+    static public function add_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
         $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
         $crs = false;
         if ($setting->exists()) {
@@ -5857,9 +5859,11 @@ class AdminFinanceController extends Controller
         return ['total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable];
     }
 
-    static public function done_payment($shipment_id, $type)
+    static public function done_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
         if ($shipment->shipment_type == 1) {
             if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
@@ -5974,7 +5978,13 @@ class AdminFinanceController extends Controller
         $company_banks = BanksList::where('affiliate', 1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
 
-        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status]);
+
+        $date = date('Y-m-d');
+        $from = date('Y-m-d',strtotime($date.'-6 month'));
+        $to = $date;
+
+
+        return view('admin.finance.done_payments')->with(['banks' => $banks, 'company_banks' => $company_banks, 'shippers' => $shippers, 'case_nature_channels' => $case_nature_channels, 'shipper_status' => $shipper_status,'from'=>$from,'to'=>$to]);
     }
 
     public function done_payments_list(Request $request)

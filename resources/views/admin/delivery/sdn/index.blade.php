@@ -870,63 +870,63 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    {
-                        text: 'Mark Closed',
-                        className: 'btn btn-primary closed',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Mark as Closed!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url:"{{route('admin.delivery.sdn.bulk_closed')}}",
-                                            method:'POST',
-                                            data:{
-                                                'sdn_ids':selected_rowsx,
-                                                '_token':'{{ csrf_token() }}'
-                                            }
-                                        }).done(function (data) {
-                                            if (data.status == 1) {
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
-                                                            });
-                                                        } else {
-                                                            toastr.error(data.error, 'Error!', {
-                                                                positionClass: 'toast-top-center',
-                                                                containerId: 'toast-top-center'
-                                                            });
-                                                        }
-                                                        selected_rowsx = [];
+                    // {
+                    //     text: 'Mark Closed',
+                    //     className: 'btn btn-primary closed',
+                    //     enabled: false,
+                    //     action: function (e, dt, node, config) {
+                    //         swal({
+                    //                 title: 'Are You Sure?',
+                    //                 text: 'Select Yes to Mark as Closed!',
+                    //                 icon: 'warning',
+                    //                 buttons: {
+                    //                     cancel: {
+                    //                         text: 'No',
+                    //                         value: null,
+                    //                         visible: true,
+                    //                         closeModal: true,
+                    //                     },
+                    //                     confirm: {
+                    //                         text: 'Yes',
+                    //                         value: true,
+                    //                         visible: true,
+                    //                         closeModal: true
+                    //                     }
+                    //                 },
+                    //                 closeOnClickOutside: false,
+                    //                 closeOnEsc: false,
+                    //                 dangerMode: true
+                    //             }).then(function (confirm) {
+                    //                 if (confirm) {
+                    //                     $.ajax({
+                    //                         url:"{{route('admin.delivery.sdn.bulk_closed')}}",
+                    //                         method:'POST',
+                    //                         data:{
+                    //                             'sdn_ids':selected_rowsx,
+                    //                             '_token':'{{ csrf_token() }}'
+                    //                         }
+                    //                     }).done(function (data) {
+                    //                         if (data.status == 1) {
+                    //                                         toastr.success(data.success, 'Success!', {
+                    //                                             positionClass: 'toast-bottom-center',
+                    //                                             containerId: 'toast-bottom-center'
+                    //                                         });
+                    //                                     } else {
+                    //                                         toastr.error(data.error, 'Error!', {
+                    //                                             positionClass: 'toast-top-center',
+                    //                                             containerId: 'toast-top-center'
+                    //                                         });
+                    //                                     }
+                    //                                     selected_rowsx = [];
 
-                                                        table.rows().deselect();
-                                                        table.draw(true);
-                                                        table.button('.closed').disable();
-                                        });
-                                    }
-                                });
-                        }
-                    },
+                    //                                     table.rows().deselect();
+                    //                                     table.draw(true);
+                    //                                     table.button('.closed').disable();
+                    //                     });
+                    //                 }
+                    //             });
+                    //     }
+                    // },
 
                     //--------------------------------------
 

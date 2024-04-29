@@ -1,9 +1,11 @@
 <?php
 
+use App\CronDonePayment;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Models\Shipment;
 use Illuminate\Database\Seeder;
+use \App\ShipmentsArchieve;
 
 class CreatePaymentsForMissingShipmentsSeeder extends Seeder
 {
@@ -14,72 +16,36 @@ class CreatePaymentsForMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $shipment_ids = [
-            34695727,
-            34699052,
-            34687136,
-            34568946,
-            34695606,
-            34687301,
-            34687571,
-            34687862,
-            34698901,
-            34687386,
-            34695813,
-            34711381,
-            33854837,
-            33854996,
-            33855042,
-            33867086,
-            34691942,
-            34670401,
-            34670629,
-            34670632,
-            34687197,
-            34687413,
-            34687875,
-            34691307,
-            34693043,
-            34693227,
-            34688566,
-            34688695,
-            34693514,
-            34652254,
-            34687440,
-            34688923,
-            34689488,
-            34691295,
-            34936111,
-            34688271,
-            34690322,
-            34692370,
-            34690409,
-            34685669,
-            34691353,
-            33818008,
-            34689071,
-            34689150,
-        ];
-        
+        $tracking_number = CronDonePayment::where('status',1)->pluck('tracking_number')->toArray();
+        $shipment_ids = Shipment::whereIn('tracking_number',$tracking_number)->select('id')->pluck('id')->toArray();
+        if(count($shipment_ids) == 0){
+            $shipment_ids = ShipmentsArchieve::whereIn('tracking_number',$tracking_number)->select('id')->pluck('id')->toArray();
+        }
         foreach ($shipment_ids as $shipment_id){
             $shipment = Shipment::find($shipment_id);
+            if(empty($shipment)){
+                $shipment = ShipmentsArchieve::find($shipment_id);
+            }
             if($shipment){
                 if (in_array($shipment->shipper_status_id, [14, 16, 30, 31, 36, 37])) {
 
                     if ($shipment->booking_type_id == 2) {
-                        ShipmentChargesController::replacement($shipment_id);
+                        ShipmentChargesController::replacement($shipment_id,$shipment);
                     } else if ($shipment->booking_type_id == 3) {
-                        ShipmentChargesController::try_and_buy($shipment_id);
+                        ShipmentChargesController::try_and_buy($shipment_id,$shipment);
                     }
 
                     if ($shipment->booking_type_id != 4) {
-                        AdminFinanceController::add_payment($shipment_id, 0);
+                        AdminFinanceController::add_payment($shipment_id, 0,$shipment);
                     } else {
-                        AdminFinanceController::done_payment($shipment_id, 0);
+                        AdminFinanceController::done_payment($shipment_id, 0,$shipment);
                     }
 
                 }
             }
+        }
+        if(count($tracking_number) > 0){
+            CronDonePayment::whereIn('tracking_number',$tracking_number)->update(['status'=>0]);
         }
     }
 }
