@@ -83,7 +83,7 @@ class LoginController extends Controller
     }
 
 
-    public function showLeadWordPressLoginForm($id)
+    public function showLeadWordPressLoginForm($id, $token)
     {
         $background_image = [];
         $background_images = BackgroundImage::where('background_image_screen_id', 2);
@@ -98,7 +98,12 @@ class LoginController extends Controller
 
         $lead = Lead::find($id);
 
-        return view('client.auth.lead_wordpress_register')->with(['lead' => $lead , 'background_image' => $background_image]);
+        if(isset($lead) && $token == $lead->activation_code){
+            return view('client.auth.lead_wordpress_register')->with(['lead' => $lead , 'background_image' => $background_image]);
+        }else{
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
     }
 
     protected function attemptLogin(Request $request)

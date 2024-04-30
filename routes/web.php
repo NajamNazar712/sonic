@@ -52,7 +52,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
     
     //Wordpress Register Via Leads (Trax.pk)
-    Route::get('/register/{id}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
+    Route::get('/register/{id}/{token}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
 
     Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');

@@ -13,6 +13,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Runner;
 use App\Jobs\ProcessOTPSMS;
 use App\Mail\Notifications;
+use Illuminate\Support\Str;
 use App\Http\Models\Dispute;
 use App\Http\Models\Invoice;
 use Illuminate\Http\Request;
@@ -99,6 +100,7 @@ use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\NotificationSettingShipper;
+use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\OvernightOverlandReportData;
@@ -120,10 +122,9 @@ use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Excel_reports\MonthAverageDestination;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\Admin\ShipperVerificationPinCode as AdminShipperVerificationPinCode;
 
 class NotificationsController extends Controller
 {
@@ -11032,7 +11033,35 @@ class NotificationsController extends Controller
                     
                     
                
-                } 
+                } else if ($id == 230){
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+                    $lead_ids = $reference_1_id;
+                    $tokens = $reference_2_id;
+                    
+                    foreach($lead_ids as $key => $lead_id) {
+                        $lead = Lead::find($lead_id);
+                        
+                        $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
+                        $link = '<a href="' . $route . '">Click here to sign up</a>';
+                        
+                        if (strpos($body, '[Link]') !== FALSE) {
+                            $body = str_replace('[Link]', $link, $body);
+                        }
+                        if (strpos($body, '[Company Name]') !== FALSE) {
+                            $body = str_replace('[Company Name]', $lead->company, $body);
+                        }
+
+                        if (strpos($body, '[Full Name]') !== FALSE) {
+                            $body = str_replace('[Full Name]', $lead->contact_person, $body);
+                        }
+
+                        if (strpos($subject, '[Company Name]') !== FALSE) {
+                            $subject = str_replace('[Company Name]', $lead->company, $subject);
+                        }
+                        self::email($subject, $body, $lead->email_address);
+                    }
+                }
             }
         }
     }

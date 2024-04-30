@@ -2,17 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\LeadTaggingController;
-use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use App\Http\Models\City;
+use Illuminate\Support\Str;
+use Illuminate\Console\Command;
+use App\Http\Models\ServiceList;
+use Illuminate\Support\Facades\Log;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\LeadReference;
-use App\Http\Models\City;
-use App\Http\Models\ServiceList;
-use Carbon\Carbon;
-use GuzzleHttp\Client;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\LeadTaggingController;
 
 class WebsiteLead extends Command
 {
@@ -51,11 +52,10 @@ class WebsiteLead extends Command
         if($environment == 'production'){
             $base_uri = 'https://trax.pk/wp-json/tl/v1/';
         }
-//        elseif ($environment == 'staging'){
-//            $base_uri = 'https://trax.pk/api/';
-//        }
+        elseif ($environment == 'staging'){
+            $base_uri = 'https://trax.pk/api/';
+        }
         else{
-
             $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
@@ -67,11 +67,12 @@ class WebsiteLead extends Command
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
         $new_leads = array();
+        $token_added = array();
         $leads_added = array();
 
         if($response->status == 0){
             $leads = $response->leads;
-            foreach ($leads as $lead) {
+            foreach ($leads as $key => $lead) {
 
                 if($lead->data){
 
@@ -99,6 +100,8 @@ class WebsiteLead extends Command
                         continue;
                     }
 
+                    $token = Str::random(8);
+
                     $new_lead = new Lead();
                     $new_lead->contact_person = $lead->data->contact_person;
                     $new_lead->city_id = $city_id;
@@ -110,8 +113,9 @@ class WebsiteLead extends Command
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
-                    $new_lead->company_name = $lead->data->company_name;
+                    $new_lead->company = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
+                    $new_lead->activation_code = $token;
 
                     $new_lead->save();
 
@@ -121,25 +125,30 @@ class WebsiteLead extends Command
                     $lead_log->status_id = 1;
                     $lead_log->updated_by = 7;
                     $lead_log->save();
-                    $leads_added[] = $lead->id;
+                    $leads_added[] = $new_lead->id;
+                    $token_added[$key] = $token;
+
                 }
 
             }
         }
 
-        if(count($leads_added) > 0){
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-            $client->delete('leads', [
-                'form_params' => [
-                    "token" => 'TraxOnlinePvtLtdAYWD',
-                    "ids" => $leads_added
-                ]
-            ]);
-        }
+        // if(count($leads_added) > 0){
+        //     $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+        //     $client->delete('leads', [
+        //         'form_params' => [
+        //             "token" => 'TraxOnlinePvtLtdAYWD',
+        //             "ids" => $leads_added
+        //         ]
+        //     ]);
+        // }
 
-        if(count($new_leads) > 0){
-            NotificationsController::send(203, $new_leads, Carbon::today());
-        }
+        // if(count($new_leads) > 0){
+            // NotificationsController::send(203, $new_leads, Carbon::today());
+            NotificationsController::send(230, $leads_added, $token_added);
+
+        // }
+
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
     }
