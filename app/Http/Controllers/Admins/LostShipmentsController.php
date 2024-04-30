@@ -997,7 +997,7 @@ class LostShipmentsController extends Controller
                   ->where('shipment_id', $shipment_id) ;
         
             if(isset($request->updated_at)){
-                $query->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($request->updated_at) - 10)) 
+                $query->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($request->updated_at))) 
                 ->where('updated_at', '<=', $request->updated_at); 
             }
         
