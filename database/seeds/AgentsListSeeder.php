@@ -28,7 +28,7 @@ class AgentsListSeeder extends Seeder
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Agents > Agents List', 'url'=>'admin.settings.agents_list.index', 'permission_id' => 951),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile > Reason Validation > Agents List', 'url'=>'admin.settings.agents_list.index', 'permission_id' => 951),
         ));
     }
 }
