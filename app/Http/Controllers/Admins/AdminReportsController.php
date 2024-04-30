@@ -14269,7 +14269,9 @@ class AdminReportsController extends Controller
             'spt.admin_id as sales_person_id',
             'sales_person.name as sales_person_name',
             'stt.kam as stt_kam_id',
-            'kam.name as stt_kam_name'
+            'kam.name as stt_kam_name',
+            'scu.user_id as scu_kam_id',
+            'scun.name as scu_kam_name'
             
         ];
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -14292,6 +14294,17 @@ class AdminReportsController extends Controller
             })
             
             ->leftJoin('admins as kam', 'kam.id','stt.kam')
+            ->leftjoin('sales_commissions as sc', 'sc.shipper_id', '=', 'u.id')
+            ->leftjoin('sales_commission_users as scu', function($join){
+                $join->on('scu.sales_commission_id', '=','sc.id')
+                ->where(
+                    'scu.id',
+                    '=',
+                    DB::raw('(select max(id) from sales_commission_users where sales_commission_users.tier_id = 3)')
+
+                );
+            })
+            ->leftjoin('admins as scun', 'scun.id', '=', 'scu.user_id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -14505,6 +14518,13 @@ class AdminReportsController extends Controller
         if($search_sale_person =  $request->get('search_sale_person')) {
             $shipments->where('spt.admin_id', $search_sale_person);
         }
+ 
+        if ($search_kam = $request->get('search_kam')) {
+            $shipments->where(function($query) use ($search_kam) {
+                $query->where('stt.kam', $search_kam)
+                      ->orWhere('scu.user_id', $search_kam);
+            });
+        }
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -14615,6 +14635,13 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
+            })
+            ->editColumn('kam', function ($shipments) {
+                if($shipments->stt_kam_id == null) {
+                    return $shipments->scu_kam_name;
+                } else {
+                    return $shipments->stt_kam_name;
+                }
             });
       
 
@@ -14677,6 +14704,8 @@ class AdminReportsController extends Controller
                 $rowArray['aging'] = ($days == 0) ? "-" : $days;
                 $days = Carbon::now()->diffInDays($rowArray['last_status_date']);
                 $rowArray['aging_last_status'] = ($days == 0) ? "-" : $days;
+
+                $rowArray['kam'] = $rowArray['stt_kam_id'] != null ?  $rowArray['stt_kam_name'] : $rowArray['scu_kam_name'];
         
                 if (isset($rowArray['crm_request_id'])) {
                     $rowArray['crm_id_padded'] = str_pad($rowArray['crm_request_id'], 6, '0', STR_PAD_LEFT);

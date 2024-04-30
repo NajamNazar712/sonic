@@ -202,6 +202,7 @@
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Sales Person</th>
+                        <th class="border-primary border-darken-1">KAM</th>
                         <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">First Attempt Date</th>
@@ -644,6 +645,7 @@
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no', text:'Account No.', value:'account_no',download:true},
                     {data: 'shipper', name: 'u.name', as:'shipper', class: 'align-middle shipper', text:'Shipper',value:'shipper',download:true},
                     {data: 'sales_person_name', name: 'sales_person.name', as:'sales_person_name', class: 'align-middle sales_person_name', text:'Sales Person',value:'sales_person_name',download:true},
+                    {data: 'kam', name: 'kam', as:'kam', class: 'align-middle kam', text:'KAM',value:'kam',download:true},
                     {data: 'sub_segment', name: 'scs.name', as:'sub_segment', class: 'align-middle sub_segment',text:'Sub Segment', value:'sub_segment',download:true},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name',text:'Consignee Name', value:'name',download:true},
                     {data: 'first_attempt_date', name: 'sjfa.created_at', as:'first_attempt_date', class: 'align-middle first_attempt_date',text:'First Attempt Date',value:'first_attempt_date',download:true},
