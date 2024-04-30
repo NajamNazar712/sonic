@@ -15,10 +15,26 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
+                            <div class="row mt-3 mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_barcode_type" id="search_barcode_type" class="form-control select2">
+                                            @foreach($types as $type)
+                                                <option value="{{ $type->id }}">{{ $type->barcode_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
+                    
                             @include('admin.inc.messages')
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
+                                    <th  class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Barcode No#</th>
                                     <th class="border-primary border-darken-1">Barcode.</th>
@@ -329,14 +345,17 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+            $('#search_barcode_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Barcode Type',
+                width:'100%',
+                allowClear:true
+            });
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                
-                @if (session('role_id') == 1 || count(array_intersect([981], session('permissions'))) !== 0)
-
                 buttons: [
+                @if (session('role_id') == 1 || count(array_intersect([981], session('permissions'))) !== 0)
                     {
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
@@ -348,22 +367,84 @@
                          
                         }
                     },
-                    {
-                        text: '<i class="la la-print"></i> Print',
-                        className: 'btn btn-primary print'
-                    },
-                    'reset'
-                ],
-                @else
-                buttons: [
-                    {
-                        text: '<i class="la la-print"></i> Print',
-                        className: 'btn btn-primary print'
-                    },
-                    'reset'
-                ],
                 @endif
+                    {
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            table.button(1).disable();
+                            print(selected_rows);
+                            table.rows().deselect();
+                            selected_rows = [];
+                        }
+                    },
+
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action: function (e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function (index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.print').enable();
+                                }
+                            });
+
+
+                        }
+                    },
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function (e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function (index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.print').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    'reset'
+                ],
                 scrollX: true, scrollY: '500px',
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -374,12 +455,28 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.barcode_generator.list') }}',
+                    headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                    data: function (d) {
+                        d.search_barcode_type = $('#search_barcode_type').val();
+                    }
                     
                 },
                 rowId: 'id',
                 order: [[4, 'desc']],
                 columns: [
-                
+                    
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        class: 'text-center align-middle select p-1',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -400,8 +497,8 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).addClass('select-checkbox');
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -416,6 +513,61 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
+
+             $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.print').enable();
+                }
+                else {
+                    table.button('.print').disable();
+                }
+            });
+
+
+
+            function print(selected_rows) {
+                $.ajax({
+                        url: '{!! route('admin.barcode_generator.print_barcodes') !!}',
+                        method: 'POST',
+                        data: {
+                            'ids[]': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                        })
+                        .done(function (data) {
+
+                            var tab = window.open('', '_blank');
+
+                            if (!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                    });
+                            } else {
+                                    tab.document.write(data);
+                                    tab.document.close();
+                                    tab.focus();
+                            }
+                });
+            }
 
                $("#add_form").validate({
                             errorClass: "danger",

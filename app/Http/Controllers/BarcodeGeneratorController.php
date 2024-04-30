@@ -34,10 +34,14 @@ class BarcodeGeneratorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function list()
+    public function list(Request $request)
     {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 981);
-            $data = BarcodeGenerator::leftJoin('barcode_types as bt', 'bt.id','barcode_generators.barcode_type_id')->select(['barcode_generators.*','bt.barcode_name']);
+            $data = BarcodeGenerator::leftJoin('barcode_types as bt', 'bt.id','barcode_generators.barcode_type_id')->select(['barcode_generators.*','bt.barcode_name'])->orderby('barcode_generators.id', 'desc');
+
+            if($barcode_type = $request->get('search_barcode_type')) {
+                $data =  $data->where('barcode_generators.barcode_type_id', $barcode_type);
+            }
 
             $datatable = Datatables::of($data)
             ->addColumn('barcode', function ($data) {
@@ -82,7 +86,7 @@ class BarcodeGeneratorController extends Controller
      */
     public function print_barcodes(Request $request)
     {
-        
+        $ids = $request->ids;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '<!doctype html>
@@ -120,8 +124,8 @@ class BarcodeGeneratorController extends Controller
 
         $barcodes = '';
 
-        foreach ($barcodes as $barcode) {
-            $record = BarcodeGenerator::find($barcode);
+        foreach ($ids as $id) {
+            $record = BarcodeGenerator::find($id);
 
             $barcodes .= '
                 <div class="text-center pwrapper p-1">

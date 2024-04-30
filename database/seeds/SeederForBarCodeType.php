@@ -13,7 +13,7 @@ class SeederForBarCodeType extends Seeder
     {
         DB::table('barcode_types')->truncate();
         DB::table('barcode_types')->insert(array(
-            array('id' => 1,'barcode_name' => 'Logistics Booking'),
+            array('id' => 1,'barcode_name' => 'Canvas Bag'),
         ));
     }
 }
