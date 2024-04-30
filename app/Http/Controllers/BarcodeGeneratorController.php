@@ -36,7 +36,6 @@ class BarcodeGeneratorController extends Controller
      */
     public function list()
     {
-        if(session('role_id') == 1 || in_array(981, session('permissions')) ){
             ActivityTrailController::createActivityTrailLog(Auth::id(), 981);
             $data = BarcodeGenerator::leftJoin('barcode_types as bt', 'bt.id','barcode_generators.barcode_type_id')->select(['barcode_generators.*','bt.barcode_name']);
 
@@ -48,11 +47,6 @@ class BarcodeGeneratorController extends Controller
                 return $html;
             });
             return $datatable->make(true);
-        }else{
-
-            
-        }
-        
     }
 
     /**

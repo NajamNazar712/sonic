@@ -334,7 +334,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 
-                @if (session('role_id') == 1 || count(array_intersect([982], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([981], session('permissions'))) !== 0)
 
                 buttons: [
                     {
@@ -348,11 +348,18 @@
                          
                         }
                     },
-                
+                    {
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print'
+                    },
                     'reset'
                 ],
                 @else
                 buttons: [
+                    {
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print'
+                    },
                     'reset'
                 ],
                 @endif
@@ -404,26 +411,12 @@
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
-
-                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                        //     $(td).appendTo($(search));
-                        // } else {
-                        //     var current = $(input).appendTo($(search)).on('change', function () {
-                        //         column.search($(this).val(), false, false, true).draw();
-                        //     }).wrap(td).after(icon);
-
-                        //     if (column.search()) {
-                        //         current.val(column.search());
-                        //     }
-                        // }
                     });
 
                     this.api().table().columns.adjust();
                 }
-
-               
-
             });
+
                $("#add_form").validate({
                             errorClass: "danger",
                             successClass: 'success',

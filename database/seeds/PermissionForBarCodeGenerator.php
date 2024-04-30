@@ -16,9 +16,9 @@ class PermissionForBarCodeGenerator extends Seeder
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert([
-            ['id' => 980, 'name' => 'Barcode Generator - Index', 'module_id' => 33],
-            ['id' => 981, 'name' => 'Barcode Generator - List', 'module_id' => 33],
-            ['id' => 982, 'name' => 'Barcode Generator - Create', 'module_id' => 33],
+            ['id' => 980, 'name' => 'Barcode Generator - List', 'module_id' => 33],
+            ['id' => 981, 'name' => 'Barcode Generator - Create', 'module_id' => 33],
+            
         ]);
 
         // if new screen or excel
