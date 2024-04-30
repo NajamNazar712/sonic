@@ -24,7 +24,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [];
+        $shipmentId = [34765978,34749674,34735683,34715191,34766064,34735846,34735107,34733669,34729209,34713659,34712703,34701378,34680021,34656644,34596999,34570400,34708125,34666844,34663418,34654551,34644290,34605866,34595605,34587925,34586309,34572306,34559379,34556914,34555066,34508354,34482996,34745352,34710003,34695139,34681841];
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
@@ -74,6 +74,8 @@ class JourneyMissingEntrySeeder extends Seeder
                     }
                     $pending_payment_shipment = new PendingPaymentShipment();
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                    $pending_payment_shipment->created_at = $shipment->created_at;
+                    $pending_payment_shipment->updated_at = $shipment->created_at;
                     $pending_payment_shipment->shipment_id = $shipment->id;
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;

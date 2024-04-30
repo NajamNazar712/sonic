@@ -18,7 +18,7 @@
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="select_statement_sdn" id="select_statement_sdn" disabled class="form-control select2" data-rule-required="true" data-msg-required="SDN is required">
+                                <select name="select_statement_sdn" id="select_statement_sdn" disabled class="form-control select2">
                                     @foreach($sdns as $sdn)
                                         <option value="{{$sdn->id}}">{{str_pad($sdn->id, 6, '0', STR_PAD_LEFT)}}</option>
                                     @endforeach
