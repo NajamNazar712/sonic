@@ -14394,7 +14394,8 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal', 'ssjal.shipment_scanning_journey_id', '=', 'ssj.id')
             ->leftJoin('shipment_scanning_journey_area_logs as ssjal_hss', 'ssjal_hss.shipment_scanning_journey_id', '=', 'ssj_hss.id')
-            ->leftJoin('city_areas as ca_scanning', 'ssjal.area_id', '=', 'ca_scanning.id')
+            ->leftJoin('admins as new_admin', 'new_admin.id', '=', 'ssj.admin_id')        
+            ->leftJoin('city_areas as ca_scanning', 'new_admin.area_id', '=', 'ca_scanning.id')
             ->select($select)
             ->groupBy('shipments.id');
             
