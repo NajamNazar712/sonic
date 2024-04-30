@@ -74,6 +74,8 @@ class JourneyMissingEntrySeeder extends Seeder
                     }
                     $pending_payment_shipment = new PendingPaymentShipment();
                     $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                    $pending_payment_shipment->created_at = $shipment->created_at;
+                    $pending_payment_shipment->updated_at = $shipment->created_at;
                     $pending_payment_shipment->shipment_id = $shipment->id;
                     $pending_payment_shipment->type = 0;
                     $pending_payment_shipment->amount = $shipment->amount;
