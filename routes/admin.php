@@ -1642,6 +1642,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
             Route::post('excel_store', 'Admins\AdminFinanceController@change_shipment_weight_excel_store')->name('excel_store');
             Route::post('calculate_amount', 'Admins\AdminFinanceController@change_shipment_weight_calculate_amount')->name('calculate_amount');
+            Route::post('view_excel_store', 'Admins\AdminFinanceController@view_change_shipment_weight_excel_store')->name('view_excel_store');
         });
 
         Route::prefix('add_shipment_adjustment')->name('add_shipment_adjustment.')->group(function () {
