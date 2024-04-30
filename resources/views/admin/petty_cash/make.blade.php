@@ -547,16 +547,17 @@
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
 
-            var result = true;
+            
             $.validator.addMethod("reference_no",
                 function(value, element) {
+                    var result = true;
                     $.ajax({
                         type: "POST",
-                        async: true,
+                        async: false,
                         url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
                         data: {reference: value,'_token': '{!! csrf_token() !!}'},
                         success: function (data) {
-                            if(data === 'true'){
+                            if(data == 'true'){
                                 result = false;
                             }else{
                                 result = true;
@@ -565,7 +566,7 @@
                     });
                     return result;
                 },
-                "Statement Reference Number already exists."
+                "Reference Number already exists in Draft or Statement."
             );
 
             $('body').on('select2:select','.account_head .head_select',function () {
