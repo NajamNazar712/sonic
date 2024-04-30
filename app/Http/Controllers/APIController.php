@@ -887,20 +887,22 @@ class APIController extends Controller
                 $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
                 $order_id = $request->input('order_id');
                 $prefix_matched = false;
+
                 foreach ($shipment_pre_book as $prefix) {
                     $length = strlen($prefix);
-                    $check_order_id = str_split($order_id, $length);
-                    if ($prefix == $check_order_id[0]) {
+                    $check_order_id = substr($order_id, 0, $length);
+                    if ($prefix == $check_order_id) {
                         $prefix_matched = true;
-                        if (!array_key_exists(1, $check_order_id)) {
+                        $remaining_order_id = substr($order_id, $length);
+                        if (empty($remaining_order_id)) {
                             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                         }
                         break;
-                    } else {
-                        if (!$prefix_matched) {
-                            return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-                        }
                     }
+                }
+                // If none of the prefixes matched
+                if (!$prefix_matched) {
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                 }
             } 
             else {
