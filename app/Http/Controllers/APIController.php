@@ -896,6 +896,10 @@ class APIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
                         }
                         break;
+                    } else {
+                        if (!$prefix_matched) {
+                            return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                        }
                     }
                 }
             } 
