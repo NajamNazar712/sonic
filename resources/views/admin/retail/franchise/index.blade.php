@@ -853,18 +853,14 @@
                 }
             });
 
-
-
-
-
-
             $("#edit_franchise_form").submit(function(event) {
                 event.preventDefault();
-                var gst_commission = $('#commission_percentage').val();
-                var withholding_tax_percentage = $('#withholding_tax_percentage').val();
-                if (!gst_commission || !withholding_tax_percentage){
-                    return;
-                }
+                // var gst_commission = $('#commission_percentage').val();
+                // var withholding_tax_percentage = $('#withholding_tax_percentage').val();
+                // if (!gst_commission || !withholding_tax_percentage){
+                //     return;
+                // }
+                // alert(1);
                 var retailShippingIdsEdit = [];
                 var productPercentagesEdit = [];
                 $("#editTableBody").find("tr").each(function() {
@@ -873,19 +869,10 @@
                     retailShippingIdsEdit.push(selectedOptionEdit);
                     productPercentagesEdit.push(productPercentageEdit);
                 });
-                // Convert arrays to JSON strings
-                var retailShippingIdsEditJSON = JSON.stringify(retailShippingIdsEdit);
-                var productPercentagesEditJSON = JSON.stringify(productPercentagesEdit);
-                // Append JSON strings to hidden input fields
-                $("#edit_franchise_form").append("<input type='hidden' name='retail_shipping_mode_id' value='" + retailShippingIdsEditJSON + "'>");
-                $("#edit_franchise_form").append("<input type='hidden' name='product_percentage' value='" + productPercentagesEditJSON + "'>");
-                // Submit the form
-                $("#edit_franchise_form").submit();
+                $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIdsEdit) + "'>");
+                $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentagesEdit) + "'>");
+                this.submit();
             });
-
-
-
-
 
             $(".modal_close_btn").click(function() {
                 resetModal();
