@@ -59,7 +59,6 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">S. No</th>
-                                        <th class="border-primary border-darken-1">Lead ID</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
@@ -107,7 +106,6 @@
                                         {{-- <th class="border-primary border-darken-1">Referral Code</th> --}}
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
-                                        <th class="border-primary border-darken-1">Expected Average Shipments</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -1002,6 +1000,8 @@ function checkboxStatus() {
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
+									// console.log(index);	
+									// console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1066,7 +1066,6 @@ function checkboxStatus() {
                         head = [];
 
                         head.push('S.No');
-                        head.push('Lead ID');
                         head.push('Account ID');
                         head.push('Account Type');
                         head.push('Company Name');
@@ -1114,13 +1113,11 @@ function checkboxStatus() {
                         //head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
-                        head.push('Expected Average Shipments');
                         $.each(result.data, function(index, values) {
                             row = [];
 
 
                             row.push(index + 1);
-                            row.push(values.lead_id);
                             row.push(values.id);
                             row.push(values.account_type);
                             row.push(values.name);
@@ -1168,7 +1165,6 @@ function checkboxStatus() {
                             //row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
-                            row.push(values.expected_average_shipments);
                             body.push(row);
                         });
                     },
@@ -1741,7 +1737,6 @@ function checkboxStatus() {
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'lead_id_link', name: 'users.lead_id', class:'align-middle lead_id_link'},
                 {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
@@ -1789,7 +1784,6 @@ function checkboxStatus() {
                 //{data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
-                {data: 'expected_average_shipments', name: 'users.average_shipments', class: 'align-middle expected_average_shipments', orderable: true, searchable: true},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -2759,6 +2753,7 @@ function checkboxStatus() {
             placeholder: 'Select Payment Cycle'
         }).on('change', function () {
             $('#msg_limit_days').addClass('d-none')
+           
         });
 
         $( "#set_territory" ).validate({
@@ -3045,11 +3040,11 @@ function checkboxStatus() {
             submitHandler: function (form) {
                 var formData = $(form).serializeArray();
                 var fortnite = formData[3]['value'].split(',');
-                var monthly = formData[5]['value'];
+                var monthly = formData[6]['value'];
                 var selected_days = [];
 
-                if (formData[6] && formData[6]['value']) {
-                    var splitValues = formData[6]['value'].split(',');
+                if (formData[7] && formData[7]['value']) {
+                    var splitValues = formData[7]['value'].split(',');
                     if (splitValues.length > 0) {
                         selected_days = splitValues;
                     }
@@ -3065,10 +3060,6 @@ function checkboxStatus() {
                 };
                 fortnite = fortnite.length;
                 selected_days = selected_days.length;
-
-                //for prod checking
-                console.log(selected_days);
-
                 if ((formData[2]['value'] == '4' && selected_days === 2) ||
                     (formData[2]['value'] == '5' && selected_days === 3) ||
                     (formData[2]['value'] == '2' && selected_days === 1) || 
@@ -3076,7 +3067,7 @@ function checkboxStatus() {
                     (formData[2]['value'] == '1') ||
                     (formData[2]['value'] == '3' && (monthly !== "nonem"))) {
                         swal(swalConfig);
-                        form.submit();
+                        form.submit();   
                 } 
                 else {
                     if(formData[2]['value'] == '4'){
@@ -3205,6 +3196,7 @@ function checkboxStatus() {
                                     '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
 
                         $.each(data.details, function (index,value) {
+                            // console.log(value,value.admin);
                                 var serial = index + 1;
                                 var status = '';
                                 if(value['status'] == 1){
@@ -3316,6 +3308,12 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             selectedValues = [];
             $('#payment_cycle_msg').text('')
             var id = $(this).val();
+
+
+            var option = $('<option></option>').attr('value', 1).text(1 + " Days");
+            $("#fornite_2").empty().append(option);
+
+
             if (id == 4 || id == 5 || id == 2) {
                 $("#checkboxContainer").removeClass("d-none");
                 $('#fornite').addClass('d-none')
@@ -3379,7 +3377,6 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
             $('#total_commission').val(0).trigger('change');
             $('#total_commission_value').text('0');
             $('#datatable_rate').DataTable().clear().draw();
-            kam_count = 0;
         });
         
     var selected_users = [];
@@ -3517,10 +3514,8 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
     function roundToTwo(num) {
         return +(Math.round(num + "e+2") + "e-2");
     }
-    
-    var kam_count = 0;
+
     $('#commission_add_button').on('click', function () {
-        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -3541,66 +3536,50 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }       
-      
+        }
+
         if (flag) {
-            if(is_kam == 'KAM' && kam_count > 0 ){
-                var kam_error = 'You Can Select One KAM Only!';
-                toastr.error(kam_error, 'Error!', {
+       
+
+            if (commission <= commission_max) {
+                selected_commission = roundToTwo(selected_commission + commission);
+                commission_max = commission_max - commission;
+                this_btn.attr('disabled', true);
+                var user_id = '';
+                var user_name = '';
+                var tier_id = '';
+                var tier_name = '';
+                var tier_type = '';
+                tier_id = $('#sales_tier_select').val();
+                tier_name = $('#sales_tier_select').find(":selected").text();
+                tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                if (tier_type == 1) {
+                    user_id = $('#user_select').val();
+                    user_name = $('#user_select').find(":selected").text();
+                } else {
+                    user_name = $('#external_person_name').val();
+                }
+
+                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                $('#sales_tier_select').val(null).trigger('change');
+                $('#user_select').val(null).trigger('change');
+                $('#user_select').attr('disabled', true);
+                $('#external_person_name').val('');
+                $('#external_person_name').attr('disabled', true);
+                $('#user_commission').val('');
+
+            } else {
+                var error = 'Selected Commission value exceeds!';
+                toastr.error(error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
-            }else{
-                if (commission <= commission_max) {
-                    selected_commission = roundToTwo(selected_commission + commission);
-                    commission_max = commission_max - commission;
-                    this_btn.attr('disabled', true);
-                    var user_id = '';
-                    var user_name = '';
-                    var tier_id = '';
-                    var tier_name = '';
-                    var tier_type = '';
-                    tier_id = $('#sales_tier_select').val();
-                    tier_name = $('#sales_tier_select').find(":selected").text();
-                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                    if (tier_type == 1) {
-                        user_id = $('#user_select').val();
-                        user_name = $('#user_select').find(":selected").text();
-                    } else {
-                        user_name = $('#external_person_name').val();
-                    }
-                    if(is_kam == 'KAM'){
-                        kam_count+=1;
-                    }
-                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                    $('#sales_tier_select').val(null).trigger('change');
-                    $('#user_select').val(null).trigger('change');
-                    $('#user_select').attr('disabled', true);
-                    $('#external_person_name').val('');
-                    $('#external_person_name').attr('disabled', true);
-                    $('#user_commission').val('');
-
-                } else {
-                    var error = 'Selected Commission value exceeds!';
-                    toastr.error(error, 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
-                }
             }
-       
         }
     });
         $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
             var id = $(this).parents('tr').attr('id');
-            //check if sale tier is KAM
-            var rowData = table_2.row($(this).parents('tr')).data();
-            var regex = /KAM/;
 
-            if (regex.test(rowData[2])) {
-                kam_count-=1;
-            } 
-            //
             var user_id = $('input[name="user_id[' + id + ']"]').val();
             if (user_id) {
                 var index = $.inArray(user_id, selected_users);

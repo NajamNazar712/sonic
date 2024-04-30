@@ -185,9 +185,12 @@ class AdminPettyCashController extends Controller
     {
         $reference = $request->reference;
         if (PettyCashStatement::where('reference_no', $reference)->exists()) {
-            return "true";
+            return 'true';
         } else {
-            return "false";
+            if(PettyCashStatementDraft::where('reference_no', $reference)->exists() ) {
+                return 'true'; 
+            }
+            return 'false';
         }
     }
 
