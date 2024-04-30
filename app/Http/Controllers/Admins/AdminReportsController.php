@@ -12812,6 +12812,8 @@ class AdminReportsController extends Controller
                     ->editColumn('action', function($rv_report) {
                         if ($rv_report['action'] == "") { 
                             return '-';
+                        }elseif($rv_report['action'] == 'Re-Attempt') {
+                            return 'Return';
                         }
                         else {
                             return $rv_report['action'];
