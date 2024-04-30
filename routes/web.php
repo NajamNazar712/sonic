@@ -24,6 +24,9 @@ Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
 
+Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+
+
 
 Auth::routes();
 
@@ -47,6 +50,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('rate/daily_visit', 'Shippers\ShipperDashboardController@rate_daily_visit')->name('rate_daily_visit');
 
     Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
+    
+    //Wordpress Register Via Leads (Trax.pk)
+    Route::get('/register/{id}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
+
     Route::post('/login', 'Auth\LoginController@login')->name('login.submit');
     //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
     //    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');

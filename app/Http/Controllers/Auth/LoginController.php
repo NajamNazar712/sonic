@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Admins\GlobalSettingsController;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\InternationalUsersInformation;
-use App\Http\Models\ProjectArrivalShipper;
-use App\Http\Models\RateStatus;
-use App\Http\Models\ShipmentPrebook;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Shipper\UserOtpVerification;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Models\RateStatus;
 use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\SubstituteUserPermission;
-use App\Http\Models\PackagingCharge;
-use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\NpsSurvey;
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\ShipmentPrebook;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Models\NpsShipperRatting;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\NpsShipperSkipSurvey;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\ProjectArrivalShipper;
+
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\InternationalUsersInformation;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Controllers\Admins\GlobalSettingsController;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 
 class LoginController extends Controller
@@ -79,6 +80,25 @@ class LoginController extends Controller
         }
 
         return view('client.auth.login')->with(['background_image' => $background_image]);
+    }
+
+
+    public function showLeadWordPressLoginForm($id)
+    {
+        $background_image = [];
+        $background_images = BackgroundImage::where('background_image_screen_id', 2);
+        if ($background_images->exists()) {
+            $background_image = $background_images->first();
+            $background_image['path'] = 'storage/' . $background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        } else {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+        }
+
+        $lead = Lead::find($id);
+
+        return view('client.auth.lead_wordpress_register')->with(['lead' => $lead , 'background_image' => $background_image]);
     }
 
     protected function attemptLogin(Request $request)
