@@ -4550,7 +4550,7 @@ class AdminReportsController extends Controller
             if ($export) {
                 $shipments = array();
             }
-            $four_month_back = date('Y-m-d 00:00:00', strtotime($from . '-4 months'));
+            $four_month_back = date('Y-m-d 00:00:00', strtotime($from . '-12 months'));
             foreach ($hubs as $hub) {
                 foreach ($types as $type) {
                     $rows = DB::table('shipments as s');
@@ -4701,7 +4701,7 @@ class AdminReportsController extends Controller
                         });
                     }
 
-                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
+                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id)->whereBetween('s.created_at', [$four_month_back, $from]);
 
                     if ($mode) {
                         $rows = $rows->where('s.shipping_mode_id', '=', $mode);
