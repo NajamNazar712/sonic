@@ -12753,7 +12753,7 @@ class AdminReportsController extends Controller
         $rv_report = RvAgentCallHistory::join('shipments', 'rv_agent_call_histories.shipment_id','shipments.id')
         ->join('rv_shipment_assign_agents', 'rv_shipment_assign_agents.id', 'rv_agent_call_histories.rv_shipment_assign_agent_id')
         ->leftjoin('rv_shipment_assign_agent_details',function($join){
-            $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=' ,'rv_shipment_assign_agents.id');
+            $join->on('rv_shipment_assign_agent_details.rv_shipment_assign_agent_id', '=' ,'rv_shipment_assign_agents.id')
             ->whereRaw('DATE(rv_shipment_assign_agent_details.created_at) = DATE(rv_agent_call_histories.created_at)');
         })
         ->leftjoin('users', 'shipments.user_id', 'users.id')
