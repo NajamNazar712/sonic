@@ -488,7 +488,7 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-        if(!PendingPayment::check_negative_payable($user_id)){
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
@@ -1507,7 +1507,7 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
 
-        if(!PendingPayment::check_negative_payable($user_id)){
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
@@ -8591,7 +8591,7 @@ class APIController extends Controller
         $user_id = $request->user_id;
         $flag = null;
 
-        if(!PendingPayment::check_negative_payable($user_id)){
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
             return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
         }
 
