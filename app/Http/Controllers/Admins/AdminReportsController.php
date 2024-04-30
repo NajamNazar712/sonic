@@ -4701,7 +4701,7 @@ class AdminReportsController extends Controller
                         });
                     }
 
-                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id)->whereBetween('s.created_at', [$four_month_back, $from]);
+                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
 
                     if ($mode) {
                         $rows = $rows->where('s.shipping_mode_id', '=', $mode);
