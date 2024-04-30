@@ -24,14 +24,14 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [34765978,34749674,34735683,34715191,34766064,34735846,34735107,34733669,34729209,34713659,34712703,34701378,34680021,34656644,34596999,34570400,34708125,34666844,34663418,34654551,34644290,34605866,34595605,34587925,34586309,34572306,34559379,34556914,34555066,34508354,34482996,34745352,34710003,34695139,34681841];
+        $shipmentId = [36947386,36926584];
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
                 if($shipment->shipper_status_id === 5)
                 {
-                    $shipment->created_at = $shipment->created_at;
-                    $shipment->updated_at = $shipment->created_at;
+                    $shipment->created_at = $shipment->updated_at;
+                    $shipment->updated_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
                     $shipment->save();
@@ -92,8 +92,8 @@ class JourneyMissingEntrySeeder extends Seeder
 
                     $shipment_journey->shipment_id = $shipment->id;
                     $shipment_journey->verification = $verification;
-                    $shipment_journey->created_at = $shipment->created_at;
-                    $shipment_journey->updated_at = $shipment->created_at;
+                    $shipment_journey->created_at = $shipment->updated_at;
+                    $shipment_journey->updated_at = $shipment->updated_at;
                     $shipment_journey->shipper_status_id = $shipment->shipper_status_id;
                     $shipment_journey->consignee_status_id = $shipment->consignee_status_id;
                     $shipment_journey->status_reason_id = null;
