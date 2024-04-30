@@ -4550,7 +4550,7 @@ class AdminReportsController extends Controller
             if ($export) {
                 $shipments = array();
             }
-            $four_month_back = date('Y-m-d 00:00:00', strtotime($from . '-13 months'));
+            $four_month_back = date('Y-m-d 00:00:00', strtotime($from . '-4 months'));
             foreach ($hubs as $hub) {
                 foreach ($types as $type) {
                     $rows = DB::table('shipments as s');
