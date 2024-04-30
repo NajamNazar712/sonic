@@ -100,13 +100,19 @@ class WebsiteLead extends Command
                     }
 
                     $new_lead = new Lead();
-                    $new_lead->contact_person = $lead->data->full_name;
+                    $new_lead->contact_person = $lead->data->contact_person;
                     $new_lead->city_id = $city_id;
                     $new_lead->phone_number = $lead->data->phone_number;
                     $new_lead->email_address = $lead->data->email;
                     $new_lead->requested_date = Carbon::now();
                     $new_lead->service_id = $service_id;
-                    $new_lead->reference_id = $reference_id;
+                    $new_lead->ntn_number = $lead->data->ntn_number;
+                    $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
+                    $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
+                    $new_lead->business_address = $lead->data->business_address;
+                    $new_lead->company_name = $lead->data->company_name;
+                    $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
+
                     $new_lead->save();
 
                     $lead_log = new LeadLog();
