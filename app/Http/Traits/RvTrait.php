@@ -1227,11 +1227,11 @@ trait RvTrait
 
             $shipments = RvShipmentTicket::whereIn('shipment_user_id',$included_shippers)
             ->when($agent, function ($query, $agent) {
-                if($agent->agent_type_id == 1) //These Agents will get shipments pending with first call only
+                if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                 {
                     return $query->where('call_count' , 0);
                 }
-                else if($agent->agent_type_id == 2)//These Agents will get shipments pending with second call only
+                else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                 {
                     return $query->where('call_count' , '>', 0);
                 }
@@ -1260,11 +1260,11 @@ trait RvTrait
 
                 $shipments = RvShipmentTicket::whereIn('shipment_user_id',$result)
                 ->when($agent, function ($query, $agent) {
-                    if($agent->agent_type_id == 1) //These Agents will get shipments pending with first call only
+                    if($agent->agent_caller_type == 1) //These Agents will get shipments pending with first call only
                     {
                         return $query->where('call_count' , 0);
                     }
-                    else if($agent->agent_type_id == 2)//These Agents will get shipments pending with second call only
+                    else if($agent->agent_caller_type == 2)//These Agents will get shipments pending with second call only
                     {
                         return $query->where('call_count' , 1);
                     }

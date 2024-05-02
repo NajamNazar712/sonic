@@ -13,7 +13,7 @@ class CreateAgentTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('agent_types', function (Blueprint $table) {
+        Schema::create('rv_agent_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateAgentTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('agent_types');
+        Schema::dropIfExists('rv_agent_types');
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Models\Admin;
 
-use App\Http\Models\Agent\AgentType;
+use App\Http\Models\Agent\RvAgentType;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Notifications\AdminResetPasswordNotification;
@@ -79,7 +79,7 @@ class Admin extends Authenticatable
 
     public function agent_type()
     {
-        return $this->belongsTo(AgentType::class,'agent_type_id');
+        return $this->belongsTo(RvAgentType::class,'agent_caller_type');
     }
     public function responsible_city() {
         return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id');

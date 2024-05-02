@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Agents List
+                    RVR Caller Agents List
                 </h1>
 
                 <div class="card">
@@ -443,7 +443,7 @@
                     $('#edit_agent_id').val(data.agent_id);
                     $('#edit_agent_name').val(data.agent_name);
                     $('#edit_agent_type_name').val(data.agent_type_name);
-                    $('#edit_agent_type_id').val(data.agent_type_id);
+                    $('#edit_agent_type_id').val(data.agent_caller_type);
                     $('#editAgentTypeModal').modal('show');
                 })
                 

@@ -5,7 +5,7 @@ namespace App\Http\Models\Agent;
 use App\Http\Models\Admin\Admin;
 use Illuminate\Database\Eloquent\Model;
 
-class AgentType extends Model
+class RvAgentType extends Model
 {
     //
 

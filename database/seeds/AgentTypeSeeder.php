@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Models\Agent\AgentType;
+use App\Http\Models\Agent\RvAgentType;
 use Illuminate\Database\Seeder;
 
 class AgentTypeSeeder extends Seeder
@@ -12,15 +12,15 @@ class AgentTypeSeeder extends Seeder
      */
     public function run()
     {
-        AgentType::create([
+        RvAgentType::create([
             'name' => '1st Caller'
         ]);
 
-        AgentType::create([
+        RvAgentType::create([
             'name' => '2nd Caller'
         ]);
 
-        AgentType::create([
+        RvAgentType::create([
             'name' => 'Both'
         ]);
     }

@@ -14,7 +14,7 @@ class AddAgentTypeColumnInAdminsTable extends Migration
     public function up()
     {
         Schema::table('admins', function (Blueprint $table) {
-            $table->integer('agent_type_id')->nullable()->index();
+            $table->integer('agent_caller_type')->nullable()->index();
         });
     }
 
@@ -26,7 +26,7 @@ class AddAgentTypeColumnInAdminsTable extends Migration
     public function down()
     {
         Schema::table('admins', function (Blueprint $table) {
-            $table->dropColumn('agent_type_id');
+            $table->dropColumn('agent_caller_type');
         });
     }
 }
