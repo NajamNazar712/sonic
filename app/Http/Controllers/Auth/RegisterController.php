@@ -114,6 +114,7 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        dd($data);
         if($data['nature_of_account'] == 1){
         	return Validator::make($data, [
                 'name' => 'required|string|max:255|unique:users',

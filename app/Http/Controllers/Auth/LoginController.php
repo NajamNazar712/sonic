@@ -101,7 +101,7 @@ class LoginController extends Controller
         if(isset($lead) && $token == $lead->activation_code){
             return view('client.auth.lead_wordpress_register')->with(['lead' => $lead , 'background_image' => $background_image]);
         }else{
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return view('errors.404');
         }
 
     }

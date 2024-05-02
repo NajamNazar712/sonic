@@ -8,7 +8,7 @@
     <meta name="keywords" content="Trax">
     <meta name="author" content="Trax IT">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - Sonic | Trax</title>
+    <title>Lead Register - Sonic | Trax</title>
     <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon_new.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon_new-32x32.png') }} ">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon_new-16x16.png') }}">
@@ -83,11 +83,11 @@
                                 </p>
                                 <div class="card-body">
                                     @include('client.inc.messages')
-                                    <form class="form-horizontal" method="POST" action="{{ route('cod.login.submit') }}">
+                                    <form class="form-horizontal" method="POST" action="{{ route('cod.register.submit') }}">
                                         @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="text" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
-                                                   value="{{ $lead->email_address }}" disabled>
+                                                   value="{{ $lead->email_address }}" readonly>
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
                                             </div>
