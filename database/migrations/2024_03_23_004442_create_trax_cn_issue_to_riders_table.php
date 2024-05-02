@@ -19,6 +19,7 @@ class CreateTraxCnIssueToRidersTable extends Migration
             $table->string('company_code')->nullable();
             $table->integer('rider_id');
             $table->integer('product_id');
+            $table->integer('arae_code')->nullable();
             $table->bigInteger('cn_from');
             $table->bigInteger('cn_to');
             $table->integer('quantity')->nullable();

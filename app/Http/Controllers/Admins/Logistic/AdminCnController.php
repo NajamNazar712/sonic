@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
+use function foo\func;
 
 class AdminCnController extends Controller
 {
@@ -168,7 +169,7 @@ class AdminCnController extends Controller
 
     public  function cn_receive_admin_store_store(Request  $request)
     {
-
+        $user_id = Auth::id();
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'area_code' => ['required','max:255'],
@@ -185,6 +186,25 @@ class AdminCnController extends Controller
         }
 
         try {
+
+            if($request->cn_to < $request->cn_from)
+            {
+                return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
+            }
+            $cn_store =  TraxCnReceiveAdminStore::where('area_code', $request->area_code)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1);
+
+            if($cn_store->exists()){
+                return  redirect()->back()->with('error','Duplicate Cn found!');
+            }
+
             $date= Carbon::now()->toDateString();
             $quantity = ($request->cn_to-$request->cn_from+1);
 
@@ -196,6 +216,7 @@ class AdminCnController extends Controller
             $cn_receive_admin_store->cn_to = $request->cn_to;
             $cn_receive_admin_store->quantity = $quantity;
             $cn_receive_admin_store->receive_date = $date;
+            $cn_receive_admin_store->user_id = $user_id;
             $cn_receive_admin_store->save();
 
             return redirect()->back()->with('success','CN Receive Admin store successfully');
@@ -303,6 +324,8 @@ class AdminCnController extends Controller
     }
     public function cn_issue_to_rider_store(Request $request)
     {
+//        $hub_id = session('hub');
+//        dd( session('hubs'));
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'rider_id' => ['required','integer'],
@@ -319,36 +342,71 @@ class AdminCnController extends Controller
         }
 
         try {
-            $time_stamp = now();
-            $quantity = ($request->cn_to - $request->cn_from + 1);
-            $child_cn = [];
-
-            DB::beginTransaction();
-
-            $trax_cn_issue_rider = new TraxCnIssueToRider();
-            $trax_cn_issue_rider->company_code = $request->company_code;
-            $trax_cn_issue_rider->rider_id = $request->rider_id;
-            $trax_cn_issue_rider->product_id = $request->product_id;
-            $trax_cn_issue_rider->cn_from = $request->cn_from;
-            $trax_cn_issue_rider->cn_to = $request->cn_to;
-            $trax_cn_issue_rider->quantity = $quantity;
-            $trax_cn_issue_rider->issue_date = $time_stamp->toDateString();
-            $trax_cn_issue_rider->save();
-
-            for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
-                $child_cn[] = [
-                    'cn_issue_id' => $trax_cn_issue_rider->id,
-                    'cn_number' => $i,
-                    'created_at' => $time_stamp,
-                    'updated_at' => $time_stamp
-                ];
+            $cn_issue =  TraxCnIssueToRider::where('area_code', 202)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1);
+            if($cn_issue->exists()){
+                return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
 
-            TraxRiderCnDetail::insert($child_cn);
+            $cn_store =  TraxCnReceiveAdminStore::where('area_code', 202)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1)
+                ->latest('id');
 
-            DB::commit();
+            if($cn_store->exists()){
+                if($request->cn_to < $request->cn_from)
+                {
+                    return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
+                }
+                $time_stamp = now();
+                $quantity = ($request->cn_to - $request->cn_from + 1);
+                $child_cn = [];
 
-            return redirect()->back()->with('success','CN issue to rider successfully');
+                DB::beginTransaction();
+
+                $trax_cn_issue_rider = new TraxCnIssueToRider();
+                $trax_cn_issue_rider->company_code = $request->company_code;
+                $trax_cn_issue_rider->rider_id = $request->rider_id;
+                $trax_cn_issue_rider->product_id = $request->product_id;
+                $trax_cn_issue_rider->area_code = 202;
+                $trax_cn_issue_rider->cn_from = $request->cn_from;
+                $trax_cn_issue_rider->cn_to = $request->cn_to;
+                $trax_cn_issue_rider->quantity = $quantity;
+                $trax_cn_issue_rider->issue_date = $time_stamp->toDateString();
+                $trax_cn_issue_rider->save();
+
+                for ($i = $request->cn_from; $i <= $request->cn_to; $i++) {
+                    $child_cn[] = [
+                        'cn_issue_id' => $trax_cn_issue_rider->id,
+                        'cn_number' => $i,
+                        'created_at' => $time_stamp,
+                        'updated_at' => $time_stamp
+                    ];
+                }
+
+                TraxRiderCnDetail::insert($child_cn);
+
+                DB::commit();
+
+                return redirect()->back()->with('success','CN issue to rider successfully');
+            } else {
+                return redirect()->back()->with('error','CN not found in admin store!');
+            }
+
+
 
         } catch (\Exception $exception){
             DB::rollBack();

@@ -100,13 +100,13 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>CN From</label>
-                                    <input type="text" name="cn_from" class="form-control" data-rule-required="true" data-msg-required="CN from is required" >
+                                    <input type="number" name="cn_from"  class="form-control" data-rule-required="true" data-msg-required="CN from is required" >
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>CN To</label>
-                                    <input type="text" name="cn_to" class="form-control" data-rule-required="true" data-msg-required="CN to is required">
+                                    <input type="number" name="cn_to"  class="form-control" data-rule-required="true" data-msg-required="CN to is required">
                                 </div>
                             </div>
                         </div>
@@ -203,7 +203,7 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>CN To</label>
-                                    <input type="text" name="cn_to" id="edit_cn_to" class="form-control" data-rule-required="true" data-msg-required="CN to is required" readonly>
+                                    <input type="text" name="cn_to" id="edit_cn_to"   class="form-control" data-rule-required="true" data-msg-required="CN to is required" readonly>
                                 </div>
                             </div>
                         </div>
@@ -579,7 +579,19 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function (form) {
-                    form.submit();
+                    var cn_to = parseInt($(form).find('[name="cn_to"]').val());
+                    var cn_from = parseInt($(form).find('[name="cn_from"]').val());
+
+                    if((cn_to < cn_from))
+                    {
+                        toastr.error('CN To Must be grater than or equal to  CN From!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }else{
+                        form.submit();
+                    }
+
                 }
             });
 
