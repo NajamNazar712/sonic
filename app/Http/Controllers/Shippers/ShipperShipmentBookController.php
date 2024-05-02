@@ -2915,9 +2915,9 @@ class ShipperShipmentBookController extends Controller
             $data = $validator->getData();
             $service_type_id = $data['service_type_id'];
         
-            if ($service_type_id == 2 && ($value < 0.1 || $value > 10)) {
+            if ($service_type_id == 2 && ($value < 0.001 || $value > 10)) {
                 return false;
-            } elseif ($service_type_id != 2 && ($value < 1 || $value > 10000)) {
+            } elseif ($service_type_id != 2 && ($value < 0.001 || $value > 100000)) {
                 return false;
             }else{
                 return true;
@@ -7340,9 +7340,8 @@ class ShipperShipmentBookController extends Controller
     public function get_consignee_infos(Request $request)
     {
         $data = array();
-        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%");
-        if ($consignee_info->exists()) {
-            $consignee_info = $consignee_info->limit(10)->get();
+        $consignee_info = ConsigneeInfo::where('phone_number_1', 'LIKE', "%" . $request->q . "%")->orWhere('phone_number_2', 'LIKE', "%" . $request->q . "%")->limit(10)->get();
+        if (count($consignee_info) > 0) {
             foreach ($consignee_info as $item) {
                 $data[] = ['id' => $item->id, 'full_name' => $item->phone_number_1 . ' / ' . $item->name, 'text' => $item->name];
             }
