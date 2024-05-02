@@ -115,6 +115,7 @@ class WebsiteLead extends Command
                     $new_lead->business_address = $lead->data->business_address;
                     $new_lead->company = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
+                    $new_lead->referral_id = $reference_id;
                     $new_lead->activation_code = $token;
 
                     $new_lead->save();
@@ -129,25 +130,24 @@ class WebsiteLead extends Command
                     $token_added[$key] = $token;
 
                 }
-
             }
         }
 
-        // if(count($leads_added) > 0){
-        //     $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-        //     $client->delete('leads', [
-        //         'form_params' => [
-        //             "token" => 'TraxOnlinePvtLtdAYWD',
-        //             "ids" => $leads_added
-        //         ]
-        //     ]);
-        // }
+        if(count($leads_added) > 0){
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $client->delete('leads', [
+                'form_params' => [
+                    "token" => 'TraxOnlinePvtLtdAYWD',
+                    "ids" => $leads_added
+                ]
+            ]);
+        }
 
-        // if(count($new_leads) > 0){
+        if(count($leads_added) > 0){
             // NotificationsController::send(203, $new_leads, Carbon::today());
             NotificationsController::send(230, $leads_added, $token_added);
 
-        // }
+        }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
