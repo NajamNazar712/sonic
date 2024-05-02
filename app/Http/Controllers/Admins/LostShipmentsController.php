@@ -997,8 +997,7 @@ class LostShipmentsController extends Controller
                   ->where('shipment_id', $shipment_id) ;
         
             if(isset($request->updated_at)){
-                $query->where('updated_at', '>=', date('Y-m-d H:i:s', strtotime($request->updated_at))) 
-                ->where('updated_at', '<=', $request->updated_at); 
+                $query->whereBetween('updated_at', [date('Y-m-d H:i:s', strtotime($request->updated_at)), date('Y-m-d H:i:s', strtotime($request->updated_at) + 10)]);
             }
         
             $query->groupBy('user_id');
@@ -1011,7 +1010,7 @@ class LostShipmentsController extends Controller
                 $details[$key]['name'] = $admin->name;
                 $details[$key]['type'] = $admin->employee->employee_type->name;
                 $details[$key]['status'] = $admin->employee->employee_status->name;
-                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->updated_at)->format('Y-m-d H:i:s');
 
 
             }else{
@@ -1020,7 +1019,7 @@ class LostShipmentsController extends Controller
                 $details[$key]['name'] = $rider->name;
                 $details[$key]['type'] = $rider->employee->employee_type->name;
                 $details[$key]['status'] = $rider->employee->employee_status->name;
-                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->created_at)->format('Y-m-d H:i:s');
+                $details[$key]['marked_at'] = Carbon::parse($lost_responsible_shipment->updated_at)->format('Y-m-d H:i:s');
             }
         }
 
