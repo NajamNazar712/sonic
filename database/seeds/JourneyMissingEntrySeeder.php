@@ -24,13 +24,13 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [36947386,36926584];
+        $shipmentId = [37181651,37085856];
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
                 if($shipment->shipper_status_id === 5)
                 {
-                    $shipment->created_at = $shipment->updated_at;
+                    // $shipment->created_at = $shipment->updated_at;
                     $shipment->updated_at = $shipment->updated_at;
                     $shipment->shipper_status_id = 14;
                     $shipment->consignee_status_id = 14;
