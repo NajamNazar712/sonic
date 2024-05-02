@@ -138,10 +138,30 @@
                     </div>
 
                     <div class="col-3">
+                        <select name="service_type_select" id="service_type_select" class="select2">
+                            @foreach($service_types as $service_type)
+                                <option value="{{$service_type->id}}">{{$service_type->booking_type}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+                    <div class="col-3">
                         <div class="form-group">
                             <select name="ref_name_select" id="ref_name_select" class="select2">
                                 @foreach($referral_names as $referral_name)
                                     <option value="{{$referral_name->id}}">{{$referral_name->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="rider_types_referral" id="rider_types_referral" class="select2">
+                                @foreach($rider_types_referral as $rider_type_referral)
+                                    <option value="{{$rider_type_referral->id}}">{{$rider_type_referral->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -409,6 +429,21 @@
                 allowClear:true,
             });
         
+
+            $('#rider_types_referral').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Rider Type Referral*'
+            }).on('change', function() {
+                var rider_type = $(this).val();
+                if (rider_type == 3) {
+                    $('#ref_name_select').prop('disabled', true); 
+                } else {
+                    $('#ref_name_select').prop('disabled', false); 
+                }
+            });
+
+            
+            
             $('.arrival_time_from').pickatime({
                 clear: '',
                 format: 'h:i A',
@@ -445,6 +480,12 @@
                         }
                     }
                 }
+            });
+
+            $('#service_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Type",
+                allowClear:true,
             });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
@@ -688,6 +729,9 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_origin_hub = $('#search_origin_hub').val();
                         d.search_origin_zone = $('#search_origin_zone').val();
+
+                        d.service_type_select = $('#service_type_select').val()
+                        d.rider_type_referral = $('#rider_types_referral').val();
 
                     }
                 },

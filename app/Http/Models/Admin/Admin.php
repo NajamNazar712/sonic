@@ -81,4 +81,8 @@ class Admin extends Authenticatable
     {
         return $this->belongsTo(AgentType::class,'agent_type_id');
     }
+    public function responsible_city() {
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id');
+    }
+
 }
