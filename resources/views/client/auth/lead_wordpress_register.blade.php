@@ -88,6 +88,10 @@
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="text" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
                                                    value="{{ $lead->email_address }}" readonly>
+                                                   <input type="hidden" name="nature_of_account" value="1">
+                                                   <input type="hidden" name="wordpress_lead_register" value="1">
+                                                   <input type="hidden" name="lead_id" value="{{ $lead->id }}">
+
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
                                             </div>

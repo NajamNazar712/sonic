@@ -114,78 +114,78 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        dd($data);
-        if($data['nature_of_account'] == 1){
-        	return Validator::make($data, [
-                'name' => 'required|string|max:255|unique:users',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'company_address'=>'required|string|max:255',
-                'phone'=>'required|string|max:255|unique:users',
-                'nature_of_account' => 'required',
-                'average_shipment' => 'required',
-                'sale_person' => 'required',
-                'average_shipment_duration' => 'required',
-                'cnic'=>'required|string|max:255',
-				'url'=>'required|string|max:255',
-                'shipper_city'=>'required|int',
-                'shipper_product_type'=>'required|int',
-                'product_name' => 'required_if:shipper_product_type, ==, 24',
-                'shipping_city.*'=>'required|string|max:255',
-                'pickup_address.*'=>'required|string|max:255',
-                'pickup_brand_name.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'shipping_phone.*'=>'required|string|max:255',
-                'shipping_email.*'=>'required|string|max:255',
-                'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|max:255',
-                'bank_name.*'=>'required|max:255',
-                'bank_branch.*'=>'required|string|max:255',
-                'account_no.*'=>'required|string|max:255',
-                'account_title.*'=>'required|string|max:255',
-                'iban_no.*'=>'required|string|max:255',
-                'cnic_front_image' => 'mimes:png,jpeg,jpg',
-                'cnic_back_image' => 'mimes:png,jpeg,jpg',
-                'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                // 'g-recaptcha-response' => 'required|captcha',
-                'segments' => 'required',
-                'sub_segments' => 'required',
-                'referral' => '',
-                
-                
-            ]);
-        }else{
+        if ($data['nature_of_account'] == 1 && $data['wordpress_lead_register'] != 1) {
             return Validator::make($data, [
                 'name' => 'required|string|max:255|unique:users',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6',
-                'shipper_poc'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'company_address'=>'required|string|max:255',
-                'phone'=>'required|string|max:255|unique:users',
+                'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'company_address' => 'required|string|max:255',
+                'phone' => 'required|string|max:255|unique:users',
                 'nature_of_account' => 'required',
                 'average_shipment' => 'required',
                 'sale_person' => 'required',
                 'average_shipment_duration' => 'required',
-                'cnic'=>'required|string|max:255',
-				'url'=>'required|string|max:255',
-                'shipper_city'=>'required|string|max:255',
-                'shipper_product_type'=>'required|int',
-                'product_name' => 'required_if:shipper_product_type, ==, 24',
-                'shipping_city.*'=>'required|string|max:255',
-                'pickup_address.*'=>'required|string|max:255',
-                'pickup_brand_name.*'=>'required|string|max:255',
-                'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
-                'shipping_phone.*'=>'required|string|max:255',
-                'shipping_email.*'=>'required|string|max:255',
-                'product_type.*'=>'required|max:255',
-                'bank_city.*'=>'required|max:255',
-                'bank_name.*'=>'required|max:255',
-                'bank_branch.*'=>'required|string|max:255',
-                'account_no.*'=>'required|string|max:255',
-                'account_title.*'=>'required|string|max:255',
-                'iban_no.*'=>'required|string|max:255',
-//                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
+                'cnic' => 'required|string|max:255',
+                'url' => 'required|string|max:255',
+                'shipper_city' => 'required|string|max:255',
+                'shipper_product_type' => 'required|int',
+                'product_name' => 'required_if:shipper_product_type,24',
+                'shipping_city.*' => 'required|string|max:255',
+                'pickup_address.*' => 'required|string|max:255',
+                'pickup_brand_name.*' => 'required|string|max:255',
+                'shipping_poc.*' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'shipping_phone.*' => 'required|string|max:255',
+                'shipping_email.*' => 'required|string|max:255',
+                'product_type.*' => 'required|max:255',
+                'bank_city.*' => 'required|max:255',
+                'bank_name.*' => 'required|max:255',
+                'bank_branch.*' => 'required|string|max:255',
+                'account_no.*' => 'required|string|max:255',
+                'account_title.*' => 'required|string|max:255',
+                'iban_no.*' => 'required|string|max:255',
+                'cnic_front_image' => 'mimes:png,jpeg,jpg',
+                'cnic_back_image' => 'mimes:png,jpeg,jpg',
+                'blank_cheque_image' => 'mimes:png,jpeg,jpg',
+                'segments' => 'required',
+                'sub_segments' => 'required',
+                'referral' => '',
+            ]);
+        } else if ($data['nature_of_account'] == 1 && $data['wordpress_lead_register'] == 1) {
+            return Validator::make($data, [
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+            ]);
+        } else {
+            return Validator::make($data, [
+                'name' => 'required|string|max:255|unique:users',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'shipper_poc' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'company_address' => 'required|string|max:255',
+                'phone' => 'required|string|max:255|unique:users',
+                'nature_of_account' => 'required',
+                'average_shipment' => 'required',
+                'sale_person' => 'required',
+                'average_shipment_duration' => 'required',
+                'cnic' => 'required|string|max:255',
+                'url' => 'required|string|max:255',
+                'shipper_city' => 'required|string|max:255',
+                'shipper_product_type' => 'required|int',
+                'product_name' => 'required_if:shipper_product_type,24',
+                'shipping_city.*' => 'required|string|max:255',
+                'pickup_address.*' => 'required|string|max:255',
+                'pickup_brand_name.*' => 'required|string|max:255',
+                'shipping_poc.*' => 'required|regex:/^[a-zA-Z ]+$/u|max:255',
+                'shipping_phone.*' => 'required|string|max:255',
+                'shipping_email.*' => 'required|string|max:255',
+                'product_type.*' => 'required|max:255',
+                'bank_city.*' => 'required|max:255',
+                'bank_name.*' => 'required|max:255',
+                'bank_branch.*' => 'required|string|max:255',
+                'account_no.*' => 'required|string|max:255',
+                'account_title.*' => 'required|string|max:255',
+                'iban_no.*' => 'required|string|max:255',
                 'billing_person_name' => 'required|string|max:255',
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
@@ -193,14 +193,13 @@ class RegisterController extends Controller
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
-                // 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
                 'sub_segments' => 'required',
                 'cycle_of_invoicing' => 'required',
-                'referral' => ''
-
+                'referral' => '',
             ]);
         }
+            
 
     }
 
@@ -337,16 +336,36 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {     
+        if($data['wordpress_lead_register'] == 1){
+            $lead = Lead::find($data['lead_id']);
+            dd($lead);
+            User::create([
+                'name' => $lead->contact_person,
+                'email' => $lead->email_address,
+                'address' => $lead->business_address,
+                'password' => Hash::make($data['password']),
+                'phone'=>$lead->phone_number,
+                'city_id'=>$lead->city_id,
+                'reference_id' => $lead->referral_id,
+                'lead_id' => $lead->id,
+                'average_shipments' => $lead->average_shipment_per_week,
+                'account_type_id' => '1',
+                'ntn_no' => $lead->ntn_number,
+                'status' => '0',
+            ]);
+
+        }
+
         if(array_key_exists('lead_id', $data)){
             $lead_id = $data['lead_id'];
         }
         else{
             $lead_id = null;
         }
+
         if(array_key_exists('territory_id', $data)){
             $territory_id = $data['territory_id'];
-        }
-        else{
+        } else{
             $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
             if($auto_tag_territory->exists()){
                 $auto_tag_territory = $auto_tag_territory->first();
