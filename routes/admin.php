@@ -3758,6 +3758,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@franchise_name')->name('name');
 
             Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
+            Route::get('/retail_product_charges', 'Admins\Retail\RetailAdminUserManagementController@retail_product_charges')->name('retail_product_charges');
+            Route::get('/retail_product_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_product_attachments')->name('retail_product_attachments');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');

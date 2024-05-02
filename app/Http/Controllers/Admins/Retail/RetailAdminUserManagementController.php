@@ -81,7 +81,6 @@ class RetailAdminUserManagementController extends Controller
         $products = Product::orderBy('product_name')->get();
         $product_percentage = RetailFranchiseProductPercentage::get();
         $shipping_modes = RetailShippingMode::where('business_category_id',1)->get();
-
         return view('admin.retail.franchise.index')->with(['hubs' => $hubs, 'products' => $products, 'product_percentage' => $product_percentage, 'shipping_modes' => $shipping_modes]);
     }
 
@@ -298,25 +297,12 @@ class RetailAdminUserManagementController extends Controller
             $franchise->save();
 
             $retail_franchise_product_percentage = RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->get();
-
             if ($retail_franchise_product_percentage->isNotEmpty()) {
-                // Delete existing records if any
                 RetailFranchiseProductPercentage::where('franchise_id', $franchise->id)->delete();
-
-                // Retrieve existing data into arrays
-                $existing_retail_shipping_mode_ids = $retail_franchise_product_percentage->pluck('retail_shipping_mode_id')->toArray();
-                $existing_product_percentages = $retail_franchise_product_percentage->pluck('product_percentage')->toArray();
-            } else {
-                // No existing records, initialize empty arrays
-                $existing_retail_shipping_mode_ids = [];
-                $existing_product_percentages = [];
             }
-
-            // Retrieve new data from the request
             $new_retail_shipping_mode_names = json_decode($request->input('retail_shipping_mode_id'));
             $new_product_percentages = json_decode($request->input('product_percentage'));
 
-            // Fetch the corresponding ids for the new names
             $new_retail_shipping_mode_ids = [];
             foreach ($new_retail_shipping_mode_names as $name) {
                 $retailShippingMode = RetailShippingMode::where('name', $name)->first();
@@ -335,59 +321,62 @@ class RetailAdminUserManagementController extends Controller
                 $retail_franchise_product_percentage->save();
             }
 
+            $franchise_retail_product_charges = RetailFranchiseProductCharges::where('franchise_id', $franchise->id)->first();
+            if ($franchise_retail_product_charges != null){
+                $franchise_retail_product_charges->delete();
+                $new_charges = new RetailFranchiseProductCharges();
+                $new_charges->franchise_id = $franchise->id;
+                $new_charges->franchise_gst = $request->franchise_gst;
+                $new_charges->franchise_withholding = $request->franchise_withholding;
+                $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->save();
+            } else {
+                $new_charges = new RetailFranchiseProductCharges();
+                $new_charges->franchise_id = $franchise->id;
+                $new_charges->franchise_gst = $request->franchise_gst;
+                $new_charges->franchise_withholding = $request->franchise_withholding;
+                $new_charges->franchise_deduction = $request->franchise_deduction;
+                $new_charges->save();
+            }
+
             $franchise_retail_product_attachment_edit = RetailFranchiseProductAttachment::where('franchise_id', $franchise->id)->first();
-            if ($request->hasFile('attachment_1')) {
-                if ($franchise_retail_product_attachment_edit) {
-                    if ($franchise_retail_product_attachment_edit->attachment_1) {
-                        Storage::disk('public')->delete('franchise_product_attachment_1/' . $franchise_retail_product_attachment_edit->attachment_1);
+            if ($franchise_retail_product_attachment_edit != null) {
+                // Loop through each attachment
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        // Delete old attachment if it exists
+                        $old_attachment = $franchise_retail_product_attachment_edit->$attachment_name;
+                        if ($old_attachment) {
+                            Storage::disk('public')->delete('franchise_product_attachment_' . $i . '/' . $old_attachment);
+                        }
+                        // Store new attachment
+                        $file = $request->file($attachment_name);
+                        $filename = 'attachment_' . $i . '_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                        Storage::disk('public')->putFileAs('franchise_product_attachment_' . $i, $file, $filename);
+                        // Update attachment field in the database
+                        $franchise_retail_product_attachment_edit->$attachment_name = $filename;
                     }
-                } else {
-                    $franchise_retail_product_attachment_edit = new RetailFranchiseProductAttachment();
-                    $franchise_retail_product_attachment_edit->franchise_id = $franchise->id;
                 }
-            
-                $file = $request->file('attachment_1');
-                $filename = 'attachment_1_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('franchise_product_attachment_1', $filename, 'public');
-                $franchise_retail_product_attachment_edit->attachment_1 = $filename;
-                $franchise_retail_product_attachment_edit->save();
-            }
-            if ($request->hasFile('attachment_2')) {
-                if ($franchise_retail_product_attachment_edit->attachment_2) {
-                    Storage::disk('public')->delete('franchise_product_attachment_2/' . $franchise_retail_product_attachment_edit->attachment_2);
+            } else {
+                // Create a new record if none exists
+                $franchise_retail_product_attachment_edit = new RetailFranchiseProductAttachment();
+                $franchise_retail_product_attachment_edit->franchise_id = $franchise->id;
+                // Loop through each attachment
+                for ($i = 1; $i <= 5; $i++) {
+                    $attachment_name = 'attachment_' . $i;
+                    if ($request->hasFile($attachment_name)) {
+                        // Store new attachment
+                        $file = $request->file($attachment_name);
+                        $filename = 'attachment_' . $i . '_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
+                        Storage::disk('public')->putFileAs('franchise_product_attachment_' . $i, $file, $filename);
+                        // Update attachment field in the database
+                        $franchise_retail_product_attachment_edit->$attachment_name = $filename;
+                    }
                 }
-                $file = $request->file('attachment_2');
-                $filename = 'attachment_2_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('franchise_product_attachment_2', $filename, 'public');
-                $franchise_retail_product_attachment_edit->attachment_2 = $filename;
             }
-            if ($request->hasFile('attachment_3')) {
-                if ($franchise_retail_product_attachment_edit->attachment_3) {
-                    Storage::disk('public')->delete('franchise_product_attachment_3/' . $franchise_retail_product_attachment_edit->attachment_3);
-                }
-                $file = $request->file('attachment_3');
-                $filename = 'attachment_3_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('franchise_product_attachment_3', $filename, 'public');
-                $franchise_retail_product_attachment_edit->attachment_3 = $filename;
-            }
-            if ($request->hasFile('attachment_4')) {
-                if ($franchise_retail_product_attachment_edit->attachment_4) {
-                    Storage::disk('public')->delete('franchise_product_attachment_4/' . $franchise_retail_product_attachment_edit->attachment_4);
-                }
-                $file = $request->file('attachment_4');
-                $filename = 'attachment_4_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('franchise_product_attachment_4', $filename, 'public');
-                $franchise_retail_product_attachment_edit->attachment_4 = $filename;
-            }
-            if ($request->hasFile('attachment_5')) {
-                if ($franchise_retail_product_attachment_edit->attachment_5) {
-                    Storage::disk('public')->delete('franchise_product_attachment_5/' . $franchise_retail_product_attachment_edit->attachment_5);
-                }
-                $file = $request->file('attachment_5');
-                $filename = 'attachment_5_' . $date . '_' . Carbon::now()->format('His') . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('franchise_product_attachment_5', $filename, 'public');
-                $franchise_retail_product_attachment_edit->attachment_5 = $filename;
-            }
+            $franchise_retail_product_attachment_edit->updated_by = $admin->id;
+            $franchise_retail_product_attachment_edit->save();
 
             return redirect()->back()->with('success', 'Franchise Updated Successfully!');
         } else {
@@ -421,6 +410,31 @@ class RetailAdminUserManagementController extends Controller
                 'product_percentage' => $percentage->product_percentage,
             ];
         }
+        return response()->json(['data' => $data]);
+    }
+
+    public function retail_product_charges(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_product_percentage = RetailFranchiseProductCharges::where('franchise_id', $franchiseId)->first();
+        
+        if ($retail_franchise_product_percentage != null){
+            $data = $retail_franchise_product_percentage;
+        } else {
+            $data = null;
+        }
+        
+        return response()->json(['data' => $data]);
+    }
+
+    public function retail_product_attachments(Request $request){
+        $franchiseId = $request->franchise_id;
+        $retail_franchise_product_attachment = RetailFranchiseProductAttachment::where('franchise_id', $franchiseId)->first();
+        if ($retail_franchise_product_attachment != null){
+            $data = $retail_franchise_product_attachment;
+        } else {
+            $data = null;
+        }
+        
         return response()->json(['data' => $data]);
     }
 

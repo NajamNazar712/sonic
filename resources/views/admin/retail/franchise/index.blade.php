@@ -327,26 +327,31 @@
                                 <div class="form-group">
                                     <label for="attachment_1">Attachment 1</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_1" id="attachment_1" accept="image/*,.doc,.docx,.pdf">
+                                    <a id="attachment_1_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
                                     <label for="attachment_2">Attachment 2</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_2" id="attachment_2" accept="image/*,.doc,.docx,.pdf">
+                                    <a id="attachment_2_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
                                     <label for="attachment_3">Attachment 3</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_3" id="attachment_3" accept="image/*,.doc,.docx,.pdf">
+                                    <a id="attachment_3_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
                                     <label for="attachment_4">Attachment 4</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_4" id="attachment_4" accept="image/*,.doc,.docx,.pdf">
+                                    <a id="attachment_4_filename" target="_blank"></a>
                                 </div>
         
                                 <div class="form-group">
                                     <label for="attachment_5">Attachment 5</label>
                                     <input class="form-control form-control-sm" type="file" name="attachment_5" id="attachment_5" accept="image/*,.doc,.docx,.pdf">
+                                    <a id="attachment_5_filename" target="_blank"></a>
                                 </div>
                             </div>
                         </div>
@@ -652,6 +657,42 @@
                 $('#edit_insurance').val(insurance);
 
                 $('#edit_remarks_title').text('Edit Franchise ' + name);
+
+                // show the franchise retail charges
+                $.ajax({
+                    type: "GET",
+                    url: '{{ route('admin.retail.franchise.retail_product_charges') }}',
+                    data: { franchise_id: id },
+                    success: function (response) {
+                        $('#commission_percentage_edit').val(response.data.franchise_gst);
+                        $('#withholding_tax_percentage_edit').val(response.data.franchise_withholding);
+                        $('#deduction_percentage_edit').val(response.data.franchise_deduction);
+                    }
+                });
+
+                $.ajax({
+                    type: "GET",
+                    url: '{{ route('admin.retail.franchise.retail_product_attachments') }}',
+                    data: { franchise_id: id },
+                    success: function (response) {
+                        if (response.data) {
+                            var franchiseId = response.data.franchise_id;
+                            if (franchiseId === id) {
+                                for (var i = 1; i <= 5; i++) {
+                                    var attachmentKey = 'attachment_' + i;
+                                    var attachmentFileName = response.data[attachmentKey];
+                                    if (attachmentFileName) {
+                                        var attachmentURL = '/storage/franchise_product_attachment_' + i + '/' + attachmentFileName;
+                                        var attachmentLink = $('<a>').attr('href', attachmentURL).attr('target', '_blank').text(attachmentFileName);
+                                        $('#attachment_' + i + '_filename').html(attachmentLink);
+                                    } else {
+                                        $('#attachment_' + i + '_filename').text('No attachment');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 $('#edit_franchise').modal('show');
             });
 
@@ -700,11 +741,17 @@
             // reset modal on close
             function resetModal() {
                 $("#product_percentage").val("");
+                $("#product_percentage_edit").val("");
                 $("#retail_shipping_mode_id").val("1").trigger("change");
+                $("#retail_shipping_mode_id_edit").val("1").trigger("change");
                 $("#error_message").hide();
+                $("#error_message_edit").hide();
                 $("#product_percentage").removeAttr("required");
+                $("#product_percentage_edit").removeAttr("required");
                 $("#tableBody").empty();
+                $("#tableBodyEdit").empty();
                 $("#tableRow").hide();
+                $("#tableRowEdit").hide();
             }
 
             $("#retail_product_add_btn").on('click', function (event) {
@@ -712,15 +759,11 @@
                 var productPercentage = $("#product_percentage").val();
 
                 if (productPercentage.trim() === '' || !$.isNumeric(productPercentage)) {
-                    // Show error message
                     $("#error_message").text("Please enter a valid product percentage.").show();
                     $("#product_percentage").attr("required", true);
                 } else {
-                    // Hide error message
                     $("#error_message").hide();
                     $("#product_percentage").removeAttr("required");
-
-                    // Check if the selected option already exists in the table
                     var isDuplicate = false;
                     $("#tableBody").find("tr").each(function() {
                         if ($(this).find("td:first").text() === selectedOption) {
@@ -741,29 +784,19 @@
                             }
                         });
                         $("#tableRow").show();
-
-                        // Clear input fields after adding a new row
                         $("#product_percentage").val('');
                     }
                 }
             });
 
-
-
-
-
-
             $("#add_franchise_form").submit(function(event) {
                 event.preventDefault();
-                var attachment1 = $("#attachment_1")[0].files[0];
-                var gst_commission = $('#commission_percentage').val();
-                var withholding_tax_percentage = $('#withholding_tax_percentage').val();
-                if (!attachment1 || !gst_commission || !withholding_tax_percentage){
-                    // Stop form submission
-                    return;
-                }
-
-                // Collect all shipping modes and product percentages
+                // var attachment1 = $("#attachment_1")[0].files[0];
+                // var gst_commission = $('#commission_percentage').val();
+                // var withholding_tax_percentage = $('#withholding_tax_percentage').val();
+                // if (!attachment1 || !gst_commission || !withholding_tax_percentage){
+                //     return;
+                // }
                 var retailShippingIds = [];
                 var productPercentages = [];
                 $("#tableBody").find("tr").each(function() {
@@ -772,18 +805,11 @@
                     retailShippingIds.push(selectedOption);
                     productPercentages.push(productPercentage);
                 });
-
-                // Append shipping data to the form before submission
                 $(this).append("<input type='hidden' name='retail_shipping_mode_id' value='" + JSON.stringify(retailShippingIds) + "'>");
                 $(this).append("<input type='hidden' name='product_percentage' value='" + JSON.stringify(productPercentages) + "'>");
 
                 this.submit();
             });
-
-
-
-
-
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function(event) {
                 var selectedOption = $("#retail_shipping_mode_id_edit option:selected").text();
@@ -813,10 +839,6 @@
                     $(this).closest('tr').remove();
                 });
             });
-
-
-
-
 
             $("#edit_retail_product_add_btn").on('click', function (event) {
                 var selectedOptionEdit = $("#retail_shipping_mode_id_edit option:selected").text();
@@ -860,7 +882,6 @@
                 // if (!gst_commission || !withholding_tax_percentage){
                 //     return;
                 // }
-                // alert(1);
                 var retailShippingIdsEdit = [];
                 var productPercentagesEdit = [];
                 $("#editTableBody").find("tr").each(function() {
