@@ -188,7 +188,7 @@ class ReturnV2Controller extends Controller
                             $shipment = $assigned_shipment->shipment_id;
                         }
                         if ($shipment) {
-                            $shipment = Shipment::find($shipment->id ?? $shipment);
+                            $shipment = Shipment::find($shipment->shipment_id ?? $shipment);
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
