@@ -1680,86 +1680,105 @@
                                     action: function(e, dt, node, config) {
                                         if (selected_rows != '' && restricted_rows.length == 0) {
                                             swal({
-                                                title: 'Are You Sure?',
-                                                text: 'Select Yes to change shipment status to Re-Attempt!',
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'No',
+                                            title: 'Enter Your Remarks',
+                                            icon: 'info',
+                                            content: "input",
+                                            buttons: {
+                                            cancel: {
+                                                        text: 'Cancel',
                                                         value: null,
                                                         visible: true,
                                                         closeModal: true,
                                                     },
-                                                    confirm: {
-                                                        text: 'Yes',
-                                                        value: true,
-                                                        visible: true,
-                                                        closeModal: true
+                                            confirm: {
+                                                        text: "Submit",
                                                     }
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            }).then(function(confirm) {
-                                                if (confirm) {
-                                                    blockPagePermanently();
-                                                    table.rows().nodes().each(function(index) {
-                                                        var row = table.row(index);
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            }).then(function(remarks){
 
-                                                        if ($(row.node()).hasClass(
-                                                                'selected')) {
-                                                            var id = parseInt(row.id());
-                                                            var remark = $(row.node())
-                                                                .find(
-                                                                    'td.shipment_remarks textarea'
-                                                                ).val();
-                                                            shipment_remarks[id] =
-                                                                remark;
+                                                if (remarks !== null) { 
+
+                                                    swal({
+                                                    title: 'Are You Sure?',
+                                                    text: 'Select Yes to change shipment status to Re-Attempt!',
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'No',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                        confirm: {
+                                                            text: 'Yes',
+                                                            value: true,
+                                                            visible: true,
+                                                            closeModal: true
                                                         }
-                                                    });
-
-                                                    $.ajax({
-                                                        url: "{{ route('admin.return.reattempt.status') }}",
-                                                        method: 'POST',
-                                                        data: {
-                                                            'shipment_ids': selected_rows,
-                                                            '_token': '{{ csrf_token() }}',
-                                                            'action': 'reattempt',
-                                                            'remark': shipment_remarks
-                                                        }
-                                                    }).done(function(data) {
-                                                        UnblockPagePermanently();
-                                                        selected_rows = [];
-                                                        restricted_rows = [];
-                                                        shipment_remarks = {};
-                                                        table.button('.confirm')
-                                                            .disable();
-                                                        table.button('.re-attempt')
-                                                            .disable();
-                                                        table.button('.assign')
-                                                            .disable();
-                                                        table.button('.un-assign')
-                                                            .disable();
-                                                        table.rows().deselect();
-                                                        table.draw('false');
-
-                                                        if (data.status == 1) {
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                    }).then(function(confirm) {
+                                                    if (confirm) {
+                                                        blockPagePermanently();
+                                                        table.rows().nodes().each(function(index) {
+                                                            var row = table.row(index);
+    
+                                                            if ($(row.node()).hasClass(
+                                                                    'selected')) {
+                                                                var id = parseInt(row.id());
+                                                                shipment_remarks[id] =
+                                                                remarks;
+                                                            }
+                                                        });
+    
+                                                        $.ajax({
+                                                            url: "{{ route('admin.return.reattempt.status') }}",
+                                                            method: 'POST',
+                                                            data: {
+                                                                'shipment_ids': selected_rows,
+                                                                '_token': '{{ csrf_token() }}',
+                                                                'action': 'reattempt',
+                                                                'remark': shipment_remarks
+                                                            }
+                                                        }).done(function(data) {
                                                             UnblockPagePermanently();
+                                                            selected_rows = [];
+                                                            restricted_rows = [];
+                                                            shipment_remarks = {};
+                                                            table.button('.confirm')
+                                                                .disable();
+                                                            table.button('.re-attempt')
+                                                                .disable();
+                                                            table.button('.assign')
+                                                                .disable();
+                                                            table.button('.un-assign')
+                                                                .disable();
+                                                            table.rows().deselect();
                                                             table.draw('false');
-                                                            toastr.success(data.success,
-                                                                'Success!', {
-                                                                    positionClass: 'toast-bottom-center',
-                                                                    containerId: 'toast-bottom-center'
-                                                                });
-                                                        } else {
-                                                            UnblockPagePermanently();
-                                                            toastr.error(data.error,
-                                                                'Error!', {
-                                                                    positionClass: 'toast-top-center',
-                                                                    containerId: 'toast-top-center'
-                                                                });
-                                                        }
-
+    
+                                                            if (data.status == 1) {
+                                                                UnblockPagePermanently();
+                                                                table.draw('false');
+                                                                toastr.success(data.success,
+                                                                    'Success!', {
+                                                                        positionClass: 'toast-bottom-center',
+                                                                        containerId: 'toast-bottom-center'
+                                                                    });
+                                                            } else {
+                                                                UnblockPagePermanently();
+                                                                toastr.error(data.error,
+                                                                    'Error!', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
+                                                            }
+    
+                                                        });
+                                                    }
                                                     });
                                                 }
                                             });
