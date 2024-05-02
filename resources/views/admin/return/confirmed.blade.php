@@ -295,70 +295,94 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows !== '' && restricted_rows.length == 0){
+
                                 swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Are you sure, you want to revert this Shipment?',
-                                    icon: 'warning',
+                                    title: 'Enter Your Remarks',
+                                    icon: 'info',
+                                    content: "input",
                                     buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
+                                    cancel: {
+                                                text: 'Cancel',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                    confirm: {
+                                                text: "Submit",
+                                            }
                                     },
                                     closeOnClickOutside: false,
                                     closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        blockPagePermanently();
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
+                                    }).then(function(remarks){
 
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.remarks input').val();
-                                                shipment_remarks[id] = remark;
-                                            }
-                                        });
-                                        //alert(selected_rows);
-                                    $.ajax({
-                                        url:"{{route('admin.return.confirmed.revert.status')}}",
-                                        method:'POST',
-                                        data:{
-                                            'shipment_ids':selected_rows,
-                                            '_token':'{{ csrf_token() }}',
-                                            'action': 'revert',
-                                            'remark': shipment_remarks
-                                        }
-                                    })
-                                    .done(function (data) {
-                                        UnblockPagePermanently();
-                                        table.draw(false);
+                                        if (remarks !== null) { 
 
-                                        if (data.status == 0) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
+                                            swal({
+                                                title: 'Are You Sure?',
+                                                text: 'Are you sure, you want to revert this Shipment?',
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'No',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Yes',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            }).then(function (confirm) {
+                                                if (confirm) {
+                                                    blockPagePermanently();
+                                                    table.rows().nodes().each(function(index) {
+                                                        var row = table.row(index);
+
+                                                        if ($(row.node()).hasClass('selected')) {
+                                                            var id = parseInt(row.id());
+                                                            shipment_remarks[id] = remarks;
+                                                        }
+                                                    });
+                                                    //alert(selected_rows);
+                                                $.ajax({
+                                                    url:"{{route('admin.return.confirmed.revert.status')}}",
+                                                    method:'POST',
+                                                    data:{
+                                                        'shipment_ids':selected_rows,
+                                                        '_token':'{{ csrf_token() }}',
+                                                        'action': 'revert',
+                                                        'remark': shipment_remarks
+                                                    }
+                                                })
+                                                .done(function (data) {
+                                                    UnblockPagePermanently();
+                                                    table.draw(false);
+
+                                                    if (data.status == 0) {
+                                                        toastr.success(data.success, 'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastr.error(data.error, 'Error!', {
+                                                            positionClass: 'toast-top-center',
+                                                            containerId: 'toast-top-center'
+                                                        });
+                                                    }
+                                                        table.button('.revert').disable();
+                                                });
+                                                }
                                             });
+
                                         }
-                                        else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                            table.button('.revert').disable();
                                     });
-                                    }
-                            });
 
                             }else{
                                 var error = "Not selected any shipments!";

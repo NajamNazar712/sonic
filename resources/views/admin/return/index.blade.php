@@ -1727,11 +1727,9 @@
                                                         table.rows().nodes().each(function(index) {
                                                             var row = table.row(index);
     
-                                                            if ($(row.node()).hasClass(
-                                                                    'selected')) {
+                                                            if ($(row.node()).hasClass('selected')) {
                                                                 var id = parseInt(row.id());
-                                                                shipment_remarks[id] =
-                                                                remarks;
+                                                                shipment_remarks[id] = remarks;
                                                             }
                                                         });
     
