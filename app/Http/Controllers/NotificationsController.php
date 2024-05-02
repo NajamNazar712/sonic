@@ -11039,28 +11039,28 @@ class NotificationsController extends Controller
                     $lead_ids = $reference_1_id;
                     $tokens = $reference_2_id;
                     
-                    foreach($lead_ids as $key => $lead_id) {
+                    foreach ($lead_ids as $key => $lead_id) {
                         $lead = Lead::find($lead_id);
-                        
                         $route = route('cod.signup', ['id' => $lead->id, 'token' => $tokens[$key]]);
                         $link = '<a href="' . $route . '">Click here to sign up</a>';
-                        
+                    
+                        $body = $notification->body; // Reset $body to its original state
+                        $subject = $notification->subject;  // Reset $subject to its original state
+
                         if (strpos($body, '[Link]') !== FALSE) {
-                            $body = str_replace('[Link]', $link, $body);
+                            $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
                         }
                         if (strpos($body, '[Company Name]') !== FALSE) {
-                            $body = str_replace('[Company Name]', $lead->company, $body);
+                            $body = str_replace('[Company Name]', $lead->company, $body); // Use $body instead of $old_body
                         }
-
                         if (strpos($body, '[Full Name]') !== FALSE) {
-                            $body = str_replace('[Full Name]', $lead->contact_person, $body);
+                            $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
                         }
-
                         if (strpos($subject, '[Company Name]') !== FALSE) {
                             $subject = str_replace('[Company Name]', $lead->company, $subject);
                         }
-                        self::email($subject, $body, $lead->email_address);
-                    }
+                        self::email($subject, $body, $lead->email_address); // Send email with $body
+                    }                    
                 }
             }
         }

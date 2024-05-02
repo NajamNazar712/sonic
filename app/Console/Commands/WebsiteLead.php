@@ -66,9 +66,9 @@ class WebsiteLead extends Command
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
-        $new_leads = array();
-        $token_added = array();
         $leads_added = array();
+        $old_leads = array();
+        $token_added = array();
 
         if($response->status == 0){
             $leads = $response->leads;
@@ -128,7 +128,7 @@ class WebsiteLead extends Command
                     $lead_log->save();
                     $leads_added[] = $new_lead->id;
                     $token_added[$key] = $token;
-
+                    $old_leads[] = $lead->id;
                 }
             }
         }
@@ -138,16 +138,12 @@ class WebsiteLead extends Command
             $client->delete('leads', [
                 'form_params' => [
                     "token" => 'TraxOnlinePvtLtdAYWD',
-                    "ids" => $leads_added
-                ]
-            ]);
+                    "ids" => $old_leads
+                    ]
+                ]);
         }
 
-        if(count($leads_added) > 0){
-            // NotificationsController::send(203, $new_leads, Carbon::today());
-            NotificationsController::send(230, $leads_added, $token_added);
-
-        }
+        
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 
