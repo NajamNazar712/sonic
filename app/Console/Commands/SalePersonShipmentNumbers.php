@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\SalesPersonNumbersReportController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class SalePersonShipmentNumbers extends Command
 {
@@ -43,5 +44,6 @@ class SalePersonShipmentNumbers extends Command
         $date = Carbon::yesterday()->format('Y-m-d');
         $response = SalesPersonNumbersReportController::sale_person_numbers_overall($date . ' 00:00:00');
         NotificationsController::send(47, $date, $response);
+        Log::channel('cronJobLog')->info('s ' .'saleperson:numbers Running');
     }
 }
