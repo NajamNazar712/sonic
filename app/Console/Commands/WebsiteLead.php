@@ -141,9 +141,13 @@ class WebsiteLead extends Command
                     "ids" => $old_leads
                     ]
                 ]);
+            
+            NotificationsController::send(230, $leads_added, $token_added);
         }
 
-        
+        // if(count($old_leads) > 0){
+        //     NotificationsController::send(203, $old_leads, Carbon::today());
+        // }
 
         Log::channel('cronJobLog')->info('s ' .'website:leads Running');
 

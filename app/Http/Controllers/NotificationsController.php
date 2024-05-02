@@ -11034,8 +11034,8 @@ class NotificationsController extends Controller
                     
                
                 } else if ($id == 230){
-                    $subject = $notification->subject;
-                    $body = $notification->body;
+                    // $subject = $notification->subject;
+                    // $body = $notification->body;
                     $lead_ids = $reference_1_id;
                     $tokens = $reference_2_id;
                     
