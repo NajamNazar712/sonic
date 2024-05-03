@@ -4570,7 +4570,7 @@ class AdminReportsController extends Controller
                                     ->on('s.consignee_city_id', '=', 'zcc.city_id');
                             });
                     } else {
-                        $rows = $rows->join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
+                        $rows = $rows->join('cities', 'cities.id', '=', 's.consignee_city_id');
                     }
 
                     if ($type == 'status_not_attempted') {
