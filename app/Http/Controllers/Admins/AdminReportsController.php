@@ -4552,19 +4552,18 @@ class AdminReportsController extends Controller
 
             foreach ($hubs as $hub) {
                 foreach ($types as $type) {
-                    $rows = DB::table('cities');
+                    $rows = DB::table('shipments as s');
 
                     if ($type == 'status_not_attempted' || $type == 'delivery_tomorrow') {
-                        $rows = $rows->join('shipments as s', function ($join) {
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
+                            ->join('cities', function ($join) {
                             $join->where(function ($query) {
                                 $query->where('cities.id', '=', DB::raw('s.consignee_city_id'))
                                     ->orWhere(function ($sub_query) {
-                                        $sub_query->on('cities.id', '=', DB::raw('(select usii.city_id from user_shipping_infos as usii where usii.id = s.pickup_address_id)'));
+                                        $sub_query->on('cities.id', '=',DB::raw('usi.city_id'));
                                     });
                             });
-                        })
-                            ->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
-                            ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
+                        })->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                             //->leftjoin('cities as sch', 's.consignee_city_id', '=', 'sch.id')
                             ->leftjoin('zone_class_cities as zcc', function ($join) {
                                 $join->on('pc.zone_id', '=', 'zcc.zone_id')
