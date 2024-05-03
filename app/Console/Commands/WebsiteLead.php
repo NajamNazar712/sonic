@@ -14,6 +14,8 @@ use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\LeadReference;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\LeadTaggingController;
+use App\Http\Models\Admin\Lead\LeadZone;
+use App\Http\Models\Admin\SalePersonTag;
 
 class WebsiteLead extends Command
 {
@@ -79,6 +81,7 @@ class WebsiteLead extends Command
                     $city = City::where('name', $lead->data->city_name[0])->first();
                     if($city){
                         $city_id = $city->id;
+                     
                     }
                     else{
                         continue;
@@ -113,7 +116,7 @@ class WebsiteLead extends Command
                     $new_lead->average_shipment_per_week = $lead->data->avg_shipment;
                     $new_lead->average_parcel_cod_amount = $lead->data->avg_parcel;
                     $new_lead->business_address = $lead->data->business_address;
-                    $new_lead->company = $lead->data->company_name;
+                    $new_lead->company_name = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
                     $new_lead->referral_id = $reference_id;
                     $new_lead->activation_code = $token;
@@ -129,6 +132,9 @@ class WebsiteLead extends Command
                     $leads_added[] = $new_lead->id;
                     $token_added[$key] = $token;
                     $old_leads[] = $lead->id;
+
+
+                    
                 }
             }
         }

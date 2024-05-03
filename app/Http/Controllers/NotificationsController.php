@@ -11051,13 +11051,13 @@ class NotificationsController extends Controller
                             $body = str_replace('[Link]', $link, $body); // Use $body instead of $old_body
                         }
                         if (strpos($body, '[Company Name]') !== FALSE) {
-                            $body = str_replace('[Company Name]', $lead->company, $body); // Use $body instead of $old_body
+                            $body = str_replace('[Company Name]', $lead->company_name, $body); // Use $body instead of $old_body
                         }
                         if (strpos($body, '[Full Name]') !== FALSE) {
                             $body = str_replace('[Full Name]', $lead->contact_person, $body); // Use $body instead of $old_body
                         }
                         if (strpos($subject, '[Company Name]') !== FALSE) {
-                            $subject = str_replace('[Company Name]', $lead->company, $subject);
+                            $subject = str_replace('[Company Name]', $lead->company_name, $subject);
                         }
                         self::email($subject, $body, $lead->email_address); // Send email with $body
                     }                    

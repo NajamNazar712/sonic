@@ -112,30 +112,29 @@ class LoginController extends Controller
         $attempt = Auth::guard('web')->attempt($this->credentials($request), $request->filled('remember'));
 
         
-        // dd($request->all());
-
-
-
+        
+        
+        
         if ($attempt) {
             session(['user_type' => 1]);
         }
         else {
             $attempt = Auth::guard('substitute_users')->attempt($this->credentials($request), $request->filled('remember'));
-
+            
             if ($attempt) {
                 session(['user_type' => 2]);
             }
         }
-
+        
         return $attempt;
     }
-
+    
     protected function sendLoginResponse(Request $request)
     {
         $request->session()->regenerate();
-
+        
         $this->clearLoginAttempts($request);
-
+        
         if (session('user_type') == 1) {
             $guard = Auth::guard('web');
         }
@@ -159,7 +158,7 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if ($user->status != 3) {
+            else if ($user->status != 3 || $user->status != 0) {
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
             }

@@ -9,6 +9,15 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
+        
+                @if($user->status == 0)
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%; background-color: {{ $color }};" aria-valuenow="{{ $percentage }}">
+                            {{ $percentage }}%
+                        </div>
+                    </div>
+                @endif
+            
                 <div class="row">
                         <div class="col">
                         <table class="table table-bordered">

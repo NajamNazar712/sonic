@@ -2,127 +2,131 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Auth;
+use Carbon\Carbon;
 use App\DailyVisit;
-use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
-use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\Http\Controllers\ShipperAgreementController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
-use App\Http\Models\Admin\ReattemptPercentageForShipper;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\AverageShipmentCycle;
-use App\Http\Models\BookingType;
-use App\Http\Models\BookingTypeCharges;
-use App\Http\Models\BusinessCategory;
-use App\Http\Models\CashHandlingCharge;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Consolidation;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CorporateBookingTypeCharge;
-use App\Http\Models\CorporateCashHandlingCharge;
-use App\Http\Models\CorporateDefaultCashHandlingCharge;
-use App\Http\Models\CorporateDefaultDiscountCharge;
-use App\Http\Models\CorporateDefaultFuelSurcharge;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\CorporateDefaultRateStatus;
-use App\Http\Models\CorporateDefaultReturnCharge;
-use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateDiscountCharge;
-use App\Http\Models\CorporateFuelSurcharge;
-use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CorporateMinChargeableWeight;
-use App\Http\Models\CorporateRateStatus;
-use App\Http\Models\CorporateReturnCharge;
-use App\Http\Models\CorporateReturnChargeZoneWise;
-use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CorporateWeightChargeZoneWise;
-use App\Http\Models\CRM\CrmRequestCaseNature;
-use App\Http\Models\CRM\CrmRequestCaseNatureType;
-use App\Http\Models\CRM\CrmRequestChannel;
-use App\Http\Models\DiscountCharge;
-use App\Http\Models\DiscountWeightCharge;
-use App\Http\Models\DonePayment;
-use App\Http\Models\DonePaymentShipment;
-use App\Http\Models\FuelSurcharge;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\InvoicingCycle;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialTypes;
-use App\Http\Models\PaymentMode;
-use App\Http\Models\Product;
-use App\Http\Models\RateRemark;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
-use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
-use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
-use App\Http\Models\Rates\RateDestinationHub;
-use App\Http\Models\Rates\RateOriginHub;
-use App\Http\Models\RateStatus;
-use App\Http\Models\Reference;
-use App\Http\Models\ReturnCharge;
+use GuzzleHttp\Client;
+use App\RouteLocations;
+use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\Http\Models\ShipmentPaymentStatus;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\Shipper\ShipperPayment;
-use App\Http\Models\Shipper\UserOtpVerification;
-use App\Http\Models\ShipperContact;
-use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use App\Http\Models\UserDocumentAttachment;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\WeightCharge;
-use App\Http\Models\WMS\WmsCurrentStock;
-use App\Http\Models\WMS\WmsLabellingCharge;
-use App\Http\Models\WMS\WmsPackingCharge;
-use App\Http\Models\WMS\WmsPendingPicking;
-use App\Http\Models\WMS\WmsPerProductCharge;
-use App\Http\Models\WMS\WmsPerSquareFootCharge;
-use App\Http\Models\WMS\WmsShipmentProduct;
-use App\Http\Models\WMS\WmsStorageType;
-use App\Http\Models\WMS\WmsStorageTypeCharge;
-use App\Http\Models\WMS\WmsUserInformation;
-use App\RouteLocations;
-use GuzzleHttp\Client;
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\BanksList;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\DisputeType;
-use App\Http\Models\PackagingCharge;
-use App\Http\Models\Shipment;
-use App\Http\Models\City;
-use App\Http\Models\UserDefaultBankDuration;
-use Auth;
+use App\Http\Models\Product;
 use App\Http\Models\Segment;
-
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Http\Models\Reference;
+use App\Http\Models\RateRemark;
+use App\Http\Models\RateStatus;
+use App\Http\Models\AccountType;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\DisputeType;
+use App\Http\Models\DonePayment;
+use App\Http\Models\PaymentMode;
 use Yajra\Datatables\Datatables;
-use Carbon\Carbon;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Retail\OtherParcelReceiving;
-use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
-use App\Http\Models\Admin\Retail\OtherRetailShipment;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Admin\PODImage;
+use App\Http\Models\PaymentCycle;
+use App\Http\Models\ReturnCharge;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\WeightCharge;
+use App\Http\Models\Consolidation;
+use App\Http\Models\FuelSurcharge;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\Sister_account\MergedSisterAccount;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\PODImage;
+use App\Http\Models\DiscountCharge;
+use App\Http\Models\InvoicingCycle;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipperContact;
+use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\InsuranceCharge;
+use App\Http\Models\PackagingCharge;
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\BookingTypeCharges;
+use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\SubCategorySegment;
+use App\Http\Models\WMS\WmsStorageType;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateRateStatus;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\Admin\GlobalSettings;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\DiscountWeightCharge;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\WMS\WmsPackingCharge;
+use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CorporateFuelSurcharge;
+use App\Http\Models\PackagingMaterialTypes;
+use App\Http\Models\Shipper\ShipperPayment;
+use App\Http\Models\UserDocumentAttachment;
+use App\Http\Models\WMS\WmsLabellingCharge;
+use App\Http\Models\WMS\WmsShipmentProduct;
+use App\Http\Models\WMS\WmsUserInformation;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\UserDefaultBankDuration;
+use App\Http\Models\WMS\WmsPerProductCharge;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\ShipperNotificationEmail;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\WMS\WmsStorageTypeCharge;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\CorporateBookingTypeCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\ShipperVerificationPinCode;
+use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\CorporateCashHandlingCharge;
+use App\Http\Models\Shipper\UserOtpVerification;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
+
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipperAgreementController;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\Admin\Retail\OtherRetailShipment;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Models\Admin\UserShippingInfoStoreAddress;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
+use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -250,9 +254,25 @@ class ShipperDashboardController extends Controller
                         ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
                 }
 
-
-
-
+                $percentage = null; 
+                $user = User::find($shipper_id);
+                $weight_charges = WeightCharge::where('user_id' , $shipper_id);
+                if($user->status == 0){
+                    $percentage = 30;
+                    $color = '#FF4961';
+                }else if($weight_charges->exists()){
+                    $percentage = 50;
+                    $color = '#FF9149';
+                }else if ($user->rates_added_by == 346 && $user->rates_authorized_by == 346){
+                    $percentage = 80;
+                    $color = '#1E9FF2';
+                }else if ($user->document_status == 2 && $user->status == 2){
+                    $percentage = 95;
+                    $color = '#ffd700';
+                }else if ($user->status == 3){
+                    $percentage = 100;
+                    $color = '#00d082';
+                }
 
                 /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
                 if($shipper_payment->exists()){
@@ -263,7 +283,7 @@ class ShipperDashboardController extends Controller
                 }*/
                 $shipper_payment = null;
 
-                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment, 'percentage' => $percentage, 'user' => $user, 'color' => $color]);
             }
  
         }
@@ -2310,5 +2330,70 @@ class ShipperDashboardController extends Controller
         }
     }
 
-    
+    public function wordpressLeadRegistration(){
+          /*if($lead_id == NULL){
+            return redirect()->route('cod.getstarted');
+        }*/
+
+        $user = User::find(session('user_id'));
+        $lead = Lead::find($user->lead_id);
+        $account_type = AccountType::all();
+        $products = Product::all();
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->where('business_category_id' ,1)->where('id','!=',1244)->get();
+        $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
+        $references = Reference::all();
+        $average_shipment_durations = AverageShipmentCycle::all();
+//        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
+        $segments = Segment::all();
+        $sub_segments = SubCategorySegment::all();
+        $payment_cycles = PaymentCycle::all();
+
+
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        $invoicing_cycle = InvoicingCycle::all();
+        return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user]);
+    }
+
+
+
+    public function sales_person(Request $request){
+
+        $id = $request->id;
+        if($id){
+            $sales_persons_city = City::where('id', $id);
+            if ($sales_persons_city->exists()){
+                $sales_persons_city = $sales_persons_city->first();
+                $hub_id = $sales_persons_city->hub_id;
+                $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
+
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')
+                    ->select(['admins.id', 'admins.name'])
+                    ->where('admins.status', 1)
+                    ->where('ar.department_id', 7)
+                    ->whereIn('admins.id', $admin_ids)
+                    ->where('ar.id','!=' ,4)
+                    ->where('ar.id','!=' ,75)
+                    ->where('ar.id','!=' ,67)
+                    ->where('ar.id','!=' ,43)
+                    ->get();
+
+                return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
+            }else{
+                $sale_person_admin = City::find($id)->name;
+                return response()->json(['status' => 1, 'error' => 'No sales person found for the selected city: ' . $sale_person_admin]);
+            }
+        }
+    }
+
+    public function get_sub_segment(Request $request){
+        $sub_segments = SubCategorySegment::where('segment_id',$request->segment_id);
+        if($sub_segments->exists()){
+            $sub_segments = $sub_segments->get();
+            return response()->json(['status' => 0, 'sub_segments' => $sub_segments]);
+        }else{
+            return response()->json(['status' => 1]);
+        }
+    }
 }

@@ -91,6 +91,8 @@
                                                    <input type="hidden" name="nature_of_account" value="1">
                                                    <input type="hidden" name="wordpress_lead_register" value="1">
                                                    <input type="hidden" name="lead_id" value="{{ $lead->id }}">
+                                                   <input type="hidden" name="name" value="{{ $lead->company_name }}">
+                                                   <input type="hidden" name="phone" value="{{ $lead->phone_number }}">
 
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>

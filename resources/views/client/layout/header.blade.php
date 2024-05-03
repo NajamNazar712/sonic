@@ -7,17 +7,24 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title') - Sonic | Trax</title>
 <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon_new.png') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon_new-32x32.png') }} ">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon_new-32x32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon_new-16x16.png') }}">
-<link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon_new.ico') }}">
-<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
-rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/vendors.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/menu/menu-types/vertical-overlay-menu.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/colors/palette-gradient.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon_new.ico') }}">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/vendors.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/app.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/core/menu/menu-types/vertical-overlay-menu.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/core/colors/palette-gradient.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/forms/wizard.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/pages/login-register.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('css/login.css') }}?v=2.6">
+
 <style>
     .feedback {
         display: flex;
