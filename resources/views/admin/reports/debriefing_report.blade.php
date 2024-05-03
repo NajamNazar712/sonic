@@ -40,7 +40,7 @@
                         </fieldset>
                     </div>
 
-                    <div class="form-group input-group col-4">
+                    <div class="form-group input-group col-4 d-none">
                         <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
