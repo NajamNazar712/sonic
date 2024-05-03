@@ -4660,11 +4660,11 @@ class AdminReportsController extends Controller
                         $rows = $rows->where(function ($query) use ($arrival_cut_off_time, $from) {
                             $query->where(function ($sub_query) use ($arrival_cut_off_time) {
                                 $sub_query->where(function ($sub_sub_query) {
-                                    $sub_sub_query->where(function ($sub_sub_sub_query) {
-                                        $sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
-                                            ->where('cities.id', '=', DB::raw('usi.city_id'))
-                                            ->where('sj.shipper_status_id', 2);
-                                    })
+                                        $sub_sub_query->where(function ($sub_sub_sub_query) {
+                                            $sub_sub_sub_query->where('usi.city_id', '=', DB::raw('s.consignee_city_id'))
+                                                ->where('cities.id', '=', DB::raw('usi.city_id'))
+                                                ->where('sj.shipper_status_id', 2);
+                                        })
                                         ->orWhere(function ($sub_sub_sub_query) {
                                             $sub_sub_sub_query->where('usi.city_id', '!=', DB::raw('s.consignee_city_id'))
                                                 ->where('cities.id', '=', DB::raw('s.consignee_city_id'))
@@ -4700,7 +4700,7 @@ class AdminReportsController extends Controller
 
                     }
                     if(!empty($date_start)){
-                        $rows = $rows->whereBetween('s.created_at',[$date_start,$from]);
+                        //$rows = $rows->whereBetween('s.created_at',[$date_start,$from]);
                         //$date_start = date('Y-m-d H:i:s',strtotime($from.'-6 months'));
                     }
 
