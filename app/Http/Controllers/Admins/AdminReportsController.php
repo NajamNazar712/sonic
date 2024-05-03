@@ -4494,7 +4494,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones, 'shipping_modes' => $shipping_modes]);
     }
 
-    static function debriefing_data($date, $hub, $zone, $export = FALSE, $mode)
+    static function debriefing_data($date, $hub, $zone, $export = FALSE, $mode,$date_start =null)
     {
 
         $settings = DB::table('global_settings')->where('type', 'debriefing_report_arrival_cut_off_time')->first();
@@ -4535,7 +4535,7 @@ class AdminReportsController extends Controller
                 $from = Carbon::today()->addHour($day_cut_off_time)->toDateTimeString();
                 $to = Carbon::tomorrow()->addHour($day_cut_off_time)->subSecond()->toDateTimeString();
             }
-            $start = date('Y-m-d H:i:s',strtotime($from.'-6 months'));
+
             $from_month_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from_month)->first()->id;
             $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->first()->id;
             $to_id = DB::table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('verification', 1)->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
@@ -4650,7 +4650,6 @@ class AdminReportsController extends Controller
                             //     });
                             // });
                         });
-                        $rows = $rows->whereBetween('s.created_at',[$start,$from]);
                     } else if ($type == 'confirmation_pending') {
                         $rows = $rows->where('sj.shipper_status_id', '=', 12);
                     } else if ($type == 'fake_status') {
@@ -4698,9 +4697,12 @@ class AdminReportsController extends Controller
                             //     });
                             // });
                         });
-                        $rows = $rows->whereBetween('s.created_at',[$start,$from]);
-                    }
 
+                    }
+                    if(!empty($date_start)){
+                        $rows = $rows->whereBetween('s.created_at',[$date_start,$from]);
+                        //$date_start = date('Y-m-d H:i:s',strtotime($from.'-6 months'));
+                    }
 
                     $rows = $rows->select('s.tracking_number')
                         ->where('cities.hub_id', $hub->id);
@@ -4851,15 +4853,16 @@ class AdminReportsController extends Controller
 
     public function debriefing_list(Request $request)
     {
+        $date_start = $request->get('search_date_start');
         $date = $request->get('search_date');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
 
-        return self::debriefing_data($date, $hub, $zone, NULL, $mode);
+        return self::debriefing_data($date, $hub, $zone, NULL, $mode,$date_start);
     }
 
-    static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type)
+    static public function debriefing_export_file($date, $hub, $zone, $mode, $report_type,$date_start = null)
     {
         $file_name = 'debriefing_report_';
 
@@ -4879,7 +4882,7 @@ class AdminReportsController extends Controller
 
         $details[] = ['Hubs', 'Delivered', 'Delivery Unsuccessful', 'On Hold', 'Status Not Attempted', 'Fake Status', 'Confirmation Pending', 'Total', 'Ratio', 'Delivery Note Pending', 'Total', 'Ratio', 'Delivery Tomorrow', 'Grand Total', 'Ratio'];
 
-        $result = self::debriefing_data($date, $hub, $zone, TRUE, $mode);
+        $result = self::debriefing_data($date, $hub, $zone, TRUE, $mode,$date_start);
 
         if ($result['status'] == 0) {
             $types = ['delivered', 'delivery_unsucessful', 'on_hold', 'status_not_attempted', 'fake_status', 'confirmation_pending', 'total_1', 'total_1_ratio', 'delivery_note_pending', 'total_2', 'total_2_ratio', 'delivery_tomorrow', 'grand_total', 'grand_total_ratio'];
@@ -5048,11 +5051,12 @@ class AdminReportsController extends Controller
     public function debriefing_export(Request $request)
     {
         $date = $request->get('search_date');
+        $date_start = $request->get('search_date_start');
         $hub = $request->get('search_hub');
         $zone = $request->get('search_zone');
         $mode = $request->get('search_shipping_mode');
         ActivityTrailController::createActivityTrailLog(Auth::id(), 162);
-        return self::debriefing_export_file($date, $hub, $zone, $mode, 0);
+        return self::debriefing_export_file($date, $hub, $zone, $mode, 0,$date_start);
     }
 
     static public function debriefing_hub_wise_report($date)
