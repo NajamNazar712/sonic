@@ -342,6 +342,12 @@ class AdminCnController extends Controller
         }
 
         try {
+
+            if($request->cn_to < $request->cn_from)
+            {
+                return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
+            }
+
             $cn_issue =  TraxCnIssueToRider::where('area_code', 202)
                 ->where(function ($query) use ($request) {
                     $query->where('cn_from', '<=', $request->cn_from)
@@ -367,10 +373,7 @@ class AdminCnController extends Controller
                 ->latest('id');
 
             if($cn_store->exists()){
-                if($request->cn_to < $request->cn_from)
-                {
-                    return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
-                }
+
                 $time_stamp = now();
                 $quantity = ($request->cn_to - $request->cn_from + 1);
                 $child_cn = [];
@@ -498,7 +501,7 @@ class AdminCnController extends Controller
         return view('admin.logistic.cn_child_receive_admin_store')->with(['cities'=>$cities]);
     }
 
-    public function cn_child_receive_admin_store_list()
+    public function cn_child_receive_admin_store_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 776);
@@ -550,8 +553,26 @@ class AdminCnController extends Controller
 
 
         try {
+            if($request->cn_to < $request->cn_from)
+            {
+                return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
+            }
+            $cn_store =  TraxChildCnReceiveAdminStore::where('area_code', $request->area_code)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1);
+
+            if($cn_store->exists()){
+                return  redirect()->back()->with('error','Duplicate Cn found!');
+            }
+
             $date= Carbon::now()->toDateString();
-                $quantity = ($request->cn_to-$request->cn_from +1);
+            $quantity = ($request->cn_to-$request->cn_from +1);
 
             $child_cn_admin = new TraxChildCnReceiveAdminStore();
             $child_cn_admin->company_code = $request->company_code;
@@ -679,6 +700,35 @@ class AdminCnController extends Controller
         }
 
         try {
+            if($request->cn_to < $request->cn_from)
+            {
+                return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
+            }
+            $cn_issue =  TraxChildCnIssueToRider::where('area_code', 202)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1);
+            if($cn_issue->exists()){
+                return  redirect()->back()->with('error','CN Issued Already to Rider');
+            }
+
+            $cn_store =  TraxChildCnReceiveAdminStore::where('area_code', 202)
+                ->where(function ($query) use ($request) {
+                    $query->where('cn_from', '<=', $request->cn_from)
+                        ->where('cn_to', '>=', $request->cn_from)
+                        ->orWhere('cn_from', '<=', $request->cn_to)
+                        ->where('cn_to', '>=', $request->cn_to)
+                        ->orWhere('cn_from', '>=',$request->cn_from)
+                        ->where('cn_to', '<=', $request->cn_to);
+                })->where('status',1)
+                ->latest('id');
+
+
             $time_stamp = now();
             $quantity = ($request->cn_to - $request->cn_from +1);
             $child_cn = [];

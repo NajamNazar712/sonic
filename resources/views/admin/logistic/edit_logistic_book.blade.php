@@ -580,8 +580,10 @@
                                             </div>
                                             <div class="row mt-4">
                                                 <div class="col-md-12 text-center" style="border: 1px solid lightgrey; padding:7px;">
-                                                    <button type="submit" name="book" id="add" class="btn btn-primary w-50" value="Book">Book</button>
-                                                    <button type="button" name="book" id="add" class="btn btn-danger" value="Book">Skip Entry</button>
+                                                    <button type="submit" name="book" id="add" class="btn btn-primary w-50" value="Book">Update Booking</button>
+                                                    @if(isset($batch_id) && $batch_id!=0)
+                                                        <a href="{{route('admin.logistic.batch.batch_bookings',['batch_id'=>$batch_id])}}" class="btn btn-danger">Skip Entry</a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

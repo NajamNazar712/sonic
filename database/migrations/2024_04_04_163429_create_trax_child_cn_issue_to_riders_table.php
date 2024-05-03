@@ -18,6 +18,7 @@ class CreateTraxChildCnIssueToRidersTable extends Migration
             $table->integer('child_admin_store_id')->nullable();
             $table->string('company_code')->nullable();
             $table->integer('rider_id');
+            $table->integer('arae_code')->nullable();
             $table->bigInteger('cn_from');
             $table->bigInteger('cn_to');
             $table->integer('quantity')->nullable();

@@ -542,7 +542,19 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function (form) {
-                    form.submit();
+                    var cn_to = parseInt($(form).find('[name="cn_to"]').val());
+                    var cn_from = parseInt($(form).find('[name="cn_from"]').val());
+
+                    if((cn_to < cn_from))
+                    {
+                        toastr.error('CN To Must be grater than or equal to  CN From!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+
+                    }else{
+                        form.submit();
+                    }
                 }
             });
             $("#edit_child_cn_receive_admin_store_form").validate({

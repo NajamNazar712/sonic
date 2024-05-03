@@ -4149,7 +4149,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
         Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
         Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
-        Route::get('edit/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
+        Route::get('edit/?{batch_id}/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
         Route::put('update','Admins\Logistic\AdminLogisticBookingController@update')->name('update');
 
 //        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');

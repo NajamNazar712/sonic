@@ -79,7 +79,7 @@ class AdminLogisticBookingController extends Controller
             ->addColumn('action',function ($logistic_bookings){
                 if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
 //                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                      $edit_button = '<a href="' . route("admin.logistic.edit", ["booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
+                      $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>0,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 
                     $dropdown = '
                             <div class="btn-group">
@@ -130,9 +130,9 @@ class AdminLogisticBookingController extends Controller
 
 
         $datatables = Datatables::of($logistic_bookings)
-            ->addColumn('action',function ($logistic_bookings){
-                if (session('role_id') == 1 || count(array_intersect([83, 84, 507], session('permissions'))) !== 0) {
-                      $edit_button = '<a href="' . route("admin.logistic.edit", ["booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
+            ->addColumn('action',function ($logistic_bookings) use ($request){
+                if (session('role_id') == 1 || count(array_intersect([980], session('permissions'))) !== 0) {
+                      $edit_button = '<a href="' . route("admin.logistic.edit", ["batch_id"=>$request->batch_id,"booking_id" => $logistic_bookings->id]) . '" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></div></a>';
 
                     $dropdown = '
                             <div class="btn-group">
@@ -272,7 +272,7 @@ class AdminLogisticBookingController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($booking_id)
+    public function edit($batch_id,$booking_id)
     {
 
         $validate=Validator::make(['booking_id'=>$booking_id],[
@@ -310,7 +310,7 @@ class AdminLogisticBookingController extends Controller
             }
 
             return view('admin.logistic.edit_logistic_book')
-                ->with(['booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'paymentmodes'=>$paymentmodes,'riders'=>$riders]);
+                ->with(['batch_id'=>$batch_id,'booking_img_url'=>$booking_img_url,'logistic_booking'=>$logistic_booking,'item_insurance'=>$item_insurance,'item_references'=>$item_references,'booking_pieces'=>$booking_pieces,'payment_modes'=>$payment_modes,'shippers'=>$shippers,'product'=>$product,'trax_stations'=>$trax_stations,'pickup_addresses'=>$pickup_addresses,'special_handlings'=>$special_handlings,'paymentmodes'=>$paymentmodes,'riders'=>$riders]);
         }
         return  redirect()->back()->with('error','Booking not found!');
 
