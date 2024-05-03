@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRetailFranchiseProductChargesTable extends Migration
+class CreateRetailFranchiseChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRetailFranchiseProductChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('retail_franchise_product_charges', function (Blueprint $table) {
+        Schema::create('retail_franchise_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('franchise_id')->index()->nullable();
             $table->decimal('franchise_gst', 8, 2)->nullable();
@@ -30,6 +30,6 @@ class CreateRetailFranchiseProductChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('retail_franchise_product_charges');
+        Schema::dropIfExists('retail_franchise_charges');
     }
 }

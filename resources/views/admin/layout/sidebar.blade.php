@@ -1307,6 +1307,27 @@
                         <li class=" nav-item"><a href="{{ route('admin.management.shipment_received.index') }}"><span class="menu-title">Shipment Receiver Details</span></a>
                         </li>
                     @endif
+
+                    @if (session('role_id') == 1 /* || count(array_intersect([408, 409], session('permissions'))) !== 0 */)
+                        <li class=" nav-item"><a href="#"><span class="menu-title">Retail Commission</span></a>
+                            <ul class="menu-content">
+                                @if (session('role_id') == 1 /* || in_array(408, session('permissions')) */)
+                                    <li>
+                                        <a class="menu-item" href="{{ route('admin.retail.franchise.franchise_wise_commission') }}">
+                                            Franchise wise commission
+                                        </a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 /* || in_array(409, session('permissions')) */)
+                                    <li>
+                                        <a class="menu-item" href="{{ route('admin.retail.franchise.user_wise_commission') }}">
+                                            User wise commission
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
+                    @endif
                 
                 </ul>
             </li>

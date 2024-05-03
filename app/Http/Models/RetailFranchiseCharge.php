@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RetailFranchiseProductCharges extends Model
+class RetailFranchiseCharge extends Model
 {
     protected $fillable = [
         'franchise_id',

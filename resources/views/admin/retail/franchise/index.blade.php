@@ -261,21 +261,21 @@
                                 </div>
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100">
+                                    <input type="text" name="franchise_gst" id="commission_percentage_edit" class="form-control commission_percentage" placeholder="GST Commission"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="GST Commission">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
                                 </div>
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100">
+                                    <input type="text" name="franchise_withholding" id="withholding_tax_percentage_edit" class="form-control withholding_tax_percentage" placeholder="Withholding Tax"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Withholding Tax">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
                                 </div>
 
                                 <div class="input-group mb-2">
-                                    <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100">
+                                    <input type="text" name="franchise_deduction" id="deduction_percentage_edit" class="form-control deduction_percentage" placeholder="Deduction"  value="" max="100" data-toggle="tooltip" data-trigger="hover" data-placement="top" title="Deduction">
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>

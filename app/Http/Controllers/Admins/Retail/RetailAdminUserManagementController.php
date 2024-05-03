@@ -23,7 +23,8 @@ use App\Http\Models\RetailFranchiseProductPercentage;
 use App\Http\Models\Admin\Retail\RetailShippingMode;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\RetailFranchiseProductAttachment;
-use App\Http\Models\RetailFranchiseProductCharges;
+use App\Http\Models\RetailFranchiseCharge;
+use App\Http\Models\Admin\Retail\RetailShipment;
 
 class RetailAdminUserManagementController extends Controller
 {
@@ -226,7 +227,7 @@ class RetailAdminUserManagementController extends Controller
             $franchiseRetailProduct->save();
         }
 
-        $franchise_product_charges = new RetailFranchiseProductCharges();
+        $franchise_product_charges = new RetailFranchiseCharge();
         $franchise_product_charges->franchise_id = $franchise->id;
         $franchise_product_charges->franchise_gst = $request->franchise_gst;
         $franchise_product_charges->franchise_withholding = $request->franchise_withholding;
@@ -321,17 +322,17 @@ class RetailAdminUserManagementController extends Controller
                 $retail_franchise_product_percentage->save();
             }
 
-            $franchise_retail_product_charges = RetailFranchiseProductCharges::where('franchise_id', $franchise->id)->first();
+            $franchise_retail_product_charges = RetailFranchiseCharge::where('franchise_id', $franchise->id)->first();
             if ($franchise_retail_product_charges != null){
                 $franchise_retail_product_charges->delete();
-                $new_charges = new RetailFranchiseProductCharges();
+                $new_charges = new RetailFranchiseCharge();
                 $new_charges->franchise_id = $franchise->id;
                 $new_charges->franchise_gst = $request->franchise_gst;
                 $new_charges->franchise_withholding = $request->franchise_withholding;
                 $new_charges->franchise_deduction = $request->franchise_deduction;
                 $new_charges->save();
             } else {
-                $new_charges = new RetailFranchiseProductCharges();
+                $new_charges = new RetailFranchiseCharge();
                 $new_charges->franchise_id = $franchise->id;
                 $new_charges->franchise_gst = $request->franchise_gst;
                 $new_charges->franchise_withholding = $request->franchise_withholding;
@@ -415,7 +416,7 @@ class RetailAdminUserManagementController extends Controller
 
     public function retail_product_charges(Request $request){
         $franchiseId = $request->franchise_id;
-        $retail_franchise_product_percentage = RetailFranchiseProductCharges::where('franchise_id', $franchiseId)->first();
+        $retail_franchise_product_percentage = RetailFranchiseCharge::where('franchise_id', $franchiseId)->first();
         
         if ($retail_franchise_product_percentage != null){
             $data = $retail_franchise_product_percentage;
@@ -436,6 +437,44 @@ class RetailAdminUserManagementController extends Controller
         }
         
         return response()->json(['data' => $data]);
+    }
+
+    public function franchise_commission_view(){
+        $franchises = RetailUser::where('category', 1)->get();
+        $retail_franchise_shipments = $franchises->pluck('id')->toArray();
+        $franchise_shipments = RetailShipment::whereIn('retail_user_id', $retail_franchise_shipments)->get();
+        return view('admin.retail.commission.franchise_wise', [
+            'franchises' => $franchises
+        ]);
+    }
+
+    public function franchise_commission_view_ajax_list(Request $request){
+        $franchises = RetailUser::where('category', 1)->get();
+        $retail_franchise_shipments = $franchises->pluck('id')->toArray();
+        $franchise_shipments = RetailShipment::whereIn('retail_user_id', $retail_franchise_shipments)->get();
+        $shipment_month = $franchise_shipments->pluck('created_at')->map(function ($createdAt) {
+            return $createdAt->month;
+        })->toArray();
+
+        $franchise_commission_result = [];
+        $requestMonth = $request->input('month');
+        
+        if (in_array($requestMonth, $shipment_month)) {
+            $filteredShipments = $franchise_shipments->filter(function ($shipment) use ($requestMonth) {
+                return $shipment->created_at->month == $requestMonth;
+            });
+        
+            $franchise_commission_result = $filteredShipments->toArray();
+        };
+        return response()->json([
+            "data" => $franchise_commission_result
+        ]);
+    }
+
+    public function user_commission_view(){
+        $user_commission = RetailUser::where('category', 2)->get();
+        $retail_user_commission = $user_commission->pluck('id')->toArray();
+        $retail_user_shipments = RetailShipment::whereIn('retail_user_id', $retail_user_commission)->get();
     }
 
     public function trax_center_index()

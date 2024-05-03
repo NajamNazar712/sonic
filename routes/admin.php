@@ -3760,6 +3760,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/retail_product_percentage', 'Admins\Retail\RetailAdminUserManagementController@retail_product_percentage')->name('retail_product_percentage');
             Route::get('/retail_product_charges', 'Admins\Retail\RetailAdminUserManagementController@retail_product_charges')->name('retail_product_charges');
             Route::get('/retail_product_attachments', 'Admins\Retail\RetailAdminUserManagementController@retail_product_attachments')->name('retail_product_attachments');
+
+            Route::get('commission', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view')->name('franchise_wise_commission');
+            Route::get('franchise_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view_ajax_list')->name('commission.list');
+            Route::get('user_commission', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view')->name('user_wise_commission');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');
