@@ -11448,6 +11448,15 @@ class NotificationsController extends Controller
                         self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 }
+
+                //For reattempt Request agent side
+                else if ($id == 22) {
+                    if (strpos($body, '[shipment_id]') !== FALSE) {
+                        
+                        $body = str_replace('[shipment_id]', $reference1_id, $body);
+                    }
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
             }
         }
     }
