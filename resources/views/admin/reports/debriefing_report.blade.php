@@ -47,6 +47,16 @@
 										</span>
                         </div>
 
+                        <input type="text" name="search_date_start" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_start" placeholder="Search Date" data-value="{{Carbon\Carbon::now()->subMonth(6)}}">
+                    </div>
+
+                    <div class="form-group input-group col-4">
+                        <div class="input-group-prepend">
+										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+											<span class="la la-calendar-o"></span>
+										</span>
+                        </div>
+
                         <input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Search Date" data-value="{{Carbon\Carbon::now()}}">
                     </div>
 
@@ -139,6 +149,19 @@
                 }
             });
 
+            $('#search_date_start').pickadate({
+                firstDay: 1,
+                clear: '',
+                max:date,
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#search_date_root').css('top','40px');
+                }
+            });
+
             var table = $('#datatable').DataTable({
                 dom: 'tp',
                 scrollX: true,
@@ -163,6 +186,7 @@
                         '_token': '{{ csrf_token() }}',
                         'search_shipping_mode' : search_shipping_mode,
                         'search_date' : search_date,
+                        'search_date_start' : search_date_start,
                         'search_hub' : search_hub,
                         'search_zone' : search_zone
                     }
@@ -209,12 +233,14 @@
             }
 
             var search_date = $('input[name="search_date_formatted"]').val();
+            var search_date_start = $('input[name="search_date_start_formatted"]').val();
             var search_hub = $('#search_hub').val();
             var search_zone = $('#search_zone').val();
             var search_shipping_mode = $('#search_shipping_mode').val();
 
             $('#search_filter_btn').on('click', function() {
                 search_date = $('input[name="search_date_formatted"]').val();
+                search_date_start = $('input[name="search_date_start_formatted"]').val();
                 search_hub = $('#search_hub').val();
                 search_zone = $('#search_zone').val();
                 search_shipping_mode = $('#search_shipping_mode').val();
@@ -224,10 +250,11 @@
 
             $('#export_btn').on('click', function() {
                 search_date = $('input[name="search_date_formatted"]').val();
+                search_date_start = $('input[name="search_date_start_formatted"]').val();
                 search_hub = $('#search_hub').val();
                 search_zone = $('#search_zone').val();
                 search_shipping_mode = $('#search_shipping_mode').val();
-                window.open('{!! route('admin.reports.debriefing.export') !!}?search_date=' + search_date + '&search_hub=' + search_hub + '&search_zone=' + search_zone + '&search_shipping_mode=' + search_shipping_mode, '_blank');
+                window.open('{!! route('admin.reports.debriefing.export') !!}?search_date=' + search_date + '&search_date_start=' + search_date_start +  '&search_hub=' + search_hub + '&search_zone=' + search_zone + '&search_shipping_mode=' + search_shipping_mode, '_blank');
             });
         });
 
