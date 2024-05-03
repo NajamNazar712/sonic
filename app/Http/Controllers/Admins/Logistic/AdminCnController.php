@@ -505,15 +505,25 @@ class AdminCnController extends Controller
     {
         $rider_cn_list = TraxRiderCnDetail::Join('trax_cn_issue_to_riders as ir','ir.id','trax_rider_cn_details.cn_issue_id')
             ->join('riders as r','r.id','ir.rider_id')
-            ->select('trax_rider_cn_details.cn_number','trax_rider_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
+            ->select('trax_rider_cn_details.id','trax_rider_cn_details.cn_number','trax_rider_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
             ->where('trax_rider_cn_details.cn_issue_id',$request->rider_issue_id)
             ->where('ir.status',1)
-            ->where('trax_rider_cn_details.is_hold',0)
-            ->get();
+            ->where('trax_rider_cn_details.is_hold',0);
 
 
-
-        $datatables = Datatables::of($rider_cn_list);
+        $datatables = Datatables::of($rider_cn_list)
+        ->editColumn('is_used',function ($rider_cn_list){
+            if($rider_cn_list->is_used==1)
+            {
+                return 'Used';
+            }
+            return  'Not Used';
+        })->addColumn('barcode',function($rider_cn_list){
+                $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+                dd($rider_cn_list->cn_number);
+//                $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($rider_cn_list->cn_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
+//                return $html;
+        });
         return $datatables->make(true);
     }
 

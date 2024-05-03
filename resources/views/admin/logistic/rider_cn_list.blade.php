@@ -20,6 +20,8 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Consignment No</th>
                                     <th class="border-primary border-darken-1">Barcode</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -300,15 +302,12 @@
                             return '';
                         }
                     },
-                    {data: 'company_code', name: 'company_code', class: 'align-middle company_code'},
-                    {data: 'rider_trax_id', name: 'rider_trax_id', class: 'align-middle rider_trax_id'},
-                    {data: 'rider_name', name: 'rider_name', class: 'align-middle rider_name'},
-                    {data: 'segment_name', name: 's.name', class: 'align-middle segment_name', orderable: false},
-                    {data: 'cn_from', name: 'cn_from', class: 'align-middle cn_from'},
-                    {data: 'cn_to', name: 'cn_to', class: 'align-middle cn_to'},
-                    {data: 'quantity', name: 'quantity', class: 'align-middle quantity'},
-                    {data: 'issue_date', name: 'issue_date', class: 'align-middle issue_date'},
-                    {data: 'action', name: 'action', class: 'align-middle action'},
+                    {data: 'trax_id', name: 'r.trax_id', class: 'align-middle trax_id'},
+                    {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
+                    {data: 'cn_number', name: 'trax_rider_cn_details.cn_number', class: 'align-middle cn_number'},
+                    {data: 'barcode', name: 'barcode', class: 'align-middle barcode', orderable: false},
+                    {data: 'is_used', name: 'trax_rider_cn_details.is_used', class: 'align-middle is_used'},
+
 
                 ],
                 rowCallback: function (row, data, index) {
