@@ -3342,6 +3342,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@shipper_ibft_charges_settings_update')->name('update');
         });
 
+        Route::prefix('shipper_negative_payable')->name('shipper_negative_payable.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_negative_payable_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@shipper_negative_payable_update')->name('update');
+        });
+
         Route::prefix('mms_excel_booking_setting')->name('mms_excel_booking_setting.')->group(function () {
             Route::get('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_index')->name('index');
             Route::post('', 'Admins\Settings\GeneralSettingController@mms_excel_booking_setting_store')->name('store');

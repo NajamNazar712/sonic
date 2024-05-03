@@ -2398,7 +2398,12 @@
                                     @if (session('role_id') == 1 || in_array(854, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
-                                    @endif  
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(982, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.shipper_negative_payable.index') }}">Negative Payable Limit</a></li>
+                                    @endif
 
 
                                 </ul>
