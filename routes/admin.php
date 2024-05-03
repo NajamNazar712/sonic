@@ -4149,7 +4149,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\Logistic\AdminLogisticBookingController@list')->name('list');
         Route::get('create', 'Admins\Logistic\AdminLogisticBookingController@create')->name('create');
         Route::post('store','Admins\Logistic\AdminLogisticBookingController@store')->name('store');
-        Route::get('edit/?{batch_id}/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
+        Route::get('edit/{batch_id}/{booking_id}','Admins\Logistic\AdminLogisticBookingController@edit')->name('edit');
         Route::put('update','Admins\Logistic\AdminLogisticBookingController@update')->name('update');
 
 //        Route::get('/shipment/{cn_number}','Admins\Logistic\AdminLogisticBookingController@get_logistic_shipment')->name('shipment');
@@ -4229,6 +4229,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store','Admins\Logistic\AdminCnController@cn_issue_to_rider_store')->name('store');
                 Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_issue_to_rider_edit')->name('edit');
                 Route::put('update', 'Admins\Logistic\AdminCnController@cn_issue_to_rider_update')->name('update');
+
+                Route::get('cn_index/{issue_id}','Admins\Logistic\AdminCnController@rider_cn_index')->name('cn_index');
+                Route::get('cn_list/{rider_issue_id}','Admins\Logistic\AdminCnController@rider_cn_list')->name('cn_list');
+
+
             });
 
 

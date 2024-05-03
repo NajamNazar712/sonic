@@ -301,6 +301,9 @@ class AdminCnController extends Controller
             ->addColumn('action',function ($trax_cn_issue_rider){
                 if (session('role_id') == 1 || count(array_intersect([965], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $cn_list_link = '<a href="'.route('admin.logistic.cn.issue_to_rider.cn_index',['issue_id'=>$trax_cn_issue_rider->id]).'" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-search"></i></div><div class="col-9 offset-1">View CN List</div></div></a>';
+
+
 
                     $dropdown = '
                             <div class="btn-group">
@@ -308,6 +311,7 @@ class AdminCnController extends Controller
                               <div class="dropdown-menu dropdown-menu-sm">
                         ';
                     $dropdown .= $edit_button;
+                    $dropdown .= $cn_list_link;
                     $dropdown .= '
                               </div>
                             </div>
@@ -491,6 +495,26 @@ class AdminCnController extends Controller
 //            DB::rollBack();
             return redirect()->back()->with('error','Failed CN update issue to rider');
         }
+    }
+
+    public  function rider_cn_index($issue_id)
+    {
+        return view('admin.logistic.rider_cn_list')->with('issue_id',$issue_id);
+    }
+    public  function rider_cn_list(Request $request)
+    {
+        $rider_cn_list = TraxRiderCnDetail::Join('trax_cn_issue_to_riders as ir','ir.id','trax_rider_cn_details.cn_issue_id')
+            ->join('riders as r','r.id','ir.rider_id')
+            ->select('trax_rider_cn_details.cn_number','trax_rider_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
+            ->where('trax_rider_cn_details.cn_issue_id',$request->rider_issue_id)
+            ->where('ir.status',1)
+            ->where('trax_rider_cn_details.is_hold',0)
+            ->get();
+
+
+
+        $datatables = Datatables::of($rider_cn_list);
+        return $datatables->make(true);
     }
 
     public function cn_child_receive_admin_store_index()
