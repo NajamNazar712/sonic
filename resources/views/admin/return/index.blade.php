@@ -580,6 +580,36 @@
          </div>
      </div>
 
+     {{-- Enter Remarks Modal --}}
+     <div class="modal fade" id="add_remarks_modal" role="dialog" aria-labelledby="add_remarks_title" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="add_remarks_title">Remarks</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_remarks_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="add_remarks" id="add_remarks" class="form-control add_remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks is required">
+
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Remarks</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
         <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
             role="dialog" aria-labelledby="ConsigneeInformationModal" aria-hidden="true">
@@ -1679,111 +1709,109 @@
                                     enabled: false,
                                     action: function(e, dt, node, config) {
                                         if (selected_rows != '' && restricted_rows.length == 0) {
-                                            swal({
-                                            title: 'Enter Your Remarks',
-                                            icon: 'info',
-                                            content: "input",
-                                            buttons: {
-                                            cancel: {
-                                                        text: 'Cancel',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                            confirm: {
-                                                        text: "Submit",
-                                                    }
-                                            },
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false,
-                                            }).then(function(remarks){
-
-                                                if (remarks !== null) { 
+                                            $('#add_remarks_modal').modal('show');
+                                            $('#add_remarks_modal').on('hide.bs.modal', function () {
+                                                $('#add_remarks_form input.add_remarks').val('');
+                                            });
+                                            $('#add_remarks_form').validate({
+                                                ignore: [],
+                                                errorClass: 'danger',
+                                                successClass: 'success',
+                                                errorPlacement: function(error, element) {
+                                                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                                                },
+                                                normalizer: function(value) {
+                                                    return $.trim(value);
+                                                },
+                                                submitHandler: function(form) {
+                                                    var remarks = $('#add_remarks').val();
 
                                                     swal({
-                                                    title: 'Are You Sure?',
-                                                    text: 'Select Yes to change shipment status to Re-Attempt!',
-                                                    icon: 'warning',
-                                                    buttons: {
-                                                        cancel: {
-                                                            text: 'No',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
+                                                        title: 'Are You Sure?',
+                                                        text: 'Select Yes to change shipment status to Re-Attempt!',
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            cancel: {
+                                                                text: 'No',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            },
+                                                            confirm: {
+                                                                text: 'Yes',
+                                                                value: true,
+                                                                visible: true,
+                                                                closeModal: true
+                                                            }
                                                         },
-                                                        confirm: {
-                                                            text: 'Yes',
-                                                            value: true,
-                                                            visible: true,
-                                                            closeModal: true
-                                                        }
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
                                                     }).then(function(confirm) {
-                                                    if (confirm) {
-                                                        blockPagePermanently();
-                                                        table.rows().nodes().each(function(index) {
-                                                            var row = table.row(index);
-    
-                                                            if ($(row.node()).hasClass('selected')) {
-                                                                var id = parseInt(row.id());
-                                                                shipment_remarks[id] = remarks;
-                                                            }
-                                                        });
-    
-                                                        $.ajax({
-                                                            url: "{{ route('admin.return.reattempt.status') }}",
-                                                            method: 'POST',
-                                                            data: {
-                                                                'shipment_ids': selected_rows,
-                                                                '_token': '{{ csrf_token() }}',
-                                                                'action': 'reattempt',
-                                                                'remark': shipment_remarks
-                                                            }
-                                                        }).done(function(data) {
-                                                            UnblockPagePermanently();
-                                                            selected_rows = [];
-                                                            restricted_rows = [];
-                                                            shipment_remarks = {};
-                                                            table.button('.confirm')
-                                                                .disable();
-                                                            table.button('.re-attempt')
-                                                                .disable();
-                                                            table.button('.assign')
-                                                                .disable();
-                                                            table.button('.un-assign')
-                                                                .disable();
-                                                            table.rows().deselect();
-                                                            table.draw('false');
-    
-                                                            if (data.status == 1) {
+                                                        if (confirm) {
+                                                            blockPagePermanently();
+                                                            table.rows().nodes().each(function(index) {
+                                                                var row = table.row(index);
+        
+                                                                if ($(row.node()).hasClass('selected')) {
+                                                                    var id = parseInt(row.id());
+                                                                    shipment_remarks[id] = remarks;
+                                                                }
+                                                            });
+        
+                                                            $.ajax({
+                                                                url: "{{ route('admin.return.reattempt.status') }}",
+                                                                method: 'POST',
+                                                                data: {
+                                                                    'shipment_ids': selected_rows,
+                                                                    '_token': '{{ csrf_token() }}',
+                                                                    'action': 'reattempt',
+                                                                    'remark': shipment_remarks
+                                                                }
+                                                            }).done(function(data) {
                                                                 UnblockPagePermanently();
+                                                                $('#add_remarks_modal').modal('hide');
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                shipment_remarks = {};
+                                                                table.button('.confirm')
+                                                                    .disable();
+                                                                table.button('.re-attempt')
+                                                                    .disable();
+                                                                table.button('.assign')
+                                                                    .disable();
+                                                                table.button('.un-assign')
+                                                                    .disable();
+                                                                table.rows().deselect();
                                                                 table.draw('false');
-                                                                toastr.success(data.success,
-                                                                    'Success!', {
-                                                                        positionClass: 'toast-bottom-center',
-                                                                        containerId: 'toast-bottom-center'
-                                                                    });
-                                                            } else {
-                                                                UnblockPagePermanently();
-                                                                toastr.error(data.error,
-                                                                    'Error!', {
-                                                                        positionClass: 'toast-top-center',
-                                                                        containerId: 'toast-top-center'
-                                                                    });
-                                                            }
-    
-                                                        });
-                                                    }
+        
+                                                                if (data.status == 1) {
+                                                                    UnblockPagePermanently();
+                                                                    table.draw('false');
+                                                                    toastr.success(data.success,
+                                                                        'Success!', {
+                                                                            positionClass: 'toast-bottom-center',
+                                                                            containerId: 'toast-bottom-center'
+                                                                        });
+                                                                } else {
+                                                                    UnblockPagePermanently();
+                                                                    toastr.error(data.error,
+                                                                        'Error!', {
+                                                                            positionClass: 'toast-top-center',
+                                                                            containerId: 'toast-top-center'
+                                                                        });
+                                                                }
+        
+                                                            });
+                                                        }
                                                     });
+
                                                 }
                                             });
-
+                                
                                         }
                                     }
-                                },
+                            },
                                 
                             @endif {
                                 extend: 'excel',
