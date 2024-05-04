@@ -10,8 +10,8 @@
             <div class="col-12">
                 <div class="card">
                     @include('admin.inc.messages')
-                    <div id="search_form" class="row p-1 mb-2">
-                        <div class="col">
+                    <div id="search_form" class="row p-1">
+                        <div class="col-4">
                             <select name="month" id="month" class="form-control select2">
                                 <option value="01">January</option>
                                 <option value="02">February</option>
@@ -27,15 +27,6 @@
                                 <option value="12">December</option>
                             </select>
                         </div>
-
-                        <div class="col">
-                            <select name="" id="" class="form-control select2">
-                                @foreach ($franchises as $franchise)
-                                    <option value="{{ $franchise->id }}">{{ $franchise->category_id }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
                         <div class="col-2">
                             <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
@@ -46,13 +37,14 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"></th>
-                                        <th class="border-primary border-darken-1">S. No</th>
-                                        <th class="border-primary border-darken-1">Total Charges without GST</th>
-                                        <th class="border-primary border-darken-1">GST amount</th>
-                                        <th class="border-primary border-darken-1">Total amount</th>
-                                        <th class="border-primary border-darken-1">Weight Charges</th>
-                                        <th class="border-primary border-darken-1">Fuel Surcharge</th>
+                                        <th class="border-primary border-darken-1">Franchise Name</th>
+                                        <th class="border-primary border-darken-1">Total Charges Without GST</th>
+                                        <th class="border-primary border-darken-1">Product %</th>
+                                        <th class="border-primary border-darken-1">Commission</th>
+                                        <th class="border-primary border-darken-1">Franchise GST %</th>
+                                        <th class="border-primary border-darken-1">Franchise GST Amount</th>
+                                        <th class="border-primary border-darken-1">Franchise Withholding %</th>
+                                        <th class="border-primary border-darken-1">Franchise Deduction %</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -75,23 +67,59 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#search_filter_btn').on('click', function() {
-                var selectedMonth = $('#month').val();
-                $.ajax({
-                    url: "{{ route('admin.retail.franchise.commission.list') }}",
-                    method: 'GET',
-                    data: { month: selectedMonth },
-                    success: function(response) {
-                        console.log(response.data);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(error);
+        var dataTable = null;
+        $('#search_filter_btn').on('click', function() {
+            var selectedMonth = $('#month').val();
+            $.ajax({
+                url: "{{ route('admin.retail.franchise.commission.list') }}",
+                method: 'GET',
+                data: { month: selectedMonth },
+                cache: false,
+                success: function(response) {
+                    if (!response.shipments || response.shipments.length === 0) {
+                        if (dataTable !== null) {
+                            dataTable.clear().draw();
+                        }
+                        return;
                     }
-                });
+                    var combinedData = [];
+
+                    response.shipments.forEach(function(item) {
+                        var rowData = {
+                            name: item.name,
+                            product_percentage: item.product_percentage, // temporary
+                            total_charges_without_gst: item.total_charges_without_gst,
+                            commission_percentage: item.commission_percentage,
+                            franchise_gst: item.franchise_gst,
+                            charegs_with_gst: item.charegs_with_gst,
+                            franchise_withholding: item.franchise_withholding, // temporary
+                            franchise_deduction: item.franchise_deduction, // temporary
+                        };
+                        combinedData.push(rowData);
+                    });
+                    if (dataTable !== null) {
+                        dataTable.clear().rows.add(combinedData).draw();
+                    } else {
+                        dataTable = $('#datatable').DataTable({
+                            data: combinedData,
+                            columns: [
+                                { data: 'name' },
+                                { data: 'total_charges_without_gst' },
+                                { data: 'product_percentage' }, // temporary
+                                { data: 'commission_percentage' },
+                                { data: 'franchise_gst' },
+                                { data: 'charegs_with_gst' },
+                                { data: 'franchise_withholding' }, // temporary
+                                { data: 'franchise_deduction' }, // temporary
+                            ]
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
             });
         });
     </script>
-    
 
 @endsection
