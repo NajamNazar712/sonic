@@ -520,12 +520,83 @@ class AdminCnController extends Controller
             return  'Not Used';
         })->addColumn('barcode',function($rider_cn_list){
                 $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-                dd($rider_cn_list->cn_number);
-//                $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($rider_cn_list->cn_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
-//                return $html;
+                $cn_number = (string)($rider_cn_list->cn_number);
+                $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cn_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
+                return $html;
         });
         return $datatables->make(true);
     }
+    public function print_barcodes(Request $request)
+    {
+        $ids = $request->ids;
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '<!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utsf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                <title>Air Waybill Sticker Barcode</title>
+                <style type="text/css">
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+                  body {
+                    background: none !important;
+                    color: #000 !important;
+                  }
+                  .pwrapper {margin: auto; page-break-inside: avoid;}
+                  .logo {margin-bottom:5px;}
+                  .logo img {margin-bottom:2.5px; filter: brightness(0);}
+                  .logo span {font-size: 8px;}
+                  .barcode span {font-size: 12px;}
+                  @media print {
+                   html, body {min-width:auto!important; min-height:auto!important;}
+                   @page {margin:0 !important; size: landscape;}
+                   .pwrapper {margin: auto; page-break-inside: avoid;}
+                   .logo span {font-size: 8px;}
+                   .barcode span {font-size: 12px;}
+                  }
+                </style>
+              </head>
+              <body>
+        ';
+
+        $barcodes = '';
+
+        foreach ($ids as $id) {
+            $record = BarcodeGenerator::find($id);
+
+            $barcodes .= '
+                <div class="text-center pwrapper p-1">
+                    <div class="logo">
+                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">
+                    </div>
+                    <div class="barcode">
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($record->barcode_key, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <span class="d-block"><strong>* ' . $record->barcode_key . ' *</strong></span>
+                    </div>
+                </div>
+            ';
+        }
+
+        $html .= $barcodes;
+
+        $html .= '
+                <script>
+                  window.onload = function() {
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+        ';
+
+        return $html;
+    }
+
 
     public function cn_child_receive_admin_store_index()
     {
