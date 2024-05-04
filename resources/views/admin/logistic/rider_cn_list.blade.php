@@ -19,6 +19,7 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width:100% !important;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
+                                    <th  class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
@@ -35,180 +36,186 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
-        .btn-min-width {
-            min-width: 5.5rem;
+        table.dataTable {
+            font-size: 12px;
         }
 
-        .legends {
-            cursor: pointer;
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
-        .custom-nav {
-            margin-left: 4px;
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
         }
 
-        .custom-nav li {
-
-            border: 1px solid #CCCCCC;
-            border-radius: 4px;
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
         }
 
-        .custom-nav li:first-child {
-
-            margin-right: 4px !important;
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
         }
 
-        .custom-nav li:last-child {
-
-            margin-left: 4px !important;
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
         }
 
-        .custom-nav .nav-item a.nav-link {
-
-            color: #CCCCCC;
-            border: 1px solid #CCCCCC !important;
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
         }
 
-        .custom-nav .nav-item p {
-
-            line-height: 1.4;
+        #toast-bottom-center.toast-container {
+            text-align: center;
         }
 
-        .custom-nav .nav-item a.active {
-
-            /* color: #64A0D2 !important; */
-            border: 1px solid #64A0D2 !important;
-            /* background-color: #F7FAFC !important; */
-            color: #fff!important;
-            background: #5587b4!important;
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
         }
 
-        .custom-nav .nav-item a:hover {
-            color: #64A0D2 !important;
-            border: 1px solid #64A0D2 !important;
-            background-color: #F7FAFC !important;
+        .small-calender-icon {
+            font-size: 17px !important;
         }
 
-        /* start scheduled days area */
-
-        /* Hide checkboxes */
-        .scheduled_days_area input[type="checkbox"] {
-            display: none;
+        .bg-gradient-directional-booked_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
         }
 
-        /* Style labels for checkboxes */
-        .scheduled_days_area input + label {
-            display: inline-block;
-            border: 1px solid #CCCCCC;
-            background: #fff;
-            padding: 5px 1px;
-            color: #A3A3A3;
-            border-radius: 5px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s;
+        .bg-gradient-directional-arrived_shipments {
+            background-image: linear-gradient(45deg, #074077, #2fbef5);
+            background-repeat: repeat-x;
         }
 
-        /* Style the checkbox's unchecked state */
-        .scheduled_days_area input:checked + label {
-            background: #5587b4;
-            border-color: #64A0D2;
-            color: #fff;
-
+        .bg-gradient-directional-in_transit {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
         }
 
-        /* Style the checkbox's unchecked state icon */
-        .scheduled_days_area input:checked + label:before {
-            font-size: 17px;
-            position: absolute;
-            left: 24px;
-            top: 6px;
-            opacity: 1;
+        .bg-gradient-directional-destination {
+            background-image: linear-gradient(45deg, #027d8a, #01e4e4);
+            background-repeat: repeat-x;
         }
 
-        /* .scheduled_days_area input + label:hover {
-            background: #fff;
-            border-color: #CCCCCC;
-            color: #000;
-        } */
-
-        .scheduled_days_area input:not(:checked) + label:hover {
-            background: #F7FAFC;
-            border-color: #64A0D2;
-            color: #64A0D2;
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
         }
 
-        .scheduled_days_area .item-column {
-            margin-right: 10px;
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d, #90929a);
+            background-repeat: repeat-x;
         }
 
-        /* end scheduled days area */
-
-        /* start addition services */
-
-        .service-item {
-
-            border: 1px solid #CCCCCC;
-            border-radius: 4px;
-            padding-top: 12px;
-            padding-bottom: 12px;
-
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
+            background-repeat: repeat-x;
         }
 
-        .btn-service {
-            border-radius: 50%;
-            padding: 4px;
-            width: 30px;
-            height: 30px;
-            transition: all 0.4s;
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
         }
 
-        .btn-service:hover {
-
-            background: #6496BE !important;
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
         }
 
-        .btn-service:active,
-        .btn-service:focus {
-
-            background: #6496BE !important;
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c, #e0b668de);
+            background-repeat: repeat-x;
         }
 
-        .service-item .custom-input-number[type="number"]::-webkit-inner-spin-button,
-        .service-item .custom-input-number[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            appearance: none;
-            margin: 0;
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
         }
 
-        /* end addition services */
-        .delay_time{
-            background-color: #8fc5ea;
-            /* background-color: #9fa1ae; */
-            color: white;
-            /* background-color: #FF0000; */
-            /* background-color: #FFA500; */
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
         }
-        .status_tab_active{
-            color: #fff;
-            background-color: #649bc8;
+
+        .bg-gradient-directional-complaints_launched {
+            background-image: linear-gradient(45deg, #074077, #2FBEF5);
+            background-repeat: repeat-x;
         }
-        #add_cn_issue_rider_form label {
-            float: left;
+
+        .bg-gradient-directional-complaints_in_process {
+            background-image: linear-gradient(45deg, #6A1FA2, #FF4961);
+            background-repeat: repeat-x;
         }
-        .whitebackground{
-            background-color: #fff!important;
+
+        .bg-gradient-directional-complaints_closed {
+            background-image: linear-gradient(45deg, #076500, #11F118);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-complaints_rejected {
+            background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
+            background-repeat: repeat-x;
+        }
+
+        .selectize-control {
+            width: 300px !important;
+        }
+
+        .div_border {
+            border-style: double;
+        }
+
+        .statusBooked {
+            background-color: #5DADE2;
+        }
+
+        .statusOrigin {
+            background-color: #E67E22;
+        }
+
+        .statusIntransit {
+            background-color: #7F8C8D;
+        }
+
+        .statusDestination {
+            background-color: #F1C40F;
+        }
+
+        .statusNotattempted {
+            background-color: #1F618D;
+        }
+
+        .statusDeliveryunsuccessful {
+            background-color: #28B463;
+        }
+
+        .statusOnhold {
+            background-color: #154360;
         }
 
     </style>
@@ -216,52 +223,173 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
-            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
-    <script>
-
-
+    <script type="text/javascript">
         $(document).ready(function () {
 
-            {{--$('#issue_date_datepicker').pickadate({--}}
-            {{--    firstDay: 1,--}}
-            {{--    clear: '',--}}
-            {{--    min: '{{ Carbon\Carbon::today() }}',--}}
-            {{--    // format: 'dd mmmm, yyyy',--}}
-            {{--    format: 'yyyy-mm-dd',--}}
-            {{--    selectYears: true,--}}
-            {{--    selectMonths: true,--}}
-            {{--    formatSubmit: 'yyyy-mm-dd',--}}
-            {{--    hiddenSuffix: '_formatted',--}}
-            {{--});--}}
 
+            // var selected_rows = [];
+
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.leads.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Lead ID');
+                            head.push('Contact Person');
+                            head.push('City');
+                            head.push('Territory');
+                            head.push('Area');
+                            head.push('Phone No');
+                            head.push('Email Address');
+                            head.push('Service');
+                            head.push('Brand');
+                            head.push('Company');
+                            head.push('Lead Reference');
+                            head.push('Requested Date/Time');
+                            head.push('Aging');
+                            head.push('Sale Person Tagged');
+                            head.push('Sale Person Tagged At');
+                            head.push('Sale Person Tagged Aging');
+                            head.push('Reference Person');
+                            head.push('Lead Status');
+                            head.push('Reason');
+                            head.push('Call Status');
+                            head.push('Updated By');
+                            head.push('Updated At');
+
+                            $.each(result.data, function (index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.lead_id);
+                                row.push(values.contact_person);
+                                row.push(values.city);
+                                row.push(values.territory);
+                                row.push(values.area);
+                                row.push(values.phone_number);
+                                row.push(values.email_address);
+                                row.push(values.service);
+                                row.push(values.brand);
+                                row.push(values.company);
+                                row.push(values.lead_reference);
+                                row.push(values.requested_date);
+                                row.push(values.aging);
+                                row.push(values.sale_person);
+                                row.push(values.sale_person_updated_at);
+                                row.push(values.sale_person_tagged_aging);
+                                row.push(values.reference_person);
+                                row.push(values.status);
+                                row.push(values.reason_id);
+                                row.push(values.call_status);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
             var selected_rows = [];
             var issue_id = {!! isset($issue_id) ? $issue_id : 0 !!};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '500px',
                 @if (session('role_id') == 1 || count(array_intersect([964], session('permissions'))) !== 0)
 
                 buttons: [
                     {
-                        text: '<i class="la la-plus"></i> Add New',
-                        className: 'btn btn-primary request_add',
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print',
+                        enabled: false,
                         action: function (e, dt, node, config) {
-                            // $("#add_sack_bag_form")[0].reset();
-                            // $("#sackbag_detail tr:not(:first-child)").empty();
-                            // $("#add_sack_bag_form select").val(null).trigger('change.select2');
-                            $('#AddCNIssueRiderModal').modal('show');
-
+                            table.button(1).disable();
+                            print(selected_rows);
+                            table.rows().deselect();
+                            selected_rows = [];
                         }
                     },
 
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action: function (e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function (index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.print').enable();
+                                }
+                            });
+
+
+                        }
+                    },
+                    {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action: function (e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function (index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.print').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     'reset'
                 ],
                 @else
@@ -269,13 +397,12 @@
                     'reset'
                 ],
                 @endif
-                scrollX: true, scrollY: '500px',
-                // select: {
-                //     info: false,
-                //     style: 'multi',
-                //     selector: 'td.select-checkbox',
-                //     className: 'selected bg-primary bg-lighten-5 primary'
-                // },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -288,9 +415,19 @@
                     url: '{{ route("admin.logistic.cn.issue_to_rider.cn_list", ["rider_issue_id" =>':id']) }}'.replace(':id',issue_id),
                 },
                 rowId: 'id',
-                order: [[2, 'desc']],
+                // order: [[13, 'desc']],
                 columns: [
 
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        class: 'text-center align-middle select p-1',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -307,14 +444,12 @@
                     {data: 'cn_number', name: 'trax_rider_cn_details.cn_number', class: 'align-middle cn_number'},
                     {data: 'barcode', name: 'barcode', class: 'align-middle barcode', orderable: false},
                     {data: 'is_used', name: 'trax_rider_cn_details.is_used', class: 'align-middle is_used'},
-
-
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).addClass('select-checkbox');
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -325,14 +460,13 @@
                         var column = this;
                         var header = column.header();
 
-
-                        // if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
-                        //     $(td).appendTo($(search));
+                        // if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id') || $(header).is('.sale_person_tagged_aging')) {
+                        //     $(td).appendTo($(search) || $(header).is('.serial_number'));
                         // } else {
                         //     var current = $(input).appendTo($(search)).on('change', function () {
                         //         column.search($(this).val(), false, false, true).draw();
                         //     }).wrap(td).after(icon);
-
+                        //
                         //     if (column.search()) {
                         //         current.val(column.search());
                         //     }
@@ -341,18 +475,60 @@
 
                     this.api().table().columns.adjust();
                 }
-
-
-
             });
+
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.print').enable();
+                }
+                else {
+                    table.button('.print').disable();
+                }
+            });
+
+            function print(selected_rows) {
+                $.ajax({
+                    url: '{!! route('admin.logistic.cn.issue_to_rider.barcodes_print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids[]': selected_rows,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+
+                        var tab = window.open('', '_blank');
+
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        } else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+
+
         });
-
-
-
-
-
-
-
 
     </script>
 @endsection

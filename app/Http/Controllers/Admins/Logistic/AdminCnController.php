@@ -526,7 +526,7 @@ class AdminCnController extends Controller
         });
         return $datatables->make(true);
     }
-    public function print_barcodes(Request $request)
+    public function cn_barcodes_print(Request $request)
     {
         $ids = $request->ids;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -537,7 +537,7 @@ class AdminCnController extends Controller
                 <meta charset="utsf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
                 <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-                <title>Air Waybill Sticker Barcode</title>
+                <title>Logistic CN Barcodes</title>
                 <style type="text/css">
                   * {
                     -webkit-print-color-adjust: exact !important;
@@ -567,8 +567,8 @@ class AdminCnController extends Controller
         $barcodes = '';
 
         foreach ($ids as $id) {
-            $record = BarcodeGenerator::find($id);
-
+            $record = TraxRiderCnDetail::find($id);
+            $cn_number = (string)($record->cn_number);
             $barcodes .= '
                 <div class="text-center pwrapper p-1">
                     <div class="logo">
@@ -576,7 +576,7 @@ class AdminCnController extends Controller
                     </div>
                     <div class="barcode">
                         <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($record->barcode_key, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
-                        <span class="d-block"><strong>* ' . $record->barcode_key . ' *</strong></span>
+                        <span class="d-block"><strong>* ' . $cn_number . ' *</strong></span>
                     </div>
                 </div>
             ';

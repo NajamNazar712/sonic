@@ -4232,6 +4232,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::get('cn_index/{issue_id}','Admins\Logistic\AdminCnController@rider_cn_index')->name('cn_index');
                 Route::get('cn_list/{rider_issue_id}','Admins\Logistic\AdminCnController@rider_cn_list')->name('cn_list');
+                Route::post('barcodes_print','Admins\Logistic\AdminCnController@cn_barcodes_print')->name('barcodes_print');
 
 
             });
