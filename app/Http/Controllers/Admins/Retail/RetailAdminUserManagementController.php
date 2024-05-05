@@ -505,21 +505,30 @@ class RetailAdminUserManagementController extends Controller
                 // Calculate withholding
                 if ($shipment->franchise_withholding !== null) {
                     $franchise_withholding = $shipment->franchise_withholding / 100;
-                    $withholding = $commission !== null ? $commission * $franchise_withholding : null;
+                    $withholding = $charegs_with_gst !== null ? $charegs_with_gst * $franchise_withholding : null;
+                    $charges_without_withholding = $charegs_with_gst - $withholding;
                 } else {
                     $withholding = '-';
+                    $charges_without_withholding = '-';
                 }
                 $shipment->withholding = $withholding;
+                $shipment->charges_without_withholding = $charges_without_withholding;
             
                 // Calculate deduction
                 if ($shipment->franchise_deduction !== null) {
                     $franchise_deduction = $shipment->franchise_deduction / 100;
-                    $deduction = $commission !== null ? $commission * $franchise_deduction : null;
+                    $deduction = $charges_without_withholding !== null ? $charges_without_withholding * $franchise_deduction : null;
+                    $net_commission = $charges_without_withholding - $deduction;
                 } else {
                     $deduction = '-';
+                    $net_commission = '-';
                 }
                 $shipment->deduction = $deduction;
+                $shipment->net_commission = $net_commission;
             }
+
+
+
 
         return response()->json([
             'shipments' => $shipments,

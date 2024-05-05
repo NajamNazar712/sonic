@@ -44,7 +44,11 @@
                                         <th class="border-primary border-darken-1">Franchise GST %</th>
                                         <th class="border-primary border-darken-1">Franchise GST Amount</th>
                                         <th class="border-primary border-darken-1">Franchise Withholding %</th>
+                                        <th class="border-primary border-darken-1">Franchise Withholding amount</th>
+                                        <th class="border-primary border-darken-1">Charges without withholding</th>
                                         <th class="border-primary border-darken-1">Franchise Deduction %</th>
+                                        <th class="border-primary border-darken-1">Franchise Deduction amount</th>
+                                        <th class="border-primary border-darken-1">Net Commission</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -87,13 +91,17 @@
                     response.shipments.forEach(function(item) {
                         var rowData = {
                             name: item.name,
-                            product_percentage: item.product_percentage, // temporary
+                            product_percentage: item.product_percentage,
                             total_charges_without_gst: item.total_charges_without_gst,
                             commission_percentage: item.commission_percentage,
                             franchise_gst: item.franchise_gst,
                             charegs_with_gst: item.charegs_with_gst,
-                            franchise_withholding: item.franchise_withholding, // temporary
-                            franchise_deduction: item.franchise_deduction, // temporary
+                            franchise_withholding: item.franchise_withholding,
+                            withholding: item.withholding,
+                            charges_without_withholding: item.charges_without_withholding,
+                            franchise_deduction: item.franchise_deduction,
+                            deduction: item.deduction,
+                            net_commission: item.net_commission,
                         };
                         combinedData.push(rowData);
                     });
@@ -105,12 +113,16 @@
                             columns: [
                                 { data: 'name' },
                                 { data: 'total_charges_without_gst' },
-                                { data: 'product_percentage' }, // temporary
+                                { data: 'product_percentage' },
                                 { data: 'commission_percentage' },
                                 { data: 'franchise_gst' },
                                 { data: 'charegs_with_gst' },
-                                { data: 'franchise_withholding' }, // temporary
-                                { data: 'franchise_deduction' }, // temporary
+                                { data: 'franchise_withholding' },
+                                { data: 'withholding' },
+                                { data: 'charges_without_withholding' },
+                                { data: 'franchise_deduction' },
+                                { data: 'deduction' },
+                                { data: 'net_commission' },
                             ]
                         });
                     }
