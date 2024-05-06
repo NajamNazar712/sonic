@@ -1284,6 +1284,7 @@ class AdminCRMController extends Controller
         $status = CrmRequestStatus::whereIn('id', [1,5])->select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftJoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+        ->leftJoin('admin_departments', 'admin_departments.id', '=', 'admin_roles.department_id')
         ->whereIn('admin_roles.department_id', [3, 7])
         ->where(function ($query) {
             // Select all admins from department ID 3
@@ -1295,7 +1296,7 @@ class AdminCRMController extends Controller
                             ->whereIn('a.role_id', [115, 43, 75]);
             });
         })
-        ->get();
+        ->select(['a.id as id', 'a.name as name','a.trax_id as trax_id','admin_departments.name as department' ])->get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $zones = Zone::where('status', 1)->get();

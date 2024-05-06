@@ -574,7 +574,6 @@
 
 							$.each(data.fields, function(index, field) {
 								$('#edit .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
-
 								valid_fields.push(field);
 							});
 
