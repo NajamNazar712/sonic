@@ -40,14 +40,14 @@
                         </fieldset>
                     </div>
 
-                    <div class="form-group input-group col-4 d-none">
+                    <div class="form-group input-group col-4">
                         <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 											<span class="la la-calendar-o"></span>
 										</span>
                         </div>
 
-                        <input type="text" name="search_date_start" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_start" placeholder="Search Date" data-value="{{Carbon\Carbon::now()->subMonth(6)}}">
+                        <input type="text" name="search_date_start" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_start" placeholder="Search Date" data-value="{{Carbon\Carbon::now()->subMonth(4)}}">
                     </div>
 
                     <div class="form-group input-group col-4">

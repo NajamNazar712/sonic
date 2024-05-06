@@ -4699,8 +4699,8 @@ class AdminReportsController extends Controller
                         });
 
                     }
-                    if(!empty($date_start)){
-                        //$rows = $rows->whereBetween('s.created_at',[$date_start,$from]);
+                    if(!empty($date_start) && $type != 'delivery_tomorrow'){
+                        $rows = $rows->whereBetween('sj.created_at',[$date_start,$from]);
                         //$date_start = date('Y-m-d H:i:s',strtotime($from.'-6 months'));
                     }
 
