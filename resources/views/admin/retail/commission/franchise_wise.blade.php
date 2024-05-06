@@ -33,20 +33,22 @@
                     </div>
 
                     <div class="card-content">
-                        <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <div class="card-body card-dashboard overflow-auto">
+                            <table class="table table-stripped table-bordered datatable" id="datatable">
                                 <thead>
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">Franchise Name</th>
-                                        <th class="border-primary border-darken-1">Total Charges Without GST</th>
+                                        <th class="border-primary border-darken-1">Franchise Code</th>
+                                        <th class="border-primary border-darken-1">Month</th>
+                                        <th class="border-primary border-darken-1">Product</th> {{-- retail shipping mode id --}}
+                                        <th class="border-primary border-darken-1">Number of shipments</th>
+                                        <th class="border-primary border-darken-1">Total Charges</th>
                                         <th class="border-primary border-darken-1">Product %</th>
                                         <th class="border-primary border-darken-1">Commission</th>
-                                        <th class="border-primary border-darken-1">Franchise GST %</th>
+                                        <th class="border-primary border-darken-1">GST %</th>
                                         <th class="border-primary border-darken-1">Franchise GST Amount</th>
-                                        <th class="border-primary border-darken-1">Franchise Withholding %</th>
                                         <th class="border-primary border-darken-1">Franchise Withholding amount</th>
                                         <th class="border-primary border-darken-1">Charges without withholding</th>
-                                        <th class="border-primary border-darken-1">Franchise Deduction %</th>
                                         <th class="border-primary border-darken-1">Franchise Deduction amount</th>
                                         <th class="border-primary border-darken-1">Net Commission</th>
                                     </tr>
@@ -87,19 +89,20 @@
                         return;
                     }
                     var combinedData = [];
-
                     response.shipments.forEach(function(item) {
                         var rowData = {
                             name: item.name,
-                            product_percentage: item.product_percentage,
+                            code: item.code,
+                            shipment_month: item.created_at,
+                            shipping_mode_name: item.shipping_mode_name,
+                            shipmentCounts: item.shipmentCounts,
                             total_charges_without_gst: item.total_charges_without_gst,
-                            commission_percentage: item.commission_percentage,
+                            product_percentage: item.product_percentage,
+                            commission: item.commission,
                             franchise_gst: item.franchise_gst,
-                            charegs_with_gst: item.charegs_with_gst,
-                            franchise_withholding: item.franchise_withholding,
+                            gst: item.gst,
                             withholding: item.withholding,
                             charges_without_withholding: item.charges_without_withholding,
-                            franchise_deduction: item.franchise_deduction,
                             deduction: item.deduction,
                             net_commission: item.net_commission,
                         };
@@ -110,20 +113,25 @@
                     } else {
                         dataTable = $('#datatable').DataTable({
                             data: combinedData,
+                            searching: false,
                             columns: [
                                 { data: 'name' },
+                                { data: 'code' },
+                                { data: 'shipment_month' },
+                                { data: 'shipping_mode_name' },
+                                { data: 'shipmentCounts' },
                                 { data: 'total_charges_without_gst' },
                                 { data: 'product_percentage' },
-                                { data: 'commission_percentage' },
+                                { data: 'commission' },
                                 { data: 'franchise_gst' },
-                                { data: 'charegs_with_gst' },
-                                { data: 'franchise_withholding' },
+                                { data: 'gst' },
                                 { data: 'withholding' },
                                 { data: 'charges_without_withholding' },
-                                { data: 'franchise_deduction' },
                                 { data: 'deduction' },
                                 { data: 'net_commission' },
-                            ]
+                            ],
+                            scrollX: true,
+                            scrollY: true,
                         });
                     }
                 },
