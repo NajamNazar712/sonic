@@ -4253,6 +4253,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('store','Admins\Logistic\AdminCnController@cn_child_issue_to_rider_store')->name('store');
                 Route::get('edit/{id}', 'Admins\Logistic\AdminCnController@cn_child_issue_to_rider_edit')->name('edit');
                 Route::put('update', 'Admins\Logistic\AdminCnController@cn_child_issue_to_rider_update')->name('update');
+
+                Route::get('cn_index/{issue_id}','Admins\Logistic\AdminCnController@rider_child_cn_index')->name('cn_index');
+                Route::get('cn_list/{rider_issue_id}','Admins\Logistic\AdminCnController@rider_child_cn_list')->name('cn_list');
+                Route::post('barcodes_print','Admins\Logistic\AdminCnController@cn_barcodes_print')->name('barcodes_print');
             });
 
 

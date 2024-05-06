@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Logistic;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\Logistic\TraxChildCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxChildCnReceiveAdminStore;
 use App\Http\Models\Admin\Logistic\TraxProduct;
@@ -15,6 +16,7 @@ use App\Http\Models\Admin\Logistic\TraxCnIssueToRider;
 use App\Http\Models\Admin\Logistic\TraxCnReceiveAdminStore;
 use App\Http\Models\Rider;
 use App\Http\Models\Segment;
+use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -328,8 +330,13 @@ class AdminCnController extends Controller
     }
     public function cn_issue_to_rider_store(Request $request)
     {
-//        $hub_id = session('hub');
-//        dd( session('hubs'));
+        $user_id = session('id');
+        $admin = Admin::where('id',$user_id)->whereNotNull('default_hub_id');
+        if(!$admin->exists())
+        {
+            return redirect()->back()->with('error','Hub not found!');
+        }
+        $admin = $admin->first();
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'rider_id' => ['required','integer'],
@@ -352,7 +359,7 @@ class AdminCnController extends Controller
                 return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
             }
 
-            $cn_issue =  TraxCnIssueToRider::where('area_code', 202)
+            $cn_issue =  TraxCnIssueToRider::where('area_code',  $admin->default_hub_id)
                 ->where(function ($query) use ($request) {
                     $query->where('cn_from', '<=', $request->cn_from)
                         ->where('cn_to', '>=', $request->cn_from)
@@ -365,7 +372,7 @@ class AdminCnController extends Controller
                 return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
 
-            $cn_store =  TraxCnReceiveAdminStore::where('area_code', 202)
+            $cn_store =  TraxCnReceiveAdminStore::where('area_code', $admin->default_hub_id)
                 ->where(function ($query) use ($request) {
                     $query->where('cn_from', '<=', $request->cn_from)
                         ->where('cn_to', '>=', $request->cn_from)
@@ -388,7 +395,7 @@ class AdminCnController extends Controller
                 $trax_cn_issue_rider->company_code = $request->company_code;
                 $trax_cn_issue_rider->rider_id = $request->rider_id;
                 $trax_cn_issue_rider->product_id = $request->product_id;
-                $trax_cn_issue_rider->area_code = 202;
+                $trax_cn_issue_rider->area_code = $admin->default_hub_id;
                 $trax_cn_issue_rider->cn_from = $request->cn_from;
                 $trax_cn_issue_rider->cn_to = $request->cn_to;
                 $trax_cn_issue_rider->quantity = $quantity;
@@ -526,6 +533,7 @@ class AdminCnController extends Controller
         });
         return $datatables->make(true);
     }
+
     public function cn_barcodes_print(Request $request)
     {
         $ids = $request->ids;
@@ -575,7 +583,7 @@ class AdminCnController extends Controller
                         <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">
                     </div>
                     <div class="barcode">
-                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($record->barcode_key, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cn_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
                         <span class="d-block"><strong>* ' . $cn_number . ' *</strong></span>
                     </div>
                 </div>
@@ -768,6 +776,7 @@ class AdminCnController extends Controller
             ->addColumn('action',function ($trax_child_cn_issue_rider){
                 if (session('role_id') == 1 || count(array_intersect([971], session('permissions'))) !== 0) {
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $cn_list_link = '<a href="'.route('admin.logistic.cn.child_issue_to_rider.cn_index',['issue_id'=>$trax_child_cn_issue_rider->id]).'" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-search"></i></div><div class="col-9 offset-1">View CN List</div></div></a>';
 
                     $dropdown = '
                             <div class="btn-group">
@@ -775,6 +784,8 @@ class AdminCnController extends Controller
                               <div class="dropdown-menu dropdown-menu-sm">
                         ';
                     $dropdown .= $edit_button;
+                    $dropdown .= $cn_list_link;
+
                     $dropdown .= '
                               </div>
                             </div>
@@ -790,9 +801,44 @@ class AdminCnController extends Controller
 
         return $datatables->make(true);
     }
+    public  function rider_child_cn_index($issue_id)
+    {
+        return view('admin.logistic.rider_child_cn_list')->with('issue_id',$issue_id);
+    }
+    public  function rider_child_cn_list(Request $request)
+    {
+        $rider_cn_list = TraxRiderChildCnDetail::Join('trax_child_cn_issue_to_riders as ir','ir.id','trax_rider_child_cn_details.child_cn_issue_id')
+            ->join('riders as r','r.id','ir.rider_id')
+            ->select('trax_rider_child_cn_details.id','trax_rider_child_cn_details.cn_number','trax_rider_child_cn_details.is_used','ir.rider_id','r.name as rider_name','r.trax_id')
+            ->where('trax_rider_child_cn_details.child_cn_issue_id',$request->rider_issue_id)
+            ->where('ir.status',1)
+            ->where('trax_rider_child_cn_details.is_hold',0);
 
+
+        $datatables = Datatables::of($rider_cn_list)
+            ->editColumn('is_used',function ($rider_cn_list){
+                if($rider_cn_list->is_used==1)
+                {
+                    return 'Used';
+                }
+                return  'Not Used';
+            })->addColumn('barcode',function($rider_cn_list){
+                $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+                $cn_number = (string)($rider_cn_list->cn_number);
+                $html = '<img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cn_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">';
+                return $html;
+            });
+        return $datatables->make(true);
+    }
     public function cn_child_issue_to_rider_store(Request $request)
     {
+        $user_id = session('id');
+        $admin = Admin::where('id',$user_id)->whereNotNull('default_hub_id');
+        if(!$admin->exists())
+        {
+            return redirect()->back()->with('error','Hub not found!');
+        }
+        $admin = $admin->first();
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'rider_id' => ['required','integer'],
@@ -809,7 +855,7 @@ class AdminCnController extends Controller
             {
                 return  redirect()->back()->with('error','CN To Must be grater than or equal to  CN From!');
             }
-            $cn_issue =  TraxChildCnIssueToRider::where('area_code', 202)
+            $cn_issue =  TraxChildCnIssueToRider::where('area_code', $admin->default_hub_id)
                 ->where(function ($query) use ($request) {
                     $query->where('cn_from', '<=', $request->cn_from)
                         ->where('cn_to', '>=', $request->cn_from)
@@ -822,7 +868,7 @@ class AdminCnController extends Controller
                 return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
 
-            $cn_store =  TraxChildCnReceiveAdminStore::where('area_code', 202)
+            $cn_store =  TraxChildCnReceiveAdminStore::where('area_code', $admin->default_hub_id)
                 ->where(function ($query) use ($request) {
                     $query->where('cn_from', '<=', $request->cn_from)
                         ->where('cn_to', '>=', $request->cn_from)
@@ -843,6 +889,7 @@ class AdminCnController extends Controller
             $trax_child_cn_issue_rider = new TraxChildCnIssueToRider();
             $trax_child_cn_issue_rider->company_code = $request->company_code;
             $trax_child_cn_issue_rider->rider_id = $request->rider_id;
+            $trax_child_cn_issue_rider->area_code = $admin->default_hub_id;
             $trax_child_cn_issue_rider->cn_from = $request->cn_from;
             $trax_child_cn_issue_rider->cn_to = $request->cn_to;
             $trax_child_cn_issue_rider->quantity = $quantity;

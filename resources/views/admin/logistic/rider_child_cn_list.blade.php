@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rider Consignments No list')
+@section('title', 'Rider Child Consignments No list')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Rider Consignments No list
+                    Rider Child Consignments No list
                 </h1>
 
                 <div class="card">
@@ -319,84 +319,6 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
-{{--                @if (session('role_id') == 1 || count(array_intersect([964], session('permissions'))) !== 0)--}}
-
-{{--                buttons: [--}}
-{{--                    // {--}}
-{{--                    //     text: '<i class="la la-print"></i> Print',--}}
-{{--                    //     className: 'btn btn-primary print',--}}
-{{--                    //     enabled: false,--}}
-{{--                    //     action: function (e, dt, node, config) {--}}
-{{--                    //         table.button(1).disable();--}}
-{{--                    //         print(selected_rows);--}}
-{{--                    //         table.rows().deselect();--}}
-{{--                    //         selected_rows = [];--}}
-{{--                    //     }--}}
-{{--                    // },--}}
-
-{{--                    {--}}
-{{--                        extend: 'selectAll',--}}
-{{--                        text: 'Select All',--}}
-{{--                        className: 'select_all',--}}
-{{--                        action: function (e) {--}}
-{{--                            e.preventDefault();--}}
-
-{{--                            table.rows().nodes().each(function (index) {--}}
-{{--                                var row = table.row(index);--}}
-
-{{--                                if ($(row.node().firstChild).hasClass('select-checkbox')) {--}}
-{{--                                    row.select();--}}
-
-{{--                                    id = parseInt(row.id());--}}
-
-{{--                                    var index = $.inArray(id, selected_rows);--}}
-
-{{--                                    if (index === -1) {--}}
-{{--                                        selected_rows.push(id);--}}
-{{--                                    }--}}
-
-{{--                                    table.button('.print').enable();--}}
-{{--                                }--}}
-{{--                            });--}}
-
-
-{{--                        }--}}
-{{--                    },--}}
-{{--                    {--}}
-{{--                        extend: 'selectNone',--}}
-{{--                        text: 'Select None',--}}
-{{--                        className: 'select_none',--}}
-{{--                        action: function (e) {--}}
-{{--                            e.preventDefault();--}}
-
-{{--                            table.rows().nodes().each(function (index) {--}}
-{{--                                var row = table.row(index);--}}
-
-{{--                                if ($(row.node().firstChild).hasClass('select-checkbox')) {--}}
-{{--                                    row.deselect();--}}
-
-{{--                                    id = parseInt(row.id());--}}
-
-{{--                                    var index = $.inArray(id, selected_rows);--}}
-
-{{--                                    if (index !== -1) {--}}
-{{--                                        selected_rows.splice(index, 1);--}}
-{{--                                    }--}}
-
-{{--                                    if (selected_rows.length == 0) {--}}
-{{--                                        table.button('.print').disable();--}}
-{{--                                    }--}}
-{{--                                }--}}
-{{--                            });--}}
-{{--                        }--}}
-{{--                    },--}}
-{{--                    'reset'--}}
-{{--                ],--}}
-{{--                @else--}}
-{{--                buttons: [--}}
-{{--                    'reset'--}}
-{{--                ],--}}
-{{--                @endif--}}
                 buttons: [
                     'reset'
                 ],
@@ -415,7 +337,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route("admin.logistic.cn.issue_to_rider.cn_list", ["rider_issue_id" =>':id']) }}'.replace(':id',issue_id),
+                    url: '{{ route("admin.logistic.cn.child_issue_to_rider.cn_list", ["rider_issue_id" =>':id']) }}'.replace(':id',issue_id),
                 },
                 rowId: 'id',
                 // order: [[13, 'desc']],
@@ -502,7 +424,7 @@
 
             function print(selected_rows) {
                 $.ajax({
-                    url: '{!! route('admin.logistic.cn.issue_to_rider.barcodes_print') !!}',
+                    url: '{!! route('admin.logistic.cn.child_issue_to_rider.barcodes_print') !!}',
                     method: 'POST',
                     data: {
                         'ids[]': selected_rows,
