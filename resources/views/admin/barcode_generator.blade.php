@@ -90,17 +90,17 @@
                         <div class="row">
                                 <div class="col">
                                     <div class="form-group ">
-                                        <input type="text" name="prefix" class="form-control prefix" placeholder="Prefix (Alphabets Only)" data-rule-required="true" data-msg-required="Prefix is required">
+                                        <input type="text" name="prefix" class="form-control prefix" placeholder="Prefix (Alphabets Only)">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group ">
-                                        <input type="text" name="from" class="form-control from" placeholder="From" data-rule-required="true" data-msg-required="From is required" data-rule-range="[1,100000]" data-msg-range="Value needs to be from 1 to 100000">
+                                        <input type="number" name="from" class="form-control from" placeholder="From" data-rule-required="true" data-msg-required="From is required">
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group ">
-                                        <input type="text" name="to" class="form-control to" placeholder="To" data-rule-required="true" data-msg-required="To is required" data-rule-range="1,100000]" data-msg-range="Value needs to be from 0.01 to 100000">
+                                        <input type="number" name="to" class="form-control to" placeholder="To" data-rule-required="true" data-msg-required="To is required">
                                     </div>
                                 </div>
                         </div>
@@ -360,9 +360,9 @@
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
-                            //$("#add_form").reset();
-                            //$("#sackbag_detail tr:not(:first-child)").empty();
-                            //$("#add_sack_bag_form select").val(null).trigger('change.select2');
+                            $("#AddModal select").val(null).trigger('change.select2');
+                            $('#AddModal input[type="text"]').val('');
+                            $('#AddModal input[type="number"]').val('');
                             $('#AddModal').modal('show');
                          
                         }
@@ -517,6 +517,21 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+
+            $.validator.addMethod("prefix",
+                function(value, element) {
+                     // Allow empty values to pass validation
+                    if (value === '') {
+                        return true;
+                    }
+                    // Regular expression to match only alphabetic characters
+                    var regex = /^[a-zA-Z]+$/;
+
+                    // Check if the value contains only alphabetic characters
+                    return regex.test(value);
+                },
+                "Reference Number should contain only alphabetic characters."
+            );
 
              $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
                 var id = parseInt($(this).parent('tr').attr('id'));
