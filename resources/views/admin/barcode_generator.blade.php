@@ -360,6 +360,7 @@
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
+                            $('#AddModal label').remove();
                             $("#AddModal select").val(null).trigger('change.select2');
                             $('#AddModal input[type="text"]').val('');
                             $('#AddModal input[type="number"]').val('');
