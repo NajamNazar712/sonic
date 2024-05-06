@@ -158,10 +158,10 @@ class LoginController extends Controller
                 auth('web')->logout();
                 return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
             }
-            else if ($user->status != 3 || $user->status != 0) {
-                auth('web')->logout();
-                return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
-            }
+            // else if ($user->status != 3 || $user->status != 0) {
+            //     auth('web')->logout();
+            //     return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
+            // }
             else if ($user->phone_number_verified == 0){
                 auth('web')->logout();
                 return back()->with('info', 'Your Account phone number is not verified, Contact Admin');

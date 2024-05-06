@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Admins\AdminDashboardController;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Mail\Notifications;
@@ -120,8 +121,8 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        if ($data['nature_of_account'] == 1) {
-                if ($data['wordpress_account'] == 1) {
+        if ($data['nature_of_account'] == 1 && !isset($data['wordpress_lead_register'])) {
+                if (isset($data['wordpress_account']) && $data['wordpress_account'] == 1) {
                     return Validator::make($data, [
                         'name' => 'nullable',
                         'email' => 'nullable',
@@ -256,7 +257,7 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $this->validator($request->all())->validate();
-        event(new Registered($user = $this->create($request->all())));
+        event(new Registered($user = $this->create($request->all(), $request)));
         if($request->wordpress_lead_register != 1){
 
             $user_attachment = new UserDocumentAttachment();
@@ -386,9 +387,10 @@ class RegisterController extends Controller
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
+     * @param Request $request
      * @return \App\User
      */
-    protected function create(array $data)
+    protected function create(array $data, Request $request)
     {     
         if(isset($data['wordpress_lead_register']) && $data['wordpress_lead_register'] == 1){
             $lead = Lead::find($data['lead_id']);
@@ -421,7 +423,6 @@ class RegisterController extends Controller
                     $sale_person->save(); // Corrected comma to semicolon and added save() method
                 }
             }
-            
         }else{
             if(array_key_exists('lead_id', $data)){
                 $lead_id = $data['lead_id'];
@@ -464,7 +465,7 @@ class RegisterController extends Controller
                     $payment_cycle_days = 0;
             }
 
-            if($data['wordpress_account'] == 1){
+            if(isset($data['wordpress_account']) && $data['wordpress_account'] == 1 ){
                 $newUser = User::updateOrCreate(
                     ['phone' => $data['phone']],
                     [
@@ -493,6 +494,9 @@ class RegisterController extends Controller
                     'payment_cycle_id' =>  $data['payment_cycles'],
                     'payment_cycle_days' => $payment_cycle_days
                 ]);
+
+                $adminDashboardController = new AdminDashboardController();
+                $adminDashboardController->addRates($request, User::max('id'), $data);
             }else{
                 $newUser = User::create([
                     'name' => $data['name'],

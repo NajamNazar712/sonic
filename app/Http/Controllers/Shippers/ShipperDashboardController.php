@@ -59,6 +59,7 @@ use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\WMS\WmsCurrentStock;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\AverageShipmentCycle;
+use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\DiscountWeightCharge;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\WMS\WmsPackingCharge;
@@ -88,28 +89,35 @@ use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\PackagingMaterialTypeSizes;
 use App\Http\Models\ShipperVerificationPinCode;
 use App\Http\Models\WMS\WmsPerSquareFootCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\CorporateDefaultReturnCharge;
+
 use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\CorporateDefaultFuelSurcharge;
 use App\Http\Models\CorporateReturnChargeZoneWise;
-
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CorporateDefaultDiscountCharge;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\Admin\Retail\OtherRetailShipment;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\Admin\Retail\OtherParcelReceiving;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -117,6 +125,7 @@ use App\Http\Models\Admin\UserShippingInfoStoreAddress;
 use App\Http\Models\CorporateDefaultCashHandlingCharge;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
+use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
 use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
@@ -2353,7 +2362,76 @@ class ShipperDashboardController extends Controller
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
-        return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user]);
+
+
+        if (!RateStatus::where('user_id', $user->id)->exists()) {
+            $sale_person = SalePersonTag::where('user_id', $user->id)->first();
+            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_sizes = array();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            if (count($packaging_material_types) > 0) {
+
+                foreach ($packaging_material_types as $type) {
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+
+
+            $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
+            $on = null;
+            $ol = null;
+            $det = null;
+            $same_day = null;
+            foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+                if ($minimum_chargeable_weight->shipping_mode_id == 1) {
+                    $on = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
+                    $ol = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
+                    $det = $minimum_chargeable_weight->weight;
+                } else {
+                    $same_day = $minimum_chargeable_weight->weight;
+                }
+            }
+            $commission_percentage = '';
+            $settings = GlobalSettings::where('type', 'commission_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $commission_percentage = $settings->text;
+            }
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id','admins.trax_id'])->where('admins.status', 1)->get();
+            $riders_permanent = Rider::where('rider_type_id', 1)->get();
+     
+            $users = array();
+            $sales = array();
+            $all_users = array();
+            foreach ($admin_users as $u) {
+                if ($u->department_id != 7) {
+                    $users[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                } else {
+                    $sales[] = array('id' => $u->id, 'text' => $u->name . '-' . $u->trax_id);
+                }
+            }
+          
+            $all_users['results'][0]['text'] = 'Sales';
+            $all_users['results'][0]['children'] = $sales;
+            $all_users['results'][1]['text'] = 'Admins';
+            $all_users['results'][1]['children'] = $users;
+            $all_users['results'][2]['text'] = 'Riders';
+            $all_users['results'][2]['children'] = [];
+            $all_users['pagination']['more'] = true;
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+        }
+        return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
     }
 
 

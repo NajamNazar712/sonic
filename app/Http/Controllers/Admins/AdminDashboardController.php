@@ -6926,10 +6926,12 @@ class AdminDashboardController extends Controller
     /**
      * @param Request $request
      * @param $id
+     * @param $data
      * @return int
      */
-    public function addRates(Request $request, $id)
+    public function addRates(Request $request, $id, $data)
     {
+        dd($data);
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
