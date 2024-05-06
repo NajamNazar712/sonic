@@ -28,7 +28,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Negative Payable (Shipper)</span>
                                                 </div>
-                                                <input type="text" name="negative_payable" class="form-control negative_payable" placeholder="Shipper Negative Payable*" data-rule-required="true" data-msg-required="Shipper Negative Payable is required" value="{{ $negative_payable }}" >
+                                                <input type="text" name="negative_payable" class="form-control negative_payable" placeholder="Shipper Negative Payable*" data-rule-required="true" data-rule-max="0" data-msg-required="Shipper Negative Payable is required" value="{{ $negative_payable }}" >
                                             </div>
                                         </div>
 
