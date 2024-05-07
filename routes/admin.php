@@ -3764,6 +3764,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('commission', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view')->name('franchise_wise_commission');
             Route::get('franchise_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@franchise_commission_view_ajax_list')->name('commission.list');
             Route::get('user_commission', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view')->name('user_wise_commission');
+            Route::get('user_commission/ajax', 'Admins\Retail\RetailAdminUserManagementController@user_commission_view_ajax_list')->name('user_commission.list');
         });
         Route::prefix('trax_center')->name('trax_center.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@trax_center_index')->name('index');

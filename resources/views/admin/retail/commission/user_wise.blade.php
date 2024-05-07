@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Franchise Commission')
+@section('title', 'User Commission')
 
 @section('content')
-    <h1 class="mb-1">Franchise Commission</h1>
+    <h1 class="mb-1">User Commission</h1>
 
     <section>
         <div class="row">
@@ -103,7 +103,7 @@
             var selectedMonth = $('#month').val();
             var franchise = $('#franchise').val();
             $.ajax({
-                url: "{{ route('admin.retail.franchise.commission.list') }}",
+                url: "{{ route('admin.retail.franchise.user_commission.list') }}",
                 method: 'GET',
                 data: { 
                     month: selectedMonth,
