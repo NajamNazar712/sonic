@@ -1541,8 +1541,10 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function replacement($id) {
-        $shipment = Shipment::find($id);
+    static public function replacement($id,$shipment = array()) {
+        if(empty($shipment)) {
+            $shipment = Shipment::find($id);
+        }
         if($shipment->business_category_id == 2){
             return false;
         }
@@ -1964,8 +1966,10 @@ class ShipmentChargesController extends Controller
         }
     }
 
-    static public function try_and_buy($id) {
-        $shipment = Shipment::find($id);
+    static public function try_and_buy($id,$shipment = array()) {
+        if(empty($shipment)) {
+            $shipment = Shipment::find($id);
+        }
         if($shipment->business_category_id == 2){
             return false;
         }

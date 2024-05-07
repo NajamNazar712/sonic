@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\admins\CronControllers\SackBagCronController;
+use App\Http\Controllers\Admins\CronControllers\SackBagCronController;
 use Illuminate\Console\Command;
 
 class SackBagStatusUpdate extends Command

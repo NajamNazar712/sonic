@@ -24,6 +24,11 @@
                                         @else
                                             <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
                                         @endif
+                                        @if(session('mms_excel_booking_shippers') != null)
+                                            @if (in_array(session('user_id'), session('mms_excel_booking_shippers')))
+                                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_mms') }}">MMS Excel Sheet</a></li>
+                                            @endif
+                                        @endif
                                     @endif
                                     @if(session('international_rates') == 1)
                                         <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>

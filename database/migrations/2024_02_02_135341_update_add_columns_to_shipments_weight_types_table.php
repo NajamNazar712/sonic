@@ -19,7 +19,6 @@ class UpdateAddColumnsToShipmentsWeightTypesTable extends Migration
                 $table->decimal('arrival_range_weight_charges', 8, 2)->nullable()->default(NULL)->after('shipper_weight_charges');
             });
         }
-        
     }
 
     /**

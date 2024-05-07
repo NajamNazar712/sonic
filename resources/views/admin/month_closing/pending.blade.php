@@ -26,7 +26,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
+                            <input type="text" name="search_date_from" data-value="{{$date_start}}" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_from" placeholder="Search Date (From)">
                         </div>
 
 
@@ -37,7 +37,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
+                            <input type="text" name="search_date_to" data-value="{{$date_end}}" class="form-control pickadate bg-primary border-primary white rounded-right height-5-per" id="search_date_to" placeholder="Search Date (To)">
                         </div>
 
 

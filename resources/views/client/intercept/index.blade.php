@@ -16,12 +16,28 @@
                 
                 <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}" enctype="multipart/form-data">
                 @csrf
-                    <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
+                    {{-- <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
                         <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
                             <option value="1" selected>Different Consignee</option>
                             <option value="2">Same Consignee</option>
                         </select>
+                    </div> --}}
+
+                    <div class="form-group col-md-3 mb-2 text-center" style="margin: auto;">
+                        <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required" @if($intercept_type) disabled @endif>
+                            @if($intercept_type && $intercept_type->different_consignee)
+                                <option value="0" selected>Same Consignee</option>
+                                <option value="1" style="display: none;">Different Consignee</option>
+                            @elseif($intercept_type && $intercept_type->same_consignee)
+                                <option value="0" style="display: none;">Same Consignee</option>
+                                <option value="1" selected>Different Consignee</option>
+                            @else
+                                <option value="1" selected>Different Consignee</option>
+                                <option value="0">Same Consignee</option>
+                            @endif
+                        </select>
                     </div>
+                    
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
                     <div class="row justify-content-center">
 
