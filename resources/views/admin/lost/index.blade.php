@@ -808,16 +808,17 @@
                 if (data.aging < 7) {
                     $('td:eq(0)', row).addClass('select-checkbox');
                 }
-                if (data.approval >= 1 && data.permission === 944 && data.cleared != 0) {
-                    $('td:eq(0)', row).removeClass('select-checkbox');
-                }
-                if ((data.approval == 0 && data.permission != 944 || (data.approval >= 1 && data.permission != 944  && data.cleared == 0)) || (data.permission != 944 && data.shipment_cleared == null)) {
+
+                if(data.cleared == 0 && data.permission === 944){
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                }else if (data.cleared == 1 && data.permission != 944){
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                }else if(data.null_shipment == null){
+                    $('td:eq(0)', row).addClass('select-checkbox');
+                }else{
                     $('td:eq(0)', row).removeClass('select-checkbox');
                 }
 
-                if(data.permission != 944 && data.null_shipment == null){
-                    $('td:eq(0)', row).addClass('select-checkbox');
-                }
                 var info = table.page.info();
                 $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 if ($.inArray(data.shId, selected_rows) !== -1) {
