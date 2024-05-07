@@ -444,35 +444,45 @@ class RetailAdminUserManagementController extends Controller
     public function franchise_commission_view(){
         $franchises = RetailUser::where('category', 1)->get();
         $retail_franchise_shipments = $franchises->pluck('id')->toArray();
-        $franchis_details = RetailFranchise::whereIn('id', $retail_franchise_shipments)->get();
+        // $franchis_details = RetailFranchise::whereIn('id', $retail_franchise_shipments)->get();
         return view('admin.retail.commission.franchise_wise', [
-            'franchises' => $franchis_details
+            'franchises' => $franchises
         ]);
     }
 
     public function franchise_commission_view_ajax_list(Request $request){
+        $franchise = $request->franchise;
         // Franchise Users
         $franchise_users = RetailUser::where('category', 1)->get();
         $user_ids = $franchise_users->pluck('id')->toArray();
-    
-        // find shipments based on month
+
+        // Base query
+        $baseQuery = RetailShipment::query()
+        ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
+        ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
+        ->leftJoin('retail_franchise_product_percentages', function($join) {
+            $join->on('retail_franchises.id', '=', 'retail_franchise_product_percentages.franchise_id')
+                ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
+        })
+        ->leftJoin('retail_franchise_charges', function($join) {
+            $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
+        })
+        ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id');
+        if ($franchise != null) {
+            $baseQuery->where('retail_shipments.retail_user_id', $franchise);
+        } else {
+            $baseQuery
+            // ->where('retail_users.category', 1)
+                ->whereIn('retail_user_id', $user_ids);
+        }
+
         $month = $request->month;
-        $shipments = RetailShipment::whereIn('retail_user_id', $user_ids)
-            ->whereMonth('retail_shipments.created_at', $month)
-            ->leftJoin('retail_users', 'retail_shipments.retail_user_id', '=', 'retail_users.id')
-            ->leftJoin('retail_franchises', 'retail_users.category_id', '=', 'retail_franchises.id')
-            ->leftJoin('retail_franchise_product_percentages', function($join) {
-                $join->on('retail_franchises.id', '=', 'retail_franchise_product_percentages.franchise_id')
-                        ->on('retail_shipments.shipping_mode', '=', 'retail_franchise_product_percentages.retail_shipping_mode_id');
-            })
-            ->leftJoin('retail_franchise_charges', function($join) {
-                $join->on('retail_franchises.id', '=', 'retail_franchise_charges.franchise_id');
-            })
-            ->leftJoin('retail_shipping_modes', 'retail_shipments.shipping_mode', '=', 'retail_shipping_modes.id')
+        $shipments = $baseQuery->whereMonth('retail_shipments.created_at', $month)
             ->groupBy('retail_shipments.shipping_mode')
             ->groupBy('retail_franchise_product_percentages.franchise_id')
-            ->get([
+            ->select([
                 'retail_shipments.*',
+                'retail_shipments.created_at as shipment_month',
                 'retail_users.*',
                 'retail_franchises.code',
                 'retail_franchise_product_percentages.product_percentage',
@@ -480,7 +490,8 @@ class RetailAdminUserManagementController extends Controller
                 'retail_franchise_charges.franchise_withholding',
                 'retail_franchise_charges.franchise_deduction',
                 'retail_shipping_modes.name as shipping_mode_name',
-            ]);
+            ])
+            ->get();
 
             foreach ($shipments as $shipment) {
                 $shipmentCounts = $shipments->where('category_id', $shipment->category_id)

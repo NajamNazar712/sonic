@@ -27,6 +27,16 @@
                                 <option value="12">December</option>
                             </select>
                         </div>
+
+                        <div class="col-4">
+                            <select name="franchise" id="franchise" class="select2 form-control">
+                                <option value="" class="text-secondary">Select Franchise</option>
+                                @foreach ($franchises as $franchise)
+                                    <option value="{{ $franchise->id }}">{{ $franchise->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="col-2">
                             <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
@@ -76,10 +86,14 @@
         var dataTable = null;
         $('#search_filter_btn').on('click', function() {
             var selectedMonth = $('#month').val();
+            var franchise = $('#franchise').val();
             $.ajax({
                 url: "{{ route('admin.retail.franchise.commission.list') }}",
                 method: 'GET',
-                data: { month: selectedMonth },
+                data: { 
+                    month: selectedMonth,
+                    franchise: franchise
+                },
                 cache: false,
                 success: function(response) {
                     if (!response.shipments || response.shipments.length === 0) {
@@ -90,10 +104,16 @@
                     }
                     var combinedData = [];
                     response.shipments.forEach(function(item) {
+                        const dateString = item.shipment_month;
+                        const date = new Date(dateString);
+                        const monthNumber = date.toLocaleString('en-US', { month: '2-digit' });
+                        const monthName = new Date(Date.UTC(1970, monthNumber - 1, 1)).toLocaleString('en-US', { month: 'long' });
+
                         var rowData = {
                             name: item.name,
                             code: item.code,
-                            shipment_month: item.created_at,
+                            // shipment_month: item.shipment_month,
+                            shipment_month: monthName,
                             shipping_mode_name: item.shipping_mode_name,
                             shipmentCounts: item.shipmentCounts,
                             total_charges_without_gst: item.total_charges_without_gst,
