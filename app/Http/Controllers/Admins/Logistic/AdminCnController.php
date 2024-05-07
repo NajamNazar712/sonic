@@ -839,6 +839,7 @@ class AdminCnController extends Controller
             return redirect()->back()->with('error','Hub not found!');
         }
         $admin = $admin->first();
+
         $validate = Validator::make($request->all(),[
             'company_code' => ['required','max:255'],
             'rider_id' => ['required','integer'],
@@ -864,6 +865,7 @@ class AdminCnController extends Controller
                         ->orWhere('cn_from', '>=',$request->cn_from)
                         ->where('cn_to', '<=', $request->cn_to);
                 })->where('status',1);
+
             if($cn_issue->exists()){
                 return  redirect()->back()->with('error','CN Issued Already to Rider');
             }
@@ -878,6 +880,11 @@ class AdminCnController extends Controller
                         ->where('cn_to', '<=', $request->cn_to);
                 })->where('status',1)
                 ->latest('id');
+
+            if(!$cn_store->exists()){
+                return redirect()->back()->with('error','Child CN not found in admin store!');
+            }
+
 
 
             $time_stamp = now();
