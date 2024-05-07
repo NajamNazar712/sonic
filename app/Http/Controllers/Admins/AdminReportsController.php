@@ -14280,7 +14280,7 @@ class AdminReportsController extends Controller
                 ->where(
                     'spt.id',
                     '=',
-                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 1 )')
+                    DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0 )')
                 );
             })
             ->leftJoin('admins as sales_person', 'sales_person.id','spt.admin_id')
