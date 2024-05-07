@@ -3521,6 +3521,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('details', 'AdminAirwayBillJournyController@details')->name('details');
     });
 
+    Route::prefix('barcode_generator')->name('barcode_generator.')->group(function () {
+        Route::get('', 'BarcodeGeneratorController@index')->name('index');
+        Route::get('list', 'BarcodeGeneratorController@list')->name('list');
+        Route::post('submit', 'BarcodeGeneratorController@store')->name('submit');
+        Route::post('print_barcodes', 'BarcodeGeneratorController@print_barcodes')->name('print_barcodes');
+
+    });
+
     Route::prefix('coordinates')->name('coordinates.')->group(function () {
         Route::prefix('add')->name('add.')->group(function () {
             Route::get('', 'Admins\CoordinatesController@add_index')->name('index');
