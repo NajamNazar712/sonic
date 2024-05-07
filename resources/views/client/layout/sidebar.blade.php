@@ -4,9 +4,12 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             {{--<li class=" nav-item"><a href="{{route('cod.mentor_health.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-plus-circle"></i>TRAX Health</span><span class="font-weight-bold">Powered by Mentor Health</span></a></li>--}}
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
-            <li class=" nav-item"><a href="{{route('cod.wordpress.register')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Onboarding</span></a></li>
 
-            @if(isset($user) && $user->status != 0)
+            @if(session('rates_added_by') == NULL)
+                <li class=" nav-item"><a href="{{route('cod.wordpress.register')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Onboarding</span></a></li>
+            @endif
+            
+            @if(session('status') != 0)
                 <li class=" nav-item"><a href="{{route('cod.quick_search.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-search"></i>Quick Search</span></a></li>
                 @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
                     <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>

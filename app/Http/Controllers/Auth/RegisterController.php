@@ -496,7 +496,7 @@ class RegisterController extends Controller
                 ]);
 
                 $adminDashboardController = new AdminDashboardController();
-                $adminDashboardController->addRates($request, User::max('id'), $data);
+                $adminDashboardController->addRates($request, User::max('id'));
             }else{
                 $newUser = User::create([
                     'name' => $data['name'],
@@ -724,6 +724,7 @@ class RegisterController extends Controller
         $user->save();
         return view('client.register_success')->with(['verify' => 1]);
     }
+    
     public function register_success(){
         return view('client.register_success')->with(['verify' => 0]);
     }

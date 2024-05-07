@@ -73,6 +73,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('update/agreement_status', 'Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+    Route::get('access_denied', 'Shippers\ShipperDashboardController@wordpress_access_denied')->name('wordpress_access_denied');
+
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
     Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 

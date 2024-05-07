@@ -143,11 +143,14 @@ class ShipperDashboardController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:web,substitute_users');
-
-      $this->middleware('Permission');
+      $this->middleware('Permission')->except('wordpress_access_denied','contacts','userProfile','getBanks','getPickups','add_notification_emails','welcome_index');
     }
 
     public function access_denied() {
+        return view('client.access_denied');
+    }
+
+    public function wordpress_access_denied() {
         return view('client.access_denied');
     }
 
@@ -266,13 +269,13 @@ class ShipperDashboardController extends Controller
                 $percentage = null; 
                 $user = User::find($shipper_id);
                 $weight_charges = WeightCharge::where('user_id' , $shipper_id);
-                if($user->status == 0){
+                if($user->status == 0 && !$weight_charges->exists()){
                     $percentage = 30;
                     $color = '#FF4961';
                 }else if($weight_charges->exists()){
                     $percentage = 50;
                     $color = '#FF9149';
-                }else if ($user->rates_added_by == 346 && $user->rates_authorized_by == 346){
+                }else if ($user->rates_added_by == 346 || $user->rates_authorized_by == 346){
                     $percentage = 80;
                     $color = '#1E9FF2';
                 }else if ($user->document_status == 2 && $user->status == 2){
@@ -1126,7 +1129,8 @@ class ShipperDashboardController extends Controller
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         $reference = Reference::where('id', $user->reference_id)->first();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
-        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
+
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'cities_list' => $city_list, 'days'=>$payment_cycle_days]);
     }
 
     public function storeShipperId(Request $request)
@@ -2431,7 +2435,13 @@ class ShipperDashboardController extends Controller
 
             $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         }
-        return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
+        
+        if($user->rates_added_by != null){
+            return view('client.access_denied');
+        }else{
+            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
+
+        }
     }
 
 

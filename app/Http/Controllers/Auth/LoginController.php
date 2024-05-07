@@ -178,6 +178,9 @@ class LoginController extends Controller
                 $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['user_id' => $user->id]);
+                session(['status' => $user->status]);
+                session(['rates_added_by' => $user->rates_added_by]);
+
                 if (SalePersonTag::where('user_id', session('user_id'))->where('status', 0)->exists()){
                     session(['sale_person_status' => 1]);
                 }

@@ -6926,12 +6926,10 @@ class AdminDashboardController extends Controller
     /**
      * @param Request $request
      * @param $id
-     * @param $data
      * @return int
      */
-    public function addRates(Request $request, $id, $data)
+    public function addRates(Request $request, $id)
     {
-        dd($data);
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -7178,7 +7176,6 @@ class AdminDashboardController extends Controller
         $ol_validations = array();
         $detain_validations = array();
         $sameday_validations = array();
-
         $shipper_id = $id;
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             $on_validations = [
@@ -8328,7 +8325,13 @@ class AdminDashboardController extends Controller
         }
 
 
-        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        if($request->has('wordpress_account')){
+            User::where('id', $id)->update(['status' => 0, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        }else{
+            User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+            
+        }
+
         if ($request->has('rate_remarks') && $request->rate_remarks != null) {
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
@@ -8875,99 +8878,112 @@ class AdminDashboardController extends Controller
 
         if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
-            User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);
+
+    
+
+            if($request->has('wordpress_account')){
+                User::where('id', $id)->update(['rate_status' => 0, 'status' => 0, 'rates_authorized_by' => 32, 'rates_approved_by' => 32 ,'rates_approved_at' => Carbon::now()]);
+            }else{
+                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);   
+            }
         }
 
 
         //Sales Commisssion
-
-        if ($request->has('user_id')) {
-            $total_commission = $request->total_commission;
-            $users_count = count($request->user_id);
-
-            $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
-            if ($sales_commission->exists()) {
-                $sales_commission = $sales_commission->first();
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }                        
-                        else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+        if(!$request->has('wordpress_account')){
+            if ($request->has('user_id')) {
+                $total_commission = $request->total_commission;
+                $users_count = count($request->user_id);
+    
+                $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
+                if ($sales_commission->exists()) {
+                    $sales_commission = $sales_commission->first();
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];
+                            }                        
+                            else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
-                }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
-
-            } else {
-                $sales_commission = new SalesCommission();
-                $sales_commission->shipper_id = $shipper_id;
-                $sales_commission->commission_users_count = $users_count;
-                $sales_commission->commission = $total_commission;
-                $sales_commission->updated_by = Auth::id();
-                $sales_commission->save();
-                $sales_commission_id = $sales_commission->id;
-                $actual_commission = 0;
-                foreach ($request->tier_id as $row_id => $tier) {
-                    $sales_tier = SalesTier::find($tier);
-                    if ($sales_tier) {
-                        $sales_commission_user = new SalesCommissionUser();
-                        $sales_commission_user->sales_commission_id = $sales_commission_id;
-                        $sales_commission_user->tier_type_id = $sales_tier->tier_type;
-                        $sales_commission_user->tier_id = $tier;
-                        if ($sales_tier->tier_type == 1) {
-                            if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
-                                $sales_commission_user->user_type = "2";
-                            }  
-                            $sales_commission_user->user_id = $request->user_id[$row_id];         
-                        } else if ($sales_tier->tier_type == 2) {
-                            $external_user = new SalesCommissionExternalUser();
-                            $external_user->name = $request->user_id[$row_id];
-                            $external_user->shipper_id = $shipper_id;
-                            $external_user->save();
-                            $sales_commission_user->user_id = $external_user->id;
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
+    
+                } else {
+                    $sales_commission = new SalesCommission();
+                    $sales_commission->shipper_id = $shipper_id;
+                    $sales_commission->commission_users_count = $users_count;
+                    $sales_commission->commission = $total_commission;
+                    $sales_commission->updated_by = Auth::id();
+                    $sales_commission->save();
+                    $sales_commission_id = $sales_commission->id;
+                    $actual_commission = 0;
+                    foreach ($request->tier_id as $row_id => $tier) {
+                        $sales_tier = SalesTier::find($tier);
+                        if ($sales_tier) {
+                            $sales_commission_user = new SalesCommissionUser();
+                            $sales_commission_user->sales_commission_id = $sales_commission_id;
+                            $sales_commission_user->tier_type_id = $sales_tier->tier_type;
+                            $sales_commission_user->tier_id = $tier;
+                            if ($sales_tier->tier_type == 1) {
+                                if (strpos($request->user_id[$row_id], 'riders') !== false) {                      
+                                    $sales_commission_user->user_type = "2";
+                                }  
+                                $sales_commission_user->user_id = $request->user_id[$row_id];         
+                            } else if ($sales_tier->tier_type == 2) {
+                                $external_user = new SalesCommissionExternalUser();
+                                $external_user->name = $request->user_id[$row_id];
+                                $external_user->shipper_id = $shipper_id;
+                                $external_user->save();
+                                $sales_commission_user->user_id = $external_user->id;
+                            }
+                            $sales_commission_user->commission = $request->commission_percentage[$row_id];
+                            $actual_commission += $request->commission_percentage[$row_id];
+                            $sales_commission_user->save();
                         }
-                        $sales_commission_user->commission = $request->commission_percentage[$row_id];
-                        $actual_commission += $request->commission_percentage[$row_id];
-                        $sales_commission_user->save();
                     }
+                    $sales_commission->commission = $actual_commission;
+                    $sales_commission->save();
                 }
-                $sales_commission->commission = $actual_commission;
-                $sales_commission->save();
+    
             }
-
         }
+
+      
 
 
         //Sales Commissison End
 
         NotificationsController::send(38, $id);
-
-        return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        if($request->has('wordpress_account')){
+            return redirect()->route('cod.welcome');
+        }else{
+            return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
+        }
     }
 
 
