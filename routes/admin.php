@@ -1529,6 +1529,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('user_info', 'Admins\UserManagementController@user_info')->name('user_info');
             Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
+            Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
+            Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
+
+
         });
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function () {
@@ -1642,6 +1646,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
             Route::post('excel_store', 'Admins\AdminFinanceController@change_shipment_weight_excel_store')->name('excel_store');
             Route::post('calculate_amount', 'Admins\AdminFinanceController@change_shipment_weight_calculate_amount')->name('calculate_amount');
+            Route::post('view_excel_store', 'Admins\AdminFinanceController@view_change_shipment_weight_excel_store')->name('view_excel_store');
         });
 
         Route::prefix('add_shipment_adjustment')->name('add_shipment_adjustment.')->group(function () {
@@ -2401,6 +2406,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
             Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
+            });
+
+        Route::prefix('rvr_call_history')->name('rvr_call_history.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rvr_call_history_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rvr_call_history_list')->name('list');
             });
 
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
