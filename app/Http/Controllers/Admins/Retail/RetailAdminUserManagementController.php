@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Models\RetailFranchiseProductAttachment;
 use App\Http\Models\RetailFranchiseCharge;
 use App\Http\Models\RetailFranchiseCommission;
+use App\Http\Models\RetailUserCommission;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use Illuminate\Support\Facades\DB;
 
@@ -688,7 +689,7 @@ class RetailAdminUserManagementController extends Controller
                 $shipment->deduction = $deduction;
                 $shipment->net_commission = $net_commission;
 
-                RetailFranchiseCommission::updateOrCreate(
+                RetailUserCommission::updateOrCreate(
                     [
                         'franchise_id' => $shipment->category_id,
                         'month' => $month,
