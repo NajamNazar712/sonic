@@ -31,8 +31,9 @@
                                                 <input type="text" name="negative_payable" class="form-control negative_payable" placeholder="Shipper Negative Payable*" data-rule-required="true" data-rule-max="0" data-msg-required="Shipper Negative Payable is required" value="{{ $negative_payable }}" >
                                             </div>
                                         </div>
-
-                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        @if (session('role_id') == 1 || in_array(983, session('permissions')))
+                                            <button type="submit" class="btn btn-primary">Update</button>
+                                        @endif
                                     </form>
                                 </div>
                             </div>

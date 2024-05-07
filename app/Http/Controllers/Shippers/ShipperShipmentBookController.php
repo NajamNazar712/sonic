@@ -517,9 +517,6 @@ class ShipperShipmentBookController extends Controller
     public function store(Request $request) {
 
         $user_id = session('user_id');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
-            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
-        }
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -1020,6 +1017,15 @@ class ShipperShipmentBookController extends Controller
         } else {
             return redirect()->back()->with('error', 'Invalid Service Type Selected');
         }
+        }
+    }
+
+    public function check_negative_payable(Request $request){
+        $user_id = session('user_id');
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return 'false';
+        }else{
+            return 'true';
         }
     }
 
