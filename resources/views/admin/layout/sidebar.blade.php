@@ -912,7 +912,7 @@
                             </li>
                         @endif
                         @if (session('role_id') == 1 || in_array(984, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.finance.tracking_number_wise_dncc_history.index') }}">Tracking number wise DNCC info</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.finance.tracking_number_wise_dncc_info.index') }}">Tracking number wise DNCC info</a></li>
                         @endif
                     </ul>
 

@@ -1,51 +1,29 @@
 
 @extends('admin.layout.master')
-@section('title','DNCC History')
+@section('title','Tracking number wise DNCC info')
 
 @section('content')
     <h1 class="mb-1">
-       Tracking Number Wise DNCC History
+        Tracking number wise DNCC info
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row justify-content-center">
+                <form id="track_form" class="mb-1" novalidate="novalidate">
+                    <div class="row justify-content-center">
                     <div class="col-3">
-                        {{-- <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                            @foreach($shipping_mode as $mode)
-                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                            @endforeach
-                        </select> --}}
-                    </div>
-                    <div class="col-3">
-                        {{-- <select name="search_hub" id="search_hub" class="form-control select2">
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select> --}}
-                    </div>
-                    <div class="col-3" style="margin-top: 30px;">
                         <div class="form-group">
-                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%; margin-top: 50px;">
-                                
-                            </select>
+                            <input type="text" name="tracking_numbers" id="tracking_number" class="dt_search tracking_numbers"
+                                   placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
                         </div>
                     </div>
-                </div>
-
-                <div class="col justify-content-end mb-3">
-                    <div class="card-header">
-                        <div class="heading-elements">
-                            <ul class="list-inline">
-                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                        Star Shippers</a>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="form-group ml-1">
+                        <button type="submit" class="btn btn-primary">Search</button>
                     </div>
                 </div>
+                </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -53,32 +31,15 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Area</th>
-                        <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Consignee Phone</th>
-                        <th class="border-primary border-darken-1">Reattempt By</th>
-                        <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Sub Stations</th>
-                        <th class="border-primary border-darken-1">Weight</th>
-                        <th class="border-primary border-darken-1">Collection Amount</th>
-                        <th class="border-primary border-darken-1">Product Type</th>
-                        <th class="border-primary border-darken-1">Product Description</th>
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Origin Arrival Date</th>
-                        <th class="border-primary border-darken-1">Destination Zone</th>
-                        <th class="border-primary border-darken-1">Destination Arrival Date</th>
-                        <th class="border-primary border-darken-1">Last Rider</th>
-                        <th class="border-primary border-darken-1">Last Rider Trax ID</th>
-                        <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1">Destination Hub</th>
+                        <th class="border-primary border-darken-1">DNCC #</th>
+                        <th class="border-primary border-darken-1">DNCC Created at</th>
+                        <th class="border-primary border-darken-1">DNCC Last Updated at</th>
+                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">DNCC Status</th>
+                        <th class="border-primary border-darken-1">Shipment Status in DNCC</th>
                     </tr>
                     </thead>
                 </table>
@@ -170,55 +131,6 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
-        $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-            width: '100%',
-            placeholder: 'Shipping Mode',
-            allowClear:true
-        }).bind('change', function() {
-            table.draw();
-        });
-        $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-            width: '100%',
-            placeholder: 'Hub',
-            allowClear:true
-        }).bind('change', function() {
-            var cityId = $(this).val();
-            table.draw();
-
-            $('#search_area').empty();
-
-            if (cityId === '') {
-                $('#search_area').prop('disabled', true);
-                return;
-            }
-
-            $('#search_area').prop('disabled', false);
-
-            $.ajax({
-                url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
-                , type: 'GET'
-                , data: {
-                    city_id: cityId
-                }
-                , dataType: 'json'
-                , success: function(response) {
-                    $('#search_area').append('<option value="">Select</option>');
-                    $.each(response, function(index, area) {
-                        $('#search_area').append('<option value="' + area.id + '">' + area.name + '</option>');
-                    });
-                }
-                , error: function(xhr, status, error) {
-                    console.error(error);
-                }
-            });
-		});
-        $("#search_area").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select Area",
-            allowClear: true,
-            // width: '100%',
-        }).bind('change', function() {
-            table.draw();
-        });
         
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
@@ -228,38 +140,23 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.delivery.pending.list') }}',
+                    url: '{{ route('admin.finance.tracking_number_wise_dncc_info.list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
 
                         head.push('S.No');
                         head.push('Tracking .No');
-                        head.push('Shipper');
                         head.push('Origin');
                         head.push('Destination');
-                        head.push('Hub');
-                        head.push('Area');
-                        head.push('Consignee Name');
-                        head.push('Consignee Phone');
-                        head.push('Reattempt By');
-                        head.push('Address');
-                        head.push('Sub Station');
-                        head.push('Weight');
-                        head.push('Collection Amount');
-                        head.push('Product Type');
-                        head.push('Product Description');
-                        head.push('Shipping Mode');
-                        head.push('Service Type');
-                        head.push('Status');
-                        head.push('Reason');
-                        head.push('Remarks');
-                        head.push('Origin Arrival Date');
-                        head.push('Destination Zone');
-                        head.push('Destination Arrival Date');
-                        head.push('Last Rider');
-                        head.push('Last Rider Trax ID');
-                        head.push('Status Date');
+                        head.push('Destination Hub');
+                        head.push('DNCC #');
+                        head.push('DNCC Created at');
+                        head.push('DNCC Last Updated at');
+                        head.push('COD Amount');
+                        head.push('DNCC Status');
+                        head.push('Shipment Status in DNCC');
+                        
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -306,7 +203,7 @@
             buttons: [
                 {
                     extend: 'excel',
-                    title: 'Pending Deliveries',
+                    title: 'Tracking number wise DNCC info',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
@@ -322,12 +219,9 @@
             },
             serverSide: true,
             ajax:{
-                url: '{{ route('admin.delivery.pending.list') }}',
+                url: '{{ route('admin.finance.tracking_number_wise_dncc_info.list') }}',
                 data: function (d) {
-                    d.search_shipping_mode = $('#search_shipping_mode').val();
-                    d.search_hub = $('#search_hub').val();
-                    d.star_shipper_filter = $('#star_shippers_filter').val();
-                    d.search_area = $('#search_area').val();
+                    d.tracking_numbers = $('#tracking_number').val();
                 }
             },
             rowId: 'shId',
@@ -581,5 +475,34 @@
             $('#star_shippers_filter').val(0);
         });
 
+        //Selectize
+        var select = $('#tracking_number').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
     </script>
 @endsection

@@ -23,7 +23,7 @@ class TrackingNumberWiseDnccHistorySeeder extends Seeder
             array('id' => 790, 'screen_name' => 'Tracking number wise DNCC info', 'action' => 'Excel Download'),
         ));
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Finance > Tracking number wise DNCC info', 'url'=>'admin.finance.tracking_number_wise_dncc_history.index', 'permission_id' => 984),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Finance > Tracking number wise DNCC info', 'url'=>'admin.finance.tracking_number_wise_dncc_info.index', 'permission_id' => 984),
         ));
     }
 }

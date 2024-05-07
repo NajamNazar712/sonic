@@ -5230,13 +5230,13 @@ class AdminFinanceController extends Controller
         return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
 
-    public function tracking_number_wise_dncc_history_index()
+    public function tracking_number_wise_dncc_info_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 789);
-        return view('admin.finance.dncc_history');
+        return view('admin.finance.tracking_number_wise_dncc_info');
     }
 
-    public function tracking_number_wise_dncc_history_list(Request $request)
+    public function tracking_number_wise_dncc_info_list(Request $request)
     {
     
         if ($request->get('excel') && $request->get('excel') == true) {

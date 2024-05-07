@@ -1779,9 +1779,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
-        Route::prefix('tracking_number_wise_dncc_history')->name('tracking_number_wise_dncc_history.')->group(function () {
-                Route::get('', 'Admins\AdminFinanceController@tracking_number_wise_dncc_history_index')->name('index');
-                Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_history_list')->name('list');
+        Route::prefix('tracking_number_wise_dncc_info')->name('tracking_number_wise_dncc_info.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_info_list')->name('list');
         });
     });
 
