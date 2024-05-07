@@ -119,6 +119,7 @@ use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use App\Http\Models\Admin\AdminRole;
 
 
 class AdminFinanceController extends Controller
@@ -1707,7 +1708,8 @@ class AdminFinanceController extends Controller
 
                 $finance_admins = GlobalSettings::where('setting_value', 0)->where('type', 'delivery_revert_access')->first();
                 $admin = $request->user();
-                if ($admin->role_id != 1 && $admin->role_id != 4){
+                $admin_departments = AdminRole::where('department_id', 4)->pluck('id');
+                if ($admin->role_id != 1 && !in_array($admin->role_id, $admin_departments->toArray())) {
                     return ['status' => 1, 'error' => 'You are not authorized to perform this action'];
                 }
 
