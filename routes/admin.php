@@ -1529,6 +1529,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('user_info', 'Admins\UserManagementController@user_info')->name('user_info');
             Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
+            Route::post('lost_hub_user_shipment', 'Admins\UserManagementController@lost_hub_user_shipment')->name('lost_hub_user_shipment');
+            Route::get('get_lost_hub_user_shipment', 'Admins\UserManagementController@get_lost_hub_user_shipment')->name('get_lost_hub_user_shipment');
+
+
         });
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function () {
@@ -2402,6 +2406,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
             Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
+            });
+
+        Route::prefix('rvr_call_history')->name('rvr_call_history.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rvr_call_history_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@rvr_call_history_list')->name('list');
             });
 
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
@@ -3510,6 +3519,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('airway_journey')->name('airway_journey.')->group(function () {
         Route::get('', 'AdminAirwayBillJournyController@index')->name('index');
         Route::post('details', 'AdminAirwayBillJournyController@details')->name('details');
+    });
+
+    Route::prefix('barcode_generator')->name('barcode_generator.')->group(function () {
+        Route::get('', 'BarcodeGeneratorController@index')->name('index');
+        Route::get('list', 'BarcodeGeneratorController@list')->name('list');
+        Route::post('submit', 'BarcodeGeneratorController@store')->name('submit');
+        Route::post('print_barcodes', 'BarcodeGeneratorController@print_barcodes')->name('print_barcodes');
+
     });
 
     Route::prefix('coordinates')->name('coordinates.')->group(function () {

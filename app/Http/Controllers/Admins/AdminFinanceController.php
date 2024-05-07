@@ -117,6 +117,7 @@ use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Controllers\Admins\AdminDashboardController;
 use App\Http\Models\UserIbftCharge;
+use App\Http\Models\ShipmentServicesCharges;
 use App\Http\Models\Admin\StationDepositeNoteActionLog;
 use App\Http\Models\Admin\Settings\GeneralSetting;
 use Illuminate\Support\Facades\Response;
@@ -4037,9 +4038,18 @@ class AdminFinanceController extends Controller
 
     }
 
-    static public function add_payment($shipment_id, $type)
+    static public function add_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
+        $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment_id);
+        if($service_charges->exists()){
+            $service_charges = $service_charges->first();
+            $service_charges = $service_charges->reverse_pickup_charges;
+        }else{
+            $service_charges = 0;
+        }
         $setting = CorporateReimbursementSetting::where('user_id', $shipment->user_id);
         $crs = false;
         if ($setting->exists()) {
@@ -4052,7 +4062,7 @@ class AdminFinanceController extends Controller
         if ($shipment->shipment_type == 1) {
             if (!$shipment->packaging_material_request) {
                 if ($type == 0) {
-                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges;
+                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->esc_charges + $service_charges ;
                     if ($shipment->business_category_id == 1) {
                         $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id,$shipment->pickup_address->city->id)), 2, PHP_ROUND_HALF_DOWN);
                     } else {
@@ -6128,9 +6138,11 @@ class AdminFinanceController extends Controller
         return ['total_amount' => $total_amount, 'total_charges' => $total_charges, 'total_payable' => $total_payable];
     }
 
-    static public function done_payment($shipment_id, $type)
+    static public function done_payment($shipment_id, $type,$shipment = array())
     {
-        $shipment = Shipment::find($shipment_id);
+        if(empty($shipment)) {
+            $shipment = Shipment::find($shipment_id);
+        }
         if ($shipment->shipment_type == 1) {
             if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
@@ -7237,6 +7249,7 @@ class AdminFinanceController extends Controller
         $total_insurance_charges = 0;
         $total_replacement_charges = 0;
         $total_try_and_buy_charges = 0;
+        $total_reverse_pickup_charges = 0;
         $total_return_charges = 0;
         $total_packing_charges = 0;
         $total_packaging_material_charges = 0;
@@ -7255,6 +7268,13 @@ class AdminFinanceController extends Controller
             $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
             $calculate_total_fintech_charges[] = $done_fintech_charges;
             $shipment = $done_payment_shipment->shipment;
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+            if($service_charges->exists()){
+                $service_charges = $service_charges->first();
+                $service_charges = $service_charges->reverse_pickup_charges;
+            }else{
+                $service_charges = 0;
+            }
 
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
@@ -7322,6 +7342,7 @@ class AdminFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                            $total_reverse_pickup_charges += $service_charges;
                         } else {
                             $total_return_charges += $shipment->return_charges;
                         }
@@ -7456,6 +7477,10 @@ class AdminFinanceController extends Controller
                                         <td>' . number_format($total_try_and_buy_charges, 2) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>Total Reverse Pickup Charges</strong></td>
+                                        <td>' . number_format($total_reverse_pickup_charges, 2) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color secondary"><strong>Total Return Charges</strong></td>
                                         <td>' . number_format($total_return_charges, 2) . '</td>
                                     </tr>
@@ -7574,6 +7599,7 @@ class AdminFinanceController extends Controller
         $total_insurance_charges = 0;
         $total_replacement_charges = 0;
         $total_try_and_buy_charges = 0;
+        $total_reverse_pickup_charges = 0;
         $total_return_charges = 0;
         $total_packaging_material_charges = 0;
         $total_fuel_surcharge = 0;
@@ -7587,6 +7613,13 @@ class AdminFinanceController extends Controller
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+            if($service_charges->exists()){
+                $service_charges = $service_charges->first();
+                $service_charges = $service_charges->reverse_pickup_charges;
+            }else{
+                $service_charges = 0;
+            }
 
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
@@ -7654,6 +7687,7 @@ class AdminFinanceController extends Controller
                             $total_cash_handling_charges += $shipment->cash_handling_charges;
                             $total_replacement_charges += $shipment->replacement_charges;
                             $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                            $total_reverse_pickup_charges +=$service_charges;
                         } else {
                             $total_return_charges += $shipment->return_charges;
                         }
@@ -7692,7 +7726,7 @@ class AdminFinanceController extends Controller
 
         $total_columns = count($details[0]);
 
-        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
+        $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges,'Total Reverse Pickup Charges' => $total_reverse_pickup_charges , 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'IBFT Charges' => $done_payment->ibft_charges, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht)];
 
         $details[] = [];
 
@@ -8346,7 +8380,13 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
-
+                $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+                if($service_charges->exists()){
+                    $service_charges = $service_charges->first();
+                    $service_charges = $service_charges->reverse_pickup_charges;
+                }else{
+                    $service_charges = 0;
+                }
 
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -8382,6 +8422,7 @@ class AdminFinanceController extends Controller
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($service_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
@@ -8442,6 +8483,9 @@ class AdminFinanceController extends Controller
                 if (!isset($total_extra_service_charges[$origin])) {
                     $total_extra_service_charges[$origin] = 0;
                 }
+                if (!isset($total_reverse_pickup_charges[$origin])) {
+                    $total_reverse_pickup_charges[$origin] = 0;
+                }
 
 
                 if ($invoice_shipment->type != 2) {
@@ -8450,6 +8494,7 @@ class AdminFinanceController extends Controller
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
                         $total_extra_service_charges[$origin] += $shipment->esc_charges;
+                        $total_reverse_pickup_charges[$origin] += $service_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -8477,7 +8522,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="14" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -8487,6 +8532,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Replacement Charges (PKR)</th>
                             <th class="color secondary">Try & Buy Charges (PKR)</th>
                             <th class="color secondary">Return Charges (PKR)</th>
+                            <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
@@ -8508,6 +8554,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_reverse_pickup_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
@@ -8594,7 +8641,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -8605,6 +8652,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
@@ -9298,6 +9346,13 @@ class AdminFinanceController extends Controller
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
 
+                $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+                if($service_charges->exists()){
+                    $service_charges = $service_charges->first();
+                    $service_charges = $service_charges->reverse_pickup_charges;
+                }else{
+                    $service_charges = 0;
+                }
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
                 if ($shipment_journey->exists()) {
@@ -9381,12 +9436,17 @@ class AdminFinanceController extends Controller
                     $total_extra_service_charges[$origin] = 0;
                 }
 
+                if (!isset($total_reverse_pickup_charges[$origin])) {
+                    $total_reverse_pickup_charges[$origin] = 0;
+                }
+
                 if ($invoice_shipment->type != 2) {
                     if ($invoice_shipment->type == 0) {
                         $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
                         $total_extra_service_charges[$origin] += $shipment->esc_charges;
+                        $total_reverse_pickup_charges[$origin] += $service_charges;
 
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
@@ -9555,12 +9615,16 @@ class AdminFinanceController extends Controller
                         <tbody>
                         <tr>
                             <td>Weight Charges</td>
-                            <td rowspan="12">' . $shipment_counts[$origin] . '</td>
+                            <td rowspan="13">' . $shipment_counts[$origin] . '</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
                             <td>Fuel Surcharge</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Reverse Pickup Charges</td>
+                            <td>' . number_format($total_reverse_pickup_charges[$origin], 2) . '</td>
                         </tr>
                         <tr>
                             <td>Cash Handling Charges</td>
@@ -10338,6 +10402,13 @@ class AdminFinanceController extends Controller
 
         foreach ($invoice->invoice_shipments as $invoice_shipment) {
             $shipment = $invoice_shipment->shipment;
+            $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+            if($service_charges->exists()){
+                $service_charges = $service_charges->first();
+                $service_charges = $service_charges->reverse_pickup_charges;
+            }else{
+                $service_charges = 0;
+            }
             
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -10393,6 +10464,7 @@ class AdminFinanceController extends Controller
                           <td>' . $date . '</td>
                           <td>' . $shipment->actual_weight . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
+                          <td>' . (($invoice_shipment->type != 2) ? number_format($service_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                           <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
@@ -10449,6 +10521,9 @@ class AdminFinanceController extends Controller
             if (!isset($total_extra_service_charges[$origin])) {
                 $total_extra_service_charges[$origin] = 0;
             }
+            if (!isset($total_reverse_pickup_charges[$origin])) {
+                $total_reverse_pickup_charges[$origin] = 0;
+            }
 
             if (!isset($total_charges[$gst])) {
                 $total_charges[$gst] = 0;
@@ -10465,6 +10540,8 @@ class AdminFinanceController extends Controller
             if (!isset($total_invoice_amount[$gst])) {
                 $total_invoice_amount[$gst] = 0;
             }
+            
+
 
             if ($invoice_shipment->type != 2) {
                 if ($invoice_shipment->type == 0) {
@@ -10472,6 +10549,7 @@ class AdminFinanceController extends Controller
                     $total_replacement_charges[$origin] += $shipment->replacement_charges;
                     $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
                     $total_extra_service_charges[$origin] += $shipment->esc_charges;
+                    $total_reverse_pickup_charges[$origin] += $service_charges;
                 } else {
                     $total_return_charges[$origin] += $shipment->return_charges;
                 }
@@ -10589,7 +10667,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="13" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -10599,6 +10677,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Replacement Charges (PKR)</th>
                             <th class="color secondary">Try & Buy Charges (PKR)</th>
                             <th class="color secondary">Return Charges (PKR)</th>
+                            <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
@@ -10619,6 +10698,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_reverse_pickup_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
@@ -10698,7 +10778,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="16">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="17">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -10709,6 +10789,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">Arrival Date</th>
                           <th class="color secondary">Weight (kg)</th>
                           <th class="color secondary">Weight Charges (PKR)</th>
+                          <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
@@ -16066,7 +16147,13 @@ class AdminFinanceController extends Controller
         if ($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
                 $shipment = $invoice_shipment->shipment;
-
+                $service_charges = ShipmentServicesCharges::where('shipment_id', $shipment->id);
+                if($service_charges->exists()){
+                    $service_charges = $service_charges->first();
+                    $service_charges = $service_charges->reverse_pickup_charges;
+                }else{
+                    $service_charges = 0;
+                }
 
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
@@ -16162,6 +16249,9 @@ class AdminFinanceController extends Controller
                 if (!isset($total_extra_service_charges[$origin])) {
                     $total_extra_service_charges[$origin] = 0;
                 }
+                if (!isset($total_reverse_pickup_charges[$origin])) {
+                    $total_reverse_pickup_charges[$origin] = 0;
+                }
 
 
                 if ($invoice_shipment->type != 2) {
@@ -16170,6 +16260,7 @@ class AdminFinanceController extends Controller
                         $total_replacement_charges[$origin] += $shipment->replacement_charges;
                         $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
                         $total_extra_service_charges[$origin] += $shipment->esc_charges;
+                        $total_reverse_pickup_charges[$origin] += $service_charges;
                     } else {
                         $total_return_charges[$origin] += $shipment->return_charges;
                     }
@@ -16207,6 +16298,7 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Replacement Charges (PKR)</th>
                             <th class="color secondary">Try & Buy Charges (PKR)</th>
                             <th class="color secondary">Return Charges (PKR)</th>
+                            <th class="color secondary">Reverse Pickup Charges (PKR)</th>
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
@@ -16228,6 +16320,7 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                            <td>' . number_format($total_reverse_pickup_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
