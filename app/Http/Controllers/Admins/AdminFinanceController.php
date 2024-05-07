@@ -5243,7 +5243,14 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 790);
         }
 
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries (old)
+        $trackingNumbers = explode(',',$request->tracking_numbers);
+        dd($trackingNumbers);
+        $shipments = DeliveryNoteShipment::join('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+        ->join('')
+        ->whereIn('shipments.tracking_number',$trackingNumbers)
+
+        ;
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
