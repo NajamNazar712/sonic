@@ -161,7 +161,7 @@
     </div>
 
     <div class="modal fade" id="duplicate_modal" data-backdrop="static" role="dialog" aria-labelledby="duplicate_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="bookings_modal_title">Duplicate Data</h4>
@@ -852,7 +852,9 @@
         return +(Math.round(num + "e+2") + "e-2");
     }
 
+    var kam_count = 0;
     $('#commission_add_button').on('click', function () {
+        var is_kam = $('#sales_tier_select').find(":selected").text();
         var commission = parseFloat($('#user_commission').val());
         var this_btn = $(this);
 
@@ -873,64 +875,80 @@
         }
         if (!$('#user_commission').valid()) {
             flag = false;
-        }
-
+        }       
+      
         if (flag) {
-       
-
-            if (commission <= commission_max) {
-                selected_commission = roundToTwo(selected_commission + commission);
-                commission_max = commission_max - commission;
-                this_btn.attr('disabled', true);
-                var user_id = '';
-                var user_name = '';
-                var tier_id = '';
-                var tier_name = '';
-                var tier_type = '';
-                tier_id = $('#sales_tier_select').val();
-                tier_name = $('#sales_tier_select').find(":selected").text();
-                tier_type = $('#sales_tier_select').find(":selected").attr('type');
-                if (tier_type == 1) {
-                    user_id = $('#user_select').val();
-                    user_name = $('#user_select').find(":selected").text();
-                } else {
-                    user_name = $('#external_person_name').val();
-                }
-
-                add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
-                $('#sales_tier_select').val(null).trigger('change');
-                $('#user_select').val(null).trigger('change');
-                $('#user_select').attr('disabled', true);
-                $('#external_person_name').val('');
-                $('#external_person_name').attr('disabled', true);
-                $('#user_commission').val('');
-
-            } else {
-                var error = 'Selected Commission value exceeds!';
-                toastr.error(error, 'Error!', {
+            if(is_kam == 'KAM' && kam_count > 0 ){
+                var kam_error = 'You Can Select One KAM Only!';
+                toastr.error(kam_error, 'Error!', {
                     positionClass: 'toast-top-center',
                     containerId: 'toast-top-center'
                 });
-            }
-        }
-    });
-        $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
-            var id = $(this).parents('tr').attr('id');
+            }else{
+                if (commission <= commission_max) {
+                    selected_commission = roundToTwo(selected_commission + commission);
+                    commission_max = commission_max - commission;
+                    this_btn.attr('disabled', true);
+                    var user_id = '';
+                    var user_name = '';
+                    var tier_id = '';
+                    var tier_name = '';
+                    var tier_type = '';
+                    tier_id = $('#sales_tier_select').val();
+                    tier_name = $('#sales_tier_select').find(":selected").text();
+                    tier_type = $('#sales_tier_select').find(":selected").attr('type');
+                    if (tier_type == 1) {
+                        user_id = $('#user_select').val();
+                        user_name = $('#user_select').find(":selected").text();
+                    } else {
+                        user_name = $('#external_person_name').val();
+                    }
+                    if(is_kam == 'KAM'){
+                        kam_count+=1;
+                    }
+                    add_commission_row(tier_id, tier_name, tier_type, user_id, user_name, commission);
+                    $('#sales_tier_select').val(null).trigger('change');
+                    $('#user_select').val(null).trigger('change');
+                    $('#user_select').attr('disabled', true);
+                    $('#external_person_name').val('');
+                    $('#external_person_name').attr('disabled', true);
+                    $('#user_commission').val('');
 
-            var user_id = $('input[name="user_id[' + id + ']"]').val();
-            if (user_id) {
-                var index = $.inArray(user_id, selected_users);
-                if (index !== -1) {
-                    selected_users.splice(index, 1);
+                } else {
+                    var error = 'Selected Commission value exceeds!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
                 }
             }
-            var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
-            commission_max = roundToTwo(commission_max + commission);
-            selected_commission = roundToTwo(selected_commission - commission);
-            $('#total_commission_value').html(selected_commission);
-            $('#total_commission').val(selected_commission);
-            table_2.row($(this).parents('tr')).remove().draw();
-        });
+       
+        }
+    });
+    $('#datatable_rate tbody').on('click', 'tr td.action a.remove', function () {
+        var id = $(this).parents('tr').attr('id');
+        //check if sale tier is KAM
+        var rowData = table_2.row($(this).parents('tr')).data();
+        var regex = /KAM/;
+
+        if (regex.test(rowData[2])) {
+            kam_count-=1;
+        } 
+        //
+        var user_id = $('input[name="user_id[' + id + ']"]').val();
+        if (user_id) {
+            var index = $.inArray(user_id, selected_users);
+            if (index !== -1) {
+                selected_users.splice(index, 1);
+            }
+        }
+        var commission = parseFloat($('input[name="commission_percentage[' + id + ']"]').val());
+        commission_max = roundToTwo(commission_max + commission);
+        selected_commission = roundToTwo(selected_commission - commission);
+        $('#total_commission_value').html(selected_commission);
+        $('#total_commission').val(selected_commission);
+        table_2.row($(this).parents('tr')).remove().draw();
+    });
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,
@@ -1046,8 +1064,6 @@
 								var sub_segment = data.sub_segments;
 
                                 $.each(data.sub_segments, function (index, sub_segment) {
-									console.log(index);	
-									console.log(sub_segment);	
                                     $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
 									});
 
@@ -1075,7 +1091,6 @@
                     };
                 }
 
-                console.log(params);
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.accounts.pending.ajax') }}',
                     type: "POST",
@@ -1200,7 +1215,6 @@
                         //    if(selected_rows != ''){
                               
                         //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
                         //         $('#segmentTagSubmit1').on('click',function () {
                         //             var assign = parseInt($('#saletag1').val());
                         //             swal({
@@ -1350,7 +1364,6 @@
                            if(selected_rows != ''){
                               
                                 $('#SalesTagModal1').modal('show');
-                                // console.log(selected_rows);
                                 $('#salesTagSubmit1').on('click',function () {
                                     var assign = parseInt($('#saletag1').val());
                                     swal({
@@ -1925,7 +1938,6 @@
                 closeOnEsc: false,
                 dangerMode: true
             }).then((value) => {
-                console.log(value);
                 if (value) {
                     if (value === '') {
                         swal("You have not entered any remarks!", {
@@ -2097,11 +2109,78 @@
                     }
                 })
                     .done(function(data) {
-                        if(data.status){
+                        if (data.status) {
                             $('#duplicate_modal').modal('show');
-                            var html = '<table class="table table-bordered"><tr><td><strong>Phone</strong></td><td>'+ data.info.phone +'</td></tr><tr><td><strong>CNIC</strong></td><td>'+ data.info.cnic +'</td></tr><tr><td><strong>IBAN</strong></td><td>'+ data.info.iban +'</td></tr><tr><td><strong>Name</strong></td><td>'+ data.info.name +'</td></tr>';
+
+                            var baseURL = "{{ url('admin/accounts') }}";
+                            var html = '<table class="table table-bordered">';
+                            html += '<thead>';
+                            html += '<tr>' +
+                                '<th><strong>User Information</strong></th>' +
+                                '<th><strong>User Values</strong></th>' +
+                                '<th><strong>Duplicate Ids</strong></th>' +
+                                '</tr>';
+                            html += '</thead>';
+                            html += '<tbody>';
+
+                            html += '<tr>' +
+                                '<td><strong>Phone</strong></td>' +
+                                '<td>' + data.info.phone + '</td>' +
+                                '<td>' + (data.info.shared_phone ?
+                                    generateLinks(data.info.shared_phone.split(','), baseURL, 'phone') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>CNIC</strong></td>' +
+                                '<td>' + data.info.cnic + '</td>' +
+                                '<td>' + (data.info.shared_cnic ?
+                                    generateLinks(data.info.shared_cnic.split(','), baseURL, 'cnic') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>IBAN</strong></td>' +
+                                '<td>' + data.info.iban + '</td>' +
+                                '<td>' + (data.info.shared_iban ?
+                                    generateLinks(data.info.shared_iban.split(','), baseURL, 'iban') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>Name</strong></td>' +
+                                '<td>' + data.info.name + '</td>' +
+                                '<td>' + (data.info.shared_name ?
+                                    generateLinks(data.info.shared_name.split(','), baseURL, 'name') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>NTN</strong></td>' +
+                                '<td>' + (data.info.ntn && data.info.shared_ntn_no.length ? data.info.ntn : '') + '</td>' +
+                                '<td>' + (data.info.shared_ntn_no ?
+                                    generateLinks(data.info.shared_ntn_no.split(','), baseURL, 'ntn') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '<tr>' +
+                                '<td><strong>Email</strong></td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email.includes(data.info.email) ?
+                                    data.info.email : '') + '</td>' +
+                                '<td>' + (data.info.shared_email && data.info.shared_email !== '' && !data.info.shared_email.includes(data.info.email) ?
+                                    generateLinks(data.info.shared_email.split(','), baseURL, 'email') : '') + '</td>' +
+                                '</tr>';
+
+                            html += '</tbody>';
+                            html += '</table>';
+
+                            function generateLinks(ids, baseURL, type) {
+                                var links = [];
+                                for (var i = 0; i < ids.length; i++) {
+                                    var url = baseURL + '/' + ids[i].trim() + '/view';
+                                    links.push('<a href="' + url + '" target="_blank">' + ids[i].trim() + '</a>');
+                                }
+                                return links.join(', ');
+                            }
+
                             $('#duplicate_modal .modal-body').html(html);
                         }
+
 
                     });
             }

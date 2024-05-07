@@ -1243,6 +1243,7 @@ class Permission
             'reports.rv_action_count_report.index'=>930,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
+            'reports.rvr_call_history.index'=>950,
 
             'finance.ftl_invoice.index' => 509,
             'settings.debriefing_time_setting.index' => 526,
@@ -1433,7 +1434,9 @@ class Permission
             'reports.operations_performance.export_to_excel' => 892,
             'settings.parcel_value_bypass.index' => 910,
             'settings.logistic_report.index' =>932,
-			'reports.cargo_manifest.index' => 925,
+
+            'settings.mms_excel_booking_setting.index' => 938,
+			'reports.cargo_manifest.index' => 933,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

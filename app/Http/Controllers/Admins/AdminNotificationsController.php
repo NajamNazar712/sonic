@@ -92,7 +92,9 @@ class AdminNotificationsController extends Controller
     }
 
     public function send_custom_email(Request $request) {
+        
         $attachments = array();
+        $from_email = $request->notification_sender;
         if ($request->get('receiver') == 1) {
             if($request->get('search_hub') == 0) {
                 $emails = Admin::all()->pluck('email')->toArray();
@@ -154,8 +156,10 @@ class AdminNotificationsController extends Controller
                 // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
                 $body = $body . PHP_EOL . $body_attachment_message;
             }
+         
+         
             foreach ($emails as $to) {
-                NotificationsController::custom(1, $subject, $body, $to);
+                NotificationsController::custom(1, $subject, $body, $to,$from_email);
             }
 
             return redirect()->back()->with('success', 'Custom Email Sent');
@@ -198,7 +202,6 @@ class AdminNotificationsController extends Controller
         }
 
         $details['body'] = $notification->body;
-
         if ($id == 1) {
             $details['receiver'] = ['Shipper', 'Sales Person'];
 

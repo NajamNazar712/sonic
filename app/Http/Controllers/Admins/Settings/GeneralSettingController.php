@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admins\Settings;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Settings\GeneralSetting;
+use Auth;
 use Carbon\Carbon;
+use App\Http\Models\Shipper\User;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use Illuminate\Support\Facades\Auth;
 
 
 
@@ -28,14 +29,30 @@ class GeneralSettingController extends Controller
 
     public function ticker_index()
     {
-        $admin_ticker = null;
-        $shipper_ticker = null;
+        $admin_ticker = [
+            'description' => '',
+            'start_date' => '',
+            'start_time' =>  '',
+            'start_time_formatted'=> '',
+            'end_date' => '',
+            'end_time' => '',
+            'end_time_formatted'=> ''
+        ];
+        $shipper_ticker = [
+            'description' => '',
+            'start_date' => '',
+            'start_time' =>  '',
+            'start_time_formatted'=> '',
+            'end_date' => '',
+            'end_time' => '',
+            'end_time_formatted'=> ''
+        ];
 
         $settings = GeneralSetting::where('type', 'admin_ticker');
 
         if ($settings->exists()) {
             $settings = $settings->first();
-          
+
             $startformated = $this->formatDateTime($settings->start_date);
             $endformated = $this->formatDateTime($settings->end_date);
 
@@ -44,36 +61,35 @@ class GeneralSettingController extends Controller
                 'start_date' => $startformated['date'],
                 'start_time' =>  $startformated['time'],
                 'start_time_formatted'=>  $startformated['time_formatted'],
-                'end_date' => $endformated['date'], 
-                'end_time' => $endformated['time'], 
+                'end_date' => $endformated['date'],
+                'end_time' => $endformated['time'],
                 'end_time_formatted'=> $endformated['time_formatted']
-            ];  
+            ];
         }
 
         $settings = GeneralSetting::where('type', 'shipper_ticker');
-        
-      
+
+
         if ($settings->exists()) {
             $settings = $settings->first();
 
             $startformated = $this->formatDateTime($settings->start_date);
             $endformated = $this->formatDateTime($settings->end_date);
-           
+
                 $shipper_ticker = [
                     'description' => $settings->description,
                     'start_date' => $startformated['date'],
                     'start_time' =>  $startformated['time'],
                     'start_time_formatted'=>  $startformated['time_formatted'],
-                    'end_date' => $endformated['date'], 
-                    'end_time' => $endformated['time'], 
+                    'end_date' => $endformated['date'],
+                    'end_time' => $endformated['time'],
                     'end_time_formatted'=> $endformated['time_formatted']
-                ];  
-          
+                ];
+
 
         }
        
        
-
         return view('admin.settings.ticker')->with(['admin_ticker' => $admin_ticker,'shipper_ticker' => $shipper_ticker]);
     }
 
@@ -166,6 +182,42 @@ class GeneralSettingController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+    public function mms_excel_booking_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 747);
+        $users= User::where('status',3)->where('blacklist' ,0 )->where('account_type_id',2)->select('id' , 'name')->get();
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+        $mms_excel_booking_setting = array();
+        if ($settings->exists())
+        {
+            $settings = $settings->first();
+            $mms_excel_booking_setting = array_map('intval',explode(',' , $settings->description));
+        }
+        return view('admin.settings.mms_excel_booking_shippers')->with(['users' => $users , 'mms_excel_booking_setting' =>$mms_excel_booking_setting]);
+    }
+    
+    public function mms_excel_booking_setting_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 748);
+        if ($request->has('users') && count($request->users) > 0) {
+            $users = implode(',', $request->users);
+        } else{
+            $users = null;
+        }
+        $settings = GeneralSetting::where('type', 'mms_excel_booking_setting');
+    
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GeneralSetting();
+    
+            $settings->type = 'mms_excel_booking_setting';
+        }
+            $settings->description = $users;
+            $settings->save();
+            
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 
     function shipper_cap_index()
     {
@@ -190,7 +242,41 @@ class GeneralSettingController extends Controller
            });
         return $datatables->make(true);
     }
-    
+ 	// public function mobile_check_index() {
+
+    //         $shipper_ids = null;
+
+    //         $shippers = User::select(['id','name'])->where('status',3)->get();
+
+    //         $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //         if($setting->exists()) {
+    //             $setting = $setting->first();
+    //             $shipper_ids = explode(',',$setting->setting_value);
+    //         } 
+
+    //     return view("admin.settings.shipper.mobile_number_check")->with(['shippers' => $shippers,'shipper_ids' => $shipper_ids]);
+    // }
+
+    // public function mobile_check_store(Request $request) {
+
+    //     $setting = GeneralSetting::where('type', 'shipper_mobile_check');
+    //     if($setting->exists()) 
+    //     {
+    //         $setting =  $setting->first();
+    //     } else {
+    //         $setting = new GeneralSetting();
+    //         $setting->type = 'shipper_mobile_check';
+    //     }
+
+    //     $shipper_ids = implode(',',$request->shipper_ids);
+    //     $setting->setting_value =  $shipper_ids;
+    //     $setting->save();
+    //     return redirect()->back()->with('success', 'Settings Updated!');
+
+       
+
+      
+    // }    
 
     function shipper_cap_store(Request $request)
     {

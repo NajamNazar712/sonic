@@ -22,10 +22,5 @@ class CreateActivityTrailAndPermissionForIssuanceofSackBagReport extends Seeder
             array('id' => 746, 'screen_name' => 'Issuance Canvas Bag', 'action' => 'Excel'),
 
         ));
-
-        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Issuance of Canvas Bag', 'url' => 'admin.reports.issuance_sack_bag.index', 'permission_id' => 937),
-        ));
     }
 }

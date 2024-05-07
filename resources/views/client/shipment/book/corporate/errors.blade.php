@@ -14,7 +14,11 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.corporate_excel_store']) !!}
+                            @if(isset($type) && $type == 'mms')
+                                {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.corporate_excel_mms.store']) !!}
+                            @else
+                                {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.corporate_excel_store']) !!}
+                            @endif
                             {!! Form::hidden('service_type_check_id', $service_type_check_id) !!}
                             {!! Form::hidden('omni', $omni) !!}
                             <div class="table-responsive">

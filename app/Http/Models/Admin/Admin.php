@@ -75,4 +75,8 @@ class Admin extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
     }
+    public function responsible_city() {
+        return $this->belongsTo('App\Http\Models\City', 'default_hub_id', 'hub_id');
+    }
+
 }
