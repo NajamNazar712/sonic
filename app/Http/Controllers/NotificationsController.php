@@ -520,15 +520,22 @@ class NotificationsController extends Controller
                         if ($details['difference'] == 0) {
                             $details['difference'] = 0;
                         }
-                        if ($weight_types->weight_type == 1) {
-                            $details['weighted_as'] = "Partially Manual";
-                        } else if ($weight_types->weight_type == 2){
-                            $details['weighted_as'] = "Manual";
-                        } else if ($weight_types->weight_type == 3){
-                            $details['weighted_as'] = "Automatic";
-                        } else if ($weight_types->weight_type == 4){
-                            $details['weighted_as'] = "Bulk Arrival";
+
+                        if ($shipment->length != null) {
+                            $details['weighted_as'] = "Volumetric";
+                        } else {
+                            $details['weighted_as'] = "Dense";
                         }
+
+                        // if ($weight_types->weight_type == 1) {
+                        //     $details['weighted_as'] = "Partially Manual";
+                        // } else if ($weight_types->weight_type == 2){
+                        //     $details['weighted_as'] = "Manual";
+                        // } else if ($weight_types->weight_type == 3){
+                        //     $details['weighted_as'] = "Automatic";
+                        // } else if ($weight_types->weight_type == 4){
+                        //     $details['weighted_as'] = "Bulk Arrival";
+                        // }
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
