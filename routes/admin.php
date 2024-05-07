@@ -1778,6 +1778,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('retail_generate_report_to_email', 'Admins\AdminFinanceController@retail_done_payments_generate_report_to_email')->name('retail_generate_report_to_email');
             });
         });
+
+        Route::prefix('tracking_number_wise_dncc_history')->name('tracking_number_wise_dncc_history.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@tracking_number_wise_dncc_history_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@tracking_number_wise_dncc_history_list')->name('list');
+        });
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function () {
