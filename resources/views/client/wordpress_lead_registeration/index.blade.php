@@ -2787,15 +2787,18 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                    
-    
-                    
+                                                
+                                                
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                    
-                        </fieldset>
+                                
+
+                                
+    
+                                <input type="hidden" name="request_custom_quotations" value="0">
+                            </fieldset>
                     </form>
                 </div>
             </div>
@@ -2883,6 +2886,7 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function() {
+      
         $('input[type="checkbox"]').addClass('d-none');
         $('input[name="on_main_switch"]').removeClass('d-none');
         $('input[name="ol_main_switch"]').removeClass('d-none');
@@ -2932,11 +2936,12 @@
 
 
 
-        });
+        }).prop('readonly', true);
 
 
         @if ($lead != null)
             $('#shipper_city').val({{ $lead->city_id }}).trigger('change');
+            $('#reference').val({{ $lead->reference_id }}).trigger('change');
         @endif
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
@@ -3013,7 +3018,7 @@
                 placeholder: 'Select Duration',
                 // dropdownParent:$('#registership')
             });
-        $('select[name="reference"]').prepend('<option value="" selected="selected"></option>').select2({
+        $('select[name="reference"]').select2({
             placeholder: 'Select Reference',
             // dropdownParent:$('#registership')
         });
@@ -3640,6 +3645,14 @@
             placeholder: "Destination(s)",
             allowClear: true
         });
+
+
+         
+
+        $(document).on("click" ,"#customQuotationBtn", function() {
+            $('input[name="request_custom_quotations"]').val('1');
+        });
+
 
     });
 

@@ -66,6 +66,10 @@ $(".steps-validation").steps({
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
+        if(newIndex === 4){
+            var newLi = $('<li class="clearfix"><button id="customQuotationBtn" class="btn btn-primary">Request For Custom Qoutes</button></li>');
+            $('.actions ul').append(newLi);
+        }
         if(currentIndex === 0){
             var caddress = $('input[name="company_address"]').val();
             var cphone = $('input[name="shipper_phone"]').val();
@@ -192,7 +196,6 @@ $(".steps-validation").steps({
 
 // Initialize validation
 $(".steps-validation").validate({
-    ignore: 'input[type=hidden]', // ignore hidden fields
     errorClass: 'danger',
     successClass: 'success',
     highlight: function(element, errorClass) {
