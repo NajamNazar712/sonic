@@ -131,7 +131,7 @@ class JourneyMissingEntrySeeder extends Seeder
             
                 }
             }
-        }
+        
        
     }
 }
