@@ -24,7 +24,7 @@ class JourneyMissingEntrySeeder extends Seeder
     public function run()
     {
         //
-        $shipmentId = [37063924,37204035];
+        $shipmentId = [35458329];
         if($shipmentId){
             foreach($shipmentId as $value){
                 $shipment = Shipment::find($value);
@@ -87,6 +87,8 @@ class JourneyMissingEntrySeeder extends Seeder
                     // $deliveryNoteId->status = 6;
                     // $deliveryNoteId->save();
                     // ShipmentsJourneyController::add($shipment->id, $shipment->shipper_status_id, $shipment->shipper_status_id, NULL, NULL, $shipment->user_id, NULL, $deliveryNoteId->delivery_note_id);
+                  
+                    }  
                     $verification = 1;
                     $shipment_journey = new ShipmentsJourney();
 
