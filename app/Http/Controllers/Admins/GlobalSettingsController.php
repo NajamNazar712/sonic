@@ -9452,4 +9452,40 @@ class GlobalSettingsController extends Controller
             
             return redirect()->back()->with('success', 'Settings Updated!');
         }
+
+    public function shipper_negative_payable_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 787);
+        $settings = GlobalSettings::where('type', 'negative_payable_limit');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $negative_payable = $settings->setting_value;
+        } else {
+            $negative_payable = -1000;
+        }
+
+        return view('admin.settings.negative_payable')->with(['negative_payable' => $negative_payable]);
+    }
+
+    public function shipper_negative_payable_update(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 788);
+        $negative_payable = $request->negative_payable;
+        if ($negative_payable) {
+            $shipperSettings = GlobalSettings::where('type', 'negative_payable_limit');
+
+            if ($shipperSettings->exists()) {
+                $shipperSettings = $shipperSettings->first();
+            } else {
+                $shipperSettings = new GlobalSettings();
+
+                $shipperSettings->type = 'negative_payable_limit';
+            }
+            $shipperSettings->setting_value = $negative_payable;
+            $shipperSettings->save();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

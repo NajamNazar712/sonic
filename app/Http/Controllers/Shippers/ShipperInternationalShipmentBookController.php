@@ -14,6 +14,7 @@ use App\Http\Models\InternationalRatesHub;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\PaymentMode;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\Product;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentShipperReference;
@@ -89,6 +90,9 @@ class ShipperInternationalShipmentBookController extends Controller
 
     public function store(Request $request) {
         $user_id = session('user_id');
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return back()->with(['error' => "Can not process Zero COD Shipment, due to pending negative payable amount."]);
+        }
         $service_type_id = 1;
 
         if ($request->input('pickup_address') == 0) {
@@ -333,6 +337,15 @@ class ShipperInternationalShipmentBookController extends Controller
     }
     public function excel_store(Request $request) {
         $user_id = session('user_id');
+        $pending_payable = PendingPayment::check_negative_payable($user_id);
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
+        });
+
         $account_type_id = session('account_type');
         $names = [
             'pickup_address_id' => 'Pickup Address ID',
@@ -388,7 +401,8 @@ class ShipperInternationalShipmentBookController extends Controller
             'phone_number.regex' => ':attribute format is Invalid.',
 
             'consignee_phone_number_1.regex' => ':attribute format is Invalid',
-            'consignee_phone_number_2.regex' => ':attribute format is Invalid'
+            'consignee_phone_number_2.regex' => ':attribute format is Invalid',
+            'negative_balance' => 'Can not process Zero COD Shipment, due to pending negative payable amount',
         ];
 
         $rules = [
@@ -413,7 +427,7 @@ class ShipperInternationalShipmentBookController extends Controller
             'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
             'special_instructions' => ['nullable', 'between:0,190'],
             'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
-            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
+            'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0','negative_balance'],
             'payment_mode_id' => ['required', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 $query->whereNotIn('id', [2, 3]);
             })],

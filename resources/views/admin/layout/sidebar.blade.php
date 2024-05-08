@@ -2335,7 +2335,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825,851,854], session('permissions'))) !== 0)
+                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825,851,854,982], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Financials</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([157, 158, 462], session('permissions'))) !== 0)
@@ -2407,7 +2407,12 @@
                                     @if (session('role_id') == 1 || in_array(854, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
-                                    @endif  
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(982, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.settings.shipper_negative_payable.index') }}">Negative Payable Limit</a></li>
+                                    @endif
 
 
                                 </ul>
