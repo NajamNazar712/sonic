@@ -118,7 +118,7 @@ class WebsiteLead extends Command
                     $new_lead->business_address = $lead->data->business_address;
                     $new_lead->company_name = $lead->data->company_name;
                     $new_lead->business_registered_status = isset($lead->data->business_address) ? 1 : 0;
-                    $new_lead->referral_id = $reference_id;
+                    $new_lead->reference_id = $reference_id;
                     $new_lead->activation_code = $token;
                     $new_lead->cnic_number = $lead->data->cnic_number;
                     $new_lead->save();

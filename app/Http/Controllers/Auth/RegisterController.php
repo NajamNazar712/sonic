@@ -132,7 +132,7 @@ class RegisterController extends Controller
                         'phone' => 'nullable',
                         'nature_of_account' => 'required',
                         'average_shipment' => 'required',
-                        'sale_person' => 'required',
+                        'sale_person' => 'nullable',
                         'average_shipment_duration' => 'required',
                         'cnic' => 'required|string|max:255',
                         'url' => 'required|string|max:255',
@@ -421,6 +421,11 @@ class RegisterController extends Controller
                     $sale_person->user_id = User::max('id'); // Corrected comma to semicolon
                     $sale_person->status = 0; // Corrected comma to semicolon
                     $sale_person->save(); // Corrected comma to semicolon and added save() method
+                }
+
+                if($lead){
+                    $lead->sale_person = $lead_zone->admin_id;
+                    $lead->save();
                 }
             }
         }else{

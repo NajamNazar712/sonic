@@ -1588,7 +1588,7 @@ class Permission
             $routes[] = 'register.submit';
             $routes[] = 'orders.index';
             
-            if (!in_array($action, $routes)) {
+            if (!in_array($action, $routes)){
                 return redirect()->route('cod.wordpress_access_denied');
             }
 

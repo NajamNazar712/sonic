@@ -8325,12 +8325,14 @@ class AdminDashboardController extends Controller
         }
 
 
-        if($request->has('wordpress_account')){
-            User::where('id', $id)->update(['status' => 0, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
-        }else{
+        if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+            User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 1]);
+        } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+            User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346]);
+        } else {
             User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
-            
         }
+        
 
         if ($request->has('rate_remarks') && $request->rate_remarks != null) {
             $rate_remark = new RateRemark();
@@ -8879,12 +8881,12 @@ class AdminDashboardController extends Controller
         if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
 
-    
-
-            if($request->has('wordpress_account')){
-                User::where('id', $id)->update(['rate_status' => 0, 'status' => 0, 'rates_authorized_by' => 32, 'rates_approved_by' => 32 ,'rates_approved_at' => Carbon::now()]);
-            }else{
-                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);   
+            if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
+                User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 1]);
+            } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
+                User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346]);
+            } else {
+                User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
             }
         }
 
@@ -8978,7 +8980,7 @@ class AdminDashboardController extends Controller
 
         //Sales Commissison End
 
-        NotificationsController::send(38, $id);
+        // NotificationsController::send(38, $id);
         if($request->has('wordpress_account')){
             return redirect()->route('cod.welcome');
         }else{
@@ -9906,6 +9908,8 @@ class AdminDashboardController extends Controller
                     return "Authorized";
                 } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
+                } else if ($users->rate_status == 0 && $users->status == 0) {
+                    return "Requested For Custom Quotation";
                 }
             })
             ->editColumn('documents_status', function ($users) {
