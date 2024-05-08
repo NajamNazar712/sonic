@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\PendingPayment;
 use DB;
 use SnappyPDF;
 use Validator;
@@ -487,7 +488,9 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
-
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // Validator::extend('phone_number', function ($attribute, $value, $parameters) {
         //     if ($value) {
@@ -788,12 +791,20 @@ class APIController extends Controller
             }
         }
 
-        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
-        if ($shipment_pre_book->exists()) {
+        // $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
+        // if ($shipment_pre_book->exists()) {
+        //     $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+        //         $query->where('user_id', $user_id);
+        //     })];
+        // }
+        
+        $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id)->get();
+        if ($shipment_pre_book->isNotEmpty()) {
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })];
-        } else {
+        }
+        else {
             if ($user_type['restrict_order_id'] == 1) {
                 $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -862,18 +873,42 @@ class APIController extends Controller
             }
             $return_address_id = NULL;
             $service_type_id = $request->input('service_type_id');
-            if ($shipment_pre_book->exists()) {
-                $shipment_pre_book = $shipment_pre_book->first();
-                $length = strlen($shipment_pre_book->prefix);
-                $check_order_id = str_split($request->input('order_id'), $length);
-                if ($shipment_pre_book->prefix != $check_order_id[0]) {
-                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
-                } else {
-                    if (!array_key_exists(1, $check_order_id)) {
-                        return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            // if ($shipment_pre_book->exists()) {
+            //     $shipment_pre_book = $shipment_pre_book->first();
+            //     $length = strlen($shipment_pre_book->prefix);
+            //     $check_order_id = str_split($request->input('order_id'), $length);
+            //     if ($shipment_pre_book->prefix != $check_order_id[0]) {
+            //         return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //     } else {
+            //         if (!array_key_exists(1, $check_order_id)) {
+            //             return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+            //         }
+            //     }
+            // }
+            
+            if ($shipment_pre_book->isNotEmpty()) {
+                $shipment_pre_book = $shipment_pre_book->pluck('prefix')->toArray();
+                $order_id = $request->input('order_id');
+                $prefix_matched = false;
+
+                foreach ($shipment_pre_book as $prefix) {
+                    $length = strlen($prefix);
+                    $check_order_id = substr($order_id, 0, $length);
+                    if ($prefix == $check_order_id) {
+                        $prefix_matched = true;
+                        $remaining_order_id = substr($order_id, $length);
+                        if (empty($remaining_order_id)) {
+                            return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                        }
+                        break;
                     }
                 }
-            } else {
+                // If none of the prefixes matched
+                if (!$prefix_matched) {
+                    return response()->json(['status' => 1, 'message' => 'In-Valid Order ID']);
+                }
+            } 
+            else {
                 $shipment_pre_book = null;
             }
             if ($service_type_id != 5) {
@@ -1503,6 +1538,10 @@ class APIController extends Controller
     {
         $user_id = $request->user_id;
         $flag = null;
+
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
@@ -4910,6 +4949,7 @@ class APIController extends Controller
                             'shipment_id' => $shipment->id,
                             'rv_assign_agent_status_id' => 1, //ReturnConfirm
                             'updated_by_id' =>  $user_id,
+                            'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                         ];
                         $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
@@ -4969,7 +5009,10 @@ class APIController extends Controller
                                 'shipment_id' => $shipment->id,
                                 'rv_assign_agent_status_id' => 2, //Reattempt
                                 'updated_by_id' =>  $user_id,
+                                'state_id' => 3,//Open rv state id 3 is Open
+                                'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                             ];
+                           
                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
 
@@ -5091,6 +5134,7 @@ class APIController extends Controller
                                                 'shipment_id' => $shipment->id,
                                                 'rv_assign_agent_status_id' => 4, //Intercept Approved
                                                 'updated_by_id' =>  $user_id,
+                                                'type_id'=> 3, // set the user_type_id 3 against to the shipper default function set is 1.
                                             ];
                                             $this->rv_shipment_assign_agent_by_admin($rv_shipment_assign_agent_data);
 
@@ -8578,6 +8622,10 @@ class APIController extends Controller
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
         $flag = null;
+
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id)){
+            return response()->json(['status' => 1, 'message' => "Your payable amount balance has exceeded the negative limit. Please contact support for further details."]);
+        }
 
         // check if user_id is 2234 or not
         if ($user_id != 2234 && $user_id != 1049) {
