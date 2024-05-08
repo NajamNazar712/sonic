@@ -134,12 +134,12 @@ class RiderLogisticApiController extends Controller
 
                     foreach ($bookig_data as $booking)
                     {
+//
+//                        $rider_cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
+//                            ->where('trax_cn_issue_to_riders.rider_id',$rider_id)->where('rd.cn_number',$booking['cn_number'])->where('is_used',0)->where('is_hold',0);
 
-                        $rider_cn=TraxCnIssueToRider::join('trax_rider_cn_details as rd','rd.cn_issue_id','trax_cn_issue_to_riders.id')
-                            ->where('trax_cn_issue_to_riders.rider_id',$rider_id)->where('rd.cn_number',$booking['cn_number'])->where('is_used',0)->where('is_hold',0);
-
-                        if($rider_cn->exists())
-                        {
+//                        if($rider_cn->exists())
+//                        {
                             $old_booking = TraxLogisticBooking::where('cn_number',$booking['cn_number']);
                             if(!$old_booking->exists())
                             {
@@ -301,11 +301,13 @@ class RiderLogisticApiController extends Controller
                                     'cn_number'=>$old_booking->cn_number
                                 ];
                             }
-                        } else{
-                            $cn_not_issue_to_rider [] = [
-                                'cn_number'=>$booking['cn_number']
-                            ];
-                        }
+//                        }
+//                        else{
+//
+//                            $cn_not_issue_to_rider [] = [
+//                                'cn_number'=>$booking['cn_number']
+//                            ];
+//                        }
 
 
                     }
