@@ -96,11 +96,11 @@
 
                                 <div class="col">
                                     <div class="form-group">
-                                        <input type="text" name="advance_amount" id="advance_amount" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required">
+                                        <input type="text" name="advance_amount" id="advance_amount" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" pattern="[0-9]{1,8}" maxlength="10">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="rental" id="rental" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required">
+                                        <input type="text" name="rental" id="rental" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required" pattern="[0-9]{1,7}" maxlength="9">
                                     </div>
 
                                     <div class="form-group">
@@ -226,11 +226,11 @@
 
                                 <div class="col">
                                     <div class="form-group">
-                                        <input type="text" name="advance_amount" id="advance_amount_edit" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" value="">
+                                        <input type="text" name="advance_amount" id="advance_amount_edit" class="form-control advance_amount" placeholder="Advance Amount" data-rule-required="true" data-msg-required="Advance Amount is required" value="" pattern="[0-9]{1,8}" maxlength="10">
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" name="rental" id="rental_edit" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required" value="">
+                                        <input type="text" name="rental" id="rental_edit" class="form-control rental" placeholder="Rental Amount" data-rule-required="true" data-msg-required="Rental Amount is required" value="" pattern="[0-9]{1,7}" maxlength="9">
                                     </div>
 
                                     <div class="form-group">
@@ -382,24 +382,18 @@
                 'digits': 6,
             });
 
-            $('.advance_amount').inputmask({
-                'alias': 'numeric',
-                'groupSeparator': ',',
-                'autoGroup': true,
-                'digits': 0,
-                'max': 10000000,
-                'rightAlign': false,
-                'clearIncomplete': true
+            $('#advance_amount, #advance_amount_edit').on('input', function() {
+                let value = $(this).val();
+                value = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas every three digits
+                $(this).val(value);
             });
 
-            $('.rental').inputmask({
-                'alias': 'numeric',
-                'groupSeparator': ',',
-                'autoGroup': true,
-                'digits': 0,
-                'max': 1000000,
-                'rightAlign': false,
-                'clearIncomplete': true
+            $('#rental, #rental_edit').on('input', function() {
+                let value = $(this).val();
+                value = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas every three digits
+                $(this).val(value);
             });
 
             $('#add_trax_center_form #delivery_date_from').pickadate({
@@ -751,7 +745,5 @@
                 }
             });
         });
-
-        $('#advance_amount, #rental').css('text-align', '');
     </script>
 @endsection
