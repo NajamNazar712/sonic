@@ -8326,9 +8326,9 @@ class AdminDashboardController extends Controller
 
 
         if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
-            User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 1]);
+            User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 0]);
         } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
-            User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346]);
+            User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346, 'rate_status' => 0]);
         } else {
             User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
         }
@@ -8882,9 +8882,9 @@ class AdminDashboardController extends Controller
             DwsWeightChargesController::approve($id);
 
             if ($request->has('wordpress_account') && $request->request_custom_quotations == 0) {
-                User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 1]);
+                User::where('id', $id)->update(['status' => 2, 'rates_added_by' => 346, 'rates_added_at' => Carbon::now(), 'rate_status' => 0]);
             } else if ($request->has('wordpress_account') && $request->request_custom_quotations == 1) {
-                User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346]);
+                User::where('id', $id)->update(['status' => 0, 'rates_added_by' => 346, 'rate_status' => 0]);
             } else {
                 User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
             }

@@ -52,6 +52,7 @@ use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\Lead\LeadZone;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DonePaymentShipment;
@@ -101,8 +102,8 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\CorporateCashHandlingCharge;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Models\CorporateDefaultReturnCharge;
 
+use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
@@ -2361,6 +2362,7 @@ class ShipperDashboardController extends Controller
         $segments = Segment::all();
         $sub_segments = SubCategorySegment::all();
         $payment_cycles = PaymentCycle::all();
+        $admins = Admin::all();
 
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
@@ -2439,7 +2441,7 @@ class ShipperDashboardController extends Controller
         if($user->rates_added_by != null){
             return view('client.access_denied');
         }else{
-            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
+            return view('client.wordpress_lead_registeration.index')->with(['payment_cycles'=>$payment_cycles,'products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle , 'user' => $user, 'riders_permanents'=>$riders_permanent,'shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities,'admins'=>$admins,]);
 
         }
     }
@@ -2452,21 +2454,11 @@ class ShipperDashboardController extends Controller
         if($id){
             $sales_persons_city = City::where('id', $id);
             if ($sales_persons_city->exists()){
+                // Check if city exists
                 $sales_persons_city = $sales_persons_city->first();
-                $hub_id = $sales_persons_city->hub_id;
-                $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
-
-                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')
-                    ->select(['admins.id', 'admins.name'])
-                    ->where('admins.status', 1)
-                    ->where('ar.department_id', 7)
-                    ->whereIn('admins.id', $admin_ids)
-                    ->where('ar.id','!=' ,4)
-                    ->where('ar.id','!=' ,75)
-                    ->where('ar.id','!=' ,67)
-                    ->where('ar.id','!=' ,43)
-                    ->get();
-
+                $zone_id = $sales_persons_city->zone_id; 
+                $sale_persons = LeadZone::where(['zone_id' => $zone_id, 'status' => 1])->first(); 
+                
                 return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;

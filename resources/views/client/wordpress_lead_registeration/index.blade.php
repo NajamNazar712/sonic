@@ -84,7 +84,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="cnic">CNIC Number: <span class="danger">*</span></label>
-                                        <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ $lead->cnic_number }}" name="cnic">
+                                        <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ $lead->cnic_number }}" name="cnic" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -133,7 +133,7 @@
                                         <div>
                                             <select name="shipper_city" id="shipper_city"
                                                 class="select2 form-control required readonly-overlay"
-                                                style="width: 100%">
+                                                style="width: 100%" disabled>
                                                 @foreach ($all_cities as $city)
                                                     <option value="{{ $city->id }}"
                                                         {{ old('shipper_city') == $city->id ? 'selected' : '' }} >
@@ -246,7 +246,7 @@
                                         <span class="danger">*</span>
                                         <div>
                                             <select name="reference" id="reference"
-                                                class="select2 form-control required"
+                                                class="select2 form-control"
                                                 style="width: 100%">
                                                 @foreach ($references as $reference)
                                                     <option value="{{ $reference->id }}"
@@ -264,8 +264,16 @@
                                         </label>
                                         <div>
                                             <select name="sale_person" id="sale_person"
-                                                class="select2 form-control required"
-                                                style="width: 100%"></select>
+                                                class="select2 form-control"
+                                                style="width: 100%" disabled>
+                                                @foreach ($admins as $admin)
+                                                <option value="{{ $admin->id }}"
+                                                    {{ old('sale_person') == $admin->id ? 'selected' : '' }}>
+                                                    {{ $admin->name }}</option>
+                                                @endforeach
+                                        </select>
+
+                                              
                                         </div>
                                     </div>
                                 </div>
@@ -2897,51 +2905,12 @@
         $('#shipper_city').select2({
             width: '100%',
             placeholder: 'Select City',
-        }).bind('change', function() {
-            var id = $(this).val();
-            if (id) {
-                $.ajax({
-                    url: '{!! route('cod.wordpress.salesPerson') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function(data) {
-                    if (data.status == 0) {
-                        $('#sale_person').empty();
-
-                        $.each(data.sale_persons, function(key, value) {
-                            var newOption = "<option value=" + value.id + ">" + value
-                                .name + "</option>";
-                            $('#sale_person').append(newOption);
-                        });
-                        $('#sale_person').val('').trigger('change');
-
-                        @if ($lead != null)
-                            @if ($lead->sale_person_id != null)
-                                $('#sale_person').val({{ $lead->sale_person_id }}).trigger(
-                                    'change');
-                            @endif
-                        @endif
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                });
-
-            }
-
-
-
-        }).prop('readonly', true);
+        });
 
 
         @if ($lead != null)
             $('#shipper_city').val({{ $lead->city_id }}).trigger('change');
-            $('#reference').val({{ $lead->reference_id }}).trigger('change');
+            $('#sale_person').val({{ $lead->sale_person_id }}).trigger('change');
         @endif
 
         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
@@ -3022,7 +2991,7 @@
             placeholder: 'Select Reference',
             // dropdownParent:$('#registership')
         });
-        $('select[name="sale_person"]').prepend('<option value="" selected="selected"></option>').select2({
+        $('select[name="sale_person"]').select2({
             placeholder: 'Select Sale Person',
             // dropdownParent:$('#registership')
         });

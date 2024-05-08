@@ -21,6 +21,7 @@ class UpdateAddColumnsInLeadsTable extends Migration
             $table->boolean('business_registered_status')->after('company_name');
             $table->integer('ntn_number')->after('business_registered_status');
             $table->integer('activation_code')->after('ntn_number');
+            $table->string('cnic_number')->after('activation_code');
 
         });
     }
@@ -40,6 +41,7 @@ class UpdateAddColumnsInLeadsTable extends Migration
             $table->dropColumn('business_registered_status');
             $table->dropColumn('ntn_number');
             $table->dropColumn('activation_code');
+            $table->dropColumn('cnic_number');
         });
     }
 }

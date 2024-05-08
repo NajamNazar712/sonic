@@ -401,7 +401,7 @@ class RegisterController extends Controller
                 'password' => Hash::make($data['password']),
                 'phone'=>$lead->phone_number,
                 'city_id'=>$lead->city_id,
-                'reference_id' => $lead->referral_id,
+                'reference_id' => $lead->reference_id,
                 'lead_id' => $lead->id,
                 'average_shipments' => $lead->average_shipment_per_week,
                 'account_type_id' => '1',
@@ -424,7 +424,7 @@ class RegisterController extends Controller
                 }
 
                 if($lead){
-                    $lead->sale_person = $lead_zone->admin_id;
+                    $lead->sale_person_id = $lead_zone->admin_id;
                     $lead->save();
                 }
             }
