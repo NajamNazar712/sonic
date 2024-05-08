@@ -184,10 +184,14 @@ class RiderLogisticApiController extends Controller
 
                                 //update CN status and mark cn used by rider
                                 $rider_cn=TraxRiderCnDetail::where('cn_number',$booking['cn_number']);
-                                $rider_cn=$rider_cn->first();
-                                $rider_cn->is_used=1;
-                                $rider_cn->updated_by=$rider_id;
-                                $rider_cn->save();
+                                if($rider_cn->exists())
+                                {
+                                    $rider_cn=$rider_cn->first();
+                                    $rider_cn->is_used=1;
+                                    $rider_cn->updated_by=$rider_id;
+                                    $rider_cn->save();
+                                }
+
 
 
                                 $shipment=Shipment::where('tracking_number',$logistic_booking['cn_number']);
